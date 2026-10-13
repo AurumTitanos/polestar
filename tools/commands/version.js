@@ -1,7 +1,9 @@
 'use strict';
-// version: the release version, kept in package.json and in the ## Version line
-// of every addon TOC. With no argument it prints the version and any TOC that
-// disagrees; with one it sets them all.
+// version: the release version, kept in package.json, in our guides' pack
+// manifest (guides/pack.json: compile writes its version into
+// Polestar_Guides.toc) and in the ## Version line of every addon TOC. With no
+// argument it prints the version and any file that disagrees; with one it sets
+// them all.
 
 const fs = require('node:fs');
 const path = require('node:path');
@@ -10,10 +12,11 @@ const project = require('../lib/dsl/project');
 
 const usage = `usage: node tools/polestar.js version [<x.y.z>] [options]
 
-Without a version, prints package.json's version and any addon TOC whose
-## Version differs (exit 1 if one does). With one, writes it to package.json
-and to the ## Version line of every addon/<Name>/<Name>.toc present.
-Data addons built later take the version from package.json.
+Without a version, prints package.json's version and names guides/pack.json
+or any addon TOC whose version differs (exit 1 if one does). With one, writes
+it to package.json, to guides/pack.json (compile takes Polestar_Guides'
+version from it) and to the ## Version line of every addon/<Name>/<Name>.toc
+present. Data addons built later take the version from package.json.
 
 options:
   --root <dir>     folder holding package.json (default the repository)
@@ -38,10 +41,23 @@ function tocVersion(text) {
 	return m ? m[1] : null;
 }
 
-function show(pkgFile, addonsDir) {
+// Our guides' pack manifest, when the repository has one.
+function manifestFile(root) {
+	const f = path.join(root, 'guides', 'pack.json');
+	return fs.existsSync(f) ? f : null;
+}
+
+function show(pkgFile, addonsDir, manifest) {
 	const version = JSON.parse(fs.readFileSync(pkgFile, 'utf8')).version;
 	console.log(version);
 	let mismatched = 0;
+	if (manifest) {
+		const v = JSON.parse(fs.readFileSync(manifest, 'utf8')).version;
+		if (v !== version) {
+			console.error(`${path.relative(process.cwd(), manifest)}: ${v === undefined ? 'no "version" field' : `version ${v}`}`);
+			mismatched++;
+		}
+	}
 	for (const toc of tocs(addonsDir)) {
 		const v = tocVersion(fs.readFileSync(toc, 'utf8'));
 		if (v !== version) {
@@ -52,10 +68,15 @@ function show(pkgFile, addonsDir) {
 	return mismatched ? 1 : 0;
 }
 
-function set(pkgFile, addonsDir, version) {
+function set(pkgFile, addonsDir, manifest, version) {
 	const pkg = fs.readFileSync(pkgFile, 'utf8');
 	if (!PACKAGE_VERSION.test(pkg)) {
 		console.error(`${pkgFile}: no "version" field`);
+		return 1;
+	}
+	const man = manifest && fs.readFileSync(manifest, 'utf8');
+	if (man !== null && man !== undefined && !PACKAGE_VERSION.test(man)) {
+		console.error(`${path.relative(process.cwd(), manifest)}: no "version" field`);
 		return 1;
 	}
 	const files = tocs(addonsDir);
@@ -65,8 +86,10 @@ function set(pkgFile, addonsDir, version) {
 		return 1;
 	}
 	fs.writeFileSync(pkgFile, pkg.replace(PACKAGE_VERSION, `$1"${version}"`));
+	if (manifest) fs.writeFileSync(manifest, man.replace(PACKAGE_VERSION, `$1"${version}"`));
 	for (const f of files) fs.writeFileSync(f, fs.readFileSync(f, 'utf8').replace(TOC_VERSION, `## Version: ${version}`));
-	console.log(`version ${version}: package.json and ${files.length} addon TOC${files.length === 1 ? '' : 's'}`);
+	const tocsSet = `${files.length} addon TOC${files.length === 1 ? '' : 's'}`;
+	console.log(`version ${version}: package.json, ${manifest ? 'guides/pack.json and ' : ''}${tocsSet}`);
 	return 0;
 }
 
@@ -83,12 +106,13 @@ async function run(argv) {
 	const root = resolvePath(opts.root, '.', project.ROOT);
 	const addonsDir = resolvePath(opts.addons, 'addon', root);
 	const pkgFile = path.join(root, 'package.json');
-	if (!positional.length) return show(pkgFile, addonsDir);
+	const manifest = manifestFile(root);
+	if (!positional.length) return show(pkgFile, addonsDir, manifest);
 	if (!SEMVER.test(positional[0])) {
 		console.error(`"${positional[0]}" is not a version (x.y.z or x.y.z-pre)`);
 		return 2;
 	}
-	return set(pkgFile, addonsDir, positional[0]);
+	return set(pkgFile, addonsDir, manifest, positional[0]);
 }
 
-module.exports = { name: 'version', summary: 'Show or set the release version (package.json and addon TOCs)', usage, run };
+module.exports = { name: 'version', summary: 'Show or set the release version (package.json, guides/pack.json and addon TOCs)', usage, run };

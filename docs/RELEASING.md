@@ -22,16 +22,26 @@ reproducible: the same sources give byte-identical archives.
 
 ## Version
 
-The version lives in `package.json` and in the `## Version` line of every
-addon TOC. One command sets them all:
+The version lives in `package.json`, in `guides/pack.json` (the manifest of
+our guides' pack: `compile` writes its version into `Polestar_Guides.toc`)
+and in the `## Version` line of every addon TOC. One command sets them all:
 
 ```sh
-node tools/polestar.js version            # print it; exit 1 if a TOC disagrees
-node tools/polestar.js version 0.2.0      # set package.json and every addon TOC
+node tools/polestar.js version            # print it; exit 1 if guides/pack.json or a TOC disagrees
+node tools/polestar.js version 0.2.0      # set package.json, guides/pack.json and every addon TOC
 ```
 
 Data addons rebuilt later take the version from `package.json`. Versions
 follow `x.y.z`; `0.x` releases are betas.
+
+## Private builds and public releases
+
+A private build, for testing while the repository is private, may use the
+full local data build of the steps below. A public release follows
+[THIRD_PARTY.md](../THIRD_PARTY.md) ("Distributing Polestar"): the data
+rebuilt with `data build --no-questie`, then `Polestar_QuestDB` and the
+guides rebuilt from it, without `data/forever/dungeons.json` and without the
+Codex.
 
 ## Steps
 
@@ -40,7 +50,10 @@ Replace `0.2.0` with the new version throughout.
 1. Start from a clean, up-to-date `main` with the game client installed
    (the data build reads its tables and installed addons).
 
-2. Set the version and rebuild the data, the data addons and the guides:
+2. Set the version and rebuild the data, the data addons and the guides (for
+   a public release, build the data as
+   [Private builds and public releases](#private-builds-and-public-releases)
+   says):
 
    ```sh
    node tools/polestar.js version 0.2.0
@@ -91,7 +104,7 @@ Replace `0.2.0` with the new version throughout.
    ignored), tag the commit and push:
 
    ```sh
-   git add package.json addon/Polestar addon/Polestar_Guides addon/Polestar_ItemDB addon/Polestar_Recorder
+   git add package.json guides/pack.json addon/Polestar addon/Polestar_Guides addon/Polestar_ItemDB addon/Polestar_Recorder
    git commit -m "Release: 0.2.0"
    git tag -a v0.2.0 -m "Polestar 0.2.0"
    git push origin main v0.2.0
