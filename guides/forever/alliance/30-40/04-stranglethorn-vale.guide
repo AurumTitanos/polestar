@@ -1,21 +1,27 @@
-# Stranglethorn Vale, Alliance ~34 to ~36: the first half of the consensus
-# Stranglethorn visit (34.2-37.8). Flow: Nesingwary's Expedition (the first
-# hunting tiers) > Rebel Camp and Kurzen's Compound (Bookie Herod) >
-# Nesingwary again > Booty Bay (flight path, bind) > the west coast (Bloodscalp
-# trolls, crocolisks, the Crystalvein Mine) > back north to pick up the
-# Green Hills of Stranglethorn and the Rebel Camp's Kurzen quests, which the
-# next guide (05-stranglethorn-vale) finishes.
+# Stranglethorn Vale, Alliance ~34 to ~38: the consensus Stranglethorn visit
+# (34.2-37.8). Flow: Nesingwary's Expedition (the first hunting tiers) >
+# Rebel Camp and Kurzen's Compound (Bookie Herod) > Nesingwary again > Booty
+# Bay (flight path, bind) > the west coast (Bloodscalp trolls, crocolisks,
+# the Crystalvein Mine) > back north to pick up the Green Hills of
+# Stranglethorn and the Rebel Camp's Kurzen quests > Kurzen's Compound
+# (Special Forces) > the jungle ruins and Lake Nazferiti (Shadowmaw
+# panthers, Venture Co. crystals, the four troll legends, the Green Hills
+# pages) > Rebel Camp and Nesingwary turn-ins > Skullsplitter fetishes >
+# hearth to Booty Bay (Water Elementals). Then on to the Swamp of Sorrows
+# (05-arathi-highlands).
 #
 # Optional: Crystal in the Mountains starts from the Pendant of Myzrael, a
 # drop of Gluggle, a rare murloc: take it if he drops it.
 # Deviations: none in the quest set. Hemet Nesingwary (5762) is carried from
-# Thousand Needles; characters without it skip the turn-in.
+# Thousand Needles; characters without it skip the turn-in. Favor for Krazek
+# (627) and Magical Analysis (602) are carried on: the ore drops in Arathi,
+# the analysis is turned in at Dalaran's camp in Alterac (next guide).
 guide forever/alliance/30-40/04-stranglethorn-vale
 title Stranglethorn Vale
 faction Alliance
-levels 34-36
+levels 34-38
 zone Stranglethorn Vale
-next forever/alliance/30-40/05-stranglethorn-vale
+next forever/alliance/30-40/05-arathi-highlands
 
 # ---------------------------------------------------------------- Nesingwary's Expedition
 
@@ -173,3 +179,56 @@ step Nesingwary's Expedition
 step Rebel Camp
   accept 207                          -- Brother Nimetz
   accept 574                          -- Sergeant Yohwa
+
+step Kurzen's Compound
+  tip Headshrinkers stand deeper in the compound; the Commandos lurk stealthed around it and in the cave. Pick up Green Hills pages as they drop.
+  kill 941 quest 574.1                -- Kurzen Headshrinker
+  kill 938 quest 574.2                -- Kurzen Commando
+
+step The jungle ruins
+  tip Loop through the troll ruins of the north and centre: each holds one stone tablet of the troll legends. Shadowmaw Panthers prowl stealthed in the jungle around them; the Venture Co. camp on Lake Nazferiti carries the Tumbled Crystals.
+  complete 207                        -- Kurzen's Mystery: four troll legends
+  kill 684 quest 192                  -- Shadowmaw Panther
+  collect 4106 quest 213              -- Tumbled Crystal
+  complete 339                        -- Chapter I
+  complete 340                        -- Chapter II
+  complete 341                        -- Chapter III
+  complete 342                        -- Chapter IV
+
+step Rebel Camp
+  turnin 574                          -- Lieutenant Doren
+  accept 210                          -- Corporal Kaleb: for Krazek in Booty Bay
+  turnin 207                          -- Brother Nimetz
+  accept 205
+
+step Nesingwary's Expedition
+  turnin 339                          -- Barnil Stonepot
+  turnin 340
+  turnin 341
+  turnin 342
+  turnin 338
+  turnin 192                          -- Sir S. J. Erlgadin
+
+step Skullsplitter trolls
+  tip The Skullsplitter trolls hold the ruins east of the road between Nesingwary and Grom'gol.
+  collect 2466 quest 205              -- Skullsplitter Fetish
+
+step Brother Nimetz
+  turnin 205
+
+# ---------------------------------------------------------------- Booty Bay
+
+step Booty Bay
+  hearth "Booty Bay"
+  turnin 578                          -- Baron Revilgaz
+  accept 601
+  turnin 213                          -- Kebok
+  turnin 210                          -- Krazek
+  accept 627                          -- The ore drops from Drywhisker kobolds in Arathi Highlands
+
+step Water Elementals
+  collect 3923 quest 601              -- Water Elemental Bracers
+
+step Baron Revilgaz
+  turnin 601
+  accept 602                          -- For Archmage Ansirem in Alterac Mountains

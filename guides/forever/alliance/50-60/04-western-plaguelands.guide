@@ -38,12 +38,12 @@
 # A Reliquary of Purity (5527), Wasteland (1124), Meet at the Grave (3912), A Plague Upon
 # Thee (5903), Of Forgotten Memories (5781).
 # No class quests in this stretch.
-guide forever/alliance/50-60/05-western-plaguelands
+guide forever/alliance/50-60/04-western-plaguelands
 title Western Plaguelands, Eastern Plaguelands & Feralas
 faction Alliance
 levels 54-57
 zone Western Plaguelands
-next forever/alliance/50-60/06-silithus
+next forever/alliance/50-60/05-silithus
 
 # ---------------------------------------------------------------- Chillwind Camp
 

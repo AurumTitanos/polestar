@@ -35,12 +35,12 @@
 #   Seahorn in Booty Bay in that same later guide; Goblin Sponsorship (1182)
 #   needs the Ratchet chain (1180, 1181), which no Alliance guide takes.
 # Class training: Stormwind, around level 38.
-guide forever/alliance/30-40/06-arathi-highlands
+guide forever/alliance/30-40/05-arathi-highlands
 title Arathi Highlands, Alterac Mountains & Swamp of Sorrows
 faction Alliance
 levels 37-40
 zone Arathi Highlands
-next forever/alliance/30-40/07-badlands
+next forever/alliance/30-40/06-badlands
 
 # ---------------------------------------------------------------- Swamp of Sorrows
 

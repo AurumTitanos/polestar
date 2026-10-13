@@ -92,7 +92,7 @@ step Baron Longshore
   collect 5084 quest 895.1
 
 step Northwatch Hold
-  tip Northwatch Hold, on the coast further south. Theramore Marines and Preservers drop the medals; Captain Fairmount and the two cannoneers stand in the keep and on its walls.
+  tip Northwatch Hold, on the coast further south. The Theramore Marines and Preservers (15-16) drop the medals; Captain Fairmount (20) and the two cannoneers (19) stand in the keep and on its walls, and they are why the hold waits until now.
   goto 61.0,54.5 "Northwatch Hold"
   collect 5078 quest 891.1
   kill 3393 quest 891.2

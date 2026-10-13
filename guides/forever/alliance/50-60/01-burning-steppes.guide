@@ -20,12 +20,12 @@
 # Carried on: Felnok Steelspring (4808) for Everlook, Petty Squabbles (2783) for the Swamp of Sorrows, Moontouched
 # Wildkin (978) for Winterspring, The Smoldering Ruins of Thaurissan (3701) for Ironforge at 57.
 # Left out: Ragnar Thunderbrew (4128: the export never turns it in).
-guide forever/alliance/50-60/02-burning-steppes
+guide forever/alliance/50-60/01-burning-steppes
 title Burning Steppes, Azshara & Blasted Lands
 faction Alliance
 levels 51-53
 zone Burning Steppes
-next forever/alliance/50-60/03-felwood
+next forever/alliance/50-60/02-felwood
 
 # ---------------------------------------------------------------- Azshara
 

@@ -28,12 +28,12 @@
 # (6031), the last Are We There, Yeti? (5163), The Videre Elixir (3909), Moontouched Wildkin (978), Troubled
 # Spirits of Kel'Theril (5245), Auntie Marlene (5152).
 # No class quests in this stretch.
-guide forever/alliance/50-60/04-winterspring
+guide forever/alliance/50-60/03-winterspring
 title Winterspring & Eastern Plaguelands
 faction Alliance
 levels 53-55
 zone Winterspring
-next forever/alliance/50-60/05-western-plaguelands
+next forever/alliance/50-60/04-western-plaguelands
 
 # ---------------------------------------------------------------- Everlook
 

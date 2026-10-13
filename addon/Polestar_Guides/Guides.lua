@@ -2593,11 +2593,11 @@ do
 			title = "Stranglethorn Vale",
 			faction = "Alliance",
 			minLevel = 34,
-			maxLevel = 36,
+			maxLevel = 38,
 			category = "Leveling",
 			zone = 1434,
 			zoneName = "Stranglethorn Vale",
-			next = "forever/alliance/30-40/05-stranglethorn-vale",
+			next = "forever/alliance/30-40/05-arathi-highlands",
 			author = "Polestar",
 			version = 1,
 			steps = {
@@ -2818,35 +2818,12 @@ do
 						{ t = "accept", quest = 574, title = "Special Forces", npc = 733, npcName = "Sergeant Yohwa", minLevel = 30, qlvl = 38, preAll = { 203, 204 }, preTitles = { [203] = "The Second Rebellion", [204] = "Bad Medicine" }, map = 1434, x = 38.02, y = 3.33, f = "e", note = "Sergeant Yohwa" },
 					},
 				},
-			},
-		})
-	end
-	register()
-end
-
--- Source: forever/alliance/30-40/05-stranglethorn-vale.guide
-do
-	local function register()
-		Polestar.RegisterGuide({
-			id = "forever/alliance/30-40/05-stranglethorn-vale",
-			pack = "guides",
-			title = "Stranglethorn Vale",
-			faction = "Alliance",
-			minLevel = 36,
-			maxLevel = 38,
-			category = "Leveling",
-			zone = 1434,
-			zoneName = "Stranglethorn Vale",
-			next = "forever/alliance/30-40/06-arathi-highlands",
-			author = "Polestar",
-			version = 1,
-			steps = {
 				{
 					title = "Kurzen's Compound",
 					note = "Headshrinkers stand deeper in the compound; the Commandos lurk stealthed around it and in the cave. Pick up Green Hills pages as they drop.",
 					goals = {
-						{ t = "kill", quest = 574, title = "Special Forces", target = "Kurzen Headshrinker", npc = 941, count = 6, oi = 1, map = 1434, x = 47.44, y = 7.55, f = "e", spots = { { x = 48.1, y = 7.7, r = 31, n = 4 }, { x = 46.6, y = 7.4, r = 25, n = 3 } }, note = "Kurzen Headshrinker" },
-						{ t = "kill", quest = 574, title = "Special Forces", target = "Kurzen Commando", npc = 938, oi = 2, map = 1434, x = 47.28, y = 7.61, f = "e", spots = { { x = 46, y = 7.9, r = 49, n = 6 }, { x = 44.4, y = 8.2, r = 19, n = 2 } }, note = "Kurzen Commando" },
+						{ t = "kill", quest = 574, title = "Special Forces", target = "Kurzen Headshrinker", npc = 941, count = 6, oi = 1, map = 1434, x = 46.33, y = 6.96, f = "e", spots = { { x = 46.6, y = 7.4, r = 25, n = 3 }, { x = 48.1, y = 7.7, r = 31, n = 4 } }, note = "Kurzen Headshrinker" },
+						{ t = "kill", quest = 574, title = "Special Forces", target = "Kurzen Commando", npc = 938, oi = 2, map = 1434, x = 46.45, y = 6.93, f = "e", spots = { { x = 46, y = 7.9, r = 49, n = 6 }, { x = 44.4, y = 8.2, r = 19, n = 2 } }, note = "Kurzen Commando" },
 					},
 				},
 				{
@@ -2925,11 +2902,11 @@ do
 	register()
 end
 
--- Source: forever/alliance/30-40/06-arathi-highlands.guide
+-- Source: forever/alliance/30-40/05-arathi-highlands.guide
 do
 	local function register()
 		Polestar.RegisterGuide({
-			id = "forever/alliance/30-40/06-arathi-highlands",
+			id = "forever/alliance/30-40/05-arathi-highlands",
 			pack = "guides",
 			title = "Arathi Highlands, Alterac Mountains & Swamp of Sorrows",
 			faction = "Alliance",
@@ -2938,7 +2915,7 @@ do
 			category = "Leveling",
 			zone = 1417,
 			zoneName = "Arathi Highlands",
-			next = "forever/alliance/30-40/07-badlands",
+			next = "forever/alliance/30-40/06-badlands",
 			author = "Polestar",
 			version = 1,
 			steps = {
@@ -3338,11 +3315,11 @@ do
 	register()
 end
 
--- Source: forever/alliance/30-40/07-badlands.guide
+-- Source: forever/alliance/30-40/06-badlands.guide
 do
 	local function register()
 		Polestar.RegisterGuide({
-			id = "forever/alliance/30-40/07-badlands",
+			id = "forever/alliance/30-40/06-badlands",
 			pack = "guides",
 			title = "Badlands & Desolace",
 			faction = "Alliance",
@@ -4296,7 +4273,7 @@ do
 					note = "From Theramore, fly to Nijel's Point and ride south out of Desolace into Feralas; the road leads west to the Forgotten Coast dock, where the boat crosses to Feathermoon on Sardor Isle.",
 					goals = {
 						{ t = "getfp", npc = 8019, npcName = "Fyldren Moonfeather", location = "Feathermoon", map = 1444, x = 30.24, y = 43.25, f = "e", note = "Fyldren Moonfeather" },
-						{ t = "sethome", npc = 7736, npcName = "Innkeeper Shyria", location = "Feathermoon", map = 1444, x = 30.97, y = 43.49, f = "e", note = "Innkeeper Shyria" },
+						{ t = "sethome", npc = 7736, npcName = "Innkeeper Shyria", location = "Feathermoon Stronghold", map = 1444, x = 30.97, y = 43.49, f = "e", note = "Innkeeper Shyria" },
 						{ t = "accept", quest = 2982, title = "The High Wilderness", npc = 7900, npcName = "Angelas Moonbreeze", minLevel = 39, qlvl = 44, map = 1444, x = 31.83, y = 45.61, f = "e", note = "Angelas Moonbreeze" },
 						{ t = "accept", quest = 2821, title = "The Mark of Quality", npc = 7852, npcName = "Pratt McGrubben", minLevel = 40, qlvl = 46, map = 1444, x = 30.63, y = 42.71, f = "e", note = "Pratt McGrubben" },
 						{ t = "accept", quest = 2939, title = "In Search of Knowledge", npc = 7764, npcName = "Troyas Moonbreeze", minLevel = 42, qlvl = 47, map = 1444, x = 31.78, y = 45.5, f = "e", note = "Troyas Moonbreeze: his answer waits in Rut'theran Village, later" },
@@ -4388,7 +4365,7 @@ do
 					title = "Feathermoon Stronghold",
 					note = "Hearth to Feathermoon.",
 					goals = {
-						{ t = "hearth", location = "Feathermoon" },
+						{ t = "hearth", location = "Feathermoon Stronghold" },
 						{ t = "turnin", quest = 2870, title = "Against Lord Shalzaru", npc = 7877, npcName = "Latronicus Moonspear", map = 1444, x = 30.38, y = 46.17, f = "e", note = "Latronicus Moonspear" },
 						{ t = "accept", quest = 2871, title = "Delivering the Relic", npc = 7877, npcName = "Latronicus Moonspear", minLevel = 40, qlvl = 45, pre = { 2870 }, preTitles = { [2870] = "Against Lord Shalzaru" }, map = 1444, x = 30.38, y = 46.17, f = "e" },
 						{ t = "turnin", quest = 2871, title = "Delivering the Relic", npc = 7878, npcName = "Vestia Moonspear", map = 1444, x = 30.08, y = 45.06, f = "e", note = "Vestia Moonspear" },
@@ -4478,7 +4455,7 @@ do
 					title = "Feathermoon Stronghold",
 					note = "Hearth to Feathermoon.",
 					goals = {
-						{ t = "hearth", location = "Feathermoon" },
+						{ t = "hearth", location = "Feathermoon Stronghold" },
 						{ t = "turnin", quest = 4265, title = "Freed from the Hive", npc = 7880, npcName = "Ginro Hearthkindle", map = 1444, x = 31.86, y = 45.13, f = "e", note = "Ginro Hearthkindle" },
 						{ t = "accept", quest = 4266, title = "A Hero's Welcome", npc = 7880, npcName = "Ginro Hearthkindle", minLevel = 40, qlvl = 46, pre = { 4265 }, preTitles = { [4265] = "Freed from the Hive" }, map = 1444, x = 31.86, y = 45.13, f = "e" },
 						{ t = "turnin", quest = 4266, title = "A Hero's Welcome", npc = 3936, npcName = "Shandris Feathermoon", map = 1444, x = 30.28, y = 46.17, f = "e", note = "Shandris Feathermoon" },
@@ -5110,14 +5087,14 @@ do
 		Polestar.RegisterGuide({
 			id = "forever/alliance/40-50/07-un-goro-crater",
 			pack = "guides",
-			title = "Un'Goro Crater",
+			title = "Un'Goro Crater & Ironforge",
 			faction = "Alliance",
 			minLevel = 48,
-			maxLevel = 50,
+			maxLevel = 52,
 			category = "Leveling",
 			zone = 1449,
 			zoneName = "Un'Goro Crater",
-			next = "forever/alliance/40-50/08-un-goro-crater",
+			next = "forever/alliance/50-60/01-burning-steppes",
 			author = "Polestar",
 			version = 1,
 			steps = {
@@ -5266,7 +5243,7 @@ do
 					title = "Torwa Pathfinder",
 					note = "Ride south along the eastern cliffs to Torwa at the foot of the ramp.",
 					goals = {
-						{ t = "accept", quest = 4289, title = "The Apes of Un'Goro", npc = 9619, npcName = "Torwa Pathfinder", minLevel = 47, qlvl = 55, map = 1449, x = 71.64, y = 75.96, f = "e", note = "The pelts come in the next guide, on the gorilla plateau" },
+						{ t = "accept", quest = 4289, title = "The Apes of Un'Goro", npc = 9619, npcName = "Torwa Pathfinder", minLevel = 47, qlvl = 55, map = 1449, x = 71.64, y = 75.96, f = "e", note = "The pelts come after loop 2, on the gorilla plateau" },
 					},
 				},
 				{
@@ -5314,29 +5291,6 @@ do
 						{ t = "turnin", quest = 4321, title = "Making Sense of It", npc = 9117, npcName = "J.D. Collie", map = 1449, x = 41.92, y = 2.7, f = "e" },
 					},
 				},
-			},
-		})
-	end
-	register()
-end
-
--- Source: forever/alliance/40-50/08-un-goro-crater.guide
-do
-	local function register()
-		Polestar.RegisterGuide({
-			id = "forever/alliance/40-50/08-un-goro-crater",
-			pack = "guides",
-			title = "Un'Goro Crater",
-			faction = "Alliance",
-			minLevel = 50,
-			maxLevel = 51,
-			category = "Leveling",
-			zone = 1449,
-			zoneName = "Un'Goro Crater",
-			next = "forever/alliance/50-60/01-un-goro-crater",
-			author = "Polestar",
-			version = 1,
-			steps = {
 				{
 					title = "Spraggle Frock",
 					note = "Spraggle's friend Ringo has gone missing.",
@@ -5374,29 +5328,6 @@ do
 						{ t = "turnin", quest = 4491, title = "A Little Help From My Friends", npc = 9997, npcName = "Spraggle Frock", map = 1449, x = 43.62, y = 8.5, f = "e" },
 					},
 				},
-			},
-		})
-	end
-	register()
-end
-
--- Source: forever/alliance/50-60/01-un-goro-crater.guide
-do
-	local function register()
-		Polestar.RegisterGuide({
-			id = "forever/alliance/50-60/01-un-goro-crater",
-			pack = "guides",
-			title = "Un'Goro Crater, Teldrassil & Ironforge",
-			faction = "Alliance",
-			minLevel = 50,
-			maxLevel = 52,
-			category = "Leveling",
-			zone = 1449,
-			zoneName = "Un'Goro Crater",
-			next = "forever/alliance/50-60/02-burning-steppes",
-			author = "Polestar",
-			version = 1,
-			steps = {
 				{
 					title = "Sunken Temple",
 					note = "Running the Sunken Temple instead of grinding gets you there faster in a group. Skip this step to grind solo.",
@@ -5534,11 +5465,11 @@ do
 	register()
 end
 
--- Source: forever/alliance/50-60/02-burning-steppes.guide
+-- Source: forever/alliance/50-60/01-burning-steppes.guide
 do
 	local function register()
 		Polestar.RegisterGuide({
-			id = "forever/alliance/50-60/02-burning-steppes",
+			id = "forever/alliance/50-60/01-burning-steppes",
 			pack = "guides",
 			title = "Burning Steppes, Azshara & Blasted Lands",
 			faction = "Alliance",
@@ -5547,7 +5478,7 @@ do
 			category = "Leveling",
 			zone = 1428,
 			zoneName = "Burning Steppes",
-			next = "forever/alliance/50-60/03-felwood",
+			next = "forever/alliance/50-60/02-felwood",
 			author = "Polestar",
 			version = 1,
 			steps = {
@@ -5802,11 +5733,11 @@ do
 	register()
 end
 
--- Source: forever/alliance/50-60/03-felwood.guide
+-- Source: forever/alliance/50-60/02-felwood.guide
 do
 	local function register()
 		Polestar.RegisterGuide({
-			id = "forever/alliance/50-60/03-felwood",
+			id = "forever/alliance/50-60/02-felwood",
 			pack = "guides",
 			title = "Felwood",
 			faction = "Alliance",
@@ -5815,7 +5746,7 @@ do
 			category = "Leveling",
 			zone = 1448,
 			zoneName = "Felwood",
-			next = "forever/alliance/50-60/04-winterspring",
+			next = "forever/alliance/50-60/03-winterspring",
 			author = "Polestar",
 			version = 1,
 			steps = {
@@ -6017,11 +5948,11 @@ do
 	register()
 end
 
--- Source: forever/alliance/50-60/04-winterspring.guide
+-- Source: forever/alliance/50-60/03-winterspring.guide
 do
 	local function register()
 		Polestar.RegisterGuide({
-			id = "forever/alliance/50-60/04-winterspring",
+			id = "forever/alliance/50-60/03-winterspring",
 			pack = "guides",
 			title = "Winterspring & Eastern Plaguelands",
 			faction = "Alliance",
@@ -6030,7 +5961,7 @@ do
 			category = "Leveling",
 			zone = 1452,
 			zoneName = "Winterspring",
-			next = "forever/alliance/50-60/05-western-plaguelands",
+			next = "forever/alliance/50-60/04-western-plaguelands",
 			author = "Polestar",
 			version = 1,
 			steps = {
@@ -6331,11 +6262,11 @@ do
 	register()
 end
 
--- Source: forever/alliance/50-60/05-western-plaguelands.guide
+-- Source: forever/alliance/50-60/04-western-plaguelands.guide
 do
 	local function register()
 		Polestar.RegisterGuide({
-			id = "forever/alliance/50-60/05-western-plaguelands",
+			id = "forever/alliance/50-60/04-western-plaguelands",
 			pack = "guides",
 			title = "Western Plaguelands, Eastern Plaguelands & Feralas",
 			faction = "Alliance",
@@ -6344,7 +6275,7 @@ do
 			category = "Leveling",
 			zone = 1422,
 			zoneName = "Western Plaguelands",
-			next = "forever/alliance/50-60/06-silithus",
+			next = "forever/alliance/50-60/05-silithus",
 			author = "Polestar",
 			version = 1,
 			steps = {
@@ -6893,11 +6824,11 @@ do
 	register()
 end
 
--- Source: forever/alliance/50-60/06-silithus.guide
+-- Source: forever/alliance/50-60/05-silithus.guide
 do
 	local function register()
 		Polestar.RegisterGuide({
-			id = "forever/alliance/50-60/06-silithus",
+			id = "forever/alliance/50-60/05-silithus",
 			pack = "guides",
 			title = "Silithus, Un'Goro Crater & Eastern Plaguelands",
 			faction = "Alliance",
@@ -6906,7 +6837,7 @@ do
 			category = "Leveling",
 			zone = 1451,
 			zoneName = "Silithus",
-			next = "forever/alliance/50-60/07-silithus",
+			next = "forever/alliance/50-60/06-silithus",
 			author = "Polestar",
 			version = 1,
 			steps = {
@@ -7167,11 +7098,11 @@ do
 	register()
 end
 
--- Source: forever/alliance/50-60/07-silithus.guide
+-- Source: forever/alliance/50-60/06-silithus.guide
 do
 	local function register()
 		Polestar.RegisterGuide({
-			id = "forever/alliance/50-60/07-silithus",
+			id = "forever/alliance/50-60/06-silithus",
 			pack = "guides",
 			title = "Silithus, Felwood, Winterspring & the Plaguelands",
 			faction = "Alliance",
@@ -15001,7 +14932,7 @@ do
 				},
 				{
 					title = "Northwatch Hold",
-					note = "Northwatch Hold, on the coast further south. Theramore Marines and Preservers drop the medals; Captain Fairmount and the two cannoneers stand in the keep and on its walls.",
+					note = "Northwatch Hold, on the coast further south. The Theramore Marines and Preservers (15-16) drop the medals; Captain Fairmount (20) and the two cannoneers (19) stand in the keep and on its walls, and they are why the hold waits until now.",
 					goals = {
 						{ t = "goto", text = "Northwatch Hold", map = 1413, x = 61, y = 54.5, f = "e" },
 						{ t = "collect", quest = 891, title = "The Guns of Northwatch", item = 5078, itemName = "Theramore Medal", count = 10, oi = 1, map = 1413, x = 60.86, y = 54.88, f = "e", spots = { { x = 60.5, y = 54.9, r = 65, n = 7 }, { x = 61.7, y = 55.2, r = 60, n = 9 }, { x = 61.3, y = 53.5, r = 44, n = 6 }, { x = 62.2, y = 53.8, r = 43, n = 3 }, { x = 60.7, y = 52.2, r = 53, n = 3 }, { x = 62.3, y = 56.5, r = 31, n = 3 } } },
@@ -16896,11 +16827,11 @@ do
 			title = "Stranglethorn Vale",
 			faction = "Horde",
 			minLevel = 32,
-			maxLevel = 35,
+			maxLevel = 38,
 			category = "Leveling",
 			zone = 1434,
 			zoneName = "Stranglethorn Vale",
-			next = "forever/horde/30-40/03-stranglethorn-vale",
+			next = "forever/horde/30-40/03-arathi-highlands",
 			author = "Polestar",
 			version = 1,
 			steps = {
@@ -16916,7 +16847,7 @@ do
 					note = "The zeppelin lands at the tower on the west side of the camp.",
 					goals = {
 						{ t = "getfp", npc = 1387, npcName = "Thysta", location = "Grom'gol", map = 1434, x = 32.54, y = 29.35, f = "e", note = "Thysta" },
-						{ t = "sethome", npc = 5814, npcName = "Innkeeper Thulbek", location = "Grom'gol", map = 1434, x = 31.49, y = 29.75, f = "e", note = "Innkeeper Thulbek" },
+						{ t = "sethome", npc = 5814, npcName = "Innkeeper Thulbek", location = "Grom'gol Base Camp", map = 1434, x = 31.49, y = 29.75, f = "e", note = "Innkeeper Thulbek" },
 						{ t = "turnin", quest = 1240, title = "The Troll Witchdoctor", npc = 2519, npcName = "Kin'weelay", map = 1434, x = 32.27, y = 27.71, f = "e", note = "Kin'weelay" },
 						{ t = "accept", quest = 581, title = "Hunt for Yenniku", npc = 2497, npcName = "Nimboya", minLevel = 30, qlvl = 34, map = 1434, x = 32.16, y = 27.72, f = "e", note = "Nimboya" },
 					},
@@ -17032,7 +16963,7 @@ do
 				{
 					title = "Hearth to Grom'gol",
 					goals = {
-						{ t = "hearth", location = "Grom'gol" },
+						{ t = "hearth", location = "Grom'gol Base Camp" },
 						{ t = "turnin", quest = 582, title = "Headhunting", npc = 2497, npcName = "Nimboya", map = 1434, x = 32.16, y = 27.72, f = "e", note = "Nimboya" },
 					},
 				},
@@ -17131,36 +17062,13 @@ do
 				},
 				{
 					title = "Grom'gol",
-					note = "Back to Grom'gol; the next guide starts here.",
+					note = "Back to Grom'gol.",
 					goals = {
 						{ t = "turnin", quest = 569, title = "The Defense of Grom'gol", npc = 2464, npcName = "Commander Aggro'gosh", map = 1434, x = 32.17, y = 28.9, f = "e", note = "Commander Aggro'gosh" },
 						{ t = "turnin", quest = 570, title = "Mok'thardin's Enchantment", npc = 2465, npcName = "Far Seer Mok'thardin", map = 1434, x = 32.12, y = 29.24, f = "e", note = "Far Seer Mok'thardin" },
 						{ t = "vendor", candidates = { { npc = 1147, npcName = "Hragran", map = 1434, x = 31.61, y = 29.18, f = "e", faction = "H" }, { npc = 2483, npcName = "Jaquilina Dramet", map = 1434, x = 35.75, y = 10.66, f = "e", faction = "AH" }, { npc = 14921, npcName = "Rin'wosho the Trader", map = 1434, x = 15.07, y = 16, f = "e", faction = "AH" }, { npc = 2839, npcName = "Haren Kanmae", map = 1434, x = 28.31, y = 74.56, f = "e", faction = "AH" }, { npc = 1669, npcName = "Defias Profiteer", map = 1436, x = 43.47, y = 66.76, f = "e", faction = "AH" }, { npc = 984, npcName = "Thralosh", map = 1435, x = 45.06, y = 51.4, f = "e", faction = "H" }, { npc = 9544, npcName = "Yuka Screwspigot", map = 1418, x = 4.9, y = 94.7, f = "e", faction = "AH" }, { npc = 14624, npcName = "Master Smith Burninate", map = 1427, x = 38.8, y = 28.51, f = "e", faction = "AH" }, { npc = 1407, npcName = "Sranda", map = 1427, x = 82, y = 38.5, f = "e", faction = "H" }, { npc = 9179, npcName = "Jazzrik", map = 1418, x = 42.47, y = 52.5, f = "e", faction = "AH" }, { npc = 3534, npcName = "Wallace the Blind", map = 1421, x = 46.5, y = 86.49, f = "e", faction = "AH" }, { npc = 9555, npcName = "Mu'uta", map = 1417, x = 72.52, y = 33.35, f = "e", faction = "H" }, { npc = 3536, npcName = "Kris Legace", map = 1424, x = 80.14, y = 38.89, f = "e", faction = "AH" }, { npc = 3537, npcName = "Zixil", map = 1416, x = 53.6, y = 98.7, f = "e", faction = "AH" }, { npc = 3539, npcName = "Ott", map = 1416, x = 58.9, y = 88.8, f = "e", faction = "H" }, { npc = 14737, npcName = "Smith Slagtree", map = 1425, x = 77.23, y = 80.13, f = "e", faction = "H" }, { npc = 13219, npcName = "Jekyll Flandring", map = 1416, x = 62.84, y = 59.27, f = "e", faction = "H" }, { npc = 3553, npcName = "Sebastian Meloche", map = 1421, x = 43.33, y = 41.35, f = "e", faction = "H" }, { npc = 10857, npcName = "Argent Quartermaster Lightspark", map = 1422, x = 42.84, y = 83.72, f = "e", faction = "AH" }, { npc = 11278, npcName = "Magnus Frostwake", map = 1422, x = 68.12, y = 77.57, f = "e", faction = "AH" }, { npc = 5820, npcName = "Gillian Moore", map = 1458, x = 70.34, y = 58.22, f = "e", faction = "H" }, { npc = 10856, npcName = "Argent Quartermaster Hasana", map = 1422, x = 26.6, y = 55.2, f = "e", faction = "AH" }, { npc = 2117, npcName = "Harold Raims", map = 1420, x = 32.4, y = 66.43, f = "e", faction = "H" }, { npc = 3522, npcName = "Constance Brisboise", map = 1420, x = 52.6, y = 55.77, f = "e", faction = "H" }, { npc = 2136, npcName = "Oliver Dwor", map = 1420, x = 60.12, y = 53.39, f = "e", faction = "H" }, { npc = 16376, npcName = "Craftsman Wilhelm", map = 1423, x = 71.24, y = 49.9, faction = "AH" }, { npc = 3159, npcName = "Kzan Thornslash", map = 1411, x = 40.47, y = 68, f = "e", faction = "H" }, { npc = 3163, npcName = "Uhgar", map = 1411, x = 52.02, y = 40.45, f = "e", faction = "H" }, { npc = 10369, npcName = "Trayexir", map = 1411, x = 56.47, y = 73.12, f = "e", faction = "H" }, { npc = 3073, npcName = "Marjak Keenblade", map = 1412, x = 43.79, y = 77.84, faction = "H" }, { npc = 3077, npcName = "Mahnott Roughwound", map = 1412, x = 45.12, y = 62.08, faction = "H" }, { npc = 3477, npcName = "Hraq", map = 1413, x = 51.13, y = 28.96, f = "e", faction = "H" }, { npc = 3491, npcName = "Ironzar", map = 1413, x = 62.24, y = 37.48, f = "e", faction = "AH" }, { npc = 3682, npcName = "Vrang Wildgore", map = 1413, x = 43.8, y = 12.21, f = "e", faction = "H" }, { npc = 3683, npcName = "Kiknikle", map = 1413, x = 41.79, y = 38.69, f = "e", faction = "AH" }, { npc = 10380, npcName = "Sanuye Runetotem", map = 1413, x = 45.12, y = 59.01, f = "e", faction = "H" }, { npc = 14754, npcName = "Kelm Hargunth", map = 1413, x = 46.65, y = 8.38, f = "e", faction = "H" }, { npc = 6028, npcName = "Burkrum", map = 1440, x = 73.54, y = 60.31, f = "e", faction = "H" }, { npc = 3053, npcName = "Synge", map = 1441, x = 80.4, y = 77.01, f = "e", faction = "AH" }, { npc = 9551, npcName = "Starn", map = 1441, x = 44.89, y = 50.68, f = "e", faction = "H" }, { npc = 4085, npcName = "Nizzik", map = 1442, x = 62.7, y = 40.18, f = "e", faction = "AH" }, { npc = 4086, npcName = "Veenix", map = 1442, x = 58.22, y = 51.74, f = "e", faction = "AH" }, { npc = 9549, npcName = "Borand", map = 1442, x = 45.36, y = 59.1, f = "e", faction = "H" }, { npc = 8878, npcName = "Muuran", map = 1443, x = 55.59, y = 56.5, f = "e", faction = "H" }, { npc = 12045, npcName = "Hae'Wilani", map = 1443, x = 25.8, y = 71.02, f = "e", faction = "H" }, { npc = 8159, npcName = "Worb Strongstitch", map = 1444, x = 74.71, y = 42.58, f = "e", faction = "H" }, { npc = 4883, npcName = "Krak", map = 1445, x = 36.4, y = 30.85, f = "e", faction = "H" }, { npc = 5411, npcName = "Krinkle Goodsteel", map = 1446, x = 51.46, y = 28.81, f = "e", faction = "AH" }, { npc = 10361, npcName = "Gruul Darkblade", map = 1447, x = 22.22, y = 51.09, f = "e", faction = "H" }, { npc = 10379, npcName = "Altsoba Ragetotem", map = 1448, x = 34.81, y = 53.16, f = "e", faction = "H" }, { npc = 3000, npcName = "Gibbert", map = 1449, x = 44.1, y = 7.19, f = "e", faction = "AH" }, { npc = 4184, npcName = "Geenia Sunshadow", map = 1450, x = 52, y = 32.89, f = "e", faction = "AH" }, { npc = 15176, npcName = "Vargus", map = 1451, x = 51.23, y = 38.86, f = "e", faction = "AH" }, { npc = 11182, npcName = "Nixxrak", map = 1452, x = 61.62, y = 37.87, f = "e", faction = "AH" }, { npc = 3314, npcName = "Urtharo", map = 1454, x = 47.56, y = 68.38, f = "e", faction = "H" }, { npc = 3315, npcName = "Tor'phan", map = 1454, x = 62.81, y = 50.44, f = "e", faction = "H" }, { npc = 3349, npcName = "Ukra'nor", map = 1454, x = 29.74, y = 74.17, f = "e", faction = "H" }, { npc = 3356, npcName = "Sumi", map = 1454, x = 82.6, y = 23.96, f = "e", faction = "H" }, { npc = 2997, npcName = "Jyn Stonehoof", map = 1456, x = 41.42, y = 62.36, f = "e", faction = "H" }, { npc = 3343, npcName = "Grelkor", map = 1459, x = 49.68, y = 82.46, f = "e", faction = "H" } } },
 					},
 				},
-			},
-		})
-	end
-	register()
-end
-
--- Source: forever/horde/30-40/03-stranglethorn-vale.guide
-do
-	local function register()
-		Polestar.RegisterGuide({
-			id = "forever/horde/30-40/03-stranglethorn-vale",
-			pack = "guides",
-			title = "Stranglethorn Vale",
-			faction = "Horde",
-			minLevel = 34,
-			maxLevel = 36,
-			category = "Leveling",
-			zone = 1434,
-			zoneName = "Stranglethorn Vale",
-			next = "forever/horde/30-40/04-stranglethorn-vale",
-			author = "Polestar",
-			version = 1,
-			steps = {
 				{
 					title = "The Vile Reef",
 					note = "North-west of Grom'gol the Vile Reef lies under the water off the coast. The Tablet Shard rests on the sea floor by the sunken ruins; watch your breath and the murlocs.",
@@ -17199,7 +17107,7 @@ do
 				},
 				{
 					title = "Green Hills pages",
-					note = "Pages of The Green Hills of Stranglethorn drop at about 1% each from the Bloodscalp and Skullsplitter trolls; keep every page you loot and look on the auction house for the rest. Barnil takes the chapters in the next guide, which starts with a hearth to Grom'gol.",
+					note = "Pages of The Green Hills of Stranglethorn drop at about 1% each from the Bloodscalp and Skullsplitter trolls; keep every page you loot and look on the auction house for the rest. Barnil takes the chapters later in this guide.",
 					goals = {
 						{ t = "collect", quest = 339, title = "Chapter I", item = 2725, itemName = "Green Hills of Stranglethorn - Page 1", oi = 1, map = 1434, x = 34.71, y = 21.9, f = "e", spots = { { x = 34.8, y = 22.7, r = 65, n = 4 } }, optional = true },
 						{ t = "collect", quest = 339, title = "Chapter I", item = 2728, itemName = "Green Hills of Stranglethorn - Page 4", oi = 2, map = 1434, x = 34.71, y = 21.9, f = "e", spots = { { x = 34.8, y = 22.7, r = 65, n = 4 } }, optional = true },
@@ -17218,29 +17126,6 @@ do
 						{ t = "collect", quest = 342, title = "Chapter IV", item = 2751, itemName = "Green Hills of Stranglethorn - Page 27", oi = 3, map = 1434, x = 37.37, y = 31.22, f = "e", optional = true },
 					},
 				},
-			},
-		})
-	end
-	register()
-end
-
--- Source: forever/horde/30-40/04-stranglethorn-vale.guide
-do
-	local function register()
-		Polestar.RegisterGuide({
-			id = "forever/horde/30-40/04-stranglethorn-vale",
-			pack = "guides",
-			title = "Stranglethorn Vale",
-			faction = "Horde",
-			minLevel = 35,
-			maxLevel = 38,
-			category = "Leveling",
-			zone = 1434,
-			zoneName = "Stranglethorn Vale",
-			next = "forever/horde/30-40/05-arathi-highlands",
-			author = "Polestar",
-			version = 1,
-			steps = {
 				{
 					title = "Shadowmaw panthers",
 					note = "The Shadowmaw Panthers (37-38) stalk the jungle east of the Mosh'Ogg hills and north-east towards the lake; they strike from stealth. Loot every Green Hills page you find on the way.",
@@ -17318,7 +17203,7 @@ do
 						{ t = "sethome", location = "Booty Bay" },
 						{ t = "accept", quest = 213, title = "Hostile Takeover", npc = 737, npcName = "Kebok", minLevel = 31, qlvl = 36, map = 1434, x = 27, y = 77.13, f = "e", note = "Kebok" },
 						{ t = "vendor", candidates = { { npc = 2843, npcName = "Jutak", map = 1434, x = 27.46, y = 77.55, f = "e", faction = "AH" }, { npc = 5814, npcName = "Innkeeper Thulbek", map = 1434, x = 31.49, y = 29.75, f = "e", faction = "H" }, { npc = 14921, npcName = "Rin'wosho the Trader", map = 1434, x = 15.07, y = 16, f = "e", faction = "AH" }, { npc = 2483, npcName = "Jaquilina Dramet", map = 1434, x = 35.75, y = 10.66, f = "e", faction = "AH" }, { npc = 1669, npcName = "Defias Profiteer", map = 1436, x = 43.47, y = 66.76, f = "e", faction = "AH" }, { npc = 984, npcName = "Thralosh", map = 1435, x = 45.06, y = 51.4, f = "e", faction = "H" }, { npc = 9544, npcName = "Yuka Screwspigot", map = 1418, x = 4.9, y = 94.7, f = "e", faction = "AH" }, { npc = 14624, npcName = "Master Smith Burninate", map = 1427, x = 38.8, y = 28.51, f = "e", faction = "AH" }, { npc = 1407, npcName = "Sranda", map = 1427, x = 82, y = 38.5, f = "e", faction = "H" }, { npc = 9179, npcName = "Jazzrik", map = 1418, x = 42.47, y = 52.5, f = "e", faction = "AH" }, { npc = 3534, npcName = "Wallace the Blind", map = 1421, x = 46.5, y = 86.49, f = "e", faction = "AH" }, { npc = 9555, npcName = "Mu'uta", map = 1417, x = 72.52, y = 33.35, f = "e", faction = "H" }, { npc = 3537, npcName = "Zixil", map = 1416, x = 53.6, y = 98.7, f = "e", faction = "AH" }, { npc = 3536, npcName = "Kris Legace", map = 1424, x = 80.14, y = 38.89, f = "e", faction = "AH" }, { npc = 3539, npcName = "Ott", map = 1416, x = 58.9, y = 88.8, f = "e", faction = "H" }, { npc = 14737, npcName = "Smith Slagtree", map = 1425, x = 77.23, y = 80.13, f = "e", faction = "H" }, { npc = 13219, npcName = "Jekyll Flandring", map = 1416, x = 62.84, y = 59.27, f = "e", faction = "H" }, { npc = 3553, npcName = "Sebastian Meloche", map = 1421, x = 43.33, y = 41.35, f = "e", faction = "H" }, { npc = 10857, npcName = "Argent Quartermaster Lightspark", map = 1422, x = 42.84, y = 83.72, f = "e", faction = "AH" }, { npc = 11278, npcName = "Magnus Frostwake", map = 1422, x = 68.12, y = 77.57, f = "e", faction = "AH" }, { npc = 5820, npcName = "Gillian Moore", map = 1458, x = 70.34, y = 58.22, f = "e", faction = "H" }, { npc = 10856, npcName = "Argent Quartermaster Hasana", map = 1422, x = 26.6, y = 55.2, f = "e", faction = "AH" }, { npc = 2117, npcName = "Harold Raims", map = 1420, x = 32.4, y = 66.43, f = "e", faction = "H" }, { npc = 3522, npcName = "Constance Brisboise", map = 1420, x = 52.6, y = 55.77, f = "e", faction = "H" }, { npc = 2136, npcName = "Oliver Dwor", map = 1420, x = 60.12, y = 53.39, f = "e", faction = "H" }, { npc = 16376, npcName = "Craftsman Wilhelm", map = 1423, x = 71.24, y = 49.9, faction = "AH" }, { npc = 3159, npcName = "Kzan Thornslash", map = 1411, x = 40.47, y = 68, f = "e", faction = "H" }, { npc = 3163, npcName = "Uhgar", map = 1411, x = 52.02, y = 40.45, f = "e", faction = "H" }, { npc = 10369, npcName = "Trayexir", map = 1411, x = 56.47, y = 73.12, f = "e", faction = "H" }, { npc = 3073, npcName = "Marjak Keenblade", map = 1412, x = 43.79, y = 77.84, faction = "H" }, { npc = 3077, npcName = "Mahnott Roughwound", map = 1412, x = 45.12, y = 62.08, faction = "H" }, { npc = 3477, npcName = "Hraq", map = 1413, x = 51.13, y = 28.96, f = "e", faction = "H" }, { npc = 3491, npcName = "Ironzar", map = 1413, x = 62.24, y = 37.48, f = "e", faction = "AH" }, { npc = 3682, npcName = "Vrang Wildgore", map = 1413, x = 43.8, y = 12.21, f = "e", faction = "H" }, { npc = 3683, npcName = "Kiknikle", map = 1413, x = 41.79, y = 38.69, f = "e", faction = "AH" }, { npc = 10380, npcName = "Sanuye Runetotem", map = 1413, x = 45.12, y = 59.01, f = "e", faction = "H" }, { npc = 14754, npcName = "Kelm Hargunth", map = 1413, x = 46.65, y = 8.38, f = "e", faction = "H" }, { npc = 6028, npcName = "Burkrum", map = 1440, x = 73.54, y = 60.31, f = "e", faction = "H" }, { npc = 3053, npcName = "Synge", map = 1441, x = 80.4, y = 77.01, f = "e", faction = "AH" }, { npc = 9551, npcName = "Starn", map = 1441, x = 44.89, y = 50.68, f = "e", faction = "H" }, { npc = 4085, npcName = "Nizzik", map = 1442, x = 62.7, y = 40.18, f = "e", faction = "AH" }, { npc = 4086, npcName = "Veenix", map = 1442, x = 58.22, y = 51.74, f = "e", faction = "AH" }, { npc = 9549, npcName = "Borand", map = 1442, x = 45.36, y = 59.1, f = "e", faction = "H" }, { npc = 8878, npcName = "Muuran", map = 1443, x = 55.59, y = 56.5, f = "e", faction = "H" }, { npc = 12045, npcName = "Hae'Wilani", map = 1443, x = 25.8, y = 71.02, f = "e", faction = "H" }, { npc = 8159, npcName = "Worb Strongstitch", map = 1444, x = 74.71, y = 42.58, f = "e", faction = "H" }, { npc = 4883, npcName = "Krak", map = 1445, x = 36.4, y = 30.85, f = "e", faction = "H" }, { npc = 5411, npcName = "Krinkle Goodsteel", map = 1446, x = 51.46, y = 28.81, f = "e", faction = "AH" }, { npc = 10361, npcName = "Gruul Darkblade", map = 1447, x = 22.22, y = 51.09, f = "e", faction = "H" }, { npc = 10379, npcName = "Altsoba Ragetotem", map = 1448, x = 34.81, y = 53.16, f = "e", faction = "H" }, { npc = 3000, npcName = "Gibbert", map = 1449, x = 44.1, y = 7.19, f = "e", faction = "AH" }, { npc = 4184, npcName = "Geenia Sunshadow", map = 1450, x = 52, y = 32.89, f = "e", faction = "AH" }, { npc = 15176, npcName = "Vargus", map = 1451, x = 51.23, y = 38.86, f = "e", faction = "AH" }, { npc = 11182, npcName = "Nixxrak", map = 1452, x = 61.62, y = 37.87, f = "e", faction = "AH" }, { npc = 3314, npcName = "Urtharo", map = 1454, x = 47.56, y = 68.38, f = "e", faction = "H" }, { npc = 3315, npcName = "Tor'phan", map = 1454, x = 62.81, y = 50.44, f = "e", faction = "H" }, { npc = 3349, npcName = "Ukra'nor", map = 1454, x = 29.74, y = 74.17, f = "e", faction = "H" }, { npc = 3356, npcName = "Sumi", map = 1454, x = 82.6, y = 23.96, f = "e", faction = "H" }, { npc = 2997, npcName = "Jyn Stonehoof", map = 1456, x = 41.42, y = 62.36, f = "e", faction = "H" }, { npc = 3343, npcName = "Grelkor", map = 1459, x = 49.68, y = 82.46, f = "e", faction = "H" } } },
-						{ t = "turnin", quest = 577, title = "Some Assembly Required", npc = 2495, npcName = "Drizzlik", map = 1434, x = 28.29, y = 77.59, f = "e", note = "Drizzlik: the Snapjaw skins from the previous guide" },
+						{ t = "turnin", quest = 577, title = "Some Assembly Required", npc = 2495, npcName = "Drizzlik", map = 1434, x = 28.29, y = 77.59, f = "e", note = "Drizzlik: the Snapjaw skins gathered earlier" },
 					},
 				},
 				{
@@ -17350,11 +17235,11 @@ do
 	register()
 end
 
--- Source: forever/horde/30-40/05-arathi-highlands.guide
+-- Source: forever/horde/30-40/03-arathi-highlands.guide
 do
 	local function register()
 		Polestar.RegisterGuide({
-			id = "forever/horde/30-40/05-arathi-highlands",
+			id = "forever/horde/30-40/03-arathi-highlands",
 			pack = "guides",
 			title = "Arathi Highlands, Badlands & The Barrens",
 			faction = "Horde",
@@ -17363,7 +17248,7 @@ do
 			category = "Leveling",
 			zone = 1417,
 			zoneName = "Arathi Highlands",
-			next = "forever/horde/30-40/06-dustwallow-marsh",
+			next = "forever/horde/30-40/04-dustwallow-marsh",
 			author = "Polestar",
 			version = 1,
 			steps = {
@@ -17774,11 +17659,11 @@ do
 	register()
 end
 
--- Source: forever/horde/30-40/06-dustwallow-marsh.guide
+-- Source: forever/horde/30-40/04-dustwallow-marsh.guide
 do
 	local function register()
 		Polestar.RegisterGuide({
-			id = "forever/horde/30-40/06-dustwallow-marsh",
+			id = "forever/horde/30-40/04-dustwallow-marsh",
 			pack = "guides",
 			title = "Dustwallow Marsh & Desolace",
 			faction = "Horde",
@@ -18054,14 +17939,14 @@ do
 		Polestar.RegisterGuide({
 			id = "forever/horde/40-50/01-stranglethorn-vale",
 			pack = "guides",
-			title = "Stranglethorn Vale",
+			title = "Stranglethorn Vale & Swamp of Sorrows",
 			faction = "Horde",
 			minLevel = 40,
-			maxLevel = 42,
+			maxLevel = 43,
 			category = "Leveling",
 			zone = 1434,
 			zoneName = "Stranglethorn Vale",
-			next = "forever/horde/40-50/02-stranglethorn-vale",
+			next = "forever/horde/40-50/02-feralas",
 			author = "Polestar",
 			version = 1,
 			steps = {
@@ -18254,7 +18139,7 @@ do
 				},
 				{
 					title = "Booty Bay",
-					note = "Ride south to Booty Bay. Shaky Phillipe waits on the docks. The next guide starts here.",
+					note = "Ride south to Booty Bay. Shaky Phillipe waits on the docks.",
 					goals = {
 						{ t = "sethome", npc = 6807, npcName = "Innkeeper Skindle", location = "Booty Bay", map = 1434, x = 27.04, y = 77.31, f = "e", note = "Innkeeper Skindle" },
 						{ t = "turnin", quest = 617, title = "Akiris by the Bundle", npc = 2494, npcName = "Privateer Bloads", map = 1434, x = 26.76, y = 76.38, f = "e", note = "Privateer Bloads" },
@@ -18268,29 +18153,6 @@ do
 						{ t = "vendor", candidates = { { npc = 2843, npcName = "Jutak", map = 1434, x = 27.46, y = 77.55, f = "e", faction = "AH" }, { npc = 5814, npcName = "Innkeeper Thulbek", map = 1434, x = 31.49, y = 29.75, f = "e", faction = "H" }, { npc = 14921, npcName = "Rin'wosho the Trader", map = 1434, x = 15.07, y = 16, f = "e", faction = "AH" }, { npc = 2483, npcName = "Jaquilina Dramet", map = 1434, x = 35.75, y = 10.66, f = "e", faction = "AH" }, { npc = 1669, npcName = "Defias Profiteer", map = 1436, x = 43.47, y = 66.76, f = "e", faction = "AH" }, { npc = 984, npcName = "Thralosh", map = 1435, x = 45.06, y = 51.4, f = "e", faction = "H" }, { npc = 9544, npcName = "Yuka Screwspigot", map = 1418, x = 4.9, y = 94.7, f = "e", faction = "AH" }, { npc = 14624, npcName = "Master Smith Burninate", map = 1427, x = 38.8, y = 28.51, f = "e", faction = "AH" }, { npc = 1407, npcName = "Sranda", map = 1427, x = 82, y = 38.5, f = "e", faction = "H" }, { npc = 9179, npcName = "Jazzrik", map = 1418, x = 42.47, y = 52.5, f = "e", faction = "AH" }, { npc = 3534, npcName = "Wallace the Blind", map = 1421, x = 46.5, y = 86.49, f = "e", faction = "AH" }, { npc = 9555, npcName = "Mu'uta", map = 1417, x = 72.52, y = 33.35, f = "e", faction = "H" }, { npc = 3536, npcName = "Kris Legace", map = 1424, x = 80.14, y = 38.89, f = "e", faction = "AH" }, { npc = 3537, npcName = "Zixil", map = 1416, x = 53.6, y = 98.7, f = "e", faction = "AH" }, { npc = 3539, npcName = "Ott", map = 1416, x = 58.9, y = 88.8, f = "e", faction = "H" }, { npc = 14737, npcName = "Smith Slagtree", map = 1425, x = 77.23, y = 80.13, f = "e", faction = "H" }, { npc = 13219, npcName = "Jekyll Flandring", map = 1416, x = 62.84, y = 59.27, f = "e", faction = "H" }, { npc = 3553, npcName = "Sebastian Meloche", map = 1421, x = 43.33, y = 41.35, f = "e", faction = "H" }, { npc = 10857, npcName = "Argent Quartermaster Lightspark", map = 1422, x = 42.84, y = 83.72, f = "e", faction = "AH" }, { npc = 11278, npcName = "Magnus Frostwake", map = 1422, x = 68.12, y = 77.57, f = "e", faction = "AH" }, { npc = 5820, npcName = "Gillian Moore", map = 1458, x = 70.34, y = 58.22, f = "e", faction = "H" }, { npc = 10856, npcName = "Argent Quartermaster Hasana", map = 1422, x = 26.6, y = 55.2, f = "e", faction = "AH" }, { npc = 2117, npcName = "Harold Raims", map = 1420, x = 32.4, y = 66.43, f = "e", faction = "H" }, { npc = 3522, npcName = "Constance Brisboise", map = 1420, x = 52.6, y = 55.77, f = "e", faction = "H" }, { npc = 2136, npcName = "Oliver Dwor", map = 1420, x = 60.12, y = 53.39, f = "e", faction = "H" }, { npc = 16376, npcName = "Craftsman Wilhelm", map = 1423, x = 71.24, y = 49.9, faction = "AH" }, { npc = 3159, npcName = "Kzan Thornslash", map = 1411, x = 40.47, y = 68, f = "e", faction = "H" }, { npc = 3163, npcName = "Uhgar", map = 1411, x = 52.02, y = 40.45, f = "e", faction = "H" }, { npc = 10369, npcName = "Trayexir", map = 1411, x = 56.47, y = 73.12, f = "e", faction = "H" }, { npc = 3073, npcName = "Marjak Keenblade", map = 1412, x = 43.79, y = 77.84, faction = "H" }, { npc = 3077, npcName = "Mahnott Roughwound", map = 1412, x = 45.12, y = 62.08, faction = "H" }, { npc = 3477, npcName = "Hraq", map = 1413, x = 51.13, y = 28.96, f = "e", faction = "H" }, { npc = 3491, npcName = "Ironzar", map = 1413, x = 62.24, y = 37.48, f = "e", faction = "AH" }, { npc = 3682, npcName = "Vrang Wildgore", map = 1413, x = 43.8, y = 12.21, f = "e", faction = "H" }, { npc = 3683, npcName = "Kiknikle", map = 1413, x = 41.79, y = 38.69, f = "e", faction = "AH" }, { npc = 10380, npcName = "Sanuye Runetotem", map = 1413, x = 45.12, y = 59.01, f = "e", faction = "H" }, { npc = 14754, npcName = "Kelm Hargunth", map = 1413, x = 46.65, y = 8.38, f = "e", faction = "H" }, { npc = 6028, npcName = "Burkrum", map = 1440, x = 73.54, y = 60.31, f = "e", faction = "H" }, { npc = 3053, npcName = "Synge", map = 1441, x = 80.4, y = 77.01, f = "e", faction = "AH" }, { npc = 9551, npcName = "Starn", map = 1441, x = 44.89, y = 50.68, f = "e", faction = "H" }, { npc = 4085, npcName = "Nizzik", map = 1442, x = 62.7, y = 40.18, f = "e", faction = "AH" }, { npc = 4086, npcName = "Veenix", map = 1442, x = 58.22, y = 51.74, f = "e", faction = "AH" }, { npc = 9549, npcName = "Borand", map = 1442, x = 45.36, y = 59.1, f = "e", faction = "H" }, { npc = 8878, npcName = "Muuran", map = 1443, x = 55.59, y = 56.5, f = "e", faction = "H" }, { npc = 12045, npcName = "Hae'Wilani", map = 1443, x = 25.8, y = 71.02, f = "e", faction = "H" }, { npc = 8159, npcName = "Worb Strongstitch", map = 1444, x = 74.71, y = 42.58, f = "e", faction = "H" }, { npc = 4883, npcName = "Krak", map = 1445, x = 36.4, y = 30.85, f = "e", faction = "H" }, { npc = 5411, npcName = "Krinkle Goodsteel", map = 1446, x = 51.46, y = 28.81, f = "e", faction = "AH" }, { npc = 10361, npcName = "Gruul Darkblade", map = 1447, x = 22.22, y = 51.09, f = "e", faction = "H" }, { npc = 10379, npcName = "Altsoba Ragetotem", map = 1448, x = 34.81, y = 53.16, f = "e", faction = "H" }, { npc = 3000, npcName = "Gibbert", map = 1449, x = 44.1, y = 7.19, f = "e", faction = "AH" }, { npc = 4184, npcName = "Geenia Sunshadow", map = 1450, x = 52, y = 32.89, f = "e", faction = "AH" }, { npc = 15176, npcName = "Vargus", map = 1451, x = 51.23, y = 38.86, f = "e", faction = "AH" }, { npc = 11182, npcName = "Nixxrak", map = 1452, x = 61.62, y = 37.87, f = "e", faction = "AH" }, { npc = 3314, npcName = "Urtharo", map = 1454, x = 47.56, y = 68.38, f = "e", faction = "H" }, { npc = 3315, npcName = "Tor'phan", map = 1454, x = 62.81, y = 50.44, f = "e", faction = "H" }, { npc = 3349, npcName = "Ukra'nor", map = 1454, x = 29.74, y = 74.17, f = "e", faction = "H" }, { npc = 3356, npcName = "Sumi", map = 1454, x = 82.6, y = 23.96, f = "e", faction = "H" }, { npc = 2997, npcName = "Jyn Stonehoof", map = 1456, x = 41.42, y = 62.36, f = "e", faction = "H" }, { npc = 3343, npcName = "Grelkor", map = 1459, x = 49.68, y = 82.46, f = "e", faction = "H" } } },
 					},
 				},
-			},
-		})
-	end
-	register()
-end
-
--- Source: forever/horde/40-50/02-stranglethorn-vale.guide
-do
-	local function register()
-		Polestar.RegisterGuide({
-			id = "forever/horde/40-50/02-stranglethorn-vale",
-			pack = "guides",
-			title = "Stranglethorn Vale & Swamp of Sorrows",
-			faction = "Horde",
-			minLevel = 41,
-			maxLevel = 43,
-			category = "Leveling",
-			zone = 1434,
-			zoneName = "Stranglethorn Vale",
-			next = "forever/horde/40-50/03-feralas",
-			author = "Polestar",
-			version = 1,
-			steps = {
 				{
 					title = "Pirate ghosts",
 					note = "The three ghostly pirates haunt the jungle north of Booty Bay, near Zanzil's camps: Maury and Jon-Jon stand together, Chucky further east.",
@@ -18447,11 +18309,11 @@ do
 	register()
 end
 
--- Source: forever/horde/40-50/03-feralas.guide
+-- Source: forever/horde/40-50/02-feralas.guide
 do
 	local function register()
 		Polestar.RegisterGuide({
-			id = "forever/horde/40-50/03-feralas",
+			id = "forever/horde/40-50/02-feralas",
 			pack = "guides",
 			title = "Feralas & Tanaris",
 			faction = "Horde",
@@ -18460,7 +18322,7 @@ do
 			category = "Leveling",
 			zone = 1444,
 			zoneName = "Feralas",
-			next = "forever/horde/40-50/04-feralas",
+			next = "forever/horde/40-50/03-feralas",
 			author = "Polestar",
 			version = 1,
 			steps = {
@@ -18781,11 +18643,11 @@ do
 	register()
 end
 
--- Source: forever/horde/40-50/04-feralas.guide
+-- Source: forever/horde/40-50/03-feralas.guide
 do
 	local function register()
 		Polestar.RegisterGuide({
-			id = "forever/horde/40-50/04-feralas",
+			id = "forever/horde/40-50/03-feralas",
 			pack = "guides",
 			title = "Feralas, Dustwallow Marsh & Swamp of Sorrows",
 			faction = "Horde",
@@ -18794,7 +18656,7 @@ do
 			category = "Leveling",
 			zone = 1444,
 			zoneName = "Feralas",
-			next = "forever/horde/40-50/05-tanaris",
+			next = "forever/horde/40-50/04-tanaris",
 			author = "Polestar",
 			version = 1,
 			steps = {
@@ -19098,11 +18960,11 @@ do
 	register()
 end
 
--- Source: forever/horde/40-50/05-tanaris.guide
+-- Source: forever/horde/40-50/04-tanaris.guide
 do
 	local function register()
 		Polestar.RegisterGuide({
-			id = "forever/horde/40-50/05-tanaris",
+			id = "forever/horde/40-50/04-tanaris",
 			pack = "guides",
 			title = "Tanaris & Searing Gorge",
 			faction = "Horde",
@@ -19111,7 +18973,7 @@ do
 			category = "Leveling",
 			zone = 1446,
 			zoneName = "Tanaris",
-			next = "forever/horde/40-50/06-the-hinterlands",
+			next = "forever/horde/40-50/05-the-hinterlands",
 			author = "Polestar",
 			version = 1,
 			steps = {
@@ -19391,11 +19253,11 @@ do
 	register()
 end
 
--- Source: forever/horde/40-50/06-the-hinterlands.guide
+-- Source: forever/horde/40-50/05-the-hinterlands.guide
 do
 	local function register()
 		Polestar.RegisterGuide({
-			id = "forever/horde/40-50/06-the-hinterlands",
+			id = "forever/horde/40-50/05-the-hinterlands",
 			pack = "guides",
 			title = "The Hinterlands & Blasted Lands",
 			faction = "Horde",
@@ -19404,7 +19266,7 @@ do
 			category = "Leveling",
 			zone = 1425,
 			zoneName = "The Hinterlands",
-			next = "forever/horde/40-50/07-azshara",
+			next = "forever/horde/40-50/06-azshara",
 			author = "Polestar",
 			version = 1,
 			steps = {
@@ -19707,11 +19569,11 @@ do
 	register()
 end
 
--- Source: forever/horde/40-50/07-azshara.guide
+-- Source: forever/horde/40-50/06-azshara.guide
 do
 	local function register()
 		Polestar.RegisterGuide({
-			id = "forever/horde/40-50/07-azshara",
+			id = "forever/horde/40-50/06-azshara",
 			pack = "guides",
 			title = "Azshara, Feralas & Stranglethorn Vale",
 			faction = "Horde",

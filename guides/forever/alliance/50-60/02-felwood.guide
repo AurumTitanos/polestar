@@ -17,12 +17,12 @@
 # for Darnassus, Seeking Spiritual Aid (5158) for the Barrens, A Little Slime Goes a Long Way (4512) for Ironforge.
 # Left out: the old Timbermaw Ally and Deadwood of the North (6131, 6221): they pay no experience in the data and
 # were replaced by 8460 and 8461, which are done here.
-guide forever/alliance/50-60/03-felwood
+guide forever/alliance/50-60/02-felwood
 title Felwood
 faction Alliance
 levels 52-54
 zone Felwood
-next forever/alliance/50-60/04-winterspring
+next forever/alliance/50-60/03-winterspring
 
 # ---------------------------------------------------------------- Getting there
 

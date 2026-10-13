@@ -1,9 +1,9 @@
-guide forever/horde/30-40/05-arathi-highlands
+guide forever/horde/30-40/03-arathi-highlands
 title Arathi Highlands, Badlands & The Barrens
 faction Horde
 levels 37-40
 zone Arathi Highlands
-next forever/horde/30-40/06-dustwallow-marsh
+next forever/horde/30-40/04-dustwallow-marsh
 
 # Consensus route (Horde, simulator export consensus-horde-tauren), visits
 # 25-28: Arathi Highlands 37.4-38.4, Hillsbrad Foothills (Tarren Mill),
@@ -55,7 +55,7 @@ next forever/horde/30-40/06-dustwallow-marsh
 # Optional: Stone Is Better than Cloth (716) needs Patterned Bronze Bracers
 # (Blacksmithing or the Auction House).
 # Crystal in the Mountains (635) and Trollbane (638) are accepted in the
-# Stranglethorn guides; their turn-ins here are skipped if you never had them.
+# Stranglethorn guide; their turn-ins here are skipped if you never had them.
 # Restored: Martek the Exiled (1106, Fizzle's letter, accepted at the
 # Shimmering Flats in forever/horde/07-ashenvale) and Indurium (1108): the
 # Stonevault troggs sit between the Valley of Fangs and Agmond's End, on the

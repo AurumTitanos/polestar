@@ -1,9 +1,9 @@
-guide forever/horde/40-50/06-the-hinterlands
+guide forever/horde/40-50/05-the-hinterlands
 title The Hinterlands & Blasted Lands
 faction Horde
 levels 47-50
 zone The Hinterlands
-next forever/horde/40-50/07-azshara
+next forever/horde/40-50/06-azshara
 # Route from the Polestar route simulator's Horde consensus (Tauren export),
 # visits 49-53, levels 47.6-49.5. Checked by lint, not play-tested on
 # Forever yet. Era + known Forever quests only.
@@ -23,7 +23,7 @@ next forever/horde/40-50/07-azshara
 #   one accept, Whiskey Slim's Lost Grog (580), and the optional OOX-17/TN
 #   turn-in (648, carried on to the next Booty Bay visit).
 # - The Swamp of Sorrows return (visit 51) is gone: Threat From the Sea and
-#   Continued Threat (1426-1428) are finished in forever/horde/40-50/04-feralas.
+#   Continued Threat (1426-1428) are finished in forever/horde/40-50/03-feralas.
 # - The Blasted Lands come first, straight from Thorium Point by way of
 #   Stonard, then the Undercity on the way to Tarren Mill: no Undercity
 #   bind, no hearth back to it, no zeppelin.

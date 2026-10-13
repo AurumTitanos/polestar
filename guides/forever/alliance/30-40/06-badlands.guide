@@ -31,7 +31,7 @@
 # Diving (705, its clams lie on Stranglethorn's far north-west coast, which the
 # route no longer visits): never finished on the route.
 # Class training: none here; the next guide trains in Stormwind.
-guide forever/alliance/30-40/07-badlands
+guide forever/alliance/30-40/06-badlands
 title Badlands & Desolace
 faction Alliance
 levels 39-41

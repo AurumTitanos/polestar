@@ -292,7 +292,7 @@ local function add(id, title, faction, lo, hi, zoneName, zone, n)
 	table.insert(uistub.order, id)
 end
 add("forever/alliance/30-40/02-desolace", "Desolace", "Alliance", 31, 34, "Desolace", 1443)
-add("forever/alliance/30-40/04-stranglethorn-vale", "Stranglethorn Vale", "Alliance", 34, 36, "Stranglethorn Vale", 1434)
+add("forever/alliance/30-40/04-stranglethorn-vale", "Stranglethorn Vale", "Alliance", 34, 38, "Stranglethorn Vale", 1434)
 add("forever/alliance/40-50/04-tanaris", "Tanaris", "Alliance", 45, 47, "Tanaris", 1446)
 add("forever/horde/30-40/01-desolace", "Desolace & Hillsbrad Foothills", "Horde", 30, 33, "Desolace", 1443)
 -- The Horde road from Durotar through the Barrens: the compiled guides

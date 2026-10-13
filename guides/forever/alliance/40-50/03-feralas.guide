@@ -42,7 +42,7 @@ next forever/alliance/40-50/04-tanaris
 step Feathermoon Stronghold
   tip From Theramore, fly to Nijel's Point and ride south out of Desolace into Feralas; the road leads west to the Forgotten Coast dock, where the boat crosses to Feathermoon on Sardor Isle.
   getfp "Feathermoon" npc 8019        -- Fyldren Moonfeather
-  sethome "Feathermoon" npc 7736      -- Innkeeper Shyria
+  sethome "Feathermoon Stronghold" npc 7736 -- Innkeeper Shyria
   accept 2982                         -- Angelas Moonbreeze
   accept 2821                         -- Pratt McGrubben
   accept 2939                         -- Troyas Moonbreeze: his answer waits in Rut'theran Village, later
@@ -106,7 +106,7 @@ step Lord Shalzaru
 
 step Feathermoon Stronghold
   tip Hearth to Feathermoon.
-  hearth "Feathermoon"
+  hearth "Feathermoon Stronghold"
   turnin 2870                         -- Latronicus Moonspear
   accept 2871
   turnin 2871                         -- Vestia Moonspear
@@ -168,7 +168,7 @@ step Shay's escort
 
 step Feathermoon Stronghold
   tip Hearth to Feathermoon.
-  hearth "Feathermoon"
+  hearth "Feathermoon Stronghold"
   turnin 4265                         -- Ginro Hearthkindle
   accept 4266
   turnin 4266                         -- Shandris Feathermoon
