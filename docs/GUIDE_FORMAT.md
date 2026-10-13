@@ -8,7 +8,9 @@ Guides are written as `.guide` text files in a guide pack (Polestar's own:
 [PACKS.md](PACKS.md)) and compiled to Lua by `node tools/polestar.js compile`.
 The compiler fills in names, titles and coordinates from the reference data in
 `data/forever/`, so a line can be as short as `accept 783`. Anything you write
-explicitly wins over the data. Worked examples of every goal are in the
+explicitly wins over the data. Without the reference data the compiler stops
+with one error, unless `--no-data` says to compile guides that give every
+title, name and place themselves. Worked examples of every goal are in the
 Cookbook at the end of this page.
 
 ```

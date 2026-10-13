@@ -7,8 +7,9 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { Diagnostics } = require('../dsl/diag');
-const { parseArgs, printDiagnostics, formatError, plural } = require('../dsl/cli');
+const { parseArgs, resolvePath, printDiagnostics, formatError, plural } = require('../dsl/cli');
 const { ROOT, compileProject, buildPackFiles } = require('../dsl/project');
+const { hasCoreData, emptyData, CORE_FILES } = require('../dsl/data');
 const { commandPack, packArgument } = require('./locate');
 const { FOLDER_RE, LICENSE_PLACEHOLDER } = require('./format');
 
@@ -34,9 +35,11 @@ function otherPack(opts, positional = [], cwd = process.cwd()) {
 }
 
 // compile and lint: parse argv (`spec`: parseArgs flags/options, --format
-// checked) and find the pack (packArgument, commandPack). -> { exit } when
-// the command is done (help 0, usage error 2, invalid pack.json 1: its
-// diagnostics printed), else { opts, pack, out } with out = printDiagnostics' options.
+// checked), find the pack (packArgument, commandPack) and its reference data.
+// -> { exit } when the command is done (help 0, usage error 2, invalid
+// pack.json or no reference data 1: the diagnostics printed), else
+// { opts, pack, out, dataDir, cache } with out = printDiagnostics' options and
+// cache buildPack's (empty data with `--no-data`, else null).
 function packCommand(argv, { name, usage, flags, options }) {
 	const { opts, positional, error } = parseArgs(argv, { flags, options });
 	if (opts.help) {
@@ -44,7 +47,7 @@ function packCommand(argv, { name, usage, flags, options }) {
 		return { exit: 0 };
 	}
 	const arg = error ? {} : packArgument(opts, positional);
-	const usageError = error || arg.error || formatError(opts.format);
+	const usageError = error || arg.error || formatError(opts.format) || noDataConflict(opts);
 	const pack = usageError ? null : commandPack({ ...opts, pack: arg.pack });
 	if (!pack || pack.error) {
 		console.error(`${usageError || pack.error}\n\n${usage}`);
@@ -56,7 +59,52 @@ function packCommand(argv, { name, usage, flags, options }) {
 		if (out.format !== 'json') console.error(`${name} failed: ${plural(pack.diags.filter((d) => d.severity === 'error').length, 'error')} in pack.json`);
 		return { exit: 1 };
 	}
-	return { opts, pack, out };
+	const dataDir = resolvePath(opts.data, 'data/forever', ROOT);
+	if (opts.noData) return { opts, pack, out, dataDir, cache: noDataCache() };
+	const missing = noReferenceData(pack, dataDir, true);
+	if (missing) {
+		printDiagnostics(missing, out);
+		if (out.format !== 'json') console.error(`${name} failed: no reference data`);
+		return { exit: 1 };
+	}
+	return { opts, pack, out, dataDir, cache: null };
+}
+
+// --no-data next to an option naming data (parseArgs' opts) -> the usage error, or null.
+function noDataConflict(opts) {
+	if (!opts.noData) return null;
+	const named = [['--data', opts.data], ['--context-data', opts.contextData], ['--sim', opts.sim]].find(([, value]) => value !== undefined);
+	return named ? `--no-data and ${named[0]} cannot be used together` : null;
+}
+
+// buildPack's cache for --no-data: empty reference data for the pack and its context.
+function noDataCache() {
+	return { data: emptyData(), contextData: emptyData(), diags: [] };
+}
+
+// dir relative to the working directory when inside it, else absolute.
+function shownPath(dir) {
+	const shown = path.relative(process.cwd(), dir);
+	return shown.startsWith('..') || path.isAbsolute(shown) ? dir : shown.split(path.sep).join('/') || '.';
+}
+
+// Without any core file in dataDir every quest, NPC and place lookup fails:
+// -> Diagnostics holding the one error that says so (instead of an error on
+// every line of every guide), or null when there is data. The hint names
+// --context-data when another pack's context data is missing too, and
+// --no-data when the command takes it (`flag`).
+function noReferenceData(pack, dataDir, flag) {
+	if (hasCoreData(dataDir)) return null;
+	const what = fs.existsSync(dataDir) ? `the folder holds none of ${CORE_FILES.join(', ')}` : 'the folder does not exist';
+	const context = pack.contextDataDir && !hasCoreData(pack.contextDataDir) ? ', and --context-data <dir> for our guides read as context' : '';
+	const diag = new Diagnostics();
+	diag.error(
+		shownPath(dataDir),
+		0,
+		`no reference data: ${what}, so no quest, NPC or place can be looked up`,
+		`run \`node tools/polestar.js data build\`, or pass --data <dir>${context}${flag ? '; --no-data checks guides that give every quest title, name and place themselves' : ''}`,
+	);
+	return diag;
 }
 
 // The pack's LICENSE file (its text, or null without one), with a warning in
@@ -85,15 +133,23 @@ function readLicense(pack, diag) {
 // Lint and build a pack (commandPack's result) in memory. `cache` ({ data,
 // contextData, diags }) skips reloading the reference data on a rebuild;
 // `diags` are the warnings loading it gave (project.js loadProjectData),
-// reported with every build. `files: false` only lints. The pack folder's
-// LICENSE, when it has one, goes into the addon folder as LICENSE.txt.
-// -> { ok, diag, manifest, guides, sources, data, files }: files (folder name
-// -> content) only when there are no errors.
-function buildPack(pack, { dataDir = path.join(ROOT, 'data', 'forever'), cache = null, includeDrafts = false, files = true } = {}) {
+// reported with every build. Without a cache and without reference data in
+// dataDir no guide is read: the result holds noReferenceData's one error
+// (its hint names --no-data when `noDataFlag`, the command taking it) and
+// `noData` true. `files: false` only lints. The pack folder's LICENSE, when
+// it has one, goes into the addon folder as LICENSE.txt.
+// -> { ok, diag, manifest, guides, sources, data, files, noData }: files
+// (folder name -> content) only when there are no errors.
+function buildPack(pack, { dataDir = path.join(ROOT, 'data', 'forever'), cache = null, includeDrafts = false, files = true, noDataFlag = false } = {}) {
 	if (!pack.manifest) {
 		const diag = new Diagnostics();
 		diag.list.push(...pack.diags);
-		return { ok: false, diag, manifest: null, guides: [], sources: [], data: null, files: null };
+		return { ok: false, diag, manifest: null, guides: [], sources: [], data: null, files: null, noData: false };
+	}
+	const missing = cache && cache.data ? null : noReferenceData(pack, dataDir, noDataFlag);
+	if (missing) {
+		missing.list.push(...pack.diags);
+		return { ok: false, diag: missing, manifest: pack.manifest, guides: [], sources: [], data: null, files: null, noData: true };
 	}
 	const r = compileProject({
 		packDir: pack.dir,
@@ -116,6 +172,7 @@ function buildPack(pack, { dataDir = path.join(ROOT, 'data', 'forever'), cache =
 		sources: r.sources,
 		data: r.data,
 		files: ok && files ? buildPackFiles({ guides: r.guides, manifest: pack.manifest, data: r.data, license }) : null,
+		noData: false,
 	};
 }
 
@@ -127,4 +184,4 @@ function folderIn(parent, folder) {
 	return path.join(parent, folder);
 }
 
-module.exports = { PACK_OPTIONS, PACK_USAGE, otherPack, packCommand, buildPack, folderIn };
+module.exports = { PACK_OPTIONS, PACK_USAGE, otherPack, packCommand, noDataConflict, noDataCache, noReferenceData, buildPack, folderIn };

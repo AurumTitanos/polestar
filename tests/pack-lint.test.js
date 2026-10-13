@@ -132,16 +132,29 @@ test('a --context or --context-data folder that does not exist is a usage error'
 	}
 });
 
-test('missing default reference data is the usual warning, not a crash (a checkout without built data)', () => {
+test('another pack without reference data stops with one error; the hint names --context-data when that data is missing too', () => {
+	const empty = tmpdir();
+	const none = run(['lint', '--pack', JOE, '--data', empty, '--context', CONTEXT, '--context-data', empty]);
+	assert.equal(none.status, 1, none.stderr);
+	assert.equal(none.stderr.split('\n').filter((l) => /error:/.test(l)).length, 1, none.stderr);
+	assert.match(none.stderr, /hint: run `node tools\/polestar\.js data build`, or pass --data <dir>, and --context-data <dir> for our guides read as context;/);
+	const ctx = run(['lint', '--pack', JOE, '--data', empty, '--context', CONTEXT, '--context-data', DATA_DIR]);
+	assert.equal(ctx.status, 1, ctx.stderr);
+	assert.doesNotMatch(ctx.stderr, /--context-data/);
+});
+
+test('missing default reference data: no guide is read without the pack\'s data; missing context data alone is a warning', () => {
 	const { buildPack } = require('../tools/lib/pack/build');
 	const { commandPack } = require('../tools/lib/pack/locate');
 	const missing = path.join(tmpdir(), 'no-data');
 	// What commandPack gives with no --context-data, on a checkout whose data/forever is not built.
 	const pack = { ...commandPack({ pack: JOE, context: CONTEXT }), contextDataDir: missing };
-	// The pack's --data and the default context data both missing: one folder, one warning.
+	// The pack's --data and the default context data both missing: one error, nothing built.
 	const both = buildPack(pack, { dataDir: missing, files: false });
-	const warnings = both.diag.warnings.filter((d) => /reference data not found/.test(d.message));
-	assert.deepEqual(warnings.map((d) => d.file), [missing]);
+	assert.equal(both.ok, false);
+	assert.equal(both.noData, true);
+	assert.deepEqual(both.diag.errors.map((d) => d.file), [missing]);
+	assert.deepEqual(both.guides, []);
 	// The pack's data present, the default context data missing: lint goes ahead with a warning.
 	const ctx = buildPack(pack, { dataDir: DATA_DIR, files: false });
 	assert.deepEqual(ctx.diag.warnings.filter((d) => /reference data not found/.test(d.message)).map((d) => d.file), [missing]);

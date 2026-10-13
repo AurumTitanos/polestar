@@ -3,7 +3,7 @@
 // folder: ours (guides/) -> addon/Polestar_Guides, another pack -> <pack>/dist/<folder>.
 
 const path = require('node:path');
-const { resolvePath, printDiagnostics, plural } = require('../lib/dsl/cli');
+const { printDiagnostics, plural } = require('../lib/dsl/cli');
 const { ROOT, writePackDir } = require('../lib/dsl/project');
 const { packCommand, buildPack } = require('../lib/pack/build');
 
@@ -16,7 +16,9 @@ as LICENSE.txt when it has one. The pack is the one in <dir> (or
 --pack), else the nearest folder holding a pack.json (this one or a parent),
 else our guides/. Another pack is checked with our guides as context and
 written to <pack>/dist/<folder>/; ours to addon/Polestar_Guides/. Nothing is
-written when there are errors.
+written when there are errors, nor without reference data (\`data build\`):
+compile then stops with one error before reading any guide, unless --no-data
+says to compile without it.
 
 options:
   <dir>, --pack <dir>   the pack folder (holding pack.json)
@@ -24,6 +26,8 @@ options:
   --data <dir>          reference data (default data/forever/)
   --context <dir>       our guides, read as context for another pack (default guides/)
   --context-data <dir>  reference data for the context (default data/forever/)
+  --no-data             compile without reference data: every quest title,
+                        NPC name and place must be given in the guide
   --out <dir>           pack folder (default addon/<folder>/ for ours,
                         <pack>/dist/<folder>/ for another pack)
   --include-drafts      also compile the pack's drafts/**
@@ -32,13 +36,13 @@ options:
   --quiet               print errors only`;
 
 async function run(argv) {
-	const cmd = packCommand(argv, { name: 'compile', usage, flags: ['--include-drafts', '--quiet'], options: ['--pack', '--guides', '--data', '--context', '--context-data', '--out', '--format'] });
+	const cmd = packCommand(argv, { name: 'compile', usage, flags: ['--include-drafts', '--quiet', '--no-data'], options: ['--pack', '--guides', '--data', '--context', '--context-data', '--out', '--format'] });
 	if (cmd.exit !== undefined) return cmd.exit;
-	const { opts, pack, out } = cmd;
+	const { opts, pack, out, dataDir, cache } = cmd;
 	const summary = out.format !== 'json';
 	const { manifest } = pack;
 	const outDir = opts.out ? path.resolve(opts.out) : pack.official ? path.join(ROOT, 'addon', manifest.folder) : path.join(pack.dir, 'dist', manifest.folder);
-	const { guides, diag, sources, files } = buildPack(pack, { dataDir: resolvePath(opts.data, 'data/forever', ROOT), includeDrafts: !!opts.includeDrafts });
+	const { guides, diag, sources, files } = buildPack(pack, { dataDir, cache, includeDrafts: !!opts.includeDrafts });
 	// Write before reporting: a failed write is one more error, so the JSON
 	// document's `ok` matches the exit code.
 	if (!diag.hasErrors()) {

@@ -11,7 +11,7 @@ const path = require('node:path');
 const { parseArgs, resolvePath, printDiagnostics, plural } = require('../lib/dsl/cli');
 const { ROOT, releaseAddons, packDirRefusal, writePackDir } = require('../lib/dsl/project');
 const { detectAddonsDirs, pickAddonsDir, isDir } = require('../lib/addons');
-const { PACK_OPTIONS, PACK_USAGE, otherPack, buildPack, folderIn } = require('../lib/pack/build');
+const { PACK_OPTIONS, PACK_USAGE, otherPack, noDataConflict, noDataCache, buildPack, folderIn } = require('../lib/pack/build');
 
 // Data addons built locally from inputs that may not be redistributed
 // (docs/SUITE.md, "In-game packs"): installed when built, never packaged.
@@ -28,7 +28,8 @@ Given another guide pack (<dir>, --pack, or run inside one) it lints and
 builds that pack into <pack>/dist/<folder>/ instead and installs that
 folder; an existing <AddOns>/<folder> is replaced only when it is empty or a
 generated build of the same pack (its TOC's X-Polestar-Pack names this
-pack's id).
+pack's id). Without reference data (\`data build\`) it stops with one error,
+unless --no-data says to build without it.
 
 Destination, first match wins:
   --dest <dir>             the Interface/AddOns folder to install into
@@ -44,6 +45,8 @@ options:
   --recorder    also install Polestar_Recorder
   --dry-run     print what would happen, change nothing
   --addons <dir>  source folder holding the addons (default addon/)
+  --no-data     a guide pack only: build it without reference data (every
+                quest title, NPC name and place given in the guide)
 ${PACK_USAGE}`;
 
 // -> { dir, how } or { error }. `native` ({ platform, root }, tools/lib/addons.js
@@ -191,10 +194,10 @@ function installPack(other, opts, ctx) {
 		console.error(`${opts.recorder ? '--recorder' : '--addons'} installs Polestar itself; run it outside the pack, without a pack folder\n\n${usage}`);
 		return 2;
 	}
-	const built = buildPack(other, { dataDir: resolvePath(opts.data, 'data/forever', ROOT) });
+	const built = buildPack(other, { dataDir: resolvePath(opts.data, 'data/forever', ROOT), cache: opts.noData ? noDataCache() : null, noDataFlag: true });
 	printDiagnostics(built.diag, { quiet: true });
 	if (!built.ok) {
-		console.error(`install failed: ${plural(built.diag.errors.length, 'error')} (run lint for details)`);
+		console.error(`install failed: ${built.noData ? 'no reference data' : `${plural(built.diag.errors.length, 'error')} (run lint for details)`}`);
 		return 1;
 	}
 	const name = built.manifest.folder;
@@ -222,13 +225,14 @@ function installPack(other, opts, ctx) {
 // native install in tests, so a test never reaches a real game folder.
 async function run(argv, env = process.env, native = {}) {
 	const ctx = { env, native };
-	const { opts, positional, error } = parseArgs(argv, { flags: ['--link', '--recorder', '--dry-run'], options: ['--dest', '--addons', ...PACK_OPTIONS] });
+	const { opts, positional, error } = parseArgs(argv, { flags: ['--link', '--recorder', '--dry-run', '--no-data'], options: ['--dest', '--addons', ...PACK_OPTIONS] });
 	if (opts.help) {
 		console.log(usage);
 		return 0;
 	}
-	if (error) {
-		console.error(`${error}\n\n${usage}`);
+	const usageError = error || noDataConflict(opts);
+	if (usageError) {
+		console.error(`${usageError}\n\n${usage}`);
 		return 2;
 	}
 	const other = otherPack(opts, positional);
@@ -237,6 +241,10 @@ async function run(argv, env = process.env, native = {}) {
 		return 2;
 	}
 	if (other) return installPack(other, opts, ctx);
+	if (opts.noData) {
+		console.error(`--no-data builds a guide pack; run it inside the pack or name its folder\n\n${usage}`);
+		return 2;
+	}
 	const source = opts.addons ? path.resolve(opts.addons) : path.join(ROOT, 'addon');
 	const release = releaseAddons(source);
 	const local = LOCAL_DATA_ADDONS.filter((n) => fs.existsSync(path.join(source, n, `${n}.toc`)));

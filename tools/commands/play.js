@@ -79,7 +79,7 @@ async function run(argv) {
 	if (other) {
 		const { dir, built } = buildPlayPack(other, { dataDir: resolvePath(opts.data, 'data/forever', ROOT) });
 		if (!dir) {
-			console.error(`play: the pack has ${plural(built.diag.errors.length, 'error')}; fix them first`);
+			console.error(built.noData ? 'play: not started: no reference data' : `play: the pack has ${plural(built.diag.errors.length, 'error')}; fix them first`);
 			return 1;
 		}
 		console.log(`guide pack ${built.manifest.id}: ${plural(built.guides.length, 'guide')}, loaded after ours`);

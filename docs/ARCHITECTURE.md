@@ -1566,6 +1566,14 @@ their own diagnostics not reported).
 | `install`, `pack` | builds and installs the pack; writes `<pack>/dist/<folder>-<version>.zip` |
 | `record draft`, `sim compare` | drafts into `<pack>/drafts/` under `<id>/draft/`; scores the pack's chain beside ours |
 
+`lint`, `compile`, `dev`, `play`, `install` and `pack` build a pack through
+`buildPack` (`tools/lib/pack/build.js`). When the data folder is missing or holds none of
+the core files, it reads no guide and returns one error (`noReferenceData`)
+with `noData` set; the command prints that error and exits 1, and `dev`
+checks this once at start instead of watching. `--no-data` (`lint`, `compile`,
+`dev`, and `install` and `pack` on a pack) builds with empty data instead and
+cannot be combined with `--data`, `--context-data` or `--sim`.
+
 The folder rule (PACK_FORMAT.md, "TOC fields") is `packDirRefusal` in
 `tools/lib/dsl/project.js`. Lint's pack rules mirror the runtime's
 (`tests/packs-parity.test.js`); our house rules (elites in Leveling guides)

@@ -175,15 +175,49 @@ test('lint runs the same checks without writing, with matching exit codes', () =
 	assert.equal(usage.status, 2);
 });
 
-test('a missing data directory is a warning; guides with explicit names still compile', () => {
+test('without reference data lint and compile stop with one error before reading any guide', () => {
+	const missing = path.join(tmpdir(), 'nope');
+	const empty = tmpdir();
+	for (const dir of [missing, empty]) {
+		const lint = cli('lint', '--guides', GUIDES_DIR, '--data', dir);
+		assert.equal(lint.status, 1, lint.stderr);
+		assert.equal(lint.stdout, '');
+		const errors = lint.stderr.split('\n').filter((l) => /error:/.test(l));
+		assert.equal(errors.length, 1, lint.stderr);
+		assert.ok(errors[0].startsWith(`${dir}: error: no reference data: the folder ${dir === missing ? 'does not exist' : 'holds none of quests.json'}`), errors[0]);
+		assert.match(lint.stderr, /hint: run `node tools\/polestar\.js data build`, or pass --data <dir>; --no-data/);
+		assert.match(lint.stderr, /\nlint failed: no reference data\n$/);
+		assert.doesNotMatch(lint.stderr, /\.guide/);
+	}
+	const out = tmpdir();
+	const compile = cli('compile', '--guides', GUIDES_DIR, '--data', missing, '--out', out, '--format', 'json');
+	assert.equal(compile.status, 1, compile.stderr);
+	const doc = JSON.parse(compile.stdout);
+	assert.deepEqual([doc.ok, doc.errors, doc.warnings, doc.diagnostics.length], [false, 1, 0, 1]);
+	assert.equal(doc.diagnostics[0].file, missing);
+	assert.deepEqual(fs.readdirSync(out), []);
+});
+
+test('partial reference data is a warning naming the missing files, and the guides are checked', () => {
+	const data = tmpdir();
+	for (const f of fs.readdirSync(DATA_DIR)) if (f !== 'map-frames.json') fs.copyFileSync(path.join(DATA_DIR, f), path.join(data, f));
+	const r = cli('lint', '--guides', GUIDES_DIR, '--data', data);
+	assert.match(r.stderr, /: warning: missing map-frames\.json\n/);
+	assert.match(r.stdout + r.stderr, /lint (ok|failed): 2 files, 2 guides: /);
+});
+
+test('--no-data compiles guides that give every name themselves', () => {
 	const guides = tmpdir();
 	fs.writeFileSync(path.join(guides, 'a.guide'), guideText(['guide forever/a', 'title A', 'levels 1-2', 'zone map 1429', '', 'step S', '  accept 424243 "New Quest" @50,50', '  turnin 424243 "New Quest"']));
 	const out = tmpdir();
-	const r = cli('compile', '--guides', guides, '--data', path.join(guides, 'nope'), '--out', out);
+	const r = cli('compile', '--guides', guides, '--no-data', '--out', out);
 	assert.equal(r.status, 0, r.stderr);
-	assert.match(r.stderr, /warning: reference data not found/);
+	assert.doesNotMatch(r.stderr, /reference data/);
 	assert.match(fs.readFileSync(path.join(out, 'Guides.lua'), 'utf8'), /id = "forever\/a"/);
 	assert.match(fs.readFileSync(path.join(out, 'LICENSE-DATA.txt'), 'utf8'), /No reference data sources were recorded/);
+	const both = cli('lint', '--guides', guides, '--no-data', '--data', DATA_DIR);
+	assert.equal(both.status, 2);
+	assert.match(both.stderr, /--no-data and --data cannot be used together/);
 });
 
 test('compile never writes into a folder that is not a generated pack (case-insensitive --out at the repo)', () => {

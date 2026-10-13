@@ -316,4 +316,15 @@ function objectiveLabel(questId, o) {
 	return `${questId}.${o.index} = ${OBJECTIVE_VERB[o.kind] || o.kind} ${what}${o.count ? ` x${o.count}` : ''}`;
 }
 
-module.exports = { loadData, Data, objectiveLabel };
+// Whether dir holds any of the core files: without one, every quest, NPC and
+// zone lookup fails.
+function hasCoreData(dir) {
+	return FILES.some((name) => fs.existsSync(path.join(dir, `${name}.json`)));
+}
+
+// No reference data at all (`--no-data`): every file counts as missing.
+function emptyData() {
+	return new Data({}, { missing: [...FILES, ...OPTIONAL].map((name) => `${name}.json`) });
+}
+
+module.exports = { loadData, Data, objectiveLabel, hasCoreData, emptyData, CORE_FILES: FILES.map((name) => `${name}.json`) };

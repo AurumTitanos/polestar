@@ -222,6 +222,24 @@ test('inside a pack, install builds it and installs its folder; a second install
 	assert.match(dry.out, /would replace PolestarPack_MiniPack/);
 });
 
+test('install of a pack without reference data stops with one error and touches nothing', async () => {
+	const pack = miniCopy();
+	const dest = liveAddOns();
+	const before = snapshot(dest);
+	const empty = tmpdir();
+	const { result, out } = await quiet(() => install.run(['--pack', pack, '--data', empty, '--context', path.join(PACKS, 'context'), '--context-data', DATA_DIR, '--dest', dest], {}));
+	assert.equal(result, 1, out);
+	assert.equal(out.split('\n').filter((l) => /error:/.test(l)).length, 1, out);
+	assert.match(out, /error: no reference data: the folder holds none of quests\.json/);
+	assert.match(out, /--no-data checks guides/);
+	assert.match(out, /\ninstall failed: no reference data$/);
+	assert.deepEqual(snapshot(dest), before);
+	assert.equal(fs.existsSync(path.join(pack, 'dist')), false);
+	const ours = await quiet(() => install.run(['--no-data', '--dest', dest], {}));
+	assert.equal(ours.result, 2, ours.out);
+	assert.match(ours.out, /--no-data builds a guide pack/);
+});
+
 test('install refuses to replace a hand-made folder with the pack folder\'s name', async () => {
 	const pack = miniCopy();
 	const dest = tmpdir();

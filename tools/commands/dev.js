@@ -14,7 +14,7 @@ const { ROOT, writePackDir, loadProjectData } = require('../lib/dsl/project');
 const { Diagnostics } = require('../lib/dsl/diag');
 const { loadData } = require('../lib/dsl/data');
 const { isDir } = require('../lib/addons');
-const { PACK_OPTIONS, PACK_USAGE, otherPack, buildPack, folderIn } = require('../lib/pack/build');
+const { PACK_OPTIONS, PACK_USAGE, otherPack, noDataConflict, noDataCache, noReferenceData, buildPack, folderIn } = require('../lib/pack/build');
 const { commandPack } = require('../lib/pack/locate');
 const { chooseDest } = require('./install');
 const { playPackRoot, untilStopped, defaultArt, playDataDir } = require('./play');
@@ -29,7 +29,8 @@ and without errors compiles the pack into <AddOns>/<folder>, then reloads
 the playground when --play started one. In game, /reload shows the change;
 a pack's first build needs one restart of the game. A folder in AddOns is
 replaced only when it is empty or a generated build of the same pack.
-Ctrl-C stops.
+Ctrl-C stops. Without reference data (\`data build\`) dev stops at once with
+one error, unless --no-data says to build without it.
 
 options:
   --dest <dir>          the Interface/AddOns folder (default: the one install finds)
@@ -37,6 +38,8 @@ options:
   --play                also start the playground with the pack loaded (client
                         art and SavedVariables folder as play finds them)
   --port <n>            the playground's port (default 8077; 0 picks a free one)
+  --no-data             build without reference data: every quest title, NPC
+                        name and place must be given in the guide
 ${PACK_USAGE}`;
 
 // Paths (relative to the pack, forward slashes) whose change rebuilds.
@@ -48,7 +51,7 @@ function watched(rel) {
 }
 
 async function run(argv, env = process.env) {
-	const { opts, positional, error } = parseArgs(argv, { flags: ['--no-game', '--play'], options: ['--dest', '--port', ...PACK_OPTIONS] });
+	const { opts, positional, error } = parseArgs(argv, { flags: ['--no-game', '--play', '--no-data'], options: ['--dest', '--port', ...PACK_OPTIONS] });
 	if (opts.help) {
 		console.log(usage);
 		return 0;
@@ -57,7 +60,8 @@ async function run(argv, env = process.env) {
 	const usageError =
 		error ||
 		(opts.noGame && opts.dest ? '--dest and --no-game cannot be used together' : null) ||
-		(!Number.isInteger(port) || port < 0 || port > 65535 ? '--port needs a port number' : null);
+		(!Number.isInteger(port) || port < 0 || port > 65535 ? '--port needs a port number' : null) ||
+		noDataConflict(opts);
 	if (usageError) {
 		console.error(`${usageError}\n\n${usage}`);
 		return 2;
@@ -70,6 +74,14 @@ async function run(argv, env = process.env) {
 	if (!first) {
 		console.error('dev works on a guide pack: run it inside one (a folder with pack.json) or name its folder; our guides build with `compile`');
 		return 2;
+	}
+	const dataDir = resolvePath(opts.data, 'data/forever', ROOT);
+	// No watching without data: every build would fail the same way.
+	const missing = opts.noData ? null : noReferenceData(first, dataDir, true);
+	if (missing) {
+		printDiagnostics(missing);
+		console.error('dev: not started: no reference data');
+		return 1;
 	}
 	if (opts.play && !fs.existsSync(path.join(ROOT, 'data', 'forever', 'races.json'))) {
 		console.error('dev --play: data/forever is not built (the playground needs it): run node tools/polestar.js data build first');
@@ -87,12 +99,14 @@ async function run(argv, env = process.env) {
 		console.log(`dev: building into ${addons} (${dest.how})`);
 		if (dest.create && !isDir(addons)) fs.mkdirSync(addons, { recursive: true });
 	}
-	const dataDir = resolvePath(opts.data, 'data/forever', ROOT);
-	// The reference data is read once; its warnings (missing folder or core
-	// files, as lint prints them) are added to every build's diagnostics.
-	const dataDiag = new Diagnostics();
-	const cache = { data: loadProjectData(dataDir, dataDiag), diags: dataDiag.list };
-	if (first.contextDataDir && fs.existsSync(first.contextDataDir)) cache.contextData = path.resolve(first.contextDataDir) === path.resolve(dataDir) ? cache.data : loadData(first.contextDataDir);
+	// The reference data is read once; its warnings (missing core files or
+	// context data, as lint prints them) are added to every build's diagnostics.
+	let cache = noDataCache();
+	if (!opts.noData) {
+		const dataDiag = new Diagnostics();
+		cache = { data: loadProjectData(dataDir, dataDiag), diags: dataDiag.list };
+		if (first.contextDataDir && fs.existsSync(first.contextDataDir)) cache.contextData = path.resolve(first.contextDataDir) === path.resolve(dataDir) ? cache.data : loadData(first.contextDataDir);
+	}
 	const playRoot = opts.play ? playPackRoot() : null;
 	let playDir = null; // the last good build for the playground
 	let play = null;

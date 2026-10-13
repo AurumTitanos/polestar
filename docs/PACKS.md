@@ -38,7 +38,11 @@ You need:
 
 `$LUA` picks a Lua interpreter when you have several. `polestar doctor` exits
 with code 1 when Node or the reference data is missing, since every command
-needs them.
+needs them. Without the reference data (the folder missing, or holding none of
+its core files) `lint`, `compile`, `dev`, `install`, `pack` and `play` stop
+before reading any guide, with one error naming the folder, and exit with
+code 1; `dev` then does not start watching. A folder missing only some of the
+core files is a warning naming them, and the guides are checked.
 
 The reference data is what fills in quest titles, givers and coordinates.
 `data build` assembles it from the sources listed in Polestar's
@@ -232,7 +236,7 @@ on another.
 
 | Command | What it checks |
 |---|---|
-| `polestar lint` | every check `compile` makes, writing nothing; exit code 1 on errors. `--format json` prints one document on stdout and no summary: `{ "ok", "errors", "warnings", "diagnostics" }`, `ok` true without errors, `errors` and `warnings` the counts, and `diagnostics` one object per problem with `file`, `line`, `severity` (`error` or `warning`), `message` and, when there is one, `hint`. `--quiet` leaves the warnings out of the list (text, JSON and annotations alike); the JSON counts still include them. `--format github` prints workflow annotations. `--include-drafts` checks `drafts/` too |
+| `polestar lint` | every check `compile` makes, writing nothing; exit code 1 on errors. `--format json` prints one document on stdout and no summary: `{ "ok", "errors", "warnings", "diagnostics" }`, `ok` true without errors, `errors` and `warnings` the counts, and `diagnostics` one object per problem with `file`, `line`, `severity` (`error` or `warning`), `message` and, when there is one, `hint`. `--quiet` leaves the warnings out of the list (text, JSON and annotations alike); the JSON counts still include them. `--format github` prints workflow annotations. `--include-drafts` checks `drafts/` too. `--no-data` checks without reference data: the guides must give every quest title, NPC name and place themselves (`compile`, `dev`, and `install` and `pack` on a pack take it too; it cannot be combined with `--data`, `--context-data` or `--sim`) |
 | `polestar playtest [--filter text] [--class C]` | plays every guide (with `--filter`, those whose file or id contains the text) to the end in the real addon against a simulated world, once per class it branches on plus one it never names, as each race that can reach it (only race and class pairs the game has); Polestar's guides join where yours hand over. Prints per guide, race and class `ok  joe/elwynn (Human Warrior)`, `stuck … at step N "title": goal M (…) stays active`, `fail …` (a problem found while playing, such as a goal with no location) or, for a hand-over that does not land on the next guide with something to do or lands on one the character cannot follow (`no Human can follow it`), a `stuck` line naming the hand-over; exit code 1 when any is stuck or fails, when nothing played, or when the pack does not compile |
 | `polestar play` | the playground: your guides, your row on the Guide packs page and its problems, in the browser |
 | `polestar sim compare --faction F [--race R]` | inside a pack: scores your leveling chain beside Polestar's under the simulator's model (hours to level 10, 20 … 60); a chain starting above level 1 is scored after Polestar's own chain up to the level yours starts at, and a chain whose guides name no race is scored for every race of the faction. Needs the simulator's world (docs/SIMULATION.md) |
@@ -345,6 +349,8 @@ checks authors meet most; the rest are listed in GUIDE_FORMAT.md
 
 | Message | Fix |
 |---|---|
+| no reference data: the folder does not exist / the folder holds none of quests.json, npcs.json, …, so no quest, NPC or place can be looked up | run `polestar data build` in the clone, or point `--data <dir>` at a built folder (and `--context-data <dir>` when our guides' data is missing too); `--no-data` checks guides that give every quest title, name and place themselves |
+| missing <file>.json, … (warning) | the reference data is partly built: run `polestar data build` again |
 | no pack.json in <dir> | create `pack.json` with `id`, `title`, `author`, `version` and `license` (or run `polestar new`) |
 | pack.json is not valid JSON (…) | a missing value, quote or comma; JSON allows no trailing commas or comments |
 | pack.json must hold one JSON object | write `{ "id": "...", "title": "...", "author": "...", "version": "...", "license": "..." }` |

@@ -162,13 +162,21 @@ test('dev takes the pack folder as its one argument; two folders, or one without
 	assert.match(none.stderr, /no pack\.json in \.\.\/my-pack/);
 });
 
-test('dev prints the missing reference data warning, as lint does', { timeout: 30000 }, async () => {
-	const d = dev(miniCopy(), tmpdir(), '--data', path.join(tmpdir(), 'no-data'));
-	try {
-		await d.waitFor(/no-data: warning: reference data not found/);
-	} finally {
-		await d.stop();
-	}
+test('without reference data dev prints one error and exits instead of watching', { timeout: 30000 }, async () => {
+	const dest = tmpdir();
+	const missing = path.join(tmpdir(), 'no-data');
+	const d = dev(miniCopy(), dest, '--data', missing);
+	const code = await d.exited;
+	assert.equal(code, 1, d.out());
+	assert.equal(d.out().split('\n').filter((l) => /error:/.test(l)).length, 1, d.out());
+	assert.match(d.out(), new RegExp(`${missing.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}: error: no reference data: the folder does not exist`));
+	assert.match(d.out(), /hint: run `node tools\/polestar\.js data build`, or pass --data <dir>; --no-data/);
+	assert.match(d.out(), /dev: not started: no reference data\n$/);
+	assert.doesNotMatch(d.out(), /watching|\.guide/);
+	assert.deepEqual(fs.readdirSync(dest), []);
+	const both = polestar(['dev', miniCopy(), '--no-game', '--no-data', '--data', missing], { cwd: tmpdir() });
+	assert.equal(both.status, 2, both.stderr);
+	assert.match(both.stderr, /--no-data and --data cannot be used together/);
 });
 
 test('dev reports a deleted pack.json, keeps the last good build and watching, and builds again once it is back', { timeout: 30000 }, async () => {

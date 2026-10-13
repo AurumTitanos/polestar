@@ -12,7 +12,7 @@ const path = require('node:path');
 const { parseArgs, resolvePath, printDiagnostics, plural } = require('../lib/dsl/cli');
 const project = require('../lib/dsl/project');
 const { commandPack, packArgument } = require('../lib/pack/locate');
-const { PACK_OPTIONS, PACK_USAGE, otherPack, buildPack, folderIn } = require('../lib/pack/build');
+const { PACK_OPTIONS, PACK_USAGE, otherPack, noDataConflict, noDataCache, buildPack, folderIn } = require('../lib/pack/build');
 const { writeZip, directoryEntries } = require('../lib/zip');
 
 const usage = `usage: node tools/polestar.js pack [<dir>] [options]
@@ -26,13 +26,16 @@ the LICENSE.
 Given another guide pack (<dir>, --pack, or run inside one): lints and builds it with our
 guides as context, then writes <pack>/dist/<folder>-<version>.zip holding its
 addon folder, the version taken from pack.json. Both are byte for byte
-reproducible.
+reproducible. Without reference data (\`data build\`) pack stops with one
+error; a guide pack can be built without it with --no-data.
 
 options:
 ${PACK_USAGE}
   --guides <dir>        our guide sources (default guides/; not with a pack folder)
   --addons <dir>        addon source folder (default addon/)
-  --dist <dir>          output folder (default dist/, <pack>/dist/ for a pack)`;
+  --dist <dir>          output folder (default dist/, <pack>/dist/ for a pack)
+  --no-data             a guide pack only: build it without reference data
+                        (every quest title, NPC name and place given in the guide)`;
 
 // Our guides (in dirs.guides) built in memory; null (reported) on errors.
 function compile(ours, dirs) {
@@ -40,7 +43,7 @@ function compile(ours, dirs) {
 	const built = buildPack({ ...ours, diags: [] }, { dataDir: dirs.data });
 	printDiagnostics(built.diag, { quiet: true });
 	if (!built.ok) {
-		console.error(`pack failed: ${plural(built.diag.errors.length, 'error')} in guides (run lint for details)`);
+		console.error(`pack failed: ${built.noData ? 'no reference data' : `${plural(built.diag.errors.length, 'error')} in guides (run lint for details)`}`);
 		return null;
 	}
 	return built;
@@ -149,10 +152,10 @@ function pack(dirs, version) {
 
 // Another pack: <dist>/<folder>-<version>.zip from the build, in memory.
 function packOther(other, opts) {
-	const built = buildPack(other, { dataDir: resolvePath(opts.data, 'data/forever', project.ROOT) });
+	const built = buildPack(other, { dataDir: resolvePath(opts.data, 'data/forever', project.ROOT), cache: opts.noData ? noDataCache() : null, noDataFlag: true });
 	printDiagnostics(built.diag, { quiet: true });
 	if (!built.ok) {
-		console.error(`pack failed: ${plural(built.diag.errors.length, 'error')} (run lint for details)`);
+		console.error(`pack failed: ${built.noData ? 'no reference data' : `${plural(built.diag.errors.length, 'error')} (run lint for details)`}`);
 		return 1;
 	}
 	const { manifest, files } = built;
@@ -171,13 +174,13 @@ function packOther(other, opts) {
 }
 
 async function run(argv) {
-	const { opts, positional, error } = parseArgs(argv, { flags: [], options: [...PACK_OPTIONS, '--guides', '--addons', '--dist'] });
+	const { opts, positional, error } = parseArgs(argv, { flags: ['--no-data'], options: [...PACK_OPTIONS, '--guides', '--addons', '--dist'] });
 	if (opts.help) {
 		console.log(usage);
 		return 0;
 	}
 	const arg = error ? {} : packArgument(opts, positional);
-	const usageError = error || arg.error || (opts.guides && arg.pack !== undefined ? '--guides and a pack folder cannot be used together' : null);
+	const usageError = error || arg.error || (opts.guides && arg.pack !== undefined ? '--guides and a pack folder cannot be used together' : null) || noDataConflict(opts);
 	if (usageError) {
 		console.error(`${usageError}\n\n${usage}`);
 		return 2;
@@ -188,6 +191,10 @@ async function run(argv) {
 		return 2;
 	}
 	if (other) return packOther(other, opts);
+	if (opts.noData) {
+		console.error(`--no-data builds a guide pack; our release needs the reference data\n\n${usage}`);
+		return 2;
+	}
 	const dirs = {
 		guides: resolvePath(opts.guides, 'guides', project.ROOT),
 		data: resolvePath(opts.data, 'data/forever', project.ROOT),
