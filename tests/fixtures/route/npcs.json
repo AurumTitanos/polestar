@@ -1,0 +1,276 @@
+{
+	"1": {
+		"id": 1,
+		"name": "Marshal Ash",
+		"level": 20,
+		"faction": "A",
+		"spawns": {
+			"9001": {
+				"f": "e",
+				"pts": [
+					[
+						50,
+						50
+					]
+				]
+			}
+		}
+	},
+	"2": {
+		"id": 2,
+		"name": "Farmer Bell",
+		"level": 12,
+		"faction": "A",
+		"spawns": {
+			"9001": {
+				"f": "e",
+				"pts": [
+					[
+						51,
+						50.5
+					]
+				]
+			}
+		}
+	},
+	"3": {
+		"id": 3,
+		"name": "Hermit Crane",
+		"level": 15,
+		"faction": "A",
+		"spawns": {
+			"9001": {
+				"f": "e",
+				"pts": [
+					[
+						20,
+						80
+					]
+				]
+			}
+		}
+	},
+	"4": {
+		"id": 4,
+		"name": "Brann Ironfist",
+		"level": 30,
+		"faction": "A",
+		"spawns": {
+			"9001": {
+				"f": "e",
+				"pts": [
+					[
+						50.5,
+						48.5
+					]
+				]
+			}
+		},
+		"title": "Warrior Trainer"
+	},
+	"5": {
+		"id": 5,
+		"name": "Kobold Vermin",
+		"level": 2,
+		"faction": "AH",
+		"spawns": {
+			"9001": {
+				"f": "e",
+				"pts": [
+					[
+						29,
+						29
+					],
+					[
+						30,
+						30
+					],
+					[
+						31,
+						30
+					],
+					[
+						30,
+						31
+					],
+					[
+						29,
+						31
+					],
+					[
+						31,
+						29
+					],
+					[
+						70,
+						70
+					],
+					[
+						72,
+						71
+					]
+				]
+			}
+		}
+	},
+	"6": {
+		"id": 6,
+		"name": "Prowler Wolf",
+		"level": 3,
+		"faction": "AH",
+		"spawns": {
+			"9001": {
+				"f": "e",
+				"pts": [
+					[
+						70,
+						30
+					],
+					[
+						71,
+						31
+					],
+					[
+						69,
+						31
+					],
+					[
+						70,
+						32
+					],
+					[
+						72,
+						30
+					]
+				]
+			}
+		}
+	},
+	"7": {
+		"id": 7,
+		"name": "Bristle Boar",
+		"level": 5,
+		"faction": "AH",
+		"spawns": {
+			"9001": {
+				"f": "e",
+				"pts": [
+					[
+						75,
+						75
+					],
+					[
+						76,
+						76
+					],
+					[
+						74,
+						76
+					],
+					[
+						75,
+						77
+					]
+				]
+			}
+		}
+	},
+	"8": {
+		"id": 8,
+		"name": "Grunt Harsk",
+		"level": 20,
+		"faction": "H",
+		"spawns": {
+			"9001": {
+				"f": "e",
+				"pts": [
+					[
+						40,
+						40
+					]
+				]
+			}
+		}
+	},
+	"9": {
+		"id": 9,
+		"name": "Harbormaster Vell",
+		"level": 25,
+		"faction": "A",
+		"spawns": {
+			"9002": {
+				"f": "e",
+				"pts": [
+					[
+						50,
+						50
+					]
+				]
+			}
+		}
+	},
+	"10": {
+		"id": 10,
+		"name": "Bandit Lookout",
+		"level": "6-7",
+		"faction": "AH",
+		"spawns": {
+			"9001": {
+				"f": "e",
+				"pts": [
+					[
+						25,
+						60
+					],
+					[
+						26,
+						61
+					],
+					[
+						24,
+						61
+					],
+					[
+						25,
+						62
+					]
+				]
+			}
+		}
+	},
+	"11": {
+		"id": 11,
+		"name": "Tide Crawler",
+		"level": 5,
+		"faction": "AH",
+		"spawns": {
+			"9002": {
+				"f": "e",
+				"pts": [
+					[
+						40,
+						40
+					]
+				]
+			}
+		}
+	},
+	"12": {
+		"id": 12,
+		"name": "Sister Amara",
+		"level": 30,
+		"faction": "A",
+		"spawns": {
+			"9001": {
+				"f": "e",
+				"pts": [
+					[
+						49.5,
+						51
+					]
+				]
+			}
+		},
+		"title": "Priest Trainer"
+	}
+}

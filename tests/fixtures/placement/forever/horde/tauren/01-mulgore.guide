@@ -1,0 +1,345 @@
+guide forever/horde/tauren/01-mulgore
+title Camp Narache, Mulgore & Thunder Bluff
+faction Horde
+race Tauren
+levels 1-10
+zone Mulgore
+next forever/horde/02-barrens
+
+# Route: the simulator's consensus route for Tauren (world 5b662c40).
+#
+# Mulgore 1-8.1 (21 quests, bind Bloodhoof Village), Thunder Bluff 8.1-8.3
+# (Traditions of the Bluff, The Longwalkers; flight path), then the Crossroads
+# (flight path, bind) and the simulator's grind to 10 there. The Barrens
+# 11-15 quests are in forever/horde/02-barrens.
+#
+# Order: the simulator's, except that Break Sharptusk! and The Adventurer are
+# taken while you are at Camp Narache instead of on separate trips back, and
+# Grace of An'she and Mu'sha goes straight to the shrine (the incense burns
+# for ten minutes). Thunderhorn Totem is handed in at Bloodhoof once its
+# claws are done.
+#
+# Class trip at 10: Thunder Bluff for training and the class quests the next
+# guide continues (Warrior 1505, Shaman 1523, Hunter taming chain to 6089,
+# Druid bear chain and Teleport: Moonglade), then back to the Crossroads.
+#
+# Flow: Camp Narache -> plainstriders and cougars -> Seer Graytongue -> the
+# shrine of An'she and Mu'sha -> Brambleblade Ravine -> Camp Narache ->
+# Bloodhoof Village (bind) -> Winterhoof Water Well -> Chakuyak and the
+# western plains -> hearth -> the Ravaged Caravan -> Venture Co. Mine ->
+# Palemane Rock escort -> Thunder Bluff -> the Crossroads (grind to 10) ->
+# Thunder Bluff (class trip) -> the Crossroads.
+
+# ---------------------------------------------------------------- Camp Narache
+
+step Camp Narache
+  tip You start on the mesa of Camp Narache. Grull and the chief stand by the big tent in the middle.
+  accept 747                          -- Grull Hawkwind
+  accept 752                          -- Chief Hawkwind
+
+step Plainstriders
+  tip Plainstriders roam the grass all around the camp.
+  collect 4740 quest 747.1
+  collect 4739 quest 747.2
+
+step Grull Hawkwind
+  turnin 747
+  accept 750
+  train class
+
+step Greatmother Hawkwind
+  tip Greatmother Hawkwind sits by the tent on the camp's eastern edge; the Water Pitcher stands next to her.
+  turnin 752
+  accept 753
+  collect 4755 quest 753.1
+
+step Chief Hawkwind
+  turnin 753
+  accept 755
+
+step Antur Fallow
+  tip Antur stands at the west end of the camp.
+  accept 1656
+
+step Mountain cougars
+  tip Mountain Cougars prowl the hills south of the camp.
+  goto 42.5,86.0 "Mountain cougars"
+  collect 4742 quest 750.1
+
+step Grull Hawkwind
+  turnin 750
+  accept 780
+  accept 3376                         -- Brave Windfeather, next to Grull
+  train class
+
+step Seer Graytongue
+  tip Follow the path south out of camp to the Seer's tent at the foot of the hills.
+  turnin 755
+  accept 95805
+  accept 757
+
+step The shrine of An'she and Mu'sha
+  tip The incense burns out in ten minutes: run straight east along the southern hills to the Ritual Fire.
+  turnin 95805
+
+# ---------------------------------------------------------------- Brambleblade Ravine
+
+step Brambleblade Ravine
+  tip Battleboars graze north of the shrine; the Bristleback quilboar hold the ravine to the north-east. Chief Sharptusk Thornmantle stands at its eastern end, and the Dirt-stained Map lies on the ground in the camp.
+  goto 57.5,79.5 "Brambleblade Ravine"
+  collect 4848 quest 780.1
+  collect 4849 quest 780.2
+  collect 4770 quest 757.1
+  collect 10459 quest 3376.1
+  collect 4851
+  accept 781
+
+step Camp Narache
+  tip Back west to the camp.
+  turnin 780                          -- Grull Hawkwind
+  turnin 3376                         -- Brave Windfeather
+  turnin 781                          -- Chief Hawkwind
+  turnin 757
+  accept 763
+  accept 96659
+
+# ---------------------------------------------------------------- Bloodhoof Village
+
+step Bloodhoof Village
+  tip Follow the road north out of Red Cloud Mesa to Bloodhoof Village. Kaga Wildhoof waits on the road just south of the village.
+  turnin 96659                        -- Kaga Wildhoof
+  sethome "Bloodhoof Village" npc 6747  -- Innkeeper Kauth
+  turnin 1656
+  turnin 763                          -- Baine Bloodhoof
+  accept 96130                        -- Yaw Sharpmane
+  accept 748                          -- Mull Thunderhorn
+
+step Poison Water
+  tip Prairie Wolves and Adult Plainstriders roam the plains around the village.
+  collect 4758 quest 748.1
+  collect 4759 quest 748.2
+
+step Mull Thunderhorn
+  turnin 748
+  accept 754
+  train class
+
+step Winterhoof Water Well
+  tip The well lies south-east of the village.
+  use 5411 quest 754.1 @51.8,68.4     -- Winterhoof Cleansing Totem
+
+step Mull Thunderhorn
+  turnin 754
+  accept 756
+
+step Chakuyak
+  tip Chakuyak, a lone wolf, prowls the plains west of the village.
+  collect 270302 quest 96130.1
+
+step Prairie Stalkers and Flatland Cougars
+  tip Stalkers and cougars roam the plains north and west of the village.
+  collect 4801 quest 756.1
+  collect 4802 quest 756.2
+
+step Back to Bloodhoof
+  hearth "Bloodhoof Village"
+  turnin 96130                        -- Yaw Sharpmane
+  turnin 756                          -- Mull Thunderhorn
+
+# ---------------------------------------------------------------- Winterhoof and the Ravaged Caravan
+
+step Winterhoof Water Well
+  tip Morin Cloudstalker camps by the well south-east of Bloodhoof, Malah Longwind a little further east.
+  accept 749                          -- Morin Cloudstalker
+  accept 99081                        -- Malah Longwind
+
+step The Ravaged Caravan
+  tip The wrecked caravan lies north of the well, east of the road to Thunder Bluff.
+  turnin 749
+  accept 751
+
+step Brave Wildrunner
+  tip Back to Bloodhoof Village.
+  turnin 99081
+
+step Morin Cloudstalker
+  turnin 751
+  accept 764
+  accept 765
+
+step The Venture Co. Mine
+  tip The goblins work the mine in the hills north-east of the well. Fizsprocket stands in the back of the mine.
+  goto 59.5,47.0 "The Venture Co. Mine"
+  kill 2978 quest 764.1
+  kill 2979 quest 764.2
+  collect 4819 quest 765.1
+
+step Morin Cloudstalker
+  turnin 764
+  turnin 765
+
+# ---------------------------------------------------------------- Palemane Rock
+
+step Perith Stormhoof
+  tip Perith is held in the gnoll camp at Palemane Rock, west of Bloodhoof. Lead him out of the camp.
+  accept 98430
+  complete 98430
+
+# ---------------------------------------------------------------- Thunder Bluff
+
+step Thunder Bluff
+  zone Thunder Bluff
+  tip Head north up the road to Thunder Bluff and ride a lift up to the mesas. Tal keeps the wind riders on the central rise.
+  getfp "Thunder Bluff" npc 2995      -- Tal
+  train class
+
+step Eylah Sunhorn
+  zone Thunder Bluff
+  tip Buy a Bundle of Herbs from Nida, Ceder Twigs from Nata, Sinew Thread from Mahu and Ceremonial Flint and Tinder from Naal, all on the central rise, combine them and sprinkle the incense off Hunter's Rise.
+  accept 97485
+  goto 57.5,88.0 "Hunter Rise"        -- Combine the four items into Prepared Incense and spread it off Hunter Rise
+  turnin 97485
+
+step Cairne Bloodhoof
+  zone Thunder Bluff
+  tip Cairne stands in the great tent on the central rise.
+  turnin 98430
+
+# ---------------------------------------------------------------- The Crossroads
+
+step The Crossroads
+  zone The Barrens
+  tip Ride down from Thunder Bluff and follow the road south-east past Bloodhoof Village and east out of Mulgore through the pass into the Barrens. At Camp Taurajo turn north onto the Gold Road and follow it to the Crossroads.
+  getfp "Crossroads" npc 3615         -- Devrak
+  sethome "The Crossroads" npc 3934   -- Innkeeper Boorand Plainswind
+  level 10                            -- Raptors, zhevras and plainstriders around the town
+
+# ---------------------------------------------------------------- Class trip to Thunder Bluff
+
+step Thunder Bluff
+  zone Thunder Bluff
+  tip The Crossroads has no class trainers: fly to Thunder Bluff.
+  fly "Thunder Bluff"
+  train class
+
+step Torm Ragetotem
+  only Warrior
+  zone Thunder Bluff
+  tip Torm is on Hunter Rise, among the warrior trainers.
+  accept 1505
+
+step Xanis Flameweaver
+  only Shaman
+  zone Thunder Bluff
+  tip Xanis is on Spirit Rise, near the shaman trainers.
+  accept 1523
+
+step Kary Thunderhorn
+  only Hunter
+  zone Thunder Bluff
+  tip Kary is on Hunter Rise, among the hunter trainers.
+  accept 6065
+
+step Yaw Sharpmane
+  only Hunter
+  zone Mulgore
+  tip Ride down to Bloodhoof Village.
+  turnin 6065
+  accept 6061
+
+step Tame an Adult Plainstrider
+  only Hunter
+  tip Use the Taming Rod on an Adult Plainstrider on the plains around the village.
+  kill 2956 quest 6061.1              -- Tame it with the Taming Rod
+
+step Yaw Sharpmane
+  only Hunter
+  turnin 6061
+  accept 6087
+
+step Tame a Prairie Stalker
+  only Hunter
+  tip Use the Taming Rod on a Prairie Stalker north of the village.
+  kill 2959 quest 6087.1              -- Tame it with the Taming Rod
+
+step Yaw Sharpmane
+  only Hunter
+  turnin 6087
+  accept 6088
+
+step Tame Swoop
+  only Hunter
+  tip Use the Taming Rod on a Swoop; they glide over the plains north-west of the village.
+  kill 2970 quest 6088.1              -- Tame it with the Taming Rod
+
+step Yaw Sharpmane
+  only Hunter
+  turnin 6088
+  accept 6089
+
+step Holt Thunderhorn
+  only Hunter
+  zone Thunder Bluff
+  tip Back up to Hunter Rise.
+  turnin 6089
+
+step Innkeeper Pala
+  only Druid
+  zone Thunder Bluff
+  tip Pala keeps the inn on the central rise.
+  accept 5926
+
+step Turak Runetotem
+  only Druid
+  zone Thunder Bluff
+  tip Turak teaches on Elder Rise.
+  turnin 5926
+  accept 5922
+
+step Moonglade
+  only Druid
+  zone Moonglade
+  tip Cast Teleport: Moonglade. Dendrite Starblaze is in Nighthaven.
+  turnin 5922
+  accept 5930
+
+step Great Bear Spirit
+  only Druid
+  zone Moonglade
+  tip The spirit sits in the north-western woods of Moonglade; speak with it.
+  complete 5930 @39.1,27.5
+
+step Dendrite Starblaze
+  only Druid
+  zone Moonglade
+  turnin 5930
+  accept 5932
+
+step Hearth to the Crossroads
+  only Druid
+  zone The Barrens
+  hearth "The Crossroads"
+
+step Turak Runetotem
+  only Druid
+  zone Thunder Bluff
+  tip Fly to Thunder Bluff; Turak is on Elder Rise.
+  fly "Thunder Bluff"
+  turnin 5932                         -- Turak Runetotem
+  accept 6002
+
+step The Moonkin Stone
+  only Druid
+  zone Mulgore
+  tip The stone stands in the pass between Mulgore and the Barrens. Use the Cenarion Lunardust there and defeat Lunaclaw.
+  use 15710 @71.7,65.0                -- Cenarion Lunardust
+  complete 6002
+
+step Turak Runetotem
+  only Druid
+  zone Thunder Bluff
+  turnin 6002
+
+step Back to the Crossroads
+  zone The Barrens
+  fly "Crossroads"

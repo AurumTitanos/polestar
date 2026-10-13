@@ -1,0 +1,8 @@
+<Ui>
+	<Script file="NpcInfoTables.lua"/>
+	<Script file="NpcLootTables.lua"/>
+	<Script file="ContainerInfoTables.lua"/>
+	<Script file="ContainerLootTables.lua"/>
+	<Script file="Mounts.lua"/>
+	<Script file="Pets.lua"/>
+</Ui>

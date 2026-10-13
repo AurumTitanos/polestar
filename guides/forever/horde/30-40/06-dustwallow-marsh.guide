@@ -1,0 +1,221 @@
+guide forever/horde/30-40/06-dustwallow-marsh
+title Dustwallow Marsh & Desolace
+faction Horde
+levels 39-41
+zone Dustwallow Marsh
+next forever/horde/40-50/01-stranglethorn-vale
+
+# Consensus route (Horde, simulator export consensus-horde-tauren), visits
+# 29-30: Dustwallow Marsh 39.2-39.8 and Desolace 39.8-40.2. Shared by every
+# Horde start. Era + known Forever quests only.
+#
+# Flow: Ratchet -> fly to Camp Taurajo (Shamans: Brine) -> the Shady Rest Inn
+# -> Brackenwall Village -> the Quagmire (Ogron) -> Muckshell crabs -> Witch
+# Hill (Stinky, Mirefin murlocs, Swamp Eye Jarl) -> Darkfang spiders and the
+# Darkmist cavern -> Brackenwall -> Jarl -> hearth to Ratchet -> fly to
+# Shadowprey Village (bind) -> the Valley of Spears escort -> the Kodo
+# Graveyard -> the Gizelton caravan -> Kormek's Hut -> the Kodo Graveyard ->
+# Kormek's Hut -> Thunder Axe Fortress -> Ethel Rethor and the Slitherblade
+# coast -> Shadowprey -> Mannoroc Coven -> hearth to Shadowprey.
+#
+# Deviations from the export:
+# - The Shady Rest pick-ups (Suspicious Hoofprints 1268, The Black Shield
+#   1251, Lieutenant Paval Reethe 1269) are in Dustwallow, at the burned inn
+#   on the road from Camp Taurajo; the export files them under the Barrens.
+#   All three go to Krog together on arrival, so Do'gol's venom sacs are
+#   gathered in the same loop as the rest.
+# - Stinky's Escape (1270): the export escorts Stinky but never hands it in.
+#   It is turned in to Mebok Mizzyrix in Ratchet after the hearth there,
+#   which the route makes anyway.
+# - Jarl Needs a Blade (1203) is optional: the Moonsteel Broadsword is a
+#   Blacksmithing item (or the Auction House), nothing drops it.
+# - Desolace: Kormek's Hut is visited twice (Bone Collector needs the quest
+#   before the bones can be picked up); the Thunder Axe box and Ethel Rethor
+#   follow on the second visit.
+#
+# Class quests: Shamans hand in Brine's red waterskin (1536) south of Camp
+# Taurajo.
+#
+# Left out: Claim Rackmore's Treasure! (6161): its two keys come from the
+# north coast naga and the crabs by Shadowprey, and the chest sits on
+# Ranazjar Isle in the far north, a crossing of the whole zone for one quest.
+# The Black Shield for Thunder Bluff (1276) and Report to Zor (1262) are
+# accepted and carried: later guides turn them in.
+# The export's closing Booty Bay bind belongs to the next guide, which
+# starts there.
+
+# ---------------------------------------------------------------- To the marsh
+
+step Fly to Camp Taurajo
+  zone The Barrens
+  fly "Camp Taurajo"
+
+step Brine
+  only Shaman
+  tip Brine's hut stands on the ridge above the quilboar watering hole, south of Camp Taurajo.
+  turnin 1536                         -- Brine: the red waterskin from Tarren Mill
+
+step Shady Rest Inn
+  zone Dustwallow Marsh
+  tip Ride east from Camp Taurajo along the road into the marsh. The burned-out Shady Rest Inn stands beside it just past the border; the shield, the badge and the hoofprints are in and beside the ruin.
+  goto 29.7,48.0 "Shady Rest Inn"
+  accept 1251
+  accept 1268
+  accept 1269
+
+# ---------------------------------------------------------------- Brackenwall Village
+
+step Brackenwall Village
+  tip Take the road north at the fork to the ogre village of Brackenwall.
+  turnin 1269                         -- Krog
+  turnin 1251
+  turnin 1268
+  accept 1321
+  turnin 1321                         -- Do'gol
+  accept 1322
+  accept 1177                         -- Mudcrush Durtfeet, at the south edge of the village
+
+step Questioning Reethe
+  tip Ogron waits in the Quagmire east of the village. Follow him to Reethe and keep him alive through the fight that breaks out.
+  goto 41.0,36.7 "Ogron"
+  accept 1273
+  complete 1273
+
+step Muckshell crabs
+  tip The Muckshell crabs line the pools east of the Quagmire; now and then one carries the Jeweled Pendant for Marg Speaks.
+  goto 50.5,39.5 "Muckshell pools"
+  collect 5942 quest 1261
+
+# ---------------------------------------------------------------- Witch Hill
+
+step Stinky Ignatz
+  tip Ride north to Witch Hill. Stinky stands at the foot of the hill; escort him while he gathers Bogbean Leaves just south of it.
+  goto 46.9,17.5 "Stinky Ignatz"
+  accept 1270
+  complete 1270
+
+step Mirefin murlocs
+  tip The Mirefin murlocs crowd the coast east and north-east of Witch Hill; every kind drops heads.
+  goto 54.2,15.4 "Mirefin coast"
+  collect 5847 quest 1177
+
+step Swamp Eye Jarl
+  tip Jarl lives in the Swamplight Manor south-east of Witch Hill.
+  turnin 1218
+  accept 1206
+
+# ---------------------------------------------------------------- Back west
+
+step Darkfang spiders
+  tip Ride west back across the marsh. The Darkfang Venomspitters on the ridges north of Brackenwall drop the venom sacs.
+  goto 35.7,14.8 "Darkfang ridges"
+  collect 5959 quest 1322
+
+step Darkmist cavern
+  tip The Darkmist spiders swarm the cavern mouth north-west of Brackenwall; every kind drops eyes.
+  goto 30.5,21.3 "Darkmist cavern"
+  collect 5884 quest 1206
+
+step Brackenwall Village
+  turnin 1273                         -- Krog
+  accept 1276                         -- for Mosarn in Thunder Bluff, around level 44
+  turnin 1177                         -- Mudcrush Durtfeet
+  turnin 1261                         -- Nazeer Bloodpike
+  accept 1262                         -- for Zor Lonetree in Orgrimmar, around level 45
+  turnin 1322                         -- Do'gol
+  accept 1323
+  turnin 1323                         -- Krog
+
+step Swamp Eye Jarl
+  tip Ride east back to the Swamplight Manor.
+  turnin 1206
+  accept 1203 optional                -- only if you carry a Moonsteel Broadsword (Blacksmithing or the Auction House)
+  turnin 1203 optional
+
+step Hearth to Ratchet
+  hearth "Ratchet"
+  turnin 1270                         -- Mebok Mizzyrix
+
+# ---------------------------------------------------------------- Desolace
+
+step Shadowprey Village
+  zone Desolace
+  fly "Shadowprey Village"
+  sethome "Shadowprey Village"
+  accept 5381                         -- Taiga Wisemane
+  accept 6143                         -- Drulzegar Skraghook
+
+step Melizza Brimbuzzle
+  tip Ride north-east to the Valley of Spears. Melizza is held in the Maraudine centaur camp; free her and escort her out east of the valley.
+  goto 33.9,53.5 "Melizza Brimbuzzle"
+  accept 6132
+  complete 6132
+
+step Kodo Graveyard
+  tip Hornizz waits at the goblin camp on the west side of the Kodo Graveyard.
+  turnin 6132
+  accept 6134
+
+step Gizelton Caravan
+  tip Rigger Gizelton's caravan stops on the road at the edge of Mannoroc Coven. Escort it east past the coven; demons attack it twice.
+  goto 45.4,75.3 "Gizelton caravan"
+  accept 5943
+  complete 5943
+
+step Scrabblescrew's Camp
+  tip The caravan ends at Smeed's camp on the east side of the Kodo Graveyard.
+  turnin 5943
+
+step Kormek's Hut
+  tip Ride north up the road to the hut by the road north of the graveyard.
+  accept 5501                         -- Bibbly F'utzbuckle
+
+step Kodo bones and ghosts
+  tip Pick up the kodo bones scattered across the graveyard, and use the Crate of Ghost Magnets among the bones: the ghosts it draws drop the ghost-o-plasm.
+  goto 50.0,60.0 "Kodo Graveyard"
+  collect 13703 quest 5501
+  complete 6134
+
+step Hornizz Brimbuzzle
+  turnin 6134
+
+step Kormek's Hut
+  turnin 5501                         -- Bibbly F'utzbuckle
+
+step Thunder Axe Fortress
+  tip The Burning Blade hold the fortress north-west of Kormek's Hut. Use the Demon Pick on the Demon Spirit in the fortress to get the Demon Box.
+  goto 55.0,26.6 "Thunder Axe Fortress"
+  collect 13542 quest 5381
+
+# ---------------------------------------------------------------- The coast
+
+step Ethel Rethor
+  tip Ride west to Azore Aldamort's tower at Ethel Rethor on the north-west coast.
+  accept 6027                         -- Azore Aldamort
+
+step Slitherblade coast
+  tip The Slitherblade naga hold the coast north of Ethel Rethor, up to Sar'theris Strand. Lord Kragaru guards the Book of the Ancients at the far northern tip.
+  goto 31.4,20.0 "Slitherblade coast"
+  kill 4714 quest 6143.1
+  kill 4711 quest 6143.2
+  kill 4712 quest 6143.3
+  collect 15803 quest 6027
+
+step Azore Aldamort
+  turnin 6027
+
+step Shadowprey Village
+  tip Ride south down the coast back to Shadowprey.
+  turnin 5381                         -- Taiga Wisemane
+  accept 5581
+  turnin 6143                         -- Drulzegar Skraghook
+
+step Portals of the Legion
+  tip Ride east to Mannoroc Coven. Use the Rod of Banishing by each demon portal to close six of them.
+  goto 52.0,78.0 "Mannoroc Coven"
+  complete 5581
+
+step Hearth to Shadowprey
+  hearth "Shadowprey Village"
+  turnin 5581                         -- Taiga Wisemane
+  note The next guide takes you back to Stranglethorn Vale.

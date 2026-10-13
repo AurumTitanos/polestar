@@ -1,0 +1,27 @@
+{
+	"schema": 1,
+	"frame": "e",
+	"source": "test fixture",
+	"crossings": [
+		{
+			"id": "elwynn-stormwind",
+			"a": { "map": 1429, "x": 32.42, "y": 50.02, "radius": 20 },
+			"b": { "map": 1453, "x": 69.3, "y": 85.44, "radius": 20 },
+			"ab": "Enter Stormwind City",
+			"ba": "Leave Stormwind City"
+		}
+	],
+	"open": [{ "a": 1436, "b": 1429 }],
+	"chains": [
+		{
+			"id": "test-cave",
+			"name": "Test Cave",
+			"open": "mouth",
+			"nodes": [
+				{ "map": 1436, "x": 40, "y": 75, "radius": 15, "caption": "Enter the cave" },
+				{ "map": 1436, "x": 39, "y": 76, "radius": 10, "caption": "Follow the path", "back": "Climb back out" },
+				{ "map": 1436, "x": 38.2, "y": 77.5, "radius": 10, "caption": "Enter the mine" }
+			]
+		}
+	]
+}

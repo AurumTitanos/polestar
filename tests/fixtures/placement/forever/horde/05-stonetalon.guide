@@ -1,0 +1,130 @@
+guide forever/horde/05-stonetalon
+title Stonetalon Mountains
+faction Horde
+levels 24-25
+zone Stonetalon Mountains
+next forever/horde/06-ashenvale
+
+# Built from the simulator's consensus Horde route
+# and Era-baseline reference data; not yet play-tested on Forever.
+#
+# Flow: in from the Barrens past Malaka'Jin -> up the Webwinder Path:
+# Besseleth, Ziz Fizziks -> Windshear Crag (Super Reaper blueprints, Piznik)
+# -> Ziz Fizziks -> Sun Rock Retreat (flight path, bind) -> the burned-out
+# note's trail west of Sun Rock -> Gaea Seeds at Mirkfallon Lake -> Sun Rock
+# -> the Charred Vale (Gaea mounds, fire elementals, Bloodfury harpies) ->
+# north to the Cenarion grove below Stonetalon Peak -> hearth to Sun Rock ->
+# north again past the Peak into Ashenvale, to Zoram'gar Outpost
+# (forever/horde/06-ashenvale).
+#
+# Deviations from the consensus: the consensus goes to Sun Rock first and
+# comes back down to Ziz Fizziks and Windshear Crag, then kills Besseleth and
+# hearths back up; here the Webwinder Path quests are done on the way up and
+# the hearth is used after the Cenarion grove instead (without the addition
+# below this guide takes 0.86 h under the simulator, Orc; the skeleton 0.90
+# h). Added: Harpies Threaten (6282), in the Charred Vale with the fire
+# elementals: +0.22 h here, -0.15 h at the end of
+# forever/horde/07-thousand-needles (less grinding there).
+#
+# Further Instructions (1094) is accepted here and turned in to Sputtervalve
+# when the route next lands in Ratchet (forever/horde/30-40/05-dustwallow).
+#
+# Optional: Arachnophobia (6284): Besseleth is elite, so grouping up is
+# advised.
+#
+# Left out: Bloodfury Bloodline (6283, an elite harpy matriarch), Jin'Zil's
+# Forest Magic (1058: 30 Courser Eyes at the Peak and the turn-in back in
+# Malaka'Jin), the Seereth goblin chain (1061/1062/1068: The Spirits of
+# Stonetalon alone measured +0.16 h, and the rest needs two returns to
+# Seereth's camp on the Barrens border), Ordanus (1088, level 29, Alliance
+# side of Ashenvale) and Earthen Arise (6481, needs 6421).
+
+# ---------------------------------------------------------------- Webwinder Path
+
+step Besseleth
+  tip The road from Malaka'Jin climbs north as the Webwinder Path. A Wanted poster stands beside it; Besseleth (level 21) hangs in her web in the side canyon to the west. Besseleth is elite: grouping up is advised.
+  accept 6284 optional @59.1,75.7     -- Wanted Poster: Besseleth
+  goto 52.0,73.9 "Besseleth's lair" optional
+  collect 16192 quest 6284 optional
+
+step Ziz Fizziks
+  tip Further up the path, Ziz Fizziks has a hut where the road forks east to Windshear Crag.
+  turnin 1483
+  accept 1093
+
+step Windshear Crag
+  tip East of Ziz, the Venture Company is clear-cutting Windshear Crag. The Operators drive the shredders; one of them carries the blueprints. Piznik, a friendly goblin miner, works the small mine on the east side: stay with him while he mines, Venture Co. thugs come for him.
+  goto 67.5,52.0 "Windshear Crag"
+  collect 5734 quest 1093
+  accept 1090                         -- Piznik
+  complete 1090
+  turnin 1090
+  accept 1092
+
+step Ziz Fizziks
+  turnin 1092
+  turnin 1093
+  accept 1094                         -- Sputtervalve is in Ratchet: keep it for the boat from Booty Bay at about 39
+
+# ---------------------------------------------------------------- Sun Rock Retreat
+
+step Sun Rock Retreat
+  tip Follow the road west to Sun Rock Retreat.
+  getfp "Sun Rock Retreat" npc 4312   -- Tharm
+  sethome "Sun Rock Retreat" npc 7731 -- Innkeeper Jayka
+  turnin 6284 optional                -- Maggran Earthbinder
+  accept 6282
+  accept 1087                         -- Braelyn Firehand, outside the gate
+  accept 6393                         -- Tsunaman
+  accept 6562                         -- Keep it: Je'neu Sancrea at Zoram'gar Outpost, Ashenvale
+  accept 6301                         -- Tammra Windfield
+  vendor nearest
+
+step The note's trail
+  tip West of Sun Rock the trail of the burned-out note goes on: Pocket Litter by the road, then a Mound of Dirt a little to the north.
+  turnin 79192 @40.8,52.6             -- Pocket Litter
+  accept 79980
+  turnin 79980 @39.6,49.9             -- Mound of Dirt
+
+step Gaea Seeds
+  tip The Gaea Seeds lie in the grass around the southern shore of Mirkfallon Lake, north of Sun Rock.
+  goto 48.8,40.7 "Mirkfallon Lake"
+  collect 16205 quest 6301
+
+step Sun Rock Retreat
+  turnin 6301                         -- Tammra Windfield
+  accept 6381
+
+# ---------------------------------------------------------------- The Charred Vale
+
+step The Charred Vale
+  tip West of Sun Rock lies the burned Charred Vale. Plant the Gaea Seeds in the dirt mounds on the valley floor; the fire elementals that wander through it (Rogue Flame Spirits, Burning Ravagers and Destroyers) drop Incendrites. Bloodfury Harpies and Ambushers nest on the north side, Slayers and Roguefeathers to the south.
+  goto 32.9,67.9 "Charred Vale"
+  interact 177929 quest 6381          -- Gaea Dirt Mounds
+  collect 16312 quest 6393
+  kill 4022 quest 6282.1
+  kill 4025 quest 6282.2
+  kill 4024 quest 6282.3
+  kill 4023 quest 6282.4
+
+# ---------------------------------------------------------------- Stonetalon Peak
+
+step Cenarion grove
+  tip Head north on the road past Mirkfallon Lake toward Stonetalon Peak. The Cenarion druids hold the grove below the peak.
+  goto 36.5,13.0 "Cenarion grove"
+  kill 4057 quest 1087.1
+  kill 4053 quest 1087.2
+  kill 4051 quest 1087.3
+
+step Sun Rock Retreat
+  hearth "Sun Rock Retreat"
+  turnin 6381                         -- Tammra Windfield
+  turnin 6393                         -- Tsunaman
+  turnin 1087                         -- Braelyn Firehand
+  turnin 6282                         -- Maggran Earthbinder
+  note Braelyn's next quest, Ordanus, is level 29 on the Alliance side of Ashenvale. Skip it.
+
+step North to Ashenvale
+  zone Ashenvale
+  tip Walk back north past Stonetalon Peak: the road crosses into Ashenvale. Keep west at the forks to reach the coast and Zoram'gar Outpost.
+  getfp "Zoram'gar Outpost" npc 11901 -- Andruk

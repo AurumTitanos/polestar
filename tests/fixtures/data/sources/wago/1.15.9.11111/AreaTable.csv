@@ -1,0 +1,6 @@
+ID,ZoneName,AreaName_lang,ContinentID,ParentAreaID
+12,ElwynnForest,"Elwynn Forest",0,0
+87,Goldshire,Goldshire,0,12
+1519,StormwindCity,"Stormwind City",0,0
+5000,Inset,"Inset, ""Test""",0,0
+9999,Deep,"The Deep",0,0

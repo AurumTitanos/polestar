@@ -1,0 +1,908 @@
+{
+	"meta": {
+		"schema": 1,
+		"builtAt": "2026-01-01T00:00:00.000Z",
+		"build": "1.60.1.70338",
+		"sources": [
+			{
+				"name": "synthetic fixture",
+				"version": "1",
+				"licence": "MIT"
+			}
+		],
+		"counts": {},
+		"coverage": {
+			"items": 15,
+			"withSource": 14,
+			"share": 0.933
+		},
+		"pack": null
+	},
+	"items": {
+		"750": {
+			"id": 750,
+			"name": "Tough Wolf Meat",
+			"quality": 1,
+			"kind": "item",
+			"spell": null,
+			"reqLevel": null,
+			"repFaction": null,
+			"repStanding": null,
+			"reqSkill": null,
+			"reqSkillRank": null,
+			"sources": []
+		},
+		"1179": {
+			"id": 1179,
+			"name": "Ice Cold Milk",
+			"quality": 1,
+			"kind": "item",
+			"spell": null,
+			"reqLevel": 5,
+			"repFaction": null,
+			"repStanding": null,
+			"reqSkill": null,
+			"reqSkillRank": null,
+			"sources": [
+				{
+					"type": "object",
+					"object": 2843,
+					"chance": 25,
+					"from": [
+						"rarescanner"
+					]
+				},
+				{
+					"type": "world",
+					"minLevel": 1,
+					"maxLevel": 10,
+					"from": [
+						"pfquest"
+					]
+				}
+			]
+		},
+		"1931": {
+			"id": 1931,
+			"name": "Huge Gnoll Claw",
+			"quality": 1,
+			"kind": "item",
+			"spell": null,
+			"reqLevel": null,
+			"repFaction": null,
+			"repStanding": null,
+			"reqSkill": null,
+			"reqSkillRank": null,
+			"sources": [
+				{
+					"type": "drop",
+					"npc": 448,
+					"chance": 100,
+					"from": [
+						"pfquest"
+					]
+				}
+			]
+		},
+		"1933": {
+			"id": 1933,
+			"name": "Staff of Conjuring",
+			"quality": 2,
+			"kind": "item",
+			"spell": null,
+			"reqLevel": 9,
+			"repFaction": null,
+			"repStanding": null,
+			"reqSkill": null,
+			"reqSkillRank": null,
+			"sources": [
+				{
+					"type": "drop",
+					"npc": 61,
+					"chance": 8.5,
+					"from": [
+						"rarescanner",
+						"pfquest"
+					]
+				}
+			]
+		},
+		"2862": {
+			"id": 2862,
+			"name": "Rough Sharpening Stone",
+			"quality": 1,
+			"kind": "item",
+			"spell": null,
+			"reqLevel": null,
+			"repFaction": null,
+			"repStanding": null,
+			"reqSkill": null,
+			"reqSkillRank": null,
+			"sources": [
+				{
+					"type": "craft",
+					"spell": 2660,
+					"skillLine": 164,
+					"profession": "Blacksmithing",
+					"skill": 1,
+					"from": [
+						"client"
+					]
+				}
+			]
+		},
+		"2933": {
+			"id": 2933,
+			"name": "Seal of Wrynn",
+			"quality": 2,
+			"kind": "item",
+			"spell": null,
+			"reqLevel": 10,
+			"repFaction": null,
+			"repStanding": null,
+			"reqSkill": null,
+			"reqSkillRank": null,
+			"sources": [
+				{
+					"type": "quest",
+					"quest": 176,
+					"choice": true,
+					"from": [
+						"pfquest",
+						"questie"
+					]
+				}
+			]
+		},
+		"5503": {
+			"id": 5503,
+			"name": "Clam Meat",
+			"quality": 1,
+			"kind": "item",
+			"spell": null,
+			"reqLevel": null,
+			"repFaction": null,
+			"repStanding": null,
+			"reqSkill": null,
+			"reqSkillRank": null,
+			"sources": [
+				{
+					"type": "container",
+					"item": 5523,
+					"chance": 60,
+					"from": [
+						"pfquest"
+					]
+				}
+			]
+		},
+		"5976": {
+			"id": 5976,
+			"name": "Guild Tabard",
+			"quality": 1,
+			"kind": "tabard",
+			"spell": null,
+			"reqLevel": null,
+			"repFaction": null,
+			"repStanding": null,
+			"reqSkill": null,
+			"reqSkillRank": null,
+			"sources": [
+				{
+					"type": "vendor",
+					"npc": 5049,
+					"cost": 10000,
+					"from": [
+						"pfquest"
+					]
+				}
+			]
+		},
+		"6454": {
+			"id": 6454,
+			"name": "Manual: Strong Anti-Venom",
+			"quality": 1,
+			"kind": "recipe",
+			"spell": 7935,
+			"reqLevel": null,
+			"repFaction": null,
+			"repStanding": null,
+			"reqSkill": 129,
+			"reqSkillRank": 125,
+			"sources": [
+				{
+					"type": "drop",
+					"npc": 448,
+					"chance": 1.5,
+					"from": [
+						"pfquest"
+					]
+				}
+			]
+		},
+		"8485": {
+			"id": 8485,
+			"name": "Cat Carrier (Bombay)",
+			"quality": 1,
+			"kind": "pet",
+			"spell": 10673,
+			"reqLevel": null,
+			"repFaction": null,
+			"repStanding": null,
+			"reqSkill": null,
+			"reqSkillRank": null,
+			"sources": [
+				{
+					"type": "vendor",
+					"npc": 6367,
+					"cost": 4000,
+					"from": [
+						"pfquest"
+					]
+				}
+			]
+		},
+		"8631": {
+			"id": 8631,
+			"name": "Reins of the Striped Frostsaber",
+			"quality": 3,
+			"kind": "mount",
+			"spell": 10793,
+			"reqLevel": 40,
+			"repFaction": null,
+			"repStanding": null,
+			"reqSkill": null,
+			"reqSkillRank": null,
+			"sources": [
+				{
+					"type": "vendor",
+					"npc": 4730,
+					"cost": 800000,
+					"from": [
+						"pfquest",
+						"client"
+					]
+				}
+			]
+		},
+		"8632": {
+			"id": 8632,
+			"name": "Reins of the Spotted Frostsaber",
+			"quality": 3,
+			"kind": "mount",
+			"spell": 10789,
+			"reqLevel": 40,
+			"repFaction": null,
+			"repStanding": null,
+			"reqSkill": null,
+			"reqSkillRank": null,
+			"sources": [
+				{
+					"type": "vendor",
+					"npc": 4730,
+					"cost": 800000,
+					"from": [
+						"pfquest",
+						"client"
+					]
+				}
+			]
+		},
+		"13086": {
+			"id": 13086,
+			"name": "Reins of the Winterspring Frostsaber",
+			"quality": 4,
+			"kind": "mount",
+			"spell": 17229,
+			"reqLevel": 60,
+			"repFaction": 589,
+			"repStanding": 8,
+			"reqSkill": null,
+			"reqSkillRank": null,
+			"sources": [
+				{
+					"type": "rep",
+					"faction": 589,
+					"standing": 8,
+					"npc": 10618,
+					"from": [
+						"atlasloot"
+					]
+				},
+				{
+					"type": "vendor",
+					"npc": 10618,
+					"cost": 1000000,
+					"limited": true,
+					"from": [
+						"pfquest"
+					]
+				}
+			]
+		},
+		"13335": {
+			"id": 13335,
+			"name": "Deathcharger's Reins",
+			"quality": 4,
+			"kind": "mount",
+			"spell": 17481,
+			"reqLevel": 60,
+			"repFaction": null,
+			"repStanding": null,
+			"reqSkill": null,
+			"reqSkillRank": null,
+			"sources": [
+				{
+					"type": "drop",
+					"npc": 10440,
+					"chance": 0.1,
+					"instance": "stratholme",
+					"from": [
+						"atlasloot",
+						"pfquest"
+					]
+				}
+			]
+		},
+		"18245": {
+			"id": 18245,
+			"name": "Horn of the Black War Wolf",
+			"quality": 4,
+			"kind": "mount",
+			"spell": 22724,
+			"reqLevel": 60,
+			"repFaction": null,
+			"repStanding": null,
+			"reqSkill": null,
+			"reqSkillRank": null,
+			"sources": [
+				{
+					"type": "pvp",
+					"rank": 11,
+					"npc": 12796,
+					"from": [
+						"atlasloot"
+					]
+				}
+			]
+		}
+	},
+	"npcs": {
+		"61": {
+			"id": 61,
+			"name": "Thuros Lightfingers",
+			"level": 11,
+			"levelMax": null,
+			"faction": null,
+			"rare": true,
+			"elite": false,
+			"boss": false,
+			"instance": null,
+			"roles": [],
+			"loot": [
+				1933,
+				2933
+			],
+			"spawns": [
+				{
+					"map": 1429,
+					"x": 89.4,
+					"y": 79.3,
+					"f": "e"
+				},
+				{
+					"map": 1429,
+					"x": 69.6,
+					"y": 79.4,
+					"f": "e"
+				}
+			]
+		},
+		"196": {
+			"id": 196,
+			"name": "Eagan Peltskinner",
+			"level": 5,
+			"levelMax": null,
+			"faction": "A",
+			"rare": false,
+			"elite": false,
+			"boss": false,
+			"instance": null,
+			"roles": [
+				"questgiver"
+			],
+			"loot": [],
+			"spawns": [
+				{
+					"map": 1429,
+					"x": 48.9,
+					"y": 40.2,
+					"f": "e"
+				}
+			]
+		},
+		"240": {
+			"id": 240,
+			"name": "Marshal Dughan",
+			"level": 25,
+			"levelMax": null,
+			"faction": "A",
+			"rare": false,
+			"elite": false,
+			"boss": false,
+			"instance": null,
+			"roles": [
+				"questgiver"
+			],
+			"loot": [],
+			"spawns": [
+				{
+					"map": 1429,
+					"x": 42.1,
+					"y": 65.9,
+					"f": "e"
+				}
+			]
+		},
+		"448": {
+			"id": 448,
+			"name": "Hogger",
+			"level": 11,
+			"levelMax": null,
+			"faction": null,
+			"rare": false,
+			"elite": true,
+			"boss": false,
+			"instance": null,
+			"roles": [],
+			"loot": [],
+			"spawns": [
+				{
+					"map": 1429,
+					"x": 26.5,
+					"y": 89.6,
+					"f": "e"
+				},
+				{
+					"map": 1429,
+					"x": 27.8,
+					"y": 92.6,
+					"f": "e"
+				}
+			]
+		},
+		"4730": {
+			"id": 4730,
+			"name": "Lelanai",
+			"level": 35,
+			"levelMax": null,
+			"faction": "A",
+			"rare": false,
+			"elite": false,
+			"boss": false,
+			"instance": null,
+			"roles": [
+				"vendor"
+			],
+			"loot": [],
+			"spawns": [
+				{
+					"map": 1438,
+					"x": 25.2,
+					"y": 50.1,
+					"f": "e"
+				},
+				{
+					"map": 1457,
+					"x": 38.3,
+					"y": 15.4,
+					"f": "e"
+				}
+			]
+		},
+		"5049": {
+			"id": 5049,
+			"name": "Lyesa Steelbrow",
+			"level": 25,
+			"levelMax": null,
+			"faction": "A",
+			"rare": false,
+			"elite": false,
+			"boss": false,
+			"instance": null,
+			"roles": [
+				"vendor"
+			],
+			"loot": [],
+			"spawns": [
+				{
+					"map": 1455,
+					"x": 36.3,
+					"y": 85.5,
+					"f": "e"
+				}
+			]
+		},
+		"6367": {
+			"id": 6367,
+			"name": "Donni Anthania",
+			"level": 15,
+			"levelMax": null,
+			"faction": "A",
+			"rare": false,
+			"elite": false,
+			"boss": false,
+			"instance": null,
+			"roles": [
+				"vendor"
+			],
+			"loot": [],
+			"spawns": [
+				{
+					"map": 1429,
+					"x": 44.2,
+					"y": 53.4,
+					"f": "e"
+				}
+			]
+		},
+		"10440": {
+			"id": 10440,
+			"name": "Baron Rivendare",
+			"level": 62,
+			"levelMax": null,
+			"faction": null,
+			"rare": false,
+			"elite": true,
+			"boss": true,
+			"instance": "stratholme",
+			"roles": [],
+			"loot": [],
+			"spawns": []
+		},
+		"10618": {
+			"id": 10618,
+			"name": "Rivern Frostwind",
+			"level": 60,
+			"levelMax": null,
+			"faction": "A",
+			"rare": false,
+			"elite": false,
+			"boss": false,
+			"instance": null,
+			"roles": [
+				"vendor",
+				"repair"
+			],
+			"loot": [],
+			"spawns": [
+				{
+					"map": 1452,
+					"x": 49.9,
+					"y": 9.8,
+					"f": "e"
+				}
+			]
+		},
+		"12796": {
+			"id": 12796,
+			"name": "Raider Bork",
+			"level": 61,
+			"levelMax": null,
+			"faction": "H",
+			"rare": false,
+			"elite": false,
+			"boss": false,
+			"instance": null,
+			"roles": [
+				"vendor"
+			],
+			"loot": [],
+			"spawns": [
+				{
+					"map": 1454,
+					"x": 41.8,
+					"y": 69.2,
+					"f": "e"
+				}
+			]
+		}
+	},
+	"objects": {
+		"68": {
+			"id": 68,
+			"name": "Wanted Poster",
+			"treasure": false,
+			"loot": [],
+			"spawns": [
+				{
+					"map": 1429,
+					"x": 42.4,
+					"y": 66.1,
+					"f": "e"
+				}
+			]
+		},
+		"2843": {
+			"id": 2843,
+			"name": "Battered Chest",
+			"treasure": true,
+			"loot": [
+				1179
+			],
+			"spawns": [
+				{
+					"map": 1429,
+					"x": 63.5,
+					"y": 56.1,
+					"f": "e"
+				},
+				{
+					"map": 1429,
+					"x": 79.6,
+					"y": 55.7,
+					"f": "e"
+				}
+			]
+		}
+	},
+	"quests": {
+		"33": {
+			"id": 33,
+			"title": "Wolves Across the Border",
+			"level": 6,
+			"minLevel": 2,
+			"faction": "A",
+			"races": null,
+			"classes": null,
+			"start": {
+				"npc": [
+					196
+				],
+				"object": [],
+				"item": []
+			},
+			"end": {
+				"npc": [
+					196
+				],
+				"object": []
+			},
+			"objectives": [
+				{
+					"type": "item",
+					"id": 750,
+					"count": 8,
+					"text": "Tough Wolf Meat"
+				}
+			],
+			"pre": [],
+			"zone": 1429,
+			"rewards": [],
+			"choices": [],
+			"preAny": []
+		},
+		"176": {
+			"id": 176,
+			"title": "Wanted: \"Hogger\"",
+			"level": 11,
+			"minLevel": 6,
+			"faction": "A",
+			"races": 77,
+			"classes": null,
+			"start": {
+				"npc": [],
+				"object": [
+					68
+				],
+				"item": []
+			},
+			"end": {
+				"npc": [
+					240
+				],
+				"object": []
+			},
+			"objectives": [
+				{
+					"type": "item",
+					"id": 1931,
+					"count": 1,
+					"text": "Huge Gnoll Claw; 100%, bloody"
+				},
+				{
+					"type": "kill",
+					"id": 448,
+					"count": 1,
+					"text": "Hogger"
+				}
+			],
+			"pre": [
+				33
+			],
+			"zone": 1429,
+			"rewards": [],
+			"choices": [
+				2933,
+				1933
+			],
+			"preAny": [
+				7,
+				783
+			]
+		}
+	},
+	"instances": {
+		"stratholme": {
+			"key": "stratholme",
+			"name": "Stratholme",
+			"kind": "dungeon",
+			"forever": true,
+			"areaId": 2017,
+			"map": null,
+			"entrance": {
+				"map": 1423,
+				"x": 27.4,
+				"y": 11.6,
+				"f": "e"
+			},
+			"levels": [
+				45,
+				58,
+				60
+			],
+			"bosses": [
+				{
+					"name": "Baron Rivendare",
+					"npc": 10440,
+					"items": [
+						13335
+					]
+				}
+			]
+		}
+	},
+	"zones": {
+		"1423": {
+			"id": 1423,
+			"name": "Eastern Plaguelands"
+		},
+		"1429": {
+			"id": 1429,
+			"name": "Elwynn Forest"
+		},
+		"1438": {
+			"id": 1438,
+			"name": "Teldrassil"
+		},
+		"1452": {
+			"id": 1452,
+			"name": "Winterspring"
+		},
+		"1454": {
+			"id": 1454,
+			"name": "Orgrimmar"
+		},
+		"1455": {
+			"id": 1455,
+			"name": "Ironforge"
+		},
+		"1457": {
+			"id": 1457,
+			"name": "Darnassus"
+		}
+	},
+	"factions": {
+		"69": {
+			"id": 69,
+			"name": "Darnassus",
+			"side": "Alliance"
+		},
+		"589": {
+			"id": 589,
+			"name": "Wintersaber Trainers",
+			"side": "Alliance"
+		}
+	},
+	"spells": {
+		"5784": {
+			"kind": "mount",
+			"item": null,
+			"name": "Summon Felsteed",
+			"class": "WARLOCK"
+		},
+		"10673": {
+			"kind": "pet",
+			"item": 8485,
+			"name": "Bombay Cat",
+			"class": null
+		},
+		"10789": {
+			"kind": "mount",
+			"item": 8632,
+			"name": "Spotted Frostsaber",
+			"class": null
+		},
+		"10793": {
+			"kind": "mount",
+			"item": 8631,
+			"name": "Striped Frostsaber",
+			"class": null
+		},
+		"13819": {
+			"kind": "mount",
+			"item": null,
+			"name": "Summon Warhorse",
+			"class": "PALADIN"
+		},
+		"17229": {
+			"kind": "mount",
+			"item": 13086,
+			"name": "Winterspring Frostsaber",
+			"class": null
+		},
+		"17481": {
+			"kind": "mount",
+			"item": 13335,
+			"name": "Deathcharger",
+			"class": null
+		},
+		"22724": {
+			"kind": "mount",
+			"item": 18245,
+			"name": "Black War Wolf",
+			"class": null
+		}
+	},
+	"frames": {
+		"1423": {
+			"c": 0,
+			"left": -2185.417,
+			"right": -6056.25,
+			"top": 3800,
+			"bottom": 1218.75
+		},
+		"1429": {
+			"c": 0,
+			"left": 1535.417,
+			"right": -1935.417,
+			"top": -7939.583,
+			"bottom": -10254.166
+		},
+		"1438": {
+			"c": 1,
+			"left": 3814.583,
+			"right": -1277.083,
+			"top": 11831.25,
+			"bottom": 8437.5
+		},
+		"1452": {
+			"c": 1,
+			"left": -316.667,
+			"right": -7416.667,
+			"top": 8533.333,
+			"bottom": 3800
+		},
+		"1454": {
+			"c": 1,
+			"left": -3680.601,
+			"right": -5083.206,
+			"top": 2273.877,
+			"bottom": 1338.461
+		},
+		"1455": {
+			"c": 0,
+			"left": -713.591,
+			"right": -1504.216,
+			"top": -4569.241,
+			"bottom": -5096.846
+		},
+		"1457": {
+			"c": 1,
+			"left": 2938.363,
+			"right": 1880.03,
+			"top": 10238.316,
+			"bottom": 9532.587
+		}
+	}
+}

@@ -1,0 +1,14 @@
+{
+	"builtAt": "fixture",
+	"sources": [
+		{
+			"name": "Polestar synthetic route fixture",
+			"url": null,
+			"revision": "1",
+			"license": "MIT"
+		}
+	],
+	"counts": {
+		"quests": 20
+	}
+}

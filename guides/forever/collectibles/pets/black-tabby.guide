@@ -1,0 +1,19 @@
+guide forever/collectibles/pets/black-tabby
+title Black Tabby
+category Collectibles
+folder Companion pets · Drops
+keywords Cat Carrier (Black Tabby), Maine Coon, Dalaran Spellscribe, Ambermill, Silverpine Forest, cat
+collects 8491
+faction Horde
+levels 18-60
+zone Silverpine Forest
+
+# Cat Carrier (Black Tabby) from the Dalaran mages of Ambermill.
+# Sources: items.json (Dalaran Spellscribe 17%, other Dalaran mages 0.2%,
+# pfQuest; pfQuest calls it Maine Coon); Forever client 1.60.1.70338 (name).
+# Our data marks these mages friendly to the Alliance, so this guide is Horde
+# only; Alliance players buy it on the Auction House.
+
+step Dalaran Spellscribe
+  tip The Dalaran Spellscribe, a rare spawn among the mages at Ambermill in southern Silverpine Forest, drops it about 17% of the time in our data; the other Dalaran mages at Ambermill and around the Dalaran crater drop it at about 0.2%. Kill the mages until the Spellscribe appears. Alliance players buy it on the Auction House.
+  collect 8491 "Cat Carrier (Black Tabby)" @63.5,63.3 -- Ambermill

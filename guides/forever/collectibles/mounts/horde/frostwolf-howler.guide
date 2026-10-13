@@ -1,0 +1,23 @@
+guide forever/collectibles/mounts/horde/frostwolf-howler
+title Frostwolf Howler
+category Collectibles
+folder Mounts · Reputation
+keywords Horn of the Frostwolf Howler, Frostwolf Clan, Alterac Valley, Jekyll Flandring, Grunnda Wolfheart, wolf, Exalted, PvP
+collects 19029
+faction Horde
+levels 51-60
+zone Alterac Mountains
+
+# Horn of the Frostwolf Howler for Exalted Frostwolf Clan (Era rule; the
+# reputation comes from Alterac Valley, one of Forever's four battlegrounds).
+# Sources: Forever client 1.60.1.70338 tables via wago.tools (ItemSparse: level
+# 60, 200g, no riding rank asked); items.json / npcs.json for the vendors.
+
+step Frostwolf Clan
+  tip Alterac Valley (level 51+) raises Frostwolf Clan: win, capture towers and graveyards, and hand in the battleground's turn-ins. Jekyll Flandring waits at the Horde end of Alterac Mountains outside the battleground; Grunnda Wolfheart inside Alterac Valley sells the same mount.
+  rep "Frostwolf Clan" Exalted
+
+step Horn of the Frostwolf Howler
+  tip The Forever client lists it at 200g and level 60, and asks for no riding rank.
+  level 60
+  buy 19029 npc 13219                 -- Jekyll Flandring, 200g

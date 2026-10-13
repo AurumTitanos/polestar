@@ -1,0 +1,88 @@
+{
+  "meta": { "schema": 1, "builtAt": "2026-10-12T00:00:00Z", "build": "1.60.1.70338", "sources": [{ "name": "synthetic", "version": "1", "licence": "MIT" }] },
+  "frames": {
+    "9001": { "c": 0, "left": 1000, "right": -1000, "top": 1000, "bottom": -1000 },
+    "9002": { "c": 0, "left": -1000, "right": -3000, "top": 1000, "bottom": -1000 },
+    "9003": { "c": 1, "left": 1000, "right": -1000, "top": 1000, "bottom": -1000 }
+  },
+  "zones": {
+    "9001": { "id": 9001, "name": "Amber Vale" },
+    "9002": { "id": 9002, "name": "Ember Hollow" },
+    "9003": { "id": 9003, "name": "Frost Isle" }
+  },
+  "factions": {
+    "9100": { "id": 9100, "name": "Vale Wardens", "side": "Alliance" },
+    "9101": { "id": 9101, "name": "Ember Clan", "side": "Horde" }
+  },
+  "npcs": {
+    "5001": { "id": 5001, "name": "Mira Saddler", "level": 30, "levelMax": null, "faction": "A", "rare": false, "elite": false, "boss": false, "instance": null, "roles": ["vendor"], "spawns": [{ "map": 9001, "x": 52, "y": 50, "f": "e" }] },
+    "5002": { "id": 5002, "name": "Grosh Saddler", "level": 30, "levelMax": null, "faction": "H", "rare": false, "elite": false, "boss": false, "instance": null, "roles": ["vendor"], "spawns": [{ "map": 9001, "x": 51, "y": 50, "f": "e" }] },
+    "5003": { "id": 5003, "name": "Tobin Far", "level": 30, "levelMax": null, "faction": "A", "rare": false, "elite": false, "boss": false, "instance": null, "roles": ["vendor"], "spawns": [{ "map": 9002, "x": 80, "y": 80, "f": "e" }] },
+    "5004": { "id": 5004, "name": "Bristle Boar", "level": 18, "levelMax": 19, "faction": null, "rare": false, "elite": false, "boss": false, "instance": null, "roles": [], "spawns": [{ "map": 9001, "x": 60, "y": 60, "f": "e" }, { "map": 9002, "x": 20, "y": 20, "f": "e" }] },
+    "5005": { "id": 5005, "name": "Thornback Boar", "level": 18, "levelMax": 19, "faction": null, "rare": false, "elite": false, "boss": false, "instance": null, "roles": [], "spawns": [{ "map": 9001, "x": 60, "y": 60, "f": "e" }] },
+    "5006": { "id": 5006, "name": "Old Grumble", "level": 40, "levelMax": null, "faction": null, "rare": false, "elite": false, "boss": false, "instance": null, "roles": [], "spawns": [{ "map": 9001, "x": 40, "y": 40, "f": "e" }] },
+    "5007": { "id": 5007, "name": "Quartermaster Ilsa", "level": 35, "levelMax": null, "faction": "A", "rare": false, "elite": false, "boss": false, "instance": null, "roles": ["vendor"], "spawns": [{ "map": 9001, "x": 45, "y": 45, "f": "e" }] },
+    "5008": { "id": 5008, "name": "Elder Rowan", "level": 25, "levelMax": null, "faction": "A", "rare": false, "elite": false, "boss": false, "instance": null, "roles": ["questgiver"], "spawns": [{ "map": 9001, "x": 48, "y": 50, "f": "e" }] },
+    "5009": { "id": 5009, "name": "Captain Hale", "level": 25, "levelMax": null, "faction": "A", "rare": false, "elite": false, "boss": false, "instance": null, "roles": ["questgiver"], "spawns": [{ "map": 9001, "x": 47, "y": 52, "f": "e" }] },
+    "5010": { "id": 5010, "name": "Seamstress Lyra", "level": 30, "levelMax": null, "faction": "A", "rare": false, "elite": false, "boss": false, "instance": null, "roles": ["trainer", "trainer:197"], "spawns": [{ "map": 9001, "x": 49, "y": 49, "f": "e" }] },
+    "5011": { "id": 5011, "name": "Gnash the Unseen", "level": 21, "levelMax": null, "faction": null, "rare": true, "elite": false, "boss": false, "instance": null, "roles": [], "spawns": [{ "map": 9001, "x": 70, "y": 30, "f": "e" }] },
+    "5012": { "id": 5012, "name": "Kobold Digger", "level": 19, "levelMax": 20, "faction": null, "rare": false, "elite": false, "boss": false, "instance": null, "roles": [], "spawns": [{ "map": 9001, "x": 62, "y": 40, "f": "e" }] },
+    "5013": { "id": 5013, "name": "Lord Ashcroft", "level": 22, "levelMax": null, "faction": null, "rare": false, "elite": true, "boss": true, "instance": "ashen_crypt", "roles": [], "spawns": [] }
+  },
+  "objects": {
+    "6001": { "id": 6001, "name": "Weathered Chest", "treasure": true, "spawns": [{ "map": 9001, "x": 55, "y": 58, "f": "e" }] },
+    "6002": { "id": 6002, "name": "Supply Crate", "treasure": false, "spawns": [{ "map": 9001, "x": 63, "y": 42, "f": "e" }] }
+  },
+  "quests": {
+    "7001": { "id": 7001, "title": "Trouble in the Vale", "level": 18, "minLevel": 15, "faction": "A", "races": null, "classes": null, "start": { "npc": [5008], "object": [], "item": [] }, "end": { "npc": [5009], "object": [] }, "objectives": [{ "type": "kill", "id": 5012, "count": 5, "text": "Kobold Digger" }, { "type": "item", "id": 8010, "count": 3, "text": "Kobold Candle" }], "pre": [], "preAny": [], "zone": 9001, "rewards": [], "choices": [] },
+    "7002": { "id": 7002, "title": "The Saddler's Request", "level": 20, "minLevel": 18, "faction": "A", "races": null, "classes": null, "start": { "npc": [5009], "object": [], "item": [] }, "end": { "npc": [5008], "object": [] }, "objectives": [{ "type": "object", "id": 6002, "count": 1, "text": "Supply Crate" }, { "type": "event", "id": null, "count": 1, "text": "Report to the elder" }], "pre": [7001], "preAny": [7003, 7004], "zone": 9001, "rewards": [], "choices": [8001] },
+    "7003": { "id": 7003, "title": "Horde Errand", "level": 15, "minLevel": 10, "faction": "H", "races": null, "classes": null, "start": { "npc": [5002], "object": [], "item": [] }, "end": { "npc": [5002], "object": [] }, "objectives": [], "pre": [], "preAny": [], "zone": 9001, "rewards": [], "choices": [] },
+    "7004": { "id": 7004, "title": "Alliance Errand", "level": 15, "minLevel": 10, "faction": "A", "races": null, "classes": null, "start": { "npc": [5001], "object": [], "item": [] }, "end": { "npc": [5001], "object": [] }, "objectives": [], "pre": [], "preAny": [], "zone": 9001, "rewards": [], "choices": [] },
+    "7005": { "id": 7005, "title": "High Peril", "level": 32, "minLevel": 30, "faction": "A", "races": null, "classes": null, "start": { "npc": [5008], "object": [], "item": [] }, "end": { "npc": [5008], "object": [] }, "objectives": [], "pre": [], "preAny": [], "zone": 9001, "rewards": [8002], "choices": [] },
+    "7006": { "id": 7006, "title": "Orcish Rite", "level": 18, "minLevel": 10, "faction": null, "races": 2, "classes": null, "start": { "npc": [5008], "object": [], "item": [] }, "end": { "npc": [5008], "object": [] }, "objectives": [], "pre": [], "preAny": [], "zone": 9001, "rewards": [8003], "choices": [] },
+    "7007": { "id": 7007, "title": "Strange Rite", "level": 18, "minLevel": 10, "faction": null, "races": 512, "classes": null, "start": { "npc": [5008], "object": [], "item": [] }, "end": { "npc": [5008], "object": [] }, "objectives": [], "pre": [], "preAny": [], "zone": 9001, "rewards": [8003], "choices": [] }
+  },
+  "instances": {
+    "ashen_crypt": { "key": "ashen_crypt", "name": "Ashen Crypt", "kind": "dungeon", "forever": true, "areaId": null, "map": null, "entrance": { "map": 9001, "x": 30, "y": 70, "f": "e" }, "levels": [18, 20, 26], "bosses": [{ "name": "Lord Ashcroft", "npc": 5013, "items": [8008] }] }
+  },
+  "spells": {
+    "9500": { "kind": "mount", "item": 8000, "name": "Amber Strider", "class": null },
+    "9501": { "kind": "mount", "item": 8011, "name": "Summon Charger", "class": "PALADIN" },
+    "9502": { "kind": "mount", "item": 8012, "name": "Ember Wolf", "class": null },
+    "9503": { "kind": "mount", "item": null, "name": "Summon Shadowsteed", "class": "WARLOCK" },
+    "9504": { "kind": "pet", "item": 8013, "name": "Pocket Toad", "class": null }
+  },
+  "items": {
+    "8000": { "id": 8000, "name": "Amber Strider Reins", "quality": 3, "kind": "mount", "spell": 9500, "reqLevel": 20, "sources": [
+      { "type": "vendor", "npc": 5002, "cost": 100000, "from": ["client"] },
+      { "type": "vendor", "npc": 5003, "cost": 100000, "from": ["client"] },
+      { "type": "vendor", "npc": 5001, "cost": 100000, "from": ["client"] }
+    ] },
+    "8001": { "id": 8001, "name": "Saddler's Gloves", "quality": 2, "kind": "item", "spell": null, "reqLevel": 18, "sources": [{ "type": "quest", "quest": 7002, "choice": true, "from": ["questie"] }] },
+    "8002": { "id": 8002, "name": "Peril Blade", "quality": 2, "kind": "item", "spell": null, "reqLevel": null, "sources": [
+      { "type": "quest", "quest": 7005, "from": ["questie"] },
+      { "type": "drop", "npc": 5004, "chance": 1, "from": ["questie"] }
+    ] },
+    "8003": { "id": 8003, "name": "Rite Totem", "quality": 1, "kind": "item", "spell": null, "reqLevel": null, "sources": [
+      { "type": "quest", "quest": 7006, "from": ["questie"] },
+      { "type": "quest", "quest": 7007, "from": ["questie"] }
+    ] },
+    "8004": { "id": 8004, "name": "Boar Tusk", "quality": 1, "kind": "item", "spell": null, "reqLevel": null, "sources": [
+      { "type": "drop", "npc": 5005, "chance": 5, "from": ["questie"] },
+      { "type": "drop", "npc": 5004, "chance": 50, "from": ["questie"] }
+    ] },
+    "8005": { "id": 8005, "name": "Lyra's Bolt", "quality": 1, "kind": "item", "spell": null, "reqLevel": null, "sources": [{ "type": "craft", "spell": 9601, "skillLine": 197, "profession": "Tailoring", "skill": 100, "from": ["client"] }] },
+    "8006": { "id": 8006, "name": "Warden Tabard", "quality": 1, "kind": "tabard", "spell": null, "reqLevel": null, "sources": [{ "type": "rep", "faction": 9100, "standing": 7, "npc": 5007, "from": ["atlasloot"] }] },
+    "8007": { "id": 8007, "name": "Grumble Hide", "quality": 1, "kind": "item", "spell": null, "reqLevel": null, "sources": [{ "type": "drop", "npc": 5006, "chance": 30, "from": ["questie"] }] },
+    "8008": { "id": 8008, "name": "Crypt Blade", "quality": 3, "kind": "item", "spell": null, "reqLevel": null, "sources": [{ "type": "drop", "npc": 5013, "chance": 20, "instance": "ashen_crypt", "from": ["atlasloot"] }] },
+    "8009": { "id": 8009, "name": "Chest Trinket", "quality": 2, "kind": "item", "spell": null, "reqLevel": null, "sources": [{ "type": "object", "object": 6001, "chance": 40, "from": ["rarescanner"] }] },
+    "8010": { "id": 8010, "name": "Kobold Candle", "quality": 1, "kind": "item", "spell": null, "reqLevel": null, "sources": [{ "type": "drop", "npc": 5012, "chance": 60, "from": ["questie"] }] },
+    "8011": { "id": 8011, "name": "Charger Bridle", "quality": 4, "kind": "mount", "spell": 9501, "reqLevel": null, "sources": [{ "type": "vendor", "npc": 5001, "from": ["client"] }] },
+    "8012": { "id": 8012, "name": "Ember Wolf Horn", "quality": 3, "kind": "mount", "spell": 9502, "reqLevel": null, "sources": [{ "type": "rep", "faction": 9101, "standing": 8, "npc": 5002, "from": ["atlasloot"] }] },
+    "8013": { "id": 8013, "name": "Pocket Toad", "quality": 1, "kind": "pet", "spell": 9504, "reqLevel": null, "sources": [{ "type": "vendor", "npc": 5001, "cost": 500, "from": ["client"] }] },
+    "8014": { "id": 8014, "name": "Gnash's Fang", "quality": 2, "kind": "item", "spell": null, "reqLevel": null, "sources": [{ "type": "drop", "npc": 5011, "chance": 25, "from": ["rarescanner"] }] },
+    "8015": { "id": 8015, "name": "Mystery Box Prize", "quality": 1, "kind": "item", "spell": null, "reqLevel": null, "sources": [{ "type": "world", "minLevel": 10, "maxLevel": 30, "from": ["wowhead"] }] },
+    "8016": { "id": 8016, "name": "Warden Charger Reins", "quality": 4, "kind": "mount", "spell": null, "reqLevel": null, "repFaction": 9100, "repStanding": 8, "sources": [{ "type": "vendor", "npc": 5007, "cost": 800000, "from": ["client"] }] },
+    "8017": { "id": 8017, "name": "Pattern: Vale Cloak", "quality": 2, "kind": "recipe", "spell": null, "reqLevel": null, "reqSkill": 197, "reqSkillRank": 125, "sources": [{ "type": "vendor", "npc": 5001, "cost": 2000, "from": ["client"] }] }
+  }
+}

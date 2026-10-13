@@ -1,0 +1,10 @@
+## Interface: 16001
+## Title: Polestar Guides
+## Notes: Leveling, profession, reputation and collectible guides for Polestar.
+## Author: Polestar
+## X-License: GPL-3.0-only
+## Version: 0.1.0
+## Category: Quests
+## Dependencies: Polestar
+
+Pack.xml

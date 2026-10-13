@@ -1,0 +1,31 @@
+guide forever/collectibles/mounts/alliance/black-war-mounts
+title Black War Mounts
+category Collectibles
+folder Mounts · PvP
+keywords Black War Steed Bridle, Reins of the Black War Tiger, Black Battlestrider, Black War Ram, Lieutenant Karter, Commander, PvP rank 11, Champions' Hall
+collects 18241, 18242, 18243, 18244
+faction Alliance
+levels 40-60
+zone Stormwind City
+
+# The Alliance rank 11 PvP mounts from Lieutenant Karter in Stormwind.
+# Rank 11 (Commander / Lieutenant General) unlocks the Black War mounts;
+# vendors in Stormwind and Orgrimmar.
+# Sources: Forever client 1.60.1.70338 via wago.tools (ItemSparse: level 40,
+# 100g, racial riding spell, no rank in the item itself). Our data has no spawn
+# for the vendor, so the waypoint is the honor hall next to its quartermasters
+# (npcs.json).
+
+step PvP rank 11
+  tip Forever's PvP ranks come from Rank Points earned in battlegrounds and world PvP, with a weekly cap; Commander (rank 11) unlocks the Black War mounts. Polestar cannot read your rank, so this step waits for level 40 and the riding skill.
+  level 40
+  skill Riding 75
+
+step Lieutenant Karter
+  tip Lieutenant Karter sells the mounts in the Champions' Hall in Stormwind's Old Town, beside the other honor quartermasters such as Officer Areyn. The Forever client lists each at 100g; choose one.
+  goto 73.8,53.6 "Champions' Hall"
+  vendor 12783 @73.8,53.6             -- Lieutenant Karter
+  buy 18241 npc 12783 @73.8,53.6 optional -- 100g
+  buy 18242 npc 12783 @73.8,53.6 optional -- 100g
+  buy 18243 npc 12783 @73.8,53.6 optional -- 100g
+  buy 18244 npc 12783 @73.8,53.6 optional -- 100g

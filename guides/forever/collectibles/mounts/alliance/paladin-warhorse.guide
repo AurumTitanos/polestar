@@ -1,0 +1,33 @@
+guide forever/collectibles/mounts/alliance/paladin-warhorse
+title Paladin Warhorse
+category Collectibles
+folder Mounts · Class
+keywords Summon Warhorse, Tome of Nobility, Paladin, Duthorian Rall, class mount
+faction Alliance
+class Paladin
+levels 40-60
+zone Stormwind City
+
+# Summon Warhorse for Alliance Paladins: The Tome of Nobility.
+# Sources: Forever client 1.60.1.70338 tables via wago.tools (Mount: the spell
+# is still a Forever mount; ItemSparse); quests.json and npcs.json for the
+# chain.
+# Forever's Forsaken Paladins have their own warhorse quest (A Trusty Steed, in
+# the beta client); its giver and steps are not
+# published or in our data yet, so this guide covers Humans and Dwarves only.
+
+step The Tome of Nobility (Ironforge)
+  only Dwarf
+  zone Ironforge
+  tip At 40 Brandur Ironhammer in the Mystic Ward sends you to Duthorian Rall in Stormwind's Cathedral of Light. Take the tram from Ironforge to Stormwind.
+  level 40
+  accept 4486
+
+step Summon Warhorse
+  zone Stormwind City
+  tip Duthorian Rall stands in the Cathedral of Light. Turning in the Tome of Nobility teaches Summon Warhorse; Paladins do not buy a mount.
+  level 40
+  accept 1661 only Human
+  turnin 1661 only Human
+  turnin 4486 only Dwarf
+  learn 13819 "Summon Warhorse"

@@ -1,0 +1,22 @@
+guide forever/collectibles/pets/bitter-baitling
+title Bitter Baitling
+category Collectibles
+folder Companion pets · Vendors
+keywords Jang, Extravagant Extravaganza Coin, fishing, Booty Bay, Stranglethorn Fishing Extravaganza
+collects 276275
+levels 1-60
+zone Stranglethorn Vale
+
+# Bitter Baitling from Jang in Booty Bay for one Extravagant Extravaganza Coin.
+# Sources: npcs.json (Jang); Forever client 1.60.1.70338 via wago.tools.
+# How the coin is earned is not in what we have; Jang runs Booty Bay's fishing
+# contest in Era.
+
+step Extravagant Extravaganza Coin
+  tip The Bitter Baitling is a fishing reward: Jang trades it for one Extravagant Extravaganza Coin, a reward of the fishing contest Jang runs in Booty Bay. The coin's exact source is not published yet.
+  collect 274026 "Extravagant Extravaganza Coin" @27.4,76.8 -- Jang, Booty Bay
+
+step Jang
+  tip Jang stands on the Booty Bay docks.
+  vendor 15078                        -- Jang
+  buy 276275 "Bitter Baitling" npc 15078 -- 1 Extravagant Extravaganza Coin

@@ -1,0 +1,7 @@
+## Interface: 16001
+## Title: Fixture Collections
+## Version: Fixture 1.0
+## LoadOnDemand: 1
+Locales\Locales.xml
+private.lua
+data.lua

@@ -1,0 +1,205 @@
+guide forever/legacy/legacy-challenges
+title Legacy Challenges
+category Legacy
+levels 1-60
+zone Burning Steppes
+
+# A planner for Forever's 65 Legacy Challenges, one step per category group.
+# Source: Blizzard's "Get to Know the World of Warcraft: Forever Legacy System"
+# news post. Each challenge is worth 1 account-wide Legacy Point:
+#   Classes (27)     every class reaching 25, 45 and 60
+#   Tradeskills (18) Alchemy, Blacksmithing, Enchanting, Engineering,
+#                    Leatherworking, Tailoring reaching 150, 225 and 300
+#   PvP (12)         ranks 3, 7, 10, 13, 14; Exalted with the four
+#                    battleground factions; Field of Honor weeks 4, 7, 10
+#   Adventure (2)    explore the entire world map on one character; the Lord
+#                    Valthalak dungeon-set questline
+#   Dungeons (3)     final boss of every level 15-25, 26-45, 46-60 dungeon
+#   Raids (3)        Onyxia; all 13 Hyjal Summit bosses; all 8 Barrow Deeps
+#                    bosses
+#
+# Tracking today: what this character can prove is tracked automatically
+# (level, skill rank, battleground reputation, the Valthalak quests). Everything
+# else is a manual check-off: PvP ranks, Field of Honor weeks and dungeon/raid
+# bosses (`kill` with no quest is a checkbox), and world exploration (notes;
+# the Exploration guides track it area by area).
+#
+# Under the hood Legacy Challenges are achievements, but no achievement ids
+# exist in our data yet (the newest wow_classic_era client tables on wago.tools
+# carry none). Once a player runs `/lsrec legacy` in Polestar_Recorder on a live
+# Forever client and that recording is imported, every manual goal here becomes
+# an `achieve <id> "Name"` goal (with `criteria <n>` for per-boss and
+# per-dungeon parts) and is tracked automatically, account-wide.
+#
+# Dungeon brackets: Blizzard has not published which dungeon falls in which
+# bracket. The grouping below follows each dungeon's usual Classic level range;
+# boss names and ids are from npcs.json. Forever's new instances (Hall of
+# Thanes, Ruins of Lordaeron, Hyjal Summit, Barrow Deeps) are not in our data,
+# so they are named-only checkboxes.
+
+# ---------------------------------------------------------------- Classes
+
+step Classes: level 25
+  tip Classes give 27 points: every class reaching 25, 45 and 60. They count once per class across your account, so a second character of a class you already raised adds nothing; a new class does. The first character to reach 25 usually unlocks the Legacy System itself.
+  level 25
+
+step Classes: level 45
+  tip Level 45 with this character's class.
+  level 45
+
+step Classes: level 60
+  tip Level 60 with this character's class.
+  level 60
+
+# ---------------------------------------------------------------- Tradeskills
+
+step Tradeskills: Alchemy
+  tip Each crafting profession gives 3 points, at 150, 225 and 300. Ranks count once per profession across your account. Follow the Polestar guide "Alchemy 1-300" (Professions). A crafting profession at 150 also unlocks the Legacy System.
+  skill Alchemy 150
+  skill Alchemy 225
+  skill Alchemy 300
+
+step Tradeskills: Blacksmithing
+  tip Follow the Polestar guide "Blacksmithing 1-300" (Professions).
+  skill Blacksmithing 150
+  skill Blacksmithing 225
+  skill Blacksmithing 300
+
+step Tradeskills: Enchanting
+  tip Follow the Polestar guide "Enchanting 1-300" (Professions).
+  skill Enchanting 150
+  skill Enchanting 225
+  skill Enchanting 300
+
+step Tradeskills: Engineering
+  tip Follow the Polestar guide "Engineering 1-300" (Professions).
+  skill Engineering 150
+  skill Engineering 225
+  skill Engineering 300
+
+step Tradeskills: Leatherworking
+  tip Follow the Polestar guide "Leatherworking 1-300" (Professions).
+  skill Leatherworking 150
+  skill Leatherworking 225
+  skill Leatherworking 300
+
+step Tradeskills: Tailoring
+  tip Follow the Polestar guide "Tailoring 1-300" (Professions).
+  skill Tailoring 150
+  skill Tailoring 225
+  skill Tailoring 300
+
+# ---------------------------------------------------------------- PvP
+
+step PvP: battleground reputations (Alliance)
+  only Alliance
+  tip Exalted with each battleground faction is worth a point (4 in all; this page shows three, see the note). Follow the Polestar Reputation guides Warsong Gulch Reputation, Arathi Basin Reputation and Alterac Valley Reputation. The Diplomat Legacy perk increases reputation gains.
+  rep 890 Exalted             -- Warsong Gulch
+  rep 509 Exalted             -- Arathi Basin
+  rep 730 Exalted             -- Alterac Valley
+  note Blizzard counts four battleground reputations, but our faction data has three per side (Warsong Gulch, Arathi Basin, Alterac Valley). The fourth is likely tied to Forever's new PvP content; check the in-game Legacy panel.
+
+step PvP: battleground reputations (Horde)
+  only Horde
+  tip Exalted with each battleground faction is worth a point (4 in all; this page shows three, see the note). Follow the Polestar Reputation guides Warsong Gulch Reputation, Arathi Basin Reputation and Alterac Valley Reputation. The Diplomat Legacy perk increases reputation gains.
+  rep 889 Exalted             -- Warsong Gulch
+  rep 510 Exalted             -- Arathi Basin
+  rep 729 Exalted             -- Alterac Valley
+  note Blizzard counts four battleground reputations, but our faction data has three per side (Warsong Gulch, Arathi Basin, Alterac Valley). The fourth is likely tied to Forever's new PvP content; check the in-game Legacy panel.
+
+step PvP: honor ranks
+  tip Ranks 3, 7, 10, 13 and 14 are a point each. Polestar cannot read your highest rank yet, so tick each one off yourself. Forever's honor rules for reaching a rank have not been published in detail; in Classic, ranks come from your weekly honor standing, and 13-14 take many weeks of top standing.
+  kill "enemy players for honor until PvP Rank 3"
+  kill "enemy players for honor until PvP Rank 7"
+  kill "enemy players for honor until PvP Rank 10"
+  kill "enemy players for honor until PvP Rank 13"
+  kill "enemy players for honor until PvP Rank 14"
+
+step PvP: Field of Honor
+  tip The Field of Honor PvP season has weekly journey quests; finishing the ones for weeks 4, 7 and 10 is a point each. These quests are new in Forever and not in our data, so tick each one off yourself.
+  kill "enemy players and finish the Field of Honor week 4 journey quest"
+  kill "enemy players and finish the Field of Honor week 7 journey quest"
+  kill "enemy players and finish the Field of Honor week 10 journey quest"
+
+# ---------------------------------------------------------------- Adventure
+
+step Adventure: explore the world map
+  tip Exploring the entire world map on one character is a point, and it can also unlock the Legacy System. It must all be on the same character.
+  note Follow the Polestar Exploration guides: Exploration: Eastern Kingdoms 1-30, 30-45 and 45-60, and Exploration: Kalimdor 1-30, 30-45 and 45-60. They track every area as you discover it.
+  note This step cannot check the whole map by itself yet; it becomes a tracked goal once the Legacy achievement ids are recorded.
+
+step Adventure: Lord Valthalak
+  zone Burning Steppes
+  tip The Lord Valthalak questline is a point. It is the level 60 dungeon-set chain: Deliana (Ironforge) or Mokvar (Orgrimmar) send you through In Search of Anthion and Anthion's Parting Words to Bodley at Blackrock Mountain, whose Three Kings of Flame, the Left and Right Pieces of Lord Valthalak's Amulet, Final Preparations and Mea Culpa, Lord Valthalak end with Return to Bodley. Back to the Beginning then leads to the class Saving the Best for Last quests.
+  accept 8997 only Alliance   -- Bodley offers it once Return to Bodley is turned in
+  accept 8998 only Horde      -- Bodley offers it once Return to Bodley is turned in
+  note Which quest Blizzard counts as the end of the questline (Return to Bodley or your class's Saving the Best for Last) is unconfirmed until the Legacy data is recorded.
+
+step Adventure: Back to the Beginning (Alliance)
+  only Alliance
+  zone Ironforge
+  tip Deliana then offers your class's Saving the Best for Last, the final upgrade of the dungeon set.
+  turnin 8997                 -- Deliana, Ironforge
+
+step Adventure: Back to the Beginning (Horde)
+  only Horde
+  zone Orgrimmar
+  tip Mokvar then offers your class's Saving the Best for Last, the final upgrade of the dungeon set.
+  turnin 8998                 -- Mokvar, Orgrimmar
+
+# ---------------------------------------------------------------- Dungeons
+
+step Dungeons: level 15-25
+  tip The final boss of every level 15-25 dungeon earns one point together. Tick each boss off when you kill it; the grouping follows the usual Classic level ranges, so check the in-game Legacy panel for the exact list.
+  kill 11520                  -- Ragefire Chasm
+  kill 3654                   -- Wailing Caverns (appears after the Disciple of Naralex's event)
+  kill 639                    -- The Deadmines
+  kill 4275                   -- Shadowfang Keep
+  kill 4829                   -- Blackfathom Deeps
+  kill 1716                   -- The Stockade: the usual last kill; the Stockade has no fixed final boss
+  note Forever adds the dungeons Hall of Thanes and Ruins of Lordaeron; their bosses and brackets are not in our data yet.
+
+step Dungeons: level 26-45
+  tip The final boss of every level 26-45 dungeon earns one point together.
+  kill 7800                   -- Gnomeregan
+  kill 4421                   -- Razorfen Kraul
+  kill 4543                   -- Scarlet Monastery: Graveyard
+  kill 6487                   -- Scarlet Monastery: Library
+  kill 3975                   -- Scarlet Monastery: Armory
+  kill 3977                   -- Scarlet Monastery: Cathedral
+  kill 7358                   -- Razorfen Downs
+  kill 2748                   -- Uldaman (level 41-51; may count in the 46-60 bracket)
+
+step Dungeons: level 46-60
+  tip The final boss of every level 46-60 dungeon earns one point together.
+  kill 7267                   -- Zul'Farrak
+  kill 12201                  -- Maraudon
+  kill 5709                   -- Sunken Temple
+  kill 9019                   -- Blackrock Depths
+  kill 9568                   -- Lower Blackrock Spire
+  kill 10363                  -- Upper Blackrock Spire
+  kill 11492                  -- Dire Maul East
+  kill 11486                  -- Dire Maul West
+  kill 11501                  -- Dire Maul North
+  kill 1853                   -- Scholomance
+  kill 10813                  -- Stratholme, Live side
+  kill 10440                  -- Stratholme, Undead side
+
+step Forever's new dungeons
+  tip Hall of Thanes and Ruins of Lordaeron are new in Forever. Their bosses, levels and Legacy bracket are not in our data, so tick them off yourself.
+  kill "the final boss of Hall of Thanes"
+  kill "the final boss of Ruins of Lordaeron"
+
+# ---------------------------------------------------------------- Raids
+
+step Raids: Onyxia
+  tip Killing Onyxia is a point. In Classic her lair needs an attunement: Drakefire Amulet for the Alliance, Blood of the Black Dragon Champion for the Horde.
+  kill 10184                  -- Onyxia's Lair, Dustwallow Marsh
+
+step Raids: Hyjal Summit
+  tip All 13 Hyjal Summit bosses are a point. Hyjal Summit is a new Forever raid; its bosses are not in our data, so tick it off once all 13 are down.
+  kill "all 13 Hyjal Summit bosses"
+
+step Raids: Barrow Deeps
+  tip All 8 Barrow Deeps bosses are a point. Barrow Deeps is a new Forever raid; its bosses are not in our data, so tick it off once all 8 are down.
+  kill "all 8 Barrow Deeps bosses"

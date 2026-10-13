@@ -1,0 +1,17 @@
+guide forever/collectibles/pets/condor-hatchling
+title Condor Hatchling
+category Collectibles
+folder Companion pets · Drops
+keywords Shaking Egg, Lord Condar, Loch Modan, condor, rare
+collects 282637
+levels 14-60
+zone Loch Modan
+
+# Shaking Egg (the Condor Hatchling) from Lord Condar in Loch Modan (new in
+# Forever).
+# Sources: Wowhead Forever item 282637 (Lord Condar, 0.2% in 475 kills);
+# npcs.json (Lord Condar's spawn); Forever client 1.60.1.70338.
+
+step Lord Condar
+  tip Lord Condar is a rare level 15-16 condor in south-eastern Loch Modan; early kill counts give about 0.2% per kill, so expect many respawns.
+  collect 282637 "Shaking Egg" @77.7,74.9 -- Lord Condar

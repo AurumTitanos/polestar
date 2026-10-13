@@ -1,0 +1,152 @@
+guide forever/alliance/04-redridge-mountains
+title Redridge Mountains
+faction Alliance
+levels 20-23
+zone Redridge Mountains
+next forever/alliance/05-duskwood
+
+# Visit 4 of the simulator's consensus Alliance route (Human export,
+# 20.5 to 22.7): the boat from Auberdine to Stormwind, the road east through
+# Elwynn, Redridge, then south to Darkshire.
+#
+# Flow: Stormwind (training) -> Elwynn road -> Three Corners -> Lakeridge
+# Highway (flight path) -> Lakeshire (hearth, every quest giver) -> the
+# sunken chest -> the gnoll hills toward Three Corners, Bellygrub -> Deputy
+# Feldon -> Lakeshire -> the lake murlocs, Alther's Mill, Galardell Valley ->
+# hearth -> Render's Valley and Keeshan -> Lakeshire -> Duskwood.
+#
+# Deviations from the export:
+# - The simulator took Lakeshire's quests in two batches (20.5 and 21.5) and
+#   walked to Galardell Valley twice (Fangore at 21.4, the pendants at 22.4);
+#   here every quest but Fangore's is taken on arrival and Galardell is one
+#   trip. The Fangore poster (180, quest level 26) is red at 20: it is taken
+#   at the second Lakeshire stop, around 21, right before the trip east.
+# - The Lakeshire flight path and hearth (listed at the end of Darkshore in
+#   the export) are taken on arrival. The Darkshire flight path and hearth
+#   the export lists at the end of this visit belong to the Duskwood guide.
+# - Left out, accepted but never turned in on the route: The Price of Shoes
+#   (118, Smith Argus in Goldshire) and Theocritus' Retrieval (178, a pendant
+#   drop for the Tower of Azora).
+#
+# Class quests: none woven in on this leg; train in Stormwind on the way.
+#
+# Not taken: Tharil'zun, Shadow Magic, Wanted: Gath'Ilzogg and Morganth (19,
+# 115, 169, 249: elite targets), Blackrock Blockade (98387) and the
+# Speaking of Fortitude and Theocritus chains (343+, 94, 248): not on the
+# route. Underbelly Scales and Howling in the Hills (122, 126) need The
+# Price of Shoes (118, Goldshire turn-in) and A Baying of Gnolls (124)
+# first: skipped. The Defias Brotherhood (65), from Westfall, is turned in to
+# Wiley the Black in Lakeshire; its follow-up (132) leads back to Westfall:
+# not taken.
+
+# ---------------------------------------------------------------- Stormwind and the road
+
+step Stormwind
+  zone Stormwind City
+  tip The Auberdine boat docks at Stormwind Harbor. Walk up into the city for training, then leave by the main gate and follow the road east through Elwynn Forest.
+  train class                                 -- Level 18 and 20 spells
+  vendor nearest
+
+step Three Corners
+  zone Redridge Mountains
+  tip The road from Elwynn enters Redridge at Three Corners. Guard Parker stands where the roads to Redridge and Duskwood meet.
+  accept 244                                  -- Guard Parker
+
+step Lakeridge Highway
+  tip Follow the road along the south shore of Lake Everstill to the gryphon master. Deputy Feldon and Guard Howe stand by the road next to her.
+  getfp "Lakeshire"
+  turnin 244                                  -- Deputy Feldon
+  accept 246
+  accept 98407
+  accept 128                                  -- Guard Howe
+
+# ---------------------------------------------------------------- Lakeshire
+
+step Lakeshire
+  tip Cross the long bridge north into town. Foreman Oslow and Marshal Marris stand at the north end of the bridge, Dockmaster Baren on the docks, Chef Breanna at the inn, Bailiff Conacher in the town hall, Martie Jainrose in her garden at the west end.
+  sethome "Lakeshire"
+  accept 125                                  -- Foreman Oslow
+  accept 98386
+  accept 20                                   -- Marshal Marris
+  accept 150                                  -- Dockmaster Baren
+  accept 127
+  accept 92                                   -- Chef Breanna
+  accept 91                                   -- Bailiff Conacher
+  accept 34                                   -- Martie Jainrose
+  turnin 65                                   -- Wiley the Black, by the docks
+
+step Sunken Chest
+  tip Swim east from the bridge into Lake Everstill; the chest lies on the lake bed.
+  collect 1309 quest 125                      -- Oslow's Toolbox
+  turnin 125                                  -- Foreman Oslow
+  accept 89
+
+# ---------------------------------------------------------------- West of the lake
+
+step Gnolls toward Three Corners
+  tip Redridge Mongrels and other gnolls hold the hills east of Three Corners, north of the road; Redridge Thrashers prowl among them, Poachers camp south of the road. Dire Condors and Great Goretusks roam the same hills.
+  kill 423 quest 246                          -- Redridge Mongrel
+  kill 424 quest 246                          -- Redridge Poacher
+  collect 280911 quest 98407                  -- Spiked Collar: Redridge Thrashers
+  collect 2856 quest 89                       -- Iron Pike
+  collect 1013 quest 89                       -- Iron Rivet
+  collect 1080 quest 92                       -- Tough Condor Meat
+  collect 2296 quest 92                       -- Great Goretusk Snout
+
+step Bellygrub
+  tip Bellygrub (level 24) roots around the pen just west of Lakeshire. Pull him away from the other boars and fight at full health.
+  collect 3631 quest 34                       -- Bellygrub's Tusk
+
+step Deputy Feldon
+  turnin 246
+  turnin 98407
+
+step Lakeshire
+  turnin 89                                   -- Foreman Oslow
+  turnin 34                                   -- Martie Jainrose
+  accept 180 lvl 21                           -- The Wanted poster by the inn: Lieutenant Fangore, in Galardell Valley
+
+# ---------------------------------------------------------------- East of the lake
+
+step Lake murlocs
+  tip Murloc Flesheaters and Tidecallers line the south shore east of the bridge. Any of them can carry a Spotted Sunfish or a fin.
+  collect 1467 quest 127                      -- Spotted Sunfish
+  collect 1468 quest 150                      -- Murloc Fin
+
+step Alther's Mill
+  tip Greater Tarantulas crawl on the slopes around the mill north-east of the lake; Blackrock Renegades hold the mill itself.
+  kill 505 quest 98386                        -- Greater Tarantula
+  collect 1081 quest 92                       -- Crisp Spider Meat
+  collect 3014 quest 20                       -- Battleworn Axe: any Blackrock orc
+
+step Galardell Valley
+  tip East past the mill and across the river. Shadowhide gnolls fill the valley; Lieutenant Fangore leads them at its north end. Stay out of Stonewatch Keep to the south: its orcs are elite.
+  collect 1075 quest 91                       -- Shadowhide Pendant: any Shadowhide gnoll
+  collect 3632 quest 180                      -- Lieutenant Fangore
+
+step Back to Lakeshire
+  hearth "Lakeshire"
+  turnin 150                                  -- Dockmaster Baren
+  turnin 127
+  turnin 92                                   -- Chef Breanna
+  turnin 98386                                -- Foreman Oslow
+  turnin 20                                   -- Marshal Marris
+  turnin 91                                   -- Bailiff Conacher
+  turnin 180                                  -- Magistrate Solomon, in the town hall
+  vendor nearest
+
+# ---------------------------------------------------------------- Render's Valley
+
+step Render's Valley
+  tip Head north out of Lakeshire up the Redridge Canyons to Render's Valley. Blackrock Champions camp in the valley.
+  kill 435 quest 128                          -- Blackrock Champion
+
+step Corporal Keeshan
+  tip Keeshan hides at the very north end of the valley, by the Burning Steppes border. Escort him down to Lakeshire; Blackrock orcs ambush you on the way.
+  accept 219                                  -- Corporal Keeshan
+  complete 219
+
+step Lakeshire
+  turnin 219                                  -- Marshal Marris
+  turnin 128                                  -- Guard Howe, by the gryphons south of the bridge
+  note Duskwood is next: follow the road west to Three Corners, then south to Darkshire.

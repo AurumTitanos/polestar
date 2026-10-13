@@ -1,0 +1,986 @@
+'use strict';
+// Renders the addon's UI without the game. Each scene runs the REAL Core,
+// Theme and UI Lua (loaded through the TOC/XML manifests, as the client does)
+// against the test client stub plus tools/preview/stub.lua, with the fake
+// Engine and sample guides from tests/lua/stub_ui.lua; the dumped geometry is
+// drawn to SVG by tools/preview/render.js.
+
+const fs = require('node:fs');
+const path = require('node:path');
+const os = require('node:os');
+const { runAddon } = require('../../tests/helpers/lua');
+const { writeCodexPack, sampleCodex } = require('../../tests/helpers/codex');
+const { buildQuestDB, writeQuestDB } = require('../lib/questdb/build');
+const { Font } = require('../preview/font');
+const { svg, compose, TextureCache } = require('../preview/render');
+
+const ROOT = path.join(__dirname, '..', '..');
+const ADDON = path.join(ROOT, 'addon', 'Polestar');
+const OUT = path.join(ROOT, 'docs', 'preview');
+const FILES = ['Core/Core.xml', 'Theme/Theme.xml', 'Gear/Gear.xml', 'Lookup/Lookup.xml', 'Dungeons/Dungeons.xml', 'UI/UI.xml'];
+// The reward panel scenes also run QoL, which owns the marks.
+const REWARD_FILES = [...FILES, 'QoL/QoL.xml'];
+
+// Gear sample data, written for the preview (names and numbers are samples,
+// not taken from any addon): a Human warrior at 6 in Northshire, a few
+// leveling items with quest, drop and craft sources, the reward choices of
+// "Kobold Camp Cleanup" (7) and "Wolves Across the Border" (33).
+const GEAR_SETUP = `local W = stub.world or {}
+UnitRace = function() return "Human", "Human", 1 end
+UnitFactionGroup = function() return "Alliance", "Alliance" end
+UnitLevel = function() return 6 end
+UnitClass = function() return "Warrior", "WARRIOR", 1 end
+local worn = { [1] = "item:9150", [5] = "item:9151", [7] = "item:9152" }
+GetInventoryItemLink = function(unit, slot) return worn[slot] end
+local G = Polestar.Gear
+Polestar.ItemDB.Register({ schema = 1, build = "preview" }, {
+	[9150] = "1 4 1 1 4 2 armor20", [9151] = "5 4 1 1 4 2 armor40", [9152] = "7 4 1 1 4 2 armor30",
+	[9101] = "5 8 5 2 4 3 str3 sta2 armor90", [9102] = "5 8 5 2 4 1 int3 spi2 armor25", [9103] = "7 7 5 1 4 3 armor70",
+	[9104] = "13 9 6 2 2 7 str2 dmin7 dmax13 speed2200", [9105] = "16 8 5 2 4 1 sta2 armor12", [9106] = "10 9 7 2 4 3 str2 armor55",
+	[9107] = "8 7 4 1 4 2 agi1 armor35",
+})
+Polestar.ItemDB.RegisterLeveling({ source = "preview" }, {
+	professions = { "Alchemy", "Blacksmithing", "Enchanting", "Engineering", "Leatherworking", "Tailoring" },
+	names = { [9101] = "Militia Chain Vest", [9102] = "Acolyte's Robe", [9103] = "Kobold Mining Leggings", [9104] = "Northshire Shortsword",
+		[9105] = "Woolen Cape", [9106] = "Gauntlets of the Watch", [9107] = "Tracker's Boots" },
+	src = { [9101] = "q7", [9102] = "q7", [9103] = "q7", [9104] = "d257x84z12", [9105] = "c2397p6s75", [9106] = "q33", [9107] = "q33" },
+	race = {},
+	quests = { [7] = "6 3 1 12 0 0 0|9101,9102,9103||Kobold Camp Cleanup", [33] = "7 4 1 12 0 0 0|9106,9107||Wolves Across the Border" },
+	npcs = { [257] = "Kobold Worker" },
+	zones = { [12] = "Elwynn Forest" },
+})
+G.RefreshPlayer()`;
+
+// The client's reward panel for quest 7's choices, drawn in flat colours (the
+// preview has no client art): QuestInfo's choice buttons as
+// LargeQuestRewardItemButtonTemplate lays them out (147×41, a 39px icon at the
+// top left with its quality border, the name slot beside it; two to a row,
+// 1px apart), on parchment. QoL's marks are drawn by the real QoL/Rewards.lua;
+// sell prices are samples. Runs after GEAR_SETUP.
+const REWARD_PANEL = `local QoL = Polestar.QoL
+local PRICE = { [9101] = 45, [9102] = 38, [9103] = 52, [9104] = 60 }
+QoL.Client.SellPrice = function(item) return PRICE[tonumber(tostring(item):match("item:(%d+)") or item)] end
+local CHOICES = { 9101, 9102, 9103, 9104 }
+local NAMES = { [9101] = "Militia Chain Vest", [9102] = "Acolyte's Robe", [9103] = "Kobold Mining Leggings", [9104] = "Northshire Shortsword" }
+local QUALITY = { [9101] = { 0.12, 1, 0 }, [9102] = { 0.12, 1, 0 }, [9103] = { 1, 1, 1 }, [9104] = { 0.12, 1, 0 } }
+local ICON = { [9101] = { 0.36, 0.38, 0.42 }, [9102] = { 0.42, 0.3, 0.5 }, [9103] = { 0.45, 0.36, 0.24 }, [9104] = { 0.5, 0.52, 0.56 } }
+GetNumQuestChoices = function() return #CHOICES end
+GetQuestItemInfo = function(kind, i) local id = CHOICES[i]; return NAMES[id], 0, 1, 2, true, id end
+GetQuestItemLink = function(kind, i) local id = CHOICES[i]; return id and "item:" .. id end
+GetQuestMoneyToGet = function() return 0 end
+local P = CreateFrame("Frame", "QuestInfoRewardsFrame", UIParent)
+P:SetSize(318, 134)
+P:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+local paper = P:CreateTexture(nil, "BACKGROUND")
+paper:SetAllPoints()
+paper:SetColorTexture(0.86, 0.78, 0.6, 1)
+local head = P:CreateFontString(nil, "ARTWORK")
+Polestar.Theme.Font(head, "heading")
+head:SetTextColor(0.24, 0.16, 0.06, 1)
+head:SetPoint("TOPLEFT", P, "TOPLEFT", 12, -12)
+head:SetText("Choose your reward:")
+P.RewardButtons = {}
+for i, id in ipairs(CHOICES) do
+	local b = CreateFrame("Button", nil, P)
+	b:SetSize(147, 41)
+	b:SetPoint("TOPLEFT", P, "TOPLEFT", 12 + ((i - 1) % 2) * 148, -36 - math.floor((i - 1) / 2) * 43)
+	b.Icon = b:CreateTexture(nil, "BACKGROUND")
+	b.Icon:SetSize(39, 39)
+	b.Icon:SetPoint("TOPLEFT", b, "TOPLEFT", 0, 0)
+	b.Icon:SetColorTexture(ICON[id][1], ICON[id][2], ICON[id][3], 1)
+	local slot = b:CreateTexture(nil, "BACKGROUND")
+	slot:SetPoint("TOPLEFT", b.Icon, "TOPRIGHT", 0, -2)
+	slot:SetSize(106, 35)
+	slot:SetColorTexture(0.2, 0.15, 0.1, 0.88)
+	local edge = CreateFrame("Frame", nil, b)
+	edge:SetAllPoints(b.Icon)
+	Polestar.Theme.Border(edge, QUALITY[id][1], QUALITY[id][2], QUALITY[id][3], 1)
+	b.Name = b:CreateFontString(nil, "BORDER")
+	Polestar.Theme.Font(b.Name, "label")
+	b.Name:SetTextColor(1, 1, 1, 1)
+	b.Name:SetPoint("LEFT", slot, "LEFT", 8, 0)
+	b.Name:SetWidth(92)
+	b.Name:SetJustifyH("LEFT")
+	b.Name:SetText(NAMES[id])
+	b.type, b.objectType = "choice", "item"
+	b:SetID(i)
+	P.RewardButtons[i] = b
+end
+QoL.Rewards.OnQuestComplete()`;
+
+const FONT_FILES = ['Inter-Regular.ttf', 'Inter-Medium.ttf', 'Inter-SemiBold.ttf'];
+// Fonts the preview cannot ship (EllesmereUI's, the client's) are set in the
+// nearest Inter weight; widths are measured in the same face that is drawn.
+const FALLBACK = 'Inter-Medium.ttf';
+
+function loadFonts() {
+	const fonts = {};
+	for (const f of FONT_FILES) fonts[f] = new Font(path.join(ADDON, 'Media', 'Fonts', f));
+	return new Proxy(fonts, { get: (t, k) => t[k] || t[FALLBACK] });
+}
+
+// Advance widths (em) for every code point the UI can plausibly show.
+function metricsLua(fonts) {
+	const cps = [];
+	for (let c = 32; c < 127; c++) cps.push(c);
+	for (let c = 0xa0; c < 0x180; c++) cps.push(c);
+	cps.push(0x2013, 0x2014, 0x2018, 0x2019, 0x201c, 0x201d, 0x2026, 0x2022, 0x00b7, 0x00d7, 0x2192);
+	const parts = FONT_FILES.map((file) => {
+		const f = fonts[file];
+		const adv = cps.map((c) => `[${c}]=${f.advanceEm(c).toFixed(5)}`).join(',');
+		return `[${JSON.stringify(file)}]={upm=${f.upm},fallback=${f.advanceEm(0x6e).toFixed(5)},adv={${adv}}}`;
+	});
+	return `preview = { metrics = { ${parts.join(',')} }, fallbackFont = ${JSON.stringify(FALLBACK)} }`;
+}
+
+// Scenes: Lua run after the fakes are installed and the player logged in.
+// Each panel is one run; `roots` names the frames to draw.
+const GUIDE = ['PolestarGuideFrame'];
+const OPTIONS = ['PolestarOptions'];
+const PICKER = ['PolestarPicker'];
+// Lookup scenes run the real Search, Codex and Lookup runtime over the
+// synthetic Codex pack of tests/fixtures/codex/sample.json (panel.codex: the
+// stubbed client loads it when asked, as the game does; without it the pack
+// is missing). The character: a level 60 Night Elf hunter in Dolanaar, and a
+// stand-in for Nav's travel estimate (a run on one map, a long trip across).
+const HUNTER = `uistub.player.level, uistub.player.race, uistub.player.class = 60, "NightElf", "HUNTER"`;
+function lookupScene(script, player = HUNTER) {
+	return `${player}
+Polestar.Compat.GetPlayerMapPosition = function() return 1438, 55.6, 52.4 end
+Polestar.Nav.EstimateTravel = function(from, to)
+	if from.map ~= to.map then return 1500 end
+	return math.sqrt((from.x - to.x) ^ 2 + (from.y - to.y) ^ 2) * 9
+end
+${script}`;
+}
+// The sample Codex, plus one mount of Era vendor stock retired in Forever
+// (codex build marks such stock `status: "retired"`), for the scenes only.
+function previewCodex() {
+	const codex = sampleCodex();
+	codex.items['12302'] = {
+		id: 12302, name: 'Reins of the Frostsaber', quality: 4, kind: 'mount', spell: 16056, reqLevel: 60, status: 'retired',
+		repFaction: null, repStanding: null, reqSkill: null, reqSkillRank: null,
+		sources: [{ type: 'vendor', npc: 4730, cost: 1000000, from: ['pfquest'] }],
+	};
+	return codex;
+}
+let codexPack = null;
+function codexStub() {
+	if (!codexPack) codexPack = writeCodexPack(previewCodex());
+	return codexPack.stubLua;
+}
+// Dungeons scenes (panel.dungeons): the synthetic fixture
+// tests/fixtures/codex/dungeons.json (game names, sample numbers: Wailing
+// Caverns with its quests and bosses, the Deadmines, a Forever dungeon with
+// nothing known) as a Codex pack carrying Dungeons1.lua, loaded when the
+// section asks. POLESTAR_DUNGEONS_PACK: a Dungeons1.lua built by `codex build`
+// (local, never committed) used instead of the fixture's; render those with
+// POLESTAR_CLIENT_ART so they land outside the repository.
+const DUNGEONS_PACK = process.env.POLESTAR_DUNGEONS_PACK || null;
+let dungeonsPack = null;
+function dungeonsStub() {
+	if (!dungeonsPack) {
+		const { buildJournal, emitJournal } = require('../lib/codex/journal');
+		const f = JSON.parse(fs.readFileSync(path.join(ROOT, 'tests', 'fixtures', 'codex', 'dungeons.json'), 'utf8'));
+		const files = DUNGEONS_PACK ? [{ name: 'Dungeons1.lua', text: fs.readFileSync(DUNGEONS_PACK, 'utf8') }] : emitJournal(buildJournal(f.inputs, f.codex));
+		dungeonsPack = writeCodexPack(f.codex, { extraFiles: files });
+	}
+	return dungeonsPack.stubLua;
+}
+// The character: a level 20 Tauren druid in the Barrens. The client's quest
+// difficulty colours (Blizzard_FrameXMLBase/Constants.lua), and a quest
+// state for a few quests: one done, one in the log, one ready to turn in.
+const DUNGEONS_SETUP = `uistub.player.level, uistub.player.race, uistub.player.class, uistub.player.faction = 20, "Tauren", "DRUID", "Horde"
+OpenWorldMap = OpenWorldMap or function() end
+UnitRace = function() return "Tauren", "Tauren", 6 end
+UnitFactionGroup = function() return "Horde", "Horde" end
+UnitLevel = function() return 20 end
+QuestDifficultyColors = {
+	impossible = { r = 1, g = 0.1, b = 0.1 }, verydifficult = { r = 1, g = 0.5, b = 0.25 }, difficult = { r = 1, g = 0.82, b = 0 },
+	standard = { r = 0.25, g = 0.75, b = 0.25 }, trivial = { r = 0.5, g = 0.5, b = 0.5 },
+}
+local done, log, ready = { [1490] = true, [870] = true }, { [914] = true }, { [1486] = true }
+Polestar.Compat.IsQuestCompleted = function(id) return done[id] or false end
+Polestar.Compat.IsOnQuest = function(id) return (log[id] or ready[id]) and true or false end
+Polestar.Compat.IsQuestReadyForTurnIn = function(id) return ready[id] or false end
+Polestar.Compat.GetPlayerMapPosition = function() return 1413, 51, 30 end`;
+function dungeonsScene(script) {
+	return `${clientArtLua()}${DUNGEONS_SETUP}\nPolestar.UI.ShowPicker()\nlocal DS = Polestar.UI.DungeonsSection\n${script}`;
+}
+// Rares scenes (panel.rares): the sample Codex plus a few Elwynn Forest and
+// Teldrassil rares and a treasure (names from the game; levels, places and
+// loot are sample numbers written for the preview, not taken from any addon),
+// with the Rares files loaded after the UI. A level 10 Human in Elwynn
+// Forest, near the vineyard; three sightings in this realm's history.
+let raresPack = null;
+function raresStub() {
+	if (!raresPack) {
+		const c = sampleCodex();
+		const rare = (id, name, level, map, x, y, loot, extra = {}) => {
+			c.npcs[id] = { id, name, level, levelMax: null, faction: null, rare: true, elite: false, boss: false, instance: null, roles: [], loot, spawns: [{ map, x, y, f: 'e' }], ...extra };
+		};
+		c.npcs[61].loot = [1933, 2589, 2933, 750];
+		c.npcs[61].spawns.push({ map: 1429, x: 79.8, y: 69.1, f: 'e' });
+		rare(99, 'Morgaine the Sly', 10, 1429, 30.4, 64.5, [2589]);
+		rare(100, 'Gruff Swiftbite', 12, 1429, 26.1, 93.2, [750, 2589]);
+		rare(471, 'Mother Fang', 10, 1429, 62.1, 50.3, [2589], { elite: true });
+		rare(472, 'Fedfennel', 12, 1429, 69.3, 79.6, [2589]);
+		rare(79, 'Narg the Taskmaster', 10, 1429, 78.9, 56.2, [2589, 750]);
+		rare(14428, 'Uruson', 7, 1438, 49.6, 23.4, [2589]);
+		c.items[2589] = { id: 2589, name: 'Linen Cloth', quality: 1, kind: 'item', spell: null, reqLevel: null,
+			sources: [61, 99, 100, 471, 472, 79].map((npc) => ({ type: 'drop', npc, chance: 22, from: ['pfquest'] })) };
+		c.items[1933].sources[0].chance = 8.5;
+		c.objects[2843].loot = [1179, 2589];
+		raresPack = writeCodexPack(c);
+	}
+	return raresPack.stubLua;
+}
+const RARES_SETUP = `uistub.player.level = 10
+UnitLevel = function() return 10 end
+Polestar.Compat.GetPlayerMapPosition = function() return 1429, 86.5, 76.8 end
+local R = Polestar.Rares
+local now = R.Now()
+R.Record({ kind = "rare", id = 61, name = "Thuros Lightfingers", level = 11, source = "vignette" }, { map = 1429, x = 89.2, y = 79.1 }, now - 2 * 3600, true)
+R.Record({ kind = "rare", id = 471, name = "Mother Fang", level = 10, source = "nameplate" }, { map = 1429, x = 62.4, y = 50.1 }, now - 26 * 3600, true)
+R.Record({ kind = "treasure", id = 2843, name = "Battered Chest", source = "vignette" }, { map = 1429, x = 79.6, y = 55.7 }, now - 3 * 86400, false)
+Polestar.Codex.Load()`;
+function raresScene(script) {
+	return `${clientArtLua()}${RARES_SETUP}\n${script}`;
+}
+const RARES_FILES = [...FILES, 'Rares/Rares.xml'];
+const TOAST = ['PolestarRareToast'];
+// The guide menu's sample library: pitches, pros and cons on a few guides,
+// Westfall on its real map (art with POLESTAR_CLIENT_ART), and leveling
+// guides past 30 so the folders show the bands. Pitches written for the
+// preview, not taken from any guide; ids, titles and levels are the shipped
+// guides'.
+const PICKER_SETUP = `local U = uistub.guides
+local function about(id, pitch, pros, cons) local g = U[id]; g.pitch, g.pros, g.cons = pitch, pros, cons end
+about("forever/alliance/human/01-elwynn-forest", "From Northshire Abbey down to Goldshire and the farms around it: short runs, an inn at the crossroads, and Westfall waiting to the west.",
+	{ "Every quest giver within a short walk of Goldshire", "The inn is on the way to everything" }, { "Busy at peak hours" })
+about("forever/alliance/02-westfall", "Farmland overrun by the Defias Brotherhood, with Sentinel Hill at its heart and the Deadmines at the end.",
+	{ "A compact zone: most camps sit near Sentinel Hill", "Leads straight into the Deadmines", "A flight path at Sentinel Hill" }, { "Long walks to the coast", "Harvest Watchers crowd the fields" })
+-- Where Engine.GuideFocus puts each guide, found the Engine's way: the first
+-- goal on the guide's zone map, of its step when a tab has it open, else of
+-- the guide (the guide's own percent: the stub Compat converts no frames).
+-- The sample Westfall has no goals; its start is the guide file's.
+local START = { ["forever/alliance/02-westfall"] = { 57, 47.17 } }
+local function onZone(g, step)
+	for _, goal in ipairs(step and step.goals or {}) do
+		if goal.map == g.zone and goal.x and goal.y then return goal.x, goal.y end
+	end
+end
+Polestar.Engine.GuideFocus = function(id)
+	local g = U[id]
+	if not g then return nil end
+	for _, t in ipairs((Polestar.Engine.GetTabs())) do
+		if t.guideId == id and t.stepIndex then
+			local x, y = onZone(g, g.steps[t.stepIndex])
+			if x then return x, y end
+		end
+	end
+	if START[id] then return START[id][1], START[id][2] end
+	for _, step in ipairs(g.steps) do
+		local x, y = onZone(g, step)
+		if x then return x, y end
+	end
+end
+local function add(id, title, faction, lo, hi, zoneName, zone, n)
+	local steps = {}
+	for i = 1, n or 30 do steps[i] = { title = title .. " " .. i, goals = { { t = "note", text = "Step " .. i, status = "pending" } } } end
+	U[id] = { id = id, title = title, faction = faction, minLevel = lo, maxLevel = hi, category = "Leveling", zone = zone or 0, zoneName = zoneName, steps = steps }
+	table.insert(uistub.order, id)
+end
+add("forever/alliance/30-40/02-desolace", "Desolace", "Alliance", 31, 34, "Desolace", 1443)
+add("forever/alliance/30-40/04-stranglethorn-vale", "Stranglethorn Vale", "Alliance", 34, 36, "Stranglethorn Vale", 1434)
+add("forever/alliance/40-50/04-tanaris", "Tanaris", "Alliance", 45, 47, "Tanaris", 1446)
+add("forever/horde/30-40/01-desolace", "Desolace & Hillsbrad Foothills", "Horde", 30, 33, "Desolace", 1443)
+-- The Horde road from Durotar through the Barrens: the compiled guides
+-- themselves (addon/Polestar_Guides), so the facts (quests, zones, the guide
+-- after it) are the real ones. They replace the samples of the same id.
+do
+	local register = Polestar.RegisterGuide
+	Polestar.RegisterGuide = function(def)
+		if not U[def.id] then table.insert(uistub.order, def.id) end
+		U[def.id] = def
+	end
+	for _, rel in ipairs({ "orc-troll/01-durotar", "orc-troll/02-the-barrens", "02-the-barrens", "03-silverpine-forest", "04-the-barrens", "05-stonetalon-mountains" }) do
+		dofile("addon/Polestar_Guides/Guides/forever/horde/" .. rel .. ".lua")
+	end
+	Polestar.RegisterGuide = register
+end`;
+function pickerScene(script) {
+	return `${clientArtLua()}${PICKER_SETUP}\n${script}`;
+}
+// Three guides open as tabs, the leveling one active.
+const TABS = 'uistub.openTabs({ { uistub.elwynn, 3 }, { uistub.tailoring, 2 }, { uistub.stormwindRep, 2 } }, 1)';
+const HOVER = 'PolestarGuideFrame.IsMouseOver = function() return true end; Polestar.UI.GuideFrame.HoverIn()';
+const RECORDER = `stub.addonsLoaded.Polestar_Recorder = true
+PolestarRecorderDB = { enabled = true, current = "s2", sessions = {
+	s1 = { char = { name = "Testchar" }, events = {} },
+	s2 = { char = { name = "Testchar" }, events = { {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {} } } } }`;
+// A module registering its controls into a declared page, the way Quests,
+// Gear, Maps and QoL do.
+const REGISTERED = `Polestar.RegisterDefaults("qol", { mapObjectives = true, markerScale = 1, markerColor = { 1, 0.82, 0.3 } })
+Polestar.RegisterOptions({ page = "Questing", tab = "Quests", section = "Quest database", controls = {
+	{ kind = "toggle", key = "qol.mapObjectives", label = "Objective markers", help = "Show quest objectives on the world map." },
+	{ kind = "slider", key = "qol.markerScale", label = "Marker size", min = 0.5, max = 2, step = 0.05, format = function(v) return math.floor(v * 100 + 0.5) .. "%" end },
+	{ kind = "color", key = "qol.markerColor", label = "Marker colour" },
+} })`;
+// Every module that registers options, for the pages they fill.
+const MODULE_FILES = ['Core/Core.xml', 'Theme/Theme.xml', 'Quests/Quests.xml', 'Gear/Gear.xml', 'Maps/Maps.xml', 'QoL/QoL.xml', 'Lookup/Lookup.xml',
+	'Dungeons/Dungeons.xml', 'UI/UI.xml', 'Rares/Rares.xml'];
+// Six more pages from third-party modules, in the game font: the list
+// scrolls in its own area, clear of the version and the stage chip.
+const MANY_PAGES = `Polestar.Set("ui.font", "game")
+Polestar.RegisterDefaults("extra", { on = true })
+for i, name in ipairs({ "Professions", "Reputation", "Achievements", "Collections", "Talents", "Keybinds" }) do
+	Polestar.RegisterOptions({ page = name, icon = "gear", order = 70 + i, controls = { { kind = "toggle", key = "extra.on", label = "Enabled" } } })
+end`;
+// A look of your own: the accent on a 2px border, no band, no shadow, and
+// the arrow in your own colours.
+const CUSTOM_LOOK = `Polestar.Set("ui.borderAccent", true); Polestar.Set("ui.borderSize", 2); Polestar.Set("ui.band", false); Polestar.Set("ui.shadow", false)
+Polestar.Set("nav.arrowColor", { 0.45, 0.7, 1 }); Polestar.Set("nav.arrowNearColor", { 1, 0.55, 0.85 })`;
+
+// The route choice window, filled the way Engine.GetRouteChoice fills it, with
+// each zone's pitch, pros and cons read from its guide file. The shipped
+// leveling guides follow one shared route (no choice), so the scene uses the
+// frozen guides of tests/fixtures/placement, which offered one.
+const ROUTE = ['PolestarRouteChoice'];
+const ROUTE_GUIDES = path.join(ROOT, 'tests', 'fixtures', 'placement', 'forever');
+function luaOf(v) {
+	if (v === null || v === undefined) return 'nil';
+	if (typeof v === 'number' || typeof v === 'boolean') return String(v);
+	if (typeof v === 'string') return JSON.stringify(v);
+	if (Array.isArray(v)) return `{ ${v.map(luaOf).join(', ')} }`;
+	return `{ ${Object.entries(v).map(([k, x]) => `${k} = ${luaOf(x)}`).join(', ')} }`;
+}
+function routeOption(rel, extra) {
+	const text = fs.readFileSync(path.join(ROUTE_GUIDES, rel), 'utf8');
+	const all = (k) => [...text.matchAll(new RegExp(`^${k} (.+)$`, 'gm'))].map((m) => m[1].trim());
+	const [min, max] = all('levels')[0].split('-').map(Number);
+	const title = all('title')[0];
+	return { id: all('guide')[0], title, zoneName: all('zone')[0], minLevel: min, maxLevel: max, pitch: all('pitch')[0], pros: all('pro'), cons: all('con'), ...extra };
+}
+// POLESTAR_CLIENT_ART: a local folder holding map art decoded from the game
+// client (<fileID>.tga, base tiles and every overlay tile, plus maps.json:
+// { [uiMapID]: { artID, layer, textures } }). With it, the route cards and the
+// guide menu show each zone's real painting, unfogged by UI/ZoneArtOverlays.lua
+// when artID matches, and every preview is written into <folder>/preview/
+// instead of docs/preview/, so Blizzard art never lands in the repository.
+// Without it, the cards show the night band.
+const CLIENT_ART = process.env.POLESTAR_CLIENT_ART || null;
+function clientArtLua() {
+	if (!CLIENT_ART) return '';
+	const maps = JSON.parse(fs.readFileSync(path.join(CLIENT_ART, 'maps.json'), 'utf8'));
+	const entries = Object.entries(maps).map(([id, m]) => `[${id}] = ${luaOf(m)}`);
+	return `C_Map = C_Map or {}
+local ART = { ${entries.join(', ')} }
+C_Map.GetMapArtLayers = function(id) local m = ART[id]; return m and { m.layer } or {} end
+C_Map.GetMapArtLayerTextures = function(id) local m = ART[id]; return m and m.textures or {} end
+C_Map.GetMapArtID = function(id) local m = ART[id]; return m and m.artID end
+`;
+}
+function routeScene(from, fromTitle, options, joinsAt) {
+	const choice = { from, fromTitle, recommended: options.find((o) => o.recommended).id, joinsAt, options };
+	return `${clientArtLua()}local E = Polestar.Engine
+E.GetRouteChoice = function() return ${luaOf(choice)} end
+E.PendingRouteChoice = function() return ${JSON.stringify(from)} end
+Polestar.UI.ShowRouteChoice(${JSON.stringify(from)})`;
+}
+// zone: the guide's uiMapID; focusX/Y: where the route starts on it (live frame).
+const UNDEAD_CHOICE = routeScene('forever/horde/undead/01-tirisfal-glades', 'Tirisfal Glades', [
+	routeOption('horde/02-barrens.guide', { recommended: true, seconds: 610, quests: 43, zone: 1413, focusX: 51.5, focusY: 30.3 }),
+	routeOption('horde/02-silverpine.guide', { seconds: 140, quests: 40, zone: 1421, focusX: 42.8, focusY: 40.9 }),
+], 'Hillsbrad Foothills');
+
+// Quest markers: the real Core, Theme, Nav (Pins) and Quests modules over
+// the fixture quest database of tests/fixtures/questdb (built by `questdb
+// build` into a temporary folder, as tests/quests.test.js does), with the
+// client world of tests/lua/stub_world.lua and stub_quests.lua. A level 4
+// Human in Elwynn Forest at the abbey, on a kill quest (7), an item quest with
+// drops, a crate and a vendor (60), an object and an exploration objective
+// (18), and one ready to hand in (33). No Blizzard art: the world map is a
+// plain ground with a 10% grid and the zone name; the minimap a dark disc.
+const QUEST_FILES = ['Core/Core.xml', 'Theme/Theme.xml', 'Nav/Nav.xml', 'Quests/Quests.xml'];
+const QUEST_STUBS = ['stub_world.lua', 'stub_quests.lua'];
+let questDbDir = null;
+function questDbLua() {
+	if (!questDbDir) {
+		questDbDir = fs.mkdtempSync(path.join(os.tmpdir(), 'polestar-preview-questdb-'));
+		writeQuestDB(buildQuestDB({ dataDir: path.join(ROOT, 'tests', 'fixtures', 'questdb') }), questDbDir);
+		process.on('exit', () => fs.rmSync(questDbDir, { recursive: true, force: true }));
+	}
+	const files = ['MapFrames.lua', 'Quests.lua', 'Npcs.lua', 'Objects.lua', 'Items.lua'].map((f) => JSON.stringify(path.join(questDbDir, f)));
+	return `stub.quests.dbFiles = { ${files.join(', ')} }`;
+}
+const MAP_W = 700, MAP_H = 470;
+// Runs before the addon files: the world, then the map canvas (the shape of
+// Blizzard_MapCanvas a data provider sees, as tests/lua/stub_nav.lua fakes
+// it) sized like the world map's, and the minimap's ground. Map percent to
+// canvas pixels: x * MAP_W, y * MAP_H from the top left.
+const QUEST_PLAYER = { x: 46.4, y: 39.6 };
+function questWorld() {
+	return `${questDbLua()}
+local w = stub.world
+w.addMap(1429, { name = "Elwynn Forest", c = 0, left = 1500, right = -1500, top = 500, bottom = -1500 })
+w.moveTo(1429, ${QUEST_PLAYER.x}, ${QUEST_PLAYER.y})
+for q, t in pairs({ [7] = "Kobold Camp Cleanup", [18] = "Gathering Wood", [33] = "Wolves Across the Border", [60] = "Kobold Candles" }) do w.titles[q] = t end
+w.complete({ 14 }); w.setLevel(4)
+stub.worldMapID = 1429
+local FONT = "Interface\\\\AddOns\\\\Polestar\\\\Media\\\\Fonts\\\\Inter-SemiBold.ttf"
+local NAV = "Interface\\\\AddOns\\\\Polestar\\\\Media\\\\Nav\\\\"
+
+MapCanvasDataProviderMixin = {
+	OnAdded = function(self, map) self.owningMap = map end,
+	GetMap = function(self) return self.owningMap end,
+	RemoveAllData = function() end,
+	RefreshAllData = function() end,
+	OnMapChanged = function(self) self:RefreshAllData() end,
+}
+MapCanvasPinMixin = {
+	OnLoad = function() end, OnAcquired = function() end, OnReleased = function() end,
+	SetOwningMap = function(self, map) self.owningMap = map end,
+	GetMap = function(self) return self.owningMap end,
+	SetPosition = function(self, x, y) self:GetMap():SetPinPosition(self, x, y) end,
+	SetScalingLimits = function() end, SetIgnoreGlobalPinScale = function() end,
+	UseFrameLevelType = function(self, t) self.pinFrameLevelType = t end,
+	CheckMouseButtonPassthrough = function() end,
+}
+local map = WorldMapFrame
+map:SetSize(${MAP_W}, ${MAP_H})
+map:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+map:Show()
+map.pinPools = {}
+map.ScrollContainer:SetAllPoints(map)
+local canvas = CreateFrame("Frame", nil, map.ScrollContainer)
+canvas:SetPoint("TOPLEFT", map, "TOPLEFT", 0, 0)
+canvas:SetSize(${MAP_W}, ${MAP_H})
+canvas:SetClipsChildren(true)
+local edge = map:CreateTexture(nil, "BACKGROUND")
+edge:SetPoint("TOPLEFT", -1, 1); edge:SetPoint("BOTTOMRIGHT", 1, -1)
+edge:SetColorTexture(0.03, 0.03, 0.04, 1)
+local ground = canvas:CreateTexture(nil, "BACKGROUND")
+ground:SetAllPoints(canvas)
+ground:SetColorTexture(0.2, 0.24, 0.18, 1)
+for i = 1, 9 do
+	local v = canvas:CreateTexture(nil, "BORDER")
+	v:SetColorTexture(1, 1, 1, 0.05); v:SetSize(1, ${MAP_H}); v:SetPoint("TOPLEFT", canvas, "TOPLEFT", i * ${MAP_W / 10}, 0)
+	local h = canvas:CreateTexture(nil, "BORDER")
+	h:SetColorTexture(1, 1, 1, 0.05); h:SetSize(${MAP_W}, 1); h:SetPoint("TOPLEFT", canvas, "TOPLEFT", 0, -i * ${MAP_H / 10})
+end
+local name = canvas:CreateFontString(nil, "ARTWORK")
+name:SetFont(FONT, 15, ""); name:SetTextColor(0.93, 0.89, 0.78, 0.6)
+name:SetPoint("TOPLEFT", canvas, "TOPLEFT", 14, -12); name:SetText("Elwynn Forest")
+function map.GetCanvas() return canvas end
+function map.SetPinPosition(self, pin, x, y)
+	pin:ClearAllPoints()
+	pin:SetPoint("CENTER", canvas, "TOPLEFT", x * ${MAP_W}, -y * ${MAP_H})
+end
+-- Blizzard_MapCanvas: AcquirePin applies the frame level of the pin's type
+-- (Blizzard_WorldMap orders QUEST_BLOB far below SUPER_TRACKED_QUEST); pins
+-- of one type share it and draw in acquire order (re-stamped for render.js).
+local acquired = 0
+function map.AcquirePin(self, template, ...)
+	local pool = self.pinPools[template]
+	local pin, new = pool:Acquire()
+	pin.pinTemplate = template
+	pin:SetOwningMap(self)
+	if new then pin:OnLoad() end
+	pin:SetFrameLevel(canvas:GetFrameLevel() + (pin.pinFrameLevelType == "PIN_FRAME_LEVEL_QUEST_BLOB" and 2 or 20))
+	acquired = acquired + 1
+	pin.seq = 1000000 + acquired
+	pin:Show()
+	pin:OnAcquired(...)
+	pin:CheckMouseButtonPassthrough("RightButton")
+	return pin
+end
+function map.RemoveAllPinsByTemplate(self, template)
+	if self.pinPools[template] then self.pinPools[template]:ReleaseAll() end
+end
+function map.UnregisterPin() end
+-- The player, as the world map's own unit pin draws it: above every pin.
+local me = CreateFrame("Frame", nil, canvas)
+me:SetFrameLevel(100); me:SetSize(22, 22)
+me:SetPoint("CENTER", canvas, "TOPLEFT", ${(QUEST_PLAYER.x / 100) * MAP_W}, ${-(QUEST_PLAYER.y / 100) * MAP_H})
+local meArrow = me:CreateTexture(nil, "OVERLAY")
+meArrow:SetAllPoints(me); meArrow:SetTexture(NAV .. "arrow"); meArrow:SetRotation(0.4)
+
+Minimap:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
+stub.minimapZoom = 2
+-- pin-fill's disc covers 42 of its 64 pixels.
+local rim = Minimap:CreateTexture(nil, "BACKGROUND", nil, -1)
+rim:SetTexture(NAV .. "pin-fill"); rim:SetVertexColor(0.04, 0.04, 0.05, 1)
+rim:SetPoint("CENTER"); rim:SetSize(146 * 64 / 42, 146 * 64 / 42)
+local disc = Minimap:CreateTexture(nil, "BACKGROUND")
+disc:SetTexture(NAV .. "pin-fill"); disc:SetVertexColor(0.2, 0.24, 0.18, 1)
+disc:SetPoint("CENTER"); disc:SetSize(140 * 64 / 42, 140 * 64 / 42)
+-- The client draws the player arrow at the centre, above the pins.
+local player = CreateFrame("Frame", nil, Minimap)
+player:SetFrameLevel(100); player:SetSize(22, 22); player:SetPoint("CENTER")
+local arrow = player:CreateTexture(nil, "OVERLAY")
+arrow:SetAllPoints(player); arrow:SetTexture(NAV .. "arrow"); arrow:SetRotation(0.4)`;
+}
+// After login: the marker layers turned on (off by default), the quest log,
+// then the markers settle (Quests' 0.2 s throttle).
+const QUEST_LOG = `local w = stub.world
+for _, k in ipairs({ "mapObjectives", "minimapObjectives", "objectiveAreas", "turnInMarkers", "availableQuests" }) do Polestar.Set("qol." .. k, true) end
+stub.advance(0.3)
+w.accept(7, { { text = "Kobold Vermin slain: 0/10", type = "monster", required = 10 } }); w.progress(7, 1, 3)
+w.accept(60, { { text = "Large Candle: 0/8", type = "item", required = 8 } }); w.progress(60, 1, 2)
+w.accept(18, { { text = "Bundle of Wood: 0/1", type = "object", required = 1 }, { text = "Scout the farm", type = "event", required = 1 } })
+w.accept(33, { { text = "Tough Wolf Meat: 0/8", type = "item", required = 8 } }); w.finish(33)
+stub.advance(0.3)`;
+// A guide on the step that takes on the kobolds and hands in the wolf meat:
+// those quests' markers are highlighted, the others dimmed (qol.guideDim).
+const QUEST_GUIDE = `Polestar.RegisterGuide({ id = "preview/elwynn", title = "Elwynn Forest", faction = "Alliance", minLevel = 1, maxLevel = 10, zone = 1429, steps = {
+	{ title = "Kobold Camp", goals = {
+		{ t = "kill", quest = 7, target = "Kobold Vermin", count = 10, map = 1429, x = 47.8, y = 35.8 },
+		{ t = "turnin", quest = 33, title = "Wolves Across the Border", npc = 196, npcName = "Eagan Peltskinner", map = 1429, x = 48.9, y = 40.2 },
+	} },
+} })
+Polestar.Set("qol.guideDim", true)
+Polestar.Engine.SetGuide("preview/elwynn")
+stub.advance(0.3)`;
+// A route into the next zone: Westfall west of the sample Elwynn, joined by
+// one crossing on the border, so the walk goes to the crossing first (its
+// caption is the default, "Go to <zone>") and the trail dots run to it.
+const TRAVEL = `local w = stub.world
+local WESTFALL = { name = "Westfall", c = 0, left = 4500, right = 1500, top = 500, bottom = -1500 }
+w.addMap(1436, WESTFALL)
+Polestar.Nav.RegisterCrossings({ complete = true,
+	zones = { [1429] = w.maps[1429], [1436] = WESTFALL },
+	crossings = { { id = "border", a = { map = 1429, c = 0, wx = -700, wy = 1460, r = 15 }, b = { map = 1436, c = 0, wx = -700, wy = 1540, r = 15 } } } })
+Polestar.Nav.SetTarget(1436, 60, 45, "Sentinel Hill")
+stub.advance(1)`;
+function questScene(roots, script) {
+	// `before` is read when the panel runs, so the database is only built for these scenes.
+	return { roots, stubs: QUEST_STUBS, files: QUEST_FILES, get before() { return questWorld(); }, script };
+}
+const SCENES = [
+	{
+		file: 'guide.svg',
+		title: 'Guide window: a field step; a hub, one person at a time (first, then the second); the tip opened',
+		panels: [
+			{ roots: GUIDE, script: TABS },
+			{ roots: GUIDE, script: `${TABS}; uistub.setStep(4)` },
+			{ roots: GUIDE, script: `${TABS}; uistub.goal(4, 1).status = "done"; uistub.goal(4, 2).status = "done"; uistub.setStep(4)` },
+			{ roots: GUIDE, script: `${TABS}; Polestar.UI.GuideFrame.parts.tip:Click()` },
+		],
+	},
+	{
+		file: 'guide-transparent.svg',
+		title: 'Transparent mode over a bright world: at rest, and with the cursor over it',
+		backdrop: 'terrain',
+		panels: [
+			{ roots: GUIDE, script: `Polestar.Set("ui.style", "transparent"); ${TABS}` },
+			{ roots: GUIDE, script: `Polestar.Set("ui.style", "transparent"); ${TABS}; ${HOVER}` },
+		],
+	},
+	{
+		file: 'guide-compact.svg',
+		title: 'Compact mode: standard and transparent',
+		panels: [
+			{ roots: GUIDE, script: `Polestar.Set("ui.compact", true); ${TABS}` },
+			{ roots: GUIDE, script: `Polestar.Set("ui.compact", true); Polestar.Set("ui.style", "transparent"); ${TABS}` },
+		],
+		backdrop: 'terrain',
+	},
+	{
+		file: 'guide-states.svg',
+		title: 'No guide open, guide complete, out-levelled banner, header menu',
+		panels: [
+			{ roots: GUIDE, script: 'Polestar.Engine.SetGuide(nil)' },
+			{ roots: GUIDE, script: `${TABS}; uistub.complete()` },
+			{ roots: GUIDE, script: `${TABS}; Polestar.Fire("GUIDE_OUTLEVELED", uistub.elwynn, "forever/alliance/02-westfall")` },
+			{ roots: [...GUIDE, 'PolestarMenu'], script: `${TABS}; stub.RunScript(Polestar.UI.GuideFrame.menuButton, "OnClick", "LeftButton")` },
+		],
+	},
+	{
+		file: 'route-choice.svg',
+		title: 'Choose your path: an Undead after Tirisfal Glades; the guide window while the choice waits',
+		panels: [
+			{ roots: ROUTE, script: UNDEAD_CHOICE },
+			{ roots: GUIDE, script: `${TABS}; uistub.complete(); Polestar.Engine.PendingRouteChoice = function() return "forever/horde/undead/01-tirisfal-glades" end; Polestar.UI.GuideFrame.Render()` },
+		],
+	},
+	{
+		file: 'beta-notice.svg',
+		title: 'The first-run beta notice, once per account after login; About carries the same note',
+		panels: [
+			{ roots: ['PolestarBetaNotice'], script: 'Polestar.UI.BetaNotice.Show()' },
+		],
+	},
+	{
+		file: 'guide-professions.svg',
+		title: 'Profession and reputation guides: chosen trainer with alternatives, skill bar, reputation bar',
+		panels: [
+			{ roots: GUIDE, script: 'uistub.openTabs({ { uistub.tailoring, 1 } }, 1); uistub.goal(1, 1).status = "active"; uistub.update()' },
+			{ roots: GUIDE, script: 'uistub.openTabs({ { uistub.tailoring, 2 } }, 1)' },
+			{ roots: GUIDE, script: 'uistub.openTabs({ { uistub.stormwindRep, 2 } }, 1)' },
+		],
+	},
+	{
+		file: 'guide-smart.svg',
+		title: 'Smart logic: training reminder, an unavailable quest, a farm spot with alternatives',
+		panels: [
+			{
+				roots: GUIDE,
+				script: `${TABS}; Polestar.Fire("TRAIN_DUE", 12, { npc = 914, npcName = "Ander Germaine", map = 1453, x = 79.6, y = 70.2 })`,
+			},
+			{
+				roots: GUIDE,
+				script: `${TABS}; local g = uistub.goal(4, 2); g.status, g.unavailable, g.unavailableText = "skipped", "level", "Needs level 7"
+uistub.setStep(4)`,
+			},
+			{
+				roots: GUIDE,
+				script: `${TABS}; local f = uistub.goal(3, 4); f.npcName, f.lvl, f.alternatives, f.detail = "Young Wolf", { min = 2, max = 4 }, 2, nil
+f.candidates = { { npcName = "Young Wolf", map = 1429, x = 46, y = 38.5 } }
+uistub.update()`,
+			},
+		],
+	},
+	{
+		file: 'guide-ellesmere.svg',
+		title: 'With EllesmereUI: Polestar follows its accent and font by default; every colour stays editable',
+		panels: [
+			{ eui: true, roots: GUIDE, script: `stub.setAccent(0.6, 0.48, 1); ${TABS}` },
+			{ eui: true, roots: OPTIONS, script: 'stub.setAccent(0.6, 0.48, 1); Polestar.UI.ShowOptions("appearance")' },
+		],
+	},
+	{
+		file: 'schemes.svg',
+		title: 'Colour schemes on the guide window: Dusk (default), Night, Graphite, EllesmereUI; and your own ground, accent and brightness',
+		panels: [
+			{ roots: GUIDE, script: `${TABS}; uistub.setStep(4)` },
+			{ roots: GUIDE, script: `Polestar.Set("ui.scheme", "night"); ${TABS}; uistub.setStep(4)` },
+			{ roots: GUIDE, script: `Polestar.Set("ui.scheme", "graphite"); ${TABS}; uistub.setStep(4)` },
+			{ eui: true, roots: GUIDE, script: `stub.setAccent(0.6, 0.48, 1); Polestar.Set("ui.scheme", "ellesmere"); ${TABS}; uistub.setStep(4)` },
+			{ roots: GUIDE, script: `Polestar.Set("ui.bgColor", { 0.08, 0.2, 0.2 }); Polestar.Set("ui.accent", { 0.45, 0.85, 0.8 }); Polestar.Set("ui.brightness", 0.3); ${TABS}; uistub.setStep(4)` },
+		],
+	},
+	{
+		file: 'schemes-options.svg',
+		title: 'Options > Appearance in each scheme: Dusk, Night, Graphite, and EllesmereUI installed (its scheme, follow toggles, its font offered)',
+		panels: [
+			{ roots: OPTIONS, script: 'Polestar.UI.ShowOptions("appearance")' },
+			{ roots: OPTIONS, script: 'Polestar.Set("ui.scheme", "night"); Polestar.UI.ShowOptions("appearance")' },
+			{ roots: OPTIONS, script: 'Polestar.Set("ui.scheme", "graphite"); Polestar.UI.ShowOptions("appearance")' },
+			{ eui: true, roots: OPTIONS, script: 'stub.setAccent(0.6, 0.48, 1); Polestar.Set("ui.scheme", "ellesmere"); Polestar.UI.ShowOptions("appearance")' },
+		],
+	},
+	{
+		file: 'schemes-picker.svg',
+		title: 'The guide menu in Dusk (default), Night, Graphite, and EllesmereUI with its purple accent',
+		panels: [
+			{ roots: PICKER, script: pickerScene(`${TABS}; Polestar.Set("ui.pickerFaction", "All"); Polestar.UI.ShowPicker(); Polestar.UI.Picker.SetCategory("Leveling"); Polestar.UI.Picker.Select("forever/alliance/02-westfall")`) },
+			{ roots: PICKER, script: pickerScene(`Polestar.Set("ui.scheme", "night"); ${TABS}; Polestar.Set("ui.pickerFaction", "All"); Polestar.UI.ShowPicker(); Polestar.UI.Picker.SetCategory("Leveling"); Polestar.UI.Picker.Select("forever/alliance/02-westfall")`) },
+			{ roots: PICKER, script: pickerScene(`Polestar.Set("ui.scheme", "graphite"); ${TABS}; Polestar.Set("ui.pickerFaction", "All"); Polestar.UI.ShowPicker(); Polestar.UI.Picker.SetCategory("Leveling"); Polestar.UI.Picker.Select("forever/alliance/02-westfall")`) },
+			{ eui: true, roots: PICKER, script: pickerScene(`stub.setAccent(0.6, 0.48, 1); Polestar.Set("ui.scheme", "ellesmere"); ${TABS}; Polestar.Set("ui.pickerFaction", "All"); Polestar.UI.ShowPicker(); Polestar.UI.Picker.SetCategory("Leveling"); Polestar.UI.Picker.Select("forever/alliance/02-westfall")`) },
+		],
+	},
+	{
+		file: 'options.svg',
+		title: 'Options: Guide (Window, Arrow & routes, Automation)',
+		panels: [
+			{ roots: OPTIONS, script: 'Polestar.UI.ShowOptions("guide")' },
+			{ roots: OPTIONS, script: 'Polestar.UI.ShowOptions("guide"); Polestar.UI.Options.Select("guide", "Arrow & routes")' },
+			{ roots: OPTIONS, script: 'Polestar.UI.ShowOptions("guide"); Polestar.UI.Options.Select("guide", "Automation")' },
+		],
+	},
+	{
+		file: 'options-appearance.svg',
+		title: 'Options: Appearance (Colour & type, Windows, Arrow); then a look of your own: an accent border 2px thick, no band, no shadow, your own arrow colours',
+		panels: [
+			{ roots: OPTIONS, script: 'Polestar.UI.ShowOptions("appearance")' },
+			{ roots: OPTIONS, script: 'Polestar.UI.ShowOptions("appearance"); Polestar.UI.Options.Select("appearance", "Windows")' },
+			{ roots: OPTIONS, script: 'Polestar.UI.ShowOptions("appearance"); Polestar.UI.Options.Select("appearance", "Arrow")' },
+			{ roots: OPTIONS, script: `${CUSTOM_LOOK}; Polestar.UI.ShowOptions("appearance"); Polestar.UI.Options.Select("appearance", "Windows")` },
+			{ roots: GUIDE, script: `${CUSTOM_LOOK}; ${TABS}; uistub.setStep(4)` },
+		],
+	},
+	{
+		file: 'options-modules.svg',
+		title: 'Options: pages the modules fill: Map, Questing, Discovery, Quality of Life',
+		panels: [
+			{ files: MODULE_FILES, roots: OPTIONS, script: 'Polestar.UI.ShowOptions("map")' },
+			{ files: MODULE_FILES, roots: OPTIONS, script: 'Polestar.UI.ShowOptions("questing")' },
+			{ files: MODULE_FILES, roots: OPTIONS, script: 'Polestar.UI.ShowOptions("discovery"); Polestar.UI.Options.Select("discovery", "Rares")' },
+			{ files: MODULE_FILES, roots: OPTIONS, script: 'Polestar.UI.ShowOptions("qualityoflife")' },
+		],
+	},
+	{
+		file: 'options-more.svg',
+		title: 'Options: Recorder and About, at the foot of the list',
+		panels: [
+			{ roots: OPTIONS, before: RECORDER, script: 'Polestar.UI.ShowOptions("recorder")' },
+			{ roots: OPTIONS, script: 'Polestar.UI.ShowOptions("about")' },
+		],
+	},
+	{
+		file: 'options-search.svg',
+		title: 'Options: a module\'s registered controls, search across pages, and a crowded sidebar in the game font that scrolls clear of the version',
+		panels: [
+			{ roots: OPTIONS, script: `${REGISTERED}; Polestar.UI.ShowOptions("questing")` },
+			{ roots: OPTIONS, script: `${REGISTERED}; Polestar.UI.ShowOptions(); local box = Polestar.UI.Options.frame.Search; box:SetText("arrow"); stub.RunScript(box, "OnTextChanged", true)` },
+			{ files: MODULE_FILES, roots: OPTIONS, script: `${MANY_PAGES}; Polestar.UI.ShowOptions("about")` },
+		],
+	},
+	{
+		file: 'picker.svg',
+		title: 'Guide menu: Home (Continue, Suggested) with the details; Leveling folders by faction and band',
+		panels: [
+			{
+				roots: PICKER,
+				script: pickerScene(`${TABS}; Polestar.UI.ShowPicker(); Polestar.UI.Picker.Select(uistub.elwynn)`),
+			},
+			{
+				roots: PICKER,
+				script: pickerScene(`${TABS}; Polestar.Set("ui.pickerFaction", "All"); Polestar.UI.ShowPicker(); Polestar.UI.Picker.SetCategory("Leveling")
+Polestar.UI.Picker.Select("forever/alliance/02-westfall")`),
+			},
+		],
+	},
+	{
+		file: 'picker-views.svg',
+		title: 'Guide menu: Current (the open tabs) and Recent (the last guides loaded)',
+		panels: [
+			{
+				roots: PICKER,
+				script: pickerScene(`${TABS}; Polestar.UI.ShowPicker(); Polestar.UI.Picker.SetView("current"); Polestar.UI.Picker.Select(uistub.tailoring)`),
+			},
+			{
+				roots: PICKER,
+				script: pickerScene(`${TABS}; Polestar.CharState().ui = { recentGuides = { "forever/alliance/02-westfall", uistub.elwynn, "forever/alliance/dwarf-gnome/01-dun-morogh", "forever/alliance/nightelf/01-teldrassil" } }
+Polestar.UI.ShowPicker(); Polestar.UI.Picker.SetView("recent"); Polestar.UI.Picker.Select("forever/alliance/02-westfall")`),
+			},
+		],
+	},
+	{
+		file: 'picker-search.svg',
+		title: 'Guide menu: Favorites (star on), and a search with its first result selected',
+		panels: [
+			{
+				roots: PICKER,
+				script: pickerScene(`${TABS}; Polestar.CharState().ui = { favoriteGuides = { ["forever/alliance/02-westfall"] = true, ["forever/collectibles/mounts/alliance/horse"] = true } }
+Polestar.UI.ShowPicker(); Polestar.UI.Picker.SetCategory("Favorites"); Polestar.UI.Picker.Select("forever/alliance/02-westfall")`),
+			},
+			{
+				roots: PICKER,
+				script: pickerScene(`${TABS}; Polestar.UI.ShowPicker(); local box = Polestar.UI.Picker.search; box:SetText("elwynn"); stub.RunScript(box, "OnTextChanged", true)`),
+			},
+		],
+	},
+	{
+		file: 'picker-art.svg',
+		title: 'Guide menu zone art: the Durotar starter at its first stop; The Barrens (19\u201324) open at step 13, on that step',
+		panels: [
+			{
+				roots: PICKER,
+				script: pickerScene(`Polestar.Set("ui.pickerFaction", "Horde"); Polestar.UI.ShowPicker(); Polestar.UI.Picker.SetCategory("Leveling")
+Polestar.UI.Picker.Select("forever/horde/orc-troll/01-durotar")`),
+			},
+			{
+				roots: PICKER,
+				script: pickerScene(`uistub.openTabs({ { "forever/horde/04-the-barrens", 13 } }, 1); Polestar.Set("ui.pickerFaction", "Horde"); Polestar.UI.ShowPicker()
+Polestar.UI.Picker.SetCategory("Leveling"); Polestar.UI.Picker.Select("forever/horde/04-the-barrens")`),
+			},
+		],
+	},
+	{
+		file: 'hub.svg',
+		title: 'The hub: sections on the rail (Guides, Lookup, Dungeons, Rares) with Options at its foot; the sidebar holds the wordmark, the search and the section\'s own index on one edge',
+		panels: [
+			{ roots: PICKER, script: pickerScene(`${TABS}; Polestar.Set("ui.pickerFaction", "All"); Polestar.UI.ShowPicker(); Polestar.UI.Picker.SetCategory("Leveling"); Polestar.UI.Picker.Select("forever/alliance/02-westfall")`) },
+			{ codex: true, roots: PICKER, script: lookupScene('Polestar.Lookup.Show("saber")') },
+			{ dungeons: true, roots: PICKER, script: dungeonsScene('Polestar.Dungeons.Open()') },
+		],
+	},
+	{
+		file: 'lookup.svg',
+		title: 'Lookup in the hub, over the sample Codex: "saber" with a vendor mount selected; the Winterspring Frostsaber, reputation or a limited vendor, its best source chosen; an empty search: the recent lookups',
+		panels: [
+			{ codex: true, roots: PICKER, script: lookupScene('Polestar.Lookup.Show("saber")') },
+			{ codex: true, roots: PICKER, script: lookupScene('Polestar.Lookup.Show(nil, "mount", 13086); Polestar.UI.Lookup.SelectSource(1)') },
+			{ codex: true, roots: PICKER, script: lookupScene('Polestar.Lookup.Show(nil, "mount", 8631); Polestar.Lookup.Show(nil, "npc", 448); Polestar.Lookup.Show(nil, "mount", 13335); Polestar.UI.Picker.SetQuery("")') },
+		],
+	},
+	{
+		file: 'lookup-retired.svg',
+		title: 'Lookup: "frostsaber" with the retired Reins of the Frostsaber last, dimmed with its chip; its details for reference, no guide',
+		panels: [
+			{ codex: true, roots: PICKER, script: lookupScene('Polestar.Lookup.Show("frostsaber"); Polestar.UI.Lookup.Select("mount", 12302)') },
+		],
+	},
+	{
+		file: 'lookup-drop.svg',
+		title: "Lookup: Deathcharger's Reins for a level 4 character, a rare drop out of reach, saying why",
+		panels: [{ codex: true, roots: PICKER, script: lookupScene('Polestar.Lookup.Show(nil, "mount", 13335); Polestar.UI.Lookup.SelectSource(1)', '') }],
+	},
+	{
+		file: 'lookup-missing.svg',
+		title: 'Lookup without the Codex pack: opened; a search only the Codex could answer; a guide still found',
+		panels: [
+			{ roots: PICKER, script: lookupScene('Polestar.UI.ShowLookup()') },
+			{ roots: PICKER, script: lookupScene('Polestar.Lookup.Show("saber")') },
+			{ roots: PICKER, script: lookupScene('Polestar.Lookup.Show("westfall")') },
+		],
+	},
+	{
+		file: 'picker-codex.svg',
+		title: 'Guide search in the hub: the guides that match, then what the Codex holds (a few per kind) and a way into Lookup',
+		panels: [
+			{ codex: true, roots: PICKER, script: pickerScene(lookupScene(`${TABS}; Polestar.UI.ShowPicker(); local box = Polestar.UI.Picker.search; box:SetText("elwynn"); stub.RunScript(box, "OnTextChanged", true)`)) },
+			{ codex: true, roots: PICKER, script: pickerScene(lookupScene(`${TABS}; Polestar.UI.ShowPicker(); local box = Polestar.UI.Picker.search; box:SetText("wol"); stub.RunScript(box, "OnTextChanged", true)`)) },
+		],
+	},
+	{
+		file: 'gear-pick.svg',
+		title: 'The reward pick under turn-in goals: an upgrade (chevron, gain) and, with nothing better, the best of the choices',
+		panels: [
+			{ roots: GUIDE, script: `${GEAR_SETUP}\n${TABS}; uistub.setStep(4)` },
+			{ roots: GUIDE, script: `${GEAR_SETUP}\nworn[5] = "item:9101"; worn[7] = "item:9103"; worn[10] = "item:9106"; worn[8] = "item:9107"; Polestar.Gear.Invalidate("equipment")\n${TABS}; uistub.setStep(4)` },
+		],
+	},
+	{
+		file: 'quest-rewards.svg',
+		title: "The game's reward panel: a green arrow on each upgrade, the one to take framed in the accent; with no upgrade, the coin on the one that sells for most",
+		panels: [
+			{ roots: ['QuestInfoRewardsFrame'], files: REWARD_FILES, script: `${GEAR_SETUP}\n${REWARD_PANEL}` },
+			{ roots: ['QuestInfoRewardsFrame'], files: REWARD_FILES, script: `${GEAR_SETUP}\nworn[5] = "item:9101"; worn[7] = "item:9103"; worn[16] = "item:9104"; Polestar.Gear.Invalidate("equipment")\n${REWARD_PANEL}` },
+		],
+	},
+	{
+		file: 'quests-map.svg',
+		title: 'Quest markers on the world map: givers, kill, item (drops, crate, vendor), object and exploration objectives, a turn-in; then a guide step highlighting its quests and dimming the rest',
+		panels: [
+			questScene(['WorldMapFrame'], QUEST_LOG),
+			questScene(['WorldMapFrame'], `${QUEST_LOG}\n${QUEST_GUIDE}`),
+		],
+	},
+	{
+		file: 'quests-minimap.svg',
+		title: 'Quest markers on the minimap around the player: nearby objectives, givers and the turn-in; then with the guide step highlighted',
+		panels: [
+			questScene(['Minimap'], QUEST_LOG),
+			questScene(['Minimap'], `${QUEST_LOG}\n${QUEST_GUIDE}`),
+		],
+	},
+	{
+		file: 'travel.svg',
+		title: 'Travel: the arrow (Arrow scale 160%) on a route into the next zone, its leg captioned ("Go to Westfall"), and the trail dots on the world map from the player to the zone crossing',
+		panels: [questScene(['PolestarNavArrow'], `Polestar.Set("nav.arrowScale", 1.6)\n${TRAVEL}`), questScene(['WorldMapFrame'], TRAVEL)],
+	},
+	{
+		file: 'dungeons.svg',
+		title: 'Dungeons in the hub: Home for a level 20 Tauren (the dungeons for your level, faction filter Horde); Wailing Caverns, its Quests tab',
+		panels: [
+			{ dungeons: true, roots: PICKER, script: dungeonsScene('Polestar.Dungeons.Open()') },
+			{ dungeons: true, roots: PICKER, script: dungeonsScene('Polestar.Dungeons.Open("wailing-caverns")') },
+		],
+	},
+	{
+		file: 'dungeons-bosses.svg',
+		title: 'Wailing Caverns: the Bosses tab (kill order and the quests each serves) and the Map tab (the entrance and the quest givers near it); All dungeons with the filter on All',
+		panels: [
+			{ dungeons: true, roots: PICKER, script: dungeonsScene('Polestar.Dungeons.Open("wailing-caverns"); DS.SetTab("bosses")') },
+			{ dungeons: true, roots: PICKER, script: dungeonsScene('Polestar.Dungeons.Open("wailing-caverns"); DS.SetTab("map")') },
+			{ dungeons: true, roots: PICKER, script: dungeonsScene('Polestar.Dungeons.Open(); DS.SetFaction("All"); DS.SetBand("all")') },
+		],
+	},
+	{
+		file: 'dungeons-small.svg',
+		title: 'The hub at its smallest (menu scale 0.7): Wailing Caverns, Quests; without the Codex pack',
+		panels: [
+			{ dungeons: true, roots: PICKER, script: dungeonsScene('Polestar.Set("ui.menuScale", 0.7); Polestar.Dungeons.Open("wailing-caverns")') },
+			{ roots: PICKER, script: dungeonsScene('Polestar.Dungeons.Open()') },
+		],
+	},
+	{
+		file: 'rares.svg',
+		title: 'Rares in the hub: Elwynn Forest\'s rares by zone, Thuros Lightfingers with its signature drop, its spawns and when it was last met; the Seen list',
+		panels: [
+			{ rares: true, files: RARES_FILES, roots: PICKER, script: raresScene('Polestar.Rares.Show("rare", 61)') },
+			{ rares: true, files: RARES_FILES, roots: PICKER, script: raresScene('Polestar.Rares.Show(); Polestar.UI.RaresSection.SetTab("seen")') },
+		],
+	},
+	{
+		file: 'rares-toast.svg',
+		title: 'The rare alert over the world: a rare on the minimap at its distance; a rare elite in sight; a treasure',
+		backdrop: 'terrain',
+		panels: [
+			{ rares: true, files: RARES_FILES, roots: TOAST, script: raresScene('local a = Polestar.Rares.AlertOf({ source = "vignette", kind = "rare", id = 61, name = "Thuros Lightfingers", level = 11 }, { map = 1429, x = 89.2, y = 79.1 }, true); a.yards = 87; Polestar.Fire("RARE_SPOTTED", a); stub.advance(4)') },
+			{ rares: true, files: RARES_FILES, roots: TOAST, script: raresScene('Polestar.Fire("RARE_SPOTTED", Polestar.Rares.AlertOf({ source = "nameplate", kind = "rare", id = 471, name = "Mother Fang", level = 10, classification = "rareelite" }, nil, false)); stub.advance(12)') },
+			{ rares: true, files: RARES_FILES, roots: TOAST, script: raresScene('local a = Polestar.Rares.AlertOf({ source = "vignette", kind = "treasure", id = 2843, name = "Battered Chest" }, { map = 1429, x = 79.6, y = 55.7 }, true); a.yards = 412; Polestar.Fire("RARE_SPOTTED", a)') },
+		],
+	},
+];
+
+// panel.stubs / panel.files: other client stubs and manifests than the UI's
+// (stub_ui.lua's fake Engine and guides, installed after load).
+function dumpPanel(panel, prelude) {
+	const before = [prelude, `dofile(${JSON.stringify(path.join(ROOT, 'tools', 'preview', 'stub.lua'))})`];
+	if (panel.eui) before.push('stub.withEllesmere()');
+	if (panel.before) before.push(panel.before);
+	if (panel.codex) before.push(codexStub());
+	if (panel.dungeons) before.push(dungeonsStub());
+	if (panel.rares) before.push(raresStub());
+	const { emitted } = runAddon({
+		stubs: panel.stubs || ['stub_ui.lua'],
+		before: before.join('\n'),
+		addons: [{ name: 'Polestar', files: panel.files || FILES }],
+		script: `${panel.stubs ? '' : 'uistub.install()\n'}stub.login()\n${panel.script}\nstub.advance(1)\npreview.emit()`,
+	});
+	const dump = emitted[emitted.length - 1];
+	if (!dump || !dump.objects) throw new Error('preview: the scene emitted no frames');
+	return dump;
+}
+
+async function run(argv) {
+	const only = new Set(argv.filter((a) => !a.startsWith('-')));
+	const fonts = loadFonts();
+	const textures = new TextureCache(path.join(ADDON, 'Media', 'UI'), CLIENT_ART);
+	const prelude = metricsLua(fonts);
+	const outDir = CLIENT_ART ? path.join(CLIENT_ART, 'preview') : OUT;
+	fs.mkdirSync(outDir, { recursive: true });
+	const written = [];
+	for (const scene of SCENES) {
+		if (only.size && !only.has(scene.file) && !only.has(scene.file.replace(/\.svg$/, ''))) continue;
+		const shared = { glyphs: new Set(), defs: [] };
+		let panels;
+		try {
+			panels = scene.panels.map((p, i) => svg(dumpPanel(p, prelude), { fonts, textures, roots: p.roots, prefix: `p${i}`, shared }));
+		} finally {
+			if (codexPack) codexPack.cleanup();
+			codexPack = null;
+			if (dungeonsPack) dungeonsPack.cleanup();
+			dungeonsPack = null;
+			if (raresPack) raresPack.cleanup();
+			raresPack = null;
+		}
+		const file = path.join(outDir, scene.file);
+		fs.writeFileSync(file, compose(panels, { title: scene.title, shared, backdrop: scene.backdrop }));
+		written.push(file);
+		console.log(path.relative(ROOT, file));
+	}
+	if (!written.length) {
+		console.error(`no preview scene named ${[...only].join(', ')}`);
+		return 2;
+	}
+	return 0;
+}
+
+module.exports = {
+	name: 'preview',
+	summary: 'Render the guide window, picker and options to docs/preview/*.svg',
+	usage: [
+		'usage: node tools/polestar.js preview [scene ...]',
+		'',
+		'Runs the real Theme and UI Lua against a geometry-recording client stub',
+		'with sample guides and writes SVGs to docs/preview/. Scenes:',
+		...SCENES.map((s) => `  ${s.file.replace(/\.svg$/, '').padEnd(16)} ${s.title}`),
+	].join('\n'),
+	run,
+	SCENES,
+};

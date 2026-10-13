@@ -1,0 +1,68 @@
+guide forever/reputation/warsong-gulch
+title Warsong Gulch Reputation
+category Reputation
+levels 10-60
+zone Ashenvale
+# Silverwing Sentinels (890, Alliance) and Warsong Outriders (889, Horde).
+# Exalted with each battleground reputation is one of Forever's Legacy PvP
+# Challenges (one account-wide Legacy Point each; official Legacy System news).
+#
+# From the Era-baseline reference data: the faction NPCs (Sentinel Farsong and
+# Illiyana Moonblaze at Silverwing Grove, Ashenvale; Captain Shatterskull and
+# Kelm Hargunth at Mor'shan Rampart, The Barrens), their mark turn-ins
+# (Vanquish the Invaders! 7788/7871-7873/8291, Quell the Silverwing Usurpers
+# 7789/7874-7876/8294, one per level bracket), the care packages (7863-7865,
+# 7866-7868, one of the three) and the weekend Call to Arms quests at the
+# Alliance Brigadier General / Horde Warbringer. Forever's Field of Honor season
+# reworks PvP and may change marks, so the turn-ins stay notes until a live
+# recording confirms them; the steps track the standing itself (rep 890/889).
+# The battleground itself has no quest-giver steps: enter it from any
+# battlemaster.
+
+step Silverwing Sentinels to Friendly
+  only Alliance
+  tip The Silverwing Sentinels are the Night Elves holding Warsong Gulch. Their reputation comes from the battleground: every enemy flag your team captures pays it to the whole team. Queue at any battlemaster. Forever's Legacy Diplomat perk increases reputation gains.
+  talk 14733 optional -- Sentinel Farsong, Silverwing Grove
+  note Sentinel Farsong takes Warsong Gulch Marks of Honor for Vanquish the Invaders!, once per level bracket (data); check them live.
+  rep 890 Friendly
+
+step Silverwing Sentinels to Honored
+  only Alliance
+  tip Keep playing Warsong Gulch and capturing flags. On Call to Arms: Warsong Gulch weekends the Alliance Brigadier General in the capitals takes three Warsong Gulch Marks of Honor for extra reputation.
+  talk 14753 optional -- Illiyana Moonblaze hands out one Sentinel care package by level
+  rep 890 Honored
+
+step Silverwing Sentinels to Revered
+  only Alliance
+  tip Keep capturing flags in Warsong Gulch.
+  rep 890 Revered
+
+step Silverwing Sentinels to Exalted
+  only Alliance
+  tip Exalted with the Silverwing Sentinels earns a Legacy Point.
+  rep 890 Exalted
+
+step Warsong Outriders to Friendly
+  only Horde
+  zone The Barrens
+  tip The Warsong Outriders are the Orcs logging Ashenvale. Their reputation comes from the battleground: every enemy flag your team captures pays it to the whole team. Queue at any battlemaster. Forever's Legacy Diplomat perk increases reputation gains.
+  talk 14781 optional -- Captain Shatterskull, Mor'shan Rampart
+  note Captain Shatterskull takes Warsong Gulch Marks of Honor for Quell the Silverwing Usurpers, once per level bracket (data); check them live.
+  rep 889 Friendly
+
+step Warsong Outriders to Honored
+  only Horde
+  zone The Barrens
+  tip Keep playing Warsong Gulch and capturing flags. On Call to Arms: Warsong Gulch weekends the Horde Warbringer in the capitals takes three Warsong Gulch Marks of Honor for extra reputation.
+  talk 14754 optional -- Kelm Hargunth hands out one Outrider care package by level
+  rep 889 Honored
+
+step Warsong Outriders to Revered
+  only Horde
+  tip Keep capturing flags in Warsong Gulch.
+  rep 889 Revered
+
+step Warsong Outriders to Exalted
+  only Horde
+  tip Exalted with the Warsong Outriders earns a Legacy Point.
+  rep 889 Exalted

@@ -1,0 +1,28 @@
+guide forever/collectibles/pets/minimule
+title Minimule
+category Collectibles
+folder Companion pets · Vendors
+keywords Packmule Treat, Minimule, mule, Merchant's Favor, Azeroth Commerce Authority, Durotar Supply and Logistics, Tamelyn Aldridge, Gishah
+collects 284664
+levels 10-60
+zone Redridge Mountains
+
+# Packmule Treat (the Minimule) for 1,500 Merchant's Favor from the supply
+# reputation camps.
+# The treat costs 1,500 Merchant's Favor, earned from crate hand-ins at the camps.
+# Sources: NPCs 256389 / 256384 (positions); Forever client 1.60.1.70338 via wago.tools.
+# Merchant's Favor is a currency Polestar cannot count.
+
+step Azeroth Commerce Authority
+  only Alliance
+  zone Redridge Mountains
+  tip The Alliance camp is at Three Corners in western Redridge Mountains. Loot supply crates in the world, fill them and hand them in to Marcy Baker for Merchant's Favor (5-20 a crate); the treat costs 1,500.
+  vendor 256389 "Tamelyn Aldridge" @10.6,71.3 live
+  buy 284664 "Packmule Treat" npc 256389 @10.6,71.3 live -- 1,500 Merchant's Favor
+
+step Durotar Supply and Logistics
+  only Horde
+  zone The Barrens
+  tip The Horde camp is just outside the Crossroads. Loot supply crates in the world, fill them and hand them in at the camp for Merchant's Favor; the treat costs 1,500. (Another Gishah stands in the Undercity; this is the one at the camp.)
+  vendor 256384 "Gishah" @49.4,29.4
+  buy 284664 "Packmule Treat" npc 256384 @49.4,29.4 -- 1,500 Merchant's Favor

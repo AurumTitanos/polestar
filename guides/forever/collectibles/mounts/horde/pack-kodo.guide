@@ -1,0 +1,24 @@
+guide forever/collectibles/mounts/horde/pack-kodo
+title Pack Kodo
+category Collectibles
+folder Mounts · Reputation
+keywords Reins of the Pack Kodo, Durotar Supply and Logistics, Okamache, Crossroads, Barrens, Merchant's Favor, supply crates
+collects 262766
+faction Horde
+levels 10-60
+zone The Barrens
+
+# Reins of the Pack Kodo from Okamache at the Durotar Supply and Logistics camp.
+# The reins cost 6,000 Merchant's Favor, earned from crate hand-ins at the camps.
+# Sources: NPC 256400 (position); Forever
+# client 1.60.1.70338 via wago.tools (ItemSparse 262766: level 60, Journeyman
+# Riding). Merchant's Favor is a currency Polestar cannot count.
+
+step Durotar Supply and Logistics
+  tip The camp is just outside the Crossroads in the Barrens. Loot supply crates in the world, fill them, and hand them in at the camp for Merchant's Favor (5-20 a crate); the Pack Kodo costs 6,000. Craftsman's Writs may help from level 10.
+  goto 49.5,29.0 "Durotar Supply and Logistics camp"
+
+step Pack Kodo
+  tip The reins need level 60 and Journeyman Riding to ride (Forever client); you can buy them earlier.
+  vendor 256400 "Okamache" @49.6,28.8
+  buy 262766 "Reins of the Pack Kodo" npc 256400 -- 6,000 Merchant's Favor

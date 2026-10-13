@@ -1,0 +1,448 @@
+guide forever/horde/undead/01-tirisfal-glades
+title Tirisfal Glades
+faction Horde
+race Undead
+levels 1-13
+zone Tirisfal Glades
+next forever/horde/02-the-barrens
+
+# Route: the simulator's consensus Undead route (data/sim/export/
+# consensus-horde-undead, visit 1, levels 1-12.9).
+#
+# Flow: Deathknell -> the road east past Calvin Montague and Gordo -> Brill
+# (bind) -> Doom Weed north of town -> west fields, Gordo, Calvin's duel ->
+# hearth -> the north: Rot Hide graveyards, Maggot Eye, the Vile Fin coast ->
+# Brill -> Deathguard Linnea's camp -> Brill -> west loop: Agamand Mills,
+# Solliden, the pumpkin fields, the Crusader's Outpost, the Whispering Forest
+# and Shadowvale -> hearth -> Brill -> the Scarlet camp south of town -> Brill
+# -> east loop: Linnea's camp, the Balnir Farmstead cultists and graves,
+# Captain Vachon, the Vicious Night Web Spiders -> Linnea's camp -> Brill ->
+# Captain Melrache on the north-east coast -> Brill -> Leonid in the Whispering
+# Forest -> hearth -> zeppelin to Durotar -> the Crossroads (flight path, bind).
+#
+# Optional: A Letter Undelivered (361). A Letter to Yvette drops from the
+# Agamand Mills undead about one kill in 25-30, so its accept and turn-in never
+# block.
+#
+# Deviations from the export (same quest set apart from "Left out"):
+# - Patience (99141): the export accepts and turns it in on the spot; here the
+#   three reports are asked for where you pass Dillinger, Gordo and Kristof.
+# - Marla's Last Wish (6395, level 3) is taken after Night Web's Hollow and A
+#   New Plague (367, level 6) on the second pass through Brill, where the
+#   route is sure to meet their level requirements.
+# - The Adventurer (96656) is taken from Executor Arren with Vital Intelligence
+#   and handed to Eleanor Shackleton on the first walk out of Brill (export:
+#   picked up at 9.9, turned in at 10.3).
+# - A New Plague, A Putrid Task and Sticks and Bones are done in the fields
+#   west of Brill on the way to Calvin's duel instead of after the hearth back.
+# - Deaths in the Family (354) is taken with The Haunted Mills at 7 and done
+#   at Agamand Mills during the west loop; the export takes it at 12 and walks
+#   back to the mills for it (then hearths from there).
+# - Rear Guard Patrol (356) and Hides for the Forsaken (97558) are taken at
+#   Linnea's camp when Forsaken Duties is turned in at 9.3 (export: 11.9); the
+#   murloc skins come from the west-loop shore, the wings and hides from the
+#   bats and darkhounds you pass anyway. Tomb Weed (99142) is taken from
+#   Holland at the 10.3 turn-in round (export: 12.0).
+# - The export runs Brill -> spiders -> Brill -> Vachon -> Brill -> Melrache ->
+#   Brill -> cultists -> Agamand Mills -> hearth. Here everything east of Brill
+#   is one loop after the Scarlet camp, Melrache is one trip from Brill and the
+#   third hearth comes after Leonid (export hearths at 6.4, 10.3 and 12.1).
+# - The export's Crossroads flight path and bind at 12.9 close this guide:
+#   zeppelin from the towers by the Ruins of Lordaeron, then the walk through
+#   Durotar to the Crossroads, where the next guide starts.
+#
+# Class quests: none on this route. Class training at Deathknell (2, 4) and in
+# Brill (6, 8, 10, 12).
+#
+# Left out (accepted by the export but never turned in on its route): The
+# Prodigal Lich (405, Bethor Iceshard in the Undercity), Delivery to
+# Silverpine Forest (445, the Sepulcher) and Leonid's Letter (98545, Glix
+# Xizzix in the Undercity). With them go the Prodigal Lich chain and the
+# Undercity flight path of the older Tirisfal guide; the export has neither.
+
+# ---------------------------------------------------------------- Deathknell
+
+step Undertaker Mordo
+  tip You rise in the crypt at the south end of Deathknell. Undertaker Mordo waits just outside.
+  accept 363
+
+step Shadow Priest Sarvis
+  tip Follow the path north into Deathknell; Sarvis stands in front of the church.
+  turnin 363
+  accept 364
+
+step Mindless Zombies
+  tip The zombies shamble around the graveyard and the houses just east of the church.
+  goto 32.7,63.5 "Deathknell graveyard"
+  kill 1501 quest 364.1
+  kill 1502 quest 364.2
+
+step Shadow Priest Sarvis
+  turnin 364
+  accept 3901
+  accept 376                          -- Novice Elreth, beside the church
+  accept 98389                        -- Aramis Hammerhand
+  train class                         -- The Deathknell trainers stand around the church
+
+step Rattlecages, scavengers and duskbats
+  tip Rattlecage Skeletons wander the ruined houses in the north half of Deathknell. Young Scavengers and Duskbats roam all around the village; the Ragged Scavengers and Mangy Duskbats are on its east side.
+  goto 33.0,61.5 "North Deathknell"
+  kill 1890 quest 3901.1
+  collect 3265 quest 376.1
+  collect 3264 quest 376.2
+
+step Back to the church
+  turnin 3901                         -- Shadow Priest Sarvis
+  turnin 376                          -- Novice Elreth
+  accept 3902                         -- Deathguard Saltain
+  accept 380                          -- Executor Arren, in the church
+  train class
+
+step Scavenging Deathknell
+  tip The Equipment Boxes lie beside the ruined houses in the north of Deathknell.
+  collect 11127 quest 3902.1
+
+step Night Web's Hollow
+  tip Head west to the cave. The Young Night Web Spiders sit outside; the Night Web Spiders and the Webbed Victims are inside.
+  goto 27.5,58.0 "Night Web's Hollow"
+  kill 1504 quest 380.1
+  kill 1505 quest 380.2
+  goto 24.8,59.6 "Webbed Victims"    -- Free six Webbed Victims inside the cave for Aramis
+
+step Back to Deathknell
+  turnin 3902                         -- Deathguard Saltain
+  turnin 380                          -- Executor Arren
+  accept 381
+  turnin 98389                        -- Aramis Hammerhand
+  accept 6395                         -- Novice Elreth
+
+step The Scarlet farm
+  tip The Scarlet Converts and Initiates hold the farm east of Deathknell. Samuel Fipps wanders between the farmhouses: his remains are for Marla's Last Wish.
+  goto 37.5,64.5 "Scarlet farm"
+  collect 3266 quest 381.1
+  collect 16333                       -- Samuel's Remains, from Samuel Fipps
+
+step Marla's Grave
+  tip Marla's Grave is in the Deathknell graveyard, beside the church.
+  interact 178090 quest 6395.1
+
+step Executor Arren
+  turnin 6395                         -- Novice Elreth
+  turnin 381                          -- Executor Arren
+  accept 382
+
+step Meven Korgal
+  tip Meven Korgal stands at the south end of the Scarlet farm.
+  collect 2885 quest 382.1
+
+step Executor Arren
+  turnin 382
+  accept 383
+  accept 96656
+
+# ---------------------------------------------------------------- To Brill
+
+step Calvin Montague
+  tip Leave Deathknell by the road north-east. Calvin Montague stands by the farmhouse at the Solliden Farmstead.
+  accept 8
+
+step Gordo
+  tip Gordo, the big abomination, walks the road a little further east. The Gloom Weed grows along the road around him.
+  accept 5481
+  collect 12737 quest 5481.1
+
+step Brill
+  tip Follow the road east to Brill. Junior Apothecary Holland stands at the north-west edge of town; the Gallows' End Tavern is the big inn in the middle, with Executor Zygand in front of it.
+  turnin 5481                         -- Junior Apothecary Holland
+  accept 5482
+  sethome "Gallows' End Tavern" npc 5688 -- Innkeeper Renee
+  turnin 8                            -- Innkeeper Renee
+  turnin 383                          -- Executor Zygand
+  accept 427
+  accept 99134
+  accept 99141
+  accept 404                          -- Deathguard Dillinger
+  collect 286200 quest 99141.1 @58.2,51.5 -- Ask Deathguard Dillinger for his report
+  accept 86784                        -- Deathguard Bartholomew
+  train class                         -- The Brill trainers are in and around the inn
+
+step Discipline
+  goto 60.6,52.0 "Brill"              -- Use the Executor's Motivator on five idle Deathguards around town
+
+step Doom Weed
+  tip The Doom Weed grows in the graveyard fields just north of Brill.
+  goto 57.0,39.0 "North of Brill"
+  collect 13702 quest 5482.1
+
+step Brill
+  turnin 5482                         -- Junior Apothecary Holland
+  turnin 99134                        -- Executor Zygand
+  accept 367                          -- Apothecary Johaan
+
+step Dry Branches
+  tip The Dry Branches lie on the ground around the south-west edge of Brill.
+  collect 279991 quest 86784.1 @56.5,53.5
+
+step Eleanor Shackleton
+  tip Eleanor camps just south-west of town.
+  turnin 96656
+  accept 96607
+  complete 96607 @57.2,55.5           -- /sit by her campfire until you get Boosted Rest
+  turnin 96607
+  accept 96658
+  turnin 86784
+
+step Fields west of Brill
+  tip Rotting Dead and Ravaged Corpses shamble through the fields just west of Brill; Darkhounds roam a little further west, toward Gordo.
+  goto 52.5,53.0 "Fields west of Brill"
+  collect 2855 quest 404.1
+  collect 2858 quest 367.1
+
+step Gordo
+  collect 286202 quest 99141.3 @43.1,54.7 -- Ask Gordo for his report
+
+step Calvin Montague
+  tip Walk on west to Calvin and talk to him: he wants a duel.
+  accept 590
+  complete 590 @38.2,56.8             -- Beat Calvin in the duel
+  turnin 590
+
+step Hearth to Brill
+  hearth "Gallows' End Tavern"
+
+# ---------------------------------------------------------------- Brill and the north
+
+step Brill
+  turnin 367                          -- Apothecary Johaan
+  accept 368
+  turnin 404                          -- Deathguard Dillinger
+  accept 426
+  talk 265944                         -- William Pickman, in the inn: ask him about cooking
+  turnin 96658
+  accept 95314                        -- Carolai Anise
+  accept 398                          -- The Wanted poster by the inn
+  accept 358                          -- Magistrate Sevren, in the town hall
+  accept 362                          -- Coleman Farthing, in the inn
+  accept 354
+  accept 375                          -- Gretchen Dedmar
+  buy 2320 npc 2118                   -- Coarse Thread from Abigail Shiel, for Gretchen
+
+step Greater Duskbats
+  tip Greater Duskbats fly over the fields around Brill and along the road north.
+  collect 2876 quest 375.1
+
+step Rot Hide graveyards
+  tip The Rot Hide Graverobbers dig through the graveyards north of Brill; all the Rot Hides drop the ichor.
+  goto 55.5,42.0 "Rot Hide graveyards"
+  kill 1941 quest 358.1
+  collect 2834 quest 358.3
+
+step Maggot Eye
+  tip The Rot Hide Mongrels hold the hills further north. Maggot Eye (level 11) stands in their camp on the hill south of the shore: clear the gnolls around him first.
+  kill 1675 quest 358.2
+  collect 3635 quest 398.1            -- Maggot Eye's Paw
+
+step Vile Fin murlocs
+  tip The Vile Fin murlocs line the north shore.
+  goto 61.0,28.0 "North coast"
+  collect 2859 quest 368.1
+
+step Brill
+  tip Follow the road south back to Brill.
+  turnin 375                          -- Gretchen Dedmar
+  turnin 358                          -- Magistrate Sevren
+  accept 359
+  turnin 398                          -- Executor Zygand
+  turnin 368                          -- Apothecary Johaan
+  accept 369
+  train class
+
+step Deathguard Linnea
+  tip Follow the road south-east from Brill past the zeppelin towers. Linnea, Kristof and Shelene Rhobart camp by the road.
+  turnin 359
+  accept 360
+  accept 356
+  accept 97558                        -- Shelene Rhobart
+  collect 286201 quest 99141.2 @65.2,60.3 -- Ask Deathguard Kristof for his report
+
+step Magistrate Sevren
+  tip Back up the road to Brill.
+  turnin 360
+  turnin 99141                        -- Executor Zygand
+
+# ---------------------------------------------------------------- West loop
+
+step Agamand Mills
+  tip Follow the road north-west to Agamand Mills. Devlin Agamand walks the graveyard south of the mills; Nissa, Gregor and Thurman Agamand haunt the mills themselves. Rattlecage and Cracked Skull Soldiers drop the ribs, Darkeye Bonecasters the skulls, and any of them may drop A Letter to Yvette. From here on, kill the Duskbats and Darkhounds you pass: Shelene wants their wings and hides.
+  goto 46.5,36.0 "Agamand Mills"
+  collect 2831 quest 362.1            -- Devlin Agamand
+  collect 2828 quest 354.2            -- Nissa Agamand
+  collect 2829 quest 354.1            -- Gregor Agamand
+  collect 2830 quest 354.3            -- Thurman Agamand
+  collect 3162 quest 426.1
+  collect 3163 quest 426.2
+  collect 2839 optional               -- A Letter to Yvette, a rare drop
+  accept 361 optional                 -- Only if the letter dropped
+
+step Deathguard Simmer
+  tip Walk south-west to the Solliden Farmstead; Simmer stands at the farm.
+  accept 365
+
+step Tirisfal Pumpkins
+  tip The pumpkins grow in the Scarlet-held fields north-west of Solliden.
+  goto 34.5,49.0 "Pumpkin fields"
+  collect 2846 quest 365.1
+
+step Crusader's Outpost
+  tip Scarlet Warriors guard the outpost just west of the pumpkin fields. Bareth Dawnstone is held inside: talk to him and stay with him until he is out.
+  goto 32.0,47.5 "Crusader's Outpost"
+  kill 1535 quest 427.1
+  accept 99144                        -- Bareth Dawnstone
+  goto 32.0,46.3 "Crusader's Outpost" -- Escort Bareth out of the outpost
+
+step Vile Fin shore
+  tip More Vile Fin murlocs walk the shore just north of the outpost.
+  goto 30.5,43.5 "Shore north of the outpost"
+  collect 278244 quest 97558.3
+
+step Whispering Forest
+  tip Head west into the Whispering Forest; Hilda and Ephram camp at its edge.
+  accept 99152                        -- Hilda the Breaker
+  accept 99153                        -- Ephram Barbaro
+
+step Shadowvale
+  tip Shadowvale is the hollow at the west edge of the glades. The Shadowvale Lurchers and Mystics drop the bones; the bottles lie on the ground among them, and the Glowing Crystal Fragment is at the south end.
+  goto 9.8,66.0 "Shadowvale"
+  collect 286259 quest 99152.1
+  collect 268801 quest 95314.1
+  collect 286269 quest 99153.1
+
+step Whispering Forest
+  turnin 99153                        -- Ephram Barbaro
+  turnin 99152                        -- Hilda the Breaker
+
+step Hearth to Brill
+  hearth "Gallows' End Tavern"
+
+step Brill
+  turnin 426                          -- Deathguard Dillinger
+  accept 99142                        -- Junior Apothecary Holland
+  turnin 365                          -- Apothecary Johaan
+  accept 407
+  turnin 95314                        -- Carolai Anise
+  turnin 99144                        -- Shari Stilwell
+  turnin 427                          -- Executor Zygand
+  accept 370
+  accept 374                          -- Deathguard Burgess
+  turnin 361 optional                 -- Yvette Farthing, in the inn
+  turnin 362                          -- Coleman Farthing
+  turnin 354
+  turnin 407                          -- The Captured Scarlet Zealot, in the town hall basement
+  train class
+
+# ---------------------------------------------------------------- The Scarlet camp
+
+step The Scarlet camp
+  tip Follow the road south-west from Brill to the Scarlet Crusade camp. Captain Perrine stands at its south end; every Scarlet there can drop a ring.
+  goto 50.0,66.5 "Scarlet camp"
+  kill 1662 quest 370.1
+  kill 1537 quest 370.2
+  kill 1536 quest 370.3
+  collect 2875 quest 374.1
+
+step Brill
+  turnin 374                          -- Deathguard Burgess
+  turnin 370                          -- Executor Zygand
+  accept 371
+
+# ---------------------------------------------------------------- East loop
+
+step Deathguard Terrence
+  tip Take the road south-east out of Brill; Terrence stands on it short of the zeppelin towers.
+  accept 96895
+
+step Hadric Harlson
+  tip Hadric stands at Deathguard Linnea's camp.
+  turnin 96895
+  accept 96897
+  accept 96898
+  accept 96899
+
+step Balnir Farmstead
+  tip The Cult of the Damned holds the farm just south-east of the camp. The Necrotic Crystal Fragments lie on the ground among the cultists, and the cultists carry some too.
+  goto 67.5,64.0 "Cult camp"
+  kill 267006 quest 96897.1
+  kill 275437 quest 96897.2
+  collect 275851 quest 96898.1
+
+step Balnir graves
+  tip Follow the road east. Bleeding Horrors and Wandering Spirits haunt the graves on the east side of the farmstead, where the Tomb Weed grows.
+  goto 76.0,60.5 "Balnir graves"
+  kill 1529 quest 356.1
+  kill 1532 quest 356.2
+  collect 286204 quest 99142.1
+
+step Captain Vachon
+  tip The Scarlet Friars camp just north-east of the graves; Captain Vachon stands among them.
+  goto 79.0,56.0 "Scarlet camp"
+  kill 1664 quest 371.1
+  kill 1538 quest 371.2
+
+step Vicious Night Web Spiders
+  tip The spiders lurk in the woods at the far east end of the glades.
+  goto 86.0,51.0 "Eastern woods"
+  collect 2872 quest 369.1
+
+step Hides for the Forsaken
+  tip Duskbats and Darkhounds roam all along the road back west; finish the wings and hides on the way.
+  collect 278242 quest 97558.1
+  collect 278243 quest 97558.2
+
+step Deathguard Linnea's camp
+  turnin 356                          -- Deathguard Linnea
+  turnin 97558                        -- Shelene Rhobart
+  turnin 96897                        -- Hadric Harlson
+  turnin 96898
+
+step Brill
+  tip Back up the road to Brill.
+  turnin 369                          -- Apothecary Johaan
+  accept 492
+  turnin 492                          -- The Captured Mountaineer, in the town hall basement
+  turnin 371                          -- Executor Zygand
+  accept 372
+  turnin 99142                        -- Junior Apothecary Holland
+  train class
+
+# ---------------------------------------------------------------- Captain Melrache
+
+step Captain Melrache
+  tip Follow the road north-east from Brill past Brightwater Lake. Captain Melrache and his two Scarlet Bodyguards hold the Scarlet watchtower on the north-east coast, north of the Scarlet Watch Post: pull the bodyguards first.
+  goto 79.5,25.5 "Scarlet watchtower"
+  kill 1665 quest 372.1
+  kill 1660 quest 372.2
+
+step Executor Zygand
+  tip Back to Brill.
+  turnin 372
+
+# ---------------------------------------------------------------- Leonid, then on to the Barrens
+
+step Leonid Barthalomew
+  tip Follow the road west past Agamand Mills to the Whispering Forest. Leonid stands just north of Hilda's camp.
+  turnin 96899
+  accept 96896
+  turnin 96896                        -- Listen to Leonid and Danitha Morr, then talk to him again
+
+step Hearth to Brill
+  hearth "Gallows' End Tavern"
+
+step Zeppelin to Durotar
+  tip Walk south-east from Brill to the zeppelin towers outside the Ruins of Lordaeron and board the zeppelin to Orgrimmar (the other one goes to Grom'gol).
+  goto 60.7,58.9 "Zeppelin tower"
+
+step The Crossroads
+  zone The Barrens
+  tip The zeppelin lands at the tower just north-east of Orgrimmar's main gate. Follow the road south into Durotar, cross the Southfury River bridge below Far Watch Post and follow the road west to the Crossroads.
+  getfp "Crossroads" npc 3615         -- Devrak, the wind rider master
+  sethome "The Crossroads" npc 3934   -- Innkeeper Boorand Plainswind

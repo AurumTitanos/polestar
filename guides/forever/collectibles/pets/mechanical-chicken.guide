@@ -1,0 +1,62 @@
+guide forever/collectibles/pets/mechanical-chicken
+title Mechanical Chicken
+category Collectibles
+folder Companion pets · Quests
+keywords An OOX of Your Own, Oglethorpe Obnoticus, OOX, homing robot, distress beacon, Feralas, Tanaris, Hinterlands, Booty Bay
+collects 10398
+levels 43-60
+zone Feralas
+
+# Mechanical Chicken from An OOX of Your Own: rescue Oglethorpe Obnoticus's
+# three homing robots, then visit him in Booty Bay.
+# Sources: quests.json (the OOX chain, its givers and turn-ins); items.json (the
+# beacons' droppers, pfQuest rates); Forever client 1.60.1.70338. The reward is
+# general Era knowledge (not in quests.json).
+
+step OOX-22/FE Distress Beacon in Feralas
+  tip Each robot starts with a distress beacon that mobs in its zone drop (about 1-2.5% per kill in our data). Start in Feralas.
+  collect 8705 x1 nearest
+
+step Rescue OOX-22/FE
+  tip Take the beacon to OOX-22/FE in a cave near Feral Scar Vale, then escort it to the dock on the Forgotten Coast. Its turn-in is in Booty Bay; keep it for later.
+  accept 2766
+  turnin 2766
+  accept 2767
+  complete 2767                       -- Escort OOX-22/FE
+
+step OOX-17/TN Distress Beacon in Tanaris
+  zone Tanaris
+  tip Most Tanaris mobs can drop OOX-17/TN's beacon (about 0.5-3% per kill in our data).
+  collect 8623 x1 nearest
+
+step Rescue OOX-17/TN
+  zone Tanaris
+  tip Take the beacon to OOX-17/TN in Tanaris, then escort it to Steamwheedle Port. Its turn-in is in Booty Bay too.
+  accept 351
+  turnin 351
+  accept 648
+  complete 648                        -- Escort OOX-17/TN
+
+step OOX-09/HL Distress Beacon in the Hinterlands
+  zone The Hinterlands
+  tip Most Hinterlands mobs can drop OOX-09/HL's beacon (about 1-2.5% per kill in our data).
+  collect 8704 x1 nearest
+
+step Rescue OOX-09/HL
+  zone The Hinterlands
+  tip Take the beacon to OOX-09/HL at the head of the river near Skulk Rock, then escort it to the shore beyond Overlook Cliff.
+  accept 485
+  turnin 485
+  accept 836
+  complete 836                        -- Escort OOX-09/HL
+
+step Oglethorpe Obnoticus in Booty Bay
+  zone Stranglethorn Vale
+  tip Oglethorpe Obnoticus is in Booty Bay. With all three robots home he offers An OOX of Your Own, whose reward is the Mechanical Chicken; it needs level 45.
+  turnin 2767
+  turnin 648
+  turnin 836
+  level 45
+  accept 3721
+  turnin 3721
+  collect 10398 @28.4,76.4            -- Mechanical Chicken

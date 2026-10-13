@@ -1,0 +1,19 @@
+guide forever/collectibles/pets/narkk
+title Narkk's Parrots
+category Collectibles
+folder Companion pets · Vendors
+keywords Parrot Cage, Senegal, Cockatiel, parrot, Booty Bay
+collects 8495, 8496
+levels 1-60
+zone Stranglethorn Vale
+
+# Narkk's parrots in Booty Bay.
+# Sources: items.json / npcs.json (vendor, stock); Forever client 1.60.1.70338
+# via wago.tools (ItemSparse prices; every pet item teaches its companion when
+# used).
+
+step Narkk
+  tip Narkk, the pirate supplier in Booty Bay, sells two parrots (40s each). Booty Bay is neutral: the boat from Ratchet and the Stranglethorn road both arrive there. Each pet item teaches its companion when you use it; the goals stay ticked afterwards.
+  vendor 2663                         -- Narkk
+  buy 8495 npc 2663 optional          -- Parrot Cage (Senegal), 40s
+  buy 8496 npc 2663 optional          -- Parrot Cage (Cockatiel), 40s

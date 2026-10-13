@@ -1,0 +1,1067 @@
+{
+	"about": "Synthetic Dungeons fixture: game names, sample numbers (not taken from any addon). tests/dungeons-runtime.test.js and the Dungeons preview.",
+	"codex": {
+		"meta": {
+			"schema": 1,
+			"builtAt": "2026-01-01T00:00:00.000Z",
+			"build": "1.60.1.70338",
+			"sources": [
+				{
+					"name": "synthetic fixture",
+					"version": "1",
+					"licence": "MIT"
+				}
+			],
+			"counts": {},
+			"coverage": {
+				"items": 12,
+				"withSource": 5,
+				"share": 0.4
+			},
+			"pack": null
+		},
+		"items": {
+			"918": {
+				"id": 918,
+				"name": "Deviate Hide Pack",
+				"quality": 1,
+				"kind": "item",
+				"spell": null,
+				"reqLevel": null,
+				"sources": []
+			},
+			"2041": {
+				"id": 2041,
+				"name": "Tunic of Westfall",
+				"quality": 2,
+				"kind": "item",
+				"spell": null,
+				"reqLevel": null,
+				"sources": []
+			},
+			"5180": {
+				"id": 5180,
+				"name": "Necklace of Calisea",
+				"quality": 3,
+				"kind": "item",
+				"spell": null,
+				"reqLevel": null,
+				"sources": []
+			},
+			"5187": {
+				"id": 5187,
+				"name": "Rhahk'Zor's Hammer",
+				"quality": 3,
+				"kind": "item",
+				"spell": null,
+				"reqLevel": null,
+				"sources": []
+			},
+			"6087": {
+				"id": 6087,
+				"name": "Chausses of Westfall",
+				"quality": 2,
+				"kind": "item",
+				"spell": null,
+				"reqLevel": null,
+				"sources": []
+			},
+			"6443": {
+				"id": 6443,
+				"name": "Deviate Hide",
+				"quality": 1,
+				"kind": "item",
+				"spell": null,
+				"reqLevel": null,
+				"sources": [
+					{
+						"type": "drop",
+						"npc": 3636,
+						"chance": 20,
+						"instance": "wailing-caverns",
+						"from": [
+							"atlasloot"
+						]
+					}
+				]
+			},
+			"6480": {
+				"id": 6480,
+				"name": "Slick Deviate Leggings",
+				"quality": 2,
+				"kind": "item",
+				"spell": null,
+				"reqLevel": null,
+				"sources": []
+			},
+			"6504": {
+				"id": 6504,
+				"name": "Wingblade",
+				"quality": 3,
+				"kind": "item",
+				"spell": null,
+				"reqLevel": null,
+				"sources": []
+			},
+			"6505": {
+				"id": 6505,
+				"name": "Crescent Staff",
+				"quality": 3,
+				"kind": "item",
+				"spell": null,
+				"reqLevel": null,
+				"sources": []
+			},
+			"9738": {
+				"id": 9738,
+				"name": "Gem of Cobrahn",
+				"quality": 1,
+				"kind": "item",
+				"spell": null,
+				"reqLevel": null,
+				"sources": [
+					{
+						"type": "drop",
+						"npc": 3669,
+						"chance": 20,
+						"instance": "wailing-caverns",
+						"from": [
+							"atlasloot"
+						]
+					}
+				]
+			},
+			"9739": {
+				"id": 9739,
+				"name": "Gem of Anacondra",
+				"quality": 1,
+				"kind": "item",
+				"spell": null,
+				"reqLevel": null,
+				"sources": [
+					{
+						"type": "drop",
+						"npc": 3671,
+						"chance": 20,
+						"instance": "wailing-caverns",
+						"from": [
+							"atlasloot"
+						]
+					}
+				]
+			},
+			"10441": {
+				"id": 10441,
+				"name": "Glowing Shard",
+				"quality": 1,
+				"kind": "item",
+				"spell": null,
+				"reqLevel": null,
+				"sources": [
+					{
+						"type": "drop",
+						"npc": 3654,
+						"chance": 20,
+						"instance": "wailing-caverns",
+						"from": [
+							"atlasloot"
+						]
+					}
+				]
+			}
+		},
+		"npcs": {
+			"234": {
+				"id": 234,
+				"name": "Gryan Stoutmantle",
+				"level": 35,
+				"levelMax": null,
+				"faction": null,
+				"rare": false,
+				"elite": false,
+				"boss": false,
+				"instance": null,
+				"roles": [],
+				"spawns": [
+					{
+						"map": 1436,
+						"x": 56.3,
+						"y": 47.5,
+						"f": "e"
+					}
+				]
+			},
+			"639": {
+				"id": 639,
+				"name": "Edwin VanCleef",
+				"level": 21,
+				"levelMax": null,
+				"faction": null,
+				"rare": false,
+				"elite": true,
+				"boss": true,
+				"instance": "deadmines",
+				"roles": [],
+				"spawns": []
+			},
+			"3448": {
+				"id": 3448,
+				"name": "Tonga Runetotem",
+				"level": 32,
+				"levelMax": null,
+				"faction": null,
+				"rare": false,
+				"elite": false,
+				"boss": false,
+				"instance": null,
+				"roles": [],
+				"spawns": [
+					{
+						"map": 1413,
+						"x": 52.2,
+						"y": 31.9,
+						"f": "e"
+					}
+				]
+			},
+			"3636": {
+				"id": 3636,
+				"name": "Deviate Ravager",
+				"level": 18,
+				"levelMax": null,
+				"faction": null,
+				"rare": false,
+				"elite": false,
+				"boss": false,
+				"instance": "wailing-caverns",
+				"roles": [],
+				"spawns": []
+			},
+			"3653": {
+				"id": 3653,
+				"name": "Kresh",
+				"level": 20,
+				"levelMax": null,
+				"faction": null,
+				"rare": false,
+				"elite": true,
+				"boss": true,
+				"instance": "wailing-caverns",
+				"roles": [],
+				"spawns": []
+			},
+			"3654": {
+				"id": 3654,
+				"name": "Mutanus the Devourer",
+				"level": 22,
+				"levelMax": null,
+				"faction": null,
+				"rare": false,
+				"elite": true,
+				"boss": true,
+				"instance": "wailing-caverns",
+				"roles": [],
+				"spawns": []
+			},
+			"3669": {
+				"id": 3669,
+				"name": "Lord Cobrahn",
+				"level": 20,
+				"levelMax": null,
+				"faction": null,
+				"rare": false,
+				"elite": true,
+				"boss": true,
+				"instance": "wailing-caverns",
+				"roles": [],
+				"spawns": []
+			},
+			"3671": {
+				"id": 3671,
+				"name": "Lady Anacondra",
+				"level": 20,
+				"levelMax": null,
+				"faction": null,
+				"rare": false,
+				"elite": true,
+				"boss": true,
+				"instance": "wailing-caverns",
+				"roles": [],
+				"spawns": []
+			},
+			"5767": {
+				"id": 5767,
+				"name": "Nalpak",
+				"level": 20,
+				"levelMax": null,
+				"faction": null,
+				"rare": false,
+				"elite": false,
+				"boss": false,
+				"instance": null,
+				"roles": [],
+				"spawns": [
+					{
+						"map": 1413,
+						"x": 46,
+						"y": 35.7,
+						"f": "e"
+					}
+				]
+			},
+			"5768": {
+				"id": 5768,
+				"name": "Ebru",
+				"level": 20,
+				"levelMax": null,
+				"faction": null,
+				"rare": false,
+				"elite": false,
+				"boss": false,
+				"instance": null,
+				"roles": [],
+				"spawns": [
+					{
+						"map": 1413,
+						"x": 46,
+						"y": 35.7,
+						"f": "e"
+					}
+				]
+			},
+			"5770": {
+				"id": 5770,
+				"name": "Nara Wildmane",
+				"level": 50,
+				"levelMax": null,
+				"faction": null,
+				"rare": false,
+				"elite": false,
+				"boss": false,
+				"instance": null,
+				"roles": [],
+				"spawns": [
+					{
+						"map": 1456,
+						"x": 75.6,
+						"y": 31.2,
+						"f": "e"
+					}
+				]
+			}
+		},
+		"objects": {},
+		"quests": {
+			"155": {
+				"id": 155,
+				"title": "The Defias Brotherhood",
+				"level": 20,
+				"minLevel": 16,
+				"faction": "A",
+				"races": null,
+				"classes": null,
+				"start": {
+					"npc": [
+						234
+					],
+					"object": [],
+					"item": []
+				},
+				"end": {
+					"npc": [
+						234
+					],
+					"object": []
+				},
+				"objectives": [],
+				"pre": [],
+				"zone": 1436,
+				"rewards": [],
+				"choices": [],
+				"preAny": []
+			},
+			"166": {
+				"id": 166,
+				"title": "The Defias Brotherhood",
+				"level": 22,
+				"minLevel": 18,
+				"faction": "A",
+				"races": null,
+				"classes": null,
+				"start": {
+					"npc": [
+						234
+					],
+					"object": [],
+					"item": []
+				},
+				"end": {
+					"npc": [
+						234
+					],
+					"object": []
+				},
+				"objectives": [
+					{
+						"type": "kill",
+						"id": 639,
+						"count": 1,
+						"text": "Edwin VanCleef"
+					}
+				],
+				"pre": [
+					155
+				],
+				"zone": 1436,
+				"rewards": [],
+				"choices": [
+					6087,
+					2041
+				],
+				"preAny": []
+			},
+			"914": {
+				"id": 914,
+				"title": "Leaders of the Fang",
+				"level": 22,
+				"minLevel": 18,
+				"faction": "H",
+				"races": null,
+				"classes": null,
+				"start": {
+					"npc": [
+						5770
+					],
+					"object": [],
+					"item": []
+				},
+				"end": {
+					"npc": [
+						5770
+					],
+					"object": []
+				},
+				"objectives": [
+					{
+						"type": "item",
+						"id": 9738,
+						"count": 1,
+						"text": "Gem of Cobrahn"
+					},
+					{
+						"type": "item",
+						"id": 9739,
+						"count": 1,
+						"text": "Gem of Anacondra"
+					}
+				],
+				"pre": [
+					1490
+				],
+				"zone": 1456,
+				"rewards": [],
+				"choices": [
+					6505,
+					6504
+				],
+				"preAny": []
+			},
+			"959": {
+				"id": 959,
+				"title": "Trouble at the Docks",
+				"level": 18,
+				"minLevel": 14,
+				"faction": null,
+				"races": null,
+				"classes": null,
+				"start": {
+					"npc": [
+						3448
+					],
+					"object": [],
+					"item": []
+				},
+				"end": {
+					"npc": [
+						3448
+					],
+					"object": []
+				},
+				"objectives": [
+					{
+						"type": "kill",
+						"id": 3653,
+						"count": 1,
+						"text": "Kresh"
+					}
+				],
+				"pre": [],
+				"zone": 1413,
+				"rewards": [],
+				"choices": [],
+				"preAny": []
+			},
+			"1486": {
+				"id": 1486,
+				"title": "Deviate Hides",
+				"level": 17,
+				"minLevel": 13,
+				"faction": null,
+				"races": null,
+				"classes": null,
+				"start": {
+					"npc": [
+						5767
+					],
+					"object": [],
+					"item": []
+				},
+				"end": {
+					"npc": [
+						5767
+					],
+					"object": []
+				},
+				"objectives": [
+					{
+						"type": "item",
+						"id": 6443,
+						"count": 20,
+						"text": "Deviate Hide"
+					}
+				],
+				"pre": [],
+				"zone": 1413,
+				"rewards": [],
+				"choices": [
+					6480,
+					918
+				],
+				"preAny": []
+			},
+			"1490": {
+				"id": 1490,
+				"title": "Nara Wildmane",
+				"level": 20,
+				"minLevel": 16,
+				"faction": "H",
+				"races": null,
+				"classes": null,
+				"start": {
+					"npc": [
+						3448
+					],
+					"object": [],
+					"item": []
+				},
+				"end": {
+					"npc": [
+						5770
+					],
+					"object": []
+				},
+				"objectives": [],
+				"pre": [],
+				"zone": 1413,
+				"rewards": [],
+				"choices": [],
+				"preAny": []
+			},
+			"6981": {
+				"id": 6981,
+				"title": "The Glowing Shard",
+				"level": 22,
+				"minLevel": 18,
+				"faction": null,
+				"races": null,
+				"classes": null,
+				"start": {
+					"npc": [],
+					"object": [],
+					"item": [
+						10441
+					]
+				},
+				"end": {
+					"npc": [
+						5767
+					],
+					"object": []
+				},
+				"objectives": [],
+				"pre": [],
+				"zone": 1413,
+				"rewards": [
+					5180
+				],
+				"choices": [],
+				"preAny": []
+			}
+		},
+		"instances": {
+			"wailing-caverns": {
+				"key": "wailing-caverns",
+				"name": "Wailing Caverns",
+				"kind": "dungeon",
+				"forever": false,
+				"areaId": 718,
+				"map": null,
+				"entrance": {
+					"map": 1413,
+					"x": 46,
+					"y": 36.4,
+					"f": null
+				},
+				"levels": [
+					10,
+					17,
+					24
+				],
+				"bosses": [
+					{
+						"name": "Lady Anacondra",
+						"npc": 3671,
+						"items": []
+					},
+					{
+						"name": "Lord Cobrahn",
+						"npc": 3669,
+						"items": []
+					},
+					{
+						"name": "Mutanus the Devourer",
+						"npc": 3654,
+						"items": []
+					}
+				]
+			},
+			"deadmines": {
+				"key": "deadmines",
+				"name": "The Deadmines",
+				"kind": "dungeon",
+				"forever": false,
+				"areaId": 1581,
+				"map": null,
+				"entrance": null,
+				"levels": [
+					10,
+					17,
+					26
+				],
+				"bosses": [
+					{
+						"name": "Edwin VanCleef",
+						"npc": 639,
+						"items": [
+							5187
+						]
+					},
+					{
+						"name": "Trash",
+						"npc": null,
+						"items": []
+					}
+				]
+			},
+			"blackmaw-hold": {
+				"key": "blackmaw-hold",
+				"name": "Blackmaw Hold",
+				"kind": "dungeon",
+				"forever": true,
+				"areaId": null,
+				"map": null,
+				"entrance": null,
+				"levels": [
+					50,
+					55,
+					60
+				],
+				"bosses": []
+			}
+		},
+		"zones": {
+			"1413": {
+				"id": 1413,
+				"name": "The Barrens"
+			},
+			"1436": {
+				"id": 1436,
+				"name": "Westfall"
+			},
+			"1456": {
+				"id": 1456,
+				"name": "Thunder Bluff"
+			}
+		},
+		"factions": {
+			"81": {
+				"id": 81,
+				"name": "Thunder Bluff",
+				"side": "H"
+			}
+		},
+		"spells": {},
+		"frames": {
+			"1413": {
+				"c": 1,
+				"left": 2622.917,
+				"right": -7510.417,
+				"top": 1612.5,
+				"bottom": -5143.75
+			},
+			"1436": {
+				"c": 0,
+				"left": 3016.667,
+				"right": -483.333,
+				"top": -9416.667,
+				"bottom": -11750
+			},
+			"1456": {
+				"c": 1,
+				"left": 516.667,
+				"right": -527.083,
+				"top": -849.999,
+				"bottom": -1545.833
+			}
+		}
+	},
+	"inputs": {
+		"forever": {
+			"mapFrames": {
+				"forever": {
+					"1413": {
+						"c": 1,
+						"left": 2622.917,
+						"right": -7510.417,
+						"top": 1612.5,
+						"bottom": -5143.75
+					},
+					"1436": {
+						"c": 0,
+						"left": 3016.667,
+						"right": -483.333,
+						"top": -9416.667,
+						"bottom": -11750
+					},
+					"1456": {
+						"c": 1,
+						"left": 516.667,
+						"right": -527.083,
+						"top": -849.999,
+						"bottom": -1545.833
+					}
+				}
+			},
+			"zones": {
+				"1413": {
+					"id": 1413,
+					"name": "The Barrens",
+					"areaId": 17
+				},
+				"1436": {
+					"id": 1436,
+					"name": "Westfall",
+					"areaId": 40
+				},
+				"1456": {
+					"id": 1456,
+					"name": "Thunder Bluff",
+					"areaId": 1638
+				}
+			},
+			"quests": {
+				"155": {},
+				"166": {
+					"area": 1581
+				},
+				"914": {
+					"area": 718,
+					"xp": 2350,
+					"reputation": {
+						"faction": 81,
+						"value": 250
+					}
+				},
+				"959": {
+					"area": 718
+				},
+				"1486": {
+					"area": 718,
+					"xp": 1600
+				},
+				"1490": {},
+				"6981": {
+					"area": 718
+				}
+			},
+			"dungeons": {
+				"dungeons": [
+					{
+						"key": "wailing-caverns",
+						"name": "Wailing Caverns",
+						"levels": {
+							"min": 10,
+							"max": 24
+						},
+						"entrance": {
+							"map": 1413,
+							"x": 46,
+							"y": 36.4,
+							"f": "l"
+						},
+						"bosses": [
+							{
+								"name": "Lady Anacondra",
+								"npc": 3671,
+								"level": 20
+							},
+							{
+								"name": "Kresh",
+								"npc": 3653,
+								"level": 20
+							},
+							{
+								"name": "Lord Cobrahn",
+								"npc": 3669,
+								"level": 20
+							},
+							{
+								"name": "Mutanus the Devourer",
+								"npc": 3654,
+								"level": 22
+							}
+						],
+						"quests": [
+							{
+								"id": 1486,
+								"title": "Deviate Hides",
+								"faction": null,
+								"level": 17,
+								"minLevel": 13,
+								"xp": 1600,
+								"money": 1800,
+								"shareable": true,
+								"rewards": {
+									"items": [],
+									"choices": [
+										{
+											"item": 6480,
+											"name": "Slick Deviate Leggings",
+											"quality": 2
+										},
+										{
+											"item": 918,
+											"name": "Deviate Hide Pack",
+											"quality": 1
+										}
+									]
+								},
+								"start": {
+									"map": 1413,
+									"x": 45.99,
+									"y": 35.66,
+									"f": "e",
+									"kind": "npc",
+									"id": 5767,
+									"name": "Nalpak"
+								},
+								"end": {
+									"map": 1413,
+									"x": 45.99,
+									"y": 35.66,
+									"f": "e",
+									"kind": "npc",
+									"id": 5767,
+									"name": "Nalpak"
+								},
+								"startItem": null,
+								"startBoss": null,
+								"bosses": [],
+								"chain": []
+							},
+							{
+								"id": 914,
+								"title": "Leaders of the Fang",
+								"faction": "Horde",
+								"level": 22,
+								"minLevel": 18,
+								"xp": 2350,
+								"money": 3500,
+								"shareable": true,
+								"rewards": {
+									"items": [],
+									"choices": [
+										{
+											"item": 6505,
+											"name": "Crescent Staff",
+											"quality": 3
+										},
+										{
+											"item": 6504,
+											"name": "Wingblade",
+											"quality": 3
+										}
+									]
+								},
+								"start": {
+									"map": 1456,
+									"x": 75.6,
+									"y": 31.2,
+									"f": "e",
+									"kind": "npc",
+									"id": 5770,
+									"name": "Nara Wildmane"
+								},
+								"end": {
+									"map": 1456,
+									"x": 75.6,
+									"y": 31.2,
+									"f": "e",
+									"kind": "npc",
+									"id": 5770,
+									"name": "Nara Wildmane"
+								},
+								"startItem": null,
+								"startBoss": null,
+								"bosses": [
+									"Lady Anacondra",
+									"Lord Cobrahn"
+								],
+								"chain": [
+									1490
+								]
+							},
+							{
+								"id": 6981,
+								"title": "The Glowing Shard",
+								"faction": null,
+								"level": 22,
+								"minLevel": 15,
+								"xp": 1900,
+								"money": null,
+								"shareable": false,
+								"rewards": {
+									"items": [
+										{
+											"item": 5180,
+											"name": "Necklace of Calisea",
+											"quality": 3
+										}
+									],
+									"choices": []
+								},
+								"start": {
+									"map": 1413,
+									"x": 46,
+									"y": 36.4,
+									"f": "l",
+									"kind": "item",
+									"name": "Glowing Shard",
+									"inDungeon": true
+								},
+								"end": {
+									"map": 1413,
+									"x": 45.99,
+									"y": 35.66,
+									"f": "e",
+									"kind": "npc",
+									"id": 5767,
+									"name": "Nalpak"
+								},
+								"startItem": {
+									"item": 10441,
+									"name": "Glowing Shard"
+								},
+								"startBoss": "Mutanus the Devourer",
+								"bosses": [],
+								"chain": []
+							},
+							{
+								"id": 7777,
+								"title": "A Hidden Errand",
+								"faction": null,
+								"level": 20,
+								"hidden": true,
+								"rewards": {
+									"items": [],
+									"choices": []
+								},
+								"chain": []
+							}
+						],
+						"chainQuests": {
+							"1490": {
+								"id": 1490,
+								"title": "Nara Wildmane",
+								"faction": "Horde",
+								"level": 20,
+								"minLevel": 16,
+								"xp": 650,
+								"money": null,
+								"rewards": {
+									"items": [],
+									"choices": []
+								},
+								"start": {
+									"map": 1413,
+									"x": 52.2,
+									"y": 31.9,
+									"f": "e",
+									"kind": "npc",
+									"id": 3448,
+									"name": "Tonga Runetotem"
+								},
+								"end": {
+									"map": 1456,
+									"x": 75.6,
+									"y": 31.2,
+									"f": "e",
+									"kind": "npc",
+									"id": 5770,
+									"name": "Nara Wildmane"
+								},
+								"startItem": null
+							}
+						}
+					}
+				]
+			}
+		},
+		"client": {
+			"instanceMaps": [
+				{
+					"id": 36,
+					"name": "Deadmines",
+					"raid": false,
+					"players": 10,
+					"area": 1581,
+					"areas": [
+						1581
+					],
+					"zones": [
+						40
+					],
+					"corpse": {
+						"c": 0,
+						"x": -11089.666761,
+						"y": 1529.167
+					}
+				},
+				{
+					"id": 43,
+					"name": "Wailing Caverns",
+					"raid": false,
+					"players": 10,
+					"area": 718,
+					"areas": [
+						718
+					],
+					"zones": [
+						17
+					],
+					"corpse": null
+				}
+			]
+		}
+	}
+}

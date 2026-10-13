@@ -1,0 +1,70 @@
+guide forever/reputation/alterac-valley
+title Alterac Valley Reputation
+category Reputation
+levels 51-60
+zone Alterac Valley
+# Stormpike Guard (730, Alliance) and Frostwolf Clan (729, Horde).
+# Exalted with each battleground reputation is one of Forever's Legacy PvP
+# Challenges (one account-wide Legacy Point each; official Legacy System news).
+#
+# From the Era-baseline reference data: the turn-in NPCs inside the battleground
+# (Alterac Valley map) and their quests: Armor Scraps 7223 / Enemy Booty 7224
+# (one-time, 20 Armor Scraps) then More Armor Scraps 6781 / More Booty! 6741;
+# the quartermasters' Irondeep and Coldtooth Supplies (5892/6982, 5893/6985);
+# Arch Druid Renferal's Storm Crystals (6881/7386) and Primalist Thurloga's
+# Stormpike Soldier's Blood (6801/7385); the ram and wolf hide harnesses
+# (7026/7002); and the faction NPCs outside (Prospector Stonehewer, Voggah
+# Deathgrip). Only the one-time scrap quests are quest goals; the rest repeat,
+# and the client never flags repeatables completed, so the steps track the
+# standing itself (rep 730/729). Forever's Field of Honor season may change
+# these; refine with live recordings.
+
+step Stormpike Guard to Friendly
+  only Alliance
+  tip The Stormpike Guard holds Dun Baldar in the north of Alterac Valley. Destroying towers, taking graveyards and mines, and killing captains and generals all pay reputation to the whole team. Loot Armor Scraps from fallen enemies for Murgot Deepforge. Forever's Legacy Diplomat perk increases reputation gains.
+  accept 7223 optional
+  turnin 7223 optional
+  talk 12096 optional -- Stormpike Quartermaster: Irondeep and Coldtooth Supplies from the mines
+  rep 730 Friendly
+
+step Stormpike Guard to Honored
+  only Alliance
+  tip Keep winning Alterac Valley. More Armor Scraps (Murgot Deepforge), Storm Crystals for Arch Druid Renferal (they summon Ivus the Forest Lord) and Frostwolf Hides for the Stormpike Ram Rider Commander all repeat.
+  talk 13257 optional -- Murgot Deepforge: More Armor Scraps
+  talk 13442 optional -- Arch Druid Renferal: Crystal Cluster
+  rep 730 Honored
+
+step Stormpike Guard to Revered
+  only Alliance
+  tip Full games that kill Drek'Thar after the towers fall pay the most.
+  rep 730 Revered
+
+step Stormpike Guard to Exalted
+  only Alliance
+  tip Exalted with the Stormpike Guard earns a Legacy Point.
+  rep 730 Exalted
+
+step Frostwolf Clan to Friendly
+  only Horde
+  tip The Frostwolf Clan holds Frostwolf Keep in the south of Alterac Valley. Destroying towers, taking graveyards and mines, and killing captains and generals all pay reputation to the whole team. Loot Armor Scraps from fallen enemies for Smith Regzar. Forever's Legacy Diplomat perk increases reputation gains.
+  accept 7224 optional
+  turnin 7224 optional
+  talk 12097 optional -- Frostwolf Quartermaster: Coldtooth and Irondeep Supplies from the mines
+  rep 729 Friendly
+
+step Frostwolf Clan to Honored
+  only Horde
+  tip Keep winning Alterac Valley. More Booty! (Smith Regzar), Stormpike Soldier's Blood for Primalist Thurloga (it summons Lokholar the Ice Lord) and Alterac Ram Hides for the Frostwolf Wolf Rider Commander all repeat.
+  talk 13176 optional -- Smith Regzar: More Booty!
+  talk 13236 optional -- Primalist Thurloga: A Gallon of Blood
+  rep 729 Honored
+
+step Frostwolf Clan to Revered
+  only Horde
+  tip Full games that kill Vanndar Stormpike after the towers fall pay the most.
+  rep 729 Revered
+
+step Frostwolf Clan to Exalted
+  only Horde
+  tip Exalted with the Frostwolf Clan earns a Legacy Point.
+  rep 729 Exalted

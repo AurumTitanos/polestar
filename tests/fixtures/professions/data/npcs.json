@@ -1,0 +1,269 @@
+{
+	"38": {
+		"id": 38,
+		"name": "Defias Thug",
+		"level": 3,
+		"levelMax": 4,
+		"faction": null,
+		"spawns": {
+			"1429": {
+				"f": "e",
+				"pts": [
+					[
+						50,
+						40
+					],
+					[
+						51,
+						41
+					],
+					[
+						52,
+						40
+					],
+					[
+						80,
+						80
+					]
+				]
+			}
+		}
+	},
+	"1001": {
+		"id": 1001,
+		"name": "Burning Blade Thug",
+		"level": 5,
+		"faction": null,
+		"spawns": {
+			"1411": {
+				"f": "e",
+				"pts": [
+					[
+						40,
+						40
+					],
+					[
+						41,
+						41
+					],
+					[
+						42,
+						40
+					]
+				]
+			}
+		}
+	},
+	"1002": {
+		"id": 1002,
+		"name": "Friendly Merchant",
+		"level": 30,
+		"faction": "A",
+		"spawns": {
+			"1453": {
+				"f": "e",
+				"pts": [
+					[
+						50,
+						50
+					]
+				]
+			}
+		}
+	},
+	"1003": {
+		"id": 1003,
+		"name": "Elwynn Innkeeper",
+		"level": 30,
+		"faction": "A",
+		"spawns": {
+			"1429": {
+				"f": "e",
+				"pts": [
+					[
+						44,
+						65
+					]
+				]
+			}
+		},
+		"roles": [
+			"innkeeper"
+		]
+	},
+	"1004": {
+		"id": 1004,
+		"name": "Durotar Innkeeper",
+		"level": 30,
+		"faction": "H",
+		"spawns": {
+			"1411": {
+				"f": "e",
+				"pts": [
+					[
+						52,
+						41
+					]
+				]
+			}
+		},
+		"roles": [
+			"innkeeper"
+		]
+	},
+	"1346": {
+		"id": 1346,
+		"name": "Georgio Bolero",
+		"level": 30,
+		"faction": "A",
+		"spawns": {
+			"1453": {
+				"f": "e",
+				"pts": [
+					[
+						43.2,
+						73.5
+					]
+				]
+			}
+		}
+	},
+	"1347": {
+		"id": 1347,
+		"name": "Alexandra Bolero",
+		"level": 30,
+		"faction": "A",
+		"spawns": {
+			"1453": {
+				"f": "e",
+				"pts": [
+					[
+						43.4,
+						73.8
+					]
+				]
+			}
+		},
+		"roles": [
+			"vendor"
+		]
+	},
+	"3363": {
+		"id": 3363,
+		"name": "Magar",
+		"level": 30,
+		"faction": "H",
+		"spawns": {
+			"1454": {
+				"f": "e",
+				"pts": [
+					[
+						63.6,
+						49.9
+					]
+				]
+			}
+		}
+	},
+	"3364": {
+		"id": 3364,
+		"name": "Borya",
+		"level": 30,
+		"faction": "H",
+		"spawns": {
+			"1454": {
+				"f": "e",
+				"pts": [
+					[
+						63.1,
+						49.8
+					]
+				]
+			}
+		},
+		"roles": [
+			"vendor"
+		]
+	},
+	"5000": {
+		"id": 5000,
+		"name": "Far Vendor",
+		"level": 30,
+		"faction": "A",
+		"spawns": {
+			"1429": {
+				"f": "e",
+				"pts": [
+					[
+						40,
+						60
+					]
+				]
+			}
+		},
+		"roles": [
+			"vendor"
+		]
+	},
+	"6000": {
+		"id": 6000,
+		"name": "Pattern Seller",
+		"level": 30,
+		"faction": "AH",
+		"spawns": {
+			"1429": {
+				"f": "e",
+				"pts": [
+					[
+						42,
+						64
+					]
+				]
+			}
+		},
+		"roles": [
+			"vendor"
+		]
+	},
+	"7000": {
+		"id": 7000,
+		"name": "Town Bruiser",
+		"level": 55,
+		"faction": null,
+		"spawns": {
+			"1429": {
+				"f": "e",
+				"pts": [
+					[
+						44,
+						64
+					],
+					[
+						45,
+						65
+					],
+					[
+						43,
+						66
+					],
+					[
+						44,
+						66
+					],
+					[
+						45,
+						64
+					],
+					[
+						43,
+						64
+					],
+					[
+						44,
+						63
+					]
+				]
+			}
+		}
+	}
+}

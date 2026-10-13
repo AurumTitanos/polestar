@@ -1,0 +1,24 @@
+guide forever/collectibles/mounts/alliance/winterspring-frostsaber
+title Winterspring Frostsaber
+category Collectibles
+folder Mounts · Reputation
+keywords Reins of the Winterspring Frostsaber, Wintersaber Trainers, Rivern Frostwind, Frostsaber Rock, saber, Exalted
+collects 13086
+faction Alliance
+levels 58-60
+zone Winterspring
+
+# Reins of the Winterspring Frostsaber from Rivern Frostwind, for Exalted
+# Wintersaber Trainers (Era rule; the reputation is server-side).
+# Sources: Forever client 1.60.1.70338 tables via wago.tools (ItemSparse: level
+# 60, 200g, no riding rank asked); items.json / npcs.json for the vendors.
+
+step Wintersaber Trainers
+  tip Rivern Frostwind at Frostsaber Rock in northern Winterspring offers the repeatable Frostsaber Provisions, Winterfall Intrusion and Rampaging Giants (level 58); they are the whole road to Exalted, so expect weeks of turn-ins.
+  rep "Wintersaber Trainers" Exalted
+  talk 10618                          -- Rivern Frostwind, Frostsaber Rock
+
+step Reins of the Winterspring Frostsaber
+  tip The Forever client lists it at 200g and level 60, and asks for no riding rank.
+  level 60
+  buy 13086 npc 10618                 -- Rivern Frostwind, 200g

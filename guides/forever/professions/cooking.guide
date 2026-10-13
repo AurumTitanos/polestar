@@ -1,0 +1,451 @@
+guide forever/professions/cooking
+title Cooking 1-300
+category Professions
+coords era
+levels 5-60
+zone Ironforge
+
+# Cooking 1-300 for both factions: recipes in orange/yellow order from
+# professions.json, each with where its ingredients drop (the densest cluster
+# of normal creatures that drop them in the zone, from items.json) or a vendor
+# that sells them. Expert is a cookbook (Shandrina, Ashenvale / Wulan,
+# Desolace); Artisan is the Clamlette Surprise quest in Gadgetzan.
+# Craft counts use the Classic skill-up chance (grey - skill) / (grey - yellow).
+#
+# Spawns, trainers, vendors and recipes come from the Era baseline (pfQuest +
+# Blizzard client tables). Forever keeps Classic professions for 1-300 as far as
+# anything public says, but nothing confirms its 10-60 placement yet: refine
+# with Polestar_Recorder sessions. Waypoints are Era-frame (`coords era`); the
+# engine converts them where Forever changed a map frame.
+
+# ---------------------------------------------------------------- Apprentice
+
+step Learn Cooking
+  tip Any Cooking trainer of your faction teaches Apprentice Cooking (character level 5); the arrow picks the nearest.
+  level 5
+  train Cooking Apprentice
+
+# ---------------------------------------------------------------- Cooking 1-50
+
+step Charred Wolf Meat: ingredients
+  only Human
+  zone Elwynn Forest
+  collect 2672 x50 nearest     -- Prowler (86%) in Elwynn Forest, or wherever the arrow points
+
+step Charred Wolf Meat (1-50)
+  only Human
+  zone Elwynn Forest
+  tip Charred Wolf Meat is orange from 1 (yellow at 45, grey at 85): about 50 crafts to 50. Cook at any fire: Basic Campfire comes with Cooking.
+  craft 2538 until 50
+
+step Roasted Boar Meat: ingredients
+  only Dwarf,Gnome
+  zone Dun Morogh
+  collect 769 x50 nearest     -- Scarred Crag Boar (38%), Elder Crag Boar (36%) in Dun Morogh, or wherever the arrow points
+
+step Roasted Boar Meat (1-50)
+  only Dwarf,Gnome
+  zone Dun Morogh
+  tip Roasted Boar Meat is orange from 1 (yellow at 45, grey at 85): about 50 crafts to 50. Cook at any fire: Basic Campfire comes with Cooking.
+  craft 2540 until 50
+
+step Brilliant Smallfish: shopping
+  only NightElf
+  tip The arrow picks the nearest vendor of your faction for each item.
+  buy 6325 x1 nearest
+
+step Brilliant Smallfish: ingredients
+  only NightElf
+  zone Teldrassil
+  goto 58.4,94.0 "Rut'theran Village docks" r 25
+  note Catch about 50 Raw Brilliant Smallfish here by fishing (see the Fishing guide).
+
+step Brilliant Smallfish (1-50)
+  only NightElf
+  zone Teldrassil
+  tip Brilliant Smallfish is orange from 1 (yellow at 45, grey at 85): about 50 crafts to 50. Cook at any fire: Basic Campfire comes with Cooking. Raw Brilliant Smallfish is the common catch in Teldrassil's waters.
+  learn 7751
+  craft 7751 until 50
+
+step Roasted Boar Meat: ingredients
+  only Orc,Troll
+  zone Durotar
+  collect 769 x50 nearest     -- Dire Mottled Boar (99%), Elder Mottled Boar (74%) in Durotar, or wherever the arrow points
+
+step Roasted Boar Meat (1-50)
+  only Orc,Troll
+  zone Durotar
+  tip Roasted Boar Meat is orange from 1 (yellow at 45, grey at 85): about 50 crafts to 50. Cook at any fire: Basic Campfire comes with Cooking.
+  craft 2540 until 50
+
+step Charred Wolf Meat: ingredients
+  only Tauren
+  zone Mulgore
+  collect 2672 x50 nearest     -- Prairie Wolf Alpha (82%), Prairie Stalker (77%) in Mulgore, or wherever the arrow points
+
+step Charred Wolf Meat (1-50)
+  only Tauren
+  zone Mulgore
+  tip Charred Wolf Meat is orange from 1 (yellow at 45, grey at 85): about 50 crafts to 50. Cook at any fire: Basic Campfire comes with Cooking.
+  craft 2538 until 50
+
+step Charred Wolf Meat: ingredients
+  only Undead
+  zone Tirisfal Glades
+  collect 2672 x50 nearest     -- Ravenous Darkhound (88%) in Tirisfal Glades, or wherever the arrow points
+
+step Charred Wolf Meat (1-50)
+  only Undead
+  zone Tirisfal Glades
+  tip Charred Wolf Meat is orange from 1 (yellow at 45, grey at 85): about 50 crafts to 50. Cook at any fire: Basic Campfire comes with Cooking.
+  craft 2538 until 50
+
+step Journeyman Cooking
+  tip Journeyman Cooking raises the cap to 150; it needs skill 50 and character level 10: the arrow picks the nearest Cooking trainer of your faction.
+  level 10
+  train Cooking Journeyman
+
+# ---------------------------------------------------------------- Cooking 50-125
+
+step Goretusk Liver Pie: shopping
+  only Human
+  tip The arrow picks the nearest vendor of your faction for each item.
+  buy 2697 x1 nearest
+  buy 2678 x52 nearest
+
+step Goretusk Liver Pie: ingredients
+  only Human
+  zone Westfall
+  collect 723 x52 nearest     -- Great Goretusk (35%), Goretusk (34%) in Westfall, or wherever the arrow points
+
+step Goretusk Liver Pie (50-100)
+  only Human
+  zone Westfall
+  tip Goretusk Liver Pie is orange from 50 (yellow at 90, grey at 130): about 52 crafts to 100. Cook at any fire: Basic Campfire comes with Cooking.
+  learn 2542
+  craft 2542 until 100
+
+step Loch Frenzy Delight: shopping
+  only Dwarf,Gnome
+  tip The arrow picks the nearest vendor of your faction for each item.
+  buy 6329 x1 nearest
+  buy 2678 x52 nearest
+
+step Loch Frenzy Delight: ingredients
+  only Dwarf,Gnome
+  zone Loch Modan
+  collect 6317 x52 nearest     -- Loch Frenzy (50%) in Loch Modan, or wherever the arrow points
+
+step Loch Frenzy Delight (50-100)
+  only Dwarf,Gnome
+  zone Loch Modan
+  tip Loch Frenzy Delight is orange from 50 (yellow at 90, grey at 130): about 52 crafts to 100. Cook at any fire: Basic Campfire comes with Cooking.
+  learn 7754
+  craft 7754 until 100
+
+step Rainbow Fin Albacore: shopping
+  only NightElf
+  tip The arrow picks the nearest vendor of your faction for each item.
+  buy 6368 x1 nearest
+
+step Rainbow Fin Albacore: ingredients
+  only NightElf
+  zone Darkshore
+  goto 36.3,45.6 "Auberdine docks" r 25
+  note Catch about 68 Raw Rainbow Fin Albacore here by fishing (see the Fishing guide).
+
+step Rainbow Fin Albacore (50-110)
+  only NightElf
+  zone Darkshore
+  tip Rainbow Fin Albacore is orange from 50 (yellow at 90, grey at 130): about 68 crafts to 110. Cook at any fire: Basic Campfire comes with Cooking. Fishing off the Auberdine docks catches Raw Rainbow Fin Albacore.
+  learn 7827
+  craft 7827 until 110
+
+step Strider Stew: shopping
+  only Orc,Troll,Tauren,Undead
+  tip The arrow picks the nearest vendor of your faction for each item.
+  buy 5486 x1 nearest
+  buy 4536 x52 nearest
+
+step Strider Stew: ingredients
+  only Orc,Troll,Tauren,Undead
+  zone The Barrens
+  collect 5469 x52 nearest     -- Greater Plainstrider (33%) in The Barrens, or wherever the arrow points
+
+step Strider Stew (50-100)
+  only Orc,Troll,Tauren,Undead
+  zone The Barrens
+  tip Strider Stew is orange from 50 (yellow at 90, grey at 130): about 52 crafts to 100. Cook at any fire: Basic Campfire comes with Cooking.
+  learn 6416
+  craft 6416 until 100
+
+step Crocolisk Steak: shopping
+  only Human,Dwarf,Gnome
+  tip The arrow picks the nearest vendor of your faction for each item.
+  buy 3678 x1 nearest
+  buy 2678 x26 nearest
+
+step Crocolisk Steak: ingredients
+  only Human,Dwarf,Gnome
+  zone Wetlands
+  collect 2924 x26 nearest     -- Wetlands Crocolisk (50%) in Wetlands, or wherever the arrow points
+
+step Crocolisk Steak (100-125)
+  only Human,Dwarf,Gnome
+  zone Wetlands
+  tip Crocolisk Steak is orange from 100 (yellow at 120, grey at 160): about 26 crafts to 125. Cook at any fire: Basic Campfire comes with Cooking.
+  learn 3370
+  craft 3370 until 125
+
+step Lean Venison: shopping
+  only NightElf
+  tip The arrow picks the nearest vendor of your faction for each item.
+  buy 5489 x1 nearest
+  buy 2678 x60 nearest
+
+step Lean Venison: ingredients
+  only NightElf
+  zone Ashenvale
+  collect 5471 x15 nearest     -- Elder Shadowhorn Stag (53%) in Ashenvale, or wherever the arrow points
+
+step Lean Venison (110-125)
+  only NightElf
+  zone Ashenvale
+  tip Lean Venison is orange from 110 (yellow at 150, grey at 190): about 15 crafts to 125. Cook at any fire: Basic Campfire comes with Cooking.
+  learn 6419
+  craft 6419 until 125
+
+step Crispy Lizard Tail: shopping
+  only Horde
+  tip The arrow picks the nearest vendor of your faction for each item.
+  buy 5488 x1 nearest
+  buy 2692 x25 nearest
+
+step Crispy Lizard Tail: ingredients
+  only Horde
+  zone The Barrens
+  collect 5470 x25 nearest     -- Thunderhead (59%), Owatanka (35%) in The Barrens, or wherever the arrow points
+
+step Crispy Lizard Tail (100-125)
+  only Horde
+  zone The Barrens
+  tip Crispy Lizard Tail is orange from 100 (yellow at 140, grey at 180): about 25 crafts to 125. Cook at any fire: Basic Campfire comes with Cooking.
+  learn 6418
+  craft 6418 until 125
+
+# ---------------------------------------------------------------- Expert Cooking
+
+step Expert Cooking
+  tip Expert Cooking raises the cap to 225; it needs skill 125 and character level 20: it is a book, Expert Cookbook; the arrow picks its nearest seller for your faction. Buy it and read it.
+  level 20
+  train Cooking Expert "Buy and read Expert Cookbook (Expert Cooking)"
+
+# ---------------------------------------------------------------- Cooking 125-175
+
+step Crocolisk Steak: shopping
+  only Human,Dwarf,Gnome
+  tip The arrow picks the nearest vendor of your faction for each item.
+  buy 2678 x7 nearest
+
+step Crocolisk Steak: ingredients
+  only Human,Dwarf,Gnome
+  zone Wetlands
+  collect 2924 x7 nearest     -- Wetlands Crocolisk (50%) in Wetlands, or wherever the arrow points
+
+step Crocolisk Steak (125-130)
+  only Human,Dwarf,Gnome
+  zone Wetlands
+  tip Crocolisk Steak is yellow from 125 (yellow at 120, grey at 160): about 7 crafts to 130. Cook at any fire: Basic Campfire comes with Cooking.
+  craft 3370 until 130
+
+step Curiously Tasty Omelet: shopping
+  only Human,Dwarf,Gnome
+  tip The arrow picks the nearest vendor of your faction for each item.
+  buy 3682 x1 nearest
+  buy 2692 x46 nearest
+
+step Curiously Tasty Omelet: ingredients
+  only Human,Dwarf,Gnome
+  zone Wetlands
+  collect 3685 x46 nearest     -- Highland Razormaw (72%), Elder Razormaw (67%) in Wetlands, or wherever the arrow points
+
+step Curiously Tasty Omelet (130-175)
+  only Human,Dwarf,Gnome
+  zone Wetlands
+  tip Curiously Tasty Omelet is orange from 130 (yellow at 170, grey at 210): about 46 crafts to 175. Cook at any fire: Basic Campfire comes with Cooking.
+  learn 3376
+  craft 3376 until 175
+
+step Lean Venison: shopping
+  only NightElf
+  tip The arrow picks the nearest vendor of your faction for each item.
+  buy 2678 x100 nearest
+
+step Lean Venison: ingredients
+  only NightElf
+  zone Ashenvale
+  collect 5471 x25 nearest     -- Elder Shadowhorn Stag (53%) in Ashenvale, or wherever the arrow points
+
+step Lean Venison (125-150)
+  only NightElf
+  zone Ashenvale
+  tip Lean Venison is orange from 125 (yellow at 150, grey at 190): about 25 crafts to 150. Cook at any fire: Basic Campfire comes with Cooking.
+  craft 6419 until 150
+
+step Curiously Tasty Omelet: shopping
+  only NightElf
+  tip The arrow picks the nearest vendor of your faction for each item.
+  buy 3682 x1 nearest
+  buy 2692 x26 nearest
+
+step Curiously Tasty Omelet: ingredients
+  only NightElf
+  zone Wetlands
+  collect 3685 x26 nearest     -- Highland Razormaw (72%), Elder Razormaw (67%) in Wetlands, or wherever the arrow points
+
+step Curiously Tasty Omelet (150-175)
+  only NightElf
+  zone Wetlands
+  tip Curiously Tasty Omelet is orange from 150 (yellow at 170, grey at 210): about 26 crafts to 175. Cook at any fire: Basic Campfire comes with Cooking.
+  learn 3376
+  craft 3376 until 175
+
+step Crispy Lizard Tail: shopping
+  only Horde
+  tip The arrow picks the nearest vendor of your faction for each item.
+  buy 2692 x15 nearest
+
+step Crispy Lizard Tail: ingredients
+  only Horde
+  zone The Barrens
+  collect 5470 x15 nearest     -- Thunderhead (59%), Owatanka (35%) in The Barrens, or wherever the arrow points
+
+step Crispy Lizard Tail (125-140)
+  only Horde
+  zone The Barrens
+  tip Crispy Lizard Tail is orange from 125 (yellow at 140, grey at 180): about 15 crafts to 140. Cook at any fire: Basic Campfire comes with Cooking.
+  craft 6418 until 140
+
+step Hot Lion Chops: shopping
+  only Horde
+  tip The arrow picks the nearest vendor of your faction for each item.
+  buy 3735 x1 nearest
+  buy 2692 x35 nearest
+
+step Hot Lion Chops: ingredients
+  only Horde
+  zone Hillsbrad Foothills
+  collect 3731 x35 nearest     -- Feral Mountain Lion (56%) in Hillsbrad Foothills, or wherever the arrow points
+
+step Hot Lion Chops (140-175)
+  only Horde
+  zone Hillsbrad Foothills
+  tip Hot Lion Chops is orange from 140 (yellow at 175, grey at 215): about 35 crafts to 175. Cook at any fire: Basic Campfire comes with Cooking.
+  learn 3398
+  craft 3398 until 175
+
+# ---------------------------------------------------------------- Cooking 175-225
+
+step Roast Raptor: shopping
+  tip The arrow picks the nearest vendor of your faction for each item.
+  buy 12228 x1 nearest
+  buy 2692 x40 nearest
+
+step Roast Raptor: ingredients
+  zone Dustwallow Marsh
+  collect 12184 x40 nearest     -- Bloodfen Screecher (52%), Bloodfen Raptor (51%) in Dustwallow Marsh, or wherever the arrow points
+
+step Roast Raptor (175-215)
+  zone Dustwallow Marsh
+  tip Roast Raptor is orange from 175 (yellow at 215, grey at 255): about 40 crafts to 215. Cook at any fire: Basic Campfire comes with Cooking.
+  learn 15855
+  craft 15855 until 215
+
+step Heavy Kodo Stew: shopping
+  tip The arrow picks the nearest vendor of your faction for each item.
+  buy 12240 x1 nearest
+  buy 3713 x10 nearest
+  buy 159 x10 nearest
+
+step Heavy Kodo Stew: ingredients
+  zone Desolace
+  collect 12204 x20 nearest     -- Dying Kodo (55%), Ancient Kodo (54%), Aged Kodo (40%) in Desolace, or wherever the arrow points
+
+step Heavy Kodo Stew (215-225)
+  zone Desolace
+  tip Heavy Kodo Stew is orange from 215 (yellow at 240, grey at 280): about 10 crafts to 225. Cook at any fire: Basic Campfire comes with Cooking.
+  learn 15910
+  craft 15910 until 225
+
+# ---------------------------------------------------------------- Artisan Cooking: Clamlette Surprise
+
+step Dirge Quikcleave
+  only Alliance
+  zone Ironforge
+  tip Artisan Cooking comes from Dirge Quikcleave in Gadgetzan (Tanaris). The cooking trainer in Ironforge sends you; it needs skill 225 and level 35.
+  skill Cooking 225
+  level 35
+  accept 6612                             -- Daryl Riknussun, Ironforge
+
+step Dirge Quikcleave
+  only Horde
+  zone Orgrimmar
+  tip Artisan Cooking comes from Dirge Quikcleave in Gadgetzan (Tanaris). The cooking trainer in Orgrimmar sends you; it needs skill 225 and level 35.
+  skill Cooking 225
+  level 35
+  accept 6611                             -- Zamja, Orgrimmar
+
+step Clamlette Surprise
+  zone Tanaris
+  turnin 6612 only Alliance
+  turnin 6611 only Horde
+  accept 6610
+
+step Alterac Swiss
+  tip Clamlette Surprise asks for 20 Alterac Swiss (check the quest log); innkeepers and food vendors sell it, and the arrow picks the nearest.
+  buy 8932 x20 nearest
+
+step Giant Eggs
+  zone Felwood
+  tip Giant Eggs drop from the Ironbeak owls of Felwood.
+  collect 12207 quest 6610
+
+step Zesty Clam Meat
+  zone Tanaris
+  tip Zesty Clam Meat has no drop data: buy it at the Gadgetzan Auction House, next to Dirge, or open clams looted from coastal creatures.
+  collect 7974 quest 6610 @52.6,28.1 map 1446
+
+step Dirge Quikcleave
+  zone Tanaris
+  turnin 6610                             -- Artisan Cooking
+
+# ---------------------------------------------------------------- Cooking 225-300
+
+step Heavy Kodo Stew: shopping
+  tip The arrow picks the nearest vendor of your faction for each item.
+  buy 3713 x15 nearest
+  buy 159 x15 nearest
+
+step Heavy Kodo Stew: ingredients
+  zone Desolace
+  collect 12204 x30 nearest     -- Dying Kodo (55%), Ancient Kodo (54%), Aged Kodo (40%) in Desolace, or wherever the arrow points
+
+step Heavy Kodo Stew (225-240)
+  zone Desolace
+  tip Heavy Kodo Stew is orange from 225 (yellow at 240, grey at 280): about 15 crafts to 240. Cook at any fire: Basic Campfire comes with Cooking.
+  craft 15910 until 240
+
+step Monster Omelet: shopping
+  tip The arrow picks the nearest vendor of your faction for each item.
+  buy 16110 x1 nearest
+  buy 3713 x210 nearest
+
+step Monster Omelet: ingredients
+  zone Felwood
+  collect 12207 x105 nearest     -- Ironbeak Hunter (40%) in Felwood, or wherever the arrow points
+
+step Monster Omelet (240-300)
+  zone Felwood
+  tip Monster Omelet is orange from 240 (yellow at 265, grey at 305): about 105 crafts to 300. Cook at any fire: Basic Campfire comes with Cooking.
+  learn 15933
+  craft 15933 until 300

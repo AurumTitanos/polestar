@@ -1,0 +1,153 @@
+# Hillsbrad Foothills, Alliance 30 to ~32, then Stormwind and Ironforge: the
+# first guide of the 30-40 band.
+#
+# Flow: Southshore (Farren's murlocs and naga, the turtles, the Syndicate camp
+# on the Alterac border, the yeti cave) -> fly to Stormwind for a round of
+# turn-ins and the Missing Diplomat chain -> Deeprun Tram to Ironforge for
+# Stormpike and the Reclaimers -> next guide: Desolace.
+#
+# Deviations from the simulator route (consensus, Alliance Human):
+# - Every Southshore quest is picked up on arrival instead of after Farren's
+#   chain: same hub, no extra walk.
+# - Stormwind: the turn-ins run as one loop (Trade District, Old Town, the
+#   Keep, the Cathedral, the Mage Quarter, back through the Trade District to
+#   the tram). The route's Stormwind bind and its hearth back into the same
+#   city are dropped: the next bind (Nijel's Point) replaces it before use.
+# - The route binds at Nijel's Point while still in Ironforge (a model
+#   shortcut): the bind is in the next guide, on arrival.
+# Carried on to later guides: Costly Menace (564), Bartolo's Yeti Fur Cloak
+# (565), Hints of a New Plague? (659), An Alarming Request (92432), Noble
+# Deaths (512), Further Mysteries (525), Malin's Request (690), James Hyal
+# (1301), The Doomed Fleet (270) and The Missing Diplomat (1248), all turned
+# in later on the route.
+# Class quests: none in this stretch.
+# Left out: A Noble Brew (335, 336): a cellar stop and a walk to the Keep's
+# far side for little XP; dropped for flow.
+# Not here: Return to Milton (542), Dark Council (537) and Stormpike's
+# Deciphering (554) cannot be taken in this guide: their prerequisites (540,
+# 525, 551) are turned in later, in 06-arathi-highlands, which carries all
+# three.
+guide forever/alliance/30-40/01-hillsbrad-foothills
+title Hillsbrad Foothills, Ironforge & Stormwind City
+faction Alliance
+levels 30-32
+zone Hillsbrad Foothills
+next forever/alliance/30-40/02-desolace
+
+# ---------------------------------------------------------------- Southshore
+
+step Southshore
+  tip Pick up everything in town before heading out; Farren stands outside the inn, Maleb in the town hall.
+  accept 536                          -- Lieutenant Farren Orinelle
+  accept 555                          -- Chef Jessen
+  buy 3713 x1 npc 2381                -- Soothing Spices, from Micha Yance
+  accept 659                          -- Phin Odelic: his trail leads to Arathi
+  accept 92432 "An Alarming Request" npc 247264 -- Emissary Jacques
+  accept 505                          -- Magistrate Henry Maleb
+  accept 565                          -- Bartolo Ginsetti
+  accept 564                          -- Darren Malvew: the lions come later
+
+# ---------------------------------------------------------------- The coast
+
+step Torn Fin murlocs
+  tip The Torn Fin murlocs crowd the Western Strand, south-west of Southshore.
+  kill 2377 quest 536.1               -- Torn Fin Tidehunter
+  kill 2376 quest 536.2               -- Torn Fin Oracle
+
+step Farren
+  turnin 536
+  accept 559
+
+step Murloc heads
+  tip Back to the same murlocs; not every one drops a head.
+  collect 3716 quest 559              -- Murloc Head
+
+step Farren's Proof
+  turnin 559                          -- Lieutenant Farren Orinelle
+  accept 560
+  turnin 560                          -- Marshal Redpath
+  accept 561
+  turnin 561                          -- Lieutenant Farren Orinelle
+  accept 562
+
+step Daggerspine naga
+  tip The naga hold the shore south-east of Southshore.
+  kill 2369 quest 562.1               -- Daggerspine Shorehunter
+  kill 2371 quest 562.2               -- Daggerspine Siren
+
+step Farren
+  turnin 562
+  accept 563                          -- A report for Stormwind Keep
+
+# ---------------------------------------------------------------- North of Southshore
+
+step Snapjaws
+  tip The Snapjaw turtles bask along the river east of Southshore, south of Tarren Mill (Horde).
+  collect 3712 quest 555              -- Turtle Meat
+
+step Syndicate camp
+  tip The Syndicate camp sits on the Alterac border in northern Hillsbrad, west of Tarren Mill (Horde); the documents lie in the camp.
+  kill 2241 quest 505.2               -- Syndicate Thief
+  kill 2240 quest 505.1               -- Syndicate Footpad
+  accept 510 object 1738              -- Syndicate Documents
+  accept 511 object 1738
+
+step Yeti cave
+  tip The yetis live in the cave in the hills north of Southshore, on your way back south.
+  collect 3720 quest 565.3            -- Yeti Fur
+  note Bartolo also wants a Hillman's Cloak, a Bolt of Woolen Cloth and Fine Thread: crafted or bought; the cloak is turned in when you are back in Southshore later.
+
+step Southshore
+  turnin 555                          -- Chef Jessen
+  turnin 511                          -- Loremaster Dibbs
+  accept 514
+  turnin 505                          -- Magistrate Henry Maleb
+  turnin 510
+  accept 512
+
+# ---------------------------------------------------------------- Stormwind
+
+step Fly to Stormwind
+  zone Stormwind City
+  fly "Stormwind"                     -- From Darla Harris in Southshore
+
+step Elling Trias
+  tip The cheese shop in the Trade District.
+  turnin 1245
+  accept 1246
+
+step Dashel Stonefist
+  tip Dashel waits in the Pig and Whistle tavern in Old Town; he and his two thugs fight you, but stop once beaten.
+  turnin 1246
+  accept 1447
+  complete 1447
+  turnin 1447
+  accept 1247
+
+step Stormwind Keep
+  turnin 563                          -- Major Samuelson
+
+step Cathedral of Light
+  turnin 293                          -- Archbishop Benedictus
+  turnin 269                          -- Bishop Farthing
+  accept 270
+
+step Mage Quarter
+  tip Archmage Malin is in the Slaughtered Lamb; Garion Wendell near the canal; Connor Rivers south of the Mage Quarter.
+  accept 690                          -- Archmage Malin
+  accept 79536                        -- Garion Wendell
+  turnin 79536
+  accept 1301                         -- Connor Rivers
+
+step Elling Trias
+  turnin 1247
+  accept 1248
+
+# ---------------------------------------------------------------- Ironforge
+
+step Deeprun Tram
+  zone Ironforge
+  tip Take the Deeprun Tram from the Dwarven District to Ironforge.
+  turnin 514                          -- Prospector Stormpike, Hall of Explorers
+  accept 525
+  accept 1453                         -- Roetten Stonehammer

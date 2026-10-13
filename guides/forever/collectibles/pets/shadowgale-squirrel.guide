@@ -1,0 +1,35 @@
+guide forever/collectibles/pets/shadowgale-squirrel
+title Shadowgale Squirrel
+category Collectibles
+folder Companion pets · Vendors
+keywords Vayn Moongaze, Nightclaw Druids, Revered, Zephras Isle, squirrel
+collects 280347
+levels 1-60
+zone map 2521
+
+# Shadowgale Squirrel from Vayn Moongaze on Zephras Isle, for Revered with the
+# Nightclaw Druids.
+# It needs Revered and costs 50s; skyboats leave the isle.
+# Sources: NPC 254151
+# (position); Forever client 1.60.1.70338 via wago.tools (ItemSparse price).
+# The Nightclaw Druids (faction 2758) are not in our factions.json yet, and
+# how to raise them is not known yet.
+
+step Skyboat from Dalaran
+  only Alliance
+  zone Alterac Mountains
+  tip Zephras Isle is the Skyborne starting island; anyone may visit. A skyboat leaves the north side of Dalaran about every five minutes (another flies from north of Thunder Bluff; either faction may take either). Skip this if you are already on the island.
+  goto 12.5,51.8 "Skyboat to Zephras Isle" live
+
+step Skyboat from Thunder Bluff
+  only Horde
+  zone Mulgore
+  tip Zephras Isle is the Skyborne starting island; anyone may visit. A skyboat leaves the cliffs south of Skywatcher Plateau, north of Thunder Bluff, about every five minutes (another flies from Dalaran; either faction may take either). Skip this if you are already on the island.
+  goto 34.3,25.8 "Skyboat to Zephras Isle" live
+
+step Revered with the Nightclaw Druids
+  zone map 2521
+  tip Vayn Moongaze sells the squirrel (50s) once you are Revered with the Nightclaw Druids.
+  rep 2758 "Nightclaw Druids" Revered
+  vendor 254151 "Vayn Moongaze" @63.8,36
+  buy 280347 "Shadowgale Squirrel" npc 254151 @63.8,36 -- 50s

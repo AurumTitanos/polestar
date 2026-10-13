@@ -1,0 +1,463 @@
+guide forever/horde/tauren/01-mulgore
+title Mulgore & Durotar
+faction Horde
+race Tauren
+levels 1-13
+zone Mulgore
+next forever/horde/02-the-barrens
+
+# Route: the simulator's consensus route for Tauren (data/sim/export/consensus-horde-tauren),
+# visits 1-2: Mulgore 1-11.8 (bind Bloodhoof Village), Durotar 11.8-12.7
+# (bind Razor Hill), ending at the Crossroads (flight path, bind).
+#
+# Flow: Camp Narache -> plainstriders and cougars -> Seer Graytongue -> the
+# shrine of An'she and Mu'sha -> Brambleblade Ravine -> Camp Narache ->
+# Bloodhoof Village (bind) -> Winterhoof Water Well -> Chakuyak and the
+# northern plains -> Bloodhoof -> Thunderhorn Water Well -> Bloodhoof ->
+# Winterhoof Water Well, the Rolling Plains, Galak centaurs and the Ravaged
+# Caravan -> Bloodhoof -> Venture Co. Mine -> Wildmane Water Well and
+# Windfury Ridge -> Bael'dun Digsite -> Palemane Rock -> Bloodhoof ->
+# Winterhoof Water Well -> Red Rocks -> through the Barrens to Razor Hill
+# (Crossroads flight path on the way) -> the naga coast -> Drygulch Ravine
+# and Skull Rock -> Thunder Ridge -> Razor Hill -> the Crossroads.
+#
+# Deviations from the export:
+# - Break Sharptusk! (3376) is taken from Brave Windfeather at the second
+#   Grull visit (it needs level 3), not at level 3.1 with the first hand-ins.
+# - The Adventurer (96659) is taken from Chief Hawkwind when you leave Camp
+#   Narache and handed to Kaga Wildhoof on the road into Bloodhoof; it unlocks
+#   The Great Outdoors and Camping 101, which the export took earlier than
+#   The Adventurer (impossible in game). All three are done on arrival.
+# - Fizsprocket's Notes (98424) and the Venture Co. quests (764, 765) share
+#   one trip into the mine: the notes start from Supervisor Fizsprocket's drop,
+#   so the export's first mine visit is folded into the second.
+# - A Sacred Burial (833) and Rite of Wisdom (773) are done on one visit to
+#   Red Rocks instead of two.
+# - Durotar: both Threat from Below quests (99049, 99051) are done on one
+#   loop along the coast and handed in together after the hearth; Skull Rock
+#   is visited from Drygulch Ravine before Rezlak, so nothing is walked twice.
+#   The Crossroads flight path is picked up on the walk to Razor Hill.
+#
+# - Thunder Bluff stop after Red Rocks (added at the integrator's request;
+#   class quests are not simulated): flight path, training, and the turn-ins
+#   the export accepts but never hands in: Journey into Thunder Bluff (775),
+#   The High Chieftain (99082), Thunderhorn's Report (98435), The Hunter's
+#   Way (861) and The Longwalkers (98430, escorted out of Palemane Rock).
+#   The export's hearth to Bloodhoof at 10.2 is not used; Druids hearth there
+#   from Moonglade instead. The export's Razor Hill bind and hearth are
+#   dropped too: Thunder Ridge is a short walk from Razor Hill.
+#
+# Class quests at 10 (Thunder Bluff stop):
+# - Warrior: Veteran Uzzek (1505), continued in the Barrens guide.
+# - Shaman: Call of Fire (1523), continued in the Barrens guide.
+# - Hunter: The Hunter's Path (6065) and the taming chain at Bloodhoof to
+#   Training the Beast (6089), handed in on a flight back from the Crossroads.
+# - Druid: Heeding the Call (5926) through the Great Bear Spirit in Moonglade
+#   to Body and Heart (6002) at the Moonkin Stone in the eastern pass, handed
+#   in on a flight back from the Crossroads.
+#
+# Class training: Camp Narache, Bloodhoof Village and Thunder Bluff.
+#
+# Data-less objectives: Grace of An'she and Mu'sha (95805) is a ten-minute
+# run with the incense, handled as a direct turn-in at the shrine.
+
+# ---------------------------------------------------------------- Camp Narache
+
+step Camp Narache
+  tip You start on the mesa of Camp Narache. Grull and the chief stand by the big tent in the middle.
+  accept 747                          -- Grull Hawkwind
+  accept 752                          -- Chief Hawkwind
+
+step The Hunt Begins
+  tip Plainstriders roam the grass all around the camp.
+  complete 747
+
+step Grull Hawkwind
+  turnin 747
+  accept 750
+  train class
+
+step Greatmother Hawkwind
+  tip Greatmother Hawkwind sits by the tent on the camp's eastern edge; the Water Pitcher stands next to her.
+  turnin 752
+  accept 753
+  complete 753
+
+step Chief Hawkwind
+  turnin 753
+  accept 755
+
+step Antur Fallow
+  tip Antur stands at the west end of the camp.
+  accept 1656
+
+step The Hunt Continues
+  tip Mountain Cougars prowl the hills south of the camp.
+  complete 750
+
+step Grull Hawkwind
+  turnin 750
+  accept 780
+  accept 3376                         -- Brave Windfeather, next to Grull
+  train class
+
+step Seer Graytongue
+  tip Follow the path south out of camp to the Seer's tent at the foot of the hills.
+  turnin 755
+  accept 95805
+  accept 757
+
+step The shrine of An'she and Mu'sha
+  tip The incense burns out in ten minutes: run straight east along the southern hills to the Ritual Fire.
+  turnin 95805
+
+# ---------------------------------------------------------------- Brambleblade Ravine
+
+step Brambleblade Ravine
+  tip Battleboars graze north of the shrine; the Bristleback quilboar hold the ravine to the north-east. Chief Sharptusk Thornmantle stands at its eastern end, and the Dirt-stained Map lies on the ground in the camp.
+  complete 780
+  complete 757
+  complete 3376
+  collect 4851
+  accept 781
+
+step Camp Narache
+  tip Back west to the camp.
+  turnin 780                          -- Grull Hawkwind
+  turnin 3376                         -- Brave Windfeather
+  turnin 781                          -- Chief Hawkwind
+  turnin 757
+  accept 763
+  accept 96659
+
+# ---------------------------------------------------------------- Bloodhoof Village
+
+step Kaga Wildhoof
+  tip Follow the road north out of Red Cloud Mesa. Kaga Wildhoof waits on the road just south of Bloodhoof Village; build the campfire next to her.
+  turnin 96659
+  accept 96605
+  complete 96605
+  turnin 96605
+  accept 96661
+
+step Bloodhoof Village
+  sethome "Bloodhoof Village" npc 6747  -- Innkeeper Kauth
+  turnin 1656
+  turnin 763                          -- Baine Bloodhoof
+  turnin 96661                        -- Pyall Silentstride
+  accept 748                          -- Mull Thunderhorn
+  accept 96130                        -- Yaw Sharpmane
+
+step Poison Water
+  tip Prairie Wolves and Adult Plainstriders roam the plains around the village.
+  complete 748
+
+step Mull Thunderhorn
+  turnin 748
+  accept 754
+  train class
+
+step Winterhoof Water Well
+  tip The well lies south-east of the village.
+  use 5411 quest 754.1 @51.8,68.4     -- Winterhoof Cleansing Totem
+
+step Mull Thunderhorn
+  turnin 754
+  accept 756
+
+step Chakuyak and Thunderhorn Totem
+  tip Chakuyak, a lone wolf, prowls the plains west of the village. Prairie Stalkers and Flatland Cougars roam the plains north and west of it.
+  complete 96130
+  complete 756
+
+step Back to Bloodhoof
+  turnin 96130                        -- Yaw Sharpmane
+  turnin 756                          -- Mull Thunderhorn
+  accept 758
+  accept 99101                        -- Brave Wildrunner
+  turnin 99101                        -- Baine Bloodhoof
+  accept 99079                        -- Brave Wildrunner
+  accept 743                          -- Ruul Eagletalon
+  accept 745                          -- Baine Bloodhoof
+  accept 746
+  accept 767
+  accept 99080
+  accept 99082                        -- Baine Bloodhoof, for Cairne in Thunder Bluff
+  accept 98435                        -- Mull Thunderhorn, for Hamuul in Thunder Bluff
+  accept 761                          -- Harken Windtotem
+
+step Sparring Match
+  tip Krang Stonehoof's quest: beat three Novice Warriors (or players in duels) next to him.
+  accept 99108
+  turnin 99108
+
+step Rite of Vision
+  turnin 767                          -- Zarlman Two-Moons
+  accept 771
+  accept 766                          -- Maur Raincaller
+
+step Ahab Wheathoof
+  tip Ahab stands at the north edge of the village. Kyle wants Tender Strider Meat from plainstriders.
+  accept 99411
+
+# ---------------------------------------------------------------- Thunderhorn Water Well
+
+step Thunderhorn Water Well
+  tip The well lies north of the village. Well Stones sit around the well, Ambercorn lies under the trees nearby. Kill wolves, cougars, plainstriders and swoops on the way for Mazzranache and Swoop Hunting.
+  use 5415 quest 758.1 @44.2,51.1     -- Thunderhorn Cleansing Totem
+  complete 771
+  complete 99411
+  collect 4804 quest 766.1 optional
+  collect 4805 quest 766.2 optional
+  collect 4806 quest 766.3 optional
+  collect 4807 quest 766.4 optional
+
+step Bloodhoof Village
+  turnin 771                          -- Zarlman Two-Moons
+  accept 772
+  turnin 758                          -- Mull Thunderhorn
+  accept 759
+  turnin 99411                        -- Ahab Wheathoof
+
+# ---------------------------------------------------------------- The eastern plains
+
+step Swoop Hunting
+  tip Swoops glide over the plains all around Bloodhoof.
+  complete 761
+
+step Morin Cloudstalker
+  tip Morin camps by the Winterhoof Water Well south-east of Bloodhoof.
+  accept 749
+
+step Longwalker Malah
+  tip Malah stands on the Rolling Plains a little east of the well.
+  turnin 99079
+  accept 99081
+
+step Galak centaurs and Prairie Wolf Alphas
+  tip The Galak centaurs camp on the plains north of the Rolling Plains; Herak leads them. Prairie Wolf Alphas roam among the wolves.
+  complete 99080
+  complete 759
+
+step The Ravaged Caravan
+  tip The wrecked caravan lies north-west of the centaurs, east of the road to Thunder Bluff.
+  turnin 749
+  accept 751
+
+step Bloodhoof Village
+  turnin 761                          -- Harken Windtotem
+  turnin 759                          -- Mull Thunderhorn
+  accept 760
+  turnin 99080                        -- Baine Bloodhoof
+  turnin 99081                        -- Brave Wildrunner
+
+step Mazzranache
+  tip Finish the wolf heart, cougar femur, plainstrider scale and swoop gizzard on the plains around the village.
+  complete 766
+
+step Maur Raincaller
+  turnin 766
+
+step Morin Cloudstalker
+  tip Back south-east to the Winterhoof Water Well.
+  turnin 751
+  accept 764
+  accept 765
+
+# ---------------------------------------------------------------- The Venture Co. Mine
+
+step The Venture Co. Mine
+  tip The goblins work the mine in the hills north-east of the well. Supervisor Fizsprocket stands in the back of the mine; his Mulgore Expansion Plans start Fizsprocket's Notes, and the other pages lie inside the mine.
+  goto 61.2,49.3 "The Venture Co. Mine"
+  complete 764
+  complete 765
+  collect 281031
+  accept 98424
+  complete 98424
+
+# ---------------------------------------------------------------- Northern Mulgore
+
+step Wildmane Water Well
+  tip Cross north-west past Thunder Bluff to the Wildmane Water Well in the far north of Mulgore.
+  use 5416 quest 760.1 @42.7,25.0     -- Wildmane Cleansing Totem
+
+step Dangers of the Windfury
+  tip The Windfury harpies hold Windfury Ridge, north and west of the well.
+  complete 743
+
+step Seer Wiserunner
+  tip Seer Wiserunner stands at the edge of the Bael'dun Digsite, south of the well.
+  turnin 772
+  accept 773
+
+step Dwarven Digging
+  tip The dwarves of the Bael'dun Digsite carry the Prospector's Picks. Smash them at the forge in Bloodhoof Village.
+  complete 746
+
+step Sharing the Land
+  tip The Palemane gnolls hold Palemane Rock, south of the digsite and west of Bloodhoof. Perith Stormhoof is held in their camp: lead him out.
+  complete 745
+  accept 98430
+  complete 98430
+
+step Bloodhoof Village
+  accept 861                          -- Skorn Whitecloud
+  turnin 743                          -- Ruul Eagletalon
+  turnin 745                          -- Baine Bloodhoof
+  turnin 746
+  turnin 760                          -- Mull Thunderhorn
+  train class
+
+step Morin Cloudstalker
+  turnin 764
+  turnin 765
+  turnin 98424
+
+step Red Rocks
+  tip Head north to Red Rocks, east of Thunder Bluff. Lorekeeper Raintotem stands at the foot of the rocks; the Bristleback Interlopers dig at the burial ground and the Ancestral Spirit waits on top.
+  accept 833
+  complete 833
+  turnin 833
+  turnin 773
+  complete 861                        -- Flatland Prowlers roam the plains around Red Rocks
+  accept 775
+
+# ---------------------------------------------------------------- Thunder Bluff
+
+step Thunder Bluff
+  zone Thunder Bluff
+  tip Ride a lift up to the mesas. Tal keeps the wind riders on the central rise; Cairne stands in the great tent there.
+  getfp "Thunder Bluff" npc 2995      -- Tal
+  turnin 775
+  turnin 99082
+  turnin 98430
+  train class
+
+step Hunter Rise
+  zone Thunder Bluff
+  turnin 861                          -- Melor Stonehoof
+  accept 1505 npc 3041 only Warrior   -- Torm Ragetotem
+  accept 6065 only Hunter             -- Kary Thunderhorn
+
+step Elder Rise
+  zone Thunder Bluff
+  turnin 98435                        -- Arch Druid Hamuul Runetotem
+
+step Spirit Rise
+  only Shaman
+  zone Thunder Bluff
+  accept 1523
+
+step Turak Runetotem
+  only Druid
+  zone Thunder Bluff
+  tip Innkeeper Pala on the central rise sends you to Turak on Elder Rise.
+  accept 5926
+  turnin 5926
+  accept 5922
+
+step Moonglade
+  only Druid
+  zone Moonglade
+  tip Cast Teleport: Moonglade. Dendrite Starblaze is in Nighthaven; the Great Bear Spirit sits in the north-western woods.
+  turnin 5922
+  accept 5930
+  complete 5930 @39.1,27.5
+  turnin 5930
+  accept 5932
+
+step Back to Thunder Bluff
+  only Druid
+  zone Thunder Bluff
+  tip Hearth to Bloodhoof Village and ride north to Elder Rise.
+  hearth "Bloodhoof Village"
+  turnin 5932                         -- Turak Runetotem
+  accept 6002
+
+step Yaw Sharpmane
+  only Hunter
+  zone Mulgore
+  tip Ride down to Bloodhoof Village and tame with the Taming Rod: an Adult Plainstrider on the plains, a Prairie Stalker north of the village, a Swoop to the north-west.
+  turnin 6065
+  accept 6061
+  kill 2956 quest 6061.1              -- Tame it with the Taming Rod
+  turnin 6061
+  accept 6087
+  kill 2959 quest 6087.1              -- Tame it with the Taming Rod
+  turnin 6087
+  accept 6088
+  kill 2970 quest 6088.1              -- Tame it with the Taming Rod
+  turnin 6088
+  accept 6089
+
+step The Moonkin Stone
+  only Druid
+  zone Mulgore
+  tip The stone stands in the pass out of Mulgore, on your way east. Use the Cenarion Lunardust there and defeat Lunaclaw.
+  use 15710 @71.7,65.0                -- Cenarion Lunardust
+  complete 6002
+
+# ---------------------------------------------------------------- Durotar
+
+step The Crossroads
+  zone The Barrens
+  tip Leave Mulgore by the south-eastern pass and follow the road to the Crossroads.
+  getfp "Crossroads" npc 3615         -- Devrak
+
+step Class turn-ins in Thunder Bluff
+  only Hunter,Druid
+  zone Thunder Bluff
+  fly "Thunder Bluff"
+  turnin 6089 only Hunter             -- Holt Thunderhorn, Hunter Rise
+  turnin 6002 only Druid              -- Turak Runetotem, Elder Rise
+  fly "Crossroads"
+
+step Razor Hill
+  zone Durotar
+  tip Cross the bridge into Durotar and follow the road east to Razor Hill.
+  accept 840                          -- Takrin Pathseeker
+  accept 99048                        -- Orgnil Soulscar
+  accept 99051
+
+step Heglan Shadeeye
+  tip Heglan stands east of Razor Hill, towards the coast.
+  turnin 99048
+  accept 99049
+
+step Threat from Below
+  tip The naga raid the coast east of Razor Hill: their weapons, banners and spinefins come from them.
+  complete 99049
+  complete 99051
+
+step Drygulch Ravine
+  tip The Dustwind harpies nest in Drygulch Ravine to the north; the storm witches drop the Dull Storm Orb.
+  collect 277661
+  accept 97281
+
+step Skull Rock
+  tip Skull Rock lies just north of the ravine. Gazz'uz hides at the back of the caves and drops the Eye of Burning Shadow.
+  collect 4903
+  accept 832
+
+step Rezlak
+  tip Rezlak stands on the road west of the ravine. The Thunder Lizards roam Thunder Ridge to the west.
+  turnin 97281
+  accept 97282
+  complete 97282
+  turnin 97282
+
+step Lost But Not Forgotten
+  tip Misha Tor'kren lives in the farmstead south of Thunder Ridge. Kron's Amulet drops from the Death Flayers and Venomtail Scorpids on the ridge.
+  accept 816
+  complete 816
+  turnin 816
+
+step Back to Razor Hill
+  tip Walk south-east from Thunder Ridge back to Razor Hill.
+  turnin 99049                        -- Orgnil Soulscar
+  turnin 99051
+
+step The Crossroads
+  zone The Barrens
+  tip Walk back west over the bridge to the Crossroads.
+  sethome "The Crossroads" npc 3934   -- Innkeeper Boorand Plainswind

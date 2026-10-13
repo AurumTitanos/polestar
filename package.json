@@ -1,0 +1,35 @@
+{
+  "name": "polestar",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Leveling guides for World of Warcraft: Forever: the addon, its data pipeline and the authoring toolchain",
+  "keywords": [
+    "world-of-warcraft",
+    "wow-addon",
+    "wow-classic",
+    "leveling-guide",
+    "lua",
+    "route-simulator"
+  ],
+  "homepage": "https://github.com/fitzforge/polestar#readme",
+  "bugs": {
+    "url": "https://github.com/fitzforge/polestar/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fitzforge/polestar.git"
+  },
+  "license": "GPL-3.0-only",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "node --test \"tests/**/*.test.js\"",
+    "data": "node tools/polestar.js data build",
+    "compile": "node tools/polestar.js compile",
+    "lint": "node tools/polestar.js lint",
+    "preview": "node tools/polestar.js preview",
+    "install-addon": "node tools/polestar.js install",
+    "pack": "node tools/polestar.js pack"
+  }
+}

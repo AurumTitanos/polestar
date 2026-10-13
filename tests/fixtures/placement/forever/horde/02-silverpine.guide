@@ -1,0 +1,329 @@
+guide forever/horde/02-silverpine
+title Silverpine Forest
+faction Horde
+levels 12-18
+zone Silverpine Forest
+next forever/horde/03-hillsbrad
+pitch Undercity's backyard: a compact forest with the Forsaken's own story and short walks between quests.
+pro Short walks from the Sepulcher
+pro Ends in the Undercity: no zeppelin
+pro Undead: 2 min faster to level 32
+con No Hunter, Shaman or Druid trainer
+con Skyborne: 22 min slower to level 32
+
+# Route choice for Undead and Skyborne against forever/horde/02-barrens (the
+# consensus route of the simulator, world 5b662c40, for both).
+#
+# Arrivals: Undead at about 11.7 from Brill, on foot down the road past the
+# Undercity, after taking Delivery to Silverpine Forest (445) from Apothecary
+# Johaan in Brill (the Tirisfal guide leaves it here, so Undead who choose the
+# Barrens never carry it); Skyborne at about 14.6 from the airship landing in
+# northern Mulgore, by Orgrimmar and the zeppelin to Tirisfal Glades.
+#
+# Built from the game's quest and map data and machine-checked (lint + the
+# playthrough simulator); not yet play-tested on Forever.
+#
+# Flow: The Sepulcher (bind, flight path) -> east: Moonrage Whitescalps and
+# bears -> north loop: Malden's Orchard, The Skittering Dark, The Ivar Patch,
+# Erland's escort -> north loop 2: Moonrage shackles, The Dead Field, Ivar the
+# Foul -> bat to the Undercity (training) -> east loop: The Decrepit Ferry,
+# Grimson the Pale, the Dalaran crate -> south loop: Pyrewood Village, the
+# refugees, Ambermill -> Fenris Isle and the Lordamere Lake shore -> bat to the
+# Undercity, Brill and back: forever/horde/03-hillsbrad starts in the
+# Apothecarium.
+#
+# Added in this revision (measured to the end of 03-hillsbrad, Undead /
+# Skyborne): Watching the Roads (95981, -0.14 / -0.09 h), Stop the Spread
+# (98299, -0.12 / -0.07 h) and Arugal's Folly (98298, -0.10 / -0.06 h).
+#
+# Optional: Arugal's Folly (99, the Pyrewood Shackles) and Pyrewood Ambush
+# (452): the Pyrewood villagers and councilmen are elite, so grouping up is
+# advised.
+#
+# Left out on purpose: The Weaver (480, Archmage Ataeric is level 22 inside
+# Ambermill), Beren's Peril (516, Ravenclaw Drudgers and Guardians are 19-21),
+# Thule Ravenclaw (446, sends you back from the Undercity to the Sepulcher) and
+# Assault on Fenris Isle (442, level 24), A Husband's Revenge (530, level 20),
+# Journey to Hillsbrad Foothills (493: minimum level 19, +2 h of waiting under
+# the simulator), the rogue's Find the Shattered Hand (2378, Orgrimmar) and
+# Fenwick Thatros (1998, Hillsbrad), and the Shadowfang Keep quests (1098,
+# 1014: minimum level 18, the route is about 17 at the Sepulcher).
+
+# ---------------------------------------------------------------- Undead: Brill
+
+step Apothecary Johaan
+  only Undead
+  zone Tirisfal Glades
+  tip Before you leave Brill, Apothecary Johaan has a delivery for the Sepulcher in Silverpine Forest.
+  accept 445                          -- Apothecary Johaan
+
+# ---------------------------------------------------------------- Skyborne: the way north
+
+step Zeppelin to Tirisfal Glades
+  only Skyborne
+  zone Durotar
+  tip From the airship landing in northern Mulgore, follow the Gold Road north-east into the Barrens and north past the Crossroads to Orgrimmar. The zeppelin tower stands just north-east of Orgrimmar's main gate; take the Undercity zeppelin.
+  goto 50.8,13.5 "Zeppelin tower"
+
+step Into Silverpine
+  only Skyborne
+  zone Tirisfal Glades
+  tip The zeppelin lands at the towers outside the Ruins of Lordaeron. Walk west along the road past the ruins and south into Silverpine Forest.
+  goto 54.5,72.0 "Road to Silverpine"
+
+# ---------------------------------------------------------------- The Sepulcher
+
+step The Sepulcher
+  zone Silverpine Forest
+  tip The Sepulcher is the Forsaken crypt-town in the middle of the forest. Everyone you need stands around the crypt entrance.
+  turnin 445 only Undead              -- Apothecary Renferrel
+  accept 447
+  accept 428                          -- High Executor Hadrec
+  accept 437
+  accept 421                          -- Dalar Dawnweaver
+  accept 6321 only Undead             -- Deathguard Podrig
+  getfp "The Sepulcher" npc 2226      -- Karos Razok, the bat handler just east of the crypt
+  turnin 6321 only Undead
+  accept 6323 only Undead             -- Keep it: you fly to the Undercity at level 12
+  sethome "The Sepulcher" npc 6739    -- Innkeeper Bates
+
+# ---------------------------------------------------------------- East, then north
+
+step Moonrage Whitescalps
+  tip The Moonrage worgen roam the woods just east of the Sepulcher. Kill every Grizzled Bear you see for their hearts; you need six for A Recipe For Death.
+  goto 49.5,38.5 "East of the Sepulcher"
+  kill 1769 quest 421.1
+  collect 3253 quest 447.1 optional @48.5,32.0 -- Ferocious and Giant Grizzled Bears
+
+step Dalar Dawnweaver
+  turnin 421
+  accept 422
+
+step Malden's Orchard
+  tip Head north. The Dusty Spellbooks lie in the farmhouse at Malden's Orchard.
+  collect 3155 quest 422.1            -- Dusty Spellbooks
+  collect 3253 quest 447.1 optional @52.0,21.0 -- Keep killing Grizzled Bears on the way
+
+step The Skittering Dark
+  tip Moss Stalkers crawl around the mouth of the cave at the north-west corner of the forest; Mist Creepers sit a little further north. Both drop Skittering Blood.
+  goto 35.8,13.5 "The Skittering Dark"
+  collect 3254 quest 447.2
+  collect 3253 quest 447.1 optional @36.0,18.0 -- Giant Grizzled Bears roam the woods south of the cave
+
+step Rane Yorick
+  tip Follow the northern coast east to the Yoricks' house at The Ivar Patch.
+  turnin 428                          -- Rane Yorick
+  accept 429
+
+step Worg hearts and Erland's escort
+  tip Mottled Worgs prowl the hills around the house and the coast to the east; Worgs go further east. Deathstalker Erland waits north-east of the house: escort him back to Rane, and expect worgs to attack on the way.
+  goto 55.0,15.0 "Hills east of the Yoricks' house"
+  collect 3164 quest 429.1 @55.0,15.0 -- Mottled Worgs and Worgs
+  accept 435                          -- Deathstalker Erland
+  complete 435
+
+step Rane Yorick
+  turnin 435
+  accept 449
+  note Ivar the Foul (level 13) lurks a short walk west of the house, but Rane only sends you after him later. Leave him for the next trip north.
+
+step Back to the Sepulcher
+  tip Walk back south. Finish the bear hearts on the way if you still need them.
+  collect 3253 quest 447.1 @48.5,32.0
+  turnin 429                          -- Apothecary Renferrel
+  accept 430
+  turnin 449                          -- High Executor Hadrec
+  accept 3221
+  turnin 3221                         -- Apothecary Renferrel
+  accept 1359
+  turnin 422                          -- Dalar Dawnweaver
+  accept 423
+  accept 477                          -- Shadow Priest Allister
+
+# ---------------------------------------------------------------- North again
+
+step Moonrage shackles
+  tip Moonrage Darksouls and Gluttons share the woods north and north-west of the Sepulcher, up toward the Dead Field.
+  goto 43.0,31.0 "North of the Sepulcher"
+  collect 3157 quest 423.2            -- Moonrage Darksouls
+  collect 3156 quest 423.1 @41.0,25.5 -- Moonrage Gluttons
+
+step The Dead Field
+  tip Nightlash (level 14) haunts the Dead Field. Kill it, then walk across the field to investigate it.
+  collect 3622 quest 437.1
+  complete 437 @45.1,21.7
+
+step The Ivar Patch
+  turnin 430                          -- Quinn Yorick, in the Yoricks' house
+  accept 425                          -- Rane Yorick
+  collect 3621 quest 425              -- Ivar the Foul, a short walk west of the house
+  turnin 425
+
+step Back to the Sepulcher
+  turnin 423                          -- Dalar Dawnweaver
+  accept 424
+  turnin 437                          -- High Executor Hadrec
+  accept 438
+  level 12                            -- Short? Moonrage worgen roam just east and north of the Sepulcher
+
+# ---------------------------------------------------------------- Undercity, level 12+
+
+step Fly to the Undercity
+  fly "Undercity"                     -- Karos Razok
+
+step Undercity
+  zone map 1458
+  tip The bat drops you beside Michael Garrett in the Trade Quarter, the middle ring of the city. The Apothecarium is south-west of it, the War Quarter north-west, the Magic Quarter north-east and the Rogues' Quarter south-east.
+  turnin 6323 only Undead             -- Gordon Wendham, Trade Quarter
+  accept 6322 only Undead
+  turnin 6322 only Undead             -- Michael Garrett, the bat handler
+  accept 6324 only Undead
+  turnin 447                          -- Master Apothecary Faranell, in the Apothecarium
+  accept 450
+  turnin 1359                         -- Apothecary Zinge, in the Apothecarium
+  accept 1358
+  note Keep Sample for Helbrim: you hand it in at the Crossroads in the Barrens, after Hillsbrad (forever/horde/04-barrens).
+  train 4593 only Warrior             -- Christoph Walker, War Quarter
+  train 4607 only Priest              -- Father Lankester, War Quarter
+  train 4566 only Mage                -- Kaelystia Hatebringer, Magic Quarter
+  train 4563 only Warlock             -- Kaal Soulreaper, Magic Quarter
+  train 4583 only Rogue               -- Miles Dexter, Rogues' Quarter
+  accept 1886 only Rogue,Undead       -- Mennet Carkad, Rogues' Quarter
+  note Hunters, Shamans and Druids: no trainer for you here; you train in Orgrimmar at the end of this guide.
+
+step Back to the Sepulcher
+  zone Silverpine Forest
+  fly "The Sepulcher"                 -- Michael Garrett
+  turnin 6324 only Undead             -- Deathguard Podrig
+  turnin 450                          -- Apothecary Renferrel
+  accept 451
+  note Renferrel's lake moss and murloc tumor are for later, at Lordamere Lake.
+
+# ---------------------------------------------------------------- East loop
+
+step Astor Hadren
+  only Rogue,Undead
+  tip Astor Hadren (level 13) stands north-east of the Sepulcher, on your way to the lake. Kill him for the letter.
+  collect 7231 quest 1886
+
+step The Decrepit Ferry
+  tip The Corpse Laden Boat lies at the ferry landing on the lake shore east of the Sepulcher.
+  turnin 438
+  accept 439
+
+step Grimson the Pale
+  tip Grimson the Pale (level 15) stands south of the ferry.
+  collect 3634 quest 424.1
+
+step Border Crossings
+  tip The Dalaran Crate sits south-west of Grimson, beside the road south.
+  turnin 477
+  accept 478
+
+step Back to the Sepulcher
+  turnin 424                          -- Dalar Dawnweaver
+  accept 99 optional
+  turnin 439                          -- High Executor Hadrec
+  accept 440
+  accept 443
+  turnin 478                          -- Shadow Priest Allister
+  accept 481
+  turnin 481                          -- Dalar Dawnweaver
+  accept 98298
+  accept 98299
+  accept 482
+  turnin 482                          -- Shadow Priest Allister
+  accept 479
+  accept 95981
+  note Keep The Engraved Ring for Magistrate Sevren in Brill: you pass Brill on your way out of the zone.
+
+# ---------------------------------------------------------------- South loop
+
+step Pyrewood Village
+  tip Follow the road south to Pyrewood Village. The villagers are worgen in disguise; Watchers, Sentries and Elders all drop Pyrewood Shackles. Berard's Bookshelf is in a house on the west side of the village. The Pyrewood villagers and the councilmen of Pyrewood Ambush are elite: grouping up is advised.
+  goto 45.0,73.0 "Pyrewood Village"
+  collect 3218 quest 99.1 optional
+  collect 3255 quest 450 optional     -- Already handed in? Ignore this
+  accept 452 optional                 -- Deathstalker Faerleia, on the east side of the village
+  complete 452 optional               -- Stay by her: the villagers come in waves
+  turnin 452 optional
+
+step South of Pyrewood
+  tip The Sickly and Haggard Refugees shamble along the road south of Pyrewood toward the Greymane Wall. Moonrage Bloodhowlers prowl the woods between Pyrewood and Ambermill; they drop the Worgen Bits.
+  goto 46.0,85.0 "Refugees"
+  kill 2054 quest 98299.1
+  kill 2053 quest 98299.2
+  collect 280375 quest 98298.1
+
+step Ambermill
+  tip The Dalaran wizards hold Ambermill, east of Pyrewood. Protectors guard the outskirts, Mages the town itself; both drop pendants. Wizards and Watchers patrol around the town. Stay out of the middle, where Archmage Ataeric (level 22) stands.
+  goto 59.0,63.0 "Ambermill"
+  collect 3354 quest 479.1
+  kill 1889 quest 95981.1
+  kill 1888 quest 95981.2
+
+step Hearth to the Sepulcher
+  hearth "The Sepulcher"              -- Hearthstone on cooldown? Follow the road north.
+
+step The Sepulcher
+  turnin 99 optional                  -- Dalar Dawnweaver
+  turnin 98298
+  turnin 98299
+  turnin 479                          -- Shadow Priest Allister
+  turnin 95981
+  note Allister now offers The Weaver: Archmage Ataeric is level 22 in the middle of Ambermill. Skip it.
+  level 15                            -- Short? The Moonrage Darksouls north of the Sepulcher are good experience
+
+# ---------------------------------------------------------------- Fenris Isle and Lordamere Lake
+
+step Fenris Isle
+  tip Swim out to Fenris Isle in Lordamere Lake, east of the Decrepit Ferry. Rot Hide gnolls cover the island; every type drops Rot Hide Ichor. Stay out of Fenris Keep on the north side of the island: the gnolls there are level 18-22 and Thule Ravenclaw (24) stands inside.
+  goto 67.5,30.0 "Fenris Isle"
+  collect 3236 quest 443
+  accept 460 optional                 -- Only if A Talking Head dropped from a gnoll
+  turnin 460 optional                 -- Shallow Grave, just east of the keep
+  accept 461 optional
+  turnin 461 optional                 -- Dusty Shelf, inside the keep: bring a friend or skip it
+  accept 491 optional
+
+step Lordamere Lake shore
+  tip Lake Skulkers sit along the shore south-east of the island, Lake Creepers and Elder Lake Creepers further north-east. The Hardened Tumor is a rare drop from any Vile Fin murloc around the lake.
+  goto 72.5,35.5 "Lake Skulkers"
+  collect 3256 quest 451.2
+  collect 3257 quest 451.1 @76.5,24.5 -- Lake Creepers
+  collect 3258 quest 451.3 @68.5,21.0 -- Vile Fin Lakestalkers and Oracles
+  level 17                            -- Short? Keep killing Rot Hides and lake creatures; the next guide expects 17
+
+step Back to the Sepulcher
+  turnin 443                          -- High Executor Hadrec
+  accept 444
+
+# ---------------------------------------------------------------- Brill and the Undercity
+
+step Brill
+  zone Tirisfal Glades
+  fly "Undercity"                     -- Karos Razok
+  tip From the Undercity, follow the road north to Brill.
+  turnin 440                          -- Magistrate Sevren, in the town hall
+  accept 441
+
+step Undercity
+  zone map 1458
+  turnin 441                          -- Raleigh Andrean, Trade Quarter
+  turnin 451                          -- Master Apothecary Faranell, in the Apothecarium
+  turnin 444                          -- Bethor Iceshard, Magic Quarter
+  turnin 491 optional
+  note Bethor's next task, Thule Ravenclaw, sends you back to the Sepulcher. Skip it.
+
+step The Deathstalkers
+  only Rogue,Undead
+  zone map 1458
+  turnin 1886                         -- Mennet Carkad, Rogues' Quarter
+  accept 1898
+  turnin 1898                         -- Andron Gant
+  accept 1899
+  collect 7294 quest 1899             -- Andron's Bookshelf, next to him
+  turnin 1899                         -- Mennet Carkad
+  accept 1978
+  turnin 1978                         -- Varimathras, beside Lady Sylvanas in the Royal Quarter
+  note The next guide starts right here, in the Apothecarium.

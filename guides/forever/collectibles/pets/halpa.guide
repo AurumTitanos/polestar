@@ -1,0 +1,22 @@
+guide forever/collectibles/pets/halpa
+title Halpa's Prairie Dogs
+category Collectibles
+folder Companion pets · Vendors
+keywords Prairie Dog Whistle, Brown Ground Squirrel Whistle, Red Ground Squirrel Whistle, squirrel, prairie dog
+collects 10394, 280794, 280795
+faction Horde
+levels 1-60
+zone Thunder Bluff
+
+# Halpa's whistles in Thunder Bluff.
+# Sources: items.json / npcs.json (vendor, Prairie Dog; the new ground squirrels);
+# Forever
+# client 1.60.1.70338 via wago.tools (ItemSparse prices; every pet item teaches
+# its companion when used).
+
+step Halpa
+  tip Halpa sells three whistles in Thunder Bluff (50s each); the two ground squirrels are new in Forever. Each pet item teaches its companion when you use it; the goals stay ticked afterwards.
+  vendor 8401                         -- Halpa
+  buy 10394 npc 8401 optional         -- Prairie Dog Whistle, 50s
+  buy 280794 "Brown Ground Squirrel Whistle" npc 8401 optional -- 50s
+  buy 280795 "Red Ground Squirrel Whistle" npc 8401 optional -- 50s

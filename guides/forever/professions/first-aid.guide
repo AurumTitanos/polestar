@@ -1,0 +1,162 @@
+guide forever/professions/first-aid
+title First Aid 1-300
+category Professions
+coords era
+levels 5-60
+zone Ironforge
+
+# First Aid 1-300 for both factions: bandage recipes in orange/yellow order from
+# professions.json, learned on as few trainer visits as the recipes allow. Expert
+# is a book (Deneb Walker, Stromgarde / Balai Lok'Wein, Brackenwall Village);
+# Artisan is the Triage quest, and the Triage doctor teaches Runecloth Bandage.
+# Craft counts use the Classic skill-up chance (grey - skill) / (grey - yellow).
+#
+# Spawns, trainers, vendors and recipes come from the Era baseline (pfQuest +
+# Blizzard client tables). Forever keeps Classic professions for 1-300 as far as
+# anything public says, but nothing confirms its 10-60 placement yet: refine
+# with Polestar_Recorder sessions. Waypoints are Era-frame (`coords era`); the
+# engine converts them where Forever changed a map frame.
+
+# ---------------------------------------------------------------- Apprentice
+
+step Learn First Aid
+  tip Any First Aid trainer of your faction teaches Apprentice First Aid (character level 5); the arrow picks the nearest.
+  level 5
+  train First Aid Apprentice
+
+# ---------------------------------------------------------------- First Aid 1-125
+
+step Linen Bandage: cloth
+  collect 2589 x61 nearest     -- humanoids of level 5-20 drop Linen Cloth (or buy it at the Auction House).
+
+step Linen Bandage (1-50)
+  tip Linen Bandage is orange from 1 (yellow at 30, grey at 60): about 61 crafts to 50. Bandages need no fire: craft them anywhere.
+  craft 3275 until 50
+
+step Journeyman First Aid
+  tip Journeyman First Aid raises the cap to 150; it needs skill 50 and character level 10: the arrow picks the nearest First Aid trainer of your faction. Learn Heavy Linen Bandage on the same visit.
+  level 10
+  train First Aid Journeyman
+  learn 3276
+
+step Heavy Linen Bandage: cloth
+  collect 2589 x92 nearest     -- humanoids of level 5-20 drop Linen Cloth (or buy it at the Auction House).
+
+step Heavy Linen Bandage (50-80)
+  tip Heavy Linen Bandage is yellow from 50 (yellow at 50, grey at 100): about 46 crafts to 80. Bandages need no fire: craft them anywhere.
+  craft 3276 until 80
+
+step Wool Bandage: cloth
+  collect 2592 x49 nearest     -- humanoids of level 15-30 drop Wool Cloth (or buy it at the Auction House).
+
+step Wool Bandage (80-115)
+  tip Wool Bandage is yellow from 80 (yellow at 80, grey at 150): about 49 crafts to 115. Bandages need no fire: craft them anywhere. Any First Aid trainer of your faction teaches it; the arrow picks the nearest.
+  learn 3277
+  craft 3277 until 115
+
+step Heavy Wool Bandage: cloth
+  collect 2592 x22 nearest     -- humanoids of level 15-30 drop Wool Cloth (or buy it at the Auction House).
+
+step Heavy Wool Bandage (115-125)
+  tip Heavy Wool Bandage is yellow from 115 (yellow at 115, grey at 185): about 11 crafts to 125. Bandages need no fire: craft them anywhere.
+  learn 3278
+  craft 3278 until 125
+
+# ---------------------------------------------------------------- Expert First Aid
+
+step Expert First Aid
+  tip Expert First Aid raises the cap to 225; it needs skill 125 and character level 20: it is a book, Expert First Aid - Under Wraps; the arrow picks its nearest seller for your faction. Buy it and read it. The same vendor sells the Heavy Silk and Mageweave Bandage manuals: buy both now, you read them at 180 and 210.
+  level 20
+  train First Aid Expert "Buy and read Expert First Aid - Under Wraps (Expert First Aid)"
+  buy 16112 x1 nearest
+  buy 16113 x1 nearest
+
+# ---------------------------------------------------------------- First Aid 125-225
+
+step Heavy Wool Bandage: cloth
+  collect 2592 x76 nearest     -- humanoids of level 15-30 drop Wool Cloth (or buy it at the Auction House).
+
+step Heavy Wool Bandage (125-150)
+  tip Heavy Wool Bandage is yellow from 125 (yellow at 115, grey at 185): about 38 crafts to 150. Bandages need no fire: craft them anywhere.
+  craft 3278 until 150
+
+step Silk Bandage: cloth
+  collect 4306 x42 nearest     -- humanoids of level 25-45 drop Silk Cloth (or buy it at the Auction House).
+
+step Silk Bandage (150-180)
+  tip Silk Bandage is yellow from 150 (yellow at 150, grey at 210): about 42 crafts to 180. Bandages need no fire: craft them anywhere.
+  learn 7928
+  craft 7928 until 180
+
+step Heavy Silk Bandage: cloth
+  collect 4306 x84 nearest     -- humanoids of level 25-45 drop Silk Cloth (or buy it at the Auction House).
+
+step Heavy Silk Bandage (180-210)
+  tip Heavy Silk Bandage is yellow from 180 (yellow at 180, grey at 240): about 42 crafts to 210. Bandages need no fire: craft them anywhere.
+  learn 7929
+  craft 7929 until 210
+
+step Mageweave Bandage: cloth
+  collect 4338 x18 nearest     -- humanoids of level 35-50 drop Mageweave Cloth (or buy it at the Auction House).
+
+step Mageweave Bandage (210-225)
+  tip Mageweave Bandage is yellow from 210 (yellow at 210, grey at 270): about 18 crafts to 225. Bandages need no fire: craft them anywhere.
+  learn 10840
+  craft 10840 until 225
+
+# ---------------------------------------------------------------- Artisan First Aid: Triage
+
+step Trauma
+  only Alliance
+  zone Ironforge
+  tip Artisan First Aid comes from the Triage quest. It needs skill 225 and level 40; the First Aid trainer in Ironforge sends you to the doctor in Theramore.
+  skill "First Aid" 225
+  level 40
+  accept 6625                             -- Nissa Firestone, Ironforge
+
+step Trauma
+  only Horde
+  zone Orgrimmar
+  tip Artisan First Aid comes from the Triage quest. It needs skill 225 and level 40; the First Aid trainer in Orgrimmar sends you to the doctor in Hammerfall.
+  skill "First Aid" 225
+  level 40
+  accept 6623                             -- Arnok, Orgrimmar
+
+step Triage
+  only Alliance
+  zone Dustwallow Marsh
+  tip Triage: treat the wounded soldiers in the doctor's tent with the bandages the doctor gives you, the most critical first, before any of them die.
+  turnin 6625                             -- Doctor Gustaf VanHowzen, Theramore Isle
+  accept 6624
+  complete 6624
+  turnin 6624                             -- Artisan First Aid
+
+step Triage
+  only Horde
+  zone Arathi Highlands
+  tip Triage: treat the wounded soldiers in the doctor's tent with the bandages the doctor gives you, the most critical first, before any of them die.
+  turnin 6623                             -- Doctor Gregory Victor, Hammerfall
+  accept 6622
+  complete 6622
+  turnin 6622                             -- Artisan First Aid
+
+# ---------------------------------------------------------------- First Aid 225-300
+
+step Mageweave Bandage: cloth
+  collect 4338 x88 nearest     -- humanoids of level 35-50 drop Mageweave Cloth (or buy it at the Auction House).
+
+step Mageweave Bandage (225-260)
+  tip Mageweave Bandage is yellow from 225 (yellow at 210, grey at 270): about 88 crafts to 260. Bandages need no fire: craft them anywhere. Mageweave Bandage stays yellow to 270; one recipe to 260 saves two trips to the doctor.
+  craft 10840 until 260
+
+step Runecloth Bandage
+  tip Runecloth Bandage (skill 260) is an Artisan recipe: only the Triage doctor teaches it (Doctor Gustaf VanHowzen in Theramore, Doctor Gregory Victor in Hammerfall).
+  learn 18629 npc 12939 only Alliance
+  learn 18629 npc 12920 only Horde
+
+step Runecloth Bandage: cloth
+  collect 14047 x65 nearest     -- humanoids of level 45-60 drop Runecloth (or buy it at the Auction House).
+
+step Runecloth Bandage (260-300)
+  tip Runecloth Bandage is yellow from 260 (yellow at 260, grey at 320): about 65 crafts to 300. Bandages need no fire: craft them anywhere. Runecloth Bandage stays yellow to 320, so it carries you to 300 without a trip for Heavy Runecloth.
+  craft 18629 until 300

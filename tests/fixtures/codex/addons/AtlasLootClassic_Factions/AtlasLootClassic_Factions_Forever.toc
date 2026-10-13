@@ -1,0 +1,6 @@
+## Interface: 16001
+## Title: Fixture Factions
+## Version: Fixture 1.0
+## LoadOnDemand: 1
+Locales\Locales.xml
+data.lua

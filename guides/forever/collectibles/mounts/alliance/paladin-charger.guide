@@ -1,0 +1,34 @@
+guide forever/collectibles/mounts/alliance/paladin-charger
+title Paladin Charger
+category Collectibles
+folder Mounts · Class
+keywords Summon Charger, Lord Grayson Shadowbreaker, Judgment and Redemption, Darkreaver, Scholomance, Paladin, class mount
+faction Alliance
+class Paladin
+levels 60-60
+zone Stormwind City
+
+# Summon Charger for Alliance Paladins: the hand-off to Lord Grayson
+# Shadowbreaker, then his long chain (named in the tip, not routed step by
+# step).
+# Sources: Forever client 1.60.1.70338 tables via wago.tools (Mount: the spell
+# is still a Forever mount; ItemSparse); quests.json and npcs.json for the
+# chain.
+# Forever's Forsaken Paladins get the Forsaken Charger from their own quest
+# (Justice and Retribution); it is not in our data yet.
+
+step Lord Grayson Shadowbreaker (Ironforge)
+  only Dwarf
+  zone Ironforge
+  tip At 60 Brandur Ironhammer in the Mystic Ward sends you to Lord Grayson Shadowbreaker in Stormwind's Cathedral of Light.
+  level 60
+  accept 7670
+
+step Lord Grayson Shadowbreaker
+  zone Stormwind City
+  tip The Summon Charger chain is long and needs Scholomance. After this hand-off, Lord Grayson sends you on Emphasis on Sacrifice (High Priest Rohan in Ironforge), To Show Due Judgment and Exorcising Terrordale (25 Terrordale Spirits), The Work of Grimand Elmore (Collection of Goods: 40 Runecloth, 6 Arcanite Bars, 10 Arthas' Tears, 5 Stratholme Holy Water), Ancient Equine Spirit (Manna-Enriched Horse Feed from Merideth Carlson in Southshore), The Divination Scryer (an Azerothian Diamond and a Pristine Black Diamond) and Judgment and Redemption, which ends with Darkreaver's Fallen Charger in Scholomance.
+  level 60
+  accept 7638 only Human              -- Duthorian Rall, Cathedral of Light
+  turnin 7638 only Human
+  turnin 7670 only Dwarf
+  learn 23214 "Summon Charger"        -- Ticks once you finish the chain

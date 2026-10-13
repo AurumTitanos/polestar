@@ -1,0 +1,130 @@
+{
+ "1210": {
+  "drops": {
+   "npc": {
+    "95002": 5
+   },
+   "object": {
+    "1731": 1,
+    "2843": 0.5
+   }
+  },
+  "id": 1210,
+  "name": "Shadowgem",
+  "vendors": []
+ },
+ "1251": {
+  "drops": {
+   "npc": {},
+   "object": {}
+  },
+  "id": 1251,
+  "name": "Linen Bandage",
+  "vendors": []
+ },
+ "159": {
+  "drops": {
+   "npc": {},
+   "object": {}
+  },
+  "id": 159,
+  "name": "Refreshing Spring Water",
+  "vendors": [
+   152,
+   295
+  ]
+ },
+ "2449": {
+  "drops": {
+   "npc": {
+    "6": 0.02
+   },
+   "object": {
+    "1617": 100
+   }
+  },
+  "id": 2449,
+  "name": "Earthroot",
+  "vendors": []
+ },
+ "2581": {
+  "drops": {
+   "npc": {},
+   "object": {}
+  },
+  "id": 2581,
+  "name": "Heavy Linen Bandage",
+  "vendors": []
+ },
+ "2589": {
+  "drops": {
+   "npc": {},
+   "object": {}
+  },
+  "id": 2589,
+  "name": "Linen Cloth",
+  "vendors": []
+ },
+ "4306": {
+  "drops": {
+   "npc": {
+    "6": 1,
+    "95001": 30,
+    "95002": 40,
+    "95003": 80,
+    "95004": 50,
+    "95005": 25,
+    "95006": 20,
+    "95007": 35,
+    "95008": 30
+   },
+   "object": {}
+  },
+  "id": 4306,
+  "name": "Silk Cloth",
+  "vendors": []
+ },
+ "6452": {
+  "drops": {
+   "npc": {},
+   "object": {}
+  },
+  "id": 6452,
+  "name": "Anti-Venom",
+  "vendors": []
+ },
+ "6454": {
+  "drops": {
+   "npc": {},
+   "object": {}
+  },
+  "id": 6454,
+  "name": "Manual: Strong Anti-Venom",
+  "vendors": [
+   2805
+  ]
+ },
+ "6948": {
+  "drops": {
+   "npc": {},
+   "object": {}
+  },
+  "id": 6948,
+  "name": "Hearthstone",
+  "vendors": []
+ },
+ "750": {
+  "drops": {
+   "npc": {
+    "299": 40,
+    "69": 80,
+    "704": 30,
+    "705": 30
+   },
+   "object": {}
+  },
+  "id": 750,
+  "name": "Tough Wolf Meat",
+  "vendors": []
+ }
+}

@@ -1,0 +1,10 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+	<Script file="ItemDB.lua"/>
+	<Script file="Weights.lua"/>
+	<Script file="SpecData.lua"/>
+	<Script file="Gear.lua"/>
+	<Script file="Tooltip.lua"/>
+	<Script file="Rewards.lua"/>
+	<Script file="Picks.lua"/>
+	<Script file="Options.lua"/>
+</Ui>

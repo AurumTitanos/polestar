@@ -1,0 +1,49 @@
+{
+	"750": {
+		"id": 750,
+		"name": "Tough Wolf Meat",
+		"drops": {
+			"npc": {
+				"299": 80
+			},
+			"object": {}
+		},
+		"vendors": []
+	},
+	"772": {
+		"id": 772,
+		"name": "Large Candle",
+		"drops": {
+			"npc": {
+				"6": 40,
+				"40": 20.456
+			},
+			"object": {
+				"77": 100
+			}
+		},
+		"vendors": [
+			253
+		]
+	},
+	"1972": {
+		"id": 1972,
+		"name": "Strange Note",
+		"drops": {
+			"npc": {
+				"299": 0.5
+			},
+			"object": {}
+		},
+		"vendors": []
+	},
+	"2000": {
+		"id": 2000,
+		"name": "Unused Item",
+		"drops": {
+			"npc": {},
+			"object": {}
+		},
+		"vendors": []
+	}
+}

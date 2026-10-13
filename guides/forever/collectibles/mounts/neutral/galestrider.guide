@@ -1,0 +1,42 @@
+guide forever/collectibles/mounts/neutral/galestrider
+title Galestrider
+category Collectibles
+folder Mounts · Level 40
+keywords Empyrean Galestrider, Stormy Galestrider, Umber Galestrider, Regal Galestrider, Skyborne, Genn Fairweather, Zephras Isle, Valanaar, Riding
+collects 269681, 269683, 274930
+levels 40-60
+zone map 2521
+
+# Galestriders, the Skyborne racial mounts, from Genn Fairweather in Valanaar on
+# Zephras Isle.
+# Genn Fairweather sells them for 20 gold; skyboats leave the isle.
+# Sources: NPC 265756
+# (position); Forever client 1.60.1.70338 via wago.tools (ItemSparse: level 40,
+# Galestrider Riding, every race; SkillLineAbility files Galestrider Riding
+# under the one Riding skill). They are tagged Reputation, but no standing is
+# known; Regal Galestrider and Swift Regal Galestrider have no known source.
+
+step Learn to ride
+  tip Galestriders need level 40 and Riding (Galestrider Riding comes with it in the Forever client). Any riding trainer of your faction teaches it; see the Level 40 mount guides for where.
+  level 40
+  skill Riding 75
+
+step Skyboat from Dalaran
+  only Alliance
+  zone Alterac Mountains
+  tip Zephras Isle is the Skyborne starting island; anyone may visit. A skyboat leaves the north side of Dalaran about every five minutes (another flies from north of Thunder Bluff; either faction may take either). Skip this if you are already on the island.
+  goto 12.5,51.8 "Skyboat to Zephras Isle" live
+
+step Skyboat from Thunder Bluff
+  only Horde
+  zone Mulgore
+  tip Zephras Isle is the Skyborne starting island; anyone may visit. A skyboat leaves the cliffs south of Skywatcher Plateau, north of Thunder Bluff, about every five minutes (another flies from Dalaran; either faction may take either). Skip this if you are already on the island.
+  goto 34.3,25.8 "Skyboat to Zephras Isle" live
+
+step Genn Fairweather
+  zone map 2521
+  tip Genn Fairweather is in Valanaar, the island's harbour town, near the skyboat docks. The Forever client lists each Galestrider at 20g; choose one.
+  vendor 265756 "Genn Fairweather" @53.8,81.2
+  buy 269681 "Empyrean Galestrider" npc 265756 optional -- 20g
+  buy 269683 "Stormy Galestrider" npc 265756 optional -- 20g
+  buy 274930 "Umber Galestrider" npc 265756 optional -- 20g

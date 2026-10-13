@@ -1,0 +1,37 @@
+guide forever/collectibles/mounts/horde/skeletal-horse
+title Skeletal Horse
+category Collectibles
+folder Mounts · Level 40
+keywords Red Skeletal Horse, Blue Skeletal Horse, Brown Skeletal Horse, Undead, Forsaken, Brill, Zachariah Post, Velma Warnam, Riding
+collects 13331, 13332, 13333
+faction Horde
+levels 40-60
+zone Tirisfal Glades
+
+# First Horde skeletal horse from Zachariah Post (Brill).
+# Sources: Forever client 1.60.1.70338 tables via wago.tools (ItemSparse: level,
+# price, races, riding spell; SkillLineAbility: Riding); npcs.json and
+# items.json for the trainer, the vendor and its stock.
+# Forever riding: the client files every racial riding spell under one Riding
+# skill (SkillLineAbility), so any riding trainer of your faction teaches it:
+# Apprentice Riding (skill 75) from level 40, Journeyman Riding (150) at 60.
+# Blizzard: learning to ride grants a mount, and training costs 100g at 40 and
+# 1,000g at 60 (Kris Zierhut). ItemSparse lists the
+# mounts at 20g (level 40) and 200g (level 60), usable by every race of the
+# faction; whether a vendor still wants Exalted with another race's city (the
+# Era rule) is server-side and unconfirmed.
+
+step Learn to ride
+  zone Tirisfal Glades
+  tip Velma Warnam and Zachariah Post's stable are in Brill, Tirisfal Glades. At 40 Velma Warnam teaches Riding (100g per Blizzard's designers), and learning it gives you a mount. The Forever client lets every Horde race ride these.
+  level 40
+  train 4773                          -- Velma Warnam, riding trainer
+  skill Riding 75
+
+step Pick a colour
+  tip Zachariah Post sells the other colours (20g each in the Forever client). Buy any you want, or none if the mount you were given is the one you like.
+  vendor 4731                         -- Zachariah Post
+  buy 13331 npc 4731 optional         -- Red Skeletal Horse, 20g
+  buy 13332 npc 4731 optional         -- Blue Skeletal Horse, 20g
+  buy 13333 npc 4731 optional         -- Brown Skeletal Horse, 20g
+  note Black Skeletal Horse is a new Forever horse (level 40) whose source is not known yet.

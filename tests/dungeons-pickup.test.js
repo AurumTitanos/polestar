@@ -1,0 +1,250 @@
+'use strict';
+// "Pick up the quests" for a dungeon (addon/Polestar/Dungeons/Pickup.lua over
+// Lookup's guide machinery): which of a page's quests this character can take
+// before the run, their open prerequisites first, the givers on a travel route
+// from where the player stands, the entrance last; the guide opens in a new
+// tab, comes back after /reload, and plays to the end in the real engine.
+// Each quest's giver link points at the first prerequisite still to do.
+//
+// The Codex and the page are the synthetic tests/fixtures/codex/dungeon-pickup.json:
+// Shadowfang Keep (levels 22-30) for a Horde character with
+//   1098 Deathstalkers in Shadowfang   Hadrec, Silverpine (done in most runs)
+//   1740 The Orb of Soran'ruk          Doan Karhan, The Barrens, Warlock only
+//   1013 The Book of Ur                Keeper Bel'dugur, Undercity (in the log)
+//   1014 Arugal Must Die               Dalar, Silverpine, after 1011, which needs one
+//                                      of 1009 (Alliance) or 1010 (Bethor Iceshard,
+//                                      Undercity, turned in to Renferrel, Silverpine)
+//   1016 Return to Dalar               a follow-up of 1014: taken after the run
+//   1999 Wolves at the Wall            Tauren only
+//   1806 The Test of Righteousness     Alliance Paladin
+
+const { test, before, after } = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const { runAddon } = require('./helpers/lua');
+const { writeCodexPack } = require('./helpers/codex');
+const { SIMULATE, luaValue } = require('./helpers/guide-sim');
+const { buildJournal, emitJournal } = require('../tools/lib/codex/journal');
+
+const { codex, inputs } = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'codex', 'dungeon-pickup.json'), 'utf8'));
+const ADDON = { name: 'Polestar', files: ['Core/Core.xml', 'Lookup/Lookup.xml', 'Dungeons/Dungeons.xml'] };
+const KEY = 'shadowfang-keep';
+const GID = `lookup/pickup/${KEY}`;
+const UNDERCITY = [1458, 66, 44];
+const BARRENS = [1413, 50, 57];
+
+// The stub world draws the fixture's maps with the bounds of their Era frames.
+const MAPS = Object.entries(codex.frames)
+	.map(([id, f]) => `w.addMap(${id}, { name = ${JSON.stringify(codex.zones[id].name)}, c = ${f.c}, left = ${f.left}, right = ${f.right}, top = ${f.top}, bottom = ${f.bottom} })`)
+	.join('\n');
+
+let pack;
+before(() => {
+	pack = writeCodexPack(codex, { extraFiles: emitJournal(buildJournal(inputs, codex)) });
+});
+after(() => pack && pack.cleanup());
+
+// The guide's steps as { title, goals: "verb:quest ..." }.
+const DESCRIBE = `
+local function describe(g)
+	local out = {}
+	for i, s in ipairs(g and g.steps or {}) do
+		local verbs = {}
+		for j, goal in ipairs(s.goals) do verbs[j] = goal.t .. (goal.quest and (":" .. goal.quest) or "") end
+		out[i] = { title = s.title, goals = table.concat(verbs, " ") }
+	end
+	return out
+end
+local function tabIds()
+	local ids = {}
+	for i, t in ipairs(Polestar.Engine.GetTabs()) do ids[i] = t.guideId end
+	return ids
+end
+`;
+
+function run(script, { level = 21, race = 'Scourge', cls = 'WARLOCK', at = UNDERCITY, done = [1098], log = [1013], saved } = {}) {
+	return runAddon({
+		stubs: ['stub_world.lua'],
+		before: `${pack.stubLua}
+local w = stub.world
+${MAPS}
+w.level, w.race, w.raceName, w.faction = ${level}, ${JSON.stringify(race)}, ${JSON.stringify(race)}, "Horde"
+w.class, w.className = ${JSON.stringify(cls)}, ${JSON.stringify(cls)}
+${at ? `w.moveTo(${at.join(', ')})` : ''}
+w.complete(${luaValue(done)})
+for _, q in ipairs(${luaValue(log)}) do w.onQuest(q, { 1 }) end`,
+		addons: [ADDON],
+		saved: saved ? { Polestar: saved } : undefined,
+		login: true,
+		script: `${DESCRIBE}\nlocal D = Polestar.Dungeons\n${script}`,
+	}).emitted;
+}
+
+// From the Undercity: Bethor's errand there, on to Renferrel and Dalar in
+// Silverpine (the chain in its order, Dalar's quest once it is behind), then
+// the Barrens for the Warlock's quest, the entrance last with the quest
+// already in the log listed.
+const FROM_UNDERCITY = [
+	{ title: 'Orders from the Undercity', goals: 'accept:1010 turnin:1010' },
+	{ title: 'The Dalaran Inquiry', goals: 'accept:1011 turnin:1011' },
+	{ title: 'Dalar Dawnweaver', goals: 'accept:1014' },
+	{ title: 'Doan Karhan', goals: 'accept:1740' },
+	{ title: 'Shadowfang Keep', goals: 'note goto' },
+];
+
+test('a Horde Warlock: the quests that apply, open prerequisites first in chain order, the givers on a route from the Undercity, the entrance last', () => {
+	const [out] = run(`
+local plan = D.PickupPlan("${KEY}")
+local take, carried = {}, {}
+for i, t in ipairs(plan.take) do take[i] = t.quest.id end
+for i, q in ipairs(plan.carried) do carried[i] = q.id end
+local def = D.PickupGuide("${KEY}")
+local last = def.steps[#def.steps]
+emit({ take = take, carried = carried, title = def.title, steps = describe(def), note = last.goals[1].text,
+	entrance = { last.goals[2].map, last.goals[2].x, last.goals[2].y, last.goals[2].text } })`);
+	assert.deepEqual(out.take, [1740, 1014], 'not done 1098, Tauren-only 1999, Alliance 1806, follow-up 1016, carried 1013');
+	assert.deepEqual(out.carried, [1013]);
+	assert.equal(out.title, 'Shadowfang Keep: pick up the quests');
+	assert.deepEqual(out.steps, FROM_UNDERCITY);
+	assert.equal(out.note, 'In your log already: The Book of Ur');
+	assert.deepEqual(out.entrance, [1421, 44.8, 67.8, 'Enter Shadowfang Keep']);
+});
+
+test('the route starts where the player stands; another class gets no class quest', () => {
+	const [barrens] = run(`emit(describe(D.PickupGuide("${KEY}")))`, { at: BARRENS });
+	assert.deepEqual(barrens, [FROM_UNDERCITY[3], ...FROM_UNDERCITY.slice(0, 3), FROM_UNDERCITY[4]], 'Doan Karhan first from the Barrens');
+	const [mage] = run(`emit(describe(D.PickupGuide("${KEY}")))`, { cls: 'MAGE' });
+	assert.deepEqual(mage, [...FROM_UNDERCITY.slice(0, 3), FROM_UNDERCITY[4]]);
+});
+
+test('PickUp opens the guide in a new tab and it plays to the end; the giver link points at the first prerequisite still to do', () => {
+	const [opened, links, out] = run(`
+Polestar.Set("behavior.autoNextGuide", false)
+local before = #Polestar.Engine.GetTabs()
+local function target(id)
+	local p, label, first, turnIn = D.GiverTarget("${KEY}", id)
+	return { p and p.map or false, label or false, first or false, turnIn or false }
+end
+local links = { arugal = target(1014), orb = target(1740) }
+local id, why = D.PickUp("${KEY}")
+emit({ id = id or false, why = why or false, tabs = tabIds(), before = before, active = Polestar.Engine.GetGuide() and Polestar.Engine.GetGuide().id or false })
+stub.world.accept(1010, { 1 })
+links.arugalAfter = target(1014)
+stub.world.abandon(1010)
+emit(links)
+stub.advance(0.6)
+${SIMULATE}`);
+	assert.equal(opened.id, GID, `built (${opened.why})`);
+	assert.equal(opened.active, GID);
+	assert.deepEqual(links.arugal, [1458, 'Bethor Iceshard', 'Orders from the Undercity', false], "Arugal Must Die: Bethor's errand comes first");
+	assert.deepEqual(links.arugalAfter, [1421, 'Apothecary Renferrel', 'Orders from the Undercity', true], 'in the log: where it is turned in');
+	assert.deepEqual(links.orb, [1413, 'Doan Karhan', false, false], 'no prerequisite: the giver');
+	assert.ok(!out.stuck, `stuck: ${JSON.stringify(out.stuck)}`);
+	assert.equal(out.done, true);
+	assert.deepEqual(out.missing, {}, 'every accept and turn-in has a location');
+	assert.equal(out.visited, FROM_UNDERCITY.length);
+	assert.deepEqual([opened.tabs.length, opened.tabs[opened.tabs.length - 1]], [opened.before + 1, GID], 'in a new tab of its own');
+});
+
+test('the tab survives /reload: rebuilt before the Engine reopens it, in the same route without a position', () => {
+	const [first] = run(`
+D.PickUp("${KEY}")
+local s = Polestar.CharState()
+emit({ tabs = s.tabs, order = s.dungeonPickup and s.dungeonPickup["${KEY}"] or false, steps = describe(Polestar.Guides.Get("${GID}")) })`);
+	assert.ok(Array.isArray(first.order) && first.order.length > 0, 'the route is kept');
+	const saved = `PolestarCharDB = { schema = 1, tabs = ${luaValue(first.tabs)}, activeTab = ${first.tabs.length}, dungeonPickup = { [${JSON.stringify(KEY)}] = ${luaValue(first.order)} } }`;
+	const [after] = run(`emit({ tabs = tabIds(), active = Polestar.Engine.GetGuide() and Polestar.Engine.GetGuide().id or false, steps = describe(Polestar.Guides.Get("${GID}")) })`,
+		{ at: null, saved });
+	assert.deepEqual(after.tabs, first.tabs);
+	assert.equal(after.active, GID);
+	assert.deepEqual(after.steps, first.steps);
+	assert.deepEqual(after.steps, FROM_UNDERCITY);
+});
+
+test('nothing left to pick up: PickUp says so and builds no guide', () => {
+	const [out] = run(`
+local before = tabIds()
+local id, why = D.PickUp("${KEY}")
+emit({ id = id or false, why = why or false, guide = Polestar.Guides.Get("${GID}") ~= nil, same = #tabIds() == #before, carried = #D.PickupPlan("${KEY}").carried })`,
+	{ done: [1098, 1740, 1014, 1016], log: [1013] });
+	assert.deepEqual(out, { id: false, why: 'nothing', guide: false, same: true, carried: 1 });
+});
+
+test('a follow-up of a dungeon quest is picked up once that quest is done', () => {
+	const [out] = run(`emit(describe(D.PickupGuide("${KEY}")))`, { done: [1098, 1740, 1014], log: [1013] });
+	assert.deepEqual(out, [{ title: 'Dalar Dawnweaver', goals: 'accept:1016' }, FROM_UNDERCITY[4]]);
+});
+
+// Travel between the fixture's zones by the way a player goes (seconds):
+// Undercity and Silverpine are next door, the Barrens a zeppelin away.
+const ZONE_TRAVEL = `
+local ZONES = { [1458] = "uc", [1421] = "sp", [1413] = "b" }
+local COST = { ["uc-sp"] = 120, ["uc-b"] = 250, ["sp-b"] = 370 }
+Polestar.TravelCost = function(a, b)
+	local za, zb = ZONES[a.map], ZONES[b.map]
+	if not (za and zb) then return nil end
+	if za == zb then return 20 + math.abs(a.x - b.x) + math.abs(a.y - b.y) end
+	return COST[za .. "-" .. zb] or COST[zb .. "-" .. za]
+end`;
+
+test('the route plans toward the entrance: from the Undercity the Barrens come first, so the Silverpine chain ends next to the keep', () => {
+	const [out] = run(`${ZONE_TRAVEL}\nemit(describe(D.PickupGuide("${KEY}")))`);
+	// A nearest-next walk took Bethor first (next door), went on through
+	// Silverpine, then to the Barrens and all the way back to the keep.
+	assert.deepEqual(out, [FROM_UNDERCITY[3], ...FROM_UNDERCITY.slice(0, 3), FROM_UNDERCITY[4]]);
+});
+
+// Dungeons.PlanStops on its own: cities as points, travel by city pair.
+const PLAN = `
+local CITY = { tb = { tb = 30, og = 300, uc = 450 }, og = { tb = 300, og = 30, uc = 200 }, uc = { tb = 450, og = 200, uc = 30 } }
+local function at(city, name) return { city = city, name = name } end
+local function travel(a, b) return CITY[a.city][b.city] end
+local function names(stops, order)
+	local out = {}
+	for i, s in ipairs(order) do out[i] = stops[s].inP.name end
+	return out
+end
+`;
+
+test('Ragefire Chasm from Thunder Bluff: the givers in Thunder Bluff, the Undercity, then Orgrimmar next to the entrance', () => {
+	const [out] = run(`${PLAN}
+local stops = {
+	{ inP = at("tb", "Thunder Bluff giver"), outP = at("tb"), deps = {} },
+	{ inP = at("og", "Orgrimmar giver"), outP = at("og"), deps = {} },
+	{ inP = at("uc", "Undercity giver"), outP = at("uc"), deps = {} },
+}
+local order, cost = D.PlanStops(stops, at("tb"), at("og", "entrance"), travel)
+emit({ route = names(stops, order), cost = cost })`);
+	assert.deepEqual(out.route, ['Thunder Bluff giver', 'Undercity giver', 'Orgrimmar giver']);
+	assert.equal(out.cost, 30 + 450 + 200 + 30, 'not 30 + 300 + 200 + 200 (Orgrimmar, the Undercity and back)');
+});
+
+test('PlanStops keeps every stop after the ones it waits on, and a giver\'s visits fall together where they can', () => {
+	const [out] = run(`${PLAN}
+-- A chain: a prerequisite from the Undercity turned in at Orgrimmar, then a
+-- second one from Orgrimmar; the Orgrimmar giver has one quest open now and
+-- one that waits on the chain.
+local stops = {
+	{ inP = at("uc", "first link"), outP = at("og"), deps = {} },
+	{ inP = at("og", "second link"), outP = at("og"), deps = { 1 } },
+	{ inP = at("og", "giver, open now"), outP = at("og"), deps = {} },
+	{ inP = at("og", "giver, after the chain"), outP = at("og"), deps = { 2 } },
+}
+local order = D.PlanStops(stops, at("og"), at("og", "entrance"), travel)
+-- Above the exact size: the improved nearest-next order still honours every dependency.
+local many, from = {}, at("tb")
+for i = 1, 14 do
+	local city = ({ "tb", "og", "uc" })[i % 3 + 1]
+	many[i] = { inP = at(city, "s" .. i), outP = at(city), deps = i > 1 and i % 4 == 0 and { i - 1 } or {} }
+end
+local big = D.PlanStops(many, from, at("og", "entrance"), travel)
+local pos, ok = {}, #big == 14
+for p, i in ipairs(big) do pos[i] = p end
+for i, s in ipairs(many) do for _, d in ipairs(s.deps) do ok = ok and pos[d] < pos[i] end end
+emit({ route = names(stops, order), big = ok })`);
+	// The chain in its order; the giver's two visits fall together after it,
+	// one stop instead of two trips.
+	assert.deepEqual(out.route, ['first link', 'second link', 'giver, open now', 'giver, after the chain']);
+	assert.equal(out.big, true);
+});

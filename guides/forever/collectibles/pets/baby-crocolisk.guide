@@ -1,0 +1,16 @@
+guide forever/collectibles/pets/baby-crocolisk
+title Baby Crocolisk
+category Collectibles
+folder Companion pets · Drops
+keywords Sewer Beast, Stormwind canals, crocolisk, rare
+collects 282047
+levels 1-60
+zone Stormwind City
+
+# Baby Crocolisk from the Sewer Beast in Stormwind's canals (new in Forever).
+# Sources: Wowhead Forever item 282047 (Sewer Beast, 1.5% in 132 kills);
+# npcs.json (the Sewer Beast's spawns); Forever client 1.60.1.70338.
+
+step Sewer Beast
+  tip The Sewer Beast is a rare level 50 crocolisk that swims Stormwind's canals; early kill counts give about 1.5% per kill. It is friendly to nobody: Horde players can farm it too, but they are in an enemy capital.
+  collect 282047 "Baby Crocolisk" @32.4,62.5 -- Sewer Beast

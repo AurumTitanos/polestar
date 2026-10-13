@@ -1,0 +1,120 @@
+# Un'Goro Crater (last part) and Ironforge, Alliance ~50 to ~52 (consensus visits 56 part 3/3, 57; 58 handed off).
+# Flow: the Centipaar grind in western Tanaris -> Torwa Pathfinder -> Lar'korwi -> Torwa -> U'cha on the gorilla
+# plateau -> down the west side to Krakle -> the Fire Plume vents -> Krakle -> Torwa -> hearth Thelsamar ->
+# Ironforge (bind, training, errands).
+# Forever's 30-60 content (Riverglades, Shen'dralas, Mount Hyjal, the rest of the Wetlands expansion) is not in
+# the data yet: this guide follows Era + known Forever quests.
+# Optional extras: the Sunken Temple instead of the long grind to 51 (a group gets there faster).
+# Deviations from the export:
+# - Beware of Pterrordax, Lost! and A Little Help From My Friends (4501, 4492, 4491) are finished in the previous
+#   guide (08-un-goro-crater): Ringo's escort starts the moment it is accepted, and the Pterrordax die on the
+#   level-49 loop. The Apes of Un'Goro's pelts (4289) are collected in that guide's pelt step, so the pelts are
+#   handed in at the first Torwa stop here (U'cha needs them turned in).
+# - Local order: Lar'korwi is close to Torwa, so his head goes in before U'cha; the crater is then crossed once
+#   (north-east, west, south-east back to Torwa).
+# - Export visit 58 (Rut'theran Village at 51.4: 3022, 3661, 2939, 2940) is handed in by 40-50/05, which already
+#   passes Rut'theran at 47, so there is no Teldrassil trip here. The Talrendis Point flight path (listed by the
+#   export with that stop) opens in the next guide, where you reach Azshara.
+# Carried on: The New Springs (980) and It's a Secret to Everybody (3908) for Winterspring; A Visit to Gregan (4142)
+# for Feralas; A Little Slime Goes a Long Way (4512) for Felwood; The Smoldering Ruins of Thaurissan (3701) for the
+# Burning Steppes; Arcane Runes (3449) for Azshara.
+# Left out (accepted by the export but never turned in on its route): The Brassbolts Brothers (2769), Tabetha's Task
+# (2861), A Call to Arms: The Plaguelands! (5090) and The Borrower (2941).
+# Not restored: Reclaimed Treasures (1360): Krom Stoutarm's chest stands in the North Common Hall inside the
+# Uldaman dungeon, so it is dungeon work.
+guide forever/alliance/50-60/01-un-goro-crater
+title Un'Goro Crater, Teldrassil & Ironforge
+faction Alliance
+levels 50-52
+zone Un'Goro Crater
+next forever/alliance/50-60/02-burning-steppes
+
+# ---------------------------------------------------------------- Level 51
+
+step Sunken Temple
+  zone Swamp of Sorrows
+  tip Running the Sunken Temple instead of grinding gets you there faster in a group. Skip this step to grind solo.
+  goto 69.9,53.6 "The Temple of Atal'Hakkar" optional
+
+step Grind to 51
+  zone Tanaris
+  tip The Centipaar silithid crawl around the Noxious Lair in western Tanaris, just east of the crater ramp. The Workers are the easiest pulls.
+  level 51 -- grind on Centipaar Worker at The Noxious Lair, Tanaris
+
+# ---------------------------------------------------------------- East side
+
+step Torwa Pathfinder
+  zone Un'Goro Crater
+  tip Ride down the ramp into the crater: Torwa camps at its foot.
+  accept 4292
+
+step Lar'korwi
+  tip Lar'korwi's lair lies in the jungle north of Torwa, below the eastern cliffs: use Torwa's Pouch there. Lar'korwi is level 56: start at full health.
+  collect 11510 quest 4292.1
+
+step Torwa Pathfinder
+  turnin 4289
+  turnin 4292
+  accept 4301
+
+step U'cha
+  tip Ride north along the east side to the gorilla plateau. U'cha, a level 55 gorilla, sits in its deepest cave: clear the gorillas at the cave mouth first.
+  collect 11476 quest 4301.1
+
+# ---------------------------------------------------------------- West and Fire Plume Ridge
+
+step Krakle
+  tip Ride west past Marshal's Refuge and south down the western side to Golakka Hot Springs: Krakle the goblin sits by the water.
+  accept 974
+
+step Krakle's Thermometer
+  tip Ride east to Fire Plume Ridge, climb it and use Krakle's Thermometer at the lava vents near the top.
+  complete 974
+
+step Krakle
+  turnin 974
+  accept 980                          -- Ends with Donova Snowden in Winterspring: keep it
+
+step Torwa Pathfinder
+  tip Cross the south of the crater to Torwa by the ramp.
+  turnin 4301
+
+# ---------------------------------------------------------------- Ironforge
+
+step Thelsamar
+  zone Loch Modan
+  hearth "Stoutlager Inn"
+
+step Ironforge
+  zone Ironforge
+  tip Fly from Thelsamar to Ironforge.
+  fly "Ironforge"
+
+step Hall of Explorers
+  accept 3448                         -- Historian Karnik
+  turnin 3368                         -- Curator Thorius
+
+step Tinker Town
+  accept 4512                         -- Laris Geardawdle: the oozes are in Felwood, keep it
+
+step Mystic Ward
+  turnin 3448                         -- Tymor
+  accept 3449                         -- Four rune rubbings in Azshara: keep it
+  accept 3450
+
+step Royal Historian Archesonus
+  tip Archesonus stands beside King Magni in the High Seat.
+  accept 3702
+  complete 3702
+  turnin 3702
+  accept 3701                         -- The relics are in the Burning Steppes: keep it
+
+step Bind and train
+  sethome "Ironforge"
+  train class
+
+step Xiggs Fuselighter
+  tip Xiggs waits in the Military Ward.
+  turnin 3450
+  accept 3451
+  turnin 3451

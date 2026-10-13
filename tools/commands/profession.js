@@ -1,0 +1,147 @@
+'use strict';
+// node tools/polestar.js profession build|draft ...
+
+const fs = require('node:fs');
+const path = require('node:path');
+const { parseArgs } = require('node:util');
+
+const ROOT = path.resolve(__dirname, '..', '..');
+
+const usage = `usage: node tools/polestar.js profession build [options]
+       node tools/polestar.js profession draft <Profession> [options]
+
+build: writes data/forever/professions.json from Blizzard Classic Era client
+tables (wago.tools CSV: SkillLine, SkillLineAbility, SpellName, SpellEffect,
+SpellReagents, SpellTotems, SpellCastingRequirements, SpellFocusObject,
+ItemSparse, Item, ItemEffect) and data/forever/{items,npcs,objects}.json.
+Trainers come from a curated name list checked against npcs.json.
+
+  --offline            use cached tables only
+  --build <version>    wago.tools Classic Era build (default: newest listed)
+  --data <dir>         reference data (default data/forever)
+  --sources <dir>      source cache (default data/sources)
+  --out <file>         default <data>/professions.json
+
+draft: prints (or writes) a 1-300 guide for a crafting profession (Alchemy,
+Blacksmithing, Enchanting, Engineering, Leatherworking, Tailoring): the
+cheapest sensible recipe chain by expected crafts and material cost, with
+trainer visits, recipes to learn, materials to buy or gather, and skill
+checkpoints at 75/150/225/300.
+
+  --data <dir>         reference data (default data/forever)
+  --out [file]         write the guide (default guides/forever/professions/<name>.guide)
+  --quiet              no plan summary on stderr`;
+
+function fail(msg) {
+	console.error(`${msg}\n\n${usage}`);
+	return 2;
+}
+
+async function runBuild(rest) {
+	let values;
+	try {
+		({ values } = parseArgs({
+			args: rest,
+			options: { offline: { type: 'boolean' }, build: { type: 'string' }, data: { type: 'string' }, sources: { type: 'string' }, out: { type: 'string' } },
+			strict: true,
+		}));
+	} catch (err) {
+		return fail(err.message);
+	}
+	const { buildProfessions } = require('../lib/professions/build');
+	const abs = (p) => (p ? path.resolve(p) : undefined);
+	const res = await buildProfessions({
+		offline: values.offline,
+		build: values.build,
+		dataDir: abs(values.data),
+		sourcesDir: abs(values.sources),
+		outFile: abs(values.out),
+		log: (m) => console.error(m),
+	});
+	for (const w of res.warnings) console.error(`warning: ${w}`);
+	const lines = Object.values(res.report).map((r) => {
+		const skipped = Object.entries(r.skipped).map(([k, n]) => `${n} ${k}`).join(', ');
+		return `  ${r.name.padEnd(15)} ${String(r.recipes).padStart(4)} recipes${skipped ? ` (left out: ${skipped})` : ''}`;
+	});
+	console.log(`wrote ${path.relative(process.cwd(), res.outFile) || res.outFile} from Classic Era build ${res.build}:\n${lines.join('\n')}`);
+	return 0;
+}
+
+function loadJson(dir, name) {
+	const file = path.join(dir, `${name}.json`);
+	if (!fs.existsSync(file)) throw new Error(`${path.relative(process.cwd(), file)} missing (node tools/polestar.js ${name === 'professions' ? 'profession build' : 'data build'})`);
+	return JSON.parse(fs.readFileSync(file, 'utf8'));
+}
+
+async function runDraft(rest) {
+	let values;
+	let positionals;
+	// `--out` may come with or without a file name.
+	const args = rest.slice();
+	const outAt = args.indexOf('--out');
+	let outDefault = false;
+	if (outAt >= 0 && (outAt === args.length - 1 || args[outAt + 1].startsWith('--'))) {
+		args.splice(outAt, 1);
+		outDefault = true;
+	}
+	try {
+		({ values, positionals } = parseArgs({
+			args,
+			options: { data: { type: 'string' }, out: { type: 'string' }, quiet: { type: 'boolean' } },
+			allowPositionals: true,
+			strict: true,
+		}));
+	} catch (err) {
+		return fail(err.message);
+	}
+	if (positionals.length !== 1) return fail('draft needs one profession name');
+	const { draftGuide } = require('../lib/professions/guide');
+	const dataDir = path.resolve(values.data || path.join(ROOT, 'data', 'forever'));
+	const data = {
+		professions: loadJson(dataDir, 'professions'),
+		npcs: loadJson(dataDir, 'npcs'),
+		objects: loadJson(dataDir, 'objects'),
+		zones: loadJson(dataDir, 'zones'),
+		items: loadJson(dataDir, 'items'),
+		quests: loadJson(dataDir, 'quests'),
+		mapFrames: loadJson(dataDir, 'map-frames'),
+	};
+	// Where the compiler can place `collect <item> nearest`: the same farm spots
+	// it compiles (tools/lib/dsl/farmspots.js), so a drafted step never fails
+	// lint for want of a qualifying dropper. -> { Alliance, Horde }: the lowest
+	// mob level among the spots that side may use, or null when there is none.
+	const { loadData } = require('../lib/dsl/data');
+	const { farmSpots } = require('../lib/dsl/farmspots');
+	const compiled = loadData(dataDir);
+	const lowest = (list) => (list.length ? Math.min(...list.map((s) => s.lvl.min)) : null);
+	data.farmable = (item) => {
+		const spots = farmSpots(compiled, item);
+		return {
+			Alliance: lowest(spots.filter((s) => s.faction === 'A' || s.faction === 'AH')),
+			Horde: lowest(spots.filter((s) => s.faction === 'H' || s.faction === 'AH')),
+		};
+	};
+	const { text, plan } = draftGuide(positionals[0], data);
+	if (!values.quiet) {
+		console.error(`${plan.profession.name}: ${plan.segments.length} segments, about ${(plan.total / 10000).toFixed(1)}g of materials (heuristic)`);
+		for (const s of plan.segments) console.error(`  ${String(s.from).padStart(3)}-${String(s.to).padEnd(3)} ${s.recipe.name} x${s.count}`);
+	}
+	const out = outDefault ? path.join(ROOT, 'guides', 'forever', 'professions', `${plan.profession.name.toLowerCase()}.guide`) : values.out ? path.resolve(values.out) : null;
+	if (out) {
+		fs.mkdirSync(path.dirname(out), { recursive: true });
+		fs.writeFileSync(out, text);
+		if (!values.quiet) console.error(`wrote ${path.relative(process.cwd(), out)}`);
+	} else {
+		process.stdout.write(text);
+	}
+	return 0;
+}
+
+async function run(argv) {
+	const [sub, ...rest] = argv;
+	if (sub === 'build') return runBuild(rest);
+	if (sub === 'draft') return runDraft(rest);
+	return fail(sub ? `unknown subcommand "${sub}"` : 'missing subcommand');
+}
+
+module.exports = { name: 'profession', summary: 'Build professions.json from client tables; draft a 1-300 profession guide', usage, run };

@@ -1,0 +1,65 @@
+{
+	"1413": {
+		"id": 1413,
+		"name": "The Barrens",
+		"areaId": 17,
+		"parent": 1414,
+		"type": 3
+	},
+	"1414": {
+		"id": 1414,
+		"name": "Kalimdor",
+		"areaId": null,
+		"parent": 947,
+		"type": 2
+	},
+	"1415": {
+		"id": 1415,
+		"name": "Eastern Kingdoms",
+		"areaId": null,
+		"parent": 947,
+		"type": 2
+	},
+	"1429": {
+		"id": 1429,
+		"name": "Elwynn Forest",
+		"areaId": 12,
+		"parent": 1415,
+		"type": 3
+	},
+	"1434": {
+		"id": 1434,
+		"name": "Stranglethorn Vale",
+		"areaId": 33,
+		"parent": 1415,
+		"type": 3
+	},
+	"1436": {
+		"id": 1436,
+		"name": "Westfall",
+		"areaId": 40,
+		"parent": 1415,
+		"type": 3
+	},
+	"1444": {
+		"id": 1444,
+		"name": "Feralas",
+		"areaId": 357,
+		"parent": 1414,
+		"type": 3
+	},
+	"1453": {
+		"id": 1453,
+		"name": "Stormwind City",
+		"areaId": 1519,
+		"parent": 1415,
+		"type": 3
+	},
+	"1455": {
+		"id": 1455,
+		"name": "Ironforge",
+		"areaId": 1537,
+		"parent": 1415,
+		"type": 3
+	}
+}

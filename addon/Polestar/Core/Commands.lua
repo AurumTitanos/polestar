@@ -1,0 +1,127 @@
+-- Guide slash commands and key binding labels. Init.lua owns the /polestar
+-- dispatcher and the show/hide/guides/options/debug commands; Bindings.xml
+-- (addon root) calls into the functions below.
+
+local ADDON, ns = ...
+
+local L = ns.L
+local Engine = ns.Engine
+
+BINDING_HEADER_POLESTAR = "Polestar"
+BINDING_NAME_POLESTAR_TOGGLE = L["Toggle guide window"]
+BINDING_NAME_POLESTAR_NEXT = L["Next step"]
+BINDING_NAME_POLESTAR_PREV = L["Previous step"]
+-- Labels for the QoL secure buttons' CLICK bindings (QoL/Buttons.lua). The
+-- client looks these names up as globals; they contain spaces and a colon,
+-- so they can only be set through _G.
+_G["BINDING_NAME_CLICK PolestarQuestItemButton:LeftButton"] = L["Use quest item"]
+_G["BINDING_NAME_CLICK PolestarTargetButton:LeftButton"] = L["Target quest mob"]
+_G["BINDING_NAME_CLICK PolestarHearthButton:LeftButton"] = L["Use Hearthstone"]
+
+-- Entry points for Bindings.xml.
+ns.Bindings = {
+	Toggle = function() ns.Fire("TOGGLE_FRAME") end,
+	Next = function() Engine.Next() end,
+	Prev = function() Engine.Prev() end,
+}
+
+local function needGuide()
+	if Engine.GetGuide() then return true end
+	ns.Print(L["No guide selected. Use /polestar guides to pick one."])
+	return false
+end
+
+ns.RegisterCommand("next", function()
+	if needGuide() then Engine.Next() end
+end, L["Look at the next step (skips nothing)"])
+
+ns.RegisterCommand("prev", function()
+	if needGuide() then Engine.Prev() end
+end, L["Look at the step before"])
+
+ns.RegisterCommand("skip", function()
+	if needGuide() then Engine.Skip() end
+end, L["Skip the step shown, for good (the window offers the undo)"])
+
+ns.RegisterCommand("reset", function()
+	if not needGuide() then return end
+	Engine.ResetProgress()
+	ns.Print(L["Cleared ticks, skips and the step you were looking at for this guide."])
+end, L["Clear ticks and skips for the current guide"])
+
+ns.RegisterCommand("guide", function(rest)
+	local id = rest and rest:match("^%s*(%S+)")
+	if not id then
+		local g = Engine.GetGuide()
+		ns.Print(g and (L["Current guide: %s (%s)"]):format(g.title, g.id) or L["No guide selected."])
+		return
+	end
+	if not ns.Guides.Get(id) then
+		ns.Print((L["Unknown guide '%s'."]):format(id))
+		return
+	end
+	Engine.SetGuide(id)
+	ns.Print((L["Guide: %s"]):format(ns.Guides.Get(id).title))
+end, L["Switch to a guide by id"])
+
+ns.RegisterCommand("status", function()
+	local g = Engine.GetGuide()
+	if not g then
+		ns.Print(L["No guide selected."])
+		return
+	end
+	local done, total = Engine.GetProgress()
+	local i = Engine.GetStepIndex()
+	if not i then
+		ns.Print((L["%s: complete (%d/%d steps)."]):format(g.title, done, total))
+		return
+	end
+	local view = Engine.GetStepView(i)
+	ns.Print((L["%s: step %d of %d (%d/%d done)"]):format(g.title, i, Engine.GetStepCount(), done, total))
+	for _, goal in ipairs(view.goals) do
+		if goal.status ~= "na" then
+			local mark = goal.status == "done" and "|cff4fd1c5[x]|r " or "[ ] "
+			local progress = goal.progress and (" (%d/%d)"):format(goal.progress.cur, goal.progress.max) or ""
+			DEFAULT_CHAT_FRAME:AddMessage("  " .. mark .. goal.text .. progress)
+		end
+	end
+end, L["Show the current guide and step"])
+
+ns.RegisterCommand("tabs", function()
+	local list, active = Engine.GetTabs()
+	if #list == 0 then
+		ns.Print(L["No guide selected."])
+		return
+	end
+	ns.Print(L["Open guides:"])
+	for i, t in ipairs(list) do
+		local mark = i == active and "|cff4fd1c5>|r " or "  "
+		local state = t.complete and L["complete"] or (L["step %d of %d"]):format(t.stepIndex or 0, t.stepCount)
+		DEFAULT_CHAT_FRAME:AddMessage(("%s%d. %s  |cff8a8f98%s|r"):format(mark, i, t.title, state))
+	end
+end, L["List the open guide tabs"])
+
+ns.RegisterCommand("tab", function(rest)
+	local n = tonumber(rest and rest:match("^%s*(%d+)"))
+	local list = Engine.GetTabs()
+	if not n or not list[n] then
+		ns.Print((L["No tab %s; %d open."]):format(tostring(rest ~= "" and rest or "?"), #list))
+		return
+	end
+	Engine.SelectTab(n)
+end, L["Switch to guide tab <n>"])
+
+ns.RegisterCommand("close", function()
+	local _, active = Engine.GetTabs()
+	if active == 0 then
+		ns.Print(L["No guide selected."])
+		return
+	end
+	Engine.CloseTab(active)
+end, L["Close the current guide tab"])
+
+ns.RegisterCommand("path", function()
+	if not Engine.OfferRouteChoice() then
+		ns.Print(L["No choice of route here: this guide has one way on."])
+	end
+end, L["Choose (or change) where to level next"])

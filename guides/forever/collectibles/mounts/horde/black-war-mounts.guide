@@ -1,0 +1,31 @@
+guide forever/collectibles/mounts/horde/black-war-mounts
+title Black War Mounts
+category Collectibles
+folder Mounts · PvP
+keywords Horn of the Black War Wolf, Whistle of the Black War Raptor, Black War Kodo, Red Skeletal Warhorse, Raider Bork, Lieutenant General, PvP rank 11, Hall of Legends
+collects 18245, 18246, 18247, 18248
+faction Horde
+levels 40-60
+zone Orgrimmar
+
+# The Horde rank 11 PvP mounts from Raider Bork in Orgrimmar.
+# Rank 11 (Commander / Lieutenant General) unlocks the Black War mounts;
+# vendors in Stormwind and Orgrimmar.
+# Sources: Forever client 1.60.1.70338 via wago.tools (ItemSparse: level 40,
+# 100g, racial riding spell, no rank in the item itself). Our data has no spawn
+# for the vendor, so the waypoint is the honor hall next to its quartermasters
+# (npcs.json).
+
+step PvP rank 11
+  tip Forever's PvP ranks come from Rank Points earned in battlegrounds and world PvP, with a weekly cap; Lieutenant General (rank 11) unlocks the Black War mounts. Polestar cannot read your rank, so this step waits for level 40 and the riding skill.
+  level 40
+  skill Riding 75
+
+step Raider Bork
+  tip Raider Bork sells the mounts in the Hall of Legends in Orgrimmar's Valley of Honor, beside the other honor quartermasters such as Sergeant Ba'sha. The Forever client lists each at 100g; choose one.
+  goto 41.5,68.6 "Hall of Legends"
+  vendor 12796 @41.5,68.6             -- Raider Bork
+  buy 18245 npc 12796 @41.5,68.6 optional -- 100g
+  buy 18246 npc 12796 @41.5,68.6 optional -- 100g
+  buy 18247 npc 12796 @41.5,68.6 optional -- 100g
+  buy 18248 npc 12796 @41.5,68.6 optional -- 100g

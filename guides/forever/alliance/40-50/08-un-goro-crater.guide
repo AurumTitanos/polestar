@@ -1,0 +1,43 @@
+# Un'Goro Crater, Alliance 50, part 2 of the crater (consensus visit 56, the level 50 quests).
+# Flow: Marshal's Refuge -> the gorilla pelts on Ironstone Plateau -> Ringo on Fire Plume Ridge -> his escort
+# back to the refuge.
+# Order changes against the simulator, same quest set over the three crater guides:
+# - The export's grind to 50 on Ironstone Plateau now sits in 07, before the level 55 quests it unlocks; this
+#   part starts at 50.
+# - The Apes of Un'Goro's pelts (4289, accepted in 07) are collected here; Torwa takes them in 50-60/01.
+# - A Little Help From My Friends (4491) starts Ringo's escort the moment it is accepted, so the escort and the
+#   turn-in follow at once here instead of after the level 51 grind.
+# - Beware of Pterrordax (4501) was taken and turned in in 07.
+# Class quests: none in this visit.
+guide forever/alliance/40-50/08-un-goro-crater
+title Un'Goro Crater
+faction Alliance
+levels 50-51
+zone Un'Goro Crater
+next forever/alliance/50-60/01-un-goro-crater
+
+# ---------------------------------------------------------------- Lost!
+
+step Spraggle Frock
+  tip Spraggle's friend Ringo has gone missing.
+  accept 4492
+
+step Ironstone Plateau
+  tip The gorillas live on Ironstone Plateau, east of Marshal's Refuge. Keep their pelts for Torwa Pathfinder. Stay out of the deepest cave: U'cha is level 55.
+  collect 11478 quest 4289            -- Un'Goro Gorilla Pelt
+  collect 11479 quest 4289            -- Un'Goro Stomper Pelt
+  collect 11480 quest 4289            -- Un'Goro Thunderer Pelt
+
+# ---------------------------------------------------------------- Ringo
+
+step Ringo
+  tip Ringo sits on the south-east slope of Fire Plume Ridge, in the middle of the crater.
+  turnin 4492
+  accept 4491
+
+step Escort Ringo
+  tip Lead Ringo north to Marshal's Refuge. When he faints, use Spraggle's Canteen on him to wake him.
+  complete 4491
+
+step Spraggle Frock
+  turnin 4491

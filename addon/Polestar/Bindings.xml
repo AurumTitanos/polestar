@@ -1,0 +1,14 @@
+<Bindings>
+	<Binding name="POLESTAR_TOGGLE" header="POLESTAR" category="ADDONS">
+		Polestar.Bindings.Toggle()
+	</Binding>
+	<Binding name="POLESTAR_NEXT" category="ADDONS">
+		Polestar.Bindings.Next()
+	</Binding>
+	<Binding name="POLESTAR_PREV" category="ADDONS">
+		Polestar.Bindings.Prev()
+	</Binding>
+	<Binding name="CLICK PolestarQuestItemButton:LeftButton" category="ADDONS"/>
+	<Binding name="CLICK PolestarTargetButton:LeftButton" category="ADDONS"/>
+	<Binding name="CLICK PolestarHearthButton:LeftButton" category="ADDONS"/>
+</Bindings>

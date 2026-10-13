@@ -1,0 +1,51 @@
+guide forever/reputation/thorium-brotherhood
+title Thorium Brotherhood Reputation
+category Reputation
+levels 48-60
+zone Searing Gorge
+# Built from the Era-baseline reference data: Master Smith Burninate at Thorium
+# Point with What the Flux? (7722, the plans are an object in the Slag Pit) and
+# the repeatable Restoring Fiery Flux Supplies turn-ins (7736 Kingsblood, 8241
+# Iron, 8242 Heavy Leather, each with Coal and an Incendosaur Scale); Lokhtos
+# Darkbargainer's Favor Amongst the Brotherhood turn-ins (6642-6646) and the
+# drop tables of their materials. Nothing public shows Forever changing Searing
+# Gorge or Blackrock Depths; this has NOT been play-tested on Forever yet.
+#
+# Lokhtos stands inside Blackrock Depths, which has no map in our data, so his
+# steps point to the Blackrock Mountain entrance and track the standing (rep
+# 59). Repeatable turn-ins are never flagged completed by the client, so their
+# steps track the standing too. Gaining Acceptance (7737, Dark Iron Residue) is
+# in the data but its drop sources are not, so it is only mentioned. Turn-in
+# amounts are not in the data and are left out.
+
+step Master Smith Burninate
+  tip Thorium Point, on the scaffolds in the northwest of Searing Gorge, is the Brotherhood's outpost. The Thorium Brotherhood starts out Neutral. Forever's Legacy Diplomat perk increases reputation gains.
+  accept 7722
+
+step Secret Plans: Fiery Flux
+  tip The plans lie in the Slag Pit of the Cauldron, guarded by Dark Iron dwarves. Dark Iron dwarves also drop Dark Iron Residue, which Burninate takes for Gaining Acceptance.
+  collect 18922 quest 7722.1 @40.4,35.7
+
+step Back to Burninate
+  turnin 7722
+
+step Fiery Flux supplies to Friendly
+  tip Restoring Fiery Flux Supplies repeats in three versions: Kingsblood, Iron Bars or Heavy Leather, each with Coal and an Incendosaur Scale. Incendosaurs (level 47-49) in the north of Searing Gorge drop a scale every time, per the data; Burninate himself sells Coal.
+  collect 18944 optional @44.6,24.9
+  talk 14624 optional -- Master Smith Burninate: Restoring Fiery Flux Supplies (7736, 8241, 8242)
+  rep 59 Friendly
+
+step Lokhtos Darkbargainer to Honored
+  tip Lokhtos Darkbargainer trades in the Grim Guzzler inside Blackrock Depths. His Favor Amongst the Brotherhood turn-ins take Dark Iron Ore (mined from Dark Iron Deposits with Mining), Blood of the Mountain, Fiery Core, Lava Core and Core Leather. Lothos Riftwaker at the Blackrock Mountain entrance offers attunement to the Molten Core.
+  goto 32.1,94.7 "Blackrock Mountain"
+  note Dark Iron Ore: Favor Amongst the Brotherhood, Dark Iron Ore (6642) at Lokhtos, repeatable.
+  rep 59 Honored
+
+step Thorium Brotherhood to Revered
+  tip The Molten Core materials carry the rest: the data drops Fiery Cores from Firewalkers, Flameguards and Firelords and Lava Cores from Lava Elementals, Lava Reavers and Molten Destroyers there. Blood of the Mountain comes from Molten Destroyers and rarely elsewhere.
+  note Molten Core materials: Favor Amongst the Brotherhood, Fiery Core (6643), Lava Core (6644), Core Leather (6645), Blood of the Mountain (6646), all repeatable at Lokhtos.
+  rep 59 Revered
+
+step Thorium Brotherhood to Exalted
+  tip Keep turning in Molten Core materials and Dark Iron Ore at Lokhtos until Exalted.
+  rep 59 Exalted

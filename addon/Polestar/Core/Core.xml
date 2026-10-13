@@ -1,0 +1,12 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+	<Script file="Init.lua"/>
+	<Script file="Compat.lua"/>
+	<Script file="Data.lua"/>
+	<Script file="Hooks.lua"/>
+	<Script file="Guides.lua"/>
+	<Script file="Search.lua"/>
+	<Script file="Engine.lua"/>
+	<Script file="ClassTrainers.lua"/>
+	<Script file="Automation.lua"/>
+	<Script file="Commands.lua"/>
+</Ui>

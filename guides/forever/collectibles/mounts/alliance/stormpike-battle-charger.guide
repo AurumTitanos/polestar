@@ -1,0 +1,23 @@
+guide forever/collectibles/mounts/alliance/stormpike-battle-charger
+title Stormpike Battle Charger
+category Collectibles
+folder Mounts · Reputation
+keywords Stormpike Guard, Alterac Valley, Thanthaldis Snowgleam, Gaelden Hammersmith, ram, Exalted, PvP
+collects 19030
+faction Alliance
+levels 51-60
+zone Alterac Mountains
+
+# Stormpike Battle Charger for Exalted Stormpike Guard (Era rule; the reputation
+# comes from Alterac Valley, one of Forever's four battlegrounds).
+# Sources: Forever client 1.60.1.70338 tables via wago.tools (ItemSparse: level
+# 60, 200g, no riding rank asked); items.json / npcs.json for the vendors.
+
+step Stormpike Guard
+  tip Alterac Valley (level 51+) raises Stormpike Guard: win, capture towers and graveyards, and hand in the battleground's turn-ins. Thanthaldis Snowgleam waits outside the battleground on the Alterac Mountains border above Hillsbrad; Gaelden Hammersmith inside Alterac Valley sells the same mount.
+  rep "Stormpike Guard" Exalted
+
+step Stormpike Battle Charger
+  tip The Forever client lists it at 200g and level 60, and asks for no riding rank.
+  level 60
+  buy 19030 npc 13217                 -- Thanthaldis Snowgleam, 200g

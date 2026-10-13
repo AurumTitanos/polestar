@@ -1,0 +1,37 @@
+guide forever/collectibles/mounts/horde/swift-raptor
+title Swift Raptor
+category Collectibles
+folder Mounts · Level 60
+keywords Swift Blue Raptor, Swift Olive Raptor, Swift Green Raptor, Swift Orange Raptor, Troll, Sen'jin Village, Zjolnir, Xar'Ti, Riding
+collects 18788, 18789, 18790
+faction Horde
+levels 60-60
+zone Durotar
+
+# Swift Horde raptor from Zjolnir (Sen'jin Village).
+# Sources: Forever client 1.60.1.70338 tables via wago.tools (ItemSparse: level,
+# price, races, riding spell; SkillLineAbility: Riding); npcs.json and
+# items.json for the trainer, the vendor and its stock.
+# Forever riding: the client files every racial riding spell under one Riding
+# skill (SkillLineAbility), so any riding trainer of your faction teaches it:
+# Apprentice Riding (skill 75) from level 40, Journeyman Riding (150) at 60.
+# Blizzard: learning to ride grants a mount, and training costs 100g at 40 and
+# 1,000g at 60 (Kris Zierhut). ItemSparse lists the
+# mounts at 20g (level 40) and 200g (level 60), usable by every race of the
+# faction; whether a vendor still wants Exalted with another race's city (the
+# Era rule) is server-side and unconfirmed.
+
+step Journeyman Riding
+  zone Durotar
+  tip Xar'Ti and Zjolnir's raptors are in Sen'jin Village on the Durotar coast. At 60 Xar'Ti teaches Journeyman Riding (1,000g per Blizzard's designers); Blizzard says learning riding grants a mount. The Forever client sells each swift raptor for 200g at level 60.
+  level 60
+  train 7953                          -- Xar'Ti, riding trainer
+  skill Riding 150
+
+step Pick a colour
+  tip Zjolnir sells the other colours (200g each in the Forever client). Buy any you want, or none if the mount you were given is the one you like.
+  vendor 7952                         -- Zjolnir
+  buy 18788 npc 7952 optional         -- Swift Blue Raptor, 200g
+  buy 18789 "Swift Olive Raptor" npc 7952 optional -- 200g; the client's name (our data: Swift Green Raptor)
+  buy 18790 npc 7952 optional         -- Swift Orange Raptor, 200g
+  note Whistle of the Venomhide Ravasaur (level 60) is in the Forever client, but its source is not known yet.

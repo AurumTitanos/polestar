@@ -1,0 +1,10 @@
+guide forever/horde/02-south
+title South
+faction Horde
+levels 5-8
+zone Testvale
+next forever/horde/03-end, forever/horde/02-north
+
+step South
+  accept 90020 "South Task"
+  turnin 90020 "South Task"

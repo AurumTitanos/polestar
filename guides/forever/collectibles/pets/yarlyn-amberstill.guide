@@ -1,0 +1,21 @@
+guide forever/collectibles/pets/yarlyn-amberstill
+title Yarlyn Amberstill's Rabbits
+category Collectibles
+folder Companion pets · Vendors
+keywords Rabbit Crate, Snowshoe, Arctic, Brown, rabbit, hare, Amberstill Ranch
+collects 8497, 280797, 280801
+faction Alliance
+levels 1-60
+zone Dun Morogh
+
+# Yarlyn Amberstill's rabbits at Amberstill Ranch.
+# Sources: items.json / npcs.json (vendor, Snowshoe; the new Arctic and Brown
+# crates); Forever client 1.60.1.70338 via wago.tools (ItemSparse prices; every pet item
+# teaches its companion when used).
+
+step Yarlyn Amberstill
+  tip Yarlyn Amberstill stands at Amberstill Ranch, east of Kharanos. Each rabbit crate costs 20s; the Arctic and Brown crates are new in Forever. Each pet item teaches its companion when you use it; the goals stay ticked afterwards.
+  vendor 1263                         -- Yarlyn Amberstill
+  buy 8497 npc 1263 optional          -- Rabbit Crate (Snowshoe), 20s
+  buy 280797 "Rabbit Crate (Arctic)" npc 1263 optional -- 20s
+  buy 280801 "Rabbit Crate (Brown)" npc 1263 optional -- 20s

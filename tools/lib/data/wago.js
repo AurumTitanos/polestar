@@ -1,0 +1,113 @@
+'use strict';
+// Blizzard client tables (DB2) as CSV from wago.tools, cached per build under
+// <sources>/wago/<build>/<Table>.csv. Cached builds are immutable, so a
+// present cache file is never re-downloaded.
+//
+// Two products: Classic Era (`wow_classic_era`, 1.13-1.15, the frame pfQuest
+// coordinates are in) and Forever (`wow_classic_beta` during the beta, which
+// also lists 5.5 Mists builds, so only its 1.60+ builds count).
+
+const fs = require('node:fs');
+const path = require('node:path');
+const { parseCsv } = require('./csv');
+
+const BUILDS_URL = 'https://wago.tools/api/builds';
+// `optional` tables are fetched like the rest, but a build without them still
+// loads (tables[t] stays undefined, with a warning).
+const PRODUCTS = {
+	era: { key: 'wow_classic_era', family: /^1\.1[0-5]\./, tables: ['UiMap', 'UiMapAssignment', 'AreaTable', 'Faction'], optional: [] },
+	forever: { key: 'wow_classic_beta', family: /^1\.6\d\./, tables: ['UiMap', 'UiMapAssignment', 'AreaTable'], optional: ['ChrRaces', 'ChrClasses', 'CharBaseInfo', 'Faction'] },
+};
+const PRODUCT = PRODUCTS.era.key;
+const TABLES = PRODUCTS.era.tables;
+
+function tableUrl(table, build) {
+	return `https://wago.tools/db2/${table}/csv?build=${encodeURIComponent(build)}`;
+}
+
+function compareVersions(a, b) {
+	const pa = String(a).split('.').map(Number);
+	const pb = String(b).split('.').map(Number);
+	for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+		const d = (pa[i] || 0) - (pb[i] || 0);
+		if (d) return d;
+	}
+	return 0;
+}
+
+function newestCachedBuild(cacheRoot, product) {
+	if (!fs.existsSync(cacheRoot)) return null;
+	const builds = fs
+		.readdirSync(cacheRoot)
+		.filter((b) => /^\d+(\.\d+)+$/.test(b) && product.family.test(b) && product.tables.every((t) => fs.existsSync(path.join(cacheRoot, b, `${t}.csv`))))
+		.sort(compareVersions);
+	return builds.length ? builds[builds.length - 1] : null;
+}
+
+async function fetchText(fetchImpl, url) {
+	const res = await fetchImpl(url, { headers: { 'user-agent': 'polestar-data-build' } });
+	if (!res.ok) throw new Error(`GET ${url}: HTTP ${res.status}`);
+	return res.text();
+}
+
+async function latestBuild(fetchImpl, product) {
+	const builds = JSON.parse(await fetchText(fetchImpl, BUILDS_URL));
+	const listed = Array.isArray(builds[product.key]) ? builds[product.key].map((b) => b.version).filter(Boolean) : [];
+	const list = listed.filter((v) => product.family.test(v));
+	if (!list.length) throw new Error(`${BUILDS_URL}: no ${product.key} ${product.family.source} builds listed`);
+	return list.sort(compareVersions)[list.length - 1];
+}
+
+// -> { build, product, tables: { UiMap: rows, ... }, urls, warnings }
+// product: "era" (default) or "forever".
+async function loadWago({ sourcesDir, build, offline = false, fetchImpl = globalThis.fetch, log = () => {}, product: name = 'era' }) {
+	const product = PRODUCTS[name];
+	if (!product) throw new Error(`wago: unknown product "${name}"`);
+	const cacheRoot = path.join(sourcesDir, 'wago');
+	const warnings = [];
+	let chosen = build || null;
+	if (!chosen) {
+		if (offline) {
+			chosen = newestCachedBuild(cacheRoot, product);
+			if (!chosen) throw new Error(`--offline: no cached wago.tools build under ${cacheRoot} (${product.key})`);
+		} else {
+			try {
+				chosen = await latestBuild(fetchImpl, product);
+			} catch (err) {
+				chosen = newestCachedBuild(cacheRoot, product);
+				if (!chosen) throw err;
+				warnings.push(`wago.tools: ${err.message}; using cached ${product.key} build ${chosen}`);
+			}
+		}
+	}
+	const dir = path.join(cacheRoot, chosen);
+	const tables = {};
+	const urls = {};
+	const load = async (t) => {
+		const file = path.join(dir, `${t}.csv`);
+		urls[t] = tableUrl(t, chosen);
+		if (!fs.existsSync(file)) {
+			if (offline) throw new Error(`--offline: missing cached ${path.relative(process.cwd(), file)}`);
+			log(`fetching ${urls[t]}`);
+			const text = await fetchText(fetchImpl, urls[t]);
+			const rows = parseCsv(text);
+			if (!rows.length || !('ID' in rows[0])) throw new Error(`${urls[t]}: not a DB2 CSV export`);
+			fs.mkdirSync(dir, { recursive: true });
+			fs.writeFileSync(`${file}.tmp`, text);
+			fs.renameSync(`${file}.tmp`, file);
+		}
+		tables[t] = parseCsv(fs.readFileSync(file, 'utf8'));
+	};
+	for (const t of product.tables) await load(t);
+	for (const t of product.optional) {
+		try {
+			await load(t);
+		} catch (err) {
+			delete urls[t];
+			warnings.push(`wago.tools ${product.key} ${chosen}: no ${t} (${err.message})`);
+		}
+	}
+	return { build: chosen, product: product.key, tables, urls, warnings };
+}
+
+module.exports = { loadWago, compareVersions, tableUrl, TABLES, PRODUCT, PRODUCTS, BUILDS_URL };

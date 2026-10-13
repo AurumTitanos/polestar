@@ -1,0 +1,16 @@
+node_modules/
+.ref/
+dist/
+data/sources/
+data/forever/
+data/recordings/*
+!data/recordings/.gitkeep
+addon/Polestar_Codex/
+*.log
+data/sim/
+data/bench/
+guides/drafts/
+addon/Polestar_QuestDB/
+data/play/
+data/local/
+addon/Polestar_Travel/

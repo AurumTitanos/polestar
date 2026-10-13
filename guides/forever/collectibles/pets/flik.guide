@@ -1,0 +1,21 @@
+guide forever/collectibles/pets/flik
+title Darkmoon Faire Frogs
+category Collectibles
+folder Companion pets · Vendors
+keywords Flik, Tree Frog Box, Wood Frog Box, frog, Darkmoon Faire
+collects 11026, 11027
+levels 1-60
+zone Elwynn Forest
+
+# Flik's frogs at the Darkmoon Faire.
+# Sources: items.json / npcs.json (vendor, stock; Flik has no fixed spawn);
+# Forever client 1.60.1.70338 via wago.tools (ItemSparse prices; every pet item
+# teaches its companion when used).
+# Forever's Faire schedule is not confirmed; in Era it alternates between
+# Goldshire (Elwynn Forest) and Mulgore.
+
+step Flik at the Darkmoon Faire
+  tip Flik sells two frogs (1g each) while the Darkmoon Faire is in town. In Era the Faire sets up south of Goldshire in Elwynn Forest one month and near Thunder Bluff in Mulgore the next; go to whichever is up. Each pet item teaches its companion when you use it; the goals stay ticked afterwards.
+  vendor 14860                        -- Flik
+  buy 11026 npc 14860 optional        -- Tree Frog Box, 1g
+  buy 11027 npc 14860 optional        -- Wood Frog Box, 1g

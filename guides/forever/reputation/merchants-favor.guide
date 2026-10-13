@@ -1,0 +1,56 @@
+guide forever/reputation/merchants-favor
+title Merchant's Favor Reputation
+category Reputation
+levels 10-60
+zone Stormwind City
+# Azeroth Commerce Authority (2586, Alliance) and Durotar Supply and Logistics
+# (2587, Horde): Forever's new tradeskill factions ("Merchant's Favor"). Both
+# exist in the Blizzard Faction table (factions.json), but our Era-baseline
+# quests.json, npcs.json and items.json hold none of their NPCs, quests or
+# turn-in items (the factions came from Season of Discovery, which the data
+# does not cover). So this guide only tracks the standing (rep 2586/2587) with
+# honest notes; live Polestar_Recorder sessions will complete it with the
+# quartermasters, their turn-ins and coordinates. Nothing here is invented.
+
+step Azeroth Commerce Authority to Friendly
+  only Alliance
+  tip The Azeroth Commerce Authority is the Alliance's tradeskill faction in Forever. In Season of Discovery its reputation came from turning in crafted and gathered goods to its supply officers in the capitals; Forever's version is not in our data yet; if it works the same way, a crafting or gathering profession is the way in. Forever's Legacy Diplomat perk increases reputation gains.
+  note Where the Azeroth Commerce Authority's representatives stand in Forever is not in our data yet; a live recording will add them here.
+  rep 2586 Friendly
+
+step Azeroth Commerce Authority to Honored
+  only Alliance
+  tip Keep turning in goods to the Azeroth Commerce Authority.
+  rep 2586 Honored
+
+step Azeroth Commerce Authority to Revered
+  only Alliance
+  tip Keep turning in goods to the Azeroth Commerce Authority.
+  rep 2586 Revered
+
+step Azeroth Commerce Authority to Exalted
+  only Alliance
+  tip Keep turning in goods to the Azeroth Commerce Authority until Exalted.
+  rep 2586 Exalted
+
+step Durotar Supply and Logistics to Friendly
+  only Horde
+  zone Orgrimmar
+  tip Durotar Supply and Logistics is the Horde's tradeskill faction in Forever. In Season of Discovery its reputation came from turning in crafted and gathered goods to its supply officers in the capitals; Forever's version is not in our data yet; if it works the same way, a crafting or gathering profession is the way in. Forever's Legacy Diplomat perk increases reputation gains.
+  note Where Durotar Supply and Logistics' representatives stand in Forever is not in our data yet; a live recording will add them here.
+  rep 2587 Friendly
+
+step Durotar Supply and Logistics to Honored
+  only Horde
+  tip Keep turning in goods to Durotar Supply and Logistics.
+  rep 2587 Honored
+
+step Durotar Supply and Logistics to Revered
+  only Horde
+  tip Keep turning in goods to Durotar Supply and Logistics.
+  rep 2587 Revered
+
+step Durotar Supply and Logistics to Exalted
+  only Horde
+  tip Keep turning in goods to Durotar Supply and Logistics until Exalted.
+  rep 2587 Exalted

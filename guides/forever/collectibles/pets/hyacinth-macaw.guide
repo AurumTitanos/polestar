@@ -1,0 +1,16 @@
+guide forever/collectibles/pets/hyacinth-macaw
+title Hyacinth Macaw
+category Collectibles
+folder Companion pets · Drops
+keywords Parrot Cage (Hyacinth Macaw), Bloodsail Buccaneers, pirates, Stranglethorn, parrot
+collects 8494
+levels 35-60
+zone Stranglethorn Vale
+
+# Parrot Cage (Hyacinth Macaw) from the Bloodsail pirates of Stranglethorn.
+# Sources: items.json (Bloodsail drops, 0.02-0.04% per kill, pfQuest); Forever
+# client 1.60.1.70338.
+
+step Bloodsail pirates
+  tip Every Bloodsail pirate on the southern Stranglethorn coast can drop it, but only about once in 2,500-5,000 kills in our data. Expect a very long grind. The waypoint is the Bloodsail camp north of Booty Bay, among the Swashbucklers and Raiders.
+  collect 8494 @33,77.3               -- Bloodsail camps

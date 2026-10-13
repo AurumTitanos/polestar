@@ -1,0 +1,5 @@
+Name_lang,Pos_0,Pos_1,Pos_2,MapOffset_0,MapOffset_1,FlightMapOffset_0,FlightMapOffset_1,ID,ContinentID,ConditionID,CharacterBitNumber,Flags,UiTextureKitID,Facing,SpecialIconConditionID,VisibilityConditionID,MountCreatureID_0,MountCreatureID_1
+"Stormwind, Elwynn",-8840.5595703125,489.70001220703,109.61000061035,0,0,0,0,2,0,0,2,1,0,0,0,0,0,541
+"Sentinel Hill, Westfall",-10628.889648438,1036.6800537109,34.06000137329,0,0,0,0,4,0,0,4,1,0,0,0,0,0,541
+"Generic, World target for Zeppelin Paths",-6666,-2222.3000488281,278.60000610352,0,0,0,0,24,0,0,24,0,0,0,0,0,0,0
+"Transport, Booty Bay - Ratchet",-1965.1700439453,-5824.2900390625,-1.05999994278,0,0,0,0,34,1,0,0,0,0,0,0,0,0,0

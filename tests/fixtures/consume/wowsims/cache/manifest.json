@@ -1,0 +1,15 @@
+{
+	"fetched": "2026-10-12T00:00:00.000Z",
+	"files": {
+		"classic@7779ebbf79dc7f1341e6ab939b28a3402c9a730a:ui/warrior/sim.ts": 200,
+		"classic@5634c852d47acfcc5b6b62a6472a536df64634dc:ui/warrior/sim.ts": 200,
+		"sod@9568974bd605da01a973c0173c491d40371eedec:ui/warrior/sim.ts": 200,
+		"sod@19c880c1a8a8f87ecf8b96d6d6aaf6fca9bfb06a:ui/warrior/sim.ts": 200,
+		"classic@7779ebbf79dc7f1341e6ab939b28a3402c9a730a:ui/holy_paladin/sim.ts": 200,
+		"classic@7779ebbf79dc7f1341e6ab939b28a3402c9a730a:ui/warrior/presets.ts": 200,
+		"classic@7779ebbf79dc7f1341e6ab939b28a3402c9a730a:ui/warrior/gear_sets/blank.gear.json": 200,
+		"classic@7779ebbf79dc7f1341e6ab939b28a3402c9a730a:ui/warrior/gear_sets/p0.bis.gear.json": 200,
+		"classic@7779ebbf79dc7f1341e6ab939b28a3402c9a730a:ui/warrior/gear_sets/phase_1.gear.json": 200,
+		"classic@7779ebbf79dc7f1341e6ab939b28a3402c9a730a:LICENSE": 200
+	}
+}

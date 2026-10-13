@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Polestar playground</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<svg id="glyphs" width="0" height="0" aria-hidden="true" style="position:absolute"><defs id="glyph-defs"></defs></svg>
+<main class="stage">
+	<section class="game" aria-label="Game screen">
+		<div id="screen" class="screen" tabindex="0" aria-label="Game screen: click, hover, scroll, drag and type as in game">
+			<div id="world" class="world"></div>
+			<div id="ui" class="ui"></div>
+			<div id="chat" class="chat" aria-live="polite"></div>
+			<div id="popups" class="popups"></div>
+			<div id="notice" class="notice" hidden></div>
+		</div>
+		<form id="slash" class="slash" autocomplete="off">
+			<label for="slash-input">Chat</label>
+			<input id="slash-input" name="text" placeholder="/polestar options, /polestar guides, /run Polestar.Set(&quot;ui.scale&quot;, 1.1)" spellcheck="false">
+		</form>
+		<p id="timing" class="timing">Starting the Lua session</p>
+		<section id="errors" class="errors" hidden aria-live="polite">
+			<header><h2>Lua errors</h2><button type="button" id="errors-clear">Dismiss</button></header>
+			<ol id="error-list"></ol>
+		</section>
+	</section>
+
+	<aside class="panel" aria-label="Playground controls">
+		<header class="band">
+			<img id="emblem" alt="" width="34" height="34">
+			<div>
+				<h1>Polestar playground</h1>
+				<p id="who">Loading the character</p>
+			</div>
+		</header>
+
+		<details open id="g-look">
+			<summary>Look</summary>
+			<div class="grid">
+				<span class="label">Guide window</span>
+				<div class="seg" data-path="ui.style"><button value="standard">Standard</button><button value="transparent">Transparent</button></div>
+				<span class="label">Compact</span>
+				<label class="switch"><input type="checkbox" data-path="ui.compact"><span></span></label>
+				<label class="label" for="r-scale">Scale</label>
+				<div class="range"><input id="r-scale" type="range" min="0.6" max="1.6" step="0.05" data-path="ui.scale" data-format="pct"><output></output></div>
+				<label class="label" for="r-width">Width</label>
+				<div class="range"><input id="r-width" type="range" min="260" max="560" step="10" data-path="ui.width" data-format="int"><output></output></div>
+				<label class="label" for="r-opacity">Window opacity</label>
+				<div class="range"><input id="r-opacity" type="range" min="0.3" max="1" step="0.05" data-path="ui.opacity" data-format="pct"><output></output></div>
+				<label class="label" for="r-bg">Ground opacity</label>
+				<div class="range"><input id="r-bg" type="range" min="0" max="1" step="0.05" data-path="ui.bgOpacity" data-format="pct"><output></output></div>
+				<span class="label">Colour scheme</span>
+				<div class="seg" id="schemes" data-path="ui.scheme"></div>
+				<label class="label" for="c-accent">Accent</label>
+				<div class="colour"><input id="c-accent" type="color" data-path="ui.accent"><button type="button" class="link" data-unset="ui.accent">Scheme's</button></div>
+				<label class="label" for="c-bg">Ground colour</label>
+				<div class="colour"><input id="c-bg" type="color" data-path="ui.bgColor"><button type="button" class="link" data-unset="ui.bgColor">Scheme's</button></div>
+				<label class="label" for="r-bright">Brightness</label>
+				<div class="range"><input id="r-bright" type="range" min="-1" max="1" step="0.05" data-path="ui.brightness" data-format="signed"><output></output></div>
+				<label class="label" for="r-upnext">Up next</label>
+				<div class="range"><input id="r-upnext" type="range" min="0" max="6" step="1" data-path="ui.upcoming" data-format="upnext"><output></output></div>
+				<span class="label">Up next unfolded</span>
+				<label class="switch"><input type="checkbox" data-path="ui.upcomingOpen"><span></span></label>
+				<span class="label">Tips</span>
+				<div class="row"><label class="switch"><input type="checkbox" data-path="ui.showNotes"><span></span></label><button type="button" id="tip-toggle" class="link">Unfold this tip</button></div>
+				<label class="label" for="r-menu">Menu scale</label>
+				<div class="range"><input id="r-menu" type="range" min="0.7" max="1.4" step="0.05" data-path="ui.menuScale" data-format="pct"><output></output></div>
+				<span class="label">Font</span>
+				<div class="seg" data-path="ui.font"><button value="inter">Inter</button><button value="game">Game</button></div>
+				<span class="label">Lock window</span>
+				<label class="switch"><input type="checkbox" data-path="ui.locked"><span></span></label>
+			</div>
+			<div class="actions">
+				<button type="button" id="copy-settings" class="primary">Copy settings</button>
+				<button type="button" id="reset-look">Reset the look</button>
+			</div>
+		</details>
+
+		<details open id="g-guide">
+			<summary>Guide</summary>
+			<p id="guide-title" class="lede">No guide loaded</p>
+			<div class="grid">
+				<label class="label" for="step-pick">Step</label>
+				<div class="row"><button type="button" id="step-prev" aria-label="Previous step">&lsaquo;</button><select id="step-pick"></select><button type="button" id="step-next" aria-label="Next step">&rsaquo;</button></div>
+				<label class="label" for="guide-pick">Load guide</label>
+				<div class="row"><select id="guide-pick"></select><button type="button" id="guide-load">Load</button></div>
+			</div>
+			<ul id="goals" class="goals"></ul>
+			<div class="actions">
+				<button type="button" class="primary" data-act="goal">Complete next goal</button>
+				<button type="button" data-act="step">Play to end of step</button>
+				<button type="button" data-act="guide" title="Plays every remaining goal; can take a few seconds">Play to end of guide</button>
+			</div>
+			<p class="sub">Show the guide window</p>
+			<div class="actions">
+				<button type="button" data-state="doneStep">A done step</button>
+				<button type="button" data-state="route">Route choice waiting</button>
+				<button type="button" data-state="outlevel">Out-levelled banner</button>
+				<button type="button" data-state="train">Training due banner</button>
+				<button type="button" data-state="clearBanners" class="link">Clear banners</button>
+			</div>
+		</details>
+
+		<details open id="g-windows">
+			<summary>Windows</summary>
+			<div class="actions" id="windows">
+				<button type="button" data-open="hub">Hub</button>
+				<button type="button" data-open="guide">Guide window</button>
+				<button type="button" data-open="options">Options</button>
+				<button type="button" data-open="map">World map</button>
+				<button type="button" data-open="route">Route choice</button>
+				<button type="button" data-close="1" class="link">Close all (Esc)</button>
+			</div>
+		</details>
+
+		<details id="g-char">
+			<summary>Character</summary>
+			<div class="grid">
+				<label class="label" for="ch-faction">Faction</label>
+				<select id="ch-faction"><option>Alliance</option><option>Horde</option></select>
+				<label class="label" for="ch-race">Race</label>
+				<select id="ch-race"></select>
+				<label class="label" for="ch-class">Class</label>
+				<select id="ch-class"></select>
+				<label class="label" for="ch-level">Level</label>
+				<div class="row"><input id="ch-level" type="number" min="1" max="60" step="1"><button type="button" id="level-set">Set level</button></div>
+			</div>
+			<div class="actions">
+				<button type="button" id="ch-new" class="primary">Start this character</button>
+			</div>
+			<p class="sub">A new character starts at level 1 in their home zone. Settings carry over; their quest log and progress start over.</p>
+		</details>
+
+		<details id="g-place">
+			<summary>Position</summary>
+			<div class="grid">
+				<label class="label" for="zone-pick">Zone</label>
+				<select id="zone-pick"></select>
+			</div>
+			<canvas id="minimap" width="320" height="214" aria-label="Zone map: click to move there"></canvas>
+			<p id="where" class="sub"></p>
+		</details>
+
+		<details id="g-world">
+			<summary>World</summary>
+			<div class="actions">
+				<button type="button" data-time="60">Let 1 minute pass</button>
+				<button type="button" data-time="5">5 seconds</button>
+			</div>
+			<div class="grid">
+				<label class="label" for="q-id">Quest ID</label>
+				<div class="row"><input id="q-id" type="number" min="1"><button type="button" id="q-accept">Accept</button></div>
+			</div>
+			<ul id="quests" class="quests"></ul>
+		</details>
+
+		<details id="g-session">
+			<summary>Session</summary>
+			<div class="grid">
+				<span class="label">EllesmereUI installed</span>
+				<label class="switch"><input type="checkbox" id="eui"><span></span></label>
+			</div>
+			<div class="actions">
+				<button type="button" id="reload">Reload UI</button>
+				<button type="button" id="restart">Restart the session</button>
+			</div>
+			<p class="sub">Reload writes the SavedVariables to data/play/ and loads them back, as /reload does.</p>
+		</details>
+	</aside>
+</main>
+
+<dialog id="copy-dialog">
+	<form method="dialog">
+		<h2>Changed settings</h2>
+		<p>Paste the /run lines into chat in game, or set the values in PolestarDB.</p>
+		<textarea id="copy-text" rows="14" readonly></textarea>
+		<menu><button value="close" class="primary">Done</button></menu>
+	</form>
+</dialog>
+
+<script src="hit.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

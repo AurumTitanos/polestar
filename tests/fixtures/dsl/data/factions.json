@@ -1,0 +1,56 @@
+{
+ "469": {
+  "id": 469,
+  "name": "Alliance",
+  "parent": null,
+  "side": "Alliance",
+  "source": [
+   "fixture"
+  ]
+ },
+ "69": {
+  "id": 69,
+  "name": "Darnassus",
+  "parent": 469,
+  "side": "Alliance",
+  "source": [
+   "fixture"
+  ]
+ },
+ "72": {
+  "id": 72,
+  "name": "Stormwind",
+  "parent": 469,
+  "side": "Alliance",
+  "source": [
+   "fixture"
+  ]
+ },
+ "76": {
+  "id": 76,
+  "name": "Orgrimmar",
+  "parent": 67,
+  "side": "Horde",
+  "source": [
+   "fixture"
+  ]
+ },
+ "9001": {
+  "id": 9001,
+  "name": "Twin Name",
+  "parent": null,
+  "side": null,
+  "source": [
+   "fixture"
+  ]
+ },
+ "9002": {
+  "id": 9002,
+  "name": "Twin Name",
+  "parent": null,
+  "side": null,
+  "source": [
+   "fixture"
+  ]
+ }
+}

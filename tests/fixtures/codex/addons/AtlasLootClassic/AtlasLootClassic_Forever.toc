@@ -1,0 +1,6 @@
+## Interface: 16001
+## Title: Fixture loot core
+## Version: Fixture 1.0
+Init.lua
+Data\Profession.lua
+Data\Requirements.lua

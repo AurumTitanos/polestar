@@ -1,0 +1,348 @@
+-- Quality of Life: the questing helpers players expect from a leveling addon,
+-- each behind a "qol.*" setting on the Questing or Quality of Life options
+-- page (QoL/Options.lua).
+-- This file holds what the features share: settings, the out-of-combat queue
+-- for secure frames, the current step's goals, and the client calls Compat
+-- does not cover (bags, items, XP, money). Every client function used here
+-- is declared in Forever's API documentation or used by its FrameXML.
+
+local ADDON, ns = ...
+local L = ns.L
+
+local QoL = {}
+ns.QoL = QoL
+
+local type, pairs, select, tonumber = type, pairs, select, tonumber
+local floor, format = math.floor, string.format
+
+-- EllesmereUI modules that already do some of these jobs (docs/SUITE.md:
+-- Polestar integrates with EllesmereUI, never fights it). While the module is
+-- installed and enabled for this character, the overlapping toggle defaults to
+-- off; the player can still turn it on.
+local COVERED = {
+	sellJunk = "EllesmereUIQoL",           -- Auto Sell Junk
+	autoRepair = "EllesmereUIQoL",         -- Auto Repair
+	repairGuild = "EllesmereUIQoL",        -- Use Guild Bank Funds
+	fastLoot = "EllesmereUIQoL",           -- Quick Loot
+	skipGossip = "EllesmereUIQoL",         -- Auto Select Single Gossip
+	hideErrors = "EllesmereUIQoL",         -- Hide Error Messages
+	acceptPartyFriends = "EllesmereUIFriends", -- auto-accept invites from friends
+}
+
+-- Installed and enabled (loaded, or loadable when it loads after Polestar).
+-- C_AddOns.IsAddOnLoaded / DoesAddOnExist / GetAddOnInfo (AddOnsDocumentation.lua).
+local function present(name)
+	local A = C_AddOns
+	if not A then return false end
+	if A.IsAddOnLoaded and A.IsAddOnLoaded(name) then return true end
+	if not (A.DoesAddOnExist and A.GetAddOnInfo) or not A.DoesAddOnExist(name) then return false end
+	return select(4, A.GetAddOnInfo(name)) and true or false
+end
+QoL.Present = present
+
+-- The EllesmereUI module doing `key`'s job, when it is there; nil otherwise.
+function QoL.CoveredBy(key)
+	local name = COVERED[key]
+	return name and present(name) and name or nil
+end
+
+local defaults = {
+	itemButton = true,       -- quest item button
+	targetButton = true,     -- target macro button
+	hearthButton = true,     -- Hearthstone button while a hearth goal is active
+	buttonScale = 1,
+	xpTracker = true,
+	sellJunk = true,
+	autoRepair = true,
+	repairGuild = false,     -- guild bank first when the rank allows
+	rewardHighlight = true,
+	rewardAutoPick = false,
+	flightAutoOpen = true,
+	flightHighlight = true,
+	deathHelper = true,
+	instantQuestText = true,
+	skipGossip = true,
+	fastLoot = true,
+	hideErrors = false,      -- combat error spam ("Not enough rage", "Out of range")
+	autoReleasePvP = false,  -- release at once in battlegrounds
+	declineDuels = false,    -- friends and guild excepted
+	declineGuildInvites = false,
+	declinePartyStrangers = false,
+	acceptPartyFriends = false,
+	acceptSummon = false,
+	acceptResurrect = false,
+}
+for key in pairs(COVERED) do
+	if defaults[key] and QoL.CoveredBy(key) then defaults[key] = false end
+end
+ns.RegisterDefaults("qol", defaults)
+
+local paths = {}
+-- Setting "qol.<key>" as a boolean.
+function QoL.On(key)
+	local p = paths[key]
+	if not p then
+		p = "qol." .. key
+		paths[key] = p
+	end
+	return ns.Get(p) and true or false
+end
+
+-- Per-character module state, recreated when SavedVariables come back nil.
+function QoL.State()
+	local s = ns.CharState()
+	local q = s.qol
+	if type(q) ~= "table" then
+		q = {}
+		s.qol = q
+	end
+	return q
+end
+
+function QoL.Shift()
+	return ns.Compat and ns.Compat.IsShiftKeyDown and ns.Compat.IsShiftKeyDown() or false
+end
+
+-- A game event handled only while one of `keys` ("qol.<key>" settings) is on:
+-- registered when the first turns on, unregistered when the last turns off,
+-- so a feature that is off costs nothing. Follows saved settings from
+-- ADDON_LOADED on.
+local watches = {}
+
+local function sync(w)
+	local on = false
+	for i = 1, #w.keys do
+		if QoL.On(w.keys[i]) then
+			on = true
+			break
+		end
+	end
+	if on == w.live then return end
+	w.live = on
+	if on then ns.RegisterEvent(w.event, w.fn) else ns.UnregisterEvent(w.event, w.fn) end
+end
+
+local initialized = false
+function QoL.WhileOn(keys, event, fn)
+	local w = { keys = type(keys) == "table" and keys or { keys }, event = event, fn = fn, live = false }
+	watches[#watches + 1] = w
+	if initialized then sync(w) end
+	return w
+end
+
+-- Whether `event` is registered for a watch right now (tests, /pole status).
+function QoL.Watching(event)
+	for i = 1, #watches do
+		if watches[i].event == event and watches[i].live then return true end
+	end
+	return false
+end
+
+ns.OnInit(function()
+	initialized = true
+	for i = 1, #watches do sync(watches[i]) end
+end)
+
+ns.On("SETTING_CHANGED", function(path)
+	if not initialized or not (path == "" or path == "qol" or path:sub(1, 4) == "qol.") then return end
+	for i = 1, #watches do sync(watches[i]) end
+end)
+
+-- Reference data (Data.lua, generated by `node tools/polestar.js qol build`).
+QoL.data = { spiritHealers = {}, flightMasters = {} }
+function QoL.SetData(d)
+	if type(d) ~= "table" then return end
+	local fm = {}
+	for _, id in ipairs(d.flightMasters or {}) do fm[id] = true end
+	QoL.data = { spiritHealers = d.spiritHealers or {}, flightMasters = fm }
+end
+
+---------------------------------------------------------------------------
+-- Secure frames: attribute, visibility and position changes are protected
+-- in combat. QoL.Secure(key, fn) runs fn now, or once combat ends (the last
+-- request per key wins).
+---------------------------------------------------------------------------
+
+local queued = {}
+
+local function inLockdown()
+	return InCombatLockdown and InCombatLockdown() and true or false
+end
+QoL.InLockdown = inLockdown
+
+function QoL.Secure(key, fn)
+	if inLockdown() then
+		queued[key] = fn
+		return false
+	end
+	queued[key] = nil
+	fn()
+	return true
+end
+
+function QoL.HasQueued(key)
+	return queued[key] ~= nil
+end
+
+ns.RegisterEvent("PLAYER_REGEN_ENABLED", function()
+	for key, fn in pairs(queued) do
+		queued[key] = nil
+		ns.SafeCall(fn)
+	end
+end)
+
+---------------------------------------------------------------------------
+-- The active tab's current step: its view (statuses) and raw goals (fields
+-- the view omits, such as `oi`, `target`, `location`).
+---------------------------------------------------------------------------
+
+function QoL.CurrentStep()
+	local E = ns.Engine
+	if not (E and E.GetStepIndex and E.GetStepView) then return nil end
+	local i = E.GetStepIndex()
+	if not i then return nil end
+	local view = E.GetStepView(i)
+	if not view then return nil end
+	local guide = E.GetGuide and E.GetGuide()
+	local step = guide and guide.steps and guide.steps[i]
+	return view, step and step.goals or nil
+end
+
+-- A goal still to do (not done, not inapplicable).
+function QoL.Open(goalView)
+	local s = goalView and goalView.status
+	return s == "active" or s == "pending"
+end
+
+-- Recompute fn once on the next frame after any number of calls.
+function QoL.Coalesce(fn)
+	local scheduled = false
+	local function run()
+		scheduled = false
+		fn()
+	end
+	return function()
+		if scheduled then return end
+		scheduled = true
+		if C_Timer and C_Timer.After then C_Timer.After(0, run) else run() end
+	end
+end
+
+-- Fire `fn` on every message that can change the current step.
+function QoL.OnStep(fn)
+	ns.On("STEP_CHANGED", fn)
+	ns.On("STEP_UPDATED", fn)
+	ns.On("GUIDE_CHANGED", fn)
+	ns.On("TABS_CHANGED", fn)
+end
+
+---------------------------------------------------------------------------
+-- Client calls Compat does not cover. Secret values read as unknown.
+---------------------------------------------------------------------------
+
+local Client = {}
+QoL.Client = Client
+
+local function readable(v)
+	if v ~= nil and issecretvalue and issecretvalue(v) then return nil end
+	return v
+end
+Client.Readable = readable
+
+Client.HEARTHSTONE = 6948
+Client.QUALITY_POOR = 0
+Client.CLASS_QUEST = 12 -- Enum.ItemClass.Questitem
+
+function Client.NumBags()
+	return NUM_BAG_SLOTS or 4
+end
+
+function Client.NumSlots(bag)
+	local C = C_Container
+	if C and C.GetContainerNumSlots then return C.GetContainerNumSlots(bag) or 0 end
+	return 0
+end
+
+-- ContainerItemInfo { itemID, quality, stackCount, hasNoValue, isLocked, hyperlink } | nil
+function Client.SlotInfo(bag, slot)
+	local C = C_Container
+	if C and C.GetContainerItemInfo then return C.GetContainerItemInfo(bag, slot) end
+	return nil
+end
+
+function Client.UseSlot(bag, slot)
+	local C = C_Container
+	if C and C.UseContainerItem then C.UseContainerItem(bag, slot) end
+end
+
+function Client.ItemCount(itemID)
+	local C = ns.Compat
+	if C and C.GetItemCount then return C.GetItemCount(itemID) or 0 end
+	return 0
+end
+
+-- start, duration (0, 0 when ready or unknown)
+function Client.ItemCooldown(itemID)
+	local fn = (C_Container and C_Container.GetItemCooldown) or (C_Item and C_Item.GetItemCooldown)
+	if not fn then return 0, 0 end
+	local start, duration = fn(itemID)
+	return readable(start) or 0, readable(duration) or 0
+end
+
+function Client.ItemIcon(itemID)
+	if C_Item and C_Item.GetItemIconByID then return C_Item.GetItemIconByID(itemID) end
+	return nil
+end
+
+-- true / false, or nil when range does not apply (no target, no range).
+function Client.ItemInRange(itemID)
+	if not (C_Item and C_Item.IsItemInRange and UnitExists and UnitExists("target")) then return nil end
+	return readable(C_Item.IsItemInRange(itemID, "target"))
+end
+
+function Client.ItemUsable(itemID)
+	if C_Item and C_Item.IsUsableItem then return C_Item.IsUsableItem(itemID) and true or false end
+	return true
+end
+
+function Client.ItemSpell(itemID)
+	if C_Item and C_Item.GetItemSpell then return C_Item.GetItemSpell(itemID) end
+	return nil
+end
+
+function Client.ItemClass(itemID)
+	if C_Item and C_Item.GetItemInfoInstant then return (select(6, C_Item.GetItemInfoInstant(itemID))) end
+	return nil
+end
+
+-- Vendor sell price per item in copper, nil while uncached.
+function Client.SellPrice(item)
+	if not (item and C_Item and C_Item.GetItemInfo) then return nil end
+	return (select(11, C_Item.GetItemInfo(item)))
+end
+
+function Client.ItemIDFromLink(link)
+	return link and tonumber(link:match("item:(%d+)")) or nil
+end
+
+function Client.Money()
+	return GetMoney and GetMoney() or 0
+end
+
+-- "1g 23s 45c", zero parts left out.
+function QoL.Money(copper)
+	copper = floor(copper or 0)
+	local g, s, c = floor(copper / 10000), floor(copper / 100) % 100, copper % 100
+	if g > 0 then return format("%dg %ds %dc", g, s, c) end
+	if s > 0 then return format("%ds %dc", s, c) end
+	return format("%dc", c)
+end
+
+-- "1h 05m", "12m", "40s"
+function QoL.Duration(seconds)
+	if not seconds then return "-" end
+	seconds = floor(seconds + 0.5)
+	if seconds >= 3600 then return format(L["%dh %02dm"], floor(seconds / 3600), floor(seconds / 60) % 60) end
+	if seconds >= 60 then return format(L["%dm"], floor(seconds / 60)) end
+	return format(L["%ds"], seconds)
+end

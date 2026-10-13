@@ -1,0 +1,30 @@
+guide forever/collectibles/pets/musical-gustjumper
+title Musical Gustjumper
+category Collectibles
+folder Companion pets · Quests
+keywords frog, /sing, Zephras Isle, Skyborne, gustjumper
+collects 268109
+levels 1-60
+zone map 2521
+
+# Musical Gustjumper: sing to a frog on Zephras Isle (new in Forever).
+# At 51 72, /sing and interact with the frog that spawns; skyboats leave the
+# isle.
+# Sources: Forever client 1.60.1.70338 (item 268109).
+
+step Skyboat from Dalaran
+  only Alliance
+  zone Alterac Mountains
+  tip Zephras Isle is the Skyborne starting island; anyone may visit. A skyboat leaves the north side of Dalaran about every five minutes (another flies from north of Thunder Bluff; either faction may take either). Skip this if you are already on the island.
+  goto 12.5,51.8 "Skyboat to Zephras Isle" live
+
+step Skyboat from Thunder Bluff
+  only Horde
+  zone Mulgore
+  tip Zephras Isle is the Skyborne starting island; anyone may visit. A skyboat leaves the cliffs south of Skywatcher Plateau, north of Thunder Bluff, about every five minutes (another flies from Dalaran; either faction may take either). Skip this if you are already on the island.
+  goto 34.3,25.8 "Skyboat to Zephras Isle" live
+
+step Sing to the frogs
+  zone map 2521
+  tip Target one of the frogs here and type /sing; a Musical Gustjumper appears. Interact with it to get the pet.
+  collect 268109 "Musical Gustjumper" @51,72 live

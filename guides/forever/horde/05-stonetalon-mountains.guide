@@ -1,0 +1,202 @@
+guide forever/horde/05-stonetalon-mountains
+title Stonetalon Mountains & Ashenvale
+faction Horde
+levels 23-25
+zone Stonetalon Mountains
+next forever/horde/06-hillsbrad-foothills
+
+# Built from the simulator's consensus Horde route (export
+# consensus-horde-tauren, visits 8 and 9) and Era-baseline reference data;
+# not yet play-tested on Forever.
+#
+# Flow: north from the Crossroads to Kadrak at the Mor'shan Rampart (Warsong
+# Reports) -> Splintertree Post (flight path, bind) -> Night Run (Ashenvale
+# Hunt) -> the Warsong Scout and Outrider -> west across Ashenvale to
+# Zoram'gar Outpost (flight path, Warsong Runner, naga heads) -> fly to
+# Splintertree, back to Kadrak -> south to the Crossroads and west into
+# Stonetalon: Malaka'jin -> Ziz Fizziks and Windshear Crag -> Sun Rock
+# Retreat (flight path, bind) -> Mirkfallon Lake -> Stonetalon Peak (Jin'Zil's
+# reagents, Cenarion grove) -> hearth to Sun Rock -> the burned-out note's
+# trail -> the Charred Vale -> Sun Rock -> down the Webwinder Path to
+# Malaka'jin -> fly from the Crossroads to Orgrimmar, zeppelin to the
+# Undercity, fly to Tarren Mill (bind) for forever/horde/06-hillsbrad-foothills.
+#
+# Deviations from the export (same quest set):
+# - The export turns in Report to Kadrak after the Night Run stop; the walk
+#   north from the Crossroads passes Kadrak first, so this guide starts there.
+#   The Warsong Scout is visited on the way north instead of after a hearth.
+# - The export hearths from Kadrak to Splintertree; Kadrak is passed on foot
+#   here, so that hearth is not used.
+# - Stonetalon: the export does Jin'Zil's Forest Magic (1058) and Cenarius'
+#   Legacy (1087) on two separate trips to Stonetalon Peak; both are done in
+#   one trip here. Ziz Fizziks and Windshear Crag are done on the way up the
+#   Webwinder Path instead of on a trip back down from Sun Rock, and Jin'Zil
+#   is picked up when you pass Malaka'jin on the way in and handed in on the
+#   way out. One hearth to Sun Rock instead of two.
+# - The Undercity flight path is picked up on the way through to Tarren Mill
+#   (the export takes it at the end of the Hillsbrad stop). Without the
+#   Tarren Mill flight path the way there is the road through Silverpine,
+#   which passes Deathstalker Lesh: Time To Strike (494, export visit 10) is
+#   picked up there (optional: players who fly in never meet him) and handed
+#   to Darthalia on arrival in the next guide.
+#
+# Carried on: Calling in the Reserves (5881) and Further Instructions (1094)
+# are turned in in the Barrens and Trouble in the Deeps (6562) at Zoram'gar
+# in the next two guides.
+#
+# Left out: Bloodfury Bloodline (6283, an elite harpy matriarch), Ordanus
+# (1088, Alliance side of Ashenvale), Arachnophobia (6284, Besseleth is
+# elite and the export leaves it out). No class quests in this range.
+
+# ---------------------------------------------------------------- Mor'shan Rampart
+
+step Kadrak
+  zone Ashenvale
+  tip From the Crossroads follow the road north. Kadrak stands on the watch tower of the Mor'shan Rampart where the road enters Ashenvale. Open the Bundle of Reports he gives you.
+  turnin 6541                         -- Kadrak
+  accept 6543
+
+step Warsong Scout
+  tip Keep north on the road. The Warsong Scout waits at the Warsong lumber camp, south of Splintertree.
+  collect 16764 quest 6543.2 @71.05,68.36 -- Warsong Scout
+
+step Splintertree Post
+  tip Splintertree Post is just north up the road.
+  getfp "Splintertree Post"
+  sethome "Splintertree Post"
+  vendor nearest
+
+step Night Run
+  tip Senani Thunderheart stands at Night Run, the Warsong camp just north-east of Splintertree, beside the hunt board.
+  turnin 6382                         -- Senani Thunderheart
+  accept 6383
+  turnin 6383
+  note Senani's hunt targets (Ursangous, Shadumbra, Sharptalon) are for the next Ashenvale visit, at 27.
+
+step Warsong Outrider
+  tip The Warsong Outrider patrols the road east of Night Run toward the Satyrnaar.
+  collect 16765 quest 6543.3 @81.83,53.51 -- Warsong Outrider
+
+# ---------------------------------------------------------------- Zoram'gar Outpost
+
+step Zoram'gar Outpost
+  tip Ride west along the main road across Ashenvale, past Astranaar (Alliance: keep to the road), to the coast. Zoram'gar Outpost is on the Zoram Strand in the north-west. Its other quests are for the next visit, at 27.
+  getfp "Zoram'gar Outpost"
+  collect 16763 quest 6543.1 @12.22,34.22 -- Warsong Runner
+  accept 6442                         -- Marukai
+
+step Naga heads
+  tip Every Wrathtail naga along the strand north of the outpost drops heads.
+  goto 13.0,20.0 "Zoram Strand"
+  collect 5490 quest 6442
+
+step Zoram'gar Outpost
+  turnin 6442                         -- Marukai
+
+step Back to Kadrak
+  tip Fly to Splintertree Post and ride south down the road to the Mor'shan Rampart.
+  fly "Splintertree Post"
+  turnin 6543                         -- Kadrak
+
+# ---------------------------------------------------------------- Stonetalon Mountains
+
+step Malaka'jin
+  zone Stonetalon Mountains
+  tip Ride south to the Crossroads, then west along the road out of the Barrens into Stonetalon. The troll village of Malaka'jin sits at the entrance of the canyon.
+  accept 1058                         -- Witch Doctor Jin'Zil
+
+step Ziz Fizziks
+  tip The road climbs north as the Webwinder Path. Ziz Fizziks has a hut where the road forks east to Windshear Crag.
+  turnin 1483                         -- Ziz Fizziks
+  accept 1093
+
+step Windshear Crag
+  tip East of Ziz, the Venture Company is clear-cutting Windshear Crag; one of the Operators carries the blueprints. Piznik mines in the small mine on the east side: stay with him while he mines, Venture Co. thugs come for him.
+  goto 67.5,52.0 "Windshear Crag"
+  collect 5734 quest 1093
+  accept 1090                         -- Piznik
+  complete 1090
+  turnin 1090
+  accept 1092
+
+step Ziz Fizziks
+  turnin 1092                         -- Ziz Fizziks
+  turnin 1093
+  accept 1094                         -- Sputtervalve in Ratchet: the next guide passes there
+
+step Sun Rock Retreat
+  tip Follow the road west to Sun Rock Retreat.
+  getfp "Sun Rock Retreat"
+  sethome "Sun Rock Retreat"
+  accept 5881                         -- Maggran Earthbinder: Grish is at the Great Lift, in the next guide
+  accept 6282
+  accept 1087                         -- Braelyn Firehand, outside the gate
+  accept 6393                         -- Tsunaman
+  accept 6562                         -- Je'neu Sancrea at Zoram'gar, at 27
+  accept 6301                         -- Tammra Windfield
+  vendor nearest
+
+step Gaea Seeds
+  tip The Gaea Seeds lie in the grass around the southern shore of Mirkfallon Lake, north of Sun Rock.
+  goto 48.8,40.7 "Mirkfallon Lake"
+  collect 16205 quest 6301
+
+step Stonetalon Peak
+  tip Follow the road north toward Stonetalon Peak. Antlered Coursers graze along the way; the Sap Beasts, Twilight Runners and Fey Dragons roam the woods below the Peak, and the Cenarion druids hold the grove there.
+  goto 36.5,13.0 "Below Stonetalon Peak"
+  collect 5585 quest 1058
+  collect 5582 quest 1058
+  collect 5584 quest 1058
+  collect 5583 quest 1058
+  kill 4057 quest 1087.1
+  kill 4053 quest 1087.2
+  kill 4051 quest 1087.3
+
+step Sun Rock Retreat
+  hearth "Sun Rock Retreat"
+  turnin 6301                         -- Tammra Windfield
+  accept 6381
+  turnin 1087                         -- Braelyn Firehand
+  note Braelyn's next quest, Ordanus, is on the Alliance side of Ashenvale. Skip it.
+
+step The note's trail
+  tip West of Sun Rock the trail of the burned-out note goes on: Pocket Litter by the road, then a Mound of Dirt a little to the north.
+  turnin 79192 @40.8,52.6             -- Pocket Litter
+  accept 79980
+  turnin 79980 @39.6,49.9             -- Mound of Dirt
+
+step The Charred Vale
+  tip South-west of Sun Rock lies the burned Charred Vale. Plant the Gaea Seeds in the dirt mounds on the valley floor; the fire elementals drop Incendrites. Bloodfury Harpies and Ambushers nest on the north side, Slayers and Roguefeathers to the south.
+  goto 32.9,67.9 "Charred Vale"
+  interact 177929 quest 6381          -- Gaea Dirt Mounds
+  collect 16312 quest 6393
+  kill 4022 quest 6282.1
+  kill 4025 quest 6282.2
+  kill 4024 quest 6282.3
+  kill 4023 quest 6282.4
+
+step Sun Rock Retreat
+  turnin 6381                         -- Tammra Windfield
+  turnin 6393                         -- Tsunaman
+  turnin 6282                         -- Maggran Earthbinder
+
+step Malaka'jin
+  tip Ride back down the Webwinder Path to Malaka'jin.
+  turnin 1058                         -- Witch Doctor Jin'Zil
+
+# ---------------------------------------------------------------- To Tarren Mill
+
+step To the Undercity
+  zone Undercity
+  tip Ride east to the Crossroads and fly to Orgrimmar. Take the zeppelin from the towers outside Orgrimmar to Tirisfal Glades; the Undercity lies below the Ruins of Lordaeron. The bat handler is in the Trade Quarter.
+  getfp "Undercity"
+
+step Southpoint Tower
+  zone Hillsbrad Foothills
+  tip If you already know the Tarren Mill flight path, fly there and skip this step. Otherwise leave the Undercity and ride south down the road through Silverpine Forest past the Sepulcher and Pyrewood. Where the road turns east into Hillsbrad, Deathstalker Lesh waits at Southpoint Tower.
+  accept 494 optional                 -- Deathstalker Lesh: Darthalia in Tarren Mill
+
+step Tarren Mill
+  tip Follow the road east along the river, then north-east up into the hills to Tarren Mill.
+  getfp "Tarren Mill"
+  sethome "Tarren Mill"

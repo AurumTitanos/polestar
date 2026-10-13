@@ -1,0 +1,17 @@
+guide forever/alliance/human/02-elwynn
+title Elwynn Forest
+faction Alliance
+levels 5-10
+zone Elwynn Forest
+
+step Wolves
+  collect 750 quest 33                # objective and count come from data
+  turnin 33
+  turnin 5261 npc 197
+
+step Goldshire
+  sethome "Goldshire" npc 295
+  buy 159 x5
+  talk 9001
+  note "Mind the guards" only !Hunter @ 42.5, 64.0
+  vendor 1213 "Godric Rothgar" -- repair here

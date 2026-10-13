@@ -1,0 +1,132 @@
+{
+	"295": {
+		"id": 295,
+		"name": "Innkeeper Farley",
+		"faction": "A",
+		"roles": [
+			"innkeeper",
+			"vendor"
+		],
+		"spawns": {
+			"1429": {
+				"f": "e",
+				"pts": [
+					[
+						43.8,
+						65.8
+					]
+				]
+			}
+		}
+	},
+	"352": {
+		"id": 352,
+		"name": "Dungar Longdrink",
+		"faction": "A",
+		"roles": [
+			"flightmaster"
+		],
+		"spawns": {
+			"1453": {
+				"f": "e",
+				"pts": [
+					[
+						66.3,
+						62.1
+					]
+				]
+			}
+		}
+	},
+	"523": {
+		"id": 523,
+		"name": "Thor",
+		"faction": "A",
+		"roles": [
+			"flightmaster"
+		],
+		"spawns": {
+			"1436": {
+				"f": "e",
+				"pts": [
+					[
+						56.6,
+						52.6
+					]
+				]
+			}
+		}
+	},
+	"3453": {
+		"id": 3453,
+		"name": "Wharfmaster Dizzywig",
+		"faction": null,
+		"roles": [],
+		"spawns": {
+			"1413": {
+				"f": "e",
+				"pts": [
+					[
+						63.4,
+						38.5
+					]
+				]
+			}
+		}
+	},
+	"4631": {
+		"id": 4631,
+		"name": "Wharfmaster Lozgil",
+		"faction": null,
+		"roles": [],
+		"spawns": {
+			"1434": {
+				"f": "e",
+				"pts": [
+					[
+						26.3,
+						73.6
+					]
+				]
+			}
+		}
+	},
+	"6807": {
+		"id": 6807,
+		"name": "Innkeeper Skindle",
+		"faction": null,
+		"roles": [
+			"innkeeper"
+		],
+		"spawns": {
+			"1413": {
+				"f": "e",
+				"pts": [
+					[
+						27,
+						77.3
+					]
+				]
+			}
+		}
+	},
+	"8931": {
+		"id": 8931,
+		"name": "Innkeeper Heather",
+		"faction": "A",
+		"roles": [
+			"innkeeper"
+		],
+		"spawns": {
+			"1436": {
+				"f": "e",
+				"pts": [
+					[
+						52.9,
+						53.7
+					]
+				]
+			}
+		}
+	}
+}

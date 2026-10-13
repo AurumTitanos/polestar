@@ -1,0 +1,32 @@
+{
+	"700": {
+		"id": 700,
+		"name": "Wolf Pelt",
+		"drops": {
+			"npc": {
+				"6": 60
+			}
+		},
+		"vendors": []
+	},
+	"701": {
+		"id": 701,
+		"name": "Bandit Letter",
+		"drops": {
+			"npc": {
+				"10": 100
+			}
+		},
+		"vendors": []
+	},
+	"702": {
+		"id": 702,
+		"name": "Crate Supplies",
+		"drops": {
+			"object": {
+				"50": 100
+			}
+		},
+		"vendors": []
+	}
+}

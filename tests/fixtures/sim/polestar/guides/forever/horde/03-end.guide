@@ -1,0 +1,9 @@
+guide forever/horde/03-end
+title End
+faction Horde
+levels 8-10
+zone Testvale
+
+step End
+  accept 90030 "End Task"
+  level 10

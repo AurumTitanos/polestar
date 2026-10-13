@@ -1,0 +1,54 @@
+guide forever/reputation/cenarion-circle
+title Cenarion Circle Reputation
+category Reputation
+levels 55-60
+zone Silithus
+# Built from the Era-baseline reference data: Cenarion Hold's Bor Wildmane and
+# Huum Wildmane with Secret Communication (8318), Twilight Geolords (8320) and
+# the repeatable Encrypted Twilight Texts (8319); the Encrypted Twilight Text
+# drop table (Twilight's Hammer cultists, 25% each, Twilight Prophets 100%).
+# Farm spots are the densest spawn clusters of the droppers.
+#
+# The data is the Era (patch 1.12) Silithus, with Cenarion Hold and the Ahn'Qiraj
+# war content. Nothing public confirms Forever's Silithus matches it; this has
+# NOT been play-tested on Forever yet. Repeatable turn-ins are never flagged
+# completed by the client, so those steps track the standing (rep 609). The
+# Abyssal Council turn-ins (8361-8364, crests, signets and scepters from
+# Templars, Dukes and Lords summoned at the Wind Stones while wearing the
+# Twilight Trappings) are in the data but need a summoning setup the data does
+# not describe, so they are notes.
+
+step Cenarion Hold
+  tip Cenarion Hold is the walled town in north-central Silithus. Bor and Huum Wildmane stand together inside. The Cenarion Circle starts out Neutral. Forever's Legacy Diplomat perk increases reputation gains.
+  accept 8318
+  accept 8320
+
+step Twilight Base Camp
+  tip Twilight's Hammer cultists hold the camps in western Silithus. Twilight Geolords and Stonecallers mix here; any cultist can drop an Encrypted Twilight Text. Every cultist kill also counts toward the Cenarion Circle.
+  kill 11881 quest 8320.1 @26.2,33.9
+  collect 20404 x10 quest 8318.1 @26.3,32.9
+
+step Back to Cenarion Hold
+  turnin 8318
+  turnin 8320
+
+step Encrypted Twilight Texts to Friendly
+  tip Encrypted Twilight Texts repeats: Bor Wildmane takes more texts again and again. The cultist camps are the place to farm them.
+  collect 20404 x10 optional @26.3,32.9
+  talk 15306 optional -- Bor Wildmane: Encrypted Twilight Texts (8319)
+  rep 609 Friendly
+
+step Cenarion Circle to Honored
+  tip Keep farming the Twilight camps. Wearing the Twilight Trappings (the Twilight cultist set plus a Medallion of Station, from Aurel Goldleaf's Medallion of Station quest) lets you summon Abyssal Templars at the Wind Stones; their Abyssal Crests go to Bor Wildmane.
+  collect 20404 x10 optional @26.3,32.9
+  talk 15306 optional
+  rep 609 Honored
+
+step Cenarion Circle to Revered
+  tip From here on, the Ruins of Ahn'Qiraj raid and the Abyssal Council turn-ins (crests, signets, scepters) carry most of the reputation.
+  note Abyssal Crests (8362), Abyssal Signets (8363) and Abyssal Scepters (8364) are repeatable at Bor Wildmane once their opening quests are done.
+  rep 609 Revered
+
+step Cenarion Circle to Exalted
+  tip Keep running the Ruins of Ahn'Qiraj and turning in Abyssal Council insignia until Exalted.
+  rep 609 Exalted

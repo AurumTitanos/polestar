@@ -1,0 +1,396 @@
+guide forever/horde/orc-troll/01-durotar
+title Durotar
+faction Horde
+race Orc,Troll
+levels 1-12
+zone Durotar
+next forever/horde/orc-troll/02-the-barrens
+
+# Route: the simulator's consensus Orc route (data/sim/export/consensus-horde-orc,
+# visit 1, Durotar 1-11.9). Trolls start in the same valley and share it.
+#
+# Flow: Valley of Trials -> Sen'jin Village (report) -> Razor Hill (bind) ->
+# Razormane Grounds -> Tiragarde Keep -> Razor Hill -> Rezlak, Drygulch Ravine
+# and Thunder Ridge -> hearth -> the wreckage and the coast -> Sen'jin Village ->
+# Echo Isles and the south-east shore -> Kolkar Crag -> Razor Hill -> Fizzle
+# Darkstorm -> Razor Hill -> Heglan's shore, the naga coast, Margoz and Skull
+# Rock -> Razor Hill -> west over the Southfury River to Far Watch Post and the
+# Crossroads (flight path, bind). The Barrens guide starts at the Crossroads.
+#
+# Local order fixed by hand (same quest set as the export unless listed below):
+# - Legging It (96821) is taken at Sen'jin on the first visit: its spiders sit
+#   on the road north to Razor Hill, where Gar'Thok takes it.
+# - Rezlak's second pair (A Simmering Storm 97281, Stormy Potential 97282) and
+#   Lost But Not Forgotten (816) are done on the first Thunder Ridge visit at
+#   about 8.5 instead of a second trip there at 11: the orb drops from the
+#   Storm Witches you already kill, and the lizards and Misha are next door.
+# - A Missing Hand / Threat from Below (99048, 99049, 99051) and Conscript of
+#   the Horde (840) are taken at Razor Hill at 10.5, when Orgnil and Takrin
+#   first offer them; the naga coast is done on the way to Margoz.
+# - Conscript of the Horde (840) is turned in at Far Watch Post on the way to
+#   the Crossroads (the export turns it in on a later pass); Crossroads
+#   Conscription (842) goes to Sergra in the Barrens guide.
+# - Pa'zula's residue (96873) is collected on the Echo Isles, where the trolls
+#   drop the Hexed Pendants, and handed in on the way back.
+#
+# Class quests: Warlocks do Ruzan's Vile Familiars (1485, 1499) instead of
+# Zureetha's. At 10 in Razor Hill: Warriors take Veteran Uzzek (1505) and do
+# Path of Defense (1498) at Far Watch Post on the way out (Thun'grim 1502 and
+# Forged Steel 1503 follow in the Barrens guide); Shamans take Call of Fire
+# (2983), continued in the Barrens guide; Hunters tame their three beasts for
+# Thotar (6062, 6083, 6082) around Razor Hill. Training the Beast (6081),
+# Gan'rul's Summons (1506, Warlock) and The Shattered Hand (1963, Rogue) need
+# Orgrimmar, which this route does not visit before 19: take them there.
+#
+# Left out: quests the route accepts and never turns in: The Admiral's Orders
+# (831, to Nazgrel), Need for a Cure (812), Neeru Fireblade (829).
+# Burning Shadows (832) is carried to Neeru Fireblade in Orgrimmar (about 19).
+
+# ---------------------------------------------------------------- Valley of Trials
+
+step Kaltunk
+  accept 4641                         -- Kaltunk, where you start
+
+step Gornek
+  tip Gornek waits inside the Den, the building just west of Kaltunk.
+  turnin 4641
+  accept 788
+  accept 97279
+
+step Training weapons and boars
+  tip The weapons lie around the Den and the training grounds; the Mottled Boars roam the whole valley floor.
+  collect 277653 quest 97279.1
+  kill 3098 quest 788.1
+
+step Kzan Thornslash
+  tip Kzan stands behind the Den, on its west side.
+  turnin 97279
+
+step Hana'zua
+  tip Hana'zua lies wounded at the foot of the hills north-west of the Den.
+  accept 790
+
+step Sarkoth
+  tip Sarkoth, a large scorpid, prowls the slope south of Hana'zua.
+  collect 4905 quest 790.1
+  kill 3098 quest 788.1
+
+step Hana'zua
+  turnin 790
+  accept 804
+
+step The Den
+  turnin 804                          -- Gornek
+  turnin 788
+  accept 789
+  accept 4402                         -- Galgar, by the cooking fire
+  accept 792 only !Warlock            -- Zureetha Fargaze
+  accept 1485 only Warlock            -- Ruzan
+  train class
+
+step Foreman Thazz'ril
+  tip The foreman stands at the lumber pile east of the Den.
+  accept 5441
+
+step Lazy Peons
+  tip Hit the sleeping peons north of the Den with the Foreman's Blackjack.
+  kill 10556 quest 5441.1
+
+step Foreman Thazz'ril
+  turnin 5441
+  accept 6394
+
+step North end of the valley
+  tip Collect Cactus Apples and kill Scorpid Workers on the way north. The Vile Familiars swarm the slope by the cave on the valley's north side; Thazz'ril's Pick lies just inside the cave mouth.
+  collect 11583 quest 4402.1
+  collect 4862 quest 789.1
+  kill 3101 quest 792.1 only !Warlock
+  collect 6487 quest 1485.1 only Warlock
+  collect 16332 quest 6394.1 @43.7,53.8
+
+step Back at the Den
+  turnin 6394                         -- Foreman Thazz'ril
+  turnin 4402                         -- Galgar
+  turnin 789                          -- Gornek
+  turnin 792 only !Warlock            -- Zureetha Fargaze
+  turnin 1485 only Warlock            -- Ruzan
+  accept 1499 only Warlock
+  turnin 1499 only Warlock            -- Zureetha Fargaze
+  accept 794
+
+step Burning Blade Coven
+  tip Yarrog Baneshadow waits at the back of the cave on the valley's north side.
+  collect 4859 quest 794.1
+
+step Zureetha Fargaze
+  turnin 794
+  accept 805
+  accept 96652                        -- the Lost Journal on the ground beside her
+  train class
+
+step Ukor
+  tip Ukor stands on the road at the valley's eastern exit.
+  accept 2161
+
+# ---------------------------------------------------------------- Sen'jin and Razor Hill
+
+step Sen'jin Village
+  tip Follow the road east out of the valley to Sen'jin Village on the coast.
+  turnin 805                          -- Master Gadrin
+  accept 96821                        -- Vel'rin Fang
+
+step Ridgeshade spiders
+  tip The spiders lurk in the hills along the road north toward Razor Hill.
+  kill 266850 quest 96821.1
+  kill 266849 quest 96821.2
+
+step Brakk's campfire
+  tip Brakk camps just south of Razor Hill. Sit by his campfire (/sit) until the Boosted Rest buff appears.
+  turnin 96652                        -- Brakk
+  accept 96604
+  complete 96604 @52.1,47.4
+  turnin 96604
+  accept 96655
+
+step Razor Hill
+  turnin 2161                         -- Innkeeper Grosk
+  sethome "Razor Hill"
+  turnin 96821                        -- Gar'Thok
+  accept 784
+  complete 96655 @51.1,42.5           -- Talk to Cook Torka
+  turnin 96655
+  accept 96825
+  accept 791                          -- Furl Scornbrow, in the watchtower
+  accept 96822                        -- Turroc
+
+step Prickly pears
+  tip The prickly pears grow among the quilboar huts just west of town.
+  collect 275718 quest 96825.1
+
+step Cook Torka
+  turnin 96825
+  accept 815
+  accept 837                          -- Gar'Thok
+
+step Razormane Grounds
+  tip Quilboars and scouts hold the huts west of town; dustrunners and battleguards hold the camps farther west.
+  kill 3111 quest 837.1
+  kill 3112 quest 837.2
+  kill 3113 quest 837.3
+  kill 3114 quest 837.4
+
+step Gar'Thok
+  turnin 837
+
+step Tiragarde Keep
+  tip The keep stands on the coast south-east of Razor Hill. The raiders' axe, bow and shield lie on its outskirts. Sailors and marines drop the Canvas Scraps. Lieutenant Benedict waits at the top of the keep; his key opens the chest beside him, which holds the Aged Envelope.
+  collect 275716 quest 96822.1 @57.4,56.4
+  collect 275713 quest 96822.2 @57.3,57.9
+  collect 275717 quest 96822.3 @56.6,53.0
+  kill 3128 quest 784.1
+  kill 3129 quest 784.2
+  collect 4870 quest 791.1
+  kill 3192 quest 784.3
+  collect 4882 "Benedict's Key"
+  collect 4881 @59.3,57.6
+  accept 830
+
+step Razor Hill
+  turnin 96822                        -- Turroc
+  turnin 784                          -- Gar'Thok
+  turnin 830
+  accept 825
+  turnin 791                          -- Furl Scornbrow
+  train class
+
+# ---------------------------------------------------------------- Thunder Ridge
+
+step Rezlak
+  tip Follow the road north toward Orgrimmar. Rezlak camps beside it; the stolen sacks lie along the road south of him.
+  accept 834                          -- Rezlak
+  collect 4918 quest 834.1
+  turnin 834                          -- Rezlak
+  accept 835
+
+step Drygulch Ravine
+  tip Savages and Storm Witches nest in Drygulch Ravine, east of Rezlak. A Storm Witch drops the Dull Storm Orb.
+  kill 3117 quest 835.1
+  kill 3118 quest 835.2
+  collect 277661 "Dull Storm Orb"
+  accept 97281
+
+step Rezlak
+  turnin 835
+  turnin 97281
+  accept 97282
+
+step Thunder lizards
+  tip Thunder Lizards and Lightning Hides graze on Thunder Ridge, just west and south-west of Rezlak.
+  collect 277665 quest 97282.1
+
+step Rezlak
+  turnin 97282
+
+step Misha Tor'kren
+  tip Misha's hut stands south of the lizards. The crocolisks along the Southfury River to the west carry Kron's Amulet.
+  accept 816
+  collect 4891 quest 816.1
+  turnin 816
+  hearth "Razor Hill"
+
+# ---------------------------------------------------------------- The coast and Sen'jin
+
+step The wreckage
+  tip The gnomish toolboxes lie in the wreckage along the shore east and south-east of Razor Hill. Follow the shore south to Sen'jin.
+  collect 4863 quest 825.1
+
+step Sen'jin Village
+  accept 96873                        -- Pa'zula
+  accept 817                          -- Vel'rin Fang
+  accept 818                          -- Master Vornal
+  accept 97225
+  accept 826                          -- Master Gadrin
+  accept 823
+  accept 808
+  accept 786                          -- Lar Prowltusk
+  accept 97223                        -- Xar'Ti
+
+step Makrura and crawlers
+  tip Makrura and surf crawlers line the beaches north-east of Sen'jin.
+  collect 4887 quest 818.1
+  collect 4888 quest 818.2
+
+step Bloodtalon Matriarch
+  tip Wade across to the northern Echo Isle. The Matriarch prowls among the raptors there.
+  collect 277128 quest 97223.1
+
+step Echo Isles
+  tip Head south through the isles. The Loa idols lie all over the southern isles; Voodoo and Hexed Trolls hold them and drop the Hexed Pendants. Zalazane and Minshina's cage are on the southernmost isle.
+  collect 277135 quest 97225.1
+  kill 3206 quest 826.1
+  kill 3207 quest 826.2
+  complete 96873
+  collect 4866 quest 826.3
+  collect 4864 quest 808.1 @67.4,87.8
+
+step South-east shore
+  tip Wade back west to the shore south of Sen'jin. Durotar Tigers roam it and the Taillasher eggs sit in nests along the beach.
+  collect 4892 quest 817.1
+  collect 4890 quest 815.1
+
+step Sen'jin Village
+  turnin 96873                        -- Pa'zula
+  turnin 817                          -- Vel'rin Fang
+  turnin 818                          -- Master Vornal
+  turnin 97225                        -- Master Gadrin
+  turnin 826
+  turnin 808
+  turnin 97223                        -- Xar'Ti
+
+step Kolkar Crag
+  tip Kolkar Crag lies west of Sen'jin. The three attack plans sit on the ground among the centaur tents. Pal'juh is held at the crag as well.
+  interact 3189 quest 786.1 @49.8,81.3
+  interact 3190 quest 786.2 @47.7,77.3
+  interact 3192 quest 786.3 @46.2,78.9
+  accept 99123 @46.3,78.7
+  goto 46.3,78.7 "Kolkar Crag"        -- Free Pal'juh and see her safely out of the crag
+
+step Sen'jin Village
+  turnin 786                          -- Lar Prowltusk
+  turnin 99123                        -- Master Vornal
+
+# ---------------------------------------------------------------- Razor Hill and the north
+
+step Razor Hill
+  tip Follow the road north to Razor Hill.
+  turnin 825                          -- Gar'Thok
+  turnin 815                          -- Cook Torka
+  turnin 823                          -- Orgnil Soulscar
+  accept 806
+  accept 99048
+  accept 99051
+  accept 840                          -- Takrin Pathseeker
+  train class
+  accept 1505 only Warrior            -- Tarshaw Jaggedscar
+  accept 2983 only Shaman             -- Swart
+  accept 6062 only Hunter             -- Thotar
+
+step Fizzle Darkstorm
+  tip Fizzle holds the Burning Blade camp on Thunder Ridge, north-west of Razor Hill. Hunters: tame a Dire Mottled Boar with the Taming Rod on the way.
+  kill 3099 quest 6062.1 only Hunter  -- Tame it with the Taming Rod
+  collect 4869 quest 806.1
+
+step Razor Hill
+  turnin 806                          -- Orgnil Soulscar
+  accept 828
+  turnin 6062 only Hunter             -- Thotar
+  accept 6083 only Hunter
+
+step Heglan Shadeeye
+  tip Heglan stands on the shore east of Razor Hill. The trident, banner and dagger lie on the beach around him.
+  turnin 99048
+  accept 99049
+  collect 286010 quest 99049.1 @60.1,44.8
+  collect 286011 quest 99049.2 @60.1,42.4
+  collect 286012 quest 99049.3 @58.9,44.4
+
+step Spitelash naga
+  tip Follow the shore north. Spitelash Scouts and Attendants hold the beach below Drygulch Ravine. Hunters: tame a Surf Crawler on the beach.
+  collect 286008 quest 99051.1
+  kill 3107 quest 6083.1 only Hunter  -- Tame it with the Taming Rod
+
+step Margoz
+  tip Margoz camps on the hill west of the naga beach, south of Skull Rock.
+  turnin 828
+  accept 827
+
+step Skull Rock
+  tip Burning Blade cultists hold the caves of Skull Rock to the north; any of them drops a Searing Collar. Gazz'uz, a level 14 warlock, stands deep inside and drops the Eye of Burning Shadow.
+  collect 4871 quest 827.1
+  collect 4903 "Eye of Burning Shadow"
+  accept 832
+
+step Margoz
+  turnin 827
+
+step Razor Hill
+  tip Back south to Razor Hill.
+  turnin 99049                        -- Orgnil Soulscar
+  turnin 99051
+  turnin 6083 only Hunter             -- Thotar
+  accept 6082 only Hunter
+  train class
+
+step Armored Scorpid
+  only Hunter
+  tip Armored Scorpids crawl over the plains west of Razor Hill. Tame one, then return to Thotar.
+  kill 3126 quest 6082.1              -- Tame it with the Taming Rod
+  turnin 6082                         -- Thotar
+
+# ---------------------------------------------------------------- To the Crossroads
+
+step Far Watch Post
+  zone The Barrens
+  tip Follow the road west from Razor Hill over the Southfury River bridge; Far Watch Post sits just above it on the Barrens side.
+  turnin 840                          -- Kargal Battlescar
+  accept 842
+  turnin 1505 only Warrior            -- Uzzek
+  accept 1498 only Warrior
+
+step Thunder lizards across the river
+  only Warrior
+  zone Durotar
+  tip Thunder Lizards and Lightning Hides graze on Thunder Ridge across the bridge; any of them can drop a Singed Scale.
+  collect 6486 quest 1498.1
+
+step Uzzek
+  only Warrior
+  zone The Barrens
+  turnin 1498
+  accept 1502
+
+step The Crossroads
+  zone The Barrens
+  tip Follow the road south-west from Far Watch Post to the Crossroads. The Barrens guide starts here.
+  getfp "Crossroads"
+  sethome "The Crossroads"

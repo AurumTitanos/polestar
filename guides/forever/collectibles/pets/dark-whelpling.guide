@@ -1,0 +1,17 @@
+guide forever/collectibles/pets/dark-whelpling
+title Dark Whelpling
+category Collectibles
+folder Companion pets · Drops
+keywords Tiny Black Whelpling, Searing Whelp, Scalding Whelp, Wyrmbog, Dustwallow Marsh, Badlands, dragon, whelp
+collects 10822
+levels 38-60
+zone Dustwallow Marsh
+
+# Dark Whelpling from the black whelps of Dustwallow Marsh and the Badlands.
+# Sources: items.json (Searing / Scalding Whelp, 0.11% per kill, pfQuest);
+# Forever client 1.60.1.70338 (the client's name; pfQuest: Tiny Black
+# Whelpling).
+
+step Black whelps
+  tip The Searing Whelps of the Wyrmbog in southern Dustwallow Marsh (level 42) and the Scalding Whelps of eastern Badlands (level 41) drop it about once in 900 kills in our data. The waypoint is the Wyrmbog; the Badlands whelps are the same grind.
+  collect 10822 "Dark Whelpling" @46.9,72.5 -- The Wyrmbog

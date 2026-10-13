@@ -1,0 +1,30 @@
+{
+	"1411": {
+		"id": 1411,
+		"name": "Durotar",
+		"areaId": 14,
+		"parent": 1414,
+		"type": 3
+	},
+	"1429": {
+		"id": 1429,
+		"name": "Elwynn Forest",
+		"areaId": 12,
+		"parent": 1415,
+		"type": 3
+	},
+	"1453": {
+		"id": 1453,
+		"name": "Stormwind City",
+		"areaId": 1519,
+		"parent": 1415,
+		"type": 3
+	},
+	"1454": {
+		"id": 1454,
+		"name": "Orgrimmar",
+		"areaId": 1637,
+		"parent": 1414,
+		"type": 3
+	}
+}

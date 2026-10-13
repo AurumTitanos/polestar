@@ -1,0 +1,88 @@
+guide forever/reputation/timbermaw-hold
+title Timbermaw Hold Reputation
+category Reputation
+levels 48-60
+zone Felwood
+# Built from the Era-baseline reference data: Grazle, Nafien and Salfa and
+# their quests (8460 Timbermaw Ally, 8462 Speak to Nafien, 8461 Deadwood of the
+# North, 8465 Speak to Salfa, 8464 Winterfall Activity), the repeatable
+# turn-ins they unlock (8466 Feathers for Grazle, 8467 Feathers for Nafien,
+# 8469 Beads for Salfa) and the Deadwood Headdress Feather / Winterfall Spirit
+# Beads drop tables. Farm spots are the densest spawn clusters of the droppers.
+# Nothing public shows Forever changing Felwood or Winterspring; this has NOT
+# been play-tested on Forever yet.
+#
+# The feather and bead turn-ins are repeatable and the client never flags them
+# completed, so those steps track the Timbermaw Hold standing (rep 576). Five
+# feathers or beads per turn-in is game knowledge, not data. The data lists
+# Grazle at two spots in Felwood; he is pinned to the southern one (by the
+# Emerald Sanctuary, as Timbermaw Ally's text says).
+
+step Grazle
+  tip Timbermaw Hold starts out Unfriendly. Every Deadwood and Winterfall furbolg you kill raises it, so the quests below pay twice. Forever's Legacy Diplomat perk increases reputation gains.
+  accept 8460 @50.9,85
+
+step Deadwood Village
+  tip Deadwood furbolgs (level 48-50) camp at the southern end of Felwood. Keep every Deadwood Headdress Feather they drop: Grazle and Nafien take them later.
+  kill 7153 quest 8460.1 @48.2,91.2
+  kill 7155 quest 8460.2 @48.4,91.4
+  kill 7154 quest 8460.3 @48.1,90.3
+
+step Back to Grazle
+  turnin 8460 @50.9,85
+  accept 8462 @50.9,85
+
+step Nafien
+  tip Nafien waits in northern Felwood at the tunnel into Timbermaw Hold.
+  turnin 8462 @64.8,8.1
+  accept 8461 @64.8,8.1
+
+step Deadwood of the North
+  tip The northern Deadwood (level 53-55) hold the camps just south of the tunnel. Keep their feathers too.
+  kill 7156 quest 8461.1 @62.2,9
+  kill 7157 quest 8461.2 @62.2,9
+  kill 7158 quest 8461.3 @62.2,9
+
+step Back to Nafien
+  turnin 8461 @64.8,8.1
+  accept 8465 @64.8,8.1
+
+step Salfa
+  zone Winterspring
+  tip Go through Timbermaw Hold to its Winterspring exit; Salfa stands just outside.
+  turnin 8465 @27.7,34.5
+  accept 8464 @27.7,34.5
+
+step Winterfall Village
+  tip Winterfall Village sits on the eastern side of Winterspring. Keep every Winterfall Spirit Beads you loot: Salfa takes them.
+  kill 7439 quest 8464.1 @67.1,37.6
+  kill 7440 quest 8464.2 @67.3,35.3
+  kill 7438 quest 8464.3 @67.9,37.9
+
+step Back to Salfa
+  turnin 8464 @27.7,34.5
+
+step Feathers and beads to Friendly
+  tip Feathers for Grazle and Feathers for Nafien (Deadwood Headdress Feathers) and Beads for Salfa (Winterfall Spirit Beads) repeat as often as you like; every Deadwood or Winterfall kill counts as well. Winterfall Village is the densest bead spot in the data.
+  collect 21383 x5 optional @67.1,37.6
+  talk 11556 optional -- Salfa: Beads for Salfa (8469)
+  rep 576 Friendly
+
+step Feathers to Honored
+  zone Felwood
+  tip The northern Deadwood camps by the tunnel are the densest feather spot in the data (35% drop chance there). Hand feathers to Nafien at the tunnel, or to Grazle in the south.
+  collect 21377 x5 optional @62.2,9
+  talk 15395 optional -- Nafien: Feathers for Nafien (8467)
+  rep 576 Honored
+
+step Timbermaw Hold to Revered
+  tip Alternate Deadwood feathers (Nafien) and Winterfall beads (Salfa), whichever camp is less crowded.
+  collect 21377 x5 optional @62.2,9
+  talk 15395 optional
+  rep 576 Revered
+
+step Timbermaw Hold to Exalted
+  tip Keep turning in feathers and beads until Exalted.
+  collect 21377 x5 optional @62.2,9
+  talk 15395 optional
+  rep 576 Exalted

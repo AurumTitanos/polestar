@@ -1,0 +1,18 @@
+guide forever/horde/orc/01-start
+title Start
+faction Horde
+race Orc
+levels 1-5
+zone Testvale
+next forever/horde/02-north, forever/horde/02-south
+
+step First
+  accept 90001 "Synthetic Task"
+  kill 99002 "Fake Boar" x5 quest 90001.1
+  collect 99003 "Fake Tusk" x3 quest 90001.1
+  accept 90002 "Warlock Task" only Warlock
+  accept 90003 "Not Druid" only !Druid
+
+step Back
+  turnin 90001 "Synthetic Task"
+  level 3

@@ -1,0 +1,332 @@
+guide forever/horde/04-barrens
+title The Southern Barrens
+faction Horde
+levels 22-24
+zone The Barrens
+next forever/horde/05-stonetalon
+pitch The Gold Road south from the Crossroads: Camp Taurajo, Blackthorn Ridge and Bael Modan to the Great Lift, then north to the Mor'shan Rampart.
+pro Class training at 22 and 24
+pro Picks up the Camp Taurajo flight path
+con Opens with a bat and a zeppelin ride
+con Three flights into the Crossroads
+
+# Built from the simulator's consensus Horde route
+# and Era-baseline reference data; not yet play-tested on Forever.
+#
+# Flow: Tarren Mill -> bat to the Undercity -> zeppelin to Orgrimmar (training
+# at 22, class quests) -> fly to the Crossroads: Egg Hunt, Chol'aruk -> Ratchet
+# (Ziz Fizziks breadcrumb) -> down the Gold Road to Camp Taurajo (flight path,
+# bind) -> Bristleback camp (Tribes at War, Blood Shard) -> Field of Giants
+# (silithid eggs, the burned-out note, Aean Swiftriver's scroll) -> Gann
+# Stonespire -> Blackthorn Ridge (Kuz, Nak, Lok; Razormane weapons) -> the
+# Dustwallow border (Wrongly Blamed) -> Bael Modan (Gann's three quests) ->
+# Brave Moonhorn at the Great Lift -> hearth to Camp Taurajo -> fly to the
+# Crossroads -> north to the Mor'shan Rampart (Kadrak, Warsong Gulch; both
+# optional) -> fly to Orgrimmar (training at 24) -> back to the Crossroads and
+# west toward Stonetalon (forever/horde/05-stonetalon).
+#
+# Optional: The Runed Scroll (3513): Aean Swiftriver is a rare elite, so
+# grouping up is advised; Quell the Silverwing Usurpers (7789) needs a Warsong
+# Gulch Mark of Honor. Chol'aruk the Ravener (97003), Wrongly Blamed, Justly
+# Corrected (97250) and the Rogue's Mission: Possible But Not Probable (2478)
+# are optional too: Chol'aruk, the Outraged Pillagers and Gallywix are elite.
+#
+# Deviations from the consensus: the consensus picks up Egg Hunt and
+# Chol'aruk on a second Crossroads visit at 23.6 and runs to Ratchet from
+# there; here they are taken on arrival at 22 (the flight lands at the
+# Crossroads anyway) and Ratchet is a short stop on the way south. The
+# consensus binds at the Crossroads and in Ratchet; this guide keeps only the
+# Camp Taurajo bind (the hearth back from the Great Lift). Message to Freewind
+# Post is turned in at Freewind Post in forever/horde/07-thousand-needles;
+# Stepping Stones at Sun Rock and Ziz Fizziks on the Webwinder Path in
+# forever/horde/05-stonetalon. Same quest set as the consensus; under the
+# simulator (Orc) this guide takes 2.26 h, the skeleton 2.38 h.
+#
+# Class quests: Warrior Speak with Ruga / Trial at the Field of Giants / Speak
+# with Thun'grim (1823-1825); Warlock succubus chain (1507-1513, The Binding
+# in Orgrimmar at the end); Rogue The Shattered Salute / Deep Cover / Mission:
+# Possible But Not Probable (2460, 2458, 2478, turned in in Orgrimmar at the
+# end); Shaman Call of Water (1528, 1530, 1535; the next step, 1536, waits at
+# the Spring Well beside Tarren Mill, where the 30-40 band starts). Training
+# at 22 and 24 in Orgrimmar.
+#
+# Left out: A New Ore Sample (1153, level 29, Gravelsnout kobolds off the
+# route), Horde Presence (3514, level 29 elite in Ashenvale), Report to Kadrak
+# / The Warsong Reports (6541/6543: the three reports are spread over
+# Ashenvale and the turn-in is back at Kadrak; measured +0.39 h at the end of
+# 07-thousand-needles), The Spirits of Stonetalon (1061, Orgrimmar to
+# Seereth's camp on the way west: +0.16 h), Ishamuhale and the Ashenvale Hunt
+# (882/6382, need 3261), Shredding Machines (1068, needs Goblin Invaders), the
+# Agamaggan blessings (no XP), Warrior Brutal Armor (1838, level 30) and the
+# Razorfen Kraul quests.
+
+# ---------------------------------------------------------------- To Orgrimmar
+
+step To the Undercity
+  zone Hillsbrad Foothills
+  tip From Tarren Mill take the bat to the Undercity, then walk up out of the city to the zeppelin tower just outside the Ruins of Lordaeron. Board the zeppelin to Orgrimmar (the other one goes to Grom'gol).
+  fly "Undercity"
+
+step Zeppelin to Durotar
+  zone Tirisfal Glades
+  goto 60.7,58.9 "Zeppelin tower"
+
+step Orgrimmar
+  zone Orgrimmar
+  tip The zeppelin lands at the tower outside Orgrimmar's main gate. The flight master Doras stands on the tower in the Valley of Strength.
+  getfp "Orgrimmar" npc 3310
+  train class
+  accept 1823 only Warrior            -- Sorek, Valley of Honor
+  accept 1528 only Shaman             -- Searn Firewarder, Valley of Wisdom
+
+step Gan'rul Bloodeye
+  only Warlock
+  tip The Cleft of Shadow is the canyon under the Valley of Strength.
+  accept 1507                         -- Gan'rul Bloodeye
+  turnin 1507                         -- Cazul, a few steps away
+  accept 1508
+  turnin 1508                         -- Zankaja, Valley of Strength
+  accept 1509
+
+step Shenthul
+  only Rogue
+  tip Shenthul stands in the Cleft of Shadow. Target him and type /salute to finish The Shattered Salute.
+  accept 2460
+  complete 2460
+  turnin 2460
+  accept 2458                         -- Deep Cover: Taskmaster Fizzule waits in the northern Barrens, on your way at the end of this guide
+
+# ---------------------------------------------------------------- The Crossroads
+
+step The Crossroads
+  zone The Barrens
+  tip Fly to the Crossroads. Coming from Silverpine you may not know that flight path yet: leave Orgrimmar by the main gate and follow the road south through Durotar and west over the river to the Crossroads.
+  fly "Crossroads"
+  getfp "Crossroads" npc 3615         -- Devrak
+  accept 868                          -- Korran
+  accept 97003 optional               -- Gur'ak
+  turnin 1358                         -- Apothecary Helbrim: Sample for Helbrim, if you came through Silverpine
+  turnin 1509 only Warlock            -- Gazrog
+  accept 1510 only Warlock
+
+step Chol'aruk the Ravener
+  tip Chol'aruk prowls the plains just east of the Crossroads. Chol'aruk is elite: grouping up is advised.
+  goto 58.0,27.0 "Chol'aruk" optional
+  collect 276070 quest 97003 optional
+
+step Ratchet
+  tip Follow the road south-east to Ratchet on the coast. Sputtervalve stands by the docks.
+  accept 1483                         -- Keep it: Ziz Fizziks is on the Webwinder Path in Stonetalon
+  getfp "Ratchet" npc 16227 optional  -- Bragok
+
+step Islen Waterseer
+  only Shaman
+  tip Islen waits on the hill south of the Ratchet road.
+  turnin 1528
+  accept 1530
+
+step Ken'zigla
+  only Warlock
+  zone Stonetalon Mountains
+  tip Ken'zigla lives in Malaka'Jin, the troll village just inside Stonetalon at the end of the road west of the Crossroads. A long detour, but it is the way to your succubus.
+  turnin 1510
+  accept 1511
+
+# ---------------------------------------------------------------- Camp Taurajo
+
+step Camp Taurajo
+  zone The Barrens
+  tip Down the Gold Road south to Camp Taurajo.
+  getfp "Camp Taurajo" npc 10378      -- Omusa Thunderhorn
+  sethome "Camp Taurajo" npc 7714     -- Innkeeper Byula
+  accept 878                          -- Mangletooth, in the cage
+  accept 893                          -- Tatternack Steelforge
+  accept 97250 optional               -- Grunt Logmar
+  turnin 1511 only Warlock            -- Grunt Logmar
+  accept 1515 only Warlock
+  turnin 1823 only Warrior            -- Ruga Ragetotem
+  accept 1824 only Warrior
+
+step Bristleback camp
+  tip The Bristleback quilboar camp straddles the Gold Road just north of Camp Taurajo. Water Seekers, Thornweavers and Geomancers all drop Blood Shards: keep one for Mangletooth. Lakota'mani, a grey kodo, sometimes wanders here: his hoof starts a quest.
+  goto 47.6,52.5 "Bristleback camp"
+  kill 3260 quest 878.1
+  kill 3261 quest 878.2
+  kill 3263 quest 878.3
+  collect 5075 x1
+  collect 5099 x1 optional            -- Hoof of Lakota'mani
+  accept 883 optional
+
+step Grunt Dogran
+  only Warlock
+  tip Dogran is chained up in the quilboar camp west of the road.
+  turnin 1515
+  accept 1512                         -- Keep it: Gan'rul in Orgrimmar, at the end of this guide
+
+step Camp Taurajo
+  turnin 878                          -- Mangletooth
+  accept 5052
+  turnin 5052
+  accept 879
+  turnin 883 optional                 -- Jorn Skyseer
+  collect 5102 x1 optional            -- Owatanka's Tailspike: the blue thunder lizard Owatanka roams east of Camp Taurajo
+  accept 884 optional
+  turnin 884 optional
+  note Mangletooth trades more Blood Shards for blessings such as Spirit of the Wind (run speed): handy, not needed.
+
+# ---------------------------------------------------------------- South loop
+
+step Field of Giants
+  tip South of Camp Taurajo the Silithid Mounds dot the Field of Giants; the eggs lie in them, and Silithid Swarmers come out to defend them. Aean Swiftriver, a night elf, camps among them: his Runed Scroll starts a quest. Aean Swiftriver is elite: grouping up is advised. The Burned-Out Remains of a campfire lie by the road at the south end. Silithid Harvesters are rare: if you see one, kill it for its head.
+  goto 44.7,70.7 "Field of Giants"
+  collect 5058 quest 868
+  collect 10621 x1 optional @46.0,70.0 -- Aean Swiftriver
+  accept 3513 optional                -- Keep it: Kadrak at the Mor'shan Rampart, at the end of this guide
+  accept 79192 @46.3,73.9             -- The Burned-Out Remains: keep it for Sun Rock Retreat
+  collect 7119 quest 1824 only Warrior -- Twitching Antennae from the silithid
+  collect 5138 x1 optional @42.0,70.0 -- Harvester's Head
+  accept 897 optional
+
+step Gann Stonespire
+  tip Gann waits in a small camp further south, on the road toward Bael Modan.
+  accept 843
+  turnin 1530 only Shaman             -- Brine, just west of Gann
+  accept 1535 only Shaman
+  collect 7769 quest 1535 only Shaman @44.3,76.8 -- Fill the Empty Brown Waterskin at the quilboar watering hole
+  turnin 1535 only Shaman
+  accept 1536 only Shaman             -- Keep it: the Spring Well is beside Tarren Mill
+
+step Blackthorn Ridge
+  tip West of Gann, the Razormane hold Blackthorn Ridge. Kuz (level 21) is on the east side, Nak (23) to the south, Lok Orcbane (25) at the west end. Pathfinders and Stalkers drop the Backstabber, Seers the Wand, Warfrenzies the War Shield. Washte Pawne, a rare red wind serpent, flies over the ridge: its feather starts a quest.
+  goto 42.5,81.0 "Blackthorn Ridge"
+  collect 5074 quest 879.3            -- Kuz
+  collect 5073 quest 879.2            -- Nak
+  collect 5072 quest 879.1            -- Lok Orcbane
+  collect 5093 quest 893.1
+  collect 5092 quest 893.2
+  collect 5094 quest 893.3
+  collect 5103 x1 optional            -- Washte Pawne's Feather
+  accept 885 optional
+
+step Alliance on the border
+  tip East of Gann, Alliance soldiers and pillagers from Theramore push over the Dustwallow Marsh border. The Outraged Pillagers are elite: grouping up is advised.
+  goto 49.0,77.0 "Dustwallow border" optional
+  complete 97250 optional
+
+step Bael Modan
+  tip South of Gann, the Bael'dun dwarves dig at Bael Modan. Excavators and Foremen work the pit; Prospector Khazgorm carries the journal.
+  goto 47.5,85.3 "Bael Modan dig site"
+  kill 3374 quest 843.1
+  kill 3375 quest 843.2
+  collect 5006 quest 843.3
+
+step Gann Stonespire
+  turnin 843
+  accept 846
+
+step Bael'dun fortress
+  tip The Bael'dun Soldiers, Riflemen and Officers guard the fortress on the east side of the dig; all three items drop from them.
+  goto 49.0,84.2 "Bael'dun fortress"
+  collect 5017 quest 846.1
+  collect 5018 quest 846.2
+  collect 5019 quest 846.3
+
+step Gann Stonespire
+  turnin 846
+  accept 849
+
+step The flying machine
+  tip The dwarves' flying machine sits on its platform inside the dig site.
+  interact 3644 quest 849
+
+step Gann Stonespire
+  turnin 849
+
+step Brave Moonhorn
+  tip Follow the road south to the Great Lift. Brave Moonhorn stands at its top.
+  accept 4542                         -- Keep it: Cliffwatcher Longhorn at Freewind Post
+
+# ---------------------------------------------------------------- Back north
+
+step Camp Taurajo
+  hearth "Camp Taurajo"
+  turnin 879                          -- Mangletooth
+  accept 906
+  turnin 97250 optional               -- Grunt Logmar
+  turnin 893                          -- Tatternack Steelforge
+  turnin 885 optional                 -- Jorn Skyseer
+  turnin 897 optional
+  turnin 1824 only Warrior            -- Ruga Ragetotem
+  accept 1825 only Warrior
+  vendor nearest
+
+step The Crossroads
+  fly "Crossroads"
+  turnin 906                          -- Thork, at the top of the tower
+  turnin 868                          -- Korran
+  turnin 97003 optional               -- Gur'ak
+
+step Thun'grim Firegaze
+  only Warrior
+  tip Thun'grim camps on the hill just east of the Crossroads.
+  turnin 1825
+  note He offers Brutal Armor next: level 30, with pieces all over Kalimdor and the Eastern Kingdoms. Leave it.
+
+# ---------------------------------------------------------------- The Mor'shan Rampart
+
+step The Mor'shan Rampart
+  tip Take the road north from the Crossroads to the Mor'shan Rampart at the Ashenvale border. Kadrak watches from the tower; Captain Shatterskull stands at the base camp below.
+  turnin 3513 optional                -- Kadrak
+
+step Warsong Gulch
+  tip Captain Shatterskull wants a Warsong Gulch Mark of Honor. Queue for the battleground here if you want it; the follow-up pays out at once.
+  accept 7789 optional
+  complete 7789 optional
+  turnin 7789 optional
+  accept 7925 optional
+  turnin 7925 optional
+
+step Taskmaster Fizzule
+  only Rogue
+  tip Fizzule runs the Venture Co. camp east of the Mor'shan Rampart. He attacks strangers: target him and /salute before he does.
+  turnin 2458
+  accept 2478 optional
+
+step Mission: Possible But Not Probable
+  only Rogue
+  tip Stay stealthed: Foreman Silixiz carries the key to the tower; Gallywix and his lockbox are at the top. Gallywix is elite: grouping up is advised.
+  goto 54.8,5.6 "Venture Co. tower" optional
+  collect 8072 quest 2478.1 optional
+  kill 7310 quest 2478.2 optional
+  kill 7308 quest 2478.3 optional
+  kill 7307 quest 2478.4 optional
+  collect 8073 quest 2478.5 optional
+  collect 8074 quest 2478.6 optional
+
+# ---------------------------------------------------------------- Orgrimmar at 24
+
+step Orgrimmar
+  zone Orgrimmar
+  tip Walk back south to the Crossroads and fly to Orgrimmar to train your level 24 ranks.
+  fly "Orgrimmar"
+  train class
+
+step The Binding
+  only Warlock
+  tip Gan'rul Bloodeye stands in the Cleft of Shadow. Use Dogran's Pendant on the summoning circle there and defeat the succubus to bind her.
+  turnin 1512
+  accept 1513
+  use 6626 @49.4,50.0                 -- Dogran's Pendant
+  kill 5677 quest 1513
+  turnin 1513
+
+step Shenthul
+  only Rogue
+  turnin 2478 optional                -- Shenthul, Cleft of Shadow
+  note If you finished it, Shenthul then sends you to Serge Hinott in Hillsbrad (Hinott's Assistance); the 30-40 band starts in Tarren Mill.
+
+step West to Stonetalon
+  zone The Barrens
+  tip Fly back to the Crossroads and take the road west to Stonetalon. It climbs past Malaka'Jin into the mountains; the Webwinder Path leads north to Sun Rock Retreat.
+  fly "Crossroads"
+  goto 35.3,27.9 "Stonetalon road"

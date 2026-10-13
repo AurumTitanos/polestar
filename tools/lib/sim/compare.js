@@ -1,0 +1,237 @@
+'use strict';
+// `sim compare` and `sim bench` (docs/SIMULATION.md §5): Polestar's guides
+// (the default route and every route choice) and the best route found, all
+// scored under the same calibrated model. Outputs go to data/bench/.
+
+const fs = require('node:fs');
+const path = require('node:path');
+const sim = require('./index');
+const { Evaluator } = require('./evaluate');
+const { K_TURNIN } = require('./run');
+const { compileSequence, routeSequence } = require('./sequence');
+const { fmtH, table, mdTable } = require('./report');
+const { LEVEL_XP } = require('./xp');
+const { loadPolestarRoutes } = require('./baselines/polestar');
+
+let LEVELS = [10, 20, 30, 40, 50, 60];
+
+// Every source for one character: [{ id, label, source, events | route, family? }]
+function sources(o, faction, race, run, runD) {
+	const out = [];
+	const warn = [];
+	const res = loadResult(o, faction, race, 'solo', run.world, warn);
+	if (res) out.push({ id: 'best', label: 'Best found (solo)', source: 'sim', route: sim.routeFromKeys(run, res.best.route) });
+	const resD = loadResult(o, faction, race, 'dungeons', run.world, warn);
+	if (resD) out.push({ id: 'best-dungeons', label: 'Best found (dungeons)', source: 'sim', route: sim.routeFromKeys(runD, resD.best.route), family: 'dungeons' });
+	try {
+		const L = loadPolestarRoutes({ guidesDir: o.guidesDir || path.join(sim.ROOT, 'guides'), dataDir: o.dataDir, faction, race, cls: null });
+		if (L) {
+			out.push({ id: 'polestar', label: 'Polestar default', source: 'polestar', events: L.default.events });
+			L.variants.forEach((v, i) => out.push({ id: `polestar-${i + 1}`, label: `Polestar ${v.label}`, source: 'polestar-variant', events: v.sequence.events }));
+		}
+	} catch (err) {
+		warn.push(`Polestar: ${err.message}`);
+	}
+	return { list: out, warn };
+}
+
+// A `sim run` result, or null when missing; a result searched on another
+// world (data or builder changed) is refused, never replayed.
+function loadResult(o, faction, race, family, world, warn) {
+	const f = sim.resultFile(o.simDir, faction, race, null, family);
+	if (!fs.existsSync(f)) return null;
+	const res = JSON.parse(fs.readFileSync(f, 'utf8'));
+	try {
+		sim.assertFresh(res, world, path.basename(f));
+	} catch (err) {
+		warn.push(`best found (${family}) not shown: ${err.message}`);
+		return null;
+	}
+	return res;
+}
+
+// Evaluate a source; returns metrics plus a turn-in trace for bench.
+// Package routes run through the route evaluator (two passes per package),
+// guide sequences through the sequence evaluator (as written, grinding at
+// their level steps). Both record a turn-in/zone trace.
+function score(ev, run, src) {
+	const trace = { turnins: [], zones: [] };
+	const zname = run.world.zones;
+	ev.hook = (k, q, pt) => {
+		const lvl = ev.level + (ev.level < 60 ? ev.xp / LEVEL_XP[ev.level] : 0);
+		const z = zname[run.world.points[run.ptList[pt]][4]] || '?';
+		const last = trace.zones[trace.zones.length - 1];
+		if (last && last.zone === z) last.to = lvl;
+		else trace.zones.push({ zone: z, from: last ? last.to : 1, to: lvl });
+		if (k === K_TURNIN) trace.turnins.push({ q: run.quests[q].id, level: lvl, time: ev.time });
+	};
+	let r;
+	let seq;
+	try {
+		if (src.route) {
+			seq = routeSequence(run, src.route);
+			r = ev.evaluate(src.route);
+			r.endLevel = 60;
+		} else {
+			seq = compileSequence(run, src.events);
+			r = ev.evaluateSequence(seq, { honorCheckpoints: true });
+		}
+	} finally {
+		ev.hook = null;
+	}
+	return { seq, r, trace };
+}
+
+async function compare(o) {
+	const faction = sim.normFaction(o.faction);
+	const { world } = await sim.loadWorld({ ...o, faction });
+	const { mean } = sim.paramsFor(o.simDir, null);
+	const out = [];
+	for (const race of o.race ? [o.race] : sim.START_RACES[faction]) {
+		// Solo sources run without dungeons, dungeon routes with them.
+		const solo = sim.makeRun(world, { race, cls: null, params: mean, family: 'solo' });
+		const dung = sim.makeRun(world, { race, cls: null, params: mean, family: 'dungeons' });
+		const { list, warn } = sources(o, faction, race, solo.run, dung.run);
+		const rows = [];
+		for (const src of list) {
+			const m = src.family === 'dungeons' ? dung : solo;
+			const { seq, r, trace } = score(m.ev, m.run, src);
+			const lastLevel = trace.turnins.length ? trace.turnins[trace.turnins.length - 1].level : 1;
+			rows.push({
+				id: src.id, label: src.label, source: src.source, family: src.family || 'solo', dungeonsRun: r.dungeonsRun || 0,
+				levelsCovered: [1, Math.floor(r.endLevel || lastLevel)],
+				timeTo: Object.fromEntries(r.levelTimes.map((t, l) => [l, t || null]).filter(([l]) => l >= 2)),
+				seconds: r.seconds, endLevel: r.endLevel, endTime: r.endTime,
+				quests: r.questsDone,
+				// Partial guides: travel and grind inside the guide's own range.
+				travelShare: r.endTime && r.endLevel < 59.5 ? r.endTravel / r.endTime : r.travelSeconds / r.seconds,
+				grindSeconds: r.endTime && r.endLevel < 59.5 ? r.endGrind : r.grindSeconds,
+				segment20to30: r.levelTimes[30] && (r.endLevel == null || r.endLevel >= 29.5) ? (r.levelTimes[20] ? r.levelTimes[30] - r.levelTimes[20] : null) : null,
+				unknown: seq.unknown.length, unknownIds: seq.unknown,
+				trace,
+			});
+		}
+		out.push({ faction, race, rows, warn });
+	}
+	return out;
+}
+
+function fmtRow(x) {
+	return [
+		x.label.length > 60 ? `${x.label.slice(0, 57)}...` : x.label,
+		`${x.levelsCovered[0]}-${x.levelsCovered[1]}`,
+		...LEVELS.map((l) => (x.timeTo[l] ? fmtH(x.timeTo[l]) : '-')),
+		x.segment20to30 ? fmtH(x.segment20to30) : '-',
+		x.quests, x.dungeonsRun, `${(100 * x.travelShare).toFixed(0)}%`, fmtH(x.grindSeconds), x.unknown,
+	];
+}
+
+const makeHead = () => ['route', 'levels', ...LEVELS.map((l) => `to ${l}`), '20->30', 'quests', 'dungeons', 'travel', 'grind', 'unknown'];
+let HEAD = makeHead();
+
+async function compareCommand(args, o) {
+	const opts = { ...sim.DEFAULTS, ...o, faction: args.faction, race: args.race, guidesDir: args.guides ? path.resolve(args.guides) : undefined };
+	if (args.to) LEVELS = String(args.to).split(',').map(Number).filter((l) => l >= 2 && l <= 60);
+	HEAD = makeHead();
+	const res = await compare(opts);
+	fs.mkdirSync(opts.benchDir, { recursive: true });
+	for (const c of res) {
+		const main = c.rows.filter((x) => x.source !== 'polestar-variant');
+		const variants = c.rows.filter((x) => x.source === 'polestar-variant').sort((a, b) => a.seconds - b.seconds);
+		const shown = main.slice();
+		if (variants.length) {
+			shown.push({ ...variants[0], label: `Polestar best choice: ${variants[0].label.replace(/^Polestar /, '')}` });
+			shown.push({ ...variants[variants.length - 1], label: `Polestar worst choice: ${variants[variants.length - 1].label.replace(/^Polestar /, '')}` });
+		}
+		console.log(`\n== ${c.faction} ${c.race}: same calibrated model (times are /played hours; grind = time spent grinding incl. after the guide ends) ==`);
+		console.log(table(HEAD, shown.map(fmtRow)));
+		if (variants.length) {
+			console.log(`\nPolestar route choices (${variants.length} complete paths):`);
+			console.log(table(HEAD, variants.map(fmtRow)));
+		}
+		for (const w of c.warn) console.log(`warning: ${w}`);
+		const file = path.join(opts.benchDir, `compare-${c.faction.toLowerCase()}-${c.race.toLowerCase()}.json`);
+		fs.writeFileSync(file, `${JSON.stringify({ ...c, rows: c.rows.map(({ trace, ...x }) => x) }, null, 1)}\n`);
+		fs.writeFileSync(file.replace(/\.json$/, '.md'), `# ${c.faction} ${c.race}: route comparison\n\n${mdTable(HEAD, shown.map(fmtRow))}\n\n## Polestar route choices\n\n${mdTable(HEAD, variants.map(fmtRow))}\n`);
+		console.log(`wrote ${path.relative(process.cwd(), file)} (+ .md)`);
+	}
+	return 0;
+}
+
+// ---- bench ----
+const BRACKETS = [[1, 10], [10, 20], [20, 30], [30, 40], [40, 50], [50, 60]];
+
+function bracketOf(level) {
+	return Math.min(5, Math.floor((Math.max(1, level) - 0.0001) / 10));
+}
+
+async function bench(o) {
+	const res = await compare(o);
+	const out = [];
+	for (const c of res) {
+		const pick = ['polestar', 'best', 'best-dungeons'];
+		const srcs = c.rows.filter((x) => pick.includes(x.id));
+		const per = srcs.map((x) => {
+			const b = BRACKETS.map(() => ({ zones: [], quests: new Set() }));
+			for (const t of x.trace.turnins) b[bracketOf(t.level)].quests.add(t.q);
+			for (const z of x.trace.zones) {
+				const lo = bracketOf(z.from);
+				const hi = bracketOf(z.to);
+				for (let k = lo; k <= hi; k++) {
+					const zs = b[k].zones;
+					const last = zs[zs.length - 1];
+					const from = Math.max(z.from, BRACKETS[k][0]);
+					const to = Math.min(z.to, BRACKETS[k][1]);
+					if (to - from < 0.05 && zs.length) continue;
+					if (last && last.zone === z.zone) last.to = to;
+					else zs.push({ zone: z.zone, from, to });
+				}
+			}
+			return { id: x.id, label: x.label, brackets: b };
+		});
+		const brackets = BRACKETS.map(([lo, hi], k) => {
+			const rows = per.map((p) => ({
+				id: p.id,
+				zones: p.brackets[k].zones.filter((z) => z.to - z.from >= 0.2).map((z) => `${z.zone} ${z.from.toFixed(1)}-${z.to.toFixed(1)}`),
+				quests: p.brackets[k].quests.size,
+			}));
+			const overlap = [];
+			for (let i = 0; i < per.length; i++) for (let j = i + 1; j < per.length; j++) {
+				const A = per[i].brackets[k].quests;
+				const Bq = per[j].brackets[k].quests;
+				let n = 0;
+				for (const q of A) if (Bq.has(q)) n++;
+				overlap.push({ a: per[i].id, b: per[j].id, shared: n, jaccard: A.size + Bq.size - n ? n / (A.size + Bq.size - n) : 0 });
+			}
+			return { bracket: `${lo}-${hi}`, rows, overlap };
+		});
+		out.push({ faction: c.faction, race: c.race, sources: per.map((p) => ({ id: p.id, label: p.label })), brackets });
+	}
+	return out;
+}
+
+async function benchCommand(args, o) {
+	const opts = { ...sim.DEFAULTS, ...o, faction: args.faction, race: args.race };
+	const res = await bench(opts);
+	fs.mkdirSync(opts.benchDir, { recursive: true });
+	for (const b of res) {
+		const md = [`# Bench ${b.faction} ${b.race}`, '', `Sources: ${b.sources.map((s) => `${s.id} = ${s.label}`).join('; ')}`, ''];
+		console.log(`\n== bench ${b.faction} ${b.race} ==`);
+		for (const br of b.brackets) {
+			const head = ['source', 'quests', 'zones (levels)'];
+			const rows = br.rows.map((r) => [r.id, r.quests, r.zones.join(' > ') || '-']);
+			const ov = br.overlap.map((x) => `${x.a}/${x.b} ${x.shared} (${(100 * x.jaccard).toFixed(0)}%)`).join(', ');
+			console.log(`\n-- levels ${br.bracket} --`);
+			console.log(table(head, rows));
+			console.log(`overlap (shared quests, Jaccard): ${ov}`);
+			md.push(`## Levels ${br.bracket}`, '', mdTable(head, rows), '', `Overlap: ${ov}`, '');
+		}
+		const file = path.join(opts.benchDir, `bench-${b.faction.toLowerCase()}-${b.race.toLowerCase()}`);
+		fs.writeFileSync(`${file}.json`, `${JSON.stringify(b, null, 1)}\n`);
+		fs.writeFileSync(`${file}.md`, `${md.join('\n')}\n`);
+		console.log(`\nwrote ${path.relative(process.cwd(), file)}.{json,md}`);
+	}
+	return 0;
+}
+
+module.exports = { compare, bench, compareCommand, benchCommand, score, LEVELS };

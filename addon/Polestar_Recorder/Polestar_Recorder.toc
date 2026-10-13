@@ -1,0 +1,14 @@
+## Interface: 16001
+## Title: Polestar Recorder
+## Notes: Records quests, routes and world data while you play, for authoring Polestar guides. /lsrec
+## Author: Polestar
+## X-License: GPL-3.0-only
+## Version: 0.1.0
+## SavedVariables: PolestarRecorderDB
+
+Recorder.lua
+Quests.lua
+World.lua
+Progress.lua
+Route.lua
+Commands.lua

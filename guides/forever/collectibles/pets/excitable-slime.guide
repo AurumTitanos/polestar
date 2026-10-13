@@ -1,0 +1,21 @@
+guide forever/collectibles/pets/excitable-slime
+title Excitable Slime
+category Collectibles
+folder Companion pets · Quests
+keywords WRIGGLE., slime, slimeling, Nutritious Slime Sludge, Undercity canals, /dance
+collects 275682
+faction Horde
+levels 1-60
+zone Undercity
+
+# Excitable Slime from WRIGGLE., a hidden quest in the Undercity canals (new in
+# Forever).
+# Sources: Wowhead Forever quest 97583 and NPC 269452 (giver and position, Horde
+# only); Forever client
+# 1.60.1.70338 (item 275682).
+
+step WRIGGLE.
+  tip Find the Excitable Slime, a critter in the Undercity canals, and /dance with it until it offers WRIGGLE. Buy Nutritious Slime Sludge from a vendor in the canals and bring it back; if the slime seems tired, dance with it again.
+  accept 97583 "WRIGGLE." @57.4,63.6 live
+  turnin 97583 "WRIGGLE." @57.4,63.6 live
+  collect 275682 "Excitable Slime" @57.4,63.6 live

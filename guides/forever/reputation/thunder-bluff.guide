@@ -1,0 +1,82 @@
+guide forever/reputation/thunder-bluff
+title Thunder Bluff Reputation
+category Reputation
+faction Horde
+levels 12-60
+zone Thunder Bluff
+# Built from the Era-baseline reference data: Rumstag Proudstrider, the Thunder Bluff
+# cloth quartermaster, and the cloth quests 7820/7821/7822/7823 (one-time) and 7825
+# (Additional Runecloth, repeatable) from quests.json; cloth farm spots are
+# the densest spawn clusters of strong cloth droppers in items.json/npcs.json.
+# Nothing public shows Forever changing the cloth donations; this has NOT been
+# play-tested on Forever yet. Refine it with Polestar_Recorder sessions.
+#
+# The client never flags a repeatable quest as completed, so the Additional
+# Runecloth steps track the Thunder Bluff standing itself (rep 81) instead of
+# the turn-in. Cloth counts (60 per first donation, 20 per repeat) are game
+# knowledge: the data only has the 60 Runecloth of A Donation of Runecloth.
+
+step Rumstag Proudstrider: A Donation of Wool
+  tip Rumstag Proudstrider takes cloth for Thunder Bluff in Thunder Bluff. The first donations of Wool, Silk, Mageweave and Runecloth (60 cloth each) are done once and give the most reputation per cloth; after them, Additional Runecloth repeats until Exalted. Exalted with another race's city lets you buy that race's mounts. Forever's Legacy Diplomat perk increases reputation gains.
+  level 12
+  accept 7820
+
+step Wool Cloth
+  zone The Barrens
+  tip Venture Co. Enforcers at the Boulder Lode Mine (level 16-17) drop it here. The Auction House works too.
+  collect 2592 x60 quest 7820.1 @61,4.2
+
+step Rumstag Proudstrider: A Donation of Silk
+  zone Thunder Bluff
+  turnin 7820
+  level 26
+  accept 7821
+
+step Silk Cloth
+  zone Desolace
+  tip Kolkar centaur (level 30-33) drop it here. The Auction House works too.
+  collect 4306 x60 quest 7821.1 @72.4,47.1
+
+step Rumstag Proudstrider: A Donation of Mageweave
+  zone Thunder Bluff
+  turnin 7821
+  level 40
+  accept 7822
+
+step Mageweave Cloth
+  zone Tanaris
+  tip Dunemaul ogres (level 45-48) drop it here. The Auction House works too.
+  collect 4338 x60 quest 7822.1 @40.1,54.4
+
+step Rumstag Proudstrider: A Donation of Runecloth
+  zone Thunder Bluff
+  turnin 7822
+  level 50
+  accept 7823
+
+step Runecloth
+  zone Eastern Plaguelands
+  tip Dark Adepts and Shadowmages (level 58-60) drop it here; every Scourge kill here also counts toward the Argent Dawn (see that guide). The Auction House works too.
+  collect 14047 x60 quest 7823.1 @40,51.3
+
+step Rumstag Proudstrider: Runecloth delivered
+  zone Thunder Bluff
+  turnin 7823
+
+step Additional Runecloth to Honored
+  tip Additional Runecloth takes 20 Runecloth per turn-in and repeats as often as you like. Bring Runecloth in multiples of 20 and hand them all in at once, one turn-in after another. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.
+  collect 14047 x20 optional @40,51.3 map 1423
+  talk 14728 optional -- Additional Runecloth (7825)
+  rep 81 Honored
+
+step Additional Runecloth to Revered
+  tip Keep handing in Additional Runecloth, 20 Runecloth at a time. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.
+  collect 14047 x20 optional @40,51.3 map 1423
+  talk 14728 optional
+  rep 81 Revered
+
+step Additional Runecloth to Exalted
+  tip Keep handing in Additional Runecloth until Thunder Bluff is Exalted. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.
+  collect 14047 x20 optional @40,51.3 map 1423
+  talk 14728 optional
+  rep 81 Exalted

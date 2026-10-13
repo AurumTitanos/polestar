@@ -1,0 +1,25 @@
+guide forever/collectibles/mounts/neutral/deathcharger
+title Deathcharger
+category Collectibles
+folder Mounts · Drops
+keywords Deathcharger's Reins, Rivendare's Deathcharger, Baron Rivendare, Stratholme, dungeon, skeletal horse
+collects 13335
+levels 58-60
+zone Eastern Plaguelands
+
+# Deathcharger's Reins: a rare drop from Baron Rivendare at the end of
+# Stratholme's undead side.
+# Stratholme (58-60) is in Forever.
+# Sources: Forever client 1.60.1.70338 via wago.tools (ItemSparse: level 60, Journeyman
+# Riding); items.json (drop chance, pfQuest) and objects.json (the Service
+# Entrance at Elders' Square).
+
+step Journeyman Riding
+  tip Deathcharger's Reins needs level 60 and Journeyman Riding to ride (Forever client). Train it at your race's riding trainer; see the Level 60 mount guides.
+  level 60
+  skill Riding 150
+
+step Stratholme: Baron Rivendare
+  tip Stratholme is a group of five, level 58-60. The Service Entrance at Elders' Square, in north-western Eastern Plaguelands, leads to the undead side; Baron Rivendare waits in the Slaughter House at its end. Our data gives the reins a 0.02% drop chance (pfQuest, Era): one in about five thousand kills. Nothing shows Forever changing it.
+  goto 47.9,23.8 "Stratholme Service Entrance"
+  collect 13335 @47.9,23.8            -- Baron Rivendare

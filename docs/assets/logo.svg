@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 64 64" role="img" aria-label="Polestar logo">
+<title>Polestar</title>
+<defs>
+<radialGradient id="glow" cx="32" cy="32" r="30" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#e6ba66" stop-opacity="0.35"/><stop offset="1" stop-color="#e6ba66" stop-opacity="0"/></radialGradient>
+</defs>
+<rect x="2" y="2" width="60" height="60" rx="12" fill="#0a0d16"/>
+<rect x="2" y="2" width="60" height="60" rx="12" fill="url(#glow)"/>
+<path fill="#e6ba66" d="M35.5 9.62A22.65 22.65 0 0 1 35.5 54.38L35.5 53.06A21.35 21.35 0 0 0 35.5 10.94ZM28.5 9.62A22.65 22.65 0 0 0 28.5 54.38L28.5 53.06A21.35 21.35 0 0 1 28.5 10.94ZM32 2L35.75 28.25L47 32L35.75 35.75L32 62L28.25 35.75L17 32L28.25 28.25Z"/>
+<path fill="#ffeec2" d="M32 23L33.4 30.6L37 32L33.4 33.4L32 41L30.6 33.4L27 32L30.6 30.6Z"/>
+<circle cx="32" cy="32" r="29.5" fill="none" stroke="#fff" stroke-opacity="0.07" stroke-width="1"/>
+</svg>

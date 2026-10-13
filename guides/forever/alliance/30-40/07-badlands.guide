@@ -1,0 +1,256 @@
+# Badlands and Desolace, Alliance ~39 to ~40.5 (consensus visits 28-32).
+# Flow: Loch Modan > the Badlands (Hammertoe's Digsite, the Valley of Fangs,
+# Agmond's End, Lotwil's elementals in the Dustbowl, the Ancient Chest) >
+# hearth to Thelsamar > fly to Menethil, boat to Theramore (flight path,
+# two turn-ins) > fly to Nijel's Point > Desolace (Ethel Rethor first, then
+# one loop south through the Kodo Graveyard, Gelkis Village, the Mannoroc
+# Coven and the Magram, back up the road to Nijel's Point) > fly to Theramore,
+# where the next guide starts.
+#
+# Deviations from the export:
+# - The Shimmering Flats and Ratchet stops (visits 30-31) are dropped: a long
+#   ride from Dustwallow for small breadcrumbs (News for Fizzle 1137,
+#   Wharfmaster Dizzywig 1111, Goblin Sponsorship 1178/1180, Parts for Kravel
+#   1112), about 4,000 XP. News for Fizzle is not taken from Martek.
+# - Dustwallow Marsh's two visits are merged into one loop at the start of the
+#   next guide; this guide only passes Theramore for the flight path and the
+#   two turn-ins by the flight master. Lieutenant Paval Reethe's badge (1252)
+#   lies at the Shady Rest Inn, on that loop.
+# - Badlands Reagent Run (2500) is handed in to Ghak Healtouch right after the
+#   hearth to Thelsamar instead of at 47.9: same spot, full XP.
+# - Theramore and Ratchet binds are dropped (replaced before any hearth);
+#   the bind is Nijel's Point.
+# - Desolace: the Karnitol's Satchel step (1456, then 1457 to Ironforge) needs
+#   a second trip to the far north-west coast after Kreldig: left out.
+#   Claim Rackmore's Treasure! (6161) is left out: its two keys drop at
+#   opposite ends of the west coast. Gizelton Caravan and Get Me Out of Here!
+#   are escorts, handled as a goto with a note.
+# - Stone Is Better than Cloth (716) and Jarl Needs a Blade (1203, next guide)
+#   want crafted items (Patterned Bronze Bracers, a Moonsteel Broadsword): optional.
+# Left out: A Sign of Hope (721, to Hammertoe Grez inside Uldaman) and Pearl
+# Diving (705, its clams lie on Stranglethorn's far north-west coast, which the
+# route no longer visits): never finished on the route.
+# Class training: none here; the next guide trains in Stormwind.
+guide forever/alliance/30-40/07-badlands
+title Badlands & Desolace
+faction Alliance
+levels 39-41
+zone Badlands
+next forever/alliance/40-50/01-stranglethorn-vale
+
+# ---------------------------------------------------------------- Hammertoe's Digsite
+
+step Hammertoe's Digsite
+  zone Badlands
+  tip Ride back west to the road and follow it south out of Loch Modan through the pass into the Badlands. Prospector Ryedol and Sigrun Ironhew camp side by side at the dig.
+  accept 719                          -- Prospector Ryedol
+  accept 718                          -- Sigrun Ironhew
+
+step Shadowforge camp
+  tip The Shadowforge dwarves camp just north of the digsite; the crumpled map lies among their tents. Tunnelers and Darkweavers carry Ryedol's pick. Crag Coyotes roam the slopes around it.
+  accept 720                          -- Crumpled Map
+  collect 4616 quest 719              -- Ryedol's Lucky Pick
+  collect 7846 quest 2500             -- Crag Coyote Fang
+
+step The excavation crate
+  tip Ride north-east to the abandoned dig; the supply crate lies there among the Dustbelcher ogres.
+  collect 4629 quest 718              -- Supply Crate
+
+step Hammertoe's Digsite
+  turnin 719                          -- Prospector Ryedol
+  turnin 720
+  note Ryedol's next errand goes into Uldaman: skip it.
+  turnin 718                          -- Sigrun Ironhew
+  accept 733
+
+# ---------------------------------------------------------------- The middle
+
+step Valley of Fangs
+  tip Martek and Rigglefuzz camp together in the Valley of Fangs, in the middle of the Badlands.
+  turnin 1106                         -- Martek the Exiled
+  accept 1108
+  accept 703                          -- Rigglefuzz
+
+step Ogres and buzzards
+  tip The Dustbelcher ogres camp just south of the valley; any of them drops scrap. Buzzards circle the plain to the east.
+  collect 4630 quest 733              -- Scrap Metal
+  collect 3404 quest 703              -- Buzzard Wing
+  collect 7847 quest 2500             -- Buzzard Gizzard
+
+step Agmond's End
+  tip The battered skeleton lies just east of the ogres, at the edge of the Stonevault trogg camp; the Bonesnappers and Shamans around it drop the flakes. Theldurin sits by the ruined camp further south.
+  turnin 738                          -- Battered Dwarven Skeleton
+  note The skeleton's next task, Murdaloc, waits until the later Badlands guide at 43.
+  collect 5797 quest 1108             -- Indurium Flake
+  accept 709                          -- Theldurin the Lost
+
+step Valley of Fangs
+  turnin 703                          -- Rigglefuzz
+  turnin 1108                         -- Martek the Exiled
+  note Martek's next errand goes to the Shimmering Flats: skip it.
+
+step Lotwil Veriatus
+  tip Ride west into the Dustbowl; Lotwil works by his machines in the middle of it.
+  accept 710
+
+step Lesser Rock Elementals
+  tip The Lesser Rock Elementals wander the Dustbowl west of Lotwil.
+  collect 4626 quest 710              -- Small Stone Shard
+  collect 7848 quest 2500             -- Rock Elemental Shard
+
+step Lotwil Veriatus
+  turnin 710
+  accept 711
+
+step Rock Elementals
+  tip The Rock Elementals roam south-east of Lotwil; Giant Buzzards and Elder Crag Coyotes share the plain to their west.
+  collect 4627 quest 711              -- Large Stone Slab
+  collect 7848 quest 2500             -- Rock Elemental Shard
+  collect 7847 quest 2500             -- Buzzard Gizzard
+  collect 7846 quest 2500             -- Crag Coyote Fang
+
+step Lotwil Veriatus
+  turnin 711
+  accept 712
+
+step Greater Rock Elementals
+  tip The Greater Rock Elementals (level 42) walk the far south-west corner below Camp Boff; pull them one at a time. The Dustbelcher Wyrmhunters and Maulers at Camp Boff also drop scrap.
+  collect 4628 quest 712              -- Bracers of Rock Binding
+  collect 4630 quest 733              -- Scrap Metal
+
+step Lotwil Veriatus
+  turnin 712
+  accept 716 optional                 -- Lucien Tosselwrench, beside Lotwil
+  turnin 716 optional                 -- only if you carry Patterned Bronze Bracers (a blacksmith's craft)
+  note Lotwil's next test needs crafted gear: skip it.
+
+# ---------------------------------------------------------------- The north
+
+step The Ancient Chest
+  tip Ride north-east to the dwarven ruins in the north of the Badlands; the chest sits among the Shadowforge dwarves. Ambassador Infernus nearby is elite: give him room.
+  collect 4631 quest 709              -- Tablet of Ryun'eh
+
+step Hammertoe's Digsite
+  turnin 733                          -- Sigrun Ironhew
+
+step Theldurin the Lost
+  tip Ride south to Agmond's End.
+  turnin 709
+  accept 727                          -- for Gerrig Bonegrip in Ironforge: keep it
+
+# ---------------------------------------------------------------- To Theramore
+
+step Thelsamar
+  zone Loch Modan
+  hearth "Stoutlager Inn"
+  turnin 2500                         -- Ghak Healtouch, in the inn
+
+step Menethil Harbor
+  zone Wetlands
+  fly "Menethil Harbor"
+  tip Take the boat to Theramore from the far pier.
+  goto 4.7,63.8 "Boat to Theramore"
+
+step Theramore
+  zone Dustwallow Marsh
+  tip The flight master stands by the gate of Foothold Citadel; Clerk Lendry and Commander Samaul are inside the citadel.
+  getfp "Theramore"
+  turnin 1302                         -- Clerk Lendry
+  turnin 1264                         -- Commander Samaul
+  accept 1265                         -- for the Dustwallow loop in the next guide
+
+# ---------------------------------------------------------------- Desolace: the west
+
+step Nijel's Point
+  zone Desolace
+  fly "Nijel's Point"
+  sethome "Nijel's Point"
+  turnin 6141                         -- Brother Anton
+  accept 261
+  accept 1454                         -- Kreldig Ungor
+  accept 1466
+
+step Karnitol's Chest
+  tip Follow the road west across the north of Desolace to the ruins of Ethel Rethor; the wrecked ship's chest lies on the shore just west of them.
+  turnin 1454                         -- Karnitol's Chest
+  accept 1455
+
+step Azore Aldamort
+  tip Azore's tower stands on the hill east of the wreck.
+  accept 6027
+
+step Lord Kragaru
+  tip Lord Kragaru, a centaur chieftain, camps on the north-west coast, north of Azore's tower.
+  collect 15803 quest 6027            -- Book of the Ancients
+
+step Azore Aldamort
+  turnin 6027
+
+step Nijel's Point
+  hearth "Nijel's Point"
+  turnin 1455                         -- Kreldig Ungor
+  note Kreldig's next task, Karnitol's Satchel, is a drop on the far coast: skip it.
+
+# ---------------------------------------------------------------- Desolace: the south loop
+
+step Bibbly F'utzbuckle
+  tip Follow the road south to Kormek's Hut.
+  accept 5501
+
+step Kodo Graveyard
+  tip Hornizz stands at the edge of the Kodo Graveyard, south-west of Kormek's Hut; Kodo Bones lie among the skeletons.
+  accept 6134                         -- Hornizz Brimbuzzle
+  collect 13703 quest 5501            -- Kodo Bone
+
+step Melizza Brimbuzzle
+  tip Melizza is held in the centaur camp west of the graveyard. Free her and keep her alive on the walk out; she stops by the graveyard.
+  accept 6132
+  complete 6132 @40.1,61.6            -- escort Melizza back toward the graveyard
+
+step Hornizz Brimbuzzle
+  turnin 6132
+
+step Gelkis Village
+  tip Uthek the Wise sits in the Gelkis centaur village in the south-west.
+  turnin 1373                         -- Uthek the Wise
+  accept 1374
+
+step Gizelton Caravan
+  tip Rigger Gizelton's caravan stops on the road east of Gelkis Village. Take the quest and walk with the kodos past the Mannoroc Coven, killing the demons that jump them; talk to Smeed at his camp east of the Kodo Graveyard afterwards.
+  accept 5943                         -- Rigger Gizelton
+  complete 5943 @55.7,67.8
+  turnin 5943                         -- Smeed Scrabblescrew
+
+step Mannoroc Coven
+  tip The demons gather at the Mannoroc Coven in southern Desolace: felhounds (Mana Eaters, Mage and Ley Hunters), Nether Maidens and Sisters, and Doomwarder Captains around the pit.
+  collect 6250 quest 1466             -- Felhound Brain
+  collect 6251 quest 1466             -- Nether Wing
+  collect 6252 quest 1466             -- Doomwarder Blood
+
+step The Magram and the Valley of Bones
+  tip Khan Jehn leads the Magram in their village east of the Coven. Undead Ravagers roam the bone fields south of it; at the far south-east, use the Crate of Ghost Magnets to draw the Magrami Spectres.
+  collect 6072 quest 1374             -- Khan Jehn's Head
+  kill 11561 quest 261                -- Undead Ravager
+  collect 15849 quest 6134            -- Ghost-o-plasm
+
+step Gelkis Village
+  tip Ride west along the south of Desolace.
+  turnin 1374                         -- Uthek the Wise
+
+step Kodo Graveyard
+  turnin 6134                         -- Hornizz Brimbuzzle
+
+step Kormek's Hut
+  turnin 5501                         -- Bibbly F'utzbuckle
+
+step Nijel's Point
+  tip Follow the road north to Nijel's Point.
+  turnin 1466                         -- Kreldig Ungor
+  accept 1467                         -- for Roetten Stonehammer in Ironforge: keep it
+  turnin 261                          -- Brother Anton
+  accept 1052                         -- for Raleigh the Devout in Southshore: keep it
+
+step Fly to Theramore
+  zone Dustwallow Marsh
+  tip The next guide starts in Theramore.
+  fly "Theramore"

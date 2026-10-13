@@ -1,0 +1,36 @@
+guide forever/collectibles/mounts/alliance/swift-ram
+title Swift Ram
+category Collectibles
+folder Mounts · Level 60
+keywords Swift White Ram, Swift Brown Ram, Swift Gray Ram, Dwarf, Amberstill Ranch, Veron Amberstill, Ultham Ironhorn, Riding
+collects 18785, 18786, 18787
+faction Alliance
+levels 60-60
+zone Dun Morogh
+
+# Swift Alliance ram from Veron Amberstill (Amberstill Ranch).
+# Sources: Forever client 1.60.1.70338 tables via wago.tools (ItemSparse: level,
+# price, races, riding spell; SkillLineAbility: Riding); npcs.json and
+# items.json for the trainer, the vendor and its stock.
+# Forever riding: the client files every racial riding spell under one Riding
+# skill (SkillLineAbility), so any riding trainer of your faction teaches it:
+# Apprentice Riding (skill 75) from level 40, Journeyman Riding (150) at 60.
+# Blizzard: learning to ride grants a mount, and training costs 100g at 40 and
+# 1,000g at 60 (Kris Zierhut). ItemSparse lists the
+# mounts at 20g (level 40) and 200g (level 60), usable by every race of the
+# faction; whether a vendor still wants Exalted with another race's city (the
+# Era rule) is server-side and unconfirmed.
+
+step Journeyman Riding
+  zone Dun Morogh
+  tip Amberstill Ranch is east of Kharanos on the road to Loch Modan; Ultham Ironhorn stands beside Veron Amberstill's rams. At 60 Ultham Ironhorn teaches Journeyman Riding (1,000g per Blizzard's designers); Blizzard says learning riding grants a mount. The Forever client sells each swift ram for 200g at level 60.
+  level 60
+  train 4772                          -- Ultham Ironhorn, riding trainer
+  skill Riding 150
+
+step Pick a colour
+  tip Veron Amberstill sells the other colours (200g each in the Forever client). Buy any you want, or none if the mount you were given is the one you like.
+  vendor 1261                         -- Veron Amberstill
+  buy 18785 npc 1261 optional         -- Swift White Ram, 200g
+  buy 18786 npc 1261 optional         -- Swift Brown Ram, 200g
+  buy 18787 npc 1261 optional         -- Swift Gray Ram, 200g

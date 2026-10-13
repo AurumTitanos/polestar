@@ -1,0 +1,22 @@
+guide forever/collectibles/pets/donni-anthania
+title Donni Anthania's Cats
+category Collectibles
+folder Companion pets · Vendors
+keywords Cat Carrier, Bombay, Cornish Rex, Orange Tabby, Silver Tabby, crazy cat lady, cat, kitten
+collects 8485, 8486, 8487, 8488
+faction Alliance
+levels 1-60
+zone Elwynn Forest
+
+# Donni Anthania, the crazy cat lady, north of Goldshire.
+# Sources: items.json / npcs.json (vendor, stock); Forever client 1.60.1.70338
+# via wago.tools (ItemSparse prices; every pet item teaches its companion when
+# used).
+
+step Donni Anthania
+  tip Donni Anthania has a farmhouse north of Goldshire. Each cat carrier costs 40s. Each pet item teaches its companion when you use it; the goals stay ticked afterwards.
+  vendor 6367                         -- Donni Anthania
+  buy 8485 npc 6367 optional          -- Cat Carrier (Bombay), 40s
+  buy 8486 npc 6367 optional          -- Cat Carrier (Cornish Rex), 40s
+  buy 8487 npc 6367 optional          -- Cat Carrier (Orange Tabby), 40s
+  buy 8488 npc 6367 optional          -- Cat Carrier (Silver Tabby), 40s

@@ -1,0 +1,21 @@
+guide forever/collectibles/pets/chicken-egg
+title Chicken Egg
+category Collectibles
+folder Companion pets · Quests
+keywords CLUCK!, Farm Chicken Egg, chicken, Westfall, Farmer Saldean, Special Chicken Feed, /chicken
+collects 11110
+faction Alliance
+levels 1-60
+zone Westfall
+
+# Chicken Egg from CLUCK!, the hidden chicken quest in Westfall.
+# Sources: quests.json (CLUCK!, Alliance races only); items.json (the egg is
+# looted from an object, the feed from Farmer Saldean); Forever client
+# 1.60.1.70338. The reward is general Era knowledge (not in quests.json).
+
+step CLUCK!
+  tip Find a chicken at Farmer Saldean's farm and type /chicken at it until it offers CLUCK!. Buy Special Chicken Feed from Farmer Saldean, go back, /cheer at the same chicken, then hand in the feed. The chicken lays an egg: loot it for your Chicken Egg pet.
+  accept 3861 @56.1,30
+  buy 11109 npc 233                   -- Special Chicken Feed, from Farmer Saldean
+  turnin 3861 @56.1,30
+  collect 11110 @56.1,30              -- Loot the Farm Chicken Egg the chicken lays

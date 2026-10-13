@@ -1,0 +1,36 @@
+guide forever/collectibles/mounts/alliance/swift-saber
+title Swift Saber
+category Collectibles
+folder Mounts · Level 60
+keywords Reins of the Swift Frostsaber, Reins of the Swift Mistsaber, Reins of the Swift Stormsaber, Swift Frostsaber, Swift Mistsaber, Swift Stormsaber, tiger, Night Elf, Darnassus, Lelanai, Jartsam, Riding
+collects 18766, 18767, 18902
+faction Alliance
+levels 60-60
+zone Darnassus
+
+# Swift Alliance saber from Lelanai (Darnassus).
+# Sources: Forever client 1.60.1.70338 tables via wago.tools (ItemSparse: level,
+# price, races, riding spell; SkillLineAbility: Riding); npcs.json and
+# items.json for the trainer, the vendor and its stock.
+# Forever riding: the client files every racial riding spell under one Riding
+# skill (SkillLineAbility), so any riding trainer of your faction teaches it:
+# Apprentice Riding (skill 75) from level 40, Journeyman Riding (150) at 60.
+# Blizzard: learning to ride grants a mount, and training costs 100g at 40 and
+# 1,000g at 60 (Kris Zierhut). ItemSparse lists the
+# mounts at 20g (level 40) and 200g (level 60), usable by every race of the
+# faction; whether a vendor still wants Exalted with another race's city (the
+# Era rule) is server-side and unconfirmed.
+
+step Journeyman Riding
+  zone Darnassus
+  tip Jartsam and Lelanai's sabers are in the Cenarion Enclave's riding grounds in Darnassus. At 60 Jartsam teaches Journeyman Riding (1,000g per Blizzard's designers); Blizzard says learning riding grants a mount. The Forever client sells each swift saber for 200g at level 60.
+  level 60
+  train 4753                          -- Jartsam, riding trainer
+  skill Riding 150
+
+step Pick a colour
+  tip Lelanai sells the other colours (200g each in the Forever client). Buy any you want, or none if the mount you were given is the one you like.
+  vendor 4730                         -- Lelanai
+  buy 18766 npc 4730 optional         -- Reins of the Swift Frostsaber, 200g
+  buy 18767 npc 4730 optional         -- Reins of the Swift Mistsaber, 200g
+  buy 18902 npc 4730 optional         -- Reins of the Swift Stormsaber, 200g

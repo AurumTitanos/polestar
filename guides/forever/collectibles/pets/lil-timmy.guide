@@ -1,0 +1,20 @@
+guide forever/collectibles/pets/lil-timmy
+title White Kitten
+category Collectibles
+folder Companion pets · Vendors
+keywords Lil Timmy, Cat Carrier (White Kitten), cat, kitten
+collects 8489
+faction Alliance
+levels 1-60
+zone Stormwind City
+
+# Lil Timmy's White Kitten in Stormwind.
+# Sources: items.json / npcs.json (vendor); Forever client 1.60.1.70338 via
+# wago.tools (ItemSparse prices; every pet item teaches its companion when
+# used). A White Kitten vendor near the Stonetalon / Mulgore border has also
+# been reported (unconfirmed).
+
+step Lil Timmy
+  tip Lil Timmy sells the White Kitten (60s). He walks around the city, so the waypoint is only one point on his path; look along the nearby streets if he is not there. Each pet item teaches its companion when you use it; the goals stay ticked afterwards.
+  vendor 8666                         -- Lil Timmy
+  buy 8489 npc 8666 optional          -- Cat Carrier (White Kitten), 60s

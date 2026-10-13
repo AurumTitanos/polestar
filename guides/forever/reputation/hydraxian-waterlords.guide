@@ -1,0 +1,71 @@
+guide forever/reputation/hydraxian-waterlords
+title Hydraxian Waterlords Reputation
+category Reputation
+levels 55-60
+zone Azshara
+# Built from the Era-baseline reference data: Duke Hydraxis on his island off
+# eastern Azshara and his chain (6804 Poisoned Water, 6805 Stormers and
+# Rumblers, 6821 Eye of the Emberseer, 6822 The Molten Core, 6823 Agent of
+# Hydraxis, 6824 Hands of the Enemy), with Dust Stormer / Desert Rumbler spawns
+# for the kill quest. Nothing public shows Forever changing Hydraxis; this has
+# NOT been play-tested on Forever yet.
+#
+# The poisoned elementals of Poisoned Water, the Eye of the Emberseer (Upper
+# Blackrock Spire) and every Molten Core target have no spawn points in our
+# data, so those objectives are `complete` goals with tips. Past the chain, the
+# reputation comes from killing Molten Core's elementals and bosses, so the
+# last steps track the standing (rep 749).
+
+step Duke Hydraxis
+  tip Duke Hydraxis stands on a small island off the eastern coast of Azshara; swim or walk the shallows out to him. The Hydraxian Waterlords start out Neutral. Forever's Legacy Diplomat perk increases reputation gains.
+  accept 6804
+  accept 6805
+
+step Dust Stormers and Desert Rumblers
+  zone Silithus
+  tip Both elementals roam northwestern Silithus; the Rumblers cluster a little further north.
+  kill 11744 x15 quest 6805.1 @19.6,26.4
+  kill 11746 x15 quest 6805.2 @24.1,13.9
+
+step Poisoned Water
+  zone Eastern Plaguelands
+  tip Use the Aspect of Neptulon on the poisoned water elementals of Eastern Plaguelands, then loot their Discordant Bracers (12). Our data has no spawn points for those elementals.
+  complete 6804
+
+step Back to Duke Hydraxis
+  zone Azshara
+  turnin 6804
+  turnin 6805
+  accept 6821
+
+step Eye of the Emberseer
+  tip Pyroguard Emberseer in Upper Blackrock Spire drops the Eye of the Emberseer. This needs a raid group.
+  complete 6821
+  turnin 6821
+  accept 6822
+
+step The Molten Core
+  tip Kill a Firelord, a Molten Giant, an Ancient Core Hound and a Lava Surger in the Molten Core. Every Molten Core elemental and boss also counts toward the Waterlords.
+  complete 6822
+  turnin 6822
+  rep 749 Friendly
+
+step Agent of Hydraxis
+  tip Agent of Hydraxis needs Honored. At Honored, Duke Hydraxis hands out Aqual Quintessence, used to douse the runes in the Molten Core that summon Majordomo Executus; at Revered, the reusable Eternal Quintessence.
+  accept 6823
+  rep 749 Honored
+  turnin 6823
+  accept 6824
+
+step Hands of the Enemy
+  tip Bring the Hands of Lucifron, Gehennas, Shazzrah and Sulfuron from the Molten Core.
+  complete 6824
+  turnin 6824
+
+step Hydraxian Waterlords to Revered
+  tip Molten Core clears carry the rest. Bosses always count; in Classic, trash kills stop giving Waterlords reputation partway up, so late on the bosses do the work.
+  rep 749 Revered
+
+step Hydraxian Waterlords to Exalted
+  tip Keep clearing the Molten Core until Exalted.
+  rep 749 Exalted

@@ -1,0 +1,58 @@
+guide forever/reputation/argent-dawn
+title Argent Dawn Reputation
+category Reputation
+levels 50-60
+zone Western Plaguelands
+# Built from the Era-baseline reference data: the Argent Dawn Commission quests
+# (5401 Chillwind Camp, 5405 The Bulwark, 5503 Light's Hope; one excludes the
+# others), the repeatable Scourgestone turn-ins (5402-5404, 5406-5408,
+# 5508-5510) and the Scourgestone drop tables in items.json. Farm spots are the
+# densest spawn clusters of the droppers. Nothing public shows Forever changing
+# the Plaguelands; this has NOT been play-tested on Forever yet.
+#
+# Scourgestone turn-ins are repeatable, and the client never flags a repeatable
+# quest as completed, so those steps track the Argent Dawn standing itself
+# (rep 529). Stone counts per turn-in (20 Minion's, 10 Invader's, 1 Corruptor's)
+# and the Honored cap on the two smaller turn-ins are Classic Era game
+# knowledge, not data. Corruptor's Scourgestones drop only from named and elite
+# Scourge that the data places in Stratholme and Scholomance, so they are notes.
+# Not covered: the Craftsman's Writ and Scourge-invasion turn-ins at Light's
+# Hope (9141/9142, 9124-9129); the data has them, but whether Forever runs that
+# content is unknown.
+
+step Argent Dawn Commission (Alliance)
+  only Alliance
+  tip The Argent Dawn starts out Neutral. Take the Commission from Argent Officer Pureheart at Chillwind Camp and wear it: in Classic, Scourgestones only drop while the Argent Dawn Commission trinket is equipped. Forever's Legacy Diplomat perk increases reputation gains.
+  accept 5401
+  turnin 5401
+
+step Argent Dawn Commission (Horde)
+  only Horde
+  tip The Argent Dawn starts out Neutral. Take the Commission from Argent Officer Garush at The Bulwark and wear it: in Classic, Scourgestones only drop while the Argent Dawn Commission trinket is equipped. Forever's Legacy Diplomat perk increases reputation gains.
+  accept 5405
+  turnin 5405
+
+step Minion's Scourgestones to Friendly
+  tip Ghouls and skeletons all over Western Plaguelands drop Minion's Scourgestones (half the time, per the data); this cluster is dense. Hand them in 20 at a time to any Argent Officer (Pureheart at Chillwind Camp, Garush at The Bulwark, Duke Nicholas Zverenhoff at Light's Hope Chapel). Each turn-in also pays an Argent Dawn Valor Token for the Argent quartermasters.
+  collect 12840 x20 optional @41.8,70.4
+  talk 10840 only Alliance optional -- Argent Officer Pureheart, Chillwind Camp
+  talk 10839 only Horde optional -- Argent Officer Garush, The Bulwark
+  rep 529 Friendly
+
+step Invader's Scourgestones to Honored
+  zone Eastern Plaguelands
+  tip Dark Adepts and Shadowmages (level 58-60) drop Invader's Scourgestones here, along with Minion's stones and Runecloth. Hand Invader's in 10 at a time and Minion's 20 at a time to Duke Nicholas Zverenhoff at Light's Hope Chapel. In Classic both stop giving reputation at Honored.
+  collect 12841 x10 optional @40,51.3
+  talk 11039 optional -- Duke Nicholas Zverenhoff, Light's Hope Chapel
+  rep 529 Honored
+
+step Corruptor's Scourgestones and dungeons to Revered
+  tip From Honored on, Corruptor's Scourgestones (one per turn-in) and Scourge kills in Stratholme and Scholomance carry the reputation. The data drops Corruptor's stones from Scourge bosses there (Darkmaster Gandling, Marduk Blackpool, Vectus) and from Araj the Summoner and Putridius in Western Plaguelands. Many dungeon runs pay off faster than any open-world farm.
+  note Run Stratholme (both wings) and Scholomance, killing every Scourge you pass.
+  talk 11039 optional -- Duke Nicholas Zverenhoff, Light's Hope Chapel
+  rep 529 Revered
+
+step Argent Dawn to Exalted
+  tip Keep running Stratholme and Scholomance and turning in every Corruptor's Scourgestone at Light's Hope Chapel until Exalted.
+  talk 11039 optional
+  rep 529 Exalted

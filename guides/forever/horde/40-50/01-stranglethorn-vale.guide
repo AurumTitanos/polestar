@@ -1,0 +1,203 @@
+guide forever/horde/40-50/01-stranglethorn-vale
+title Stranglethorn Vale
+faction Horde
+levels 40-42
+zone Stranglethorn Vale
+next forever/horde/40-50/02-stranglethorn-vale
+# Route from the Polestar route simulator's Horde consensus (Tauren export),
+# visit 31 part 1/2, Stranglethorn Vale, levels 40.2-41.3. Checked by lint,
+# not play-tested on Forever yet. Era + known Forever quests only.
+#
+# Flow: Shadowprey Village -> fly Ratchet -> boat to Booty Bay -> the
+# Bloodsail cove, the Wild Shore and the Bloodsail ships -> Booty Bay ->
+# Mistvale Valley (gorillas, Mokk) -> Zanzil's camps -> the Venture Co. mine
+# -> Grom'gol (bind) -> Nesingwary -> Zul'Kunda -> hearth to Grom'gol ->
+# jungle stalkers -> the naga shore and the Holy Spring -> Booty Bay (bind).
+# The next guide finishes the jungle (ghosts, Zul'Mamwe) and goes on to the
+# Swamp of Sorrows.
+#
+# Deviations from the simulator's order:
+# - Skullsplitter Tusks (209): the tusks are gathered in the next guide at
+#   Zul'Mamwe, with Speaking with Gan'zulah and Split Bone Necklace, instead
+#   of in a separate Zul'Mamwe visit on the way north: every Skullsplitter
+#   drops the tusks, and the necklaces alone need a long stay there.
+# - Speaking with Nezzliok (585) is taken at the Bubbling Cauldron with
+#   Speaking with Gan'zulah (586) here, not at level 44 (export visit 38):
+#   its three trophy piles stand at Zul'Mamwe, Ziata'jai and Balia'mah, all
+#   on the next guide's Zul'Mamwe loop, so merging saves a later trip from
+#   Grom'gol.
+# - Witch Doctor Unbagwa's part of Stranglethorn Fever (349) is taken before
+#   the gorillas, so the fangs and the giblets come from the same kills.
+# - Binds: the simulator's Booty Bay bind on arrival is dropped (replaced by
+#   Grom'gol before any hearth). Grom'gol (for the hearth back from
+#   Zul'Kunda) and Booty Bay (for the next guide) are kept.
+#
+# Turned in here from earlier guides: Sunken Treasure (669, from Shakes
+# O'Breen in forever/horde/30-40/05-arathi-highlands) at Fleet Master Seahorn
+# on the first Booty Bay stop; the export hands it in at level 44, on a
+# separate Booty Bay trip that the next guides drop.
+#
+# Accepted here, finished later on the route: Stoley's Debt (2872) and
+# Tran'rek (2864) in Tanaris; Cortello's Riddle (624) in the Swamp of
+# Sorrows; Grim Message (2932) in the Hinterlands, around level 48.
+#
+# Left out: Sunken Treasure part 6 (670: Seahorn sends you back to Shakes
+# O'Breen in Arathi, and the route never returns there); Goblin Sponsorship
+# (1182: its chain 1178-1181 starts at Pozzik in Thousand Needles and runs
+# through Gazlowe in Ratchet, none of it on the route, and Cozzle's
+# footlocker sits in the Venture Co. camp at Lake Nazferiti, off this loop).
+
+# ---------------------------------------------------------------- The way in
+
+step Fly to Ratchet
+  zone Desolace
+  tip From Shadowprey Village fly to Ratchet.
+  fly "Ratchet"
+
+step Boat to Booty Bay
+  zone The Barrens
+  tip The boat to Booty Bay docks at the end of Ratchet's pier.
+  goto 63.4,38.5 "Ratchet pier"
+
+# ---------------------------------------------------------------- Booty Bay
+
+step Booty Bay
+  zone Stranglethorn Vale
+  tip The boat lands in Booty Bay's harbour. The quest givers stand on the boardwalks around the harbour and in the inn.
+  accept 348                            -- Fin Fizracket
+  accept 595                            -- First Mate Crazz
+  accept 606                            -- "Sea Wolf" MacKinley
+  accept 2872                           -- for Stoley in Tanaris
+  accept 600                            -- Crank Fizzlebub
+  accept 621
+  accept 209                            -- Kebok
+  accept 2864                           -- Krazek: for Tran'rek in Gadgetzan
+  accept 617                            -- Privateer Bloads
+  vendor nearest
+
+step Bloodsail Correspondence
+  tip Leave town by the tunnel; the note lies in the pirates' cove just north of Booty Bay.
+  turnin 595
+  accept 597
+
+step Booty Bay
+  turnin 597                            -- First Mate Crazz
+  accept 599
+  turnin 599                            -- Fleet Master Seahorn
+  turnin 669
+  accept 604
+  accept 587                            -- Deeg
+  accept 576                            -- Dizzy One-Eye
+
+# ---------------------------------------------------------------- The Bloodsail Buccaneers
+
+step The Wild Shore
+  tip South of Booty Bay the Bloodsail swashbucklers camp on the Wild Shore; the charts and the orders lie in their tents. Any Bloodsail can carry snuff and Dizzy's eye, so keep killing until you have both.
+  goto 29.3,82.8 "Wild Shore camp"
+  kill 1563 quest 604.1
+  collect 3920 quest 604.2 @28.1,82.1
+  collect 3921 quest 604.3 @28.1,82.2
+  collect 3910 quest 587.1
+  collect 3897 quest 576.1
+
+step Booty Bay
+  turnin 604                            -- Fleet Master Seahorn
+  accept 608
+  turnin 587                            -- Deeg
+  turnin 576                            -- Dizzy One-Eye
+
+step The Bloodsail ships
+  tip The three ships lie off the Wild Shore. Swim out and pull the crew to the rail one at a time; Firallon is level 48, so rest before you take him. A scroll, Cortello's Riddle, lies on the ships' decks: take it.
+  goto 32.9,88.2 "Captain Stillwater"
+  kill 2550 quest 608.1
+  goto 29.3,88.3 "Captain Keelhaul"
+  kill 2548 quest 608.2
+  goto 30.6,90.6 "Fleet Master Firallon"
+  kill 2546 quest 608.3
+  collect 4056 "Cortello's Riddle"
+  accept 624                            -- for a later stop in the Swamp of Sorrows
+
+step Booty Bay
+  turnin 608                            -- Fleet Master Seahorn
+
+# ---------------------------------------------------------------- North through the jungle
+
+step Witch Doctor Unbagwa
+  tip Take the road north out of Booty Bay; Unbagwa sits on a hill in Mistvale Valley, east of the road.
+  accept 349
+
+step Mistvale gorillas
+  tip The gorillas roam the valley around Unbagwa. The elders drop the giblets; any of them can drop a fang.
+  goto 33.0,64.2 "Mistvale Valley"
+  collect 3919 quest 606.1
+  collect 2799 quest 349.1
+
+step Mokk the Savage
+  tip Hand Unbagwa the fangs and stay by him: he calls three waves of gorillas, then Mokk. Fight them one at a time.
+  turnin 349
+  collect 2797 quest 348.1
+
+step Zanzil's camps
+  tip North-east of Mistvale, Zanzil's followers camp in the jungle; every one of them can carry the mixture.
+  goto 39.7,58.1 "Zanzil's camp"
+  goto 34.6,51.4 "Northern camp"
+  collect 4016 quest 621.1
+
+step Venture Co. mine
+  tip Further north, the goblins of the Venture Co. dig at the mine east of the road; miners, foremen, surveyors and tinkerers all drop the crystals.
+  goto 41.6,43.3 "Venture Co. mine"
+  collect 3917 quest 600.1
+
+# ---------------------------------------------------------------- Grom'gol and the north
+
+step Grom'gol Base Camp
+  tip Ride north-west to Grom'gol.
+  sethome "Grom'gol Base Camp" npc 5814 -- Innkeeper Thulbek
+  accept 573                            -- Far Seer Mok'thardin
+  accept 584                            -- Nimboya
+  accept 2932                           -- for later: the Hinterlands, around level 48
+  accept 598                            -- Kin'weelay
+
+step Nesingwary's Expedition
+  tip Ride north up the road; the hunters camp on the hill above the river.
+  accept 196                            -- Hemet Nesingwary
+
+step Zul'Kunda
+  tip West of the expedition, the Bloodscalp chiefs Gan'zulah and Nezzliok stand together in the ruins of Zul'Kunda. Clear their guards first, then pull them.
+  goto 23.4,8.8 "Zul'Kunda"
+  collect 3904 quest 584.1
+  collect 3905 quest 584.2
+
+step Hearth to Grom'gol
+  hearth "Grom'gol Base Camp"
+  turnin 584                            -- the Bubbling Cauldron, beside Nimboya
+  accept 586
+  accept 585
+
+# ---------------------------------------------------------------- South to Booty Bay
+
+step Jungle stalkers
+  tip The stalker raptors hunt the jungle south of Grom'gol, out towards the west coast.
+  goto 31.7,40.6 "Jungle stalkers"
+  goto 27.0,47.8 "Western stalkers"
+  kill 687 quest 196.1
+
+step Naga shore and the Holy Spring
+  tip Follow the coast south. The naga explorers wade along the shore and carry the reed bundles; the Holy Spring bubbles in the hills just east of them.
+  goto 26.0,61.8 "Naga shore"
+  kill 1907 quest 573.2
+  collect 4029 quest 617.1
+  collect 737 quest 573.1 @29.0,61.9
+
+step Booty Bay
+  tip Ride south to Booty Bay. Shaky Phillipe waits on the docks. The next guide starts here.
+  sethome "Booty Bay" npc 6807          -- Innkeeper Skindle
+  turnin 617                            -- Privateer Bloads
+  turnin 606                            -- "Shaky" Phillipe
+  accept 607
+  turnin 607                            -- "Sea Wolf" MacKinley
+  accept 609
+  turnin 621                            -- Crank Fizzlebub
+  turnin 600
+  turnin 348                            -- Fin Fizracket
+  vendor nearest

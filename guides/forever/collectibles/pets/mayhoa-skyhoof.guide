@@ -1,0 +1,18 @@
+guide forever/collectibles/pets/mayhoa-skyhoof
+title Prairie Wolf Pup
+category Collectibles
+folder Companion pets · Vendors
+keywords Mayhoa Skyhoof, Prairie Wolf Pup Carrier, wolf pup, wolf
+collects 277508
+faction Horde
+levels 1-60
+zone Orgrimmar
+
+# Mayhoa Skyhoof's Prairie Wolf Pup Carrier in Orgrimmar (new in Forever).
+# Sources: NPC 268745 (position); Forever client 1.60.1.70338 via wago.tools (ItemSparse
+# prices; every pet item teaches its companion when used).
+
+step Mayhoa Skyhoof
+  tip Mayhoa Skyhoof walks a long loop through Orgrimmar (from the Valley of Strength to the Drag); the waypoint is one point on her path. The carrier costs 60s. Each pet item teaches its companion when you use it; the goals stay ticked afterwards.
+  vendor 268745 "Mayhoa Skyhoof" @49.4,34.8 live
+  buy 277508 "Prairie Wolf Pup Carrier" npc 268745 optional -- 60s

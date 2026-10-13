@@ -1,0 +1,48 @@
+guide forever/collectibles/mounts/neutral/warlock-dreadsteed
+title Warlock Dreadsteed
+category Collectibles
+folder Mounts · Class
+keywords Summon Dreadsteed, Mor'zul Bloodbringer, Dreadsteed of Xoroth, Dire Maul, Warlock, class mount
+class Warlock
+levels 60-60
+zone Burning Steppes
+
+# Summon Dreadsteed: your trainer's hand-off to Mor'zul Bloodbringer, then his
+# long chain (named in the tip, not routed step by step).
+# Sources: Forever client 1.60.1.70338 tables via wago.tools (Mount: the spell
+# is still a Forever mount; ItemSparse); quests.json and npcs.json for the
+# chain.
+
+step Mor'zul Bloodbringer (Stormwind)
+  only Human
+  zone Stormwind City
+  tip At 60 Spackle Thornberry in the Slaughtered Lamb sends you to Mor'zul Bloodbringer in the Burning Steppes.
+  level 60
+  accept 7562 npc 5520
+
+step Mor'zul Bloodbringer (Ironforge)
+  only Dwarf,Gnome,NightElf
+  zone Ironforge
+  tip At 60 Jubahl Corpseseeker in Ironforge sends you to Mor'zul Bloodbringer in the Burning Steppes.
+  level 60
+  accept 7562 npc 6382
+
+step Mor'zul Bloodbringer (Orgrimmar)
+  only Orc,Troll,Tauren
+  zone Orgrimmar
+  tip At 60 Kurgul in the Cleft of Shadow sends you to Mor'zul Bloodbringer in the Burning Steppes.
+  level 60
+  accept 7562 npc 5815
+
+step Mor'zul Bloodbringer (Undercity)
+  only Undead
+  zone Undercity
+  tip At 60 Martha Strain in the Magic Quarter sends you to Mor'zul Bloodbringer in the Burning Steppes.
+  level 60
+  accept 7562 npc 5753
+
+step Mor'zul Bloodbringer
+  zone Burning Steppes
+  tip The Summon Dreadsteed chain is long and needs Dire Maul. After this hand-off: Rage of Blood (30 Raging Beast's Blood), Wildeyes, Lord Banehollow in Felwood, Ulathek the Traitor, Xorothian Stardust, Bell of Dethmoora (10 Elixir of Shadow Power), Wheel of the Black March (6 Large Brilliant Shards, 25 Dark Iron Ore), Doomsday Candle (35 Black Dragonscales), Arcanite (3 Arcanite Bars), Imp Delivery (J'eevee) and Dreadsteed of Xoroth, the ritual in Dire Maul.
+  turnin 7562
+  learn 23161 "Summon Dreadsteed"     -- Ticks once you finish the chain

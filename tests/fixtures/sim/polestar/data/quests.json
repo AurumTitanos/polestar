@@ -1,0 +1,7 @@
+{
+	"90001": { "id": 90001, "title": "Fixture 90001", "level": 1, "minLevel": 1, "races": null, "classes": null, "pre": [], "excl": [], "objectives": [] },
+	"90002": { "id": 90002, "title": "Fixture 90002", "level": 1, "minLevel": 1, "races": null, "classes": null, "pre": [], "excl": [], "objectives": [] },
+	"90003": { "id": 90003, "title": "Fixture 90003", "level": 1, "minLevel": 1, "races": null, "classes": null, "pre": [], "excl": [], "objectives": [] },
+	"90010": { "id": 90010, "title": "Fixture 90010", "level": 1, "minLevel": 1, "races": null, "classes": null, "pre": [], "excl": [], "objectives": [] },
+	"90020": { "id": 90020, "title": "Fixture 90020", "level": 1, "minLevel": 1, "races": null, "classes": null, "pre": [], "excl": [], "objectives": [] }
+}

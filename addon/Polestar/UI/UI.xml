@@ -1,0 +1,13 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+	<Script file="UI.lua"/>
+	<Script file="ZoneArt.lua"/>
+	<Script file="ZoneArtOverlays.lua"/>
+	<Script file="GuideFrame.lua"/>
+	<Script file="GearPick.lua"/>
+	<Script file="Picker.lua"/>
+	<Script file="Lookup.lua"/>
+	<Script file="Dungeons.lua"/>
+	<Script file="RouteChoice.lua"/>
+	<Script file="BetaNotice.lua"/>
+	<Script file="Options.lua"/>
+</Ui>

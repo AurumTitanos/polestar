@@ -1,0 +1,65 @@
+guide forever/reputation/arathi-basin
+title Arathi Basin Reputation
+category Reputation
+levels 20-60
+zone Arathi Highlands
+# The League of Arathor (509, Alliance) and The Defilers (510, Horde).
+# Exalted with each battleground reputation is one of Forever's Legacy PvP
+# Challenges (one account-wide Legacy Point each; official Legacy System news).
+#
+# From the Era-baseline reference data: the faction NPCs at Refuge Pointe
+# (Field Marshal Oslight, Sergeant Maclear, Samuel Hawke) and Hammerfall
+# (Deathmaster Dwire, Deathstalker Mortis, Rutherford Twing), their turn-ins
+# (The Battle for Arathi Basin! 8105/8166-8168 and 8120/8169-8171, Control /
+# Take Four and Five Bases 8114/8115 and 8121/8122, Arathi Resource Crate
+# turn-ins 8080/8154-8159/8297/8298 and 8123/8124/8160-8165/8299/8300), the
+# care packages (8260-8262, 8263-8265) and the weekend Call to Arms quests.
+# Forever's Field of Honor season reworks PvP and may change these, so they
+# stay notes until a live recording confirms them; the steps track the
+# standing itself (rep 509/510). Enter the battleground from any battlemaster.
+
+step League of Arathor to Friendly
+  only Alliance
+  tip The League of Arathor fights for Arathi Basin from Refuge Pointe. Their reputation comes from the battleground: the resources your team gathers pay it to everyone, so holding more bases for longer pays more. Queue at any battlemaster. Forever's Legacy Diplomat perk increases reputation gains.
+  talk 14983 optional -- Field Marshal Oslight, Refuge Pointe
+  note Field Marshal Oslight's The Battle for Arathi Basin! (assault every base) and Control Four Bases / Control Five Bases are one-time quests in the data; Sergeant Maclear beside him takes Arathi Resource Crates.
+  rep 509 Friendly
+
+step League of Arathor to Honored
+  only Alliance
+  tip Keep playing Arathi Basin. On Call to Arms: Arathi Basin weekends the Alliance Brigadier General in the capitals takes three Arathi Basin Marks of Honor for extra reputation.
+  talk 15127 optional -- Samuel Hawke hands out one Arathor care package by level
+  rep 509 Honored
+
+step League of Arathor to Revered
+  only Alliance
+  tip Keep playing Arathi Basin; wins with many bases held pay the most.
+  rep 509 Revered
+
+step League of Arathor to Exalted
+  only Alliance
+  tip Exalted with the League of Arathor earns a Legacy Point.
+  rep 509 Exalted
+
+step The Defilers to Friendly
+  only Horde
+  tip The Defilers fight for Arathi Basin from Hammerfall. Their reputation comes from the battleground: the resources your team gathers pay it to everyone, so holding more bases for longer pays more. Queue at any battlemaster. Forever's Legacy Diplomat perk increases reputation gains.
+  talk 15021 optional -- Deathmaster Dwire, Hammerfall
+  note Deathmaster Dwire's The Battle for Arathi Basin! (assault every base) and Take Four Bases / Take Five Bases are one-time quests in the data; Deathstalker Mortis beside him takes Arathi Resource Crates.
+  rep 510 Friendly
+
+step The Defilers to Honored
+  only Horde
+  tip Keep playing Arathi Basin. On Call to Arms: Arathi Basin weekends the Horde Warbringer in the capitals takes three Arathi Basin Marks of Honor for extra reputation.
+  talk 15126 optional -- Rutherford Twing hands out one Defiler's care package by level
+  rep 510 Honored
+
+step The Defilers to Revered
+  only Horde
+  tip Keep playing Arathi Basin; wins with many bases held pay the most.
+  rep 510 Revered
+
+step The Defilers to Exalted
+  only Horde
+  tip Exalted with The Defilers earns a Legacy Point.
+  rep 510 Exalted

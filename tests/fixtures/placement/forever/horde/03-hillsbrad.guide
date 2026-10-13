@@ -1,0 +1,168 @@
+guide forever/horde/03-hillsbrad
+title Undercity & Hillsbrad Foothills
+faction Horde
+levels 18-22
+zone Hillsbrad Foothills
+next forever/horde/04-barrens
+
+# A deviation from the simulator's consensus Horde route (world 0ee62c78): the final consensus stays in the Barrens from 11
+# to 23.7 and grinds about 4 h there between 19.4 and 23 (Camp Taurajo, the
+# Field of Giants, Razorfen Kraul). This guide replaces that grind with a
+# Tarren Mill loop, the Undercity / Alterac packages of the earlier consensus
+# (Undercity at 18.2, Tarren Mill at 18.4-22.1), every quest of them in the
+# simulator's order. Built from the Era-baseline reference data; not yet
+# play-tested on Forever. The simulator files Tarren Mill under the Alterac
+# Mountains (its map overlaps both zones); in game it is on the Hillsbrad
+# Foothills map.
+#
+# Measured cost (simulator, world 0ee62c78; cumulative hours at the end of
+# forever/horde/07-thousand-needles, level 32.1, with this guide against the
+# same chain without it): Orc +0.04 h, Tauren +0.15 h, Undead +0.15 h,
+# Skyborne +0.03 h (at most 0.6% of the band); 13 quests instead of the
+# grind. The band with it is still 2.3-3.6% faster than the consensus for
+# every race. forever/horde/30-40/02-alterac builds on The Rescue (498).
+#
+# Everyone meets here: Orcs, Trolls and Tauren come from the Barrens by the
+# Orgrimmar zeppelin, Undead and Skyborne from the Barrens or from Silverpine
+# Forest by bat.
+#
+# Flow: Undercity (Unending Torment, training) -> fly to Tarren Mill (bind) ->
+# the hills west of town (bears, creepers, lions) -> Hillsbrad Fields (farmers)
+# -> Tarren Mill -> Stanley and the southern fields (peasants, skulls) ->
+# Tarren Mill -> the Syndicate camps and Durnholde Keep -> Tarren Mill.
+#
+# Additions to the earlier consensus visit (measured with the simulator, Orc;
+# cumulative hours at the end of 07-thousand-needles): Battle of Hillsbrad's
+# second part (528, -0.08 h), Souvenirs of Death (546, -0.02 h), and The
+# Rescue / WANTED: Syndicate Personnel, which that visit picked up and never
+# finished (498, 549).
+#
+# Left out:
+# - Battle of Hillsbrad from the smithy on (529, 532: +0.11 h) and Dangerous!
+#   (567: +0.08 h; Miner Hackett is level 29); the Elixir of Agony chain (509,
+#   minimum level 24).
+# - Hunters, Shamans and Druids have no trainer in the Undercity or Tarren
+#   Mill: they train in Orgrimmar at the start of the next guide.
+# - Tauren Druids from the Barrens first fly from the Crossroads to Thunder
+#   Bluff to hand Turak Runetotem Power over Poison and Aquatic Form (6130,
+#   31, from Dendrite in Moonglade), then fly to Orgrimmar for the zeppelin.
+
+# ---------------------------------------------------------------- Druids: Thunder Bluff
+
+step Turak Runetotem
+  only Tauren,Druid
+  zone Thunder Bluff
+  tip From the Crossroads, where your hearthstone took you from Moonglade, fly to Thunder Bluff. Turak teaches on Elder Rise. Then fly to Orgrimmar and take the zeppelin to the Undercity.
+  turnin 6130                         -- Turak Runetotem
+  turnin 31
+
+# ---------------------------------------------------------------- Undercity
+
+step The Undercity
+  zone Undercity
+  tip From the Orgrimmar zeppelin: the towers stand outside the Ruins of Lordaeron; the Undercity is below the ruins. From Silverpine: you arrive by bat.
+  getfp "Undercity" npc 4551          -- Michael Garrett, the bat handler
+  accept 97289                        -- Master Apothecary Faranell, in the Apothecarium
+  accept 97291
+  accept 97292
+
+step Othmar's body
+  zone Undercity
+  tip Othmar's body lies on the Unfinished Abomination's table next to the Apothecarium. Inject the Hissing Serum into the system above it, then lay the Baron's head on the body.
+  turnin 97289                        -- Unfinished Abomination
+  accept 97290
+
+step Faranell's reagents
+  zone Undercity
+  tip Tawny Grisette sells the Toxic Skullcap in the Trade Quarter; the Blisterweed grows beside Martha Alliestar, the herbalism trainer in the Magic Quarter; any poison vendor in the Rogues' Quarter sells the Essence of Agony.
+  buy 281246 npc 4554 x1
+  collect 281300 quest 97291.2 @54.0,49.3
+  buy 8923 nearest x1
+
+step Master Apothecary Faranell
+  zone Undercity
+  turnin 97292
+  turnin 97290
+  turnin 97291
+  train class only !Hunter,!Shaman,!Druid
+  vendor nearest
+
+# ---------------------------------------------------------------- Tarren Mill
+
+step Tarren Mill
+  zone Hillsbrad Foothills
+  fly "Tarren Mill"
+  getfp "Tarren Mill" npc 2389        -- Zarise
+  sethome "Tarren Mill" npc 2388      -- Innkeeper Shay
+  accept 498                          -- Krusk
+  accept 549                          -- The WANTED poster by the inn
+  accept 527                          -- High Executor Darthalia
+  accept 496                          -- Apothecary Lydon
+
+# ---------------------------------------------------------------- West: the hills and Hillsbrad Fields
+
+step Bears and creepers
+  tip West of Tarren Mill, Gray Bears and Forest Moss Creepers roam the hills on the way down to the farms. The creepers drop Creeper Ichor rarely; you need only one.
+  goto 49.5,31.0 "Hills west of Tarren Mill"
+  collect 3476 quest 496.1
+  collect 3477 quest 496.2
+
+step Hillsbrad Fields
+  tip The farms east of Hillsbrad town. Farmer Ray works the field by the northern farmhouse, Farmer Getz the one further south-east; Farmhands and Farmers are everywhere.
+  goto 33.4,38.9 "Hillsbrad Fields"
+  kill 2360 quest 527.1
+  kill 2266 quest 527.2
+  kill 232 quest 527.3
+  kill 2403 quest 527.4
+
+step Tarren Mill
+  tip Starving Mountain Lions prowl the hills on the way back east; any of them may drop blood for Lydon's next task.
+  turnin 496                          -- Apothecary Lydon
+  accept 499
+  turnin 499                          -- Umpi, next to Lydon
+  accept 501
+  turnin 527                          -- High Executor Darthalia
+  accept 528
+  accept 546                          -- Deathguard Samsa
+
+# ---------------------------------------------------------------- Lions, peasants and skulls
+
+step Mountain lions
+  tip Starving Mountain Lions roam the hills between Tarren Mill and the farms.
+  goto 49.1,39.2 "Starving Mountain Lions"
+  collect 3496 quest 501.1
+
+step Peasants and skulls
+  tip The Peasants work the fields south of the farmhouses. Every Hillsbrad human drops skulls; the Peasants and the smithy's apprentices drop them most often.
+  goto 33.4,44.5 "Southern fields"
+  kill 2267 quest 528.1
+  collect 3692 quest 546.1
+
+step Tarren Mill
+  turnin 528                          -- High Executor Darthalia
+  turnin 546                          -- Deathguard Samsa
+  turnin 501                          -- Apothecary Lydon
+  accept 502
+
+step Stanley
+  tip Stanley is Farmer Ray's dog, at the northern farmhouse in Hillsbrad Fields. Hearth back afterwards.
+  turnin 502
+
+# ---------------------------------------------------------------- East: the Syndicate
+
+step Syndicate camps
+  tip From Tarren Mill go south-east into the hills on the way to Durnholde Keep. Rogues and Watchmen hold the camps along the way.
+  hearth "Tarren Mill"
+  goto 76.6,43.6 "Syndicate camps"
+  kill 2260 quest 549.1
+  kill 2261 quest 549.2
+
+step Durnholde Keep
+  tip Drull and Tog'thar are chained inside Durnholde Keep's courtyard buildings; open both locks.
+  interact 1721 quest 498.1           -- Drull's ball and chain
+  interact 1722 quest 498.2           -- Tog'thar's ball and chain
+
+step Tarren Mill
+  turnin 549                          -- High Executor Darthalia
+  turnin 498                          -- Krusk
+  tip The next guide flies to the Undercity and takes the zeppelin back to Kalimdor.

@@ -1,0 +1,207 @@
+guide forever/professions/fishing
+title Fishing 1-300
+category Professions
+coords era
+levels 5-60
+zone Ironforge
+
+# Fishing 1-300 for both factions. Every catch can raise the skill wherever you
+# fish; low skill only makes fish get away in harder waters, so each band sends
+# you to water near where you level (fishing-pool clusters from objects.json,
+# or the shore where water creatures live). Expert Fishing is a book sold by
+# Old Man Heming in Booty Bay; Artisan Fishing is Nat Pagle's quest in
+# Dustwallow Marsh (four rare fish).
+#
+# Spawns, trainers, vendors and recipes come from the Era baseline (pfQuest +
+# Blizzard client tables). Forever keeps Classic professions for 1-300 as far as
+# anything public says, but nothing confirms its 10-60 placement yet: refine
+# with Polestar_Recorder sessions. Waypoints are Era-frame (`coords era`); the
+# engine converts them where Forever changed a map frame.
+
+# ---------------------------------------------------------------- Apprentice
+
+step Learn Fishing
+  tip Any Fishing trainer of your faction teaches Apprentice Fishing (character level 5); the arrow picks the nearest. Buy a Fishing Pole from a trade goods or fishing vendor and equip it.
+  level 5
+  train Fishing Apprentice
+  buy 6256 x1 nearest
+
+# ---------------------------------------------------------------- Fishing 1-75
+
+step Fishing: Elwynn Forest (1-50)
+  only Human
+  zone Elwynn Forest
+  tip Fish here until skill 50. Click the bobber when it splashes; every catch can raise the skill.
+  goto 51.2,66.7 "Crystal Lake" r 25
+  skill Fishing 50
+
+step Fishing: Loch Modan (1-50)
+  only Dwarf,Gnome
+  zone Loch Modan
+  tip Fish here until skill 50. Click the bobber when it splashes; every catch can raise the skill.
+  goto 52.6,66.9 "The Loch" r 25
+  skill Fishing 50
+
+step Fishing: Darkshore (1-50)
+  only NightElf
+  zone Darkshore
+  tip Fish here until skill 50. Click the bobber when it splashes; every catch can raise the skill.
+  goto 35.9,46.7 "Auberdine shore" r 25
+  skill Fishing 50
+
+step Fishing: Durotar (1-50)
+  only Orc,Troll
+  zone Durotar
+  tip Fish here until skill 50. Click the bobber when it splashes; every catch can raise the skill.
+  goto 60.6,45.1 "Durotar coast" r 25
+  skill Fishing 50
+
+step Fishing: The Barrens (1-50)
+  only Tauren
+  zone The Barrens
+  tip Fish here until skill 50. Click the bobber when it splashes; every catch can raise the skill.
+  goto 46.3,37.9 "Barrens oasis" r 25
+  skill Fishing 50
+
+step Fishing: Tirisfal Glades (1-50)
+  only Undead
+  zone Tirisfal Glades
+  tip Fish here until skill 50. Click the bobber when it splashes; every catch can raise the skill.
+  goto 35.6,42.7 "Vile Fin shore" r 25
+  skill Fishing 50
+
+step Journeyman Fishing
+  tip Journeyman Fishing raises the cap to 150; it needs skill 50 and character level 10. The arrow picks the nearest Fishing trainer of your faction.
+  level 10
+  train Fishing Journeyman
+
+# ---------------------------------------------------------------- Fishing 50-125
+
+step Fishing: Westfall (50-125)
+  only Human
+  zone Westfall
+  tip Fish the pools and open water here until skill 125. Pools (floating debris, schools of fish) also drop extra loot.
+  goto 34.6,18.5 "Westfall coast" r 25
+  skill Fishing 125
+
+step Fishing: Loch Modan (50-125)
+  only Dwarf,Gnome
+  zone Loch Modan
+  tip Fish the pools and open water here until skill 125. Pools (floating debris, schools of fish) also drop extra loot.
+  goto 52.6,66.9 "The Loch" r 25
+  skill Fishing 125
+
+step Fishing: Darkshore (50-125)
+  only NightElf
+  zone Darkshore
+  tip Fish the pools and open water here until skill 125. Pools (floating debris, schools of fish) also drop extra loot.
+  goto 35.9,46.7 "Darkshore coast" r 25
+  skill Fishing 125
+
+step Fishing: The Barrens (50-125)
+  only Orc,Troll,Tauren
+  zone The Barrens
+  tip Fish the pools and open water here until skill 125. Pools (floating debris, schools of fish) also drop extra loot.
+  goto 46.3,37.9 "Barrens oasis" r 25
+  skill Fishing 125
+
+step Fishing: Silverpine Forest (50-125)
+  only Undead
+  zone Silverpine Forest
+  tip Fish the pools and open water here until skill 125. Pools (floating debris, schools of fish) also drop extra loot.
+  goto 37.8,32.1 "Lordamere Lake" r 25
+  skill Fishing 125
+
+# ---------------------------------------------------------------- Expert Fishing
+
+step Expert Fishing
+  tip Expert Fishing (cap 225) is a book, not a trainer rank: Old Man Heming sells Expert Fishing - The Bass and You in Booty Bay, at the south tip of Stranglethorn Vale, to both factions. Buy it and read it; it needs skill 125 and level 20.
+  level 20
+  train Fishing Expert "Buy and read Expert Fishing - The Bass and You (Expert Fishing)"
+
+# ---------------------------------------------------------------- Fishing 125-225
+
+step Fishing: Wetlands (125-225)
+  only Human,Dwarf,Gnome
+  zone Wetlands
+  tip Fish the pools here until skill 225. If fish keep getting away, fish easier water until your skill catches up.
+  goto 10.8,63.1 "Wetlands coast" r 25
+  skill Fishing 225
+
+step Fishing: Ashenvale (125-225)
+  only NightElf
+  zone Ashenvale
+  tip Fish the pools here until skill 225. If fish keep getting away, fish easier water until your skill catches up.
+  goto 35.8,53.7 "Ashenvale waters" r 25
+  skill Fishing 225
+
+step Fishing: Ashenvale (125-225)
+  only Orc,Troll,Tauren
+  zone Ashenvale
+  tip Fish the pools here until skill 225. If fish keep getting away, fish easier water until your skill catches up.
+  goto 47.0,69.7 "Ashenvale waters" r 25
+  skill Fishing 225
+
+step Fishing: Hillsbrad Foothills (125-225)
+  only Undead
+  zone Hillsbrad Foothills
+  tip Fish the pools here until skill 225. If fish keep getting away, fish easier water until your skill catches up.
+  goto 60.8,32.1 "Hillsbrad coast" r 25
+  skill Fishing 225
+
+# ---------------------------------------------------------------- Artisan Fishing: Nat Pagle
+
+step Nat Pagle, Angler Extreme
+  only Alliance
+  zone Ironforge
+  tip Artisan Fishing (cap 300) comes from Nat Pagle in Dustwallow Marsh. The fishing trainer in Ironforge sends you to him; the quest needs skill 225 and level 35.
+  skill Fishing 225
+  level 35
+  accept 6609                             -- Grimnur Stonebrand, Ironforge
+
+step Nat Pagle, Angler Extreme
+  only Horde
+  zone Orgrimmar
+  tip Artisan Fishing (cap 300) comes from Nat Pagle in Dustwallow Marsh. The fishing trainer in Orgrimmar sends you to him; the quest needs skill 225 and level 35.
+  skill Fishing 225
+  level 35
+  accept 6608                             -- Lumak, Orgrimmar
+
+step Nat Pagle
+  zone Dustwallow Marsh
+  tip Nat Pagle fishes from the shore of a small island off the east coast, south of Theramore.
+  turnin 6609 only Alliance
+  turnin 6608 only Horde
+  accept 6607
+
+step Sar'theris Striker
+  zone Desolace
+  tip Fish in Sar'theris Strand, the north-west coast of Desolace (Slitherblade naga shore) until you catch a Sar'theris Striker; it only bites there.
+  collect 16968 quest 6607 @33.0,22.4
+
+step Feralas Ahi
+  zone Feralas
+  tip Fish in the Verdantis River in Feralas until you catch a Feralas Ahi; it only bites there.
+  collect 16967 quest 6607
+
+step Savage Coast Blue Sailfin
+  zone Stranglethorn Vale
+  tip Fish in the Savage Coast, the north-west shore of Stranglethorn Vale until you catch a Savage Coast Blue Sailfin; it only bites there.
+  collect 16969 quest 6607 @22.0,17.3
+
+step Misty Reed Mahi Mahi
+  zone Swamp of Sorrows
+  tip Fish in the Misty Reed Strand, the south-east shore of Swamp of Sorrows until you catch a Misty Reed Mahi Mahi; it only bites there.
+  collect 16970 quest 6607 @86.5,84.0
+
+step Nat Pagle
+  zone Dustwallow Marsh
+  turnin 6607                             -- Artisan Fishing
+
+# ---------------------------------------------------------------- Fishing 225-300
+
+step Fishing: Stranglethorn Vale (225-300)
+  zone Stranglethorn Vale
+  tip Fish the pools along the coast here (eels, snappers, wreckage) until skill 300. Booty Bay sells bait and Nightcrawlers for a small fishing bonus.
+  goto 27.5,76.5 "Booty Bay coast" r 25
+  skill Fishing 300

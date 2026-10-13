@@ -1,0 +1,94 @@
+# Polestar suite
+
+The goal: every inch of WoW: Forever covered by guides, and anything a
+player sees in the world (a mount, an item, an NPC, a quest) answerable from
+inside Polestar with "how do I get that?". This document is the contract every
+module is built against.
+
+## Modules
+
+| Module | What it does |
+|---|---|
+| Guides (core) | Leveling 1-60 (proven routes, `docs/SIMULATION.md`; class quests as class-only steps inside them), professions, reputations, exploration, Legacy, collectibles (one guide per mount/pet) |
+| Navigation (core) | Arrow, travel planner, waypoints; `/polestar way <x> <y> [label]` (or `/pole way`) points the arrow at a spot on the current map |
+| Quests | Map and minimap pins for available quests, objective areas, quest givers (off by default, Map options); tooltip lines on mobs and items that a quest needs; quest levels in the log |
+| Lookup (Codex) | One search over guides and entities (items, mounts, pets, NPCs, quests, zones, dungeons, rares, recipes). "How to get" for any item, mount or pet: sources ranked for this character, one click to a guide (curated when one exists, otherwise built on the spot). Tooltip source lines; Alt-click an item link to guide; target or mouse over a player to see their mount and how to get it. Search only: no browse-everything lists |
+| Dungeons | A journal page per dungeon: every quest with where to get it, its objective, its chain and its rewards (item choices, XP, money, reputation), plus bosses and the entrance on the map, with "guide me" to givers and the entrance. No loot tables |
+| Upgrades | Upgrade indicator on item tooltips and the best pick on quest reward choices, from stat weights per spec (detected from the client's talent points) and level band |
+| Rares | Rare NPC and treasure database with locations and loot, map pins (off by default, Map options), alerts (only through APIs the Forever client has) |
+| Maps | World map without fog of war (the zone-art overlay table), coordinates, zone level ranges, dungeon entrance and travel pins (off by default, Map options) |
+| QoL | The existing QoL module, extended |
+
+Out of scope: a full UI suite (Polestar integrates with EllesmereUI through its
+public skinning API), boss and combat warnings, aura tracking, best-in-slot
+lists, loot browsing and talent builds. Polestar keeps the dungeon quest
+journal and the upgrade indicator on tooltips.
+
+Every module can be switched off in options, and none costs memory until it is
+used: modules load their data packs on demand. No surface lists a whole data
+set: lists are search results or bounded groups, built a page at a time, so
+opening or typing never stalls a frame.
+
+## Consuming other addons and sites
+
+Inputs are read from the installed copies under
+`<client>/_classic_beta_/Interface/AddOns/`, from the client's own files
+(CASC/DB2), and from public sites (Wowhead's database pages and the Forever
+databases wowforevertalents.com, foreverchanges.pro). Polestar itself is
+GPL-3.0; each input keeps its own licence, and the rules follow it:
+
+| Licence of the input | What may enter the repository |
+|---|---|
+| MIT (ForeverLevelingBiS, wowsims) | Derived data, with attribution (THIRD_PARTY.md) |
+| GPL, no licence, All Rights Reserved (AtlasLoot, QuestieDB, DungeonJournal, RareScanner, AtlasBIStooltips) and web sources | Nothing: the importer code only. Outputs are local build products (gitignored) |
+
+Always facts (ids, names, levels, coordinates, drop rates, sources, rewards),
+never another addon's prose, art or code. Every output records its sources and
+their versions in its `meta`.
+
+## Data layer
+
+- Importers: `tools/lib/consume/<addon>.js`, one per source, sharing one
+  Lua-literal reader. Each returns plain JSON. Web sources are cached under
+  `data/sources/` and only fetched when asked.
+- `node tools/polestar.js codex build` runs every importer, merges the results
+  with `data/forever/*.json` and writes `data/forever/codex/*.json` (local).
+- Precedence for a fact found in several places: recordings > the Forever
+  client's tables > Forever-specific sources (QuestieDB Forever, DungeonJournal,
+  the Forever sites) > Era sources (pfQuest, AtlasLoot Era tables) > Wowhead
+  Classic.
+
+## In-game packs
+
+| Pack | Built from | Committed | Loaded |
+|---|---|---|---|
+| `Polestar` | the core | yes | always |
+| `Polestar_Guides` | `guides/**` | yes | always |
+| `Polestar_ItemDB` | client item tables | yes | on demand |
+| `Polestar_QuestDB` | `data/forever` (includes QuestieDB) | no (local) | on demand |
+| `Polestar_Codex` | `data/forever/codex` | no (local) | on demand (first search, tooltip or lookup) |
+
+Local packs are generated into gitignored folders and installed by
+`node tools/polestar.js install` like the rest. Without them the core still
+works: Lookup and Dungeons say what is missing instead of failing.
+
+## Runtime services (core)
+
+- `Data`: `Data.Pack(name)` loads a pack on demand (`C_AddOns.LoadAddOn`) and
+  reports memory; modules never touch another module's tables directly.
+- `Search`: one index over guides and Codex entities; the hub's guide search
+  and its Lookup section share it.
+- `Lookup.Sources(kind, id)`: the sources of an item, mount or pet, ranked for
+  this character (faction, level, professions, reputation, distance via Nav).
+  `Lookup.Guide(kind, id)` opens the curated guide when one `collects` it,
+  otherwise registers a generated guide (same guide table as compiled guides,
+  not saved) and opens it in a new tab.
+- `Hooks`: item and unit tooltips, chat item links, target and mouseover. One
+  handler per hook, so modules add lines instead of fighting over the tooltip.
+
+## UI
+
+One hub, grown from the guide menu: Guides, Lookup, Dungeons and Rares as
+top-level sections, Options at the rail's foot, all in Polestar's world (the UI brief
+[`docs/UI_BRIEF.md`](UI_BRIEF.md)). New surfaces extend that world;
+they never introduce another look.

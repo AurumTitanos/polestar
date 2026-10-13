@@ -1,0 +1,38 @@
+guide forever/collectibles/mounts/alliance/mechanostrider
+title Mechanostrider
+category Collectibles
+folder Mounts · Level 40
+keywords Red Mechanostrider, Blue Mechanostrider, Green Mechanostrider, Unpainted Mechanostrider, Red, Blue, Green, Unpainted, Gnome, strider, Steelgrill's Depot, Milli Featherwhistle, Binjy Featherwhistle, Riding
+collects 8563, 8595, 13321, 13322
+faction Alliance
+levels 40-60
+zone Dun Morogh
+
+# First Alliance mechanostrider from Milli Featherwhistle (Steelgrill's Depot).
+# Sources: Forever client 1.60.1.70338 tables via wago.tools (ItemSparse: level,
+# price, races, riding spell; SkillLineAbility: Riding); npcs.json and
+# items.json for the trainer, the vendor and its stock.
+# Forever riding: the client files every racial riding spell under one Riding
+# skill (SkillLineAbility), so any riding trainer of your faction teaches it:
+# Apprentice Riding (skill 75) from level 40, Journeyman Riding (150) at 60.
+# Blizzard: learning to ride grants a mount, and training costs 100g at 40 and
+# 1,000g at 60 (Kris Zierhut). ItemSparse lists the
+# mounts at 20g (level 40) and 200g (level 60), usable by every race of the
+# faction; whether a vendor still wants Exalted with another race's city (the
+# Era rule) is server-side and unconfirmed.
+
+step Learn to ride
+  zone Dun Morogh
+  tip Steelgrill's Depot is just east of Kharanos; Binjy Featherwhistle stands beside Milli Featherwhistle's mechanostriders. At 40 Binjy Featherwhistle teaches Riding (100g per Blizzard's designers), and learning it gives you a mount. The Forever client lets every Alliance race ride these.
+  level 40
+  train 7954                          -- Binjy Featherwhistle, riding trainer
+  skill Riding 75
+
+step Pick a colour
+  tip Milli Featherwhistle sells the other colours (20g each in the Forever client). Buy any you want, or none if the mount you were given is the one you like.
+  vendor 7955                         -- Milli Featherwhistle
+  buy 8563 npc 7955 optional          -- Red Mechanostrider, 20g
+  buy 8595 npc 7955 optional          -- Blue Mechanostrider, 20g
+  buy 13321 npc 7955 optional         -- Green Mechanostrider, 20g
+  buy 13322 npc 7955 optional         -- Unpainted Mechanostrider, 20g
+  note Era let only Dwarves and Gnomes ride mechanostriders; the Forever client allows every Alliance race.

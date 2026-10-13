@@ -1,0 +1,82 @@
+guide forever/reputation/undercity
+title Undercity Reputation
+category Reputation
+faction Horde
+levels 12-60
+zone Undercity
+# Built from the Era-baseline reference data: Ralston Farnsley, the Undercity
+# cloth quartermaster, and the cloth quests 7813/7814/7817/7818 (one-time) and 7819
+# (Additional Runecloth, repeatable) from quests.json; cloth farm spots are
+# the densest spawn clusters of strong cloth droppers in items.json/npcs.json.
+# Nothing public shows Forever changing the cloth donations; this has NOT been
+# play-tested on Forever yet. Refine it with Polestar_Recorder sessions.
+#
+# The client never flags a repeatable quest as completed, so the Additional
+# Runecloth steps track the Undercity standing itself (rep 68) instead of
+# the turn-in. Cloth counts (60 per first donation, 20 per repeat) are game
+# knowledge: the data only has the 60 Runecloth of A Donation of Runecloth.
+
+step Ralston Farnsley: A Donation of Wool
+  tip Ralston Farnsley takes cloth for Undercity in Undercity. The first donations of Wool, Silk, Mageweave and Runecloth (60 cloth each) are done once and give the most reputation per cloth; after them, Additional Runecloth repeats until Exalted. Exalted with another race's city lets you buy that race's mounts. Forever's Legacy Diplomat perk increases reputation gains.
+  level 12
+  accept 7813
+
+step Wool Cloth
+  zone The Barrens
+  tip Venture Co. Enforcers at the Boulder Lode Mine (level 16-17) drop it here. The Auction House works too.
+  collect 2592 x60 quest 7813.1 @61,4.2
+
+step Ralston Farnsley: A Donation of Silk
+  zone Undercity
+  turnin 7813
+  level 26
+  accept 7814
+
+step Silk Cloth
+  zone Desolace
+  tip Kolkar centaur (level 30-33) drop it here. The Auction House works too.
+  collect 4306 x60 quest 7814.1 @72.4,47.1
+
+step Ralston Farnsley: A Donation of Mageweave
+  zone Undercity
+  turnin 7814
+  level 40
+  accept 7817
+
+step Mageweave Cloth
+  zone Tanaris
+  tip Dunemaul ogres (level 45-48) drop it here. The Auction House works too.
+  collect 4338 x60 quest 7817.1 @40.1,54.4
+
+step Ralston Farnsley: A Donation of Runecloth
+  zone Undercity
+  turnin 7817
+  level 50
+  accept 7818
+
+step Runecloth
+  zone Eastern Plaguelands
+  tip Dark Adepts and Shadowmages (level 58-60) drop it here; every Scourge kill here also counts toward the Argent Dawn (see that guide). The Auction House works too.
+  collect 14047 x60 quest 7818.1 @40,51.3
+
+step Ralston Farnsley: Runecloth delivered
+  zone Undercity
+  turnin 7818
+
+step Additional Runecloth to Honored
+  tip Additional Runecloth takes 20 Runecloth per turn-in and repeats as often as you like. Bring Runecloth in multiples of 20 and hand them all in at once, one turn-in after another. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.
+  collect 14047 x20 optional @40,51.3 map 1423
+  talk 14729 optional -- Additional Runecloth (7819)
+  rep 68 Honored
+
+step Additional Runecloth to Revered
+  tip Keep handing in Additional Runecloth, 20 Runecloth at a time. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.
+  collect 14047 x20 optional @40,51.3 map 1423
+  talk 14729 optional
+  rep 68 Revered
+
+step Additional Runecloth to Exalted
+  tip Keep handing in Additional Runecloth until Undercity is Exalted. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.
+  collect 14047 x20 optional @40,51.3 map 1423
+  talk 14729 optional
+  rep 68 Exalted

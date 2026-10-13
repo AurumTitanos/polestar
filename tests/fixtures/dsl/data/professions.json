@@ -1,0 +1,172 @@
+{
+ "129": {
+  "id": 129,
+  "kind": "secondary",
+  "name": "First Aid",
+  "ranks": [
+   {
+    "max": 75,
+    "minLevel": 1,
+    "name": "Apprentice"
+   },
+   {
+    "max": 150,
+    "minLevel": 10,
+    "name": "Journeyman"
+   },
+   {
+    "book": {
+     "item": 16084,
+     "vendors": {
+      "Alliance": [
+       2805
+      ]
+     }
+    },
+    "max": 225,
+    "minLevel": 20,
+    "minSkill": 125,
+    "name": "Expert"
+   }
+  ],
+  "recipes": [
+   {
+    "cost": 0,
+    "green": 45,
+    "grey": 60,
+    "item": 1251,
+    "itemCount": 1,
+    "learnedAt": 1,
+    "name": "Linen Bandage",
+    "reagents": [
+     {
+      "count": 1,
+      "item": 2589
+     }
+    ],
+    "recipeItem": null,
+    "source": "trainer",
+    "spell": 3275,
+    "yellow": 30
+   },
+   {
+    "cost": 100,
+    "green": 75,
+    "grey": 100,
+    "item": 2581,
+    "itemCount": 1,
+    "learnedAt": 40,
+    "name": "Heavy Linen Bandage",
+    "reagents": [
+     {
+      "count": 2,
+      "item": 2589
+     }
+    ],
+    "recipeItem": null,
+    "source": "trainer",
+    "spell": 3276,
+    "yellow": 50
+   },
+   {
+    "cost": null,
+    "green": 115,
+    "grey": 150,
+    "item": 6452,
+    "itemCount": 3,
+    "learnedAt": 80,
+    "name": "Anti-Venom",
+    "reagents": [
+     {
+      "count": 1,
+      "item": 2589
+     }
+    ],
+    "recipeItem": 6454,
+    "source": "item",
+    "spell": 7934,
+    "yellow": 80
+   }
+  ],
+  "trainers": {
+   "Alliance": [
+    2329,
+    5150
+   ],
+   "Horde": [
+    3373
+   ]
+  }
+ },
+ "186": {
+  "id": 186,
+  "kind": "gathering",
+  "name": "Mining",
+  "ranks": [
+   {
+    "max": 75,
+    "minLevel": 1,
+    "minSkill": 0,
+    "name": "Apprentice",
+    "trainers": {
+     "Alliance": [
+      1681
+     ],
+     "Horde": [
+      3175
+     ]
+    }
+   },
+   {
+    "max": 150,
+    "minLevel": 10,
+    "minSkill": 50,
+    "name": "Journeyman",
+    "trainers": {
+     "Alliance": [
+      1681
+     ],
+     "Horde": [
+      3175
+     ]
+    }
+   },
+   {
+    "max": 225,
+    "minLevel": 20,
+    "minSkill": 125,
+    "name": "Expert",
+    "trainers": {
+     "Alliance": [
+      1681
+     ]
+    }
+   },
+   {
+    "max": 300,
+    "minLevel": 35,
+    "minSkill": 225,
+    "name": "Artisan",
+    "quest": {
+     "npcs": {
+      "Alliance": [
+       8125
+      ],
+      "Horde": [
+       8125
+      ]
+     }
+    }
+   }
+  ],
+  "recipes": [],
+  "trainers": {
+   "Alliance": [
+    1681
+   ],
+   "Horde": [
+    3175
+   ]
+  }
+ }
+}

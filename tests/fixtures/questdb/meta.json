@@ -1,0 +1,13 @@
+{
+	"builtAt": "2026-01-01T00:00:00Z",
+	"sources": [
+		{
+			"name": "Fixture",
+			"url": "https://example.invalid",
+			"revision": "1",
+			"license": "MIT",
+			"notice": "Fixture notice."
+		}
+	],
+	"counts": {}
+}

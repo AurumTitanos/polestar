@@ -1,0 +1,10 @@
+guide forever/horde/02-north
+title North
+faction Horde
+levels 5-8
+zone Testvale
+next forever/horde/03-end
+
+step North
+  accept 90010 "North Task"
+  turnin 90010 "North Task"

@@ -1,0 +1,410 @@
+{
+ "179": {
+  "classes": null,
+  "end": {
+   "npc": [
+    658
+   ],
+   "object": []
+  },
+  "excl": [],
+  "id": 179,
+  "level": 2,
+  "minLevel": 1,
+  "next": null,
+  "objectiveText": "",
+  "objectives": [
+   {
+    "count": 8,
+    "id": 750,
+    "text": "Tough Wolf Meat",
+    "type": "item"
+   }
+  ],
+  "pre": [],
+  "races": null,
+  "source": [
+   "fixture"
+  ],
+  "start": {
+   "item": [],
+   "npc": [
+    658
+   ],
+   "object": []
+  },
+  "title": "Dwarven Outfitters",
+  "xp": 150,
+  "zone": 1426
+ },
+ "33": {
+  "classes": null,
+  "end": {
+   "npc": [
+    196
+   ],
+   "object": []
+  },
+  "excl": [],
+  "id": 33,
+  "level": 2,
+  "minLevel": 1,
+  "next": null,
+  "objectiveText": "",
+  "objectives": [
+   {
+    "count": 8,
+    "id": 750,
+    "text": "Tough Wolf Meat",
+    "type": "item"
+   }
+  ],
+  "pre": [],
+  "races": null,
+  "source": [
+   "fixture"
+  ],
+  "start": {
+   "item": [],
+   "npc": [
+    196
+   ],
+   "object": []
+  },
+  "title": "Wolves Across the Border",
+  "xp": 250,
+  "zone": 1429
+ },
+ "5261": {
+  "classes": null,
+  "end": {
+   "npc": [
+    196,
+    197
+   ],
+   "object": []
+  },
+  "excl": [],
+  "id": 5261,
+  "level": 2,
+  "minLevel": 1,
+  "next": null,
+  "objectiveText": "",
+  "objectives": [],
+  "pre": [],
+  "races": null,
+  "source": [
+   "fixture"
+  ],
+  "start": {
+   "item": [],
+   "npc": [
+    196
+   ],
+   "object": []
+  },
+  "title": "Eagan Peltskinner",
+  "xp": 40,
+  "zone": 1429
+ },
+ "7": {
+  "classes": null,
+  "end": {
+   "npc": [
+    197
+   ],
+   "object": []
+  },
+  "excl": [],
+  "id": 7,
+  "level": 2,
+  "minLevel": 1,
+  "next": null,
+  "objectiveText": "",
+  "objectives": [
+   {
+    "count": 10,
+    "id": 6,
+    "text": "Kobold Vermin slain",
+    "type": "kill"
+   }
+  ],
+  "pre": [
+   783
+  ],
+  "races": null,
+  "source": [
+   "fixture"
+  ],
+  "start": {
+   "item": [],
+   "npc": [
+    197
+   ],
+   "object": []
+  },
+  "title": "Kobold Camp Cleanup",
+  "xp": 250,
+  "zone": 1429
+ },
+ "783": {
+  "classes": null,
+  "end": {
+   "npc": [
+    197
+   ],
+   "object": []
+  },
+  "excl": [],
+  "id": 783,
+  "level": 1,
+  "minLevel": 1,
+  "next": null,
+  "objectiveText": "",
+  "objectives": [],
+  "pre": [],
+  "races": null,
+  "source": [
+   "fixture"
+  ],
+  "start": {
+   "item": [],
+   "npc": [
+    823
+   ],
+   "object": []
+  },
+  "title": "A Threat Within",
+  "xp": 80,
+  "zone": 1429
+ },
+ "9100": {
+  "classes": null,
+  "end": {
+   "npc": [
+    823
+   ],
+   "object": []
+  },
+  "excl": [],
+  "id": 9100,
+  "level": 3,
+  "minLevel": 1,
+  "next": null,
+  "objectiveText": "",
+  "objectives": [],
+  "pre": [],
+  "races": 2,
+  "source": [
+   "questie-forever"
+  ],
+  "start": {
+   "item": [],
+   "npc": [
+    823
+   ],
+   "object": []
+  },
+  "title": "Orcish Errand",
+  "xp": 100,
+  "zone": 1429
+ },
+ "9101": {
+  "classes": 4,
+  "end": {
+   "npc": [
+    823
+   ],
+   "object": []
+  },
+  "excl": [],
+  "id": 9101,
+  "level": 3,
+  "minLevel": 1,
+  "next": null,
+  "objectiveText": "",
+  "objectives": [],
+  "pre": [],
+  "races": null,
+  "source": [
+   "fixture"
+  ],
+  "start": {
+   "item": [],
+   "npc": [
+    823
+   ],
+   "object": []
+  },
+  "title": "Hunter Training",
+  "xp": 100,
+  "zone": 1429
+ },
+ "9200": {
+  "classes": null,
+  "end": {
+   "npc": [
+    823
+   ],
+   "object": []
+  },
+  "excl": [],
+  "id": 9200,
+  "level": 4,
+  "minLevel": 3,
+  "next": null,
+  "objectiveText": "",
+  "objectives": [],
+  "pre": [
+   9201
+  ],
+  "races": null,
+  "source": [
+   "fixture"
+  ],
+  "start": {
+   "item": [],
+   "npc": [
+    823
+   ],
+   "object": []
+  },
+  "title": "The Second Step",
+  "xp": 300,
+  "zone": 1429
+ },
+ "9201": {
+  "classes": null,
+  "end": {
+   "npc": [
+    823
+   ],
+   "object": []
+  },
+  "excl": [],
+  "id": 9201,
+  "level": 3,
+  "minLevel": 2,
+  "next": null,
+  "objectiveText": "",
+  "objectives": [],
+  "pre": [],
+  "races": null,
+  "source": [
+   "fixture"
+  ],
+  "start": {
+   "item": [],
+   "npc": [
+    823
+   ],
+   "object": []
+  },
+  "title": "The First Step",
+  "xp": 300,
+  "zone": 1429
+ },
+ "9300": {
+  "classes": null,
+  "end": {
+   "npc": [
+    823
+   ],
+   "object": []
+  },
+  "excl": [],
+  "id": 9300,
+  "level": 20,
+  "minLevel": 20,
+  "next": null,
+  "objectiveText": "",
+  "objectives": [],
+  "pre": [],
+  "races": null,
+  "source": [
+   "fixture"
+  ],
+  "start": {
+   "item": [],
+   "npc": [
+    823
+   ],
+   "object": []
+  },
+  "title": "Veteran Business",
+  "xp": 1500,
+  "zone": 1429
+ },
+ "9400": {
+  "classes": null,
+  "end": {
+   "npc": [
+    197
+   ],
+   "object": []
+  },
+  "excl": [],
+  "id": 9400,
+  "level": 3,
+  "minLevel": 2,
+  "next": null,
+  "objectiveText": "",
+  "objectives": [
+   {
+    "count": 1,
+    "id": 1617,
+    "text": "Crate inspected",
+    "type": "object"
+   }
+  ],
+  "pre": [],
+  "races": null,
+  "source": [
+   "fixture"
+  ],
+  "start": {
+   "item": [],
+   "npc": [],
+   "object": [
+    1617
+   ]
+  },
+  "title": "Crate Inspection",
+  "xp": 200,
+  "zone": 1429
+ },
+ "9500": {
+  "classes": null,
+  "end": {
+   "npc": [
+    823
+   ],
+   "object": []
+  },
+  "excl": [],
+  "id": 9500,
+  "level": 3,
+  "minLevel": 1,
+  "next": null,
+  "objectiveText": "",
+  "objectives": [],
+  "pre": [
+   9201,
+   783
+  ],
+  "races": null,
+  "source": [
+   "fixture"
+  ],
+  "start": {
+   "item": [],
+   "npc": [
+    823
+   ],
+   "object": []
+  },
+  "title": "Either Way",
+  "xp": 100,
+  "zone": 1429
+ }
+}

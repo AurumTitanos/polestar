@@ -1,0 +1,544 @@
+{
+	"5": {
+		"id": 5,
+		"title": "Dwarven Duty",
+		"level": 2,
+		"minLevel": 1,
+		"races": 4,
+		"classes": null,
+		"start": {
+			"npc": [
+				1965
+			],
+			"object": [],
+			"item": []
+		},
+		"end": {
+			"npc": [
+				1965
+			],
+			"object": []
+		},
+		"pre": [],
+		"excl": [],
+		"next": null,
+		"objectives": [],
+		"objectiveText": "",
+		"zone": 1426,
+		"xp": null,
+		"skill": null,
+		"event": null,
+		"source": [
+			"fixture"
+		]
+	},
+	"7": {
+		"id": 7,
+		"title": "Kobold Camp Cleanup",
+		"level": 2,
+		"minLevel": 1,
+		"races": null,
+		"classes": null,
+		"start": {
+			"npc": [
+				197
+			],
+			"object": [],
+			"item": []
+		},
+		"end": {
+			"npc": [
+				197
+			],
+			"object": []
+		},
+		"pre": [
+			783
+		],
+		"excl": [],
+		"next": null,
+		"objectives": [
+			{
+				"type": "kill",
+				"id": 6,
+				"count": 10,
+				"text": "Kobold Vermin"
+			}
+		],
+		"objectiveText": "",
+		"zone": 1429,
+		"xp": null,
+		"skill": null,
+		"event": null,
+		"source": [
+			"fixture"
+		]
+	},
+	"9": {
+		"id": 9,
+		"title": "Orcish Errand",
+		"level": 2,
+		"minLevel": 1,
+		"races": null,
+		"classes": null,
+		"start": {
+			"npc": [
+				3100
+			],
+			"object": [],
+			"item": []
+		},
+		"end": {
+			"npc": [
+				3100
+			],
+			"object": []
+		},
+		"pre": [],
+		"excl": [],
+		"next": null,
+		"objectives": [],
+		"objectiveText": "",
+		"zone": 1411,
+		"xp": null,
+		"skill": null,
+		"event": null,
+		"source": [
+			"fixture"
+		]
+	},
+	"10": {
+		"id": 10,
+		"title": "Veteran Work",
+		"level": 12,
+		"minLevel": 10,
+		"races": null,
+		"classes": null,
+		"start": {
+			"npc": [
+				197
+			],
+			"object": [],
+			"item": []
+		},
+		"end": {
+			"npc": [
+				197
+			],
+			"object": []
+		},
+		"pre": [],
+		"excl": [],
+		"next": null,
+		"objectives": [],
+		"objectiveText": "",
+		"zone": 1429,
+		"xp": null,
+		"skill": null,
+		"event": null,
+		"source": [
+			"fixture"
+		]
+	},
+	"12": {
+		"id": 12,
+		"title": "Harvest Festival",
+		"level": 2,
+		"minLevel": 1,
+		"races": null,
+		"classes": null,
+		"start": {
+			"npc": [
+				197
+			],
+			"object": [],
+			"item": []
+		},
+		"end": {
+			"npc": [
+				197
+			],
+			"object": []
+		},
+		"pre": [],
+		"excl": [],
+		"next": null,
+		"objectives": [],
+		"objectiveText": "",
+		"zone": 1429,
+		"xp": null,
+		"skill": null,
+		"event": 10,
+		"source": [
+			"fixture"
+		]
+	},
+	"13": {
+		"id": 13,
+		"title": "Hunter Training",
+		"level": 2,
+		"minLevel": 1,
+		"races": null,
+		"classes": 4,
+		"start": {
+			"npc": [
+				197
+			],
+			"object": [],
+			"item": []
+		},
+		"end": {
+			"npc": [
+				197
+			],
+			"object": []
+		},
+		"pre": [],
+		"excl": [],
+		"next": null,
+		"objectives": [],
+		"objectiveText": "",
+		"zone": 1429,
+		"xp": null,
+		"skill": null,
+		"event": null,
+		"source": [
+			"fixture"
+		]
+	},
+	"14": {
+		"id": 14,
+		"title": "Either This",
+		"level": 2,
+		"minLevel": 1,
+		"races": null,
+		"classes": null,
+		"start": {
+			"npc": [
+				196
+			],
+			"object": [],
+			"item": []
+		},
+		"end": {
+			"npc": [
+				196
+			],
+			"object": []
+		},
+		"pre": [],
+		"excl": [
+			15
+		],
+		"next": null,
+		"objectives": [],
+		"objectiveText": "",
+		"zone": 1429,
+		"xp": null,
+		"skill": null,
+		"event": null,
+		"source": [
+			"fixture"
+		]
+	},
+	"15": {
+		"id": 15,
+		"title": "Or That",
+		"level": 2,
+		"minLevel": 1,
+		"races": null,
+		"classes": null,
+		"start": {
+			"npc": [
+				196
+			],
+			"object": [],
+			"item": []
+		},
+		"end": {
+			"npc": [
+				196
+			],
+			"object": []
+		},
+		"pre": [],
+		"excl": [
+			14
+		],
+		"next": null,
+		"objectives": [],
+		"objectiveText": "",
+		"zone": 1429,
+		"xp": null,
+		"skill": null,
+		"event": null,
+		"source": [
+			"fixture"
+		]
+	},
+	"16": {
+		"id": 16,
+		"title": "Wanted: Hogger",
+		"level": 3,
+		"minLevel": 1,
+		"races": null,
+		"classes": null,
+		"start": {
+			"npc": [],
+			"object": [
+				31
+			],
+			"item": []
+		},
+		"end": {
+			"npc": [
+				197
+			],
+			"object": []
+		},
+		"pre": [],
+		"excl": [],
+		"next": null,
+		"objectives": [],
+		"objectiveText": "",
+		"zone": 1429,
+		"xp": null,
+		"skill": null,
+		"event": null,
+		"source": [
+			"fixture"
+		]
+	},
+	"17": {
+		"id": 17,
+		"title": "A Strange Note",
+		"level": 3,
+		"minLevel": 1,
+		"races": null,
+		"classes": null,
+		"start": {
+			"npc": [],
+			"object": [],
+			"item": [
+				1972
+			]
+		},
+		"end": {
+			"npc": [
+				197
+			],
+			"object": []
+		},
+		"pre": [],
+		"excl": [],
+		"next": null,
+		"objectives": [],
+		"objectiveText": "",
+		"zone": 1429,
+		"xp": null,
+		"skill": null,
+		"event": null,
+		"source": [
+			"fixture"
+		]
+	},
+	"18": {
+		"id": 18,
+		"title": "Gathering Wood",
+		"level": 3,
+		"minLevel": 1,
+		"races": null,
+		"classes": null,
+		"start": {
+			"npc": [
+				196
+			],
+			"object": [],
+			"item": []
+		},
+		"end": {
+			"npc": [
+				196
+			],
+			"object": []
+		},
+		"pre": [],
+		"excl": [],
+		"next": null,
+		"objectives": [
+			{
+				"type": "object",
+				"id": 55,
+				"count": null,
+				"text": "Bundle of Wood"
+			},
+			{
+				"type": "event",
+				"id": 900,
+				"count": null,
+				"text": null,
+				"map": 1429,
+				"f": "e",
+				"x": 40.5,
+				"y": 70.25
+			}
+		],
+		"objectiveText": "",
+		"zone": 1429,
+		"xp": null,
+		"skill": null,
+		"event": null,
+		"source": [
+			"fixture"
+		]
+	},
+	"19": {
+		"id": 19,
+		"title": "Either Pre Will Do",
+		"level": 3,
+		"minLevel": 1,
+		"races": null,
+		"classes": null,
+		"start": {
+			"npc": [
+				196
+			],
+			"object": [],
+			"item": []
+		},
+		"end": {
+			"npc": [
+				196
+			],
+			"object": []
+		},
+		"pre": [
+			33,
+			60
+		],
+		"excl": [],
+		"next": null,
+		"objectives": [],
+		"objectiveText": "",
+		"zone": 1429,
+		"xp": null,
+		"skill": null,
+		"event": null,
+		"source": [
+			"fixture"
+		]
+	},
+	"33": {
+		"id": 33,
+		"title": "Wolves Across the Border",
+		"level": 2,
+		"minLevel": 1,
+		"races": null,
+		"classes": null,
+		"start": {
+			"npc": [
+				196
+			],
+			"object": [],
+			"item": []
+		},
+		"end": {
+			"npc": [
+				196
+			],
+			"object": []
+		},
+		"pre": [],
+		"excl": [],
+		"next": null,
+		"objectives": [
+			{
+				"type": "item",
+				"id": 750,
+				"count": 8,
+				"text": "Tough Wolf Meat"
+			}
+		],
+		"objectiveText": "",
+		"zone": 1429,
+		"xp": null,
+		"skill": null,
+		"event": null,
+		"source": [
+			"fixture"
+		]
+	},
+	"60": {
+		"id": 60,
+		"title": "Kobold Candles",
+		"level": 4,
+		"minLevel": 2,
+		"races": null,
+		"classes": null,
+		"start": {
+			"npc": [
+				253
+			],
+			"object": [],
+			"item": []
+		},
+		"end": {
+			"npc": [
+				253
+			],
+			"object": []
+		},
+		"pre": [],
+		"excl": [],
+		"next": null,
+		"objectives": [
+			{
+				"type": "item",
+				"id": 772,
+				"count": 8,
+				"text": "Large Candle"
+			}
+		],
+		"objectiveText": "",
+		"zone": 1429,
+		"xp": null,
+		"skill": null,
+		"event": null,
+		"source": [
+			"fixture"
+		]
+	},
+	"783": {
+		"id": 783,
+		"title": "A Threat Within",
+		"level": 1,
+		"minLevel": 1,
+		"races": null,
+		"classes": null,
+		"start": {
+			"npc": [
+				823
+			],
+			"object": [],
+			"item": []
+		},
+		"end": {
+			"npc": [
+				197
+			],
+			"object": []
+		},
+		"pre": [],
+		"excl": [],
+		"next": null,
+		"objectives": [],
+		"objectiveText": "",
+		"zone": 1429,
+		"xp": null,
+		"skill": null,
+		"event": null,
+		"source": [
+			"fixture"
+		]
+	}
+}

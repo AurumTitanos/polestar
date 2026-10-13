@@ -1,0 +1,21 @@
+guide forever/collectibles/pets/weevil-k-neevil
+title Weevil K. Neevil
+category Collectibles
+folder Companion pets · Quests
+keywords My Little Friends, Amaryllis Webb, Entomology Starter Kit, Hay Weevil, weevil, bug, Swamp of Sorrows
+collects 280456
+levels 25-60
+zone Swamp of Sorrows
+
+# Weevil K. Neevil, tied to My Little Friends from Amaryllis Webb in Swamp of
+# Sorrows (new in Forever).
+# Sources: Wowhead Forever quest 93176 (giver, level 25, objectives) and its
+# follow-up A Little Help From My Friends (Un'Goro, 50). The quest page
+# lists only money as the reward, so how the pet arrives is unconfirmed.
+
+step My Little Friends
+  tip Amaryllis Webb gives you an Entomology Starter Kit: use its items to catch an Arbor Tarantula, a Hay Weevil Specimen and a Flesh Picker. This quest is named as the weevil's source but gives only money as its reward; the pet may come from the Hay Weevil you catch. If you lose the kit, she sells another.
+  accept 93176 "My Little Friends" @25,54.2 live
+  complete 93176 "My Little Friends"
+  turnin 93176 "My Little Friends" @25,54.2 live
+  collect 280456 "Weevil K. Neevil" @25,54.2 live

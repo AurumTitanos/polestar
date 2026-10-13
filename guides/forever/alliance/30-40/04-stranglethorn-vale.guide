@@ -1,0 +1,175 @@
+# Stranglethorn Vale, Alliance ~34 to ~36: the first half of the consensus
+# Stranglethorn visit (34.2-37.8). Flow: Nesingwary's Expedition (the first
+# hunting tiers) > Rebel Camp and Kurzen's Compound (Bookie Herod) >
+# Nesingwary again > Booty Bay (flight path, bind) > the west coast (Bloodscalp
+# trolls, crocolisks, the Crystalvein Mine) > back north to pick up the
+# Green Hills of Stranglethorn and the Rebel Camp's Kurzen quests, which the
+# next guide (05-stranglethorn-vale) finishes.
+#
+# Optional: Crystal in the Mountains starts from the Pendant of Myzrael, a
+# drop of Gluggle, a rare murloc: take it if he drops it.
+# Deviations: none in the quest set. Hemet Nesingwary (5762) is carried from
+# Thousand Needles; characters without it skip the turn-in.
+guide forever/alliance/30-40/04-stranglethorn-vale
+title Stranglethorn Vale
+faction Alliance
+levels 34-36
+zone Stranglethorn Vale
+next forever/alliance/30-40/05-stranglethorn-vale
+
+# ---------------------------------------------------------------- Nesingwary's Expedition
+
+step Nesingwary's Expedition
+  tip From Duskwood take the road south into Stranglethorn; the hunters' tents stand just west of the road past the Rebel Camp turn-off.
+  accept 583                          -- Barnil Stonepot
+  turnin 583                          -- Hemet Nesingwary
+  turnin 5762                         -- Hemet Nesingwary, from Thousand Needles
+  accept 194
+  accept 185                          -- Ajeck Rouack
+  accept 190                          -- Sir S. J. Erlgadin
+
+step Young tigers and panthers
+  tip Both roam the grass around the camp and along the road north.
+  kill 681 quest 185                  -- Young Stranglethorn Tiger
+  kill 683 quest 190                  -- Young Panther
+
+step Nesingwary's Expedition
+  turnin 185                          -- Ajeck Rouack
+  accept 186
+  turnin 190                          -- Sir S. J. Erlgadin
+  accept 191
+
+step Stranglethorn Tigers
+  tip The adult tigers prowl the hills just south and west of the camp.
+  kill 682 quest 186                  -- Stranglethorn Tiger
+
+step Ajeck Rouack
+  turnin 186
+  accept 187                          -- The elder tigers come later, on the way back from the Rebel Camp
+
+# ---------------------------------------------------------------- Rebel Camp
+
+step Rebel Camp
+  tip Take the road north; Private Thorsen stands on it, the camp sits in the hills to the west.
+  accept 215                          -- Private Thorsen
+  turnin 215                          -- Lieutenant Doren, in the hut
+  accept 200
+  accept 203                          -- Sergeant Yohwa
+  accept 204
+
+step Kurzen's Compound
+  tip The Kurzen rebels hold the camp east of the Rebel Camp; work its outer edge, where Jungle Fighters and Medicine Men stand, and loot the supply crates by the tents.
+  kill 937 quest 203                  -- Kurzen Jungle Fighter
+  collect 2633 quest 204.1            -- Jungle Remedy
+  collect 2634 quest 204.2            -- Venom Fern Extract, from a Kurzen Supplies crate
+
+step Bookie Herod
+  tip Herod's records lie in a hut on the compound's west side; his strongbox sits farther east, by the cave mouth.
+  turnin 200                          -- Bookie Herod's Records
+  accept 328
+  turnin 328                          -- Bookie Herod's Strongbox
+  accept 329
+
+step Rebel Camp
+  turnin 203                          -- Sergeant Yohwa
+  turnin 204
+  turnin 329                          -- Lieutenant Doren
+  accept 330
+  turnin 330                          -- Corporal Sethman
+  accept 331
+  turnin 331                          -- Lieutenant Doren
+
+# ---------------------------------------------------------------- Nesingwary's hunts
+
+step Panthers, raptors and elder tigers
+  tip Back south past Nesingwary: Panthers and Stranglethorn Raptors run in the clearings west of the camp toward the coast; the elder tigers hold the hills south-west.
+  kill 736 quest 191                  -- Panther
+  kill 685 quest 194                  -- Stranglethorn Raptor
+  kill 1085 quest 187                 -- Elder Stranglethorn Tiger
+  accept 635 optional                 -- Gluggle, a rare murloc on the coast west of camp, drops the Pendant of Myzrael: take it if you meet him
+
+step Nesingwary's Expedition
+  turnin 194                          -- Hemet Nesingwary
+  accept 195
+  turnin 187                          -- Ajeck Rouack
+  accept 188
+  turnin 191                          -- Sir S. J. Erlgadin
+
+step Sin'Dall and the Lashtail raptors
+  tip Sin'Dall, the great tiger, lairs on the hilltop south-west of the camp; Lashtail Raptors run south of it, along the way to Booty Bay.
+  collect 3879 quest 188              -- Paw of Sin'Dall
+  kill 686 quest 195                  -- Lashtail Raptor
+
+# ---------------------------------------------------------------- Booty Bay
+
+step Down to Booty Bay
+  tip Follow the main road south the length of the jungle, past the Grom'gol turn-off, to Booty Bay on the southern cape.
+  getfp "Booty Bay"                   -- Gyll, on the top floor by the docks
+  sethome "Booty Bay"                 -- Innkeeper Skindle, The Salty Sailor Tavern
+  accept 575                          -- Drizzlik, by the bank
+  accept 605                          -- Crank Fizzlebub
+  accept 198                          -- Krazek, in the tavern
+  accept 201
+  accept 189                          -- Kebok, in the tavern
+  vendor nearest
+
+# ---------------------------------------------------------------- The jungle loop
+
+step Crystalvein Mine
+  tip Walk back north; the Crystalvein Mine lies west of the road in the middle of the jungle. The Crystal Spine Basilisks there drop the shards.
+  collect 3918 quest 605              -- Singing Crystal Shard
+
+step Bloodscalp trolls
+  tip The Bloodscalp trolls hold the ruins on the coast west of Nesingwary's camp.
+  collect 1519 quest 189              -- Bloodscalp Ear
+
+step Nesingwary's Expedition
+  turnin 195                          -- Hemet Nesingwary
+  turnin 188                          -- Ajeck Rouack
+  complete 201                        -- Investigate the Camp: just look around the hunters' camp
+
+step Private Thorsen
+  tip Thorsen patrols the road north of camp, toward the Rebel Camp.
+  turnin 198
+
+step River crocolisks
+  tip River Crocolisks swim the river by the Rebel Camp.
+  collect 4053 quest 575              -- Large River Crocolisk Skin
+
+step Booty Bay
+  hearth "Booty Bay"
+  turnin 575                          -- Drizzlik
+  accept 577
+  turnin 605                          -- Crank Fizzlebub
+  turnin 201                          -- Krazek
+  turnin 189                          -- Kebok
+
+step Snapjaw Crocolisks
+  tip Snapjaw Crocolisks bask on the shore and islands along the coast north of Booty Bay.
+  collect 4104 quest 577              -- Snapjaw Crocolisk Skin
+
+step Booty Bay
+  turnin 577                          -- Drizzlik
+  accept 213                          -- Kebok
+  accept 616                          -- Krazek
+  turnin 616                          -- Baron Revilgaz, upstairs in the tavern
+  accept 578
+
+# ---------------------------------------------------------------- North again
+
+step The haunted island
+  tip Follow the west coast north; the haunted island lies off the shore west of Nesingwary's camp. Just reach it.
+  complete 578
+
+step Nesingwary's Expedition
+  tip Barnil collects the Green Hills of Stranglethorn: the pages drop from almost every humanoid in the jungle. Turn the pages into chapters as you go.
+  accept 192                          -- Sir S. J. Erlgadin
+  accept 338                          -- Barnil Stonepot
+  accept 339
+  accept 340
+  accept 341
+  accept 342
+
+step Rebel Camp
+  accept 207                          -- Brother Nimetz
+  accept 574                          -- Sergeant Yohwa

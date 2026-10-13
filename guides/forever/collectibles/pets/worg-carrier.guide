@@ -1,0 +1,25 @@
+guide forever/collectibles/pets/worg-carrier
+title Worg Carrier
+category Collectibles
+folder Companion pets · Quests
+keywords Kibler's Exotic Pets, Kibler, Bloodaxe Worg Pup, Caged Worg Pup, Upper Blackrock Spire, UBRS, worg, Flame Crest
+collects 12264
+levels 55-60
+zone Burning Steppes
+
+# Worg Carrier from Kibler's Exotic Pets (Upper Blackrock Spire).
+# Sources: quests.json (Kibler's quest); Upper Blackrock Spire
+# (58-60) is in Forever; Forever client 1.60.1.70338. The reward is
+# general Era knowledge (not in quests.json).
+
+step Kibler at Flame Crest
+  tip Kibler stands at Flame Crest in northern Burning Steppes, near the Blackrock Mountain path.
+  accept 4729
+
+step Upper Blackrock Spire
+  tip Upper Blackrock Spire is a raid group of up to ten, level 58-60. Use Kibler's cage on a Bloodaxe Worg Pup (Halycon's den) to get the Caged Worg Pup.
+  collect 12263 quest 4729 @33.2,24.9 -- Upper Blackrock Spire
+
+step Back to Kibler
+  turnin 4729
+  collect 12264 @65.9,21.9            -- Worg Carrier

@@ -1,0 +1,106 @@
+guide forever/horde/30-40/04-stranglethorn-vale
+title Stranglethorn Vale
+faction Horde
+levels 35-38
+zone Stranglethorn Vale
+next forever/horde/30-40/05-arathi-highlands
+
+# Consensus route (Horde, simulator export consensus-horde-tauren), visit 24,
+# part 3/3: Stranglethorn Vale 35.9-37.4. Shared by every Horde start.
+# Era + known Forever quests only.
+#
+# Flow: Nesingwary's camp (where the previous guide stops) -> Shadowmaw
+# panthers -> Nesingwary -> hearth to Grom'gol -> Jungle Stalkers on the coast
+# -> Grom'gol -> Mistvale gorillas -> Booty Bay (Hostile Takeover, bind) ->
+# fly to Grom'gol -> the Venture Co. camp -> hearth to Booty Bay.
+#
+# Optional: The Green Hills of Stranglethorn (338-342). Its pages drop at
+# about 1% each from the trolls (or buy them); the previous guide accepts
+# the chapters, this one turns them in if you have them.
+#
+# Deviations from the export:
+# - The export rebinds between Grom'gol and Booty Bay three times in its
+#   last hour; only the Booty Bay bind that is used (hearth back for Hostile
+#   Takeover) is kept.
+# - Hostile Takeover's crystals are gathered right after turning in the
+#   gorilla sinew at Grom'gol, on the ride north, instead of in a separate
+#   trip.
+# - The export takes the Hammerfall flight path and bind at the end of this
+#   visit; they are at the start of forever/horde/30-40/05-arathi-highlands,
+#   where you are actually in Hammerfall.
+
+# ---------------------------------------------------------------- Panther Mastery
+
+step Shadowmaw panthers
+  tip The Shadowmaw Panthers (37-38) stalk the jungle east of the Mosh'Ogg hills and north-east towards the lake; they strike from stealth. Loot every Green Hills page you find on the way.
+  goto 46.5,24.0 "Shadowmaw jungle"
+  kill 684 quest 192
+
+step Green Hills pages
+  tip Pages of The Green Hills of Stranglethorn drop at about 1% each from the Bloodscalp and Skullsplitter trolls; take what drops and check the Auction House for the rest.
+  collect 2725 quest 339.1 optional
+  collect 2728 quest 339.2 optional
+  collect 2730 quest 339.3 optional
+  collect 2732 quest 339.4 optional
+  collect 2734 quest 340.1 optional
+  collect 2735 quest 340.2 optional
+  collect 2738 quest 340.3 optional
+  collect 2740 quest 340.4 optional
+  collect 2742 quest 341.1 optional
+  collect 2744 quest 341.2 optional
+  collect 2745 quest 341.3 optional
+  collect 2748 quest 341.4 optional
+  collect 2749 quest 342.1 optional
+  collect 2750 quest 342.2 optional
+  collect 2751 quest 342.3 optional
+
+step Nesingwary's camp
+  turnin 192                          -- Sir S. J. Erlgadin
+  turnin 339 optional                 -- Barnil Stonepot
+  turnin 340 optional
+  turnin 341 optional
+  turnin 342 optional
+  turnin 338 optional
+
+# ---------------------------------------------------------------- South: stalkers, gorillas
+
+step Hearth to Grom'gol
+  hearth "Grom'gol Base Camp"
+  accept 572                          -- Far Seer Mok'thardin
+
+step Jungle Stalkers
+  tip The Jungle Stalkers (40-41) hunt the coast south of Grom'gol. They are well above you: pull one at a time and rest between fights.
+  goto 28.8,45.1 "Jungle Stalker coast"
+  collect 3863 quest 572
+
+step Far Seer Mok'thardin
+  turnin 572
+  accept 571
+
+step Mistvale gorillas
+  tip Take the road south towards Booty Bay. The Elder Mistvale Gorillas (40-41) live in Mistvale Valley, east of the road; about one in twenty carries an aged sinew.
+  goto 32.8,64.4 "Mistvale Valley"
+  collect 3862 quest 571
+
+# ---------------------------------------------------------------- Booty Bay and the Venture Co.
+
+step Booty Bay
+  tip Follow the road on south into Booty Bay.
+  sethome "Booty Bay"
+  accept 213                          -- Kebok
+  vendor nearest
+  turnin 577                          -- Drizzlik: the Snapjaw skins from the previous guide
+
+step Fly to Grom'gol
+  fly "Grom'gol"
+  turnin 571                          -- Far Seer Mok'thardin
+
+step Venture Co. camp
+  tip Ride north past Nesingwary's camp to the lake. The Venture Co. Geologists (34-36) work the camps along its western shore; they carry the Tumbled Crystals.
+  goto 43.3,19.6 "Venture Co. camp"
+  collect 4106 quest 213
+
+step Hearth to Booty Bay
+  hearth "Booty Bay"
+  turnin 213                          -- Kebok
+  note The next guide flies you north to Tarren Mill and into the Arathi Highlands.
