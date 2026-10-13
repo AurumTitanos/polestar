@@ -11,7 +11,7 @@ module is built against.
 |---|---|
 | Guides (core) | Leveling 1-60 (proven routes, `docs/SIMULATION.md`; class quests as class-only steps inside them), professions, reputations, exploration, Legacy, collectibles (one guide per mount/pet) |
 | Navigation (core) | Arrow, travel planner, waypoints; `/polestar way <x> <y> [label]` (or `/pole way`) points the arrow at a spot on the current map |
-| Quests | Map and minimap pins for available quests, objective areas, quest givers (off by default, Map options); tooltip lines on mobs and items that a quest needs; quest levels in the log |
+| Quests | Map and minimap pins for available quests, objective areas, quest givers (off by default, Map options); tooltip lines on mobs and items that a quest needs; quest levels in the log; a quest icon beside the health bar of nameplates of mobs a quest needs (replacement nameplates included) |
 | Lookup (Codex) | One search over guides and entities (items, mounts, pets, NPCs, quests, zones, dungeons, rares, recipes). "How to get" for any item, mount or pet: sources ranked for this character, one click to a guide (curated when one exists, otherwise built on the spot). Tooltip source lines; Alt-click an item link to guide; target or mouse over a player to see their mount and how to get it. Search only: no browse-everything lists |
 | Dungeons | A journal page per dungeon: every quest with where to get it, its objective, its chain and its rewards (item choices, XP, money, reputation), plus bosses and the entrance on the map, with "guide me" to givers and the entrance. No loot tables |
 | Upgrades | Upgrade indicator on item tooltips and the best pick on quest reward choices, from stat weights per spec (detected from the client's talent points) and level band |
@@ -48,9 +48,11 @@ their versions in its `meta`.
 
 ## Data layer
 
-- Importers: `tools/lib/consume/<addon>.js`, one per source, sharing one
-  Lua-literal reader. Each returns plain JSON. Web sources are cached under
-  `data/sources/` and only fetched when asked.
+- Importers: `tools/lib/consume/<addon>.js` for the Codex and gear sources
+  (AtlasLoot, ForeverLevelingBiS, RareScanner, wowsims), sharing one
+  Lua-literal reader (`lua.js`); QuestieDB is read by `data build`,
+  DungeonJournal by `dungeons build`. Each returns plain JSON. Web sources are
+  cached under `data/sources/` and only fetched when asked.
 - `node tools/polestar.js codex build` runs every importer, merges the results
   with `data/forever/*.json` and writes `data/forever/codex/*.json` (local).
 - Precedence for a fact found in several places: recordings > the Forever
@@ -67,6 +69,7 @@ their versions in its `meta`.
 | `Polestar_ItemDB` | client item tables | yes | on demand |
 | `Polestar_QuestDB` | `data/forever` (includes QuestieDB) | no (local) | on demand |
 | `Polestar_Codex` | `data/forever/codex` | no (local) | on demand (first search, tooltip or lookup) |
+| `Polestar_Travel` | a local crossings file (`travel build`) | no (local) | always, when built |
 | community guide packs (`PolestarPack_*` by default) | a pack's `.guide` files, by its author (`docs/PACKS.md`) | in the author's repository | always, when installed |
 
 Local packs are generated into gitignored folders and installed by
@@ -77,8 +80,9 @@ Guide packs (ours and the community's) register through one registry
 (`Core/Guides.lua`, ARCHITECTURE "Guide data"): each owns its guide-id prefix,
 a refusal is recorded against its pack and shown on Options > Guide packs, and
 a pack the player switches off hides its guides everywhere (`PACKS_CHANGED`).
-The tools treat every pack alike (`lint`, `compile`, `playtest`, `play`,
-`dev`, `pack`, `install`); `docs/PACK_FORMAT.md` is the contract.
+The tools treat every pack alike (`new`, `doctor`, `lint`, `compile`,
+`playtest`, `play`, `dev`, `pack`, `install`, `sim compare --pack`);
+`docs/PACK_FORMAT.md` is the contract.
 
 ## Runtime services (core)
 

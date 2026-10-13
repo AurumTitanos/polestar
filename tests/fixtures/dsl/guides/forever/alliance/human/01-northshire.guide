@@ -1,4 +1,4 @@
-# Fixture: the GUIDE_FORMAT.md example, plus the accept for quest 33 it relies on.
+# Fixture: the GUIDE_FORMAT.md example under our pack's ids, with a goto added.
 guide forever/alliance/human/01-northshire
 title Northshire Valley
 faction Alliance

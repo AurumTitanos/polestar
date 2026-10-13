@@ -272,19 +272,23 @@ Only the fitted parameter values are kept (data/sim/params.json).
 
 - Polestar: the compiled guides (default route and every route choice),
   against the best route found (solo and with dungeons).
+- A guide pack (`sim compare --pack <dir>`, or the pack folder as the one
+  argument): its chain, after our chain up to the pack's first level when it
+  starts above 1, under the same model
+  (`data/bench/compare-<faction>-<race>-<pack id>.json`).
 
 ## 6. CLI
 
 ```
-sim world   [--faction F]                     build/cache the world model
-sim calibrate [--fdj DIR]                      fit parameters to quest data and recordings
-sim run     --faction F [--race R] [--class C] [--paths N] [--workers W]
+sim world   [--faction F] [--rebuild]               build/cache the world model (data/sim/world-<faction>.json)
+sim calibrate [--fdj DIR]                            fit parameters to quest data and recordings
+sim run     --faction F [--race R] [--class C] [--paths N] [--workers W] [--seed S] [--dungeons]
             [--jobs J] [--anneal A] [--max-paths M]
-sim robust  --faction F [--draws K]            robustness of the top routes
-sim compare --faction F                        Polestar's routes vs the best found, same model
-sim bench   --faction F                        bracket table: zones, levels, quests per 10 levels
-sim export  --result <file> --out <dir>        zone-by-zone skeleton guides + visits.json for authors
-sim consensus --faction F                      one 12-60 route shared by the faction's starts
+sim robust  --faction F [--race R] [--draws K] [--top N]   robustness of the top routes
+sim compare --faction F [--race R] [--guides DIR] [--pack DIR | DIR] [--to 10,20,30]  Polestar's routes vs the best found, same model
+sim bench   --faction F [--race R]                  bracket table: zones, levels, quests per 10 levels
+sim export  --result <file> --out <dir>             zone-by-zone skeleton guides + visits.json for authors
+sim consensus --faction F [--dungeons] [--evals N]  one 12-60 route shared by the faction's starts (+ exports)
 ```
 
 Less common options: `--fdj <dir>` (calibrate: the ForeverDungeonJournal
@@ -292,9 +296,20 @@ folder, default the installed one), `--band <levels>` (level width of the
 world's quest packages, default 5; a new width rebuilds the world), `--jobs
 <n>` (run: search jobs per round, default 32), `--anneal <n>` (run:
 annealing evaluations per job, default 6000), `--max-paths <n>` (run: hard
-cap on evaluated routes, default 3x `--paths`).
+cap on evaluated routes, default 3x `--paths`), `--guides <dir>` (compare:
+the guides folder to score, default `guides/`), `--pack <dir>` or a pack
+folder as the one argument (compare: also score a guide pack's chain, after
+our chain up to its first level when it starts above 1; written to
+`data/bench/compare-<faction>-<race>-<pack id>.json`), `--to <levels>`
+(compare: levels to show, default 10,20,30,40,50,60), `--top <n>` (robust:
+routes re-evaluated), `--dungeons` (run, robust and consensus: the
+dungeon-inclusive family, needs `data/forever/dungeons.json`), `--offline`
+(never download the QuestXP table), `--quiet` (less output); `--data <dir>`
+and `--sim <dir>` move the reference data and simulator outputs (default
+`data/forever`, `data/sim`).
 
-`sim run` writes `data/sim/results/<faction>-<race>-<class>.json` and prints a
+`sim run` writes `data/sim/results/<faction>-<race>-<class>.json`
+(`…-dungeons.json` with `--dungeons`) and prints a
 report: the best route as zone visits with level ranges and times, time to
 each tenth level, XP split, travel share, convergence, and the comparison.
 
@@ -390,8 +405,8 @@ minutes at 40+). That costs 2.0-2.7 h (Horde) and 9.1-9.8 h (Alliance)
 against the consensus, almost all of it grinding: the Alliance 44-50 has
 few solo quests left once the Booty Bay, Shimmering Flats and OOX trips are
 gone (the longest stop is 48 to 50 at the Un'Goro gorillas). The previous
-guides (written against builder 15, scored on this world) are 4.4-5.2 h
-slower with 28-34 h more grinding.
+guides (written against builder 15, scored on this world) are 3.8-5.5 h
+slower with 29-34 h more grinding.
 
 Consensus time to 10/20/30/40/50/60 (h):
 

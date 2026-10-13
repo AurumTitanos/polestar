@@ -20,6 +20,10 @@ Addon folders sit at the top level of each zip, so a player (or an addon
 manager) extracts straight into `Interface/AddOns/`. The zips are
 reproducible: the same sources give byte-identical archives.
 
+Guide packs are packed by their authors with `polestar pack` in the pack
+folder (`<pack>/dist/<folder>-<version>.zip`, version from its `pack.json`);
+see docs/PACKS.md.
+
 ## Version
 
 The version lives in `package.json`, in `guides/pack.json` (the manifest of

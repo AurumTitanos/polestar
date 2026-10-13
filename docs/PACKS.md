@@ -41,9 +41,10 @@ with code 1 when Node or the reference data is missing, since every command
 needs them.
 
 The reference data is what fills in quest titles, givers and coordinates.
-`data build` assembles it from sources described in Polestar's README
-("Data"); until Polestar ships the open data, it reads some of them from
-addons installed with your game.
+`data build` assembles it from the sources listed in Polestar's
+[THIRD_PARTY.md](../THIRD_PARTY.md) (`polestar help data` names them); until
+Polestar ships the open data, it reads some of them from addons installed
+with your game.
 
 **Codespaces.** A pack made by `polestar new` from a Polestar clone whose
 origin is an http(s) or SSH URL carries `.devcontainer/devcontainer.json`: open the pack's
@@ -184,8 +185,9 @@ character can use.
 
 `--json` prints the results as one JSON array, and `lint --format
 json|github` its problems, for editors, scripts and CI. Every result has
-`kind`, `id`, `name` and `line` (the guide line), quests, guides and inns
-with another name also `notes` (the comment lines printed under it); besides:
+`kind`, `id`, `name` and `line` (the guide line); quests always, and guides
+and inns when there is something to say, also `notes` (the comment lines
+printed under it); besides:
 
 | Kind | Fields |
 |---|---|
@@ -197,7 +199,8 @@ with another name also `notes` (the comment lines printed under it); besides:
 | `inn` | `id` and `npc` (the innkeeper), `npcName`, `names` (every bind location the game may report; the first is `name`), `zone`, `map`, `x`, `y` |
 | `flight` | `id` (the flight point), `node` (its full name, `name` is its town), `faction` (`Alliance`, `Horde`, or `null` for both), `npc`, `npcName`, `zone`, `map`, `x`, `y` |
 
-Fields with nothing to say are left out (a quest with no starter has no `x`).
+Fields with nothing to say are left out (a quest with no starter has no `x`),
+except a quest's `objectives` and `notes`, which are empty lists.
 
 In game, **`/polestar where`** prints where you stand as two guide lines and
 puts them in a box to copy:
@@ -324,7 +327,7 @@ Problems have three kinds:
 | `pack-refused` | Only Polestar's own Lookup pack may register as internal. | remove `internal` from `RegisterPack` |
 | `guide-refused` | Guide <id> was refused: its id must start with <prefix>. | start every guide id with `<pack id>/` |
 | `guide-refused` | Guide <id> was refused: it was registered before its pack. | `Pack.lua` must load first: rebuild with `polestar compile` |
-| `guide-refused` | Guide <id> was refused: <reason> (`missing title`, `no steps`, `step 3 goal 2: unknown verb …`, `kill needs target`, `coordinates outside 0-100`, …). | the guide's table breaks the format: rebuild with `polestar compile`, which never writes such a table; with your own tools, PACK_FORMAT.md |
+| `guide-refused` | Guide <id> was refused: <reason> (`missing title`, `no steps`, `step 3 has no goals`, `step 3 goal 2: unknown verb …`, `step 3 goal 2: kill needs target`, `step 3 goal 2: coordinates outside 0-100`, …). | the guide's table breaks the format: rebuild with `polestar compile`, which never writes such a table; with your own tools, PACK_FORMAT.md |
 | `no-guides` | Registered no guides. | the addon loaded but registered nothing, usually a Lua error in its files: turn on `/console scriptErrors 1`, `/reload`, and read the error; rebuilding with `polestar compile` fixes a damaged folder |
 
 Nothing goes to chat: every refusal happens while the packs load or in the
@@ -335,8 +338,9 @@ them.
 
 Every message comes with `file:line: error|warning: message`, and most with a
 `hint:` line saying how to fix it. Errors stop `compile`, `pack`, `install`
-and `dev`; warnings print. These are the pack-specific ones; the guide
-checks are listed in GUIDE_FORMAT.md ("Validation").
+and `dev`; warnings print. These are the ones about packs, plus the guide
+checks authors meet most; the rest are listed in GUIDE_FORMAT.md
+("Validation").
 
 | Message | Fix |
 |---|---|

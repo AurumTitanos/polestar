@@ -9,18 +9,19 @@ explicitly wins over the data. Worked examples of every goal are in the
 Cookbook at the end of this page.
 
 ```
-guide forever/alliance/human/01-northshire
+guide joe-routes/northshire
 title Northshire Valley
 faction Alliance
 race Human
 levels 1-6
 zone Elwynn Forest
-next forever/alliance/human/02-elwynn
+next joe-routes/elwynn
 
 step Deputy Willem
   accept 783                          -- He stands at the abbey gate
   turnin 783
   accept 7
+  accept 33
   accept 5261 npc 196
 
 step Kobold camp
@@ -132,7 +133,7 @@ A step must contain at least one goal.
 | `level` | `<N>` | Reach level N (grind if needed). |
 | `note` | `<text...>` | Informational line; never blocks. Quotes optional. |
 | `skill` | `<Profession> <N>` | Reach skill rank N (`Alchemy`, `Blacksmithing`, `Enchanting`, `Engineering`, `Herbalism`, `Leatherworking`, `Mining`, `Skinning`, `Tailoring`, `Cooking`, `Fishing`, `First Aid`, quoted when multi-word). |
-| `learn` | `<spellId> ["Name"]` | Learn a recipe or spell (trainer or recipe item); name from `professions.json`. |
+| `learn` | `<spellId> ["Name"]` | Learn a recipe or spell (trainer or recipe item); name from `professions.json`. A trainer-taught spell points at every trainer of its rank (a smart target; `npc <id>` fixes one); `learn <spellId> nearest` for a recipe sold by vendors sends the player to the closest own-faction vendor of the recipe item. |
 | `craft` | `<spellId> ["Name"]` | Craft a recipe; `x<N>` crafts, or `until <N>` = until the recipe's profession reaches N. |
 | `rep` | `<Faction> <Standing>` | Reach a standing (`Neutral`, `Friendly`, `Honored`, `Revered`, `Exalted`) with a faction named in `factions.json`, or `rep <factionId> <Standing>`. |
 | `explore` | `<x>,<y> ["Area"]` | Discover the map area at those coordinates (current zone). |
@@ -149,7 +150,9 @@ Sources: profession trainers from `professions.json`; class trainers from
 goals in `guides/`, recorded trainer visits, and a curated list verified against
 `npcs.json`; without the file, the curated list); innkeepers from the `innkeeper`
 and `vendor nearest` from the `repair` role in `npcs.json`; `buy … nearest` from the
-item's `vendors`; `collect … nearest` from the item's droppers (see `collect`). Only
+item's `vendors`; `collect … nearest` from the item's droppers (see `collect`);
+`learn … nearest` from the recipe item's `vendors`; a trainer-taught `learn`
+from the profession rank's trainers in `professions.json`. Only
 factions the goal can apply to are kept, and each set keeps one candidate per town
 (within 250 yards), nearest to the previous goal first.
 Smart targets take no coordinates.
@@ -200,7 +203,7 @@ AND. `only Warrior,Paladin,Dwarf` = (Warrior or Paladin) and Dwarf.
 | `kill` target name | `npcs.json` |
 | `collect` coordinates | every drop source with spawns, ranked as above (zone, used maps, nearness), then by drop chance |
 | `collect` source `from`, `fromKind`, `fromRank`, `fromFaction` | a `collect` outside a quest objective whose item has one source with spawns, or one that drops it at 50% or more: the source's name, `npc` or `object`, the NPC's rank (1 elite, 2 rare elite, 3 boss, 4 rare) and faction (`A`, `H`, `AH`; none for a hostile mob). The guide window says "Kill Aean Swiftriver (rare elite)" for an enemy, "From <name>" otherwise; a quest started by that item reads as one line ("Runed Scroll: kill Aean Swiftriver (rare elite)") |
-| profession, recipe, trainer | `professions.json` (skill line, recipe name, created item, reagents, recipe item; a `learn` from a trainer gets the nearest trainer of the guide's faction in the current zone or a used map). Classic profession names resolve without it. |
+| profession, recipe, trainer | `professions.json` (skill line, recipe name, created item, reagents, recipe item; a trainer-taught `learn` gets every trainer of the rank that teaches it, both factions (a smart target), unless `npc <id>` names one). Classic profession names resolve without it. |
 | faction | `factions.json` by name (lowest id on ties) or id |
 | objective index | the quest's objective whose `id` matches the npc/item, when `quest Q` has no `.O` |
 | count | the linked objective's count |
@@ -534,6 +537,8 @@ ones such a character can follow:
 polestar find --kind guide westfall --race Human
 #   next forever/alliance/02-westfall  # Westfall (12-17), Alliance
 #   # its next: forever/alliance/03-darkshore
+#   next forever/collectibles/pets/chicken-egg  # Chicken Egg (1-60), Alliance
+#   …  (the other collectible guides set in Westfall follow)
 ```
 
 A guide for Humans cannot hand over to the Dwarf and Gnome guide

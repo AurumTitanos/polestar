@@ -13,8 +13,9 @@ Polestar and registers guides with it. Polestar's own guides are a pack too
 ## `pack.json`
 
 The pack's manifest, in the root of the pack's folder. Every tool finds the
-pack by the nearest `pack.json` in the current folder or a parent (or takes
-`--pack <dir>`).
+pack by the nearest `pack.json` in the current folder or a parent, or takes
+its folder as the one argument (`polestar lint ../joe-routes`) or
+`--pack <dir>`.
 
 ```json
 {
@@ -34,12 +35,12 @@ pack by the nearest `pack.json` in the current folder or a parent (or takes
 | `id` | yes | the pack id: `^[a-z0-9][a-z0-9-]{1,31}$` (2 to 32 lower-case letters, digits and hyphens, starting with a letter or digit), not reserved (below) |
 | `title` | yes | shown to players; at most 64 characters |
 | `author` | yes | shown to players; at most 64 characters |
-| `version` | yes | one word of letters, digits, `.`, `+` and `-`, at most 32 characters (`1.2.0`) |
+| `version` | yes | one word of letters, digits, `.`, `+` and `-`, starting with a letter or digit, at most 32 characters (`1.2.0`) |
 | `license` | yes | the licence of the pack's guides, as an SPDX id where one exists (`CC-BY-4.0`, `CC0-1.0`, `MIT`, `GPL-3.0-only`); at most 64 characters |
 | `website` | no | `https://` or `http://` address; at most 200 characters |
 | `source` | no | where the guides come from, in the author's words; at most 200 characters |
 | `notes` | no | one line for the AddOns list; at most 200 characters (default "Guide pack for Polestar") |
-| `folder` | no | the addon's folder name: 1 to 64 letters, digits, `_` and `-`, not starting with `Polestar_`; default `PolestarPack_` and the title in CamelCase (`Joe's Routes` → `PolestarPack_JoesRoutes`) |
+| `folder` | no | the addon's folder name: 1 to 64 letters, digits, `_` and `-`, not `Polestar` and not starting with `Polestar_` (in any case); default `PolestarPack_` and the title in CamelCase (`Joe's Routes` → `PolestarPack_JoesRoutes`) |
 
 Every value is a string on one line. A missing or invalid required field is a
 lint error; an unknown key is a warning; a `|` in a displayed value is a
@@ -48,7 +49,8 @@ warning (it prints literally in game).
 The pack folder holds `pack.json`, the `.guide` files in any layout,
 `drafts/` (Recorder drafts, compiled only with `--include-drafts`) and `dist/`
 (build output). The compiler reads every `.guide` file under the folder
-except in `dist/` and `drafts/`.
+except in `dist/`, `drafts/`, `node_modules/` and folders whose name starts
+with a dot.
 
 ## The addon
 
@@ -125,8 +127,10 @@ before a pack is built (`tests/packs-parity.test.js` holds the two together).
    may register one of its own ids again, which replaces that guide.
 3. **Clashes.** A pack whose id is already registered is refused whole, and
    the problem names both addons; the guides it registers while it loads are
-   dropped (counted in the problem), even under the holder's ids. A guide registered before its pack, or for a
-   pack never registered, is refused.
+   dropped (counted in the problem), even under the holder's ids. A guide
+   registered before its pack is refused (listed once the pack registers);
+   one for a pack that never registers is ignored, since there is no row to
+   list it on.
 4. **Map frames.** A pack may add Era map frames for maps Polestar's lack; for
    a map both cover, Polestar's win whatever the load order (lint warns).
 5. **Format.** A pack declaring a format Polestar does not read is refused

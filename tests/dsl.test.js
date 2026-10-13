@@ -31,16 +31,16 @@ test('the GUIDE_FORMAT.md example parses without errors into the documented stru
 	const { ast, errors, warnings } = parse(example);
 	assert.deepEqual(errors, []);
 	assert.deepEqual(warnings, []);
-	assert.equal(ast.id, 'forever/alliance/human/01-northshire');
+	assert.equal(ast.id, 'joe-routes/northshire');
 	assert.deepEqual(ast.header.levels, { min: 1, max: 6 });
 	assert.equal(ast.header.faction, 'Alliance');
 	assert.deepEqual(ast.header.races, ['Human']);
-	assert.deepEqual(ast.header.next, ['forever/alliance/human/02-elwynn']);
+	assert.deepEqual(ast.header.next, ['joe-routes/elwynn']);
 	assert.deepEqual(ast.header.zone.name, 'Elwynn Forest');
 	assert.deepEqual(
 		ast.steps.map((s) => [s.title, s.goals.length]),
 		[
-			['Deputy Willem', 4],
+			['Deputy Willem', 5],
 			['Kobold camp', 2],
 			['Back to the abbey', 3],
 		],
@@ -49,15 +49,16 @@ test('the GUIDE_FORMAT.md example parses without errors into the documented stru
 	const g = goals(ast);
 	assert.deepEqual(
 		g.map((x) => x.verb),
-		['accept', 'turnin', 'accept', 'accept', 'kill', 'collect', 'turnin', 'train', 'level'],
+		['accept', 'turnin', 'accept', 'accept', 'accept', 'kill', 'collect', 'turnin', 'train', 'level'],
 	);
 	assert.equal(g[0].note, 'He stands at the abbey gate');
-	assert.equal(g[3].npc, 196);
-	assert.deepEqual([g[4].npc, g[4].count, g[4].quest, g[4].oi], [6, 10, 7, 1]);
-	assert.deepEqual([g[5].item, g[5].count, g[5].quest, g[5].oi, g[5].optional], [750, 8, 33, 1, true]);
-	assert.deepEqual(g[7].only, { classes: ['WARRIOR', 'PALADIN'], races: null, factions: null });
-	assert.equal(g[7].note, 'Llane Beshere is inside the abbey');
-	assert.equal(g[8].level, 4);
+	assert.equal(g[3].quest, 33);
+	assert.equal(g[4].npc, 196);
+	assert.deepEqual([g[5].npc, g[5].count, g[5].quest, g[5].oi], [6, 10, 7, 1]);
+	assert.deepEqual([g[6].item, g[6].count, g[6].quest, g[6].oi, g[6].optional], [750, 8, 33, 1, true]);
+	assert.deepEqual(g[8].only, { classes: ['WARRIOR', 'PALADIN'], races: null, factions: null });
+	assert.equal(g[8].note, 'Llane Beshere is inside the abbey');
+	assert.equal(g[9].level, 4);
 });
 
 // Each malformed line is placed inside an otherwise valid guide; the parser must

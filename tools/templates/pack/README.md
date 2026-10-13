@@ -22,7 +22,8 @@ your next pack, run `polestar new` first and `git init` in the folder after
 You need Node 24 or newer, Lua 5.1 and a Polestar clone with `npm link`
 run in it (`polestar doctor` checks all of it). From this folder:
 
-- `polestar find <text>`: look up quest, NPC, object, item and guide ids.
+- `polestar find <text>`: look up quest, NPC, object, item and guide ids, and
+  the inn and flight point names `sethome`, `hearth`, `getfp` and `fly` take.
 - `polestar lint`: check the guides (in VS Code: the default build task).
 - `polestar playtest`: play every guide to the end in the real addon.
 - `polestar dev`: copy the pack into the game's AddOns folder while you work.

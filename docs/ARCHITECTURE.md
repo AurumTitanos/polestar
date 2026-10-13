@@ -109,6 +109,13 @@ Messages:
 | `SHOW_WELCOME` | page or nil | About's "Show the welcome again", `/polestar welcome` → UI/Welcome.lua |
 | `SHOW_COPY` | title, text | `/polestar where` → UI/Copy.lua |
 
+Modules fire their own (`TABS_CHANGED`, `ROUTE_*`, `TRAIN_DUE`,
+`CLASS_TRAINED`, `GUIDE_OUTLEVELED`, `QUESTDB_*`, `CODEX_LOADED`,
+`ITEMDB_LOADED`, `GEAR_UPDATED`, `FLIGHT_STARTED`/`FLIGHT_ENDED`,
+`QOL_HEARTH_CHANGED`, `QOL_XP_UPDATED`, `MOUNT_SPOTTED`, `RARE_SPOTTED`,
+`RARES_HISTORY`, `SHOW_LOOKUP`, `SHOW_DUNGEON`, `SHOW_RARES`), documented
+with their module.
+
 ### Settings
 
 ```lua
@@ -127,6 +134,9 @@ switch). `welcomeSeen` (UI/Welcome.lua) is the version of the welcome last
 seen: in `PolestarDB`, the account has had its welcome (later characters skip
 its Set up page); in `PolestarCharDB`, this character has (0 while due).
 `behavior.suggestFrom` (default `"guides"`) is the pack suggestions come from.
+Modules keep their own keys beside these (`rares`, `instances` account-wide;
+`ui`, `routes`, `classTrainLevel`, `qol`, `flightTimes`, `flightNow`,
+`instanceRuns` per character), each described in its section or file header.
 
 `manual` holds the player's ticks (`"tick"`, any goal but a note) **and**
 latched results (`true`): NPC interactions (talk/train/vendor) are latched
@@ -245,16 +255,16 @@ Polestar.RegisterPack({ addon = ADDON, id = "guides", format = 1, title = "Poles
   author = "Polestar", version = "0.1.0", license = "GPL-3.0-only" })   -- optional: website, source, notes
 
 Polestar.RegisterGuide({
-  id = "forever/alliance/human/01-northshire",
+  id = "forever/alliance/human/01-elwynn-forest",
   pack = "guides",
-  title = "Northshire Valley",
+  title = "Elwynn Forest",
   faction = "Alliance",            -- "Alliance" | "Horde" | nil (either)
   races = { "Human" },             -- raceFile list or nil (any)
   classes = nil,                   -- classFile list or nil (any)
-  minLevel = 1, maxLevel = 6,
+  minLevel = 1, maxLevel = 13,
   category = "Leveling",
   zone = 1429, zoneName = "Elwynn Forest",
-  next = "forever/alliance/human/02-elwynn",   -- or nil
+  next = "forever/alliance/02-westfall",   -- or nil
   author = "Polestar", version = 1,
   steps = {
     {
@@ -473,7 +483,7 @@ Polestar.Engine.GetProgress() -> doneSteps, totalSteps
   current step or its next applicable steps (4 in all) hold an applicable class
   `train` goal (an npc in the registry or `train class`). The UI shows a slim
   banner with Show (temporary `Nav.SetTarget`) and Later, cleared by
-  `CLASS_TRAINED`; Options → Automation → "Class training reminders".
+  `CLASS_TRAINED`; Options → Guide → Automation → "Trainer reminders".
 - **Unavailable quests.** An `accept` whose `closedBy` names a quest that is
   in the log or done is unavailable before any visit (reason `"closed"`,
   "No longer offered: you took <quest>"): a breadcrumb whose follow-up is
@@ -598,8 +608,8 @@ Polestar.Engine.GuideFocus(id) -> x, y | nil       -- live-frame percent of wher
   accent ring and the primary button; "From now on, take the recommended zone"
   sets `behavior.routeChoice`; "Decide later" and the header ✕ close. It
   waits out combat. The guide window's completed state and the out-levelled
-  banner open it when a choice applies; Options → Automation → "Where to
-  level next".
+  banner open it when a choice applies; Options → Guide → Automation →
+  "Where to level next".
   `POLESTAR_CLIENT_ART=<folder>` lets `preview` draw real map art from a local
   cache of decoded client tiles (base and overlay tiles, `maps.json` with each
   map's `artID`); those renders go to `<folder>/preview/`, never into `docs/`.
@@ -607,7 +617,7 @@ Polestar.Engine.GuideFocus(id) -> x, y | nil       -- live-frame percent of wher
 ### Tabs (several guides at once)
 
 ```lua
-Polestar.Engine.GetTabs() -> { { guideId, title, category, stepIndex, stepCount, done }, ... }, activeIndex
+Polestar.Engine.GetTabs() -> { { guideId, title, category, stepIndex, stepCount, done, total, complete }, ... }, activeIndex
 Polestar.Engine.OpenTab(guideId [, activate])  -> index   -- already open: just activates it (when activate ~= false)
 Polestar.Engine.CloseTab(index)                            -- the last tab may be closed (no guide)
 Polestar.Engine.SelectTab(index)
@@ -625,7 +635,9 @@ change fires `TABS_CHANGED(tabs, activeIndex)`. The waypoint follows the active
 tab only. Automation considers the current and next two steps of **every** open
 tab. `autoNextGuide` replaces the finished guide within its own tab. On login,
 saved tabs reopen; `Guides.Suggest()` opens a first tab only when none survive
-(SavedVariables can come back nil).
+(SavedVariables can come back nil). Each tab in the guide window reads
+`Title (min–max)` like the menu's rows; a narrow tab cuts the title, never the
+range (DESIGN, Guide-window tabs).
 
 **Absent guides keep their place.** A saved tab whose guide is not
 registered (its pack missing) or hidden (its pack switched off) is **absent**:
@@ -892,7 +904,7 @@ rail does not move.
 Reading flow: `docs/UI_BRIEF.md` (READING FLOW).
 
 - **Guide window** (`UI/GuideFrame.lua`): tab strip, a slim navigator (prev,
-  step number, next, menu), one focus block from the step view's
+  step number, next, Skip, menu), one focus block from the step view's
   `groups`/`focus` (the person to talk to now with only their goals, or a field
   step's objectives), counters right after the goal text (in text, success
   once complete; the accent is kept for the current goal's glyph, the arrow's
@@ -917,7 +929,7 @@ Reading flow: `docs/UI_BRIEF.md` (READING FLOW).
     nav = function() return items, activeKey end, -- its index in the sidebar ({ key, label, icon, count })
     onNav = function(key) end,           -- set the state, then UI.Picker.Render()
     search = function(text) end, enter = function() end, step = function(delta) end, -- optional
-    searchPlaceholder = "...",           -- optional
+    searchPlaceholder = "...",           -- optional; or a list of wordings, longest first: the first that fits the box shows
   })
   ```
 
@@ -1044,7 +1056,8 @@ Reading flow: `docs/UI_BRIEF.md` (READING FLOW).
   packs`): one row per `Guides.Packs()` record: title, credits, guide count,
   website in a copy box, source, and a `W.Switch` (`Guides.SetPackShown`) or
   the status text ("turned off in the AddOns list" with **Enable and reload**,
-  "not loaded: <reason>", "needs Polestar <v> or newer", "broken: registered
+  "not loaded[: <reason>]", "needs Polestar <v> or newer" (or "needs a newer
+  Polestar"), "broken: registered
   no guides", "refused: <reason>"); with problems a warning chip, **Show**
   (the list) and **Copy report** (`P.Report`: pack, versions, client build,
   every problem). Then **Suggest guides from** (`behavior.suggestFrom`,
@@ -1113,9 +1126,9 @@ Polestar.QoL.Rewards.best, .reason                -- auto-pick's settled answer 
 Polestar.Pins.SetLayer(layer, pins, opts)   -- replace a layer; opts = { world = true, minimap = true, edge = false, scale = 1 }
 Polestar.Pins.ClearLayer(layer)
 Polestar.Pins.SetLayerVisible(layer, visible)
--- pin = { map, x, y, f, icon (Theme.Media name or texture path), size, color = { r, g, b, a },
+-- pin = { map, x, y, f, icon (Theme.Media name or texture path), size, minimapSize, color = { r, g, b, a },
 --         tooltip = string | function(tooltip), onClick = function(button), priority,
---         glow (soft halo), area (yards) }
+--         glow (soft halo), ring = { r, g, b } (ring round the disc), backdrop (scrim disc), area (yards) }
 ```
 
 Pins are drawn on the world map for the map being viewed (converted through Compat
@@ -1321,8 +1334,8 @@ the last one kept for the same cluster, with their world position (`c`,
 `wx`, `wy`) worked out once, so `Pins.SetLayer` converts only new pins. Look is
 applied at publish: while a Polestar guide runs, pins of quests in its current
 step (`Engine.GetGuide().steps[Engine.GetStepIndex()].goals[*].quest`, re-read on
-`STEP_CHANGED`/`GUIDE_CHANGED`) are 1.3× with a glow and on top; with
-`qol.guideDim` every other quest pin drops to 0.4 alpha.
+`STEP_CHANGED`/`GUIDE_CHANGED`) are 1.3× inside an accent ring and on top;
+with `qol.guideDim` every other quest pin drops to 0.6 alpha (`Q.DIM_ALPHA`).
 
 Tooltips go through `Polestar.Hooks` (owner `"quests"`: UnitLines, ItemLines,
 ObjectLines, registered only while running) with the suite's quest line,
@@ -1333,7 +1346,16 @@ on the item; quest-starting items get "Starts a quest: <title>".
 the client lists without one (gossip, greeting, details; camelot's own log and
 tracker already show it, so it adds there only when missing).
 
-Settings (`qol.*`, "Quests" options page): `questDB`, `availableQuests`,
+Nameplate icons (`qol.nameplateIcons`): a mob an open objective still needs
+gets a 16px objective icon (14–20) 3px left of the health bar the player
+sees: EllesmereUI Nameplates' unit frame, Plater/ElvUI/oUF, KuiNameplates or
+Threat Plates when present, else the shown child of the base plate holding
+the largest status bar, else Blizzard's health bar, else the plate itself;
+parented to that frame so it follows its fading and scaling. Every access is
+guarded; `Quests.NameplateIcon(unit)` returns the icon (tests).
+
+Settings (`qol.*`, Questing → Quests; the markers under Map → Guide & quests →
+Quest markers): `questDB`, `availableQuests`,
 `questLevelWindow` (0–10, 10 = any; default 5), `lowLevelQuests`,
 `mapObjectives`, `objectiveAreas`, `turnInMarkers`, `minimapObjectives`,
 `guideHighlight`, `guideDim`, `questTooltips`, `nameplateIcons`, `questLevels`.
@@ -1385,7 +1407,7 @@ with 40 drop sources.
 
 `addon/Polestar/Lookup/` (`Lookup.xml`: Codex, Sources, Guide, Spotter,
 Options). Everything is off with `lookup.enabled`; `lookup.tooltip`,
-`lookup.altClick` and `lookup.mounts` switch the parts ("Lookup" options page).
+`lookup.altClick` and `lookup.mounts` switch the parts (Discovery → Lookup).
 
 ```lua
 Polestar.Codex.Load() / IsLoaded() / Meta()       -- the local Polestar_Codex pack through Data.Pack; CODEX_LOADED(meta)
@@ -1458,7 +1480,8 @@ Polestar.Lookup.QuestStep(quest, from) -> step         -- accept, objectives, tu
 `addon/Polestar/Rares/` (`Rares\Rares.xml`, loaded after `UI\UI.xml`):
 `Rares.lua` (settings `rares.*`, history, the decision), `Detect.lua` (client
 events), `Pins.lua` (map layers), `Toast.lua` (the alert), `Options.lua`
-(the "Rares" page: Alerts, Detection, Map), `View.lua` (the hub section).
+(Discovery → Rares: When a rare shows up, How rares are noticed, History; Map
+→ Rares & travel → Rares and treasures), `View.lua` (the hub section).
 Everything is off with `rares.enabled`; a detection path that is off has no
 event registered.
 
