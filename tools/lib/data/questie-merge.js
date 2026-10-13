@@ -12,7 +12,7 @@
 // on maps whose bounds changed, or that exist only in Forever, "l".
 
 const { parseCount } = require('./objectives');
-const { reducePoints, round2 } = require('./spawns');
+const { reduceSpawns, spawnRecord, round2 } = require('./spawns');
 const { luaGet, luaPairs, luaList, dropRate } = require('./questie');
 
 const SOURCE = 'questie-forever';
@@ -84,9 +84,9 @@ function questieSpawns(value, ctx) {
 	const spawns = {};
 	const counts = new Map();
 	for (const map of [...perMap.keys()].sort((a, b) => a - b)) {
-		const pts = reducePoints(perMap.get(map), ctx.spawnOptions);
-		if (!pts.length) continue;
-		spawns[map] = { f: ctx.liveMaps.has(map) ? 'l' : 'e', pts };
+		const r = reduceSpawns(perMap.get(map), ctx.spawnOptions);
+		if (!r.pts.length) continue;
+		spawns[map] = spawnRecord(ctx.liveMaps.has(map) ? 'l' : 'e', r);
 		counts.set(map, perMap.get(map).length);
 	}
 	return { spawns, counts, unmapped };
@@ -139,11 +139,21 @@ const SAME_SPAWN_YARDS = 30;
 // Questie's spawns, plus pfQuest's copies of the same spawns on maps Questie
 // does not list (pfQuest repeats a spawn on every map whose area holds it: a
 // city and its zone, both sides of a border). With `allMaps` every pfQuest
-// map Questie lacks is kept whole. toWorld(map, f, x, y) -> { c, wx, wy } | null
+// map Questie lacks is kept whole. A copy's `pts` are the ones near Questie's
+// `pts`; its `more` the rest near any Questie point, `more` included (the
+// points a cap left out). A copy map with no point near Questie's `pts` is
+// dropped, as before: its spawns are on Questie's own map, in `more`.
+// toWorld(map, f, x, y) -> { c, wx, wy } | null
 function mergeSpawns(pfSpawns, qSpawns, toWorld, allMaps = false) {
 	if (!Object.keys(qSpawns).length) return pfSpawns || {};
 	const world = [];
-	for (const [map, s] of Object.entries(qSpawns)) for (const [x, y] of s.pts) world.push(toWorld(Number(map), s.f, x, y));
+	const extra = [];
+	for (const [map, s] of Object.entries(qSpawns)) {
+		for (const [x, y] of s.pts) world.push(toWorld(Number(map), s.f, x, y));
+		for (const [x, y] of s.more || []) extra.push(toWorld(Number(map), s.f, x, y));
+	}
+	const everyPoint = [...world, ...extra];
+	const near = (w, list) => w && list.some((q) => q && q.c === w.c && Math.hypot(q.wx - w.wx, q.wy - w.wy) <= SAME_SPAWN_YARDS);
 	const out = { ...qSpawns };
 	for (const [map, s] of Object.entries(pfSpawns || {})) {
 		if (out[map]) continue;
@@ -151,11 +161,10 @@ function mergeSpawns(pfSpawns, qSpawns, toWorld, allMaps = false) {
 			out[map] = s;
 			continue;
 		}
-		const pts = s.pts.filter(([x, y]) => {
-			const w = toWorld(Number(map), s.f, x, y);
-			return w && world.some((q) => q && q.c === w.c && Math.hypot(q.wx - w.wx, q.wy - w.wy) <= SAME_SPAWN_YARDS);
-		});
-		if (pts.length) out[map] = { f: s.f, pts };
+		const at = ([x, y]) => toWorld(Number(map), s.f, x, y);
+		const pts = s.pts.filter((p) => near(at(p), world));
+		const more = [...s.pts.filter((p) => !pts.includes(p)), ...(s.more || [])].filter((p) => near(at(p), everyPoint)).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+		if (pts.length) out[map] = spawnRecord(s.f, { pts, more });
 	}
 	const sorted = {};
 	for (const k of Object.keys(out).map(Number).sort((a, b) => a - b)) sorted[k] = out[k];

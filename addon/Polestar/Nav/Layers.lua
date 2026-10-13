@@ -3,7 +3,8 @@
 --               area target (a spawn area) also shows its area as a soft disc on the world map
 --   nav.route   where the travel route changes mode: flight masters, docks, the inn (world map)
 --   nav.goals   the current step's other open goals; click one to point the arrow there (world map)
---   nav.spots   an area objective's other spots, small marks; click one to search there next (world map)
+--   nav.spots   the target's other spawn places, small marks (other places it spawns fainter);
+--               click one to search there next (world map)
 -- and the trail (Pins.SetTrail): dots from the player along the travel route's lines (each
 -- leg's start where the mode changes, and its end), broken at a Hearthstone (a jump, not a
 -- path) and across continents; without a route, straight to the target (both surfaces).
@@ -48,8 +49,9 @@ local function updateTarget(world, minimap)
 	}, { world = world, minimap = minimap, edge = true, scale = 1.4 })
 end
 
--- Every other spot of the target's spawn areas, so the player sees the whole
--- area and can pick where to look next.
+-- Every other spot of the target's spawn places, so the player sees where
+-- else it may be and can pick where to look next; the other places it spawns
+-- (`alt`, never picked by the arrow on its own) are marked fainter.
 local function updateSpots(world)
 	local target = Nav.GetTarget()
 	local spots = world and target and target.spots
@@ -61,11 +63,14 @@ local function updateSpots(world)
 	local r, g, b = Nav.RGB("arrow")
 	for i, s in ipairs(spots) do
 		if i ~= target.spot then
+			local alt = s.alt
 			pins[#pins + 1] = {
-				map = target.map, x = s.x, y = s.y, f = target.f, color = { r, g, b, 0.75 }, size = 9, priority = 20,
+				map = target.map, x = s.x, y = s.y, f = target.f, color = { r, g, b, alt and 0.5 or 0.75 },
+				size = alt and 7 or 9, priority = alt and 15 or 20,
 				tooltip = function(tip)
 					tip:SetText(label or "")
 					tip:AddLine(format(L["Spot %d of %d"], i, n), 0.7, 0.7, 0.7)
+					if alt then tip:AddLine(L["It also spawns here"], 0.7, 0.7, 0.7) end
 					tip:AddLine(L["Click to search here next"], 0.7, 0.7, 0.7)
 				end,
 				onClick = function(button)

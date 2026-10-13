@@ -503,8 +503,8 @@ local function npcOf(goal)
 end
 
 ---------------------------------------------------------------------------
--- Spawn areas: `spots` on kill and mob-drop collect goals are the clusters
--- the target mobs spawn in ({ x, y, r, n } in the goal's map and frame, r in
+-- Spawn areas: `spots` on a goal are the places its target (mobs, objects,
+-- an NPC) spawns ({ x, y, r, n, alt } in the goal's map and frame, r in
 -- yards). Distances are to an area's edge (0 inside). Re-picked by the
 -- arrival poll while the waypoint's goal has spots. One table (Lua 5.1 caps
 -- a chunk at 200 locals).
@@ -517,6 +517,9 @@ end
 -- spot not visited for FORGET seconds takes over (all visited: the one
 -- visited longest ago), so a circuit forms. CycleSpot moves on by hand (or
 -- to a given spot); a spot picked that way holds until reached.
+-- Alternatives (`alt`): other places the target spawns. The automatic picks
+-- above never choose one; moving on by hand walks them too, so every place
+-- is reachable, and one picked that way holds like any other current spot.
 ---------------------------------------------------------------------------
 
 local Spots = {
@@ -585,7 +588,7 @@ function Spots.repick(goal, c, px, py, moveOn)
 	end
 	local best, bestKey, old, oldT
 	for i, s in ipairs(spots) do
-		if not (moveOn and s == cur) then
+		if not (moveOn and s == cur) and (moveOn or not s.alt) then
 			if fresh(s) then
 				local d = c and Spots.edge(goal, s, c, px, py)
 				local key = d or (1e9 + (i - at - 1) % #spots)

@@ -54,14 +54,19 @@ test('spawn points cluster into centroids with a radius in yards, largest first'
 	assert.equal(clusters.length, 3);
 	assert.deepEqual(clusters.map((c) => c.n), [4, 2, 1]);
 	assert.deepEqual([clusters[0].x, clusters[0].y], [40.4, 40.3]);
-	// Farthest camp-A point (41, 40) from (40.425, 40.3): 0.575 % x 30 yd, 0.3 % x 20 yd.
-	assert.equal(clusters[0].r, Math.ceil(Math.hypot(0.575 * 30, 0.3 * 20)));
+	// Farthest camp-A point (41, 40) from the emitted centre (40.4, 40.3): 0.6 % x 30 yd, 0.3 % x 20 yd.
+	assert.equal(clusters[0].r, Math.ceil(Math.hypot(0.6 * 30, 0.3 * 20)));
 	assert.equal(clusters[2].r, 0);
 	// Order of input never matters; the cap keeps the largest clusters.
 	assert.deepEqual(clusterPoints([...campA].reverse().concat(lone, campB), FRAME), clusters);
 	assert.deepEqual(clusterPoints([...campA, ...campB, ...lone], FRAME, { cap: 1 }).map((c) => c.n), [4]);
 	// A wide radius merges the camps.
 	assert.equal(clusterPoints([...campA, ...campB], FRAME, { radius: 2000 }).length, 1);
+});
+
+test('a cluster radius covers every member from the centre as emitted, rounded to 0.1', () => {
+	// The centroid 10.07 rounds to 10.1: 10.04 lies 0.06 % (1.8 yd) from it, not the 0.03 % from the centroid.
+	assert.deepEqual(clusterPoints([[10.04, 10], [10.1, 10]], FRAME), [{ x: 10.1, y: 10, r: 2, n: 2 }]);
 });
 
 test('quest faction comes from the race mask, else from the givers', () => {

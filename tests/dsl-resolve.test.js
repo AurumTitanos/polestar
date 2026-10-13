@@ -5,12 +5,24 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { compile, guideText, plain } = require('./fixtures/dsl/helpers');
+const { compile, guideText, plain, fixtureData } = require('./fixtures/dsl/helpers');
 
 function goalsOf(lines) {
 	const r = compile(guideText(lines));
 	assert.deepEqual(r.errors, [], r.text);
 	return { goals: plain(r.guides[0].steps.flatMap((s) => s.goals)), r };
+}
+
+// Spawns of an npc or object on Elwynn (1429) that lie outside every spot of
+// `goal`, measured in yards through the map's Era frame.
+function outsideSpots(goal, kind, id) {
+	const data = fixtureData();
+	const fr = data.eraFrame(1429);
+	const sx = Math.abs(fr.right - fr.left) / 100;
+	const sy = Math.abs(fr.bottom - fr.top) / 100;
+	const s = data.spawns(kind, id).find((sp) => sp.map === 1429);
+	const pts = [...s.pts, ...s.more];
+	return pts.filter(([x, y]) => !(goal.spots || []).some((s) => Math.hypot((x - s.x) * sx, (y - s.y) * sy) <= s.r));
 }
 
 test('quest titles, quest givers and their positions come from data; Era-sourced points carry f = "e"', () => {
@@ -51,25 +63,72 @@ test('without previous coordinates the spawn centroid in the current zone is use
 test('collect positions at the item drop sources, preferring the current zone, then nearness, then drop chance', () => {
 	// Timber Wolf (80%) and Young Wolf (40%) both spawn in Elwynn. With no earlier
 	// point on the map, the higher-chance source's centroid is used. Both droppers'
-	// spawns make the spawn areas (the lone one dropped next to a pack of two).
+	// spawns make the spawn areas: a pack of two and, with only three spawns, the
+	// lone one too; nearest to the goal's point first.
 	// Outside a quest objective the dominant source (50% or more) is named.
-	const wolves = [{ x: 45.5, y: 39, r: 30, n: 2 }];
+	const pack = { x: 45.5, y: 39, r: 30, n: 2 };
+	const lone = { x: 44, y: 45, r: 15, n: 1 };
 	const alone = goalsOf(['step One', '  collect 750 x4']).goals[0];
-	assert.deepEqual(alone, { t: 'collect', item: 750, itemName: 'Tough Wolf Meat', from: 'Timber Wolf', fromKind: 'npc', fromFaction: 'A', count: 4, map: 1429, x: 44.5, y: 42.5, f: 'e', spots: wolves });
+	assert.deepEqual(alone, { t: 'collect', item: 750, itemName: 'Tough Wolf Meat', from: 'Timber Wolf', fromKind: 'npc', fromFaction: 'A', count: 4, map: 1429, x: 44.5, y: 42.5, f: 'e', spots: [lone, pack] });
 	// After meeting Eagan (48.94,40.17) the nearest spawn of any source wins: a Young Wolf at 46,38.
 	const linked = goalsOf(['step One', '  accept 33', '  collect 750 quest 33']).goals[1];
-	assert.deepEqual(linked, { t: 'collect', quest: 33, title: 'Wolves Across the Border', item: 750, itemName: 'Tough Wolf Meat', count: 8, oi: 1, map: 1429, x: 46, y: 38, f: 'e', spots: wolves });
+	assert.deepEqual(linked, { t: 'collect', quest: 33, title: 'Wolves Across the Border', item: 750, itemName: 'Tough Wolf Meat', count: 8, oi: 1, map: 1429, x: 46, y: 38, f: 'e', spots: [pack, lone] });
 });
 
-test('kill goals carry the spawn areas of their mob, nearest to the chosen point first; points and single spawns get none', () => {
-	// Camp Gnoll: two camps of three 140 yd apart (around 40,70 and 44,70) and a lone spawn at 42,74.
-	const { goals } = goalsOf(['step One', '  goto 41,71', '  kill 95021', '  goto 44,70', '  kill 95021', '  kill 95021 @40,70', '  kill 823']);
+test('kill goals carry the spawn areas of their mob, nearest to the chosen point first, every other place as an alternative; single spawns get none', () => {
+	// Camp Gnoll: two camps of three 140 yd apart (around 40,70 and 44,70) and a lone spawn at 42,74:
+	// seven spawns, more than six, so the arrow keeps to the camps and the lone one is an alternative.
+	const { goals } = goalsOf(['step One', '  goto 41,71', '  kill 95021', '  goto 44,70', '  kill 95021', '  kill 823']);
 	const west = { x: 40, y: 70.2, r: 15, n: 3 };
 	const east = { x: 44.1, y: 70, r: 15, n: 3 };
-	assert.deepEqual([goals[1].x, goals[1].y, goals[1].spots, goals[1].spread], [40.3, 70.3, [west, east], undefined], 'from the west camp: west first, the lone spawn dropped');
-	assert.deepEqual([goals[3].x, goals[3].y, goals[3].spots], [44, 70, [east, west]], 'from the east camp: east first');
-	assert.equal(goals[4].spots, undefined, 'hand-placed coordinates stay a point');
-	assert.equal(goals[5].spots, undefined, 'a single-spawn npc stays a point');
+	const lone = { x: 42, y: 74, r: 15, n: 1, alt: true };
+	assert.deepEqual([goals[1].x, goals[1].y, goals[1].spots, goals[1].spread], [40.3, 70.3, [west, east, lone], undefined], 'from the west camp: west first');
+	assert.deepEqual([goals[3].x, goals[3].y, goals[3].spots], [44, 70, [east, west, lone]], 'from the east camp: east first');
+	assert.equal(goals[4].spots, undefined, 'a single-spawn npc stays a point');
+});
+
+test('a hand-placed point stays the spot the arrow takes; the other places the data knows are alternatives', () => {
+	// Camp Gnoll from 40,70 (its west camp): the lone spawn and the east camp follow as alternatives, nearest first.
+	const { goals } = goalsOf(['step One', '  kill 95021 @40,70', '  kill 95023 @20,20']);
+	assert.deepEqual(goals[0].spots[0], { x: 40, y: 70, r: 20, n: 3 }, 'the author point, wide enough for the camp it stands in');
+	assert.deepEqual(goals[0].spots.slice(1), [{ x: 42, y: 74, r: 15, n: 1, alt: true }, { x: 44.1, y: 70, r: 15, n: 3, alt: true }]);
+	assert.deepEqual(outsideSpots(goals[0], 'npc', 95021), []);
+	// Baron Testshore at 20,20: more than a thousand yards from every known spawn, so the author places
+	// him where the data does not, and the data's places would mislead.
+	assert.equal(goals[1].spots, undefined);
+});
+
+test('an NPC to talk to, accept from or hand in to that stands at several places gets every one', () => {
+	const g = goalsOf(['step One', '  talk 95023']).goals[0];
+	assert.deepEqual(outsideSpots(g, 'npc', 95023), []);
+	assert.equal(g.spots.length, 2);
+	assert.ok(g.spots.every((s) => !s.alt), 'a handful of places: the arrow may take any of them');
+	assert.equal(g.spread, undefined);
+});
+
+test('a target with six spawns or fewer keeps a spot at every one: a named NPC may stand at any of them', () => {
+	// Baron Testshore: a pair around 61,50 and a third spawn 224 yd off at 66,44.
+	// From the north that third spawn is the goal's point, and it is a spot of its own, first.
+	const g = goalsOf(['step One', '  goto 66.5,43.5', '  kill 95023']).goals[1];
+	assert.deepEqual([g.x, g.y], [66, 44]);
+	assert.deepEqual(outsideSpots(g, 'npc', 95023), []);
+	assert.deepEqual([g.spots[0].x, g.spots[0].y, g.spots.length], [66, 44, 2]);
+});
+
+test('spawn areas include the points the reference data left out past its cap, data-placed and hand-placed', () => {
+	// Capped Wolf: two spread points at 20,60 and 21,60; the cap left out a third at 27,66 (more than 250 yd off).
+	const { goals } = goalsOf(['step One', '  goto 20,60', '  kill 95024', '  kill 95024 @20.5,60']);
+	for (const g of [goals[1], goals[2]]) assert.deepEqual(outsideSpots(g, 'npc', 95024), [], g.x === 20.5 ? 'hand-placed' : 'data-placed');
+	assert.ok(goals[1].spots.some((s) => s.x === 27 && s.y === 66), 'the left-out point is a place of its own');
+});
+
+test('object targets get spawn areas too: interact goals and collects from objects', () => {
+	// Kobold Crate (object 1617): crates at 47,32 and 51,28, 168 yd apart; Earthroot (2449) comes from them.
+	const { goals } = goalsOf(['step One', '  accept 9400', '  interact 1617 quest 9400', '  collect 2449 x5']);
+	for (const g of [goals[1], goals[2]]) {
+		assert.deepEqual(outsideSpots(g, 'object', 1617), [], g.t);
+		assert.deepEqual(g.spots.map((s) => [s.x, s.y]).sort(), [[47, 32], [51, 28]], `${g.t}: two crates are two places, not one area between them`);
+	}
 });
 
 test('mobs spread over a wide area make an area objective: every cluster, lone spawns too, as a walk from the chosen point', () => {
@@ -83,18 +142,21 @@ test('mobs spread over a wide area make an area objective: every cluster, lone s
 	]);
 });
 
-test('an area objective with more clusters than the cap keeps spots spread evenly over the whole area', () => {
+test('an area objective with more clusters than the cap searches spots spread evenly over the whole area; every other place is an alternative', () => {
 	// Plains Strider: twenty lone spawns on a 5 x 4 grid across Elwynn (x 10-90, y 20-80).
 	const g = goalsOf(['step One', '  goto 12,22', '  kill 95022']).goals[1];
 	assert.equal(g.spread, true);
-	assert.equal(g.spots.length, 12);
+	const searched = g.spots.filter((s) => !s.alt);
+	assert.equal(searched.length, 12);
+	assert.deepEqual(g.spots.slice(0, 12), searched, 'the searched spots come first');
 	assert.deepEqual([g.spots[0].x, g.spots[0].y], [10, 20], 'the walk starts at the chosen point');
-	assert.equal(new Set(g.spots.map((s) => `${s.x},${s.y}`)).size, 12);
-	const xs = g.spots.map((s) => s.x);
-	const ys = g.spots.map((s) => s.y);
-	assert.deepEqual([Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)], [10, 90, 20, 80], 'the picks reach every edge of the area');
+	assert.equal(new Set(g.spots.map((s) => `${s.x},${s.y}`)).size, 20, 'all twenty places, each once');
+	assert.deepEqual(outsideSpots(g, 'npc', 95022), []);
+	const xs = searched.map((s) => s.x);
+	const ys = searched.map((s) => s.y);
+	assert.deepEqual([Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)], [10, 90, 20, 80], 'the searched picks reach every edge of the area');
 	for (const [x0, x1, y0, y1] of [[10, 50, 20, 50], [50, 90, 20, 50], [10, 50, 50, 80], [50, 90, 50, 80]]) {
-		assert.ok(g.spots.some((s) => s.x >= x0 && s.x <= x1 && s.y >= y0 && s.y <= y1), `a spot in ${x0}-${x1}, ${y0}-${y1}`);
+		assert.ok(searched.some((s) => s.x >= x0 && s.x <= x1 && s.y >= y0 && s.y <= y1), `a spot in ${x0}-${x1}, ${y0}-${y1}`);
 	}
 });
 

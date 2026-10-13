@@ -21,7 +21,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { reducePoints } = require('./spawns');
+const { reduceSpawns, spawnRecord } = require('./spawns');
 const { parseProgressText } = require('./objectives');
 
 const INTERACTIONS = { gossip: null, trainer: 'trainer', vendor: 'vendor', fp: 'flightmaster' };
@@ -252,9 +252,9 @@ function applyRecordings(db, recordings, { spawnOptions } = {}) {
 		for (const [id, byMap] of live[kind]) {
 			const e = table[id];
 			for (const [map, pts] of byMap) {
-				const reduced = reducePoints(pts, spawnOptions);
-				if (!reduced.length) continue;
-				e.spawns[map] = { f: 'l', pts: reduced };
+				const reduced = reduceSpawns(pts, spawnOptions);
+				if (!reduced.pts.length) continue;
+				e.spawns[map] = spawnRecord('l', reduced);
 				stats.liveSpawnMaps++;
 			}
 		}

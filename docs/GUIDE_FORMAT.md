@@ -206,31 +206,55 @@ AND. `only Warrior,Paladin,Dwarf` = (Warrior or Paladin) and Dwarf.
 | objective index | the quest's objective whose `id` matches the npc/item, when `quest Q` has no `.O` |
 | count | the linked objective's count |
 | Era frame flag `f = "e"` | when coordinates come from Era-frame data, or were typed in an `era` guide/goal |
-| spawn areas `spots` | `kill` goals and mob-drop `collect` goals whose coordinates come from the data (not `@x,y`): see "Spawn areas" below |
+| spawn areas `spots` | every goal placed at an NPC or object that spawns at more than one place, and hand-placed `@x,y` goals whose target the data also knows: see "Spawn areas" below |
 
-**Spawn areas.** Mobs usually spawn over a wide area, so a kill or mob-drop
-collect goal also gets the areas they spawn in: `spots = { { x, y, r, n }, ... }`,
-each the centre (map percent, in the goal's own `map` and frame `f`), radius in
-yards covering its spawns, and spawn count of one cluster of the target's spawns
-(for `collect`: the likely droppers' spawns on that map, as chosen above). The
-clusters come from the quest database's clustering (`tools/lib/questdb/cluster.js`):
-70 yd, widened for thinly spread mobs to twice the median spacing between
-neighbouring spawns (at most 250 yd). Same map only. The goal keeps its `x`/`y`
-as the default point. A target with fewer than two spawns on the map (a named
-NPC) and hand-placed `@x,y` goals get no `spots`.
+**Spawn areas.** Mobs, quest objects and some NPCs spawn at more than one
+place, and a player who finds nothing where the arrow led must be able to try
+the others. So a goal placed at an NPC or object gets every place its target
+spawns: `spots = { { x, y, r, n, alt }, ... }`, each the centre (map percent,
+in the goal's own `map` and frame `f`), radius in yards covering its spawns,
+and spawn count of one cluster of the target's spawns (for `collect`: the
+likely sources' spawns on that map, mobs, objects and nodes, as chosen above).
+Every known spawn on the goal's map lies in a spot (the reference data's
+evenly spread points and the ones its per-map cap left out, `more` in
+docs/ARCHITECTURE.md, "Reference data"). Spots with `alt = true` are the
+other places it spawns: the arrow never picks one on its own, but the world
+map marks them (fainter) and moving on by hand reaches them (the arrow button,
+a click on the arrow, a click on a mark). The clusters come from the quest
+database's clustering (`tools/lib/questdb/cluster.js`). Same map only. The goal
+keeps its `x`/`y` as the default point. A target with a single spawn on the map
+gets no `spots`.
 
-- **Camps** (90% of the spawns within 250 yd of their centre): radius at least
-  15 yd, lone spawns dropped when any cluster holds two or more, nearest to the
-  goal's `x`/`y` first, at most 6. At runtime the waypoint is the spot nearest
-  the player and the arrow counts the whole area as arrived.
+- **Places** (6 spawns or fewer: a named NPC or a quest object that appears at
+  one of a few places, or the handful of mobs an objective needs): every place
+  is a spot the arrow may pick, spawns within 70 yd of each other being one
+  place, radius at least 15 yd. Places within 250 yd of their centre work as
+  camps (below); further apart, kill, collect and interact goals search them
+  like an area objective (`spread = true`, a walk from the goal's point).
+- **Camps** (90% of the spawns within 250 yd of their centre): clusters of
+  70 yd, widened for thinly spread mobs to twice the median spacing between
+  neighbouring spawns (at most 250 yd); radius at least 15 yd. The arrow picks
+  among the clusters of two or more (all of them when none has two), nearest
+  to the goal's `x`/`y` first, at most 6; lone spawns and clusters past the 6
+  follow as alternatives. At runtime the waypoint is the spot nearest the
+  player and the arrow counts the whole area as arrived.
 - **Area objectives** (spawns reaching further: raptors all over the northern
-  Barrens) also get `spread = true`. Every cluster counts, lone spawns too,
-  each at least as wide as the spacing between spawns (40-150 yd); beyond 12
-  the kept ones are spread evenly over the area (farthest-point picks from the
-  cluster nearest the goal's point), then ordered as a walk from the goal's
-  point. At runtime the player searches spot by spot: the arrow says "Search
-  here" inside a spot (never "Arrived"), moves on to the nearest spot not
-  visited lately once the player leaves it, and the world map marks every spot.
+  Barrens) also get `spread = true`. Clusters as for camps; every cluster
+  counts, lone spawns too, each at least as wide as the spacing between spawns
+  (40-150 yd); beyond 12 the searched ones are spread evenly over the area
+  (farthest-point picks from the cluster nearest the goal's point), ordered as
+  a walk from the goal's point, and the rest follow as alternatives. At runtime
+  the player searches spot by spot: the arrow says "Search here" inside a spot
+  (never "Arrived"), moves on to the nearest spot not visited lately once the
+  player leaves it, and the world map marks every spot.
+- **Hand-placed** (`@x,y`): the author's point is the spot the arrow takes,
+  wide enough for any place of the target it stands in, and every other place
+  the data knows follows as an alternative. Only where the data agrees: a point
+  more than 50 yd from every spawn of an NPC to meet, or more than 250 yd from
+  every spawn of a mob or object to kill, collect or click, places the target
+  where the data does not (Forever moved it) and gets no `spots`. A route
+  through gathering nodes lists every node place of the zone wherever its
+  point lies.
 
 See docs/ARCHITECTURE.md, Smart logic, "Spawn areas".
 
@@ -363,10 +387,10 @@ quest with nothing more specific to track.
 ```
 
 A `kill` with `quest Q.O` counts from the quest log; without it the player
-ticks it ("Patterns" below). Kill and drop goals get spawn areas from the
-data, so the arrow leads to the nearest camp. `polestar find <quest id>`
-lists a quest's objectives as `7.1 = kill Kobold Vermin x10`: the `7.1` is
-the `quest 7.1` to write.
+ticks it ("Patterns" below). Kill, collect and interact goals get spawn areas
+from the data, so the arrow leads to the nearest camp.
+`polestar find <quest id>` lists a quest's objectives as
+`7.1 = kill Kobold Vermin x10`: the `7.1` is the `quest 7.1` to write.
 
 ### Places: `goto`, `explore`
 

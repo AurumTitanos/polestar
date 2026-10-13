@@ -226,18 +226,19 @@ across keys, OR within) and `goals` (at least one).
 Goal keys common to every verb: `t` (the verb), `text` (display text),
 `note`, `optional` (`true`: never blocks the step), `only` (as on a step),
 `map`, `x`, `y` (0 to 100, together), `f` (`"e"`: the Era map frame; absent:
-the live frame), `r` (arrival radius in yards).
+the live frame), `r` (arrival radius in yards), `spots` (every place the
+goal's target spawns, below; with `map`).
 
 | Verb `t` | Required | Optional |
 |---|---|---|
 | `accept` | `quest`, `title` | `npc`/`npcName`, `object`/`objName`, `item`/`itemName`, `minLevel`, `qlvl`, `pre`, `preAll`, `closedBy`, `preTitles` |
 | `turnin` | `quest`, `title` | `npc`/`npcName`, `object`/`objName`, `rewards = { choices = { { item, itemName, quality } }, items = { ... }, xp, money }` |
 | `complete` | `quest`, `title` | — |
-| `kill` | `target` | `title`, `npc`, `count`, `quest`, `oi`, `spots`, `spread` |
-| `collect` | `item`, `itemName` | `title`, `count`, `quest`, `oi`, `spots`, `spread`, `from`, `fromKind`, `fromRank`, `fromFaction`, `candidates` |
+| `kill` | `target` | `title`, `npc`, `count`, `quest`, `oi`, `spread` |
+| `collect` | `item`, `itemName` | `title`, `count`, `quest`, `oi`, `spread`, `from`, `fromKind`, `fromRank`, `fromFaction`, `candidates` |
 | `goto` | `map`, `x`, `y` | `text`, `r` |
 | `talk` | `npc`, `npcName` | — |
-| `interact` | `object`, `objName` | `title`, `quest`, `oi` |
+| `interact` | `object`, `objName` | `title`, `quest`, `oi`, `spread` |
 | `use` | `item`, `itemName` | `title`, `quest`, `oi` |
 | `sethome` | `location`, or `candidates` | `npc`, `npcName` |
 | `hearth` | `location` | — |
@@ -276,7 +277,7 @@ The fields:
 | `reagents` | `{ { item, itemName, count } }` |
 | `standing` | 1 Hated to 8 Exalted |
 | `criteria` | an achievement's criterion index |
-| `spots` | spawn areas `{ { x, y, r, n } }`: centre in the goal's map and frame, radius in yards, spawn count |
+| `spots` | spawn places `{ { x, y, r, n, alt } }`: centre in the goal's map and frame, radius in yards, spawn count; `alt = true` for another place the target spawns, which the arrow takes only when the player moves on to it (the world map marks it) |
 | `spread` | `true` with `spots`: an area objective, searched spot by spot |
 | `from`, `fromKind`, `fromRank`, `fromFaction` | a `collect`'s main source: name, `"npc"` or `"object"`, rank (1 elite, 2 rare elite, 3 boss, 4 rare), faction `"A"`, `"H"` or `"AH"` |
 | `candidates` | smart targets: `{ { npc, npcName, map, x, y, f, faction, races, classes, lvl, rate, spawns } }`; Polestar picks the nearest usable one at runtime |

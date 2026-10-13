@@ -11,7 +11,7 @@ const path = require('node:path');
 const { parseCsv } = require('../tools/lib/data/csv');
 const { buildMaps, frameFromAssignment } = require('../tools/lib/data/maps');
 const { parseCount, parseProgressText } = require('../tools/lib/data/objectives');
-const { reducePoints } = require('../tools/lib/data/spawns');
+const { reduceSpawns } = require('../tools/lib/data/spawns');
 const { buildData } = require('../tools/lib/data/build');
 const { checkLicense } = require('../tools/lib/data/pfquest');
 const { tmpdir } = require('./helpers/tmp');
@@ -160,17 +160,17 @@ describe('spawn reduction', () => {
 	for (let i = 0; i < 10; i++) for (let j = 0; j < 6; j++) grid.push([20 + i * 5, 30 + j * 5]);
 
 	test('rounds to two decimals, drops near-duplicates and out-of-range points', () => {
-		const pts = reducePoints([[10, 10], [10.05, 10.02], [10, 10], [70.004, 20.006], [101, 5], [-1, 5], ['x', 1]]);
-		assert.deepEqual(pts, [[10, 10], [70, 20.01]]);
+		const { pts, more } = reduceSpawns([[10, 10], [10.05, 10.02], [10, 10], [70.004, 20.006], [101, 5], [-1, 5], ['x', 1]]);
+		assert.deepEqual([pts, more], [[[10, 10], [70, 20.01]], []]);
 	});
 
 	test('few points are all kept', () => {
 		const few = grid.slice(0, 24);
-		assert.equal(reducePoints(few, { cap: 24 }).length, 24);
+		assert.deepEqual(reduceSpawns(few, { cap: 24 }), { pts: few, more: [] });
 	});
 
 	test('many points are capped with an even spread', () => {
-		const pts = reducePoints(grid, { cap: 12 });
+		const { pts } = reduceSpawns(grid, { cap: 12 });
 		assert.equal(pts.length, 12);
 		// Every grid point is close to some kept point (coverage)...
 		const nearest = (p) => Math.min(...pts.map((q) => Math.hypot(p[0] - q[0], p[1] - q[1])));
@@ -181,9 +181,17 @@ describe('spawn reduction', () => {
 		assert.ok(minGap >= 10, `min gap ${minGap}`);
 	});
 
+	test('the points the cap leaves out are kept apart: no spawn is lost', () => {
+		const { pts, more } = reduceSpawns(grid, { cap: 12 });
+		assert.equal(more.length, grid.length - 12);
+		const key = (p) => `${p[0]},${p[1]}`;
+		assert.deepEqual([...pts, ...more].map(key).sort(), grid.map(key).sort(), 'pts and more together are every distinct point, each once');
+		assert.deepEqual(more, more.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]), 'more is sorted by x then y');
+	});
+
 	test('result does not depend on input order', () => {
 		const shuffled = grid.slice().reverse();
-		assert.deepEqual(reducePoints(shuffled, { cap: 12 }), reducePoints(grid, { cap: 12 }));
+		assert.deepEqual(reduceSpawns(shuffled, { cap: 12 }), reduceSpawns(grid, { cap: 12 }));
 	});
 });
 

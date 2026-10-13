@@ -341,6 +341,48 @@ test('CycleSpot moves an area objective on by hand, to the next spot or a chosen
 	assert.deepEqual(out, { next: 2, afterNext: 40, held: 40, chosen: 3, afterChosen: 80, none: false });
 });
 
+test('another place the target spawns (alt) is never picked on its own; moving on by hand reaches it and every other place', () => {
+	// Camps at 40 and 60 along y = 50, and another place at 30 (alt), radius 30 each. The player stands inside the alt.
+	const ALT = `
+Polestar.RegisterGuide({ id = "test/alt", pack = "test", title = "Alt", zone = 1429, steps = {
+	{ goals = { { t = "kill", target = "Kobold Vermin", npc = 6, count = 10, quest = 7, oi = 1, map = 1429, x = 40, y = 50,
+		spots = { { x = 40, y = 50, r = 30, n = 5 }, { x = 60, y = 50, r = 30, n = 4 }, { x = 30, y = 50, r = 30, n = 1, alt = true } } } } },
+	{ goals = { { t = "level", level = 60 } } },
+} })
+`;
+	const [out] = run({
+		guides: ALT,
+		before: `w.onQuest(7, { 10 }); w.moveTo(1429, 29, 50)`,
+		script: `
+			local w = stub.world
+			E.SetGuide("test/alt"); flush()
+			local r = {}
+			r.start = E.GetWaypoint().x
+			stub.advance(1)
+			r.still = E.GetWaypoint().x
+			r.walk = {}
+			for i = 1, 3 do
+				local index = E.CycleSpot(1, 1)
+				r.walk[i] = { index, E.GetWaypoint().x }
+			end
+			E.CycleSpot(1, 1, 3)
+			stub.advance(2)
+			r.held = E.GetWaypoint().x
+			w.moveTo(1429, 40, 50)
+			stub.advance(1)
+			r.back = E.GetWaypoint().x
+			r.count = E.GetStepView(1).goals[1].spots
+			emit(r)
+		`,
+	});
+	assert.equal(out.start, 40, 'the nearest camp, though the player stands in the alt');
+	assert.equal(out.still, 40);
+	assert.deepEqual(out.walk, [[3, 30], [2, 60], [1, 40]], 'by hand: the alt (nearest), the far camp, then the one visited longest ago');
+	assert.equal(out.held, 30, 'a place picked by hand holds while the player is there');
+	assert.equal(out.back, 40, 'walking on, the arrow returns to the camps');
+	assert.equal(out.count, 3);
+});
+
 test('a circuit of waypoints in one step costs one pass over the step, and a later arrival covers the earlier ones', () => {
 	// Gathering guides loop a dozen or more waypoints in one step until a skill
 	// rank: checking each goto against the goals after it once (not through

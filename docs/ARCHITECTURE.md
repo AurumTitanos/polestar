@@ -267,11 +267,15 @@ Polestar.RegisterGuide({
 Goal fields. Common: `t` (verb), `text` (display override), `note`,
 `optional` (true = never blocks the step), `only` (same shape as step `only`),
 `map`, `x`, `y` (0–100), `f` (`"e"` = Era frame, absent = live), `r` (arrival
-radius in yards). `kill` and mob-drop `collect` goals may carry spawn areas,
-`spots = { { x, y, r, n }, ... }`: cluster centre in the goal's `map` and frame,
-radius in yards, spawn count; camps nearest to the goal's `x`/`y` first, at most
-6; with `spread = true` (an area objective) up to 12 spread over the whole
-area, as a walk from `x`/`y` (GUIDE_FORMAT, "Spawn areas"). `x`/`y` stay the
+radius in yards). A goal placed at an NPC or object that spawns at several
+places carries spawn areas, `spots = { { x, y, r, n, alt }, ... }`: cluster
+centre in the goal's `map` and frame, radius in yards, spawn count; together
+they cover every spawn of the target on that map. Camps nearest to the goal's
+`x`/`y` first, at most 6 (a target with 6 spawns or fewer gets a spot at every
+place it spawns); with `spread = true` (an area objective, or a few places far
+apart) up to 12 spread over the whole area, as a walk from `x`/`y`. The other
+places follow with `alt = true`; a hand-placed point is the first spot, the
+data's places its alternatives (GUIDE_FORMAT, "Spawn areas"). `x`/`y` stay the
 default point.
 
 | `t` | Required | Optional | Done when (Engine) |
@@ -420,12 +424,15 @@ Polestar.Engine.GetProgress() -> doneSteps, totalSteps
   stays while the player is within `r` + 4 yd of it, then the nearest spot not
   visited in the last 300 s (`Spots.FORGET`) takes over (the one the player
   stands in counts as not visited; all visited: the one visited longest ago),
-  so the spots form a circuit. `Engine.CycleSpot(stepIndex, goalIndex[, index])`
-  moves on by hand (the current spot counts as visited) or to spot `index`; a
-  spot picked that way holds until the player reaches it. It returns the new
-  spot's index, or nil. Without a player position the first spot is used. The
-  goto-arrival poll (0.5 s) re-picks the spot while the waypoint's goal has
-  spots; a change re-evaluates (`STEP_UPDATED`, `WAYPOINT_CHANGED`). The goal
+  so the spots form a circuit. Spots with `alt` are never picked by these
+  rules; they are reached by hand and, once picked, hold like any current spot
+  (camps: until another spot is 40 yd nearer). `Engine.CycleSpot(stepIndex,
+  goalIndex[, index])` moves on by hand to the nearest spot not visited lately,
+  alternatives included (the current spot counts as visited), or to spot
+  `index`; a spot picked that way holds until the player reaches it. It returns
+  the new spot's index, or nil. Without a player position the first spot is
+  used. The goto-arrival poll (0.5 s) re-picks the spot while the waypoint's
+  goal has spots; a change re-evaluates (`STEP_UPDATED`, `WAYPOINT_CHANGED`). The goal
   view's `map`/`x`/`y` follow the chosen spot and it carries `spots` (count)
   and `spread`; the waypoint carries `area` (the spot's radius in yards) next
   to `r`, and with several spots `spots` (the goal's list) and `spot` (the
@@ -1153,8 +1160,9 @@ next spot". A left click on the arrow (not a drag) calls
 while the target is the Engine's waypoint with `spots`. The `nav.target` pin
 carries the `area`, so the world map draws the area's soft disc under the
 target pin; the `nav.spots` layer (world map, under `nav.worldPins`) marks
-every other spot of the target as a small pin; clicking one searches there
-next (`Nav.NextSpot(i)`). TomTom's arrival distance is `area + r`.
+every other spot of the target as a small pin (an `alt` spot smaller and
+fainter, its tooltip "It also spawns here"); clicking one searches there next
+(`Nav.NextSpot(i)`). TomTom's arrival distance is `area + r`.
 
 While a `SetTarget` override is active the Engine keeps announcing its own
 waypoint; `Nav.GetTarget()` is the point actually being guided to. Nav fires
@@ -1629,7 +1637,7 @@ flight timer and the instance tracker are set under Quality of Life.
 quests.json   { "<id>": { id, title, level, minLevel, races, classes, start: { npc: [], object: [], item: [] },
                           end: { npc: [], object: [] }, pre: [ids], excl: [ids], next, objectives: [
                           { type: "kill"|"item"|"object"|"event", id, count, text } ], objectiveText, zone, xp, source: [] } }
-npcs.json     { "<id>": { id, name, level, faction, spawns: { "<uiMapID>": { f: "e"|"l", pts: [[x, y], ...] } }, source: [] } }
+npcs.json     { "<id>": { id, name, level, faction, spawns: { "<uiMapID>": { f: "e"|"l", pts: [[x, y], ...], more?: [[x, y], ...] } }, source: [] } }
 objects.json  { "<id>": { id, name, spawns: { ... same ... }, source: [] } }
 items.json    { "<id>": { id, name, drops: { npc: { "<id>": chance }, object: { "<id>": chance } }, vendors: [ids], source: [] } }
 zones.json    { "<uiMapID>": { id, name, areaId, parent, type } }
@@ -1649,6 +1657,13 @@ dungeons.json { source: { name, addon, title, version, author, license }, dungeo
                 start, end: { map, x, y, f, source: "data"|"data-npc"|"dj"|"web"|"entrance", kind, id?, item?, name, inDungeon? },
                 chain, followUps, startItem, startBoss, startNear, bosses, hidden?, inData }
 ```
+
+Spawn points per entity per map: `pts` holds at most 24 (`data build --cap`),
+spread evenly over the entity's spawns (farthest-point sampling); `more` the
+distinct points the cap left out, sorted by x then y, only when there are any.
+Every consumer reads the evenly spread `pts` (the simulator, zone levels,
+QuestDB, Codex, the profession generators), except the guide compiler, whose
+spawn areas and near-spawn lint read `pts` and `more`: every known spawn.
 
 `dungeons.json` is built by `dungeons build` (`tools/lib/data/dungeonjournal.js`)
 from the installed DungeonJournal addon (no licence: local only, see

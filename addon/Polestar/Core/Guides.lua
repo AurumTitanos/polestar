@@ -229,7 +229,7 @@ local function checkGoal(goal)
 		if type(goal.spots) ~= "table" or #goal.spots == 0 or not isNum(goal.map) then return "bad spots" end
 		for i = 1, #goal.spots do
 			local s = goal.spots[i]
-			if type(s) ~= "table" or not (isNum(s.x) and isNum(s.y) and isNum(s.r) and s.r >= 0) then return "bad spot " .. i end
+			if type(s) ~= "table" or not (isNum(s.x) and isNum(s.y) and isNum(s.r) and s.r >= 0) or (s.alt ~= nil and s.alt ~= true) then return "bad spot " .. i end
 		end
 	end
 	if goal.spread ~= nil and not (goal.spread == true and goal.spots ~= nil) then return "bad spread" end

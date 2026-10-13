@@ -3,7 +3,10 @@
 // and cap the points kept per entity per map with an even spatial spread
 // (farthest-point sampling from the point nearest the centroid). Entities
 // with at most `cap` distinct points keep all of them. Output is sorted by
-// x then y, so the result depends only on the input set.
+// x then y, so the result depends only on the input set. The distinct points
+// the cap leaves out are kept apart (`more`), so a consumer that must know
+// every place an entity spawns (the guide compiler's spawn areas) has them,
+// while every other consumer reads the capped, evenly spread `pts`.
 
 const DEFAULTS = { cap: 24, dedupe: 0.3 };
 
@@ -101,19 +104,34 @@ function spread(points, cap) {
 	return chosen.sort(byXY);
 }
 
-// points: [[x, y], ...] in 0-100 map percent. Returns the reduced list.
-function reducePoints(points, options = {}) {
-	const { cap, dedupe: eps } = { ...DEFAULTS, ...options };
+function validPoints(points) {
 	const valid = [];
 	for (const p of points) {
 		const x = round2(Number(p[0]));
 		const y = round2(Number(p[1]));
 		if (Number.isFinite(x) && Number.isFinite(y) && x >= 0 && x <= 100 && y >= 0 && y <= 100) valid.push([x, y]);
 	}
-	return spread(dedupe(valid, eps), cap);
+	return valid;
 }
 
-// pfQuest coords [[x, y, areaId, respawn], ...] -> { "<uiMapID>": { f: "e", pts } }
+// points: [[x, y], ...] in 0-100 map percent -> { pts, more }: `pts` the
+// reduced list, `more` the distinct points the cap left out (sorted by x then
+// y; empty when nothing was capped).
+function reduceSpawns(points, options = {}) {
+	const { cap, dedupe: eps } = { ...DEFAULTS, ...options };
+	const all = dedupe(validPoints(points), eps);
+	const pts = spread(all, cap);
+	if (pts.length === all.length) return { pts, more: [] };
+	const kept = new Set(pts);
+	return { pts, more: all.filter((p) => !kept.has(p)) };
+}
+
+// A map's spawn record: { f, pts } plus `more` when the cap left points out.
+function spawnRecord(f, { pts, more }) {
+	return more.length ? { f, pts, more } : { f, pts };
+}
+
+// pfQuest coords [[x, y, areaId, respawn], ...] -> { "<uiMapID>": { f: "e", pts, more? } }
 // plus the number of points dropped because their area has no UiMap.
 function eraSpawns(coords, resolveArea, options) {
 	const perMap = new Map();
@@ -130,10 +148,10 @@ function eraSpawns(coords, resolveArea, options) {
 	}
 	const spawns = {};
 	for (const map of [...perMap.keys()].sort((a, b) => a - b)) {
-		const pts = reducePoints(perMap.get(map), options);
-		if (pts.length) spawns[map] = { f: 'e', pts };
+		const r = reduceSpawns(perMap.get(map), options);
+		if (r.pts.length) spawns[map] = spawnRecord('e', r);
 	}
 	return { spawns, unmapped };
 }
 
-module.exports = { reducePoints, eraSpawns, round2, DEFAULTS };
+module.exports = { reduceSpawns, spawnRecord, eraSpawns, round2, DEFAULTS };

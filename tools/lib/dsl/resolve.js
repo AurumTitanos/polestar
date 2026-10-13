@@ -80,19 +80,8 @@ function pickSpawn(data, candidates, zoneMap, prev, opts = {}) {
 	if (zoneMap != null) maps.push(zoneMap);
 	for (const m of opts.usedMaps || []) if (!maps.includes(m)) maps.push(m);
 	for (const m of maps) {
-		const on = [];
-		for (const { cand, spawns } of all) {
-			const s = spawns.find((sp) => sp.map === m);
-			if (s) on.push({ cand, s });
-		}
+		const on = onMap(all, m);
 		if (!on.length) continue;
-		// Sources with a drop chance: on this map, only the likely ones count
-		// (at least half the best chance here; sub-1% drops only when nothing better drops here).
-		if (on.some((o) => typeof o.cand.chance === 'number')) {
-			const best = Math.max(...on.map((o) => o.cand.chance || 0));
-			const likely = on.filter((o) => (o.cand.chance || 0) >= best / 2 && ((o.cand.chance || 0) >= 1 || best < 1));
-			if (likely.length) on.splice(0, on.length, ...likely);
-		}
 		if (prev && prev.map === m) {
 			let best = null;
 			for (const { cand, s } of on) {
@@ -113,31 +102,65 @@ function pickSpawn(data, candidates, zoneMap, prev, opts = {}) {
 	return { cand: candidates[0] };
 }
 
+// The candidates ([{ cand, spawns }]) that spawn on `map`, with their spawns
+// there: [{ cand, s }]. Sources with a drop chance: only the likely ones count
+// (at least half the best chance here; sub-1% drops only when nothing better
+// drops here).
+function onMap(all, map) {
+	const on = [];
+	for (const { cand, spawns } of all) {
+		const s = spawns.find((sp) => sp.map === map);
+		if (s) on.push({ cand, s });
+	}
+	if (on.some((o) => typeof o.cand.chance === 'number')) {
+		const best = Math.max(...on.map((o) => o.cand.chance || 0));
+		const likely = on.filter((o) => (o.cand.chance || 0) >= best / 2 && ((o.cand.chance || 0) >= 1 || best < 1));
+		if (likely.length) return likely;
+	}
+	return on;
+}
+
 function point(cand, map, x, y, f) {
 	return { cand, map, x: round2(x), y: round2(y), f: f === 'e' ? 'e' : undefined };
 }
 
-// Spawn areas of a kill or mob-drop collect goal (docs/GUIDE_FORMAT.md,
-// "Spawn areas"): the spawns of the npc sources on the goal's map and in its
-// frame, clustered with the quest database's clusterPoints. The cluster
-// radius is the quest database's 70 yd, widened for mobs that roam far apart
-// to twice the median spacing between neighbouring spawns (at most
-// SPOT_MAX_CLUSTER_YARDS). Fewer than two spawns there: none (a named NPC
+// Spawn areas of a goal whose target is an npc or object (docs/GUIDE_FORMAT.md,
+// "Spawn areas"): the spawns of its sources on the goal's map and in its frame,
+// clustered with the quest database's clusterPoints. Every spawn lies in a
+// spot: the ones the arrow picks by itself come first, the rest follow as
+// alternatives (`alt = true`), which the world map marks and the arrow button
+// reaches, so a player who finds no target where the arrow led can try every
+// other place it spawns. Fewer than two spawns there: none (a single spawn
 // stays a point).
 //
-// Camps: 90% of the spawns within SPREAD_YARDS of their centre. Lone spawns
-// are dropped when any cluster holds two or more; nearest to the goal's point
-// first, at most SPOT_CAP.
+// Places: a target with at most SPOT_CAP spawns is found at one of a few
+// places (a named NPC or a quest object that appears at one of them, or the
+// handful of mobs the objective needs), so every place is a spot the arrow
+// may pick: spawns within SPOT_CLUSTER_YARDS of each other are one place, at
+// least SPOT_MIN_RADIUS wide. Places that reach further than SPREAD_YARDS are
+// searched (`spread`, a walk from the goal's point); closer ones are camps,
+// nearest to the goal's point first.
+//
+// Otherwise the cluster radius is the quest database's 70 yd, widened for
+// targets that spawn far apart to twice the median spacing between
+// neighbouring spawns (at most SPOT_MAX_CLUSTER_YARDS).
+//
+// Camps: 90% of the spawns within SPREAD_YARDS of their centre. The arrow
+// picks among the clusters of two or more spawns (all clusters when none has
+// two), nearest to the goal's point first, at most SPOT_CAP; lone spawns and
+// clusters past the cap are alternatives.
 //
 // Area objectives (`spread`): the spawns reach further. Every cluster counts,
 // lone spawns too, each at least as wide as the spacing between spawns
-// (SPREAD_MIN_RADIUS..SPREAD_MAX_MIN_RADIUS); beyond SPREAD_CAP the kept ones
-// are spread evenly over the area (farthest-point picks, from the cluster
-// nearest the goal's point), then ordered as a walk from the goal's point
-// (each next spot the nearest one not yet in the walk).
+// (SPREAD_MIN_RADIUS..SPREAD_MAX_MIN_RADIUS); beyond SPREAD_CAP the searched
+// ones are spread evenly over the area (farthest-point picks, from the cluster
+// nearest the goal's point), ordered as a walk from the goal's point (each
+// next spot the nearest one not yet in the walk); the others are alternatives.
 //
-// -> { spots: [{ x, y, r, n }], spread: bool } (map percent, radius in yards,
-// spawn count) | undefined
+// Alternatives come nearest to the goal's point first.
+//
+// -> { spots: [{ x, y, r, n, alt? }], spread: bool } (map percent, radius in
+// yards, spawn count) | undefined
 const SPOT_CAP = 6;
 const SPOT_CLUSTER_YARDS = 70;
 const SPOT_MAX_CLUSTER_YARDS = 250;
@@ -216,28 +239,79 @@ function walk(data, map, spots, x, y) {
 	return out;
 }
 
-function spawnSpots(data, sources, map, f, x, y) {
+// Every known spawn point of `sources` on `map` in frame `f`: the reference
+// data's spread points and the ones its cap left out.
+function spawnPointsOf(data, sources, map, f) {
 	const pts = [];
 	for (const src of sources) {
-		if (src.kind !== 'npc') continue;
-		for (const s of data.spawns('npc', src.id)) {
-			if (s.map === map && (s.f === 'e' ? 'e' : undefined) === f) for (const p of s.pts) pts.push(p);
+		for (const s of data.spawns(src.kind, src.id)) {
+			if (s.map === map && (s.f === 'e' ? 'e' : undefined) === f) pts.push(...s.pts, ...s.more);
 		}
 	}
+	return pts;
+}
+
+// A gathering node (mine, herb or fishing object): the real source of what
+// it yields at any chance.
+const GATHER_ROLES = ['mine', 'herb', 'fishing'];
+function gatherNode(data, src) {
+	const o = src.kind === 'object' ? data.object(src.id) : null;
+	return !!(o && Array.isArray(o.roles) && o.roles.some((r) => GATHER_ROLES.includes(r)));
+}
+
+function spawnSpots(data, sources, map, f, x, y) {
+	const pts = spawnPointsOf(data, sources, map, f);
 	if (pts.length < 2) return undefined;
 	const frame = data.eraFrame(map);
+	const spread = extent90(pts, frame) > SPREAD_YARDS;
+	const nearestFirst = (spots) => {
+		const d = new Map(spots.map((s) => [s, distance(data, map, s.x, s.y, x, y)]));
+		return spots.sort((a, b) => d.get(a) - d.get(b) || b.n - a.n || a.x - b.x || a.y - b.y);
+	};
+	// The clusters the arrow picks from first, then every other one as an alternative.
+	const withRest = (picked, clusters) => [...picked, ...nearestFirst(clusters.filter((c) => !picked.includes(c))).map((c) => ({ ...c, alt: true }))];
+	if (pts.length <= SPOT_CAP) {
+		const places = clusterPoints(pts, frame, { radius: SPOT_CLUSTER_YARDS, cap: Infinity, minRadius: SPOT_MIN_RADIUS });
+		return spread ? { spots: walk(data, map, places, x, y), spread: true } : { spots: nearestFirst(places), spread: false };
+	}
 	const spacing = medianSpacing(pts, frame);
 	const radius = Math.min(SPOT_MAX_CLUSTER_YARDS, Math.max(SPOT_CLUSTER_YARDS, 2 * spacing));
-	if (extent90(pts, frame) > SPREAD_YARDS) {
+	if (spread) {
 		const minRadius = Math.round(Math.min(SPREAD_MAX_MIN_RADIUS, Math.max(SPREAD_MIN_RADIUS, spacing)));
 		const clusters = clusterPoints(pts, frame, { radius, cap: Infinity, minRadius });
-		return { spots: walk(data, map, evenly(data, map, clusters, SPREAD_CAP, x, y), x, y), spread: true };
+		return { spots: withRest(walk(data, map, evenly(data, map, clusters, SPREAD_CAP, x, y), x, y), clusters), spread: true };
 	}
-	let spots = clusterPoints(pts, frame, { radius, cap: Infinity, minRadius: SPOT_MIN_RADIUS });
-	if (spots.some((s) => s.n > 1)) spots = spots.filter((s) => s.n > 1);
-	const d = new Map(spots.map((s) => [s, distance(data, map, s.x, s.y, x, y)]));
-	spots.sort((a, b) => d.get(a) - d.get(b) || b.n - a.n || a.x - b.x || a.y - b.y);
-	return { spots: spots.slice(0, SPOT_CAP), spread: false };
+	const clusters = clusterPoints(pts, frame, { radius, cap: Infinity, minRadius: SPOT_MIN_RADIUS });
+	const camps = clusters.some((s) => s.n > 1) ? clusters.filter((s) => s.n > 1) : clusters;
+	return { spots: withRest(nearestFirst(camps).slice(0, SPOT_CAP), clusters), spread: false };
+}
+
+// A hand-placed goal (`@x,y`) whose target spawns at several places: the
+// author's point is the spot the arrow takes, and every place the data knows
+// is an alternative (a place within SPOT_MIN_RADIUS of the point joins it,
+// the point's radius growing to cover that place's spawns; when every place
+// joins, the point is the goal's only spot). Only while the point lies where
+// the data has the target, within `near` yards of a known spawn: a point
+// further from every spawn places the target where the data does not (Forever
+// moved it), and the data's places would mislead.
+// -> spots | undefined
+function handSpots(data, sources, map, f, x, y, near) {
+	if (!data.mapSize(map)) return undefined;
+	const pts = spawnPointsOf(data, sources, map, f);
+	if (!pts.some((p) => distance(data, map, p[0], p[1], x, y) <= near)) return undefined;
+	const sp = spawnSpots(data, sources, map, f, x, y);
+	if (!sp) return undefined;
+	const own = { x, y, r: SPOT_MIN_RADIUS, n: 0 };
+	const alts = [];
+	for (const s of sp.spots) {
+		const d = distance(data, map, s.x, s.y, x, y);
+		if (d <= s.r + SPOT_MIN_RADIUS) {
+			own.r = Math.max(own.r, Math.ceil(d + s.r));
+			own.n += s.n;
+		} else alts.push({ x: s.x, y: s.y, r: s.r, n: s.n, alt: true, d });
+	}
+	alts.sort((a, b) => a.d - b.d || a.x - b.x || a.y - b.y);
+	return [own, ...alts.map(({ d, ...s }) => s)];
 }
 
 function onlyOf(c) {
@@ -693,12 +767,7 @@ function resolveGoal(g, zoneMap, prev, data, err, warn, ctx = { sides: ['Allianc
 			// item at 2% or more (a rare boss at 0.2% is not where it is farmed) and
 			// gathering nodes at any chance (a gem from a Copper Vein is 1% per node, yet
 			// the real source; a chest at 0.5% is not).
-			const GATHER = ['mine', 'herb', 'fishing'];
-			const isNode = (src) => {
-				const o = src.kind === 'object' ? data.object(src.id) : null;
-				return !!(o && Array.isArray(o.roles) && o.roles.some((r) => GATHER.includes(r)));
-			};
-			checkKinds = sources.filter((s) => s.chance >= 2 || isNode(s));
+			checkKinds = sources.filter((s) => s.chance >= 2 || gatherNode(data, s));
 			questFields = true;
 			break;
 		}
@@ -1001,16 +1070,30 @@ function resolveGoal(g, zoneMap, prev, data, err, warn, ctx = { sides: ['Allianc
 				if (data.eraFrame(picked.map) || !anyFrames) goal.f = picked.f;
 				else warn(ln, `Era-frame coordinates on map ${picked.map}, but map-frames.json has no Era bounds for it; compiled as live-frame`);
 			}
-			// Mobs spread over an area: the clusters they spawn in, so the Engine
-			// can send the player to the nearest one (hand-placed points stay put);
-			// `spread`: an area objective, to search spot by spot.
-			if ((v === 'kill' || v === 'collect') && c.kind === 'npc') {
-				const sp = spawnSpots(data, picked.sources || [c], picked.map, picked.f, picked.x, picked.y);
-				if (sp) {
-					goal.spots = sp.spots;
-					if (sp.spread) goal.spread = true;
-				}
+		}
+		// Every place the target spawns, so a player who finds nothing where
+		// the arrow led can move it on to the others (spawnSpots). Kill,
+		// collect and interact goals may be area objectives (`spread`, searched
+		// spot by spot); the others go to the nearest place.
+		const area = v === 'kill' || v === 'collect' || v === 'interact';
+		if (!g.explicitCoords && picked.x !== undefined) {
+			const sp = spawnSpots(data, area ? picked.sources || [c] : [c], picked.map, picked.f, picked.x, picked.y);
+			if (sp) {
+				goal.spots = sp.spots;
+				if (sp.spread && area) goal.spread = true;
 			}
+		} else if (g.explicitCoords && goal.x !== undefined) {
+			// Hand-placed: the sources known to give the item (a drop chance, or a
+			// gathering node; not loot of unknown odds). A mob or object spawns
+			// around a farming point (SPREAD_YARDS); one NPC more than
+			// SPAWN_CHECK_YARDS away has moved (the lint's own threshold).
+			// Gathering nodes respawn over the zone's whole pool, so a route's
+			// point anywhere in it lists every node place.
+			const known = area ? candidates.filter((s) => s.chance === undefined || s.chance > 0 || gatherNode(data, s)) : [c];
+			const all = known.map((cand) => ({ cand, spawns: data.spawns(cand.kind, cand.id) }));
+			const sources = onMap(all, goal.map).map((o) => o.cand);
+			const near = !area ? SPAWN_CHECK_YARDS : sources.length && sources.every((s) => gatherNode(data, s)) ? Infinity : SPREAD_YARDS;
+			setIf(goal, 'spots', handSpots(data, sources, goal.map, goal.f, goal.x, goal.y, near));
 		}
 	}
 	if (g.r !== undefined) goal.r = g.r;
@@ -1024,8 +1107,9 @@ function resolveGoal(g, zoneMap, prev, data, err, warn, ctx = { sides: ['Allianc
 	return goal;
 }
 
-// Warn when explicit coordinates are far from every known spawn. Only spawns
-// recorded in the same map frame (`frame`: "e" | "l") are comparable.
+// Warn when explicit coordinates are far from every known spawn (the capped-out
+// ones too). Only spawns recorded in the same map frame (`frame`: "e" | "l")
+// are comparable.
 function checkNear(data, kinds, map, x, y, frame, ln, warn) {
 	let any = false;
 	let onMap = false;
@@ -1040,7 +1124,7 @@ function checkNear(data, kinds, map, x, y, frame, ln, warn) {
 			}
 			onMap = true;
 			if (!data.mapSize(map)) return; // cannot measure yards on this map
-			for (const p of s.pts) if (distance(data, map, p[0], p[1], x, y) <= SPAWN_CHECK_YARDS) return;
+			for (const p of [...s.pts, ...s.more]) if (distance(data, map, p[0], p[1], x, y) <= SPAWN_CHECK_YARDS) return;
 		}
 	}
 	if (!any) return;

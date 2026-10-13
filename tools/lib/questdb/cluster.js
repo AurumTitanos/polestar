@@ -74,10 +74,14 @@ function clusterPoints(points, frame, opts = {}) {
 		}
 	}
 
+	// The radius is measured from the centre as emitted (rounded), so the
+	// circle drawn there covers every member.
 	const out = clusters.map((c) => {
+		const x = round1(c.x);
+		const y = round1(c.y);
 		let r = 0;
-		for (const [x, y] of c.members) r = Math.max(r, dist(x, y, c.x, c.y));
-		return { x: round1(c.x), y: round1(c.y), r: Math.max(minRadius, Math.ceil(r)), n: c.members.length };
+		for (const [mx, my] of c.members) r = Math.max(r, dist(mx, my, x, y));
+		return { x, y, r: Math.max(minRadius, Math.ceil(r)), n: c.members.length };
 	});
 	out.sort((a, b) => b.n - a.n || a.x - b.x || a.y - b.y);
 	return out.slice(0, cap);

@@ -125,11 +125,12 @@ test('a compiled guide drives the real engine, guide window and arrow through a 
 		assert.equal(accepted.card, 'Marshal McBride');
 		assert.deepEqual([accepted.target.x, accepted.target.y], [48.92, 41.61]);
 
-		// After the hand-in, the arrow leads to the kobolds themselves (their
-		// spawn area), not the camp's Go to, which is the step's header.
+		// After the hand-in, the arrow leads to the kobolds themselves (the
+		// nearest place they spawn), not the camp's Go to, which is the step's
+		// header.
 		assert.equal(onSeven.step, 3);
 		assert.equal(onSeven.card, 'Kobold camp');
-		assert.deepEqual([onSeven.target.x, onSeven.target.y], [47.2, 32.5]);
+		assert.deepEqual([onSeven.target.x, onSeven.target.y], [45.1, 33.9]);
 
 		// Arriving completes the goto; the kill goal shows live progress.
 		assert.equal(atCamp.step, 3);

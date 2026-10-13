@@ -17,8 +17,9 @@ const GOAL_KEYS = [
 ];
 const REAGENT_KEYS = ['item', 'itemName', 'count'];
 const CANDIDATE_KEYS = ['npc', 'npcName', 'map', 'x', 'y', 'f', 'faction', 'races', 'classes', 'lvl', 'rate', 'spawns'];
-// Spawn areas: map-percent centre in the goal's map and frame, radius in yards, spawn count.
-const SPOT_KEYS = ['x', 'y', 'r', 'n'];
+// Spawn areas: map-percent centre in the goal's map and frame, radius in yards,
+// spawn count, and `alt` for a place the arrow reaches only when moved on to it.
+const SPOT_KEYS = ['x', 'y', 'r', 'n', 'alt'];
 // A turn-in's `rewards = { choices, items, money, xp }`: item lists in this order.
 const REWARD_KEYS = ['item', 'itemName', 'quality'];
 // Farm-spot rates (items per kill) need three decimals; coordinates are already rounded to two.

@@ -292,12 +292,16 @@ class Data {
 		return w > 0 && h > 0 ? { w, h } : null;
 	}
 
-	// Entity spawns as [{ map, f, pts }] sorted by map id.
+	// Entity spawns as [{ map, f, pts, more }] sorted by map id: `pts` the
+	// reference data's evenly spread points (at most its cap per map), `more`
+	// the points the cap left out ([] when none), for what must know every
+	// place an entity spawns.
 	spawns(kind, id) {
 		const e = kind === 'npc' ? this.npc(id) : kind === 'object' ? this.object(id) : null;
 		if (!e || !e.spawns) return [];
+		const ok = (p) => Array.isArray(p) && p.length >= 2;
 		return Object.keys(e.spawns)
-			.map((m) => ({ map: Number(m), f: e.spawns[m].f, pts: (e.spawns[m].pts || []).filter((p) => Array.isArray(p) && p.length >= 2) }))
+			.map((m) => ({ map: Number(m), f: e.spawns[m].f, pts: (e.spawns[m].pts || []).filter(ok), more: (e.spawns[m].more || []).filter(ok) }))
 			.filter((s) => s.pts.length)
 			.sort((a, b) => a.map - b.map);
 	}

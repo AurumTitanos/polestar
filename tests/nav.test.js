@@ -440,6 +440,26 @@ test('the world map marks every other spot of an area objective; clicking one se
 	assert.equal(out.off, 0);
 });
 
+test('the other places a target spawns are marked fainter and smaller, and say so', () => {
+	const [out] = run(`${SEARCH}
+		spots[3].alt = true
+		nav.setWaypoint(searchWp(1))
+		nav.showWorldMap(9000)
+		local marks = {}
+		for _, pin in ipairs(nav.pins()) do
+			if pin.data.layer.name == "nav.spots" then
+				local tip = nav.tooltipOf(pin)
+				marks[#marks + 1] = { tip[2], tip[3], math.floor(pin.width * 10 + 0.5) / 10 }
+			end
+		end
+		emit(marks)`);
+	assert.equal(out.length, 2);
+	const [camp, alt] = out;
+	assert.deepEqual(camp.slice(0, 2), ['Spot 2 of 3', 'Click to search here next']);
+	assert.deepEqual(alt.slice(0, 2), ['Spot 3 of 3', 'It also spawns here']);
+	assert.ok(alt[2] < camp[2], `the alt mark is smaller (${alt[2]} vs ${camp[2]})`);
+});
+
 test('hidden on a taxi, in an instance and without a target; zone name on another continent', () => {
 	const [out] = run(`
 		local seen = {}

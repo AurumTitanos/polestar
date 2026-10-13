@@ -192,7 +192,7 @@ step The Vilebranch temples
   tip West of the island, the Vilebranch scalpers hold the temples of Agol'watha and Shaol'watha. Slagtree's tools lie at one of the temples.
   goto 69.0,46.5 "Agol'watha"
   kill 4466 quest 7844.1
-  collect 19033 quest 7839.1 @66.4,44.8
+  collect 19033 quest 7839.1
 
 step The central hills
   tip The Silvermane Stalkers, Savage Owlbeasts and Razorbeak Skylords share the hills between the temples and Skulk Rock. Use the Wildkin Muisek Vessel on the owlbeasts you kill. The Skylords also drop Long Elegant Feathers: keep ten for Otho's second message.
