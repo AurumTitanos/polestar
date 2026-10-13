@@ -162,11 +162,11 @@ test('the default author is git config user.name, read from where new runs', () 
 
 test('origin URLs: SSH and http become https; credentials, query and fragment are dropped; anything else is skipped with the reason', () => {
 	for (const [origin, want] of [
-		['git@github.com:fitz/polestar.git', 'https://github.com/fitz/polestar.git'],
-		['ssh://git@github.com/fitz/polestar.git', 'https://github.com/fitz/polestar.git'],
-		['https://fitz:s3cret@github.com/fitz/polestar.git', 'https://github.com/fitz/polestar.git'],
-		['http://github.com/fitz/polestar.git', 'https://github.com/fitz/polestar.git'],
-		['https://github.com/fitz/polestar.git?ref=x;rm%20-rf#frag', 'https://github.com/fitz/polestar.git'],
+		['git@github.com:example/polestar.git', 'https://github.com/example/polestar.git'],
+		['ssh://git@github.com/example/polestar.git', 'https://github.com/example/polestar.git'],
+		['https://someone:s3cret@github.com/example/polestar.git', 'https://github.com/example/polestar.git'],
+		['http://github.com/example/polestar.git', 'https://github.com/example/polestar.git'],
+		['https://github.com/example/polestar.git?ref=x;rm%20-rf#frag', 'https://github.com/example/polestar.git'],
 	]) {
 		const dir = path.join(tmp(), 'p');
 		assert.equal(polestar(['new', dir, ...ARGS], { origin }).status, 0);
