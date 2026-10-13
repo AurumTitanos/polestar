@@ -1523,6 +1523,25 @@ function W.RepaintButton(b)
 	end
 end
 
+-- The page subtitle: at most two lines, in a box of 32px (two lines of the
+-- note role in any font, short of a third). Its top sits at 66 (the title's
+-- foot at 58, 8px gap), its foot at 98, 14px above the tab row.
+local SUBTITLE_LINES, SUBTITLE_H = 2, 32
+local ELLIPSIS = "\226\128\166"
+
+-- Set `text` on a wrapping string bound in width; past `lines` lines, the
+-- last words give way to an ellipsis.
+local function fitLines(fs, text, lines)
+	fs:SetText(text)
+	if fs:GetNumLines() <= lines then return end
+	local words = {}
+	for w in text:gmatch("%S+") do words[#words + 1] = w end
+	for k = #words - 1, 1, -1 do
+		fs:SetText(table.concat(words, " ", 1, k):gsub("[,;:%.%s]+$", "") .. ELLIPSIS)
+		if fs:GetNumLines() <= lines then return end
+	end
+end
+
 -- opts: { width, height, title, subtitle, searchPlaceholder, onSearch,
 --         scalePath = "ui.menuScale" (the window's scale setting) }
 --
@@ -1658,10 +1677,14 @@ function W.Shell(name, opts)
 	-- Clear of the close button (28px, 12px in, 12px gap): a long title (a
 	-- guide pack's) ends in an ellipsis.
 	f.Title:SetPoint("TOPRIGHT", head, "TOPRIGHT", -(12 + 28 + 12), -32)
-	f.Title:SetText(opts.title or "")
+	-- The subtitle: up to two lines between the pads, under the close button
+	-- and clear of it, cut with an ellipsis after the second (W.ShellTitle).
 	f.Subtitle = W.Text(head, "note", "textDim")
 	f.Subtitle:SetPoint("TOPLEFT", f.Title, "BOTTOMLEFT", 0, -8)
-	f.Subtitle:SetText(opts.subtitle or "")
+	f.Subtitle:SetHeight(SUBTITLE_H)
+	f.Subtitle:SetWordWrap(true)
+	f.Subtitle:SetJustifyV("TOP")
+	f.Subtitle:SetSpacing(2)
 	f.Close = W.IconButton(head, "close", 28, L["Close"], function() f:Hide() end, 14)
 	f.Close:SetPoint("TOPRIGHT", head, "TOPRIGHT", -12, -12)
 
@@ -1698,6 +1721,9 @@ function W.Shell(name, opts)
 	f.Scroll:SetPoint("BOTTOMRIGHT", f.Content, "BOTTOMRIGHT", -4, 4)
 	f.Body = f.Scroll.Child
 	f.BodyWidth = Wd - RAIL - SB - 2 - SHELL.pad * 2
+	W.ShellTitle(f, opts.title, opts.subtitle)
+	-- Refit the subtitle in a new font.
+	W.Painter(f.Subtitle, function(fs) fitLines(fs, f.lsSubtitle or "", SUBTITLE_LINES) end)
 	W.ShellTabs(f, nil)
 
 	if opts.scalePath then
@@ -1811,7 +1837,10 @@ end
 -- subtitle, so it never jumps between pages.
 function W.ShellTitle(f, title, subtitle)
 	f.Title:SetText(title or "")
-	f.Subtitle:SetText(subtitle or "")
+	f.lsSubtitle = subtitle or ""
+	-- The main column's width between its pads (a hub's narrower column too).
+	f.Subtitle:SetWidth(f.BodyWidth)
+	fitLines(f.Subtitle, f.lsSubtitle, SUBTITLE_LINES)
 	f.Subtitle:SetShown(subtitle ~= nil and subtitle ~= "")
 end
 

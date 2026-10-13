@@ -982,6 +982,17 @@ function dumpPanel(panel, prelude) {
 	return dump;
 }
 
+// The scenes' temporary Codex, Dungeons and Rares packs, removed after a
+// scene's panels are dumped.
+function cleanupPacks() {
+	if (codexPack) codexPack.cleanup();
+	codexPack = null;
+	if (dungeonsPack) dungeonsPack.cleanup();
+	dungeonsPack = null;
+	if (raresPack) raresPack.cleanup();
+	raresPack = null;
+}
+
 async function run(argv) {
 	const only = new Set(argv.filter((a) => !a.startsWith('-')));
 	const fonts = loadFonts();
@@ -997,12 +1008,7 @@ async function run(argv) {
 		try {
 			panels = scene.panels.map((p, i) => svg(dumpPanel(p, prelude), { fonts, textures, roots: p.roots, prefix: `p${i}`, shared }));
 		} finally {
-			if (codexPack) codexPack.cleanup();
-			codexPack = null;
-			if (dungeonsPack) dungeonsPack.cleanup();
-			dungeonsPack = null;
-			if (raresPack) raresPack.cleanup();
-			raresPack = null;
+			cleanupPacks();
 		}
 		const file = path.join(outDir, scene.file);
 		fs.writeFileSync(file, compose(panels, { title: scene.title, shared, backdrop: scene.backdrop }));
@@ -1028,4 +1034,11 @@ module.exports = {
 	].join('\n'),
 	run,
 	SCENES,
+	// For tests/text-fit.test.js: the scenes' dumps without drawing them.
+	FILES,
+	MODULE_FILES,
+	loadFonts,
+	metricsLua,
+	dumpPanel,
+	cleanupPacks,
 };

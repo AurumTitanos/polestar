@@ -529,3 +529,27 @@ test('the settings carry the hub rail: a section goes back to the hub, in the sa
 	assert.deepEqual(out.back.at, ['TOPLEFT', true, 'BOTTOMLEFT', 300, 50 + 680]);
 	assert.equal(out.back.section, 'Guides');
 });
+
+// The page subtitle wraps between the main column's pads, two lines at most,
+// the rest cut with an ellipsis; the hub's narrower column bounds it too.
+test('a shell subtitle wraps to two lines within the main column and cuts the rest', () => {
+	const [out] = run(`
+		local W = Polestar.Widgets
+		UI.ShowOptions("appearance")
+		local f = PolestarOptions
+		local s = f.Subtitle
+		local page = { text = s:GetText(), width = s:GetWidth(), lines = s:GetNumLines(), wrap = s:GetWordWrap(), height = s:GetHeight() }
+		local long = string.rep("A long subtitle that runs on. ", 12)
+		W.ShellTitle(f, "Title", long)
+		local cut = { text = s:GetText(), lines = s:GetNumLines() }
+		UI.ShowPicker()
+		emit({ page = page, cut = cut, bodyWidth = f.BodyWidth, hub = { width = PolestarPicker.Subtitle:GetWidth(), bodyWidth = PolestarPicker.BodyWidth } })`);
+	assert.match(out.page.text, /^Colours, type, window frames and the arrow\./);
+	assert.equal(out.page.wrap, true);
+	assert.equal(out.page.width, out.bodyWidth);
+	assert.ok(out.page.lines <= 2, `${out.page.lines} lines`);
+	assert.ok(out.page.height < 112 - 66, `box ${out.page.height}px`);
+	assert.equal(out.cut.lines, 2);
+	assert.match(out.cut.text, /^A long subtitle that runs on\. .*\S\u2026$/);
+	assert.equal(out.hub.width, out.hub.bodyWidth);
+});
