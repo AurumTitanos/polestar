@@ -28,7 +28,15 @@ next forever/alliance/05-duskwood
 #   (118, Smith Argus in Goldshire) and Theocritus' Retrieval (178, a pendant
 #   drop for the Tower of Azora).
 #
-# Class quests: none woven in on this leg; train in Stormwind on the way.
+# Class quests at the Stormwind stop (about level 21): Rogues take Mathias and
+# the Defias (2360, Poisons; finished at the end of 05-duskwood), Warlocks
+# Devourer of Souls (1716, the Succubus; carried to Takar the Seer in
+# 07-thousand-needles), Priests their level 20 spell: Arcane Feedback (5676,
+# Human, here), A Lack of Fear (5645, Dwarf) and Contingency Plan (94819,
+# Gnome) for Ironforge in 06-ashenvale, Elune's Grace (5673, Night Elf) for
+# Darnassus on arrival in Auberdine (06-ashenvale). Night Elf Druids fetch
+# the Westfall half pendant for Trial of the Sea Lion (272). Train in
+# Stormwind on the way.
 #
 # Not taken: Tharil'zun, Shadow Magic, Wanted: Gath'Ilzogg and Morganth (19,
 # 115, 169, 249: elite targets), Blackrock Blockade (98387) and the
@@ -46,6 +54,25 @@ step Stormwind
   tip The Auberdine boat docks at Stormwind Harbor. Walk up into the city for training, then leave by the main gate and follow the road east through Elwynn Forest.
   train class                                 -- Level 18 and 20 spells
   vendor nearest
+
+step Stormwind class quests
+  only Priest,Rogue,Warlock
+  zone Stormwind City
+  tip Master Mathias Shaw is at SI:7 in Old Town, Gakin the Darkbinder in the Slaughtered Lamb's cellar in the Mage Quarter, High Priestess Laurena in the Cathedral of Light.
+  accept 2360 only Rogue                      -- Master Mathias Shaw: Agent Kearnen in Westfall takes it, at the end of Duskwood
+  accept 1716 only Warlock                    -- Gakin the Darkbinder: Takar the Seer in the Barrens takes it, later
+  accept 5676 only Human,Priest               -- High Priestess Laurena
+  turnin 5676 only Human,Priest               -- Arcane Feedback
+  accept 5645 only Dwarf,Priest               -- High Priestess Laurena: High Priest Rohan in Ironforge takes it, later
+  accept 94819 npc 376 only Gnome,Priest      -- High Priestess Laurena: High Priestess Mims in Ironforge takes it, later
+  accept 5673 only NightElf,Priest            -- High Priestess Laurena: Priestess Alathea in Darnassus takes it, later
+
+step Half Pendant of Aquatic Endurance
+  only NightElf,Druid
+  zone Westfall
+  tip Fly to Sentinel Hill and ride north-west to the coast: the Strange Lockbox lies on the sea floor off the shore. Then ride east along the road through Elwynn to Redridge.
+  fly "Sentinel Hill"
+  collect 15882 x1                            -- Half Pendant of Aquatic Endurance: the Strange Lockbox
 
 step Three Corners
   zone Redridge Mountains

@@ -36,6 +36,8 @@
 #   Death From Below (667) need Sunken Treasure (669), handed to Fleet Master
 #   Seahorn in Booty Bay in that same later guide; Goblin Sponsorship (1182)
 #   needs the Ratchet chain (1180, 1181), which no Alliance guide takes.
+# Class quests: Warlocks hand the Heartswood to Gakin and summon their
+# Succubus (1738, 1739) at the Stormwind stop.
 # Class training: Stormwind, around level 38.
 guide forever/alliance/30-40/05-arathi-highlands
 title Arathi Highlands, Alterac Mountains & Swamp of Sorrows
@@ -106,6 +108,14 @@ step Stormwind
   accept 6141                         -- Brother Crowley, Cathedral of Light
   accept 538                          -- Milton Sheaf, the Royal Library in the keep
   train class
+
+step The Binding
+  only Warlock
+  tip Gakin the Darkbinder waits in the Slaughtered Lamb's cellar, in the Mage Quarter. Use the Heartswood Core at the summoning circle there and defeat the succubus it calls.
+  turnin 1738                         -- Gakin the Darkbinder
+  accept 1739
+  complete 1739                       -- Subdue the succubus
+  turnin 1739                         -- Summon Succubus
 
 # ---------------------------------------------------------------- Southshore
 

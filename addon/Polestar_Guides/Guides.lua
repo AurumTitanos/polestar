@@ -372,11 +372,35 @@ do
 					},
 				},
 				{
+					title = "A Lesson to Learn",
+					note = "Fly from Auberdine to Rut'theran Village and take the portal up to Mathrengyl Bearwalker in the Cenarion Enclave.",
+					only = { classes = { "DRUID" }, races = { "NightElf" } },
+					goals = {
+						{ t = "fly", location = "Rut'theran Village" },
+						{ t = "accept", quest = 26, title = "A Lesson to Learn", npc = 4217, npcName = "Mathrengyl Bearwalker", minLevel = 16, qlvl = 16, map = 1457, x = 35.37, y = 8.4, f = "e", note = "Mathrengyl Bearwalker" },
+					},
+				},
+				{
+					title = "Trial of the Lake",
+					note = "Cast Teleport: Moonglade. Dendrite Starblaze is in Nighthaven. Shrine Baubles lie in the containers on the floor of Lake Elune'ara, below Nighthaven: take one to the Shrine of Remulos in the north-west, use it there and speak to Tajarri. Then fly back to Auberdine from Nighthaven.",
+					only = { classes = { "DRUID" }, races = { "NightElf" } },
+					goals = {
+						{ t = "turnin", quest = 26, title = "A Lesson to Learn", npc = 11802, npcName = "Dendrite Starblaze", map = 1450, x = 56.21, y = 30.64, f = "e", note = "Dendrite Starblaze" },
+						{ t = "accept", quest = 29, title = "Trial of the Lake", npc = 11802, npcName = "Dendrite Starblaze", minLevel = 16, qlvl = 16, pre = { 26 }, preTitles = { [26] = "A Lesson to Learn" }, map = 1450, x = 56.21, y = 30.64, f = "e" },
+						{ t = "collect", item = 15877, itemName = "Shrine Bauble", count = 1, map = 1450, x = 54.7, y = 46.4, f = "e", spots = { { x = 52, y = 49.3, r = 99, n = 6 }, { x = 56.4, y = 53.4, r = 63, n = 3 }, { x = 60.5, y = 58.3, r = 15, n = 1, alt = true } }, note = "Shrine Bauble, from a Bauble Container in the lake", from = "Bauble Container", fromKind = "object" },
+						{ t = "use", item = 15877, itemName = "Shrine Bauble", map = 1450, x = 36, y = 41.4, f = "e", note = "At the Shrine of Remulos" },
+						{ t = "complete", quest = 29, title = "Trial of the Lake" },
+						{ t = "turnin", quest = 29, title = "Trial of the Lake", npc = 11799, npcName = "Tajarri", map = 1450, x = 36.52, y = 40.1, f = "e", note = "Tajarri" },
+						{ t = "accept", quest = 272, title = "Trial of the Sea Lion", npc = 11799, npcName = "Tajarri", minLevel = 16, qlvl = 16, pre = { 29 }, preTitles = { [29] = "Trial of the Lake" }, map = 1450, x = 36.52, y = 40.1, f = "e", note = "The half pendants lie in Darkshore and Westfall: later on the route" },
+						{ t = "fly", location = "Auberdine" },
+					},
+				},
+				{
 					title = "Blackwood furbolgs",
 					note = "Blackwood Pathfinders and Windtalkers hold the camp south-east of Auberdine.",
 					goals = {
-						{ t = "kill", quest = 985, title = "How Big a Threat?", target = "Blackwood Pathfinder", npc = 2167, count = 8, oi = 1, map = 1439, x = 39.34, y = 52.24, f = "e", spots = { { x = 39.5, y = 53.4, r = 52, n = 8 }, { x = 39.7, y = 56.3, r = 36, n = 4 } } },
-						{ t = "kill", quest = 985, title = "How Big a Threat?", target = "Blackwood Windtalker", npc = 2324, count = 5, oi = 2, map = 1439, x = 39.06, y = 52.63, f = "e", spots = { { x = 39.7, y = 53.6, r = 60, n = 9 }, { x = 39.8, y = 56.1, r = 39, n = 4 } } },
+						{ t = "kill", quest = 985, title = "How Big a Threat?", target = "Blackwood Pathfinder", npc = 2167, count = 8, oi = 1, map = 1439, x = 39.56, y = 54.37, f = "e", spots = { { x = 39.5, y = 53.4, r = 52, n = 8 }, { x = 39.7, y = 56.3, r = 36, n = 4 } } },
+						{ t = "kill", quest = 985, title = "How Big a Threat?", target = "Blackwood Windtalker", npc = 2324, count = 5, oi = 2, map = 1439, x = 39.62, y = 54.04, f = "e", spots = { { x = 39.7, y = 53.6, r = 60, n = 9 }, { x = 39.8, y = 56.1, r = 39, n = 4 } } },
 					},
 				},
 				{
@@ -467,6 +491,7 @@ do
 						{ t = "collect", quest = 2098, title = "Gyromast's Retrieval", item = 7499, itemName = "Middle of Gelkak's Key", oi = 2, map = 1439, x = 55.46, y = 12.62, f = "e", spots = { { x = 55.1, y = 12.4, r = 40, n = 7 }, { x = 31.5, y = 83.5, r = 40, n = 4 }, { x = 31, y = 85.5, r = 40, n = 3 }, { x = 31.2, y = 87.5, r = 40, n = 5 } }, spread = true },
 						{ t = "collect", quest = 2098, title = "Gyromast's Retrieval", item = 7500, itemName = "Bottom of Gelkak's Key", oi = 3, map = 1439, x = 56.39, y = 12.51, f = "e", spots = { { x = 56.6, y = 12.3, r = 40, n = 3 }, { x = 56.1, y = 14.7, r = 40, n = 2 }, { x = 57.5, y = 14.5, r = 40, n = 1 }, { x = 56, y = 16.9, r = 44, n = 5 }, { x = 55.2, y = 18.8, r = 40, n = 2 }, { x = 32.9, y = 89, r = 40, n = 1 }, { x = 30.9, y = 89.7, r = 41, n = 4 }, { x = 29.4, y = 90.5, r = 53, n = 5 } }, spread = true },
 						{ t = "turnin", quest = 2098, title = "Gyromast's Retrieval", npc = 6667, npcName = "Gelkak Gyromast", map = 1439, x = 56.66, y = 13.48, f = "e" },
+						{ t = "collect", item = 15883, itemName = "Half Pendant of Aquatic Agility", count = 1, map = 1439, x = 48.87, y = 11.32, f = "e", only = { classes = { "DRUID" }, races = { "NightElf" } }, note = "Half Pendant of Aquatic Agility: the Strange Lockbox under the water off the north coast, west of the ruins", from = "Strange Lockbox", fromKind = "object" },
 					},
 				},
 				{
@@ -594,7 +619,69 @@ do
 						{ t = "turnin", quest = 994, title = "Escape Through Force", npc = 3693, npcName = "Terenthis", map = 1439, x = 39.37, y = 43.48, f = "e", note = "Terenthis" },
 						{ t = "accept", quest = 990, title = "Trek to Ashenvale", npc = 3694, npcName = "Sentinel Selarin", minLevel = 15, qlvl = 19, pre = { 994, 995 }, preTitles = { [994] = "Escape Through Force", [995] = "Escape Through Stealth" }, map = 1439, x = 39.28, y = 43.46, f = "e", note = "Sentinel Selarin: for Raene Wolfrunner in Astranaar, on the later Ashenvale leg" },
 						{ t = "vendor", candidates = { { npc = 6300, npcName = "Elisa Steelhand", map = 1439, x = 38.14, y = 41.11, f = "e", faction = "A" }, { npc = 15315, npcName = "Mylini Frostmoon", map = 1448, x = 62.41, y = 25.78, f = "e", faction = "A" }, { npc = 12024, npcName = "Meliri", map = 1450, x = 51.18, y = 42.31, f = "e", faction = "AH" }, { npc = 3612, npcName = "Sinda", map = 1438, x = 56.33, y = 59.59, f = "e", faction = "A" }, { npc = 3952, npcName = "Aeolynn", map = 1440, x = 34.47, y = 49.52, f = "e", faction = "A" }, { npc = 4234, npcName = "Andrus", map = 1457, x = 56.13, y = 88.91, f = "e", faction = "A" }, { npc = 4188, npcName = "Illyanie", map = 1442, x = 35.59, y = 7.35, f = "e", faction = "A" }, { npc = 4164, npcName = "Cylania", map = 1457, x = 59.24, y = 46.36, f = "e", faction = "A" }, { npc = 3589, npcName = "Keina", map = 1438, x = 59.31, y = 41.09, f = "e", faction = "A" }, { npc = 3951, npcName = "Bhaldaran Ravenshade", map = 1440, x = 50.27, y = 67.27, f = "e", faction = "A" }, { npc = 4085, npcName = "Nizzik", map = 1442, x = 62.7, y = 40.18, f = "e", faction = "AH" }, { npc = 11182, npcName = "Nixxrak", map = 1452, x = 61.62, y = 37.87, f = "e", faction = "AH" }, { npc = 4086, npcName = "Veenix", map = 1442, x = 58.22, y = 51.74, f = "e", faction = "AH" }, { npc = 14753, npcName = "Illiyana Moonblaze", map = 1440, x = 61.49, y = 83.86, f = "e", faction = "A" }, { npc = 14301, npcName = "Brinna Valanaar", map = 1447, x = 12, y = 78.38, f = "e", faction = "A" }, { npc = 1322, npcName = "Maxton Strang", map = 1443, x = 67.93, y = 8.31, f = "e", faction = "A" }, { npc = 3684, npcName = "Pizznukle", map = 1413, x = 41.77, y = 38.62, f = "e", faction = "AH" }, { npc = 3491, npcName = "Ironzar", map = 1413, x = 62.24, y = 37.48, f = "e", faction = "AH" }, { npc = 1695, npcName = "Rendow", map = 1441, x = 7.6, y = 17.9, f = "e", faction = "A" }, { npc = 7852, npcName = "Pratt McGrubben", map = 1444, x = 30.63, y = 42.71, f = "e", faction = "A" }, { npc = 4890, npcName = "Piter Verance", map = 1445, x = 67.39, y = 47.86, f = "e", faction = "A" }, { npc = 3000, npcName = "Gibbert", map = 1449, x = 44.1, y = 7.19, f = "e", faction = "AH" }, { npc = 15176, npcName = "Vargus", map = 1451, x = 51.23, y = 38.86, f = "e", faction = "AH" }, { npc = 3053, npcName = "Synge", map = 1441, x = 80.4, y = 77.01, f = "e", faction = "AH" }, { npc = 8131, npcName = "Blizrik Buckshot", map = 1446, x = 50.74, y = 27.53, f = "e", faction = "AH" }, { npc = 3537, npcName = "Zixil", map = 1416, x = 53.6, y = 98.7, f = "e", faction = "AH" }, { npc = 13217, npcName = "Thanthaldis Snowgleam", map = 1416, x = 39.45, y = 81.65, f = "e", faction = "A" }, { npc = 1471, npcName = "Jannos Ironwill", map = 1417, x = 45.98, y = 47.72, f = "e", faction = "A" }, { npc = 9179, npcName = "Jazzrik", map = 1418, x = 42.47, y = 52.5, f = "e", faction = "AH" }, { npc = 9544, npcName = "Yuka Screwspigot", map = 1418, x = 4.9, y = 94.7, f = "e", faction = "AH" }, { npc = 5508, npcName = "Strumner Flintheel", map = 1419, x = 66.08, y = 17.16, f = "e", faction = "A" }, { npc = 3528, npcName = "Pyrewood Armorer", map = 1421, x = 46.4, y = 71.88, f = "e", faction = "A" }, { npc = 3534, npcName = "Wallace the Blind", map = 1421, x = 46.5, y = 86.49, f = "e", faction = "AH" }, { npc = 10856, npcName = "Argent Quartermaster Hasana", map = 1422, x = 26.6, y = 55.2, f = "e", faction = "AH" }, { npc = 10857, npcName = "Argent Quartermaster Lightspark", map = 1422, x = 42.84, y = 83.72, f = "e", faction = "AH" }, { npc = 11278, npcName = "Magnus Frostwake", map = 1422, x = 68.12, y = 77.57, f = "e", faction = "AH" }, { npc = 12942, npcName = "Leonard Porter", map = 1422, x = 43.08, y = 84.31, f = "e", faction = "A" }, { npc = 16376, npcName = "Craftsman Wilhelm", map = 1423, x = 71.24, y = 49.9, faction = "AH" }, { npc = 2404, npcName = "Blacksmith Verringtan", map = 1424, x = 32.11, y = 44.42, f = "e", faction = "A" }, { npc = 3536, npcName = "Kris Legace", map = 1424, x = 80.14, y = 38.89, f = "e", faction = "AH" }, { npc = 3543, npcName = "Robert Aebischer", map = 1424, x = 51.21, y = 56.98, f = "e", faction = "A" }, { npc = 8161, npcName = "Harggan", map = 1424, x = 98.7, y = 3.1, f = "e", faction = "A" }, { npc = 836, npcName = "Durnan Furcutter", map = 1426, x = 28.77, y = 66.37, f = "e", faction = "A" }, { npc = 1238, npcName = "Gamili Frosthide", map = 1426, x = 45.18, y = 51.93, f = "e", faction = "A" }, { npc = 1698, npcName = "Frast Dokner", map = 1426, x = 69, y = 55.89, f = "e", faction = "A" }, { npc = 3162, npcName = "Burdrak Harglhelm", map = 1426, x = 30.11, y = 45.28, f = "e", faction = "A" }, { npc = 3177, npcName = "Turuk Amberstill", map = 1426, x = 62.9, y = 49.89, f = "e", faction = "A" }, { npc = 11703, npcName = "Graw Cornerstone", map = 1427, x = 41.5, y = 74.97, f = "e", faction = "A" }, { npc = 14624, npcName = "Master Smith Burninate", map = 1427, x = 38.8, y = 28.51, f = "e", faction = "AH" }, { npc = 1296, npcName = "Felder Stover", map = 1428, x = 85.21, y = 68.39, f = "e", faction = "A" }, { npc = 54, npcName = "Corina Steele", map = 1429, x = 41.53, y = 65.9, f = "e", faction = "A" }, { npc = 78, npcName = "Janos Hammerknuckle", map = 1429, x = 47.24, y = 41.9, f = "e", faction = "A" }, { npc = 896, npcName = "Veldan Lightfoot", map = 1429, x = 25.18, y = 73.89, f = "e", faction = "A" }, { npc = 959, npcName = "Morley Eberlein", map = 1429, x = 64.69, y = 69.51, f = "e", faction = "A" }, { npc = 1198, npcName = "Rallic Finn", map = 1429, x = 83.28, y = 66.09, f = "e", faction = "A" }, { npc = 225, npcName = "Gavin Gnarltree", map = 1431, x = 73.6, y = 50.04, f = "e", faction = "A" }, { npc = 167, npcName = "Morhan Coppertongue", map = 1432, x = 34.02, y = 46.54, f = "e", faction = "A" }, { npc = 222, npcName = "Nillen Andemar", map = 1432, x = 42.87, y = 9.89, f = "e", faction = "A" }, { npc = 954, npcName = "Kat Sampson", map = 1432, x = 82.65, y = 64.11, f = "e", faction = "A" }, { npc = 1214, npcName = "Aldren Cordon", map = 1432, x = 64.82, y = 66.05, f = "e", faction = "A" }, { npc = 1362, npcName = "Gothor Brumn", map = 1432, x = 24.13, y = 18.21, f = "e", faction = "A" }, { npc = 789, npcName = "Kimberly Hiett", map = 1433, x = 21.99, y = 45.55, faction = "A" }, { npc = 3097, npcName = "Bernard Brubaker", map = 1433, x = 83.16, y = 71.02, faction = "A" }, { npc = 2482, npcName = "Zarena Cromwind", map = 1434, x = 28.34, y = 75.46, f = "e", faction = "AH" }, { npc = 2483, npcName = "Jaquilina Dramet", map = 1434, x = 35.75, y = 10.66, f = "e", faction = "AH" }, { npc = 14921, npcName = "Rin'wosho the Trader", map = 1434, x = 15.07, y = 16, f = "e", faction = "AH" }, { npc = 1668, npcName = "William MacGregor", map = 1436, x = 57.71, y = 53.94, f = "e", faction = "A" }, { npc = 1669, npcName = "Defias Profiteer", map = 1436, x = 43.47, y = 66.76, f = "e", faction = "AH" }, { npc = 1441, npcName = "Brak Durnad", map = 1437, x = 11.44, y = 59.69, f = "e", faction = "A" }, { npc = 2679, npcName = "Wenna Silkbeard", map = 1437, x = 25.61, y = 25.8, f = "e", faction = "A" }, { npc = 1287, npcName = "Marda Weller", map = 1453, x = 64.07, y = 68.36, faction = "A" }, { npc = 5509, npcName = "Kathrum Axehand", map = 1453, x = 59.3, y = 33.82, faction = "A" }, { npc = 4259, npcName = "Thurgrum Deepforge", map = 1455, x = 51.74, y = 42.78, f = "e", faction = "A" }, { npc = 5119, npcName = "Hegnar Swiftaxe", map = 1455, x = 62.19, y = 88.16, f = "e", faction = "A" }, { npc = 5133, npcName = "Harick Boulderdrum", map = 1455, x = 23.13, y = 15.94, f = "e", faction = "A" }, { npc = 4257, npcName = "Lana Thunderbrew", map = 1459, x = 43.41, y = 15.64, f = "e", faction = "A" } } },
-						{ t = "goto", text = "Boat to Stormwind", map = 1439, x = 32.4, y = 43.8, f = "e" },
+						{ t = "goto", text = "Boat to Stormwind", map = 1450, x = 32.4, y = 43.8, f = "e" },
+					},
+				},
+				{
+					title = "The Great Cat Spirit",
+					note = "Night Elves fly from Auberdine to Rut'theran Village; Skyborne take the boat from the Auberdine dock and learn the Rut'theran flight path there. Take the portal up to Mathrengyl Bearwalker in the Cenarion Enclave.",
+					only = { classes = { "DRUID" } },
+					goals = {
+						{ t = "fly", location = "Rut'theran Village", only = { races = { "NightElf" } } },
+						{ t = "getfp", location = "Rut'theran Village", only = { races = { "Skyborne" } } },
+						{ t = "accept", quest = 98393, title = "The Great Cat Spirit", npc = 4217, npcName = "Mathrengyl Bearwalker", minLevel = 20, qlvl = 20, map = 1457, x = 35.37, y = 8.4, f = "e", note = "Mathrengyl Bearwalker" },
+					},
+				},
+				{
+					title = "Dendrite Starblaze",
+					note = "Cast Teleport: Moonglade. Dendrite Starblaze is in Nighthaven; learn the flight path there if you do not have it.",
+					only = { classes = { "DRUID" } },
+					goals = {
+						{ t = "turnin", quest = 98393, title = "The Great Cat Spirit", npc = 11802, npcName = "Dendrite Starblaze", map = 1450, x = 56.21, y = 30.64, f = "e", note = "Dendrite Starblaze" },
+						{ t = "accept", quest = 98394, title = "The Great Cat Spirit", npc = 11802, npcName = "Dendrite Starblaze", minLevel = 20, qlvl = 20, map = 1450, x = 56.21, y = 30.64, f = "e", only = { races = { "NightElf" } } },
+						{ t = "accept", quest = 98341, title = "The Great Windborne Cat Spirit", npc = 11802, npcName = "Dendrite Starblaze", minLevel = 20, qlvl = 20, map = 1450, x = 56.21, y = 30.64, f = "e", only = { races = { "Skyborne" } } },
+						{ t = "getfp", location = "Moonglade" },
+					},
+				},
+				{
+					title = "The relics of the Barrow Dens",
+					note = "The Great Cat Spirit (Night Elves) and the Avatar of Saeyleenan (Skyborne) wait in southern Moonglade. The three relics lie in the Stormrage Barrow Dens, east of them. Reports from the first weeks say a relic gives no loot while another player is looting it: wait a moment and try again.",
+					only = { classes = { "DRUID" } },
+					goals = {
+						{ t = "turnin", quest = 98394, title = "The Great Cat Spirit", npc = 11957, npcName = "Great Cat Spirit", map = 1450, x = 58.39, y = 73.52, f = "e", only = { races = { "NightElf" } }, note = "Great Cat Spirit" },
+						{ t = "accept", quest = 98396, title = "The Great Cat Spirit", npc = 11957, npcName = "Great Cat Spirit", minLevel = 20, qlvl = 20, map = 1450, x = 58.39, y = 73.52, f = "e", only = { races = { "NightElf" } } },
+						{ t = "turnin", quest = 98341, title = "The Great Windborne Cat Spirit", npc = 272054, npcName = "Avatar of Saeyleenan", map = 1450, x = 44, y = 73.4, f = "e", only = { races = { "Skyborne" } }, note = "Avatar of Saeyleenan" },
+						{ t = "accept", quest = 98404, title = "The Great Windborne Cat Spirit", npc = 272054, npcName = "Avatar of Saeyleenan", minLevel = 20, qlvl = 20, map = 1450, x = 44, y = 73.4, f = "e", only = { races = { "Skyborne" } } },
+						{ t = "collect", quest = 98396, title = "The Great Cat Spirit", item = 280502, itemName = "Relic of the Fang", count = 1, oi = 1, map = 1450, x = 72.4, y = 66, f = "e", only = { races = { "NightElf" } }, note = "Relic of the Fang" },
+						{ t = "collect", quest = 98396, title = "The Great Cat Spirit", item = 280679, itemName = "Relic of the Claw", oi = 2, map = 1450, x = 75.2, y = 67.2, f = "e", only = { races = { "NightElf" } }, note = "Relic of the Claw" },
+						{ t = "collect", quest = 98396, title = "The Great Cat Spirit", item = 280680, itemName = "Relic of the Silent Shadow", oi = 3, map = 1450, x = 74.4, y = 65.4, f = "e", only = { races = { "NightElf" } }, note = "Relic of the Silent Shadow" },
+						{ t = "collect", quest = 98404, title = "The Great Windborne Cat Spirit", item = 280502, itemName = "Relic of the Fang", count = 1, oi = 1, map = 1450, x = 72.4, y = 66, f = "e", only = { races = { "Skyborne" } }, note = "Relic of the Fang" },
+						{ t = "collect", quest = 98404, title = "The Great Windborne Cat Spirit", item = 280679, itemName = "Relic of the Claw", oi = 2, map = 1450, x = 75.2, y = 67.2, f = "e", only = { races = { "Skyborne" } }, note = "Relic of the Claw" },
+						{ t = "collect", quest = 98404, title = "The Great Windborne Cat Spirit", item = 280680, itemName = "Relic of the Silent Shadow", oi = 3, map = 1450, x = 74.4, y = 65.4, f = "e", only = { races = { "Skyborne" } }, note = "Relic of the Silent Shadow" },
+						{ t = "turnin", quest = 98396, title = "The Great Cat Spirit", npc = 11957, npcName = "Great Cat Spirit", map = 1450, x = 58.39, y = 73.52, f = "e", only = { races = { "NightElf" } }, note = "Great Cat Spirit" },
+						{ t = "accept", quest = 98731, title = "Blessings of the Great Cat Spirit", npc = 11957, npcName = "Great Cat Spirit", minLevel = 20, qlvl = 20, map = 1450, x = 58.39, y = 73.52, f = "e", only = { races = { "NightElf" } } },
+						{ t = "turnin", quest = 98404, title = "The Great Windborne Cat Spirit", npc = 272054, npcName = "Avatar of Saeyleenan", map = 1450, x = 44, y = 73.4, f = "e", only = { races = { "Skyborne" } }, note = "Avatar of Saeyleenan" },
+						{ t = "accept", quest = 98738, title = "Blessings of the Great Windborne Cat Spirit", npc = 272054, npcName = "Avatar of Saeyleenan", minLevel = 20, qlvl = 20, map = 1450, x = 44, y = 73.4, f = "e", only = { races = { "Skyborne" } } },
+					},
+				},
+				{
+					title = "Back to Dendrite",
+					note = "Back to Dendrite Starblaze in Nighthaven, then fly to Rut'theran Village (by way of Auberdine).",
+					only = { classes = { "DRUID" } },
+					goals = {
+						{ t = "turnin", quest = 98731, title = "Blessings of the Great Cat Spirit", npc = 11802, npcName = "Dendrite Starblaze", map = 1450, x = 56.21, y = 30.64, f = "e", only = { races = { "NightElf" } }, note = "Dendrite Starblaze" },
+						{ t = "turnin", quest = 98738, title = "Blessings of the Great Windborne Cat Spirit", npc = 11802, npcName = "Dendrite Starblaze", map = 1450, x = 56.21, y = 30.64, f = "e", only = { races = { "Skyborne" } } },
+						{ t = "accept", quest = 98397, title = "To Darnassus", npc = 11802, npcName = "Dendrite Starblaze", minLevel = 20, qlvl = 20, map = 1450, x = 56.21, y = 30.64, f = "e" },
+						{ t = "fly", location = "Rut'theran Village" },
+					},
+				},
+				{
+					title = "To Darnassus",
+					note = "Take the portal up to Mathrengyl, then fly back to Auberdine for the boat to Stormwind.",
+					only = { classes = { "DRUID" } },
+					goals = {
+						{ t = "turnin", quest = 98397, title = "To Darnassus", npc = 4217, npcName = "Mathrengyl Bearwalker", map = 1457, x = 35.37, y = 8.4, f = "e", note = "Mathrengyl Bearwalker: Cat Form" },
+						{ t = "fly", location = "Auberdine" },
 					},
 				},
 			},
@@ -626,6 +713,29 @@ do
 					goals = {
 						{ t = "train", class = true, note = "Level 18 and 20 spells", candidates = { { npc = 5491, npcName = "Arthur the Faithful", map = 1453, x = 49.61, y = 49.84, faction = "A", classes = { "PALADIN" } }, { npc = 5484, npcName = "Brother Benjamin", map = 1453, x = 52.28, y = 47.65, faction = "A", classes = { "PRIEST" } }, { npc = 5504, npcName = "Sheldras Moontree", map = 1453, x = 35.84, y = 67.38, faction = "A", classes = { "DRUID" } }, { npc = 5515, npcName = "Einris Brightspear", map = 1453, x = 67.35, y = 36.25, faction = "A", classes = { "HUNTER" } }, { npc = 5497, npcName = "Jennea Cannon", map = 1453, x = 49.56, y = 85.8, faction = "A", classes = { "MAGE" } }, { npc = 5495, npcName = "Ursula Deline", map = 1453, x = 39.89, y = 84.19, faction = "A", classes = { "WARLOCK" } }, { npc = 918, npcName = "Osborne the Night Man", map = 1453, x = 77.43, y = 65.31, faction = "A", classes = { "ROGUE" } }, { npc = 5480, npcName = "Ilsa Corbin", map = 1453, x = 80.41, y = 59.8, faction = "A", classes = { "WARRIOR" } }, { npc = 198, npcName = "Khelden Bremen", map = 1429, x = 49.66, y = 39.4, f = "e", faction = "A", classes = { "MAGE" } }, { npc = 375, npcName = "Priestess Anetta", map = 1429, x = 49.81, y = 39.49, f = "e", faction = "A", classes = { "PRIEST" } }, { npc = 459, npcName = "Drusilla La Salle", map = 1429, x = 49.87, y = 42.65, f = "e", faction = "A", classes = { "WARLOCK" } }, { npc = 915, npcName = "Jorik Kerridan", map = 1429, x = 50.31, y = 39.92, f = "e", faction = "A", classes = { "ROGUE" } }, { npc = 911, npcName = "Llane Beshere", map = 1429, x = 50.24, y = 42.29, f = "e", faction = "A", classes = { "WARRIOR" } }, { npc = 925, npcName = "Brother Sammuel", map = 1429, x = 50.43, y = 42.12, f = "e", faction = "A", classes = { "PALADIN" } }, { npc = 913, npcName = "Lyria Du Lac", map = 1429, x = 41.09, y = 65.77, f = "e", faction = "A", classes = { "WARRIOR" } }, { npc = 927, npcName = "Brother Wilhelm", map = 1429, x = 41.1, y = 66.04, f = "e", faction = "A", classes = { "PALADIN" } }, { npc = 251507, npcName = "Josephine Carson", map = 1429, x = 41.14, y = 66.32, f = "e", faction = "A", classes = { "HUNTER" } }, { npc = 248415, npcName = "Tordrin Sternblade", map = 1429, x = 51.13, y = 40.67, f = "e", faction = "A", classes = { "HUNTER" } }, { npc = 377, npcName = "Priestess Josetta", map = 1429, x = 43.28, y = 65.72, f = "e", faction = "A", classes = { "PRIEST" } }, { npc = 328, npcName = "Zaldimar Wefhellt", map = 1429, x = 43.25, y = 66.19, f = "e", faction = "A", classes = { "MAGE" } }, { npc = 917, npcName = "Keryn Sylvius", map = 1429, x = 43.87, y = 65.94, f = "e", faction = "A", classes = { "ROGUE" } }, { npc = 906, npcName = "Maximillian Crowe", map = 1429, x = 44.39, y = 66.24, f = "e", faction = "A", classes = { "WARLOCK" } }, { npc = 926, npcName = "Bromos Grummner", map = 1426, x = 28.83, y = 68.33, f = "e", faction = "A", classes = { "PALADIN" } }, { npc = 916, npcName = "Solm Hargrin", map = 1426, x = 28.37, y = 67.51, f = "e", faction = "A", classes = { "ROGUE" } }, { npc = 895, npcName = "Thorgas Grimson", map = 1426, x = 29.18, y = 67.45, f = "e", faction = "A", classes = { "HUNTER" } }, { npc = 912, npcName = "Thran Khorman", map = 1426, x = 28.83, y = 67.24, f = "e", faction = "A", classes = { "WARRIOR" } }, { npc = 837, npcName = "Branstock Khalder", map = 1426, x = 28.6, y = 66.39, f = "e", faction = "A", classes = { "PRIEST" } }, { npc = 944, npcName = "Marryk Nurribit", map = 1426, x = 28.71, y = 66.37, f = "e", faction = "A", classes = { "MAGE" } }, { npc = 257446, npcName = "Teo Hammerstorm", map = 1426, x = 28.84, y = 66.23, f = "e", faction = "A", classes = { "SHAMAN" } }, { npc = 460, npcName = "Alamar Grimm", map = 1426, x = 28.65, y = 66.14, f = "e", faction = "A", classes = { "WARLOCK" } }, { npc = 1231, npcName = "Grif Wildheart", map = 1426, x = 45.81, y = 53.04, f = "e", faction = "A", classes = { "HUNTER" } }, { npc = 5612, npcName = "Gimrizz Shadowcog", map = 1426, x = 47.33, y = 53.69, f = "e", faction = "A", classes = { "WARLOCK" } }, { npc = 1229, npcName = "Granis Swiftaxe", map = 1426, x = 47.36, y = 52.65, f = "e", faction = "A", classes = { "WARRIOR" } }, { npc = 1234, npcName = "Hogral Bakkan", map = 1426, x = 47.56, y = 52.61, f = "e", faction = "A", classes = { "ROGUE" } }, { npc = 1226, npcName = "Maxan Anvol", map = 1426, x = 47.34, y = 52.19, f = "e", faction = "A", classes = { "PRIEST" } }, { npc = 1228, npcName = "Magis Sparkmantle", map = 1426, x = 47.5, y = 52.08, f = "e", faction = "A", classes = { "MAGE" } }, { npc = 1232, npcName = "Azar Stronghammer", map = 1426, x = 47.6, y = 52.07, f = "e", faction = "A", classes = { "PALADIN" } }, { npc = 258113, npcName = "Ingrid Dunwald", map = 1426, x = 47.51, y = 51.95, f = "e", faction = "A", classes = { "SHAMAN" } }, { npc = 1901, npcName = "Kelstrum Stonebreaker", map = 1455, x = 66.97, y = 90.15, f = "e", faction = "A", classes = { "WARRIOR" } }, { npc = 5115, npcName = "Daera Brightspear", map = 1455, x = 70.97, y = 89.8, f = "e", faction = "A", classes = { "HUNTER" } }, { npc = 5142, npcName = "Braenna Flintcrag", map = 1455, x = 24.42, y = 9.17, f = "e", faction = "A", classes = { "PRIEST" } }, { npc = 7312, npcName = "Dink", map = 1455, x = 27.16, y = 8.57, f = "e", faction = "A", classes = { "MAGE" } }, { npc = 5149, npcName = "Brandur Ironhammer", map = 1455, x = 23.13, y = 6.14, f = "e", faction = "A", classes = { "PALADIN" } }, { npc = 258098, npcName = "Eldrun Stormbreaker", map = 1455, x = 47.49, y = 13.58, f = "e", faction = "A", classes = { "SHAMAN" } }, { npc = 5167, npcName = "Fenthwick", map = 1455, x = 51.5, y = 15.33, f = "e", faction = "A", classes = { "ROGUE" } }, { npc = 5173, npcName = "Alexander Calder", map = 1455, x = 50.08, y = 7.45, f = "e", faction = "A", classes = { "WARLOCK" } }, { npc = 3593, npcName = "Alyissia", map = 1438, x = 59.64, y = 38.44, f = "e", faction = "A", classes = { "WARRIOR" } }, { npc = 3594, npcName = "Frahun Shadewhisper", map = 1438, x = 59.64, y = 38.66, f = "e", faction = "A", classes = { "ROGUE" } }, { npc = 3595, npcName = "Shanda", map = 1438, x = 59.17, y = 40.44, f = "e", faction = "A", classes = { "PRIEST" } }, { npc = 3596, npcName = "Ayanna Everstride", map = 1438, x = 58.66, y = 40.45, f = "e", faction = "A", classes = { "HUNTER" } }, { npc = 3597, npcName = "Mardant Strongoak", map = 1438, x = 58.63, y = 40.29, f = "e", faction = "A", classes = { "DRUID" } }, { npc = 3598, npcName = "Kyra Windblade", map = 1438, x = 56.22, y = 59.2, f = "e", faction = "A", classes = { "WARRIOR" } }, { npc = 3599, npcName = "Jannok Breezesong", map = 1438, x = 56.38, y = 60.14, f = "e", faction = "A", classes = { "ROGUE" } }, { npc = 3600, npcName = "Laurna Morninglight", map = 1438, x = 55.56, y = 56.75, f = "e", faction = "A", classes = { "PRIEST" } }, { npc = 3601, npcName = "Dazalar", map = 1438, x = 56.68, y = 59.49, f = "e", faction = "A", classes = { "HUNTER" } }, { npc = 3602, npcName = "Kal", map = 1438, x = 55.95, y = 61.56, f = "e", faction = "A", classes = { "DRUID" } }, { npc = 4087, npcName = "Arias'ta Bladesinger", map = 1457, x = 58.71, y = 34.9, f = "e", faction = "A", classes = { "WARRIOR" } }, { npc = 4090, npcName = "Astarii Starseeker", map = 1457, x = 38.33, y = 80.95, f = "e", faction = "A", classes = { "PRIEST" } }, { npc = 4146, npcName = "Jocaste", map = 1457, x = 40.38, y = 8.55, f = "e", faction = "A", classes = { "HUNTER" } }, { npc = 4163, npcName = "Syurna", map = 1457, x = 36.99, y = 21.91, f = "e", faction = "A", classes = { "ROGUE" } }, { npc = 4203, npcName = "Ariyell Skyshadow", map = 1457, x = 58.76, y = 44.5, f = "e", faction = "A", classes = { "HUNTER" } }, { npc = 4217, npcName = "Mathrengyl Bearwalker", map = 1457, x = 35.37, y = 8.4, f = "e", faction = "A", classes = { "DRUID" } }, { npc = 251373, npcName = "Xyton Silverwind", map = 2521, x = 41.72, y = 23.38, faction = "AH", classes = { "DRUID" } }, { npc = 251376, npcName = "Tai'ree Farsight", map = 2521, x = 42.44, y = 23.68, faction = "AH", classes = { "HUNTER" } }, { npc = 251379, npcName = "Dorii Brightwhisper", map = 2521, x = 41.53, y = 23.63, faction = "A", classes = { "MAGE" } }, { npc = 251389, npcName = "Akeri Duskblade", map = 2521, x = 43.71, y = 24.3, faction = "AH", classes = { "ROGUE" } }, { npc = 251964, npcName = "Blademaster Ren", map = 2521, x = 43.68, y = 24.17, faction = "AH", classes = { "WARRIOR" } } } },
 						{ t = "vendor", candidates = { { npc = 1348, npcName = "Gregory Ardus", map = 1453, x = 48.13, y = 55.12, faction = "A" }, { npc = 5512, npcName = "Kaita Deepforge", map = 1453, x = 63.26, y = 37.74, faction = "A" }, { npc = 1314, npcName = "Duncan Cullen", map = 1453, x = 53.18, y = 82.04, faction = "A" }, { npc = 1324, npcName = "Heinrich Stone", map = 1453, x = 77.22, y = 57.37, faction = "A" }, { npc = 78, npcName = "Janos Hammerknuckle", map = 1429, x = 47.24, y = 41.9, f = "e", faction = "A" }, { npc = 896, npcName = "Veldan Lightfoot", map = 1429, x = 25.18, y = 73.89, f = "e", faction = "A" }, { npc = 74, npcName = "Kurran Steele", map = 1429, x = 41.37, y = 65.59, f = "e", faction = "A" }, { npc = 959, npcName = "Morley Eberlein", map = 1429, x = 64.69, y = 69.51, f = "e", faction = "A" }, { npc = 1668, npcName = "William MacGregor", map = 1436, x = 57.71, y = 53.94, f = "e", faction = "A" }, { npc = 1198, npcName = "Rallic Finn", map = 1429, x = 83.28, y = 66.09, f = "e", faction = "A" }, { npc = 1669, npcName = "Defias Profiteer", map = 1436, x = 43.47, y = 66.76, f = "e", faction = "AH" }, { npc = 11703, npcName = "Graw Cornerstone", map = 1427, x = 41.5, y = 74.97, f = "e", faction = "A" }, { npc = 228, npcName = "Avette Fellwood", map = 1431, x = 73.03, y = 44.42, f = "e", faction = "A" }, { npc = 1104, npcName = "Grundel Harkin", map = 1426, x = 28.79, y = 67.84, f = "e", faction = "A" }, { npc = 3088, npcName = "Henry Chapal", map = 1433, x = 18.75, y = 41.32, faction = "A" }, { npc = 14624, npcName = "Master Smith Burninate", map = 1427, x = 38.8, y = 28.51, f = "e", faction = "AH" }, { npc = 2483, npcName = "Jaquilina Dramet", map = 1434, x = 35.75, y = 10.66, f = "e", faction = "AH" }, { npc = 14921, npcName = "Rin'wosho the Trader", map = 1434, x = 15.07, y = 16, f = "e", faction = "AH" }, { npc = 9544, npcName = "Yuka Screwspigot", map = 1418, x = 4.9, y = 94.7, f = "e", faction = "AH" }, { npc = 1273, npcName = "Grawn Thromwyn", map = 1426, x = 45.29, y = 52.19, f = "e", faction = "A" }, { npc = 3162, npcName = "Burdrak Harglhelm", map = 1426, x = 30.11, y = 45.28, f = "e", faction = "A" }, { npc = 1296, npcName = "Felder Stover", map = 1428, x = 85.21, y = 68.39, f = "e", faction = "A" }, { npc = 3177, npcName = "Turuk Amberstill", map = 1426, x = 62.9, y = 49.89, f = "e", faction = "A" }, { npc = 1698, npcName = "Frast Dokner", map = 1426, x = 69, y = 55.89, f = "e", faction = "A" }, { npc = 5125, npcName = "Dolkin Craghelm", map = 1455, x = 53.85, y = 87.89, f = "e", faction = "A" }, { npc = 3097, npcName = "Bernard Brubaker", map = 1433, x = 83.16, y = 71.02, faction = "A" }, { npc = 9179, npcName = "Jazzrik", map = 1418, x = 42.47, y = 52.5, f = "e", faction = "AH" }, { npc = 5152, npcName = "Bingus", map = 1455, x = 22.77, y = 15.92, f = "e", faction = "A" }, { npc = 5508, npcName = "Strumner Flintheel", map = 1419, x = 66.08, y = 17.16, f = "e", faction = "A" }, { npc = 167, npcName = "Morhan Coppertongue", map = 1432, x = 34.02, y = 46.54, f = "e", faction = "A" }, { npc = 1362, npcName = "Gothor Brumn", map = 1432, x = 24.13, y = 18.21, f = "e", faction = "A" }, { npc = 1450, npcName = "Brahnmar", map = 1437, x = 11.54, y = 59.86, f = "e", faction = "A" }, { npc = 1214, npcName = "Aldren Cordon", map = 1432, x = 64.82, y = 66.05, f = "e", faction = "A" }, { npc = 222, npcName = "Nillen Andemar", map = 1432, x = 42.87, y = 9.89, f = "e", faction = "A" }, { npc = 2839, npcName = "Haren Kanmae", map = 1434, x = 28.31, y = 74.56, f = "e", faction = "AH" }, { npc = 954, npcName = "Kat Sampson", map = 1432, x = 82.65, y = 64.11, f = "e", faction = "A" }, { npc = 2679, npcName = "Wenna Silkbeard", map = 1437, x = 25.61, y = 25.8, f = "e", faction = "A" }, { npc = 3534, npcName = "Wallace the Blind", map = 1421, x = 46.5, y = 86.49, f = "e", faction = "AH" }, { npc = 3543, npcName = "Robert Aebischer", map = 1424, x = 51.21, y = 56.98, f = "e", faction = "A" }, { npc = 1471, npcName = "Jannos Ironwill", map = 1417, x = 45.98, y = 47.72, f = "e", faction = "A" }, { npc = 2404, npcName = "Blacksmith Verringtan", map = 1424, x = 32.11, y = 44.42, f = "e", faction = "A" }, { npc = 3532, npcName = "Pyrewood Leatherworker", map = 1421, x = 43.95, y = 74.1, f = "e", faction = "A" }, { npc = 3537, npcName = "Zixil", map = 1416, x = 53.6, y = 98.7, f = "e", faction = "AH" }, { npc = 3536, npcName = "Kris Legace", map = 1424, x = 80.14, y = 38.89, f = "e", faction = "AH" }, { npc = 13217, npcName = "Thanthaldis Snowgleam", map = 1416, x = 39.45, y = 81.65, f = "e", faction = "A" }, { npc = 8161, npcName = "Harggan", map = 1424, x = 98.7, y = 3.1, f = "e", faction = "A" }, { npc = 12942, npcName = "Leonard Porter", map = 1422, x = 43.08, y = 84.31, f = "e", faction = "A" }, { npc = 10857, npcName = "Argent Quartermaster Lightspark", map = 1422, x = 42.84, y = 83.72, f = "e", faction = "AH" }, { npc = 11278, npcName = "Magnus Frostwake", map = 1422, x = 68.12, y = 77.57, f = "e", faction = "AH" }, { npc = 10856, npcName = "Argent Quartermaster Hasana", map = 1422, x = 26.6, y = 55.2, f = "e", faction = "AH" }, { npc = 16376, npcName = "Craftsman Wilhelm", map = 1423, x = 71.24, y = 49.9, faction = "AH" }, { npc = 3491, npcName = "Ironzar", map = 1413, x = 62.24, y = 37.48, f = "e", faction = "AH" }, { npc = 3683, npcName = "Kiknikle", map = 1413, x = 41.79, y = 38.69, f = "e", faction = "AH" }, { npc = 3588, npcName = "Khardan Proudblade", map = 1438, x = 58.72, y = 39.67, f = "e", faction = "A" }, { npc = 3609, npcName = "Shalomon", map = 1438, x = 56.31, y = 59.49, f = "e", faction = "A" }, { npc = 4183, npcName = "Naram Longclaw", map = 1439, x = 37.57, y = 40.35, f = "e", faction = "A" }, { npc = 3951, npcName = "Bhaldaran Ravenshade", map = 1440, x = 50.27, y = 67.27, f = "e", faction = "A" }, { npc = 3952, npcName = "Aeolynn", map = 1440, x = 34.47, y = 49.52, f = "e", faction = "A" }, { npc = 14753, npcName = "Illiyana Moonblaze", map = 1440, x = 61.49, y = 83.86, f = "e", faction = "A" }, { npc = 1695, npcName = "Rendow", map = 1441, x = 7.6, y = 17.9, f = "e", faction = "A" }, { npc = 3053, npcName = "Synge", map = 1441, x = 80.4, y = 77.01, f = "e", faction = "AH" }, { npc = 4085, npcName = "Nizzik", map = 1442, x = 62.7, y = 40.18, f = "e", faction = "AH" }, { npc = 4086, npcName = "Veenix", map = 1442, x = 58.22, y = 51.74, f = "e", faction = "AH" }, { npc = 4188, npcName = "Illyanie", map = 1442, x = 35.59, y = 7.35, f = "e", faction = "A" }, { npc = 1322, npcName = "Maxton Strang", map = 1443, x = 67.93, y = 8.31, f = "e", faction = "A" }, { npc = 7852, npcName = "Pratt McGrubben", map = 1444, x = 30.63, y = 42.71, f = "e", faction = "A" }, { npc = 4886, npcName = "Hans Weston", map = 1445, x = 64.63, y = 50.42, f = "e", faction = "A" }, { npc = 5411, npcName = "Krinkle Goodsteel", map = 1446, x = 51.46, y = 28.81, f = "e", faction = "AH" }, { npc = 14301, npcName = "Brinna Valanaar", map = 1447, x = 12, y = 78.38, f = "e", faction = "A" }, { npc = 15315, npcName = "Mylini Frostmoon", map = 1448, x = 62.41, y = 25.78, f = "e", faction = "A" }, { npc = 3000, npcName = "Gibbert", map = 1449, x = 44.1, y = 7.19, f = "e", faction = "AH" }, { npc = 4184, npcName = "Geenia Sunshadow", map = 1450, x = 52, y = 32.89, f = "e", faction = "AH" }, { npc = 15176, npcName = "Vargus", map = 1451, x = 51.23, y = 38.86, f = "e", faction = "AH" }, { npc = 11182, npcName = "Nixxrak", map = 1452, x = 61.62, y = 37.87, f = "e", faction = "AH" }, { npc = 4164, npcName = "Cylania", map = 1457, x = 59.24, y = 46.36, f = "e", faction = "A" }, { npc = 4234, npcName = "Andrus", map = 1457, x = 56.13, y = 88.91, f = "e", faction = "A" }, { npc = 4257, npcName = "Lana Thunderbrew", map = 1459, x = 43.41, y = 15.64, f = "e", faction = "A" } } },
+					},
+				},
+				{
+					title = "Stormwind class quests",
+					note = "Master Mathias Shaw is at SI:7 in Old Town, Gakin the Darkbinder in the Slaughtered Lamb's cellar in the Mage Quarter, High Priestess Laurena in the Cathedral of Light.",
+					only = { classes = { "ROGUE", "PRIEST", "WARLOCK" } },
+					goals = {
+						{ t = "accept", quest = 2360, title = "Mathias and the Defias", npc = 332, npcName = "Master Mathias Shaw", minLevel = 20, qlvl = 20, map = 1453, x = 78.31, y = 70.74, only = { classes = { "ROGUE" } }, note = "Master Mathias Shaw: Agent Kearnen in Westfall takes it, at the end of Duskwood" },
+						{ t = "accept", quest = 1716, title = "Devourer of Souls", npc = 6122, npcName = "Gakin the Darkbinder", minLevel = 20, map = 1453, x = 39.22, y = 85.23, only = { classes = { "WARLOCK" } }, note = "Gakin the Darkbinder: Takar the Seer in the Barrens takes it, later" },
+						{ t = "accept", quest = 5676, title = "Arcane Feedback", npc = 376, npcName = "High Priestess Laurena", minLevel = 20, qlvl = 20, closedBy = { 5677, 5678 }, preTitles = { [5677] = "Arcane Feedback", [5678] = "Arcane Feedback" }, map = 1453, x = 49.53, y = 44.6, only = { classes = { "PRIEST" }, races = { "Human" } }, note = "High Priestess Laurena" },
+						{ t = "turnin", quest = 5676, title = "Arcane Feedback", npc = 376, npcName = "High Priestess Laurena", map = 1453, x = 49.53, y = 44.6, only = { classes = { "PRIEST" }, races = { "Human" } }, note = "Arcane Feedback" },
+						{ t = "accept", quest = 5645, title = "A Lack of Fear", npc = 376, npcName = "High Priestess Laurena", minLevel = 20, qlvl = 20, closedBy = { 5641, 5647 }, preTitles = { [5641] = "A Lack of Fear", [5647] = "A Lack of Fear" }, map = 1453, x = 49.53, y = 44.6, only = { classes = { "PRIEST" }, races = { "Dwarf" } }, note = "High Priestess Laurena: High Priest Rohan in Ironforge takes it, later" },
+						{ t = "accept", quest = 94819, title = "Contingency Plan", npc = 376, npcName = "High Priestess Laurena", minLevel = 20, qlvl = 20, map = 1453, x = 49.53, y = 44.6, only = { classes = { "PRIEST" }, races = { "Gnome" } }, note = "High Priestess Laurena: High Priestess Mims in Ironforge takes it, later" },
+						{ t = "accept", quest = 5673, title = "Elune's Grace", npc = 376, npcName = "High Priestess Laurena", minLevel = 20, qlvl = 20, closedBy = { 5672, 5674, 5675 }, preTitles = { [5672] = "Elune's Grace", [5674] = "Elune's Grace", [5675] = "Elune's Grace" }, map = 1453, x = 49.53, y = 44.6, only = { classes = { "PRIEST" }, races = { "NightElf" } }, note = "High Priestess Laurena: Priestess Alathea in Darnassus takes it, later" },
+					},
+				},
+				{
+					title = "Half Pendant of Aquatic Endurance",
+					note = "Fly to Sentinel Hill and ride north-west to the coast: the Strange Lockbox lies on the sea floor off the shore. Then ride east along the road through Elwynn to Redridge.",
+					only = { classes = { "DRUID" }, races = { "NightElf" } },
+					goals = {
+						{ t = "fly", location = "Sentinel Hill" },
+						{ t = "collect", item = 15882, itemName = "Half Pendant of Aquatic Endurance", count = 1, map = 1436, x = 17.94, y = 33.18, f = "e", note = "Half Pendant of Aquatic Endurance: the Strange Lockbox", from = "Strange Lockbox", fromKind = "object" },
 					},
 				},
 				{
@@ -1005,6 +1115,25 @@ do
 						{ t = "note", text = "Next: Ashenvale. Ride north into Elwynn and on to Stormwind, then take the boat from Stormwind Harbor to Auberdine." },
 					},
 				},
+				{
+					title = "Agent Kearnen",
+					note = "Ride west along the road out of Raven Hill into Westfall. Agent Kearnen watches Klaven Mortwake's tower from the hills just inside the border. The Malformed Defias Drone (level 23) guarding the tower carries its key; Klaven's journal is in the chest at the top.",
+					only = { classes = { "ROGUE" } },
+					goals = {
+						{ t = "turnin", quest = 2360, title = "Mathias and the Defias", npc = 7024, npcName = "Agent Kearnen", map = 1436, x = 68.49, y = 70.08, f = "e", note = "Agent Kearnen" },
+						{ t = "accept", quest = 2359, title = "Klaven's Tower", npc = 7024, npcName = "Agent Kearnen", minLevel = 20, qlvl = 24, pre = { 2360 }, preTitles = { [2360] = "Mathias and the Defias" }, map = 1436, x = 68.49, y = 70.08, f = "e" },
+						{ t = "collect", quest = 2359, title = "Klaven's Tower", item = 7923, itemName = "Defias Tower Key", count = 1, oi = 1, map = 1436, x = 69.47, y = 73.99, f = "e", note = "Defias Tower Key: Malformed Defias Drone" },
+						{ t = "collect", quest = 2359, title = "Klaven's Tower", item = 7908, itemName = "Klaven Mortwake's Journal", oi = 2, map = 1436, x = 70.41, y = 73.93, f = "e", note = "Klaven Mortwake's Journal, in the chest" },
+					},
+				},
+				{
+					title = "Master Mathias Shaw",
+					note = "Ride north through Elwynn to Stormwind; Mathias Shaw is at SI:7 in Old Town. Then take the boat to Auberdine.",
+					only = { classes = { "ROGUE" } },
+					goals = {
+						{ t = "turnin", quest = 2359, title = "Klaven's Tower", npc = 332, npcName = "Master Mathias Shaw", map = 1453, x = 78.31, y = 70.74, note = "Master Mathias Shaw: Poisons" },
+					},
+				},
 			},
 		})
 	end
@@ -1028,6 +1157,36 @@ do
 			author = "Polestar",
 			version = 1,
 			steps = {
+				{
+					title = "Aquatic Form",
+					note = "Take the boat from Stormwind Harbor to Auberdine. Join the two half pendants into the Pendant of the Sea Lion and cast Teleport: Moonglade: Dendrite Starblaze is in Nighthaven. Then fly to Rut'theran Village (by way of Auberdine).",
+					only = { classes = { "DRUID" }, races = { "NightElf" } },
+					goals = {
+						{ t = "collect", quest = 272, title = "Trial of the Sea Lion", item = 15885, itemName = "Pendant of the Sea Lion", count = 1, oi = 1, map = 1450, x = 36, y = 41.42, f = "e", note = "Pendant of the Sea Lion: join the two halves" },
+						{ t = "turnin", quest = 272, title = "Trial of the Sea Lion", npc = 11802, npcName = "Dendrite Starblaze", map = 1450, x = 56.21, y = 30.64, f = "e", note = "Dendrite Starblaze" },
+						{ t = "accept", quest = 5061, title = "Aquatic Form", npc = 11802, npcName = "Dendrite Starblaze", minLevel = 16, qlvl = 16, pre = { 272 }, preTitles = { [272] = "Trial of the Sea Lion" }, map = 1450, x = 56.21, y = 30.64, f = "e" },
+						{ t = "fly", location = "Rut'theran Village" },
+					},
+				},
+				{
+					title = "Mathrengyl Bearwalker",
+					note = "Take the portal up to the Cenarion Enclave, then fly back to Auberdine.",
+					only = { classes = { "DRUID" }, races = { "NightElf" } },
+					goals = {
+						{ t = "turnin", quest = 5061, title = "Aquatic Form", npc = 4217, npcName = "Mathrengyl Bearwalker", map = 1457, x = 35.37, y = 8.4, f = "e", note = "Mathrengyl Bearwalker: Aquatic Form" },
+						{ t = "fly", location = "Auberdine" },
+					},
+				},
+				{
+					title = "Elune's Grace",
+					note = "Take the boat from Stormwind Harbor to Auberdine and fly to Rut'theran Village; Priestess Alathea is in the Temple of the Moon. Then fly back to Auberdine.",
+					only = { classes = { "PRIEST" }, races = { "NightElf" } },
+					goals = {
+						{ t = "fly", location = "Rut'theran Village" },
+						{ t = "turnin", quest = 5673, title = "Elune's Grace", npc = 11401, npcName = "Priestess Alathea", map = 1457, x = 39.52, y = 81.2, f = "e", note = "Priestess Alathea: Elune's Grace" },
+						{ t = "fly", location = "Auberdine" },
+					},
+				},
 				{
 					title = "Boat to Auberdine",
 					note = "From Stormwind Harbor take the boat to Auberdine, then ride south along the road through Darkshore.",
@@ -1481,6 +1640,15 @@ do
 					},
 				},
 				{
+					title = "Ironforge priests",
+					note = "High Priest Rohan and High Priestess Mims are in the Hall of Mysteries, in the Mystic Ward.",
+					only = { classes = { "PRIEST" }, races = { "Dwarf", "Gnome" } },
+					goals = {
+						{ t = "turnin", quest = 5645, title = "A Lack of Fear", npc = 11406, npcName = "High Priest Rohan", map = 1455, x = 24.73, y = 8.16, f = "e", only = { races = { "Dwarf" } }, note = "High Priest Rohan: Chastise" },
+						{ t = "turnin", quest = 94819, title = "Contingency Plan", npc = 258785, npcName = "High Priestess Mims", map = 1455, x = 24.89, y = 10.23, f = "e", only = { races = { "Gnome" } }, note = "High Priestess Mims: Contingency Plan" },
+					},
+				},
+				{
 					title = "Cathedral of Light",
 					note = "Take the Deeprun Tram from Tinker Town to Stormwind's Dwarven District, then walk to the Cathedral Square.",
 					goals = {
@@ -1810,6 +1978,15 @@ do
 					},
 				},
 				{
+					title = "Takar the Seer",
+					note = "On the road south through the Barrens, Takar the Seer camps east of the road, north-east of Camp Taurajo; come in from the east and keep clear of the Horde guards.",
+					only = { classes = { "WARLOCK" } },
+					goals = {
+						{ t = "turnin", quest = 1716, title = "Devourer of Souls", npc = 6244, npcName = "Takar the Seer", map = 1413, x = 49.31, y = 57.1, f = "e", note = "Takar the Seer" },
+						{ t = "accept", quest = 1738, title = "Heartswood", npc = 6244, npcName = "Takar the Seer", minLevel = 20, qlvl = 20, pre = { 1716 }, preTitles = { [1716] = "Devourer of Souls" }, map = 1413, x = 49.31, y = 57.1, f = "e", note = "Heartswood: in Ashenvale, on the way to Desolace" },
+					},
+				},
+				{
 					title = "The Great Lift",
 					note = "From Theramore follow the road west out of Dustwallow into the Barrens and south along it; give Camp Taurajo a wide berth. The Great Lift at the Barrens' south end takes you down into Thousand Needles. The journal lies at the foot of the lift.",
 					goals = {
@@ -2017,6 +2194,14 @@ do
 					},
 				},
 				{
+					title = "The Islander",
+					note = "Wu Shen trains warriors in Old Town, beside the Pig and Whistle. Klannoc Macleod waits on Fray Island in the Barrens, on the way to Ratchet much later (40-50/01).",
+					only = { classes = { "WARRIOR" } },
+					goals = {
+						{ t = "accept", quest = 1718, title = "The Islander", npc = 5479, npcName = "Wu Shen", minLevel = 30, qlvl = 30, map = 1453, x = 80.55, y = 59.87, note = "Wu Shen" },
+					},
+				},
+				{
 					title = "Stormwind Keep",
 					goals = {
 						{ t = "turnin", quest = 563, title = "Reassignment", npc = 2439, npcName = "Major Samuelson", map = 1453, x = 75.83, y = 36.72, note = "Major Samuelson" },
@@ -2091,6 +2276,14 @@ do
 					note = "Take the boat to Auberdine from Menethil's docks.",
 					goals = {
 						{ t = "fly", location = "Astranaar" },
+					},
+				},
+				{
+					title = "Heartswood",
+					note = "From Astranaar ride north-west into the hills: the Heartswood is a glowing tree north of the road to Maestra's Post. Then back past Astranaar to the Talondeep Path.",
+					only = { classes = { "WARLOCK" } },
+					goals = {
+						{ t = "collect", quest = 1738, title = "Heartswood", item = 6912, itemName = "Heartswood", count = 1, oi = 1, map = 1440, x = 31.55, y = 31.57, f = "e", note = "Heartswood" },
 					},
 				},
 				{
@@ -2952,6 +3145,17 @@ do
 					},
 				},
 				{
+					title = "The Binding",
+					note = "Gakin the Darkbinder waits in the Slaughtered Lamb's cellar, in the Mage Quarter. Use the Heartswood Core at the summoning circle there and defeat the succubus it calls.",
+					only = { classes = { "WARLOCK" } },
+					goals = {
+						{ t = "turnin", quest = 1738, title = "Heartswood", npc = 6122, npcName = "Gakin the Darkbinder", map = 1453, x = 39.22, y = 85.23, note = "Gakin the Darkbinder" },
+						{ t = "accept", quest = 1739, title = "The Binding", npc = 6122, npcName = "Gakin the Darkbinder", minLevel = 20, qlvl = 20, pre = { 1738 }, preTitles = { [1738] = "Heartswood" }, map = 1453, x = 39.22, y = 85.23 },
+						{ t = "complete", quest = 1739, title = "The Binding", note = "Subdue the succubus" },
+						{ t = "turnin", quest = 1739, title = "The Binding", npc = 6122, npcName = "Gakin the Darkbinder", map = 1453, x = 39.22, y = 85.23, note = "Summon Succubus" },
+					},
+				},
+				{
 					title = "Fly to Southshore",
 					goals = {
 						{ t = "fly", location = "Southshore", note = "Dungar Longdrink, Trade District" },
@@ -3730,6 +3934,17 @@ do
 						{ t = "accept", quest = 1288, title = "Vimes's Report", npc = 4944, npcName = "Captain Garran Vimes", minLevel = 30, qlvl = 38, pre = { 1287 }, preTitles = { [1287] = "The Deserters" }, map = 1445, x = 68.21, y = 48.62, f = "e" },
 						{ t = "turnin", quest = 1288, title = "Vimes's Report", npc = 4968, npcName = "Lady Jaina Proudmoore", map = 1445, x = 66.27, y = 49.04, f = "e", note = "Lady Jaina Proudmoore" },
 						{ t = "turnin", quest = 1204, title = "Mudrock Soup and Bugs", npc = 4794, npcName = "Morgan Stern", map = 1445, x = 66.34, y = 45.47, f = "e", note = "Morgan Stern" },
+					},
+				},
+				{
+					title = "The Affray",
+					note = "On the ride north to Ratchet, Fray Island lies off the Merchant Coast south of the town: wade over the sand bar shallows. Klannoc Macleod sends four challengers and then Big Will (level 33) at you, one at a time.",
+					only = { classes = { "WARRIOR" } },
+					goals = {
+						{ t = "turnin", quest = 1718, title = "The Islander", npc = 6236, npcName = "Klannoc Macleod", map = 1413, x = 68.62, y = 49.16, f = "e", note = "Klannoc Macleod" },
+						{ t = "accept", quest = 1719, title = "The Affray", npc = 6236, npcName = "Klannoc Macleod", minLevel = 30, qlvl = 30, pre = { 1718 }, preTitles = { [1718] = "The Islander" }, map = 1413, x = 68.62, y = 49.16, f = "e" },
+						{ t = "complete", quest = 1719, title = "The Affray", note = "Defeat the challengers and Big Will" },
+						{ t = "turnin", quest = 1719, title = "The Affray", npc = 6236, npcName = "Klannoc Macleod", map = 1413, x = 68.62, y = 49.16, f = "e", note = "Klannoc Macleod: Berserker Stance" },
 					},
 				},
 				{

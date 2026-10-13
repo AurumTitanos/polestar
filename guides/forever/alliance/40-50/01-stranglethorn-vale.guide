@@ -47,6 +47,8 @@
 # Class quests: Paladins take and hand in The Tome of Nobility (1661) from
 # Duthorian Rall in Stormwind; Warlocks take Summon Felsteed (4488) from
 # Demisette Cloyce and hand it in at Ratchet at the end of the next guide.
+# Warriors finish The Islander and The Affray (1718, 1719, Berserker Stance)
+# on Fray Island on the ride to Ratchet.
 # Class training: Stormwind.
 # Riding: the Stormwind stop at about 42 is the first city after 40. Humans,
 # Night Elves and Skyborne are pointed to their riding trainer there, Dwarves
@@ -163,6 +165,15 @@ step Theramore
   turnin 1204                         -- Morgan Stern
 
 # ---------------------------------------------------------------- Booty Bay
+
+step The Affray
+  only Warrior
+  zone The Barrens
+  tip On the ride north to Ratchet, Fray Island lies off the Merchant Coast south of the town: wade over the sand bar shallows. Klannoc Macleod sends four challengers and then Big Will (level 33) at you, one at a time.
+  turnin 1718                             -- Klannoc Macleod
+  accept 1719
+  complete 1719                           -- Defeat the challengers and Big Will
+  turnin 1719                             -- Klannoc Macleod: Berserker Stance
 
 step Ratchet
   zone The Barrens

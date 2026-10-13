@@ -49,8 +49,12 @@ next forever/alliance/07-thousand-needles
 #   Keep, Stormwind Keep and the Cathedral; The Shamed Lieutenant (98219) is
 #   carried to Southshore.
 #
-# Class quests: none on this route at these hubs. Class training in
-# Ironforge and Stormwind.
+# Class quests: on arrival in Auberdine, Night Elf Druids finish Trial of the
+# Sea Lion and Aquatic Form (272, 5061: Moonglade, then Darnassus) and Night
+# Elf Priests hand in Elune's Grace (5673) in Darnassus, both by the free
+# Rut'theran flight; in Ironforge, Dwarf and Gnome Priests hand in Chastise
+# (5645) and Contingency Plan (94819). Class training in Ironforge and
+# Stormwind.
 #
 # Left out (the export accepts them but never turns them in): Journey to
 # Stonetalon Peak (1056), Pridewings of Stonetalon (1134), Mage Summoner
@@ -71,6 +75,30 @@ next forever/alliance/07-thousand-needles
 # dungeon.
 
 # ---------------------------------------------------------------- Darkshore
+
+step Aquatic Form
+  only NightElf,Druid
+  zone Moonglade
+  tip Take the boat from Stormwind Harbor to Auberdine. Join the two half pendants into the Pendant of the Sea Lion and cast Teleport: Moonglade: Dendrite Starblaze is in Nighthaven. Then fly to Rut'theran Village (by way of Auberdine).
+  collect 15885 quest 272.1                   -- Pendant of the Sea Lion: join the two halves
+  turnin 272                                  -- Dendrite Starblaze
+  accept 5061
+  fly "Rut'theran Village"
+
+step Mathrengyl Bearwalker
+  only NightElf,Druid
+  zone Darnassus
+  tip Take the portal up to the Cenarion Enclave, then fly back to Auberdine.
+  turnin 5061                                 -- Mathrengyl Bearwalker: Aquatic Form
+  fly "Auberdine"
+
+step Elune's Grace
+  only NightElf,Priest
+  zone Darnassus
+  tip Take the boat from Stormwind Harbor to Auberdine and fly to Rut'theran Village; Priestess Alathea is in the Temple of the Moon. Then fly back to Auberdine.
+  fly "Rut'theran Village"
+  turnin 5673                                 -- Priestess Alathea: Elune's Grace
+  fly "Auberdine"
 
 step Boat to Auberdine
   zone Darkshore
@@ -385,6 +413,12 @@ step Ironforge
   accept 1179                             -- Pilot Longbeard
   train class
   vendor nearest
+
+step Ironforge priests
+  only Dwarf,Gnome,Priest
+  tip High Priest Rohan and High Priestess Mims are in the Hall of Mysteries, in the Mystic Ward.
+  turnin 5645 only Dwarf                      -- High Priest Rohan: Chastise
+  turnin 94819 only Gnome                     -- High Priestess Mims: Contingency Plan
 
 # ---------------------------------------------------------------- Stormwind
 

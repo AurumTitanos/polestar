@@ -34,6 +34,16 @@ next forever/alliance/04-redridge-mountains
 # Gyromast's Revenge (2078) ends with the Threshwackonator 4100, an elite: not
 # taken. The Tower of Althalaxx 1143 and 981 need 1167 from Delgren in
 # Ashenvale (after 970-973) first: skipped.
+#
+# Class quests (Druids; Auberdine has the flights to Rut'theran Village and
+# Moonglade, the class's own teleport does the rest):
+# - Night Elf Druids: A Lesson to Learn and Trial of the Lake (26, 29) after
+#   the first hearth, the Darkshore half pendant on the north loop; Trial of
+#   the Sea Lion (272) is finished with the Westfall half from the Stormwind
+#   stop (04-redridge-mountains) on arrival in Auberdine (06-ashenvale).
+# - Night Elf and Skyborne Druids: Cat Form (98393 to 98397, Mathrengyl
+#   Bearwalker, the Great Cat Spirit or the Avatar of Saeyleenan in
+#   Moonglade) at the end, about level 21, before the boat.
 
 # ---------------------------------------------------------------- Auberdine
 
@@ -138,6 +148,26 @@ step Hearth to Auberdine
   vendor nearest
   train class
 
+step A Lesson to Learn
+  only NightElf,Druid
+  zone Darnassus
+  tip Fly from Auberdine to Rut'theran Village and take the portal up to Mathrengyl Bearwalker in the Cenarion Enclave.
+  fly "Rut'theran Village"
+  accept 26                                   -- Mathrengyl Bearwalker
+
+step Trial of the Lake
+  only NightElf,Druid
+  zone Moonglade
+  tip Cast Teleport: Moonglade. Dendrite Starblaze is in Nighthaven. Shrine Baubles lie in the containers on the floor of Lake Elune'ara, below Nighthaven: take one to the Shrine of Remulos in the north-west, use it there and speak to Tajarri. Then fly back to Auberdine from Nighthaven.
+  turnin 26                                   -- Dendrite Starblaze
+  accept 29
+  collect 15877 x1                            -- Shrine Bauble, from a Bauble Container in the lake
+  use 15877 @36.0,41.4                        -- At the Shrine of Remulos
+  complete 29
+  turnin 29                                   -- Tajarri
+  accept 272                                  -- The half pendants lie in Darkshore and Westfall: later on the route
+  fly "Auberdine"
+
 # ---------------------------------------------------------------- Second loop
 
 step Blackwood furbolgs
@@ -209,6 +239,7 @@ step The Ruins of Mathystra
   collect 7499 quest 2098
   collect 7500 quest 2098
   turnin 2098
+  collect 15883 x1 only NightElf,Druid        -- Half Pendant of Aquatic Agility: the Strange Lockbox under the water off the north coast, west of the ruins
 
 step The Tower of Althalaxx
   tip Balthule Shadowstrike hides at the foot of the tower among the Dark Strand Fanatics. Keep his letter for Delgren in Ashenvale.
@@ -303,3 +334,55 @@ step Auberdine
   accept 990                                  -- Sentinel Selarin: for Raene Wolfrunner in Astranaar, on the later Ashenvale leg
   vendor nearest
   goto 32.4,43.8 "Boat to Stormwind"
+
+# ---------------------------------------------------------------- Druids: Cat Form
+
+step The Great Cat Spirit
+  only Druid
+  zone Darnassus
+  tip Night Elves fly from Auberdine to Rut'theran Village; Skyborne take the boat from the Auberdine dock and learn the Rut'theran flight path there. Take the portal up to Mathrengyl Bearwalker in the Cenarion Enclave.
+  fly "Rut'theran Village" only NightElf
+  getfp "Rut'theran Village" only Skyborne
+  accept 98393                                -- Mathrengyl Bearwalker
+
+step Dendrite Starblaze
+  only Druid
+  zone Moonglade
+  tip Cast Teleport: Moonglade. Dendrite Starblaze is in Nighthaven; learn the flight path there if you do not have it.
+  turnin 98393                                -- Dendrite Starblaze
+  accept 98394 only NightElf
+  accept 98341 only Skyborne
+  getfp "Moonglade"
+
+step The relics of the Barrow Dens
+  only Druid
+  tip The Great Cat Spirit (Night Elves) and the Avatar of Saeyleenan (Skyborne) wait in southern Moonglade. The three relics lie in the Stormrage Barrow Dens, east of them. Reports from the first weeks say a relic gives no loot while another player is looting it: wait a moment and try again.
+  turnin 98394 only NightElf                  -- Great Cat Spirit
+  accept 98396 only NightElf
+  turnin 98341 only Skyborne                  -- Avatar of Saeyleenan
+  accept 98404 only Skyborne
+  collect 280502 quest 98396.1 @72.4,66.0 only NightElf -- Relic of the Fang
+  collect 280679 quest 98396.2 @75.2,67.2 only NightElf -- Relic of the Claw
+  collect 280680 quest 98396.3 @74.4,65.4 only NightElf -- Relic of the Silent Shadow
+  collect 280502 quest 98404.1 @72.4,66.0 only Skyborne -- Relic of the Fang
+  collect 280679 quest 98404.2 @75.2,67.2 only Skyborne -- Relic of the Claw
+  collect 280680 quest 98404.3 @74.4,65.4 only Skyborne -- Relic of the Silent Shadow
+  turnin 98396 only NightElf                  -- Great Cat Spirit
+  accept 98731 only NightElf
+  turnin 98404 only Skyborne                  -- Avatar of Saeyleenan
+  accept 98738 only Skyborne
+
+step Back to Dendrite
+  only Druid
+  tip Back to Dendrite Starblaze in Nighthaven, then fly to Rut'theran Village (by way of Auberdine).
+  turnin 98731 only NightElf                  -- Dendrite Starblaze
+  turnin 98738 only Skyborne
+  accept 98397
+  fly "Rut'theran Village"
+
+step To Darnassus
+  only Druid
+  zone Darnassus
+  tip Take the portal up to Mathrengyl, then fly back to Auberdine for the boat to Stormwind.
+  turnin 98397                                -- Mathrengyl Bearwalker: Cat Form
+  fly "Auberdine"

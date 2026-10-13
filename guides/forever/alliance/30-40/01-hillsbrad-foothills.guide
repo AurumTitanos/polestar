@@ -20,7 +20,13 @@
 # Deaths (512), Further Mysteries (525), Malin's Request (690), James Hyal
 # (1301), The Doomed Fleet (270) and The Missing Diplomat (1248), all turned
 # in later on the route.
-# Class quests: none in this stretch.
+# Class quests: Warriors take The Islander (1718) from Wu Shen in Stormwind;
+# Fray Island lies on the ride to Ratchet in 40-50/01-stranglethorn-vale,
+# where Big Will (level 33) is no longer a risk. Warlocks: Seeking Strahad
+# and the Felhunter's Tome of the Cabal (1798 onwards) are not taken: the
+# chain runs Stormwind, Ratchet, Ironforge, Hillsbrad, Thousand Needles or
+# the southern Barrens, the Wetlands and Ratchet again, and with this route's
+# own stops it would finish near level 50.
 # Left out: A Noble Brew (335, 336): a cellar stop and a walk to the Keep's
 # far side for little XP; dropped for flow.
 # Not here: Return to Milton (542), Dark Council (537) and Stormpike's
@@ -123,6 +129,11 @@ step Dashel Stonefist
   complete 1447
   turnin 1447
   accept 1247
+
+step The Islander
+  only Warrior
+  tip Wu Shen trains warriors in Old Town, beside the Pig and Whistle. Klannoc Macleod waits on Fray Island in the Barrens, on the way to Ratchet much later (40-50/01).
+  accept 1718 npc 5479                -- Wu Shen
 
 step Stormwind Keep
   turnin 563                          -- Major Samuelson

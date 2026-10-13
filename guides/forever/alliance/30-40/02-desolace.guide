@@ -22,7 +22,9 @@
 # Gelkis comes only from killing Magram and the reverse, so one character
 # cannot serve both, and the route builds neither standing. Gizmo for Warug
 # (1371) and Khan Shaka (1375) go with them.
-# Class quests: none in this stretch.
+# Class quests: Warlocks pick up the Heartswood (1738) north-west of
+# Astranaar on the way to the Talondeep Path; Gakin takes it in Stormwind
+# (30-40/05-arathi-highlands).
 guide forever/alliance/30-40/02-desolace
 title Desolace
 faction Alliance
@@ -40,6 +42,12 @@ step Auberdine
   zone Darkshore
   tip Take the boat to Auberdine from Menethil's docks.
   fly "Astranaar"
+
+step Heartswood
+  only Warlock
+  zone Ashenvale
+  tip From Astranaar ride north-west into the hills: the Heartswood is a glowing tree north of the road to Maestra's Post. Then back past Astranaar to the Talondeep Path.
+  collect 6912 quest 1738.1               -- Heartswood
 
 step The Talondeep Path
   zone Stonetalon Mountains

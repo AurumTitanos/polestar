@@ -37,7 +37,10 @@ next forever/alliance/06-ashenvale
 # - Dropped Awaiting Word (236): a no-XP breadcrumb to Watcher Callahan at
 #   Manor Mistmantle, a detour north the route never passes otherwise.
 #
-# Class quests: none at these hubs on this route.
+# Class quests: Rogues finish Mathias and the Defias with Klaven's Tower
+# (2360, 2359, Poisons) at the end: Agent Kearnen and the tower stand just
+# over the Westfall border from Raven Hill, and Mathias Shaw is in Stormwind
+# on the way to the boat.
 #
 # Left out (not in the export): Jitters' Growling Gut and Dusky Crab Cakes
 # (163, 5, 93), Seasoned Wolf Kabobs (90: Cooking), The Weathered Grave chain
@@ -197,3 +200,20 @@ step Jitters
 step Sven's Camp
   turnin 268                              -- Sven Yorgen
   note Next: Ashenvale. Ride north into Elwynn and on to Stormwind, then take the boat from Stormwind Harbor to Auberdine.
+
+# ---------------------------------------------------------------- Rogues: Klaven's Tower
+
+step Agent Kearnen
+  only Rogue
+  zone Westfall
+  tip Ride west along the road out of Raven Hill into Westfall. Agent Kearnen watches Klaven Mortwake's tower from the hills just inside the border. The Malformed Defias Drone (level 23) guarding the tower carries its key; Klaven's journal is in the chest at the top.
+  turnin 2360                                 -- Agent Kearnen
+  accept 2359
+  collect 7923 quest 2359.1                   -- Defias Tower Key: Malformed Defias Drone
+  collect 7908 quest 2359.2                   -- Klaven Mortwake's Journal, in the chest
+
+step Master Mathias Shaw
+  only Rogue
+  zone Stormwind City
+  tip Ride north through Elwynn to Stormwind; Mathias Shaw is at SI:7 in Old Town. Then take the boat to Auberdine.
+  turnin 2359                                 -- Master Mathias Shaw: Poisons

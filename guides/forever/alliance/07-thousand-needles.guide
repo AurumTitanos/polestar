@@ -41,7 +41,9 @@ next forever/alliance/30-40/01-hillsbrad-foothills
 # Tear of Tilloa another one north of Darkshire. Not accepted in Stormwind
 # (06-ashenvale) either; no grind needed for under a tenth of a level.
 #
-# Class quests: none on this route at these hubs.
+# Class quests: Warlocks hand Devourer of Souls (1716, from Stormwind in
+# 04-redridge-mountains) to Takar the Seer on the ride through the Barrens and
+# take Heartswood (1738); the Heartswood is in Ashenvale (30-40/02-desolace).
 #
 # Left out (not in the export): Bride of the Embalmer (253: elites), The
 # Weathered Grave (225: elite Mor'Ladim), Defeat Nek'rosh (474: elite).
@@ -228,6 +230,13 @@ step Dragonmaw catapult
 step To Theramore
   hearth "Deepwater Tavern"
   note Take the boat from Menethil's pier to Theramore Isle in Dustwallow Marsh.
+
+step Takar the Seer
+  only Warlock
+  zone The Barrens
+  tip On the road south through the Barrens, Takar the Seer camps east of the road, north-east of Camp Taurajo; come in from the east and keep clear of the Horde guards.
+  turnin 1716                             -- Takar the Seer
+  accept 1738                             -- Heartswood: in Ashenvale, on the way to Desolace
 
 step The Great Lift
   zone Thousand Needles
