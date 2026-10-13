@@ -119,6 +119,8 @@ Replace `0.2.0` with the new version throughout.
    fixes), then for guide authors and the toolchain. Hours to 60 are the
    simulator's model estimates and are written as such, with the world they
    come from.
+   The notes start from CHANGELOG.md's "unreleased" section, which then
+   takes the version and the release date.
 
 9. Publish the release with the three files from step 4:
 
