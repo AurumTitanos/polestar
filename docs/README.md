@@ -9,13 +9,13 @@ and maintainers who release. Paths are from the repository root.
 | Doc | Reader | What it answers |
 |---|---|---|
 | [README.md](../README.md) | players, everyone | What Polestar is, how to install it, what it does, where to go next |
-| [CHANGELOG.md](../CHANGELOG.md) | players, maintainers | What changed in each release |
-| [docs/GUIDE_CHEATSHEET.md](GUIDE_CHEATSHEET.md) | guide authors | The guide format on one page |
+| [CHANGELOG.md](../CHANGELOG.md) | players, guide authors, contributors | What changed in each release, under "For players", "For guide authors" and "For contributors" |
+| [docs/GUIDE_CHEATSHEET.md](GUIDE_CHEATSHEET.md) | guide authors | The guide format on one page: every header line, goal and condition, with what it does and a short example |
 | [docs/GUIDE_FORMAT.md](GUIDE_FORMAT.md) | guide authors | The `.guide` language in full: header, steps, goals, conditions, what the compiler fills in, validation, a cookbook |
 | [docs/PACKS.md](PACKS.md) | guide authors | How to write, test, publish and update a guide pack; every problem the tools or the game can report, with its fix |
 | [docs/PACK_FORMAT.md](PACK_FORMAT.md) | guide authors, tool builders | The contract between a guide pack and Polestar: `pack.json`, the addon the compiler writes, the rules Polestar enforces, versioning |
 | [LICENSE-EXCEPTION.md](../LICENSE-EXCEPTION.md) | guide authors | The permission to distribute a compiled guide pack under terms of your choice |
-| [CONTRIBUTING.md](../CONTRIBUTING.md) | contributors | Ways to help, how to report a wrong step, fix a guide or change code, and how to send it |
+| [CONTRIBUTING.md](../CONTRIBUTING.md) | players, guide authors, contributors | Ways to help; how to report a wrong step; how to fix a guide; setting up; code changes; commits and pull requests; the licence of contributions |
 | [docs/ARCHITECTURE.md](ARCHITECTURE.md) | contributors | The contract between the addon's modules, the compiled guide data, the toolchain and the tests |
 | [addon/README.md](../addon/README.md) | contributors | Which addon is which, the modules in load order with each file and its public table, where a hub screen lives, the generated files inside `addon/` |
 | [tools/README.md](../tools/README.md) | contributors, maintainers | The commands by group, the `tools/lib` folders, every generated file with its command and inputs, how to tell it is stale, the rebuild order after a data change |

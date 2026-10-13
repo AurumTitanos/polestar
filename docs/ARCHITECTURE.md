@@ -15,6 +15,36 @@ Reference material, checked out locally (gitignored):
   `tools/lib/consume/lua.js` (`<client>/_classic_beta_/Interface/AddOns/`;
   read-only for reference; EllesmereUI's `SKINNING_API.md` lives there).
 
+## Overview
+
+Polestar is a set of addons, a folder of guides and the Node tools that turn
+one into the other. The addons:
+
+| Addon | What it holds | Built by | In git | Ships |
+|---|---|---|---|---|
+| `Polestar` | The addon: engine, navigation, quests, gear, maps, quality of life, Lookup, Dungeons, Rares and every window | hand-written, plus a few generated data files | yes | yes |
+| `Polestar_Guides` | Polestar's own guide pack (pack id `guides`) | `compile`, from `guides/` | yes (generated) | yes |
+| `Polestar_ItemDB` | Item stats and Forever reward choices for the gear advice; loaded on demand | `itemdb build`, then `gear build` | yes (generated) | yes |
+| `Polestar_QuestDB` | The quest database behind quest markers and tooltips; loaded on demand | `questdb build` | no (local) | yes, when built |
+| `Polestar_Codex` | Lookup's Codex, and the Dungeons and Rares data; loaded on demand | `codex build` | no (local) | no |
+| `Polestar_Travel` | Zone crossings for the travel planner, from an optional local file | `travel build` | no (local) | no |
+| `Polestar_Recorder` | The optional recorder of play sessions, for authoring | hand-written | yes | yes, as its own zip |
+
+A guide goes from a `.guide` file to the game in four steps. An author
+writes it in a guide pack (`guides/` for Polestar's own). `lint` and
+`compile` parse it and fill in names, places and coordinates from the
+reference data in `data/forever`. `compile` writes the result as Lua into the
+pack's addon folder (`addon/Polestar_Guides` for ours). `install` copies that
+folder into the game, where the pack registers its guides with
+`Core/Guides.lua` at load time and the Engine plays them ("Guide data" and
+"Engine" below).
+
+Where to look next: [docs/README.md](README.md) maps every document;
+[addon/README.md](../addon/README.md) lists every addon file with its public
+table; [tools/README.md](../tools/README.md) lists the commands, every
+generated file and the rebuild order; [tests/README.md](../tests/README.md)
+describes the test layers and the fake client.
+
 ## Runtime pieces
 
 | Addon folder | Purpose |
@@ -22,7 +52,7 @@ Reference material, checked out locally (gitignored):
 | `addon/Polestar/` | Engine, navigation, UI. |
 | `addon/Polestar_Guides/` | Our guide pack (pack id `guides`). **Generated** by `tools/polestar.js compile`. |
 | community guide packs | Addons by other authors (`X-Polestar-Pack` in their TOC), built by the same compiler from their own repositories (`docs/PACKS.md`, `docs/PACK_FORMAT.md`). |
-| `addon/Polestar_ItemDB/` | Item stats for gear advice, load-on-demand. **Generated** by `tools/polestar.js gear build`. |
+| `addon/Polestar_ItemDB/` | Item stats for gear advice, load-on-demand. **Generated** by `tools/polestar.js itemdb build` (`Items.lua`) and `tools/polestar.js gear build` (`Forever.lua`). |
 | `addon/Polestar_Recorder/` | Standalone data recorder for authoring. |
 | `addon/Polestar_QuestDB/` | Quest database, load-on-demand. **Generated** locally by `tools/polestar.js questdb build` (gitignored). |
 | `addon/Polestar_Codex/` | Lookup, Dungeons and Rares data, load-on-demand. **Generated** locally by `tools/polestar.js codex build` (gitignored). |
@@ -1543,6 +1573,8 @@ The dispatcher discovers them; adding a command never edits a shared file.
 Shared helpers: `tools/lib/lua.js` (run Lua 5.1, convert Lua data to JSON),
 `tools/lib/tga.js` (anti-aliased TGA textures).
 
+Every command, every generated file and the rebuild order: [tools/README.md](../tools/README.md).
+
 ### Guide packs (pack mode)
 
 The guide commands work on a pack: the folder given as their one argument
@@ -1966,6 +1998,8 @@ estimate to compare against); detours, steps with 600+ yd of median travel and
 no XP or a third of the guide's XP per yard.
 
 ## Tests
+
+Layers, stubs, helpers and the tests that need local data: [tests/README.md](../tests/README.md).
 
 `npm test` = `node --test "tests/**/*.test.js"`. Lua runs under real `lua5.1` through
 `tests/helpers/lua.js`, which loads `tests/lua/wow_stub.lua` and then the
