@@ -107,18 +107,18 @@ step Beasts 1-9: Mulgore (1-50)
   only Tauren
   zone Mulgore
   tip Kill and skin Adult Plainstrider (6), Battleboar (3), Elder Plainstrider (8), Flatland Cougar (7), Flatland Prowler (9), Kodo Calf (7), Mountain Cougar (3), Plainstrider (1), Prairie Stalker (7), Prairie Wolf (5), Prairie Wolf Alpha (9) along the loop until Skinning 50; skin the highest-level beasts your skill allows. A beast of level L needs skill (L-10)x10 up to level 20 and Lx5 above. Zone level 1-10.
-  goto 42.9,27.3 "Kodo Calf, Prairie Wolf Alpha" r 30
-  goto 34.9,36.5 "Kodo Calf, Flatland Cougar" r 30
-  goto 37.7,46.3 "Prairie Stalker, Kodo Calf" r 30
-  goto 45.4,39.4 "Flatland Prowler, Prairie Stalker" r 30
-  goto 42.8,56.3 "Flatland Cougar, Prairie Stalker" r 30
-  goto 37.1,73.2 "Prairie Wolf, Kodo Calf" r 30
-  goto 45.4,79.2 "Plainstrider" r 30
-  goto 43.6,86.5 "Mountain Cougar, Plainstrider" r 30
-  goto 53.4,87.6 "Battleboar, Mountain Cougar" r 30
-  goto 51.8,79.2 "Battleboar, Plainstrider" r 30
-  goto 56.6,60.9 "Adult Plainstrider, Elder Plainstrider" r 30
-  goto 55.2,30.7 "Kodo Calf, Flatland Prowler" r 30
+  goto 33.2,27.3 "Kodo Calf, Adult Plainstrider" r 30
+  goto 36.0,40.7 "Flatland Cougar, Kodo Calf" r 30
+  goto 41.7,52.4 "Prairie Wolf, Adult Plainstrider" r 30
+  goto 36.4,72.1 "Prairie Wolf, Kodo Calf" r 30
+  goto 43.1,88.6 "Mountain Cougar, Plainstrider" r 30
+  goto 49.2,89.1 "Mountain Cougar, Plainstrider" r 30
+  goto 55.9,88.1 "Battleboar, Mountain Cougar" r 30
+  goto 53.6,77.7 "Battleboar, Plainstrider" r 30
+  goto 61.3,53.6 "Flatland Cougar, Prairie Stalker" r 30
+  goto 58.1,21.1 "Kodo Calf, Flatland Prowler" r 30
+  goto 46.0,31.4 "Flatland Prowler, Prairie Stalker" r 30
+  goto 43.0,17.6 "Kodo Calf, Prairie Wolf Alpha" r 30
   skill Skinning 50
 
 step Beasts 1-9: Tirisfal Glades (1-50)

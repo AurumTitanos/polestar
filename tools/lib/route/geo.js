@@ -2,8 +2,11 @@
 // World geometry for the route planner. Map percent (0-100) converts to world
 // yards through the Era bounds in map-frames.json (docs/ARCHITECTURE.md "Map
 // frames"): wx = top + (bottom - top) * y/100, wy = left + (right - left) * x/100.
-// Live-frame spawns ("l") are converted with the same bounds: the planner only
-// needs distances, and only a handful of maps changed frame.
+// Live-frame spawns ("l") convert to world yards through the map's Forever
+// bounds (`forever`) and come back as Era-frame percent, so every point a
+// projector returns is in the Era frame when the map has Era bounds: clusters
+// never mix frames, and generators can write the numbers into `coords era`
+// guides as they are.
 
 // Distance between points on different continents. Finite so that tour
 // arithmetic stays exact; large enough that no route ever prefers it.
@@ -14,6 +17,7 @@ const FALLBACK = { c: 0, left: 0, right: -1000, top: 0, bottom: -1000 };
 
 function makeProjector(frames, warn) {
 	const era = (frames && frames.era) || {};
+	const forever = (frames && frames.forever) || {};
 	const warned = new Set();
 	function bounds(map) {
 		const b = era[String(map)];
@@ -25,8 +29,28 @@ function makeProjector(frames, warn) {
 		return { ...FALLBACK, c: -Number(map) };
 	}
 	// A route point: map percent (in frame `f` of its source spawns, "e" or
-	// "l"; null when given by the author) plus world position.
+	// "l"; null when given by the author) plus world position. An "l" point
+	// on a map with both Forever and Era bounds comes back in the Era frame
+	// (f "e"); without Era bounds it stays live and projects through Forever's.
 	function point(map, x, y, f = null) {
+		const lb = f === 'l' ? liveBounds(map) : null;
+		if (lb) {
+			const wx = lb.top + ((lb.bottom - lb.top) * y) / 100;
+			const wy = lb.left + ((lb.right - lb.left) * x) / 100;
+			const eb = era[String(map)];
+			if (eb && hasBounds(eb) && eb.c === lb.c) {
+				return {
+					map: Number(map),
+					x: round2(((wy - eb.left) / (eb.right - eb.left)) * 100),
+					y: round2(((wx - eb.top) / (eb.bottom - eb.top)) * 100),
+					f: 'e',
+					c: eb.c,
+					wx,
+					wy,
+				};
+			}
+			if (!eb) return { map: Number(map), x, y, f, c: lb.c, wx, wy };
+		}
 		const b = bounds(map);
 		return {
 			map: Number(map),
@@ -38,7 +62,19 @@ function makeProjector(frames, warn) {
 			wy: b.left + ((b.right - b.left) * x) / 100,
 		};
 	}
+	function liveBounds(map) {
+		const b = forever[String(map)];
+		return b && hasBounds(b) ? b : null;
+	}
 	return { point, bounds };
+}
+
+function hasBounds(b) {
+	return [b.left, b.right, b.top, b.bottom].every((v) => typeof v === 'number');
+}
+
+function round2(v) {
+	return Math.round(v * 100) / 100;
 }
 
 function dist(a, b) {

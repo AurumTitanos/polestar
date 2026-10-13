@@ -107,18 +107,18 @@ step Copper: Mulgore (1-50)
   only Tauren
   zone Mulgore
   tip Mine every Copper (1, orange) node you pass and circle the waypoints until Mining 50. Smelt the ore at a forge when your bags fill: smelting also raises Mining. Zone level 1-10.
-  goto 37.4,27.0 "Copper" r 30
-  goto 39.0,19.1 "Copper" r 30
-  goto 44.2,23.2 "Copper" r 30
-  goto 48.2,33.8 "Copper" r 30
-  goto 47.4,75.3 "Copper" r 30
-  goto 35.8,79.8 "Copper" r 30
-  goto 34.7,71.7 "Copper" r 30
-  goto 34.6,65.4 "Copper" r 30
-  goto 36.3,59.2 "Copper" r 30
-  goto 33.4,55.2 "Copper" r 30
-  goto 35.8,45.1 "Copper" r 30
-  goto 32.4,37.0 "Copper" r 30
+  goto 36.5,16.6 "Copper" r 30
+  goto 38.3,7.1 "Copper" r 30
+  goto 44.6,12.1 "Copper" r 30
+  goto 49.3,24.7 "Copper" r 30
+  goto 48.4,74.4 "Copper" r 30
+  goto 34.5,79.8 "Copper" r 30
+  goto 33.2,70.1 "Copper" r 30
+  goto 33.0,62.6 "Copper" r 30
+  goto 35.1,55.1 "Copper" r 30
+  goto 31.6,50.3 "Copper" r 30
+  goto 34.5,38.3 "Copper" r 30
+  goto 30.4,28.6 "Copper" r 30
   skill Mining 50
 
 step Copper: Tirisfal Glades (1-50)
@@ -220,18 +220,18 @@ step Copper: Mulgore (50-65) cont.
   only Tauren
   zone Mulgore
   tip Mine every Copper (1, yellow) node you pass and circle the waypoints until Mining 65. Smelt the ore at a forge when your bags fill: smelting also raises Mining. Zone level 1-10.
-  goto 37.4,27.0 "Copper" r 30
-  goto 39.0,19.1 "Copper" r 30
-  goto 44.2,23.2 "Copper" r 30
-  goto 48.2,33.8 "Copper" r 30
-  goto 47.4,75.3 "Copper" r 30
-  goto 35.8,79.8 "Copper" r 30
-  goto 34.7,71.7 "Copper" r 30
-  goto 34.6,65.4 "Copper" r 30
-  goto 36.3,59.2 "Copper" r 30
-  goto 33.4,55.2 "Copper" r 30
-  goto 35.8,45.1 "Copper" r 30
-  goto 32.4,37.0 "Copper" r 30
+  goto 36.5,16.6 "Copper" r 30
+  goto 38.3,7.1 "Copper" r 30
+  goto 44.6,12.1 "Copper" r 30
+  goto 49.3,24.7 "Copper" r 30
+  goto 48.4,74.4 "Copper" r 30
+  goto 34.5,79.8 "Copper" r 30
+  goto 33.2,70.1 "Copper" r 30
+  goto 33.0,62.6 "Copper" r 30
+  goto 35.1,55.1 "Copper" r 30
+  goto 31.6,50.3 "Copper" r 30
+  goto 34.5,38.3 "Copper" r 30
+  goto 30.4,28.6 "Copper" r 30
   skill Mining 65
 
 step Copper: Tirisfal Glades (50-65) cont.
@@ -258,18 +258,18 @@ step Tin & Silver: Redridge Mountains (65-125)
   only Human,Dwarf,Gnome
   zone Redridge Mountains
   tip Mine every Copper (1, green), Tin (65, orange), Silver (from 75) node you pass and circle the waypoints until Mining 125. Smelt the ore at a forge when your bags fill: smelting also raises Mining. Zone level 15-25.
-  goto 19.4,65.2 "Copper, Silver" r 30
-  goto 10.8,55.0 "Copper, Silver" r 30
-  goto 13.8,30.6 "Copper, Tin" r 30
-  goto 14.2,18.3 "Copper, Tin" r 30
-  goto 22.5,7.8 "Copper, Silver" r 30
-  goto 32.2,13.3 "Copper, Silver" r 30
-  goto 28.4,28.1 "Copper, Silver" r 30
-  goto 34.9,42.8 "Copper, Silver" r 30
-  goto 33.3,70.2 "Copper, Silver" r 30
-  goto 26.1,84.9 "Copper, Silver" r 30
-  goto 16.1,75.1 "Copper, Silver" r 30
-  goto 3.4,77.5 "Copper, Silver" r 30
+  goto 24.5,65.2 "Copper, Silver" r 30
+  goto 15.9,55.0 "Copper, Silver" r 30
+  goto 18.9,30.6 "Copper, Tin" r 30
+  goto 19.3,18.3 "Copper, Tin" r 30
+  goto 27.6,7.8 "Copper, Silver" r 30
+  goto 37.2,13.3 "Copper, Silver" r 30
+  goto 33.4,28.1 "Copper, Silver" r 30
+  goto 40.0,42.8 "Copper, Silver" r 30
+  goto 38.4,70.2 "Copper, Silver" r 30
+  goto 31.2,84.9 "Copper, Silver" r 30
+  goto 21.2,75.1 "Copper, Silver" r 30
+  goto 8.5,77.5 "Copper, Silver" r 30
   skill Mining 125
 
 step Tin & Silver: Darkshore (65-125)

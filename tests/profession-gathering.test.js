@@ -75,6 +75,32 @@ test('loop: clusters ordered as a tour starting near the entry point', () => {
 	assert.ok(score.gain === 14 && score.score > 0);
 });
 
+test('live-frame spawns come out in the Era frame, so loops on redrawn maps match `coords era`', () => {
+	// A map Forever redrew: its live frame is offset from the Era frame and
+	// covers 800 yards instead of 1000.
+	const frames = {
+		era: { 1: { c: 0, left: 0, right: -1000, top: 0, bottom: -1000 } },
+		forever: { 1: { c: 0, left: 100, right: -700, top: 200, bottom: -600 } },
+	};
+	const project = makeProjector(frames);
+	// Live 50,50 is world (-200, -300): Era 30,20.
+	const p = project.point(1, 50, 50, 'l');
+	assert.deepEqual([p.x, p.y, p.f, p.wx, p.wy], [30, 20, 'e', -200, -300]);
+	// Nodes recorded in both frames cluster together, and the waypoint is Era.
+	const pts = [
+		{ name: 'Copper Vein', w: 1, pt: project.point(1, 50, 50, 'l') },
+		{ name: 'Copper Vein', w: 1, pt: project.point(1, 50.5, 50, 'l') },
+		{ name: 'Copper Vein', w: 1, pt: project.point(1, 30, 21, 'e') },
+	];
+	const [c] = R.weightedClusters(pts, 30, project);
+	assert.equal(c.w, 3);
+	assert.equal(c.pt.f, 'e');
+	assert.deepEqual([c.pt.x, c.pt.y], [30.1, 20.3]);
+	// A map with live bounds only stays live.
+	const only = makeProjector({ era: {}, forever: frames.forever }).point(1, 50, 50, 'l');
+	assert.deepEqual([only.x, only.y, only.f, only.wx, only.wy], [50, 50, 'l', -200, -300]);
+});
+
 test('generated profession guides are up to date and compile', { skip: hasData ? false : 'data/forever not built' }, () => {
 	const { buildAll } = require('../tools/lib/professions/gathering/build');
 	const { context, OUT_DIR } = require('../tools/lib/professions/gathering/common');

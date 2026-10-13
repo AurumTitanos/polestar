@@ -105,18 +105,18 @@ step Silverleaf & Earthroot: Mulgore (1-50)
   only Tauren
   zone Mulgore
   tip Pick every Peacebloom (1, orange), Silverleaf (1, orange), Earthroot (from 15) you pass and circle the waypoints until Herbalism 50. Zone level 1-10.
-  goto 38.3,21.4 "Earthroot, Peacebloom" r 30
-  goto 35.6,41.7 "Earthroot, Peacebloom" r 30
-  goto 36.5,63.9 "Earthroot, Peacebloom" r 30
-  goto 60.7,72.4 "Earthroot, Peacebloom" r 30
-  goto 55.5,51.6 "Earthroot, Peacebloom" r 30
-  goto 46.6,53.3 "Peacebloom, Silverleaf" r 30
-  goto 39.1,48.2 "Peacebloom, Silverleaf" r 30
-  goto 45.6,42.5 "Peacebloom, Silverleaf" r 30
-  goto 47.6,35.8 "Peacebloom, Silverleaf" r 30
-  goto 45.4,27.1 "Peacebloom, Silverleaf" r 30
-  goto 52.3,27.9 "Earthroot, Peacebloom" r 30
-  goto 50.6,20.1 "Earthroot, Peacebloom" r 30
+  goto 34.3,34.1 "Earthroot, Peacebloom" r 30
+  goto 38.4,41.9 "Peacebloom, Silverleaf" r 30
+  goto 35.6,61.9 "Earthroot, Peacebloom" r 30
+  goto 47.4,48.1 "Peacebloom, Silverleaf" r 30
+  goto 63.4,70.9 "Peacebloom, Silverleaf" r 30
+  goto 66.1,64.0 "Peacebloom, Silverleaf" r 30
+  goto 59.1,47.2 "Earthroot, Peacebloom" r 30
+  goto 54.2,17.6 "Earthroot, Peacebloom" r 30
+  goto 52.3,8.3 "Earthroot, Peacebloom" r 30
+  goto 46.0,16.7 "Peacebloom, Silverleaf" r 30
+  goto 37.9,9.1 "Earthroot, Peacebloom" r 30
+  goto 28.8,24.7 "Earthroot, Silverleaf" r 30
   skill Herbalism 50
 
 step Silverleaf & Earthroot: Tirisfal Glades (1-50)
@@ -240,18 +240,18 @@ step Bruiseweed: Redridge Mountains (100-125)
   only Human,Dwarf,Gnome
   zone Redridge Mountains
   tip Pick every Peacebloom (1, green), Earthroot (15, green), Mageroyal (50, green), Briarthorn (70, yellow), Bruiseweed (100, orange) you pass and circle the waypoints until Herbalism 125. Zone level 15-25.
-  goto 30.5,64.9 "Briarthorn, Bruiseweed" r 30
-  goto 32.9,77.3 "Briarthorn, Bruiseweed" r 30
-  goto 54.3,62.1 "Briarthorn, Bruiseweed" r 30
-  goto 71.7,68.2 "Briarthorn, Bruiseweed" r 30
-  goto 77.1,43.8 "Briarthorn, Bruiseweed" r 30
-  goto 69.9,48.3 "Bruiseweed, Earthroot" r 30
-  goto 57.9,50.9 "Briarthorn, Bruiseweed" r 30
-  goto 49.1,47.6 "Briarthorn, Bruiseweed" r 30
-  goto 23.3,26.8 "Briarthorn, Mageroyal" r 30
-  goto 16.4,34.2 "Briarthorn, Bruiseweed" r 30
-  goto 19.3,62.3 "Briarthorn, Bruiseweed" r 30
-  goto 17.0,75.5 "Briarthorn, Bruiseweed" r 30
+  goto 35.6,64.9 "Briarthorn, Bruiseweed" r 30
+  goto 38.0,77.3 "Briarthorn, Bruiseweed" r 30
+  goto 59.4,62.1 "Briarthorn, Bruiseweed" r 30
+  goto 76.8,68.2 "Briarthorn, Bruiseweed" r 30
+  goto 82.2,43.8 "Briarthorn, Bruiseweed" r 30
+  goto 75.0,48.3 "Bruiseweed, Earthroot" r 30
+  goto 63.0,50.9 "Briarthorn, Bruiseweed" r 30
+  goto 54.2,47.6 "Briarthorn, Bruiseweed" r 30
+  goto 28.3,26.8 "Briarthorn, Mageroyal" r 30
+  goto 21.5,34.2 "Briarthorn, Bruiseweed" r 30
+  goto 24.4,62.3 "Briarthorn, Bruiseweed" r 30
+  goto 22.1,75.5 "Briarthorn, Bruiseweed" r 30
   skill Herbalism 125
 
 step Bruiseweed & Wild Steelbloom: Thousand Needles (100-125)
