@@ -33,6 +33,14 @@
   <a href="#data-and-licensing">Data and licensing</a>
 </p>
 
+<table align="center">
+  <tr>
+    <td align="center" width="240"><a href="#quick-start"><b>Play</b></a><br>Install the addon and follow the arrow.</td>
+    <td align="center" width="240"><a href="#writing-a-guide-pack"><b>Write guides</b></a><br>Publish your own routes as a guide pack.</td>
+    <td align="center" width="240"><a href="#building-from-source"><b>Work on Polestar</b></a><br>Fix a guide, build the addon, run the tests.</td>
+  </tr>
+</table>
+
 ## Quick start
 
 1. **Download** `Polestar-<version>.zip` from the newest release on the
@@ -84,9 +92,9 @@ are written from that route and scored under the same model
 ([How the routes are made](#how-the-routes-are-made)).
 
 Guide packs written by other players install the same way, next to Polestar
-([Guide packs](#guide-packs)). On the first login a short welcome walks
-through the guide window, setup and guide packs (`/polestar welcome` shows it
-again).
+([Guide packs](#guide-packs)). Each new character's first login opens a short
+welcome: a hello, the guide Polestar suggests for that character and the
+three things to know (`/polestar welcome` shows it again).
 
 > [!NOTE]
 > **Beta.** Every guide compiles, lints and plays to the end in a simulator
@@ -285,7 +293,7 @@ NPC and object positions, trainers, flight paths and times), and
 time, XP per hour, time in combat, deaths and travel, then the slowest
 steps and detours, the steps to fix first.
 
-### Commands
+### Slash commands
 
 `/polestar` (or `/pole`) opens the guide window; settings live in
 `/polestar options`, grouped by what you came to do: Guide, Appearance, Map,
@@ -297,6 +305,7 @@ finds any setting.
 
 | Command | What it does |
 |---|---|
+| `help` | List every command |
 | `show`, `hide` | Show or hide the guide window |
 | `guides` | Open the hub on Guides |
 | `options [page]` | Open the settings, optionally on a page |
@@ -373,7 +382,7 @@ independently: the first search is the one the guides were written from,
 the second used another random seed, up to twice as many routes and the
 current data (22 more NPC ranks checked against Forever).
 
-| Start | First search: best / consensus | Second search: best / consensus | Guides (grinding) | Earlier draft (grinding) |
+| Start | First search: best / consensus | Second search: best / consensus | Guides (grinding) | Previous guides (grinding) |
 |---|---:|---:|---:|---:|
 | Orc | 119.4 / 120.5 | 120.7 / 117.8 | 123.0 (14.4) | 128.1 (44.2) |
 | Tauren | 120.4 / 120.2 | 119.1 / 117.4 | 122.5 (13.9) | 127.9 (44.9) |
@@ -384,10 +393,10 @@ current data (22 more NPC ranks checked against Forever).
 | Night Elf | 120.0 / 119.5 | 120.9 / 118.9 | 129.2 (28.8) | 133.7 (62.5) |
 | Skyborne (Alliance) | 121.2 / 119.6 | 118.6 / 118.6 | 129.0 (27.7) | 133.0 (60.4) |
 
-The guides and the earlier draft (an earlier draft of the guides, written
+The guides and the previous guides (the earlier draft in the charts, written
 against an older model) are scored on the second search's world, where the
 guides land within 0.1 h of their score on the first. The guides as written
-are 3.8-5.4 h faster than the earlier draft, with 29-34 h less grinding.
+are 3.8-5.4 h faster than the previous guides, with 29-34 h less grinding.
 
 <p align="center">
   <img src="docs/assets/charts/starts.svg" width="880" alt="Chart: hours to 60 and hours of grinding per start. The best routes found and the consensus routes reach 60 in 117 to 121 hours; the guides in about 122 to 124 hours for the Horde and 129 for the Alliance; the earlier draft in 128 and 133. Grinding drops from 42 to 45 hours to about 14 for the Horde, and from 60 to 62 to about 28 for the Alliance.">
@@ -489,6 +498,8 @@ ordinary addon that depends on Polestar, made and supported by its author.
 Polestar shows the packs you have installed; it does not host, bundle or
 recommend any.
 
+### Installing a guide pack
+
 A pack installs like any addon: extract its zip into the AddOns folder next to
 the `Polestar` folders and restart the game. Its guides appear in the hub
 under "Guide packs", each credited to its author. Options > Guide packs
@@ -497,31 +508,54 @@ problems, switches a pack off and on without a reload, and picks where the
 guide for your level is suggested from (Polestar's own guides unless you
 choose a pack). A pack never replaces Polestar's guides or another pack's.
 
-<details>
-<summary><b>Writing a guide pack</b></summary>
+### Writing a guide pack
 
-`polestar new my-pack` starts a pack from the template, with an example guide
-that already passes lint. The tools work on a pack as they do on Polestar's
-own guides: run them in the pack's folder, or name it
-(`polestar lint ../my-pack`). `npm link` in a clone puts `polestar` on the
-PATH.
+A pack lives in its own folder, beside a clone of Polestar that provides the
+tools (Node 24 or later; Lua 5.1 for `play` and `playtest`):
 
-| Command | What it does |
-|---|---|
-| `find <text>` | Quests, NPCs, objects, items, inns, flight points and Polestar's guides as guide lines; in game, `/polestar where` gives your position as guide lines to copy |
-| `lint`, `playtest` | Check every guide, and play each to the end for every class |
-| `dev`, `play` | Rebuild into the game on every save; run the pack in the browser playground |
-| `pack` | Build the zip to publish, byte for byte reproducible |
+```sh
+git clone https://github.com/fitzforge/polestar.git
+cd polestar
+npm link               # puts `polestar` on your PATH; no npm dependencies
+polestar data build    # the reference data in data/forever/, which every guide command reads
+polestar doctor        # checks the setup and prints the fix for anything missing
+cd ..                  # your pack goes beside the clone, not inside it
+polestar new my-pack   # asks for the id, title, author and licence
+cd my-pack
+polestar dev --play    # lint and build on every save, with the browser playground
+```
 
-A pack can hand over to any of Polestar's guides with `next`, so it can cover
-one zone or one level range. [docs/PACKS.md](docs/PACKS.md) is the handbook
-(setup, a first pack in 15 minutes, testing, publishing) and
-[docs/PACK_FORMAT.md](docs/PACK_FORMAT.md) the format. A pack may use a
-licence of its author's choice ([Data and licensing](#data-and-licensing)).
+`data build` downloads its public sources and also reads quest data from an
+addon installed with the game, so today it is built on a machine with the
+Forever client (`polestar help data` lists every source). `new` writes an
+example guide that already lints and plays to the end. Before publishing,
+`polestar playtest` plays every guide to the end in the real addon, for each
+race that can reach it and each class it has steps for, and `polestar pack`
+builds the zip, byte for byte reproducible.
 
-</details>
+- [docs/PACKS.md](docs/PACKS.md): the handbook (setup, a first pack in 15
+  minutes, testing, publishing, every problem and its fix)
+- [docs/GUIDE_CHEATSHEET.md](docs/GUIDE_CHEATSHEET.md): the guide format on
+  one page; [docs/GUIDE_FORMAT.md](docs/GUIDE_FORMAT.md) in full
+- [docs/PACK_FORMAT.md](docs/PACK_FORMAT.md): what `pack.json` holds and what
+  the tools write
+- **Codespaces:** a pack made by `polestar new` carries a dev container; open
+  its repository in GitHub Codespaces for Node, Lua and the tools with nothing
+  to install (use `play` and `playtest` there, since `install` and `dev` need
+  the game)
+
+`polestar find <text>` turns quests, NPCs, objects, items, inns and flight
+points into guide lines; in game, `/polestar where` gives your position as
+one. A pack can hand over to any of Polestar's guides with `next`, so it can
+cover one zone or one level range, and may use a licence of its author's
+choice ([Data and licensing](#data-and-licensing)).
 
 ## Building from source
+
+This part is for working on Polestar itself: players need only the
+[Quick start](#quick-start), guide authors the [Guide packs](#guide-packs)
+section. [docs/README.md](docs/README.md) maps every document, and
+[CHANGELOG.md](CHANGELOG.md) lists what changed in each release.
 
 Node 24 or later (no npm dependencies) and Lua 5.1 (`lua5.1`, `luac5.1`) for
 the tests. Building the data needs a local Forever client: it reads the
@@ -539,53 +573,21 @@ node tools/polestar.js version            # the release version in package.json 
 node tools/polestar.js pack               # release zips and SHA256SUMS into dist/
 ```
 
-The suite (1186 tests) runs on every push in
-[CI](.github/workflows/ci.yml), where the tests that need the locally built
-data skip with a reason; with the data built, all pass locally. `install`
-finds the client under Wine, Proton and similar prefixes in your home
-folder, or takes `--dest <Interface/AddOns>`; `--link` symlinks the folders
-instead, so an edit needs only a `/reload`.
+`npm test` runs the suite. [CI](.github/workflows/ci.yml) runs it on every
+push to main and every pull request, where the tests that need the locally
+built data skip with a reason, and fails when the committed textures differ
+from a fresh `media` build; with the data built, all pass locally. `install`
+finds the client under Wine, Proton and similar prefixes in your home folder,
+or takes `$WOW_FOREVER_ADDONS` or `--dest <Interface/AddOns>`; `--link`
+symlinks the folders instead, so an edit needs only a `/reload`.
 
 Releases are built on a maintainer's machine, because the data addons come
 from the game client's tables: [docs/RELEASING.md](docs/RELEASING.md) has
 the steps and what each zip carries.
 
-<details>
-<summary><b>Every tool command</b></summary>
-
-`node tools/polestar.js help <command>` gives the options of each.
-
-| Command | What it does |
-|---|---|
-| `codex` | Build Lookup's Codex (`data/forever/codex` and the `Polestar_Codex` pack) |
-| `compile` | Compile `.guide` files into the `Polestar_Guides` addon |
-| `data` | Build the reference data (`data/forever/*.json`) |
-| `dev` | Lint and build a guide pack into the game on every save |
-| `doctor` | Check the setup for writing a guide pack |
-| `draft` | Generate a first-draft leveling route (`.guide`) from the reference data |
-| `dungeons` | Build the dungeon data (`data/forever/dungeons.json`) |
-| `find` | Look up quests, NPCs, objects, items, inns, flight points and guides as guide lines |
-| `gear` | Build the upgrade-advice data (item stats, reward choices, stat weights) |
-| `install` | Install the addons into the Forever client |
-| `itemdb` | Build the `Polestar_ItemDB` data addon from client tables |
-| `lint` | Check `.guide` files without writing output |
-| `maps` | Build world map data (zone level ranges, zone art overlays) |
-| `media` | Regenerate the addon's textures from code (`tools/media`) |
-| `new` | Start a guide pack from the template |
-| `pack` | Build the release zips, or a guide pack's zip |
-| `play` | Play with the real addon in the browser |
-| `playtest` | Play guides to the end for every class in the simulator |
-| `preview` | Render the UI to `docs/preview/*.svg` |
-| `profession` | Build profession data; draft a 1-300 profession guide |
-| `qol` | Build the Quality of Life data (spirit healers, flight masters) |
-| `questdb` | Build the load-on-demand quest database addon |
-| `record` | Recorder sessions: import, watch, draft guides, measure routes |
-| `sim` | Simulate and optimise leveling routes |
-| `trainers` | Build the class trainer data |
-| `travel` | Build the travel network and test routes |
-| `version` | Print the release version, or set it in `package.json` and every addon TOC |
-
-</details>
+`node tools/polestar.js help` lists every command and `help <command>` its
+options; [tools/README.md](tools/README.md) groups them, lists the generated
+files and gives the rebuild order after a data change.
 
 <details>
 <summary><b>The playground: the real addon in a browser</b></summary>
@@ -630,14 +632,14 @@ the new zones ([docs/SIMULATION.md](docs/SIMULATION.md), "Refresh").
 
 | Path | What lives there |
 |---|---|
-| [`addon/Polestar`](addon/Polestar) | The addon: engine, navigation, UI, modules, textures drawn in code |
+| [`addon/Polestar`](addon/Polestar) | The addon: engine, navigation, UI, modules, textures drawn in code ([addon/README.md](addon/README.md)) |
 | [`addon/Polestar_Guides`](addon/Polestar_Guides) | The compiled guides (generated by `compile`) |
-| [`addon/Polestar_ItemDB`](addon/Polestar_ItemDB) | Item stats for gear advice (generated by `itemdb build`) |
+| [`addon/Polestar_ItemDB`](addon/Polestar_ItemDB) | Item stats for gear advice: `Items.lua` from `itemdb build`, `Forever.lua` from `gear build` |
 | [`addon/Polestar_Recorder`](addon/Polestar_Recorder) | The optional session recorder |
 | [`guides/forever`](guides/forever) | The guide sources: leveling, professions, reputation, exploration, Legacy, collectibles |
-| [`tools`](tools) | The command line (`polestar.js`), the guide compiler, the simulator, data importers, texture and preview renderers, the playground |
-| [`tests`](tests) | `node --test` suites; `tests/lua` is the simulated game client they run the addon in |
-| [`docs`](docs) | Architecture, guide format, simulation, the suite's scope, UI renders |
+| [`tools`](tools) | The command line (`polestar.js`), the guide compiler, the simulator, data importers, texture and preview renderers, the playground ([tools/README.md](tools/README.md)) |
+| [`tests`](tests) | `node --test` suites; `tests/lua` is the simulated game client they run the addon in ([tests/README.md](tests/README.md)) |
+| [`docs`](docs) | Architecture, guide format, simulation, the suite's scope, UI renders ([docs/README.md](docs/README.md)) |
 | `data/` | Local build products and recordings, gitignored |
 
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) describes the modules and their
@@ -651,11 +653,11 @@ Issues and pull requests are welcome, guide fixes most of all: a step in the
 wrong order, a quest that is not where the guide says, a tip that would have
 saved you a minute.
 
-- **Guides** are `.guide` files under `guides/forever/`, in the format of
-  [docs/GUIDE_FORMAT.md](docs/GUIDE_FORMAT.md). Run
-  `node tools/polestar.js lint` before you send one, and play it through the
-  simulator:
-  `POLESTAR_GUIDES=02-the-barrens node --test tests/guides.test.js`.
+- **Found a wrong step?** A guide's title names its file under
+  `guides/forever/`; fix the step, run `node tools/polestar.js lint` and
+  `playtest --filter <name>`, and open a pull request. Without the reference
+  data (built from a local client today), send the fix or an issue anyway:
+  [CONTRIBUTING.md](CONTRIBUTING.md) has the full walkthrough.
 - **Code** follows the existing modules; read
   [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) first and keep
   `node --test "tests/**/*.test.js"` green.
