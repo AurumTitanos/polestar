@@ -293,7 +293,7 @@ few more listed by `/lsrec`.
 ```mermaid
 flowchart LR
   data["Reference<br/>data"] --> world["World model<br/>solo quests"]
-  world --> search["Search<br/>3.5-9M routes<br/>per start"]
+  world --> search["Search<br/>3.5-18M routes<br/>per start"]
   search --> consensus["Consensus<br/>one route<br/>from level 12"]
   search --> robust["Robustness<br/>2000 draws"]
   consensus --> guides["Guides<br/>written from<br/>the export"]
@@ -328,42 +328,58 @@ flowchart LR
 
 ### The numbers
 
-Hours to 60, solo, under the model (world `f7bd5e2c`, final run):
+Hours to 60, solo, under the model. The routes were searched twice,
+independently: the first search is the one the guides were written from,
+the second used another random seed, up to twice as many routes and the
+current data (22 more NPC ranks checked against Forever).
 
-| Start | Best found | Consensus | Guides (grinding) | Earlier draft (grinding) |
+| Start | First search: best / consensus | Second search: best / consensus | Guides (grinding) | Earlier draft (grinding) |
 |---|---:|---:|---:|---:|
-| Orc | 119.4 | 120.5 | 122.9 (14.3) | 128.0 (44.1) |
-| Tauren | 120.4 | 120.2 | 122.4 (13.8) | 127.9 (44.8) |
-| Undead | 120.8 | 120.6 | 123.5 (13.9) | 127.9 (43.1) |
-| Skyborne (Horde) | 120.2 | 120.1 | 122.8 (13.1) | 127.7 (41.8) |
-| Human | 119.6 | 119.1 | 128.7 (28.5) | 133.3 (61.4) |
-| Dwarf | 119.5 | 119.5 | 129.3 (28.4) | 133.1 (61.8) |
-| Night Elf | 120.0 | 119.5 | 129.3 (28.8) | 133.7 (62.5) |
-| Skyborne (Alliance) | 121.2 | 119.6 | 129.0 (27.7) | 133.0 (60.4) |
+| Orc | 119.4 / 120.5 | 120.7 / 117.8 | 123.0 (14.4) | 128.1 (44.2) |
+| Tauren | 120.4 / 120.2 | 119.1 / 117.4 | 122.5 (13.9) | 127.9 (44.9) |
+| Undead | 120.8 / 120.6 | 119.0 / 118.1 | 123.5 (14.0) | 128.0 (43.2) |
+| Skyborne (Horde) | 120.2 / 120.1 | 117.3 / 117.3 | 122.9 (13.2) | 127.7 (41.9) |
+| Human | 119.6 / 119.1 | 120.7 / 118.8 | 128.7 (28.5) | 133.3 (61.4) |
+| Dwarf | 119.5 / 119.5 | 120.8 / 118.8 | 129.3 (28.4) | 133.1 (61.8) |
+| Night Elf | 120.0 / 119.5 | 120.9 / 118.9 | 129.2 (28.8) | 133.7 (62.5) |
+| Skyborne (Alliance) | 121.2 / 119.6 | 118.6 / 118.6 | 129.0 (27.7) | 133.0 (60.4) |
 
-"Earlier draft" is an earlier draft of the guides, written against an older
-model and scored here on the same world. The guides as written are 4.4-5.2 h
-faster than the earlier draft, with 28-34 h less grinding. They cost
-2.0-2.7 h (Horde) and 9.1-9.8 h (Alliance) against the consensus route,
-almost all of it grinding: the Alliance mid-40s have few solo quests left
-once the long side trips are gone.
+The guides and the earlier draft (an earlier draft of the guides, written
+against an older model) are scored on the second search's world, where the
+guides land within 0.1 h of their score on the first. The guides as written
+are 3.8-5.4 h faster than the earlier draft, with 29-34 h less grinding.
 
 <p align="center">
-  <img src="docs/assets/charts/starts.svg" width="880" alt="Chart: hours to 60 and hours of grinding per start, the guides against the earlier draft. The guides reach 60 in about 122 to 124 hours for the Horde and 129 for the Alliance, against 128 and 133; grinding drops from 42 to 45 hours to about 14 for the Horde, and from 60 to 62 to about 28 for the Alliance.">
+  <img src="docs/assets/charts/starts.svg" width="880" alt="Chart: hours to 60 and hours of grinding per start. The best routes found and the consensus routes reach 60 in 117 to 121 hours; the guides in about 122 to 124 hours for the Horde and 129 for the Alliance; the earlier draft in 128 and 133. Grinding drops from 42 to 45 hours to about 14 for the Horde, and from 60 to 62 to about 28 for the Alliance.">
 </p>
 
 <p align="center">
-  <img src="docs/assets/charts/levels.svg" width="880" alt="Chart: level against hours played for each faction, the guides and the earlier draft as curves that stay close to level 45 and part in the last levels, with a strip showing the hours the guides are ahead of the earlier draft at each level.">
+  <img src="docs/assets/charts/levels.svg" width="880" alt="Chart: level against hours played for each faction: the guides, the best route found, the consensus route and the earlier draft as curves that stay close to level 45 and part in the last levels, with a strip showing the hours the guides are ahead of the earlier draft at each level.">
 </p>
 
-**How sure is this?** The searches evaluated 3.46 to 9.03 million complete
-routes per start; two of them (Human and Skyborne Horde) reached the route
-cap still finding small improvements. Re-scored under 2000 random draws of
-the model's parameters, the best route found stays within 1% of each draw's
-best in 30-99% of draws, depending on the start, and no route wins a
-majority: the top routes are close to each other, so "best found" names one
-of several near-equal routes, not a unique winner. Searched again with
-dungeons allowed (Orc, Tauren and Undead), no dungeon route beat questing solo.
+**How close to the best?** Nobody can prove a route is the best one
+possible, so the claim is narrower and checked:
+
+- **The search lands in the same place twice.** Two independent searches
+  (3.5-9.0 and 6.5-18.1 million complete routes per start) find routes
+  within 117.3-121.2 h, and their consensus routes differ by at most 2.8 h
+  (Horde) and 1.0 h (Alliance). The top of the search space is flat: many
+  different routes finish within about 2% of each other, and six of the
+  sixteen searches were still finding small improvements when they hit
+  their cap on routes.
+- **The winners hold up when the model is wrong.** Re-scored under 2000
+  random draws of the model's parameters, the best route found stays within
+  1% of each draw's best in 48-100% of draws (second search), and no route
+  wins every draw: "best found" names one of several near-equal routes.
+- **The guides trade a few hours for a smooth run.** They take 5.1-5.6 h
+  (Horde) and 9.9-10.5 h (Alliance) longer than the second search's
+  consensus. Almost all of that is grinding the guides choose: side trips
+  for one or two small quests behind a flight, boat or hearth are left out,
+  so the guides grind about 14 h (Horde) and 28 h (Alliance) where the
+  searched routes grind 0-1.5 h and 8-10 h. The Alliance mid-40s have few
+  solo quests left once those trips are gone.
+- **Dungeons do not beat questing solo** under the model: searched with
+  dungeons allowed (Orc, Tauren, Undead), no dungeon route came out ahead.
 
 > [!IMPORTANT]
 > The hours are **model estimates in /played hours**, not measurements. No

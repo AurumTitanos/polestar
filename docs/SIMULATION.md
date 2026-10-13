@@ -444,6 +444,38 @@ Horde only (the Skyborne and Alliance dungeon searches were stopped):
 Orc 120.0, Tauren 120.4, Undead 121.8 h, never ahead of the solo best
 found. Under the model dungeons do not beat questing solo.
 
+### Second search (verification)
+
+The same pipeline run again to test whether the first search's routes are
+as good as the method gets: another random seed (2), up to twice the routes
+(`--paths 6000000`, cap 18M), and the current data with the 22 rank
+corrections, world `165d88c5eaaa`. Best found / consensus, hours to 60:
+
+| start | first search | second search | guides on the second world (grinding) |
+|---|---|---|---|
+| Orc | 119.4 / 120.5 | 120.7 / 117.8 | 123.0 (14.4) |
+| Tauren | 120.4 / 120.2 | 119.1 / 117.4 | 122.5 (13.9) |
+| Undead | 120.8 / 120.6 | 119.0 / 118.1 | 123.5 (14.0) |
+| Skyborne H | 120.2 / 120.1 | 117.3 / 117.3 | 122.9 (13.2) |
+| Human | 119.6 / 119.1 | 120.7 / 118.8 | 128.7 (28.5) |
+| Dwarf | 119.5 / 119.5 | 120.8 / 118.8 | 129.3 (28.4) |
+| NightElf | 120.0 / 119.5 | 120.9 / 118.9 | 129.2 (28.8) |
+| Skyborne A | 121.2 / 119.6 | 118.6 / 118.6 | 129.0 (27.7) |
+
+- Searches: 6.54-18.07M routes per start; Horde Tauren, Undead and
+  Skyborne and Alliance Skyborne reached the cap still improving (last
+  improvement at 95-100% of the evaluations).
+- Consensus: Horde 167 shared packages, 531.4 summed policy cost (bound
+  531.6); Alliance 169 packages, 586.9 (bound 587.3).
+- Robustness: the best found route stays within 1% of each draw's best in
+  48-100% of draws; win rates 9-78%.
+- The two searches' consensus routes differ by at most 2.8 h (Horde) and
+  1.0 h (Alliance), every start within 117.3-121.2 h: the top of the search
+  space is flat, and more search still finds small gains. The guides score
+  the same on both worlds (within 0.1 h); against the second consensus they
+  cost 5.1-5.6 h (Horde) and 9.9-10.5 h (Alliance), almost all of it the
+  grinding the flow rules add.
+
 ## Known limitations
 
 - **No recordings**: time parameters (kill time, travel detours, talk and
