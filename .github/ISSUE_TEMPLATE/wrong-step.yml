@@ -1,0 +1,49 @@
+name: Wrong step
+description: A guide step that is wrong, never checks off or sends you the long way.
+title: "Wrong step: <guide>, step <number>"
+labels: ["guide"]
+body:
+  - type: input
+    id: guide
+    attributes:
+      label: Guide
+      description: The guide's title as the guide window shows it.
+      placeholder: Westfall
+    validations:
+      required: true
+  - type: input
+    id: step
+    attributes:
+      label: Step
+      description: The step's number and text as the guide window shows them.
+      placeholder: "13: Accept The Defias Brotherhood"
+    validations:
+      required: true
+  - type: textarea
+    id: wrong
+    attributes:
+      label: What is wrong
+      description: What the step says, and what you found in the game.
+    validations:
+      required: true
+  - type: textarea
+    id: where
+    attributes:
+      label: The right spot
+      description: Stand where the step should send you, type `/polestar where` and paste what it prints.
+      render: text
+  - type: input
+    id: character
+    attributes:
+      label: Race, class and level
+      placeholder: Human Warrior, level 14
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Polestar version
+      description: Shown at the foot of the Options sidebar and in the game's AddOns list.
+      placeholder: 0.2.0
+    validations:
+      required: true
