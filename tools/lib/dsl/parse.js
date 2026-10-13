@@ -19,6 +19,8 @@ const NUM_RE = /^-?\d+(?:\.\d+)?$/;
 const COORD_RE = /^(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)$/;
 
 const HEADER_KEYS = ['guide', 'title', 'levels', 'zone', 'faction', 'race', 'class', 'next', 'category', 'folder', 'keywords', 'collects', 'author', 'version', 'coords', 'pitch', 'pro', 'con'];
+// Lines inside a step that are not goals.
+const STEP_KEYS = ['zone', 'only', 'tip'];
 
 const COMMON = ['text', 'optional', 'only'];
 // `frame` = the `era` / `live` modifiers: which map frame explicit coordinates are in.
@@ -227,7 +229,7 @@ function parseGuide(text, file, diag) {
 			err(ln, 'indented line before the first `step`');
 			continue;
 		}
-		if (kw === 'zone' || kw === 'only' || kw === 'tip') {
+		if (STEP_KEYS.includes(kw)) {
 			if (lex.note !== null) err(ln, 'notes (` -- `) are only allowed on goal lines');
 			if (kw === 'zone') {
 				const spec = parseZoneSpec(line, lex, ln, err);
@@ -827,4 +829,4 @@ function parseGoal(verb, line, lex, ln, err, warn) {
 	return goal;
 }
 
-module.exports = { parseGuide, VERBS, MODS, ID_RE };
+module.exports = { parseGuide, VERBS, MODS, MOD_WORDS, HEADER_KEYS, STEP_KEYS, ID_RE };

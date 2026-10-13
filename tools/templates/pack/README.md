@@ -29,5 +29,6 @@ run in it (`polestar doctor` checks all of it). From this folder:
 - `polestar dev`: copy the pack into the game's AddOns folder while you work.
 - `polestar pack`: write the release zip to `dist/`.
 
-The guide format is described in docs/GUIDE_FORMAT.md and packs in
-docs/PACKS.md in Polestar's source. Start from `guides/example.guide`.
+Polestar's source describes the guide format on one page in
+docs/GUIDE_CHEATSHEET.md, in full in docs/GUIDE_FORMAT.md, and packs in
+docs/PACKS.md. Start from `guides/example.guide`.

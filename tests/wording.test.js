@@ -12,7 +12,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const ROOT = path.join(__dirname, '..');
-const PATHS = ['addon', 'README.md', 'docs/PACKS.md', 'docs/PACK_FORMAT.md', 'docs/GUIDE_FORMAT.md', 'tools/templates'];
+const PATHS = ['addon', 'README.md', 'docs/PACKS.md', 'docs/PACK_FORMAT.md', 'docs/GUIDE_FORMAT.md', 'docs/GUIDE_CHEATSHEET.md', 'tools/templates'];
 // Names of other guide products, kept as hashes so the repository never
 // spells them: SHA-256 of each name's lower-case form.
 const NAME_HASHES = new Set([

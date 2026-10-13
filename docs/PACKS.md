@@ -118,7 +118,8 @@ polestar dev --play               # lint and build on every save, with the playg
 ## Three ways to write guides
 
 [GUIDE_FORMAT.md](GUIDE_FORMAT.md) is the language, with a cookbook of
-examples. Whatever way you start, finish with lint and playtest (below).
+examples; [GUIDE_CHEATSHEET.md](GUIDE_CHEATSHEET.md) puts every line of it on
+one page. Whatever way you start, finish with lint and playtest (below).
 
 ### By playing
 
@@ -381,6 +382,8 @@ same pack id; anything else is refused:
 
 - [GUIDE_FORMAT.md](GUIDE_FORMAT.md): the guide language, its checks and a
   cookbook.
+- [GUIDE_CHEATSHEET.md](GUIDE_CHEATSHEET.md): every line of the guide
+  language on one page, with an example each.
 - [PACK_FORMAT.md](PACK_FORMAT.md): `pack.json`, the TOC and the Lua the
   compiler writes.
 - `polestar help <command>`: every option of every command.
