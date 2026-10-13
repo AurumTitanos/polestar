@@ -23,7 +23,8 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { addonsDir, addonVersion, readAddonLua } = require('./lua');
+const { resolveAddonsDir } = require('../addons');
+const { addonVersion, readAddonLua } = require('./lua');
 
 const ADDON = 'RareScanner';
 const FILES = [
@@ -137,7 +138,7 @@ function idLists(pairs) {
 }
 
 // -> { meta, rares, treasures, mounts, pets }
-function readRareScanner(dir = addonsDir(), opts = {}) {
+function readRareScanner(dir = resolveAddonsDir(), opts = {}) {
 	const started = Date.now();
 	const meta = { source: ADDON, version: null, licence: 'All Rights Reserved', files: [], warnings: [] };
 	const out = { meta, rares: [], treasures: [], mounts: {}, pets: {} };

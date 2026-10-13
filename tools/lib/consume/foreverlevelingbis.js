@@ -18,7 +18,8 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { addonsDir, addonVersion, readAddonLua, pairsToObject } = require('./lua');
+const { resolveAddonsDir } = require('../addons');
+const { addonVersion, readAddonLua, pairsToObject } = require('./lua');
 
 const ADDON = 'ForeverLevelingBiS';
 const FILES = ['Data/Tables.lua', 'Data/Items.lua', 'Data/Quests.lua', 'Data/Overrides.lua', 'Racials.lua'];
@@ -96,11 +97,11 @@ function applyOverrides(items, overrides) {
 
 // -> { meta, items, quests, chains, zones, factions, races, racials,
 //      proficiency: { weapon, armor }, dungeons, patterns }
-// `dir`: the addon folder (default: the installed copy under addonsDir()).
+// `dir`: the addon folder (default: the installed copy under resolveAddonsDir).
 function readForeverLevelingBiS({ dir, addons } = {}) {
-	const root = dir || path.join(addonsDir(addons) || '', ADDON);
+	const root = dir || path.join(resolveAddonsDir(addons) || '', ADDON);
 	if (!fs.existsSync(path.join(root, 'Data', 'Items.lua'))) {
-		throw new Error(`${ADDON} not found at ${root} (install it, or pass dir / set POLESTAR_ADDONS)`);
+		throw new Error(`${ADDON} not found at ${root} (install it, or pass dir / set WOW_FOREVER_ADDONS)`);
 	}
 	const files = FILES.map((f) => path.join(root, f)).filter((f) => fs.existsSync(f));
 	const raw = readAddonLua({ files, addonName: ADDON, expr: EXPR });

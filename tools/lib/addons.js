@@ -2,7 +2,9 @@
 // Finding World of Warcraft: Forever clients: Wine, Proton, Faugus, Lutris and
 // Bottles prefixes under the home folder, and native installs on Windows
 // (C:\Program Files (x86)\World of Warcraft) and macOS (/Applications/World of
-// Warcraft). Used by install and by the readers of installed addons.
+// Warcraft). Every tool that looks for the client's AddOns or WTF folder goes
+// through here: install, doctor, record import and the readers of installed
+// addons (data build, codex, gear, sim calibration).
 
 const fs = require('node:fs');
 const os = require('node:os');
@@ -100,17 +102,22 @@ function nativeWowDir({ platform = process.platform, root = platform === 'win32'
 	return NATIVE_DIRS[platform] ? path.join(root, ...NATIVE_DIRS[platform]) : null;
 }
 
-// -> [{ addons, client, kind, flavor }] for every Forever client found:
-// Wine prefixes under `home`, then the native install (see nativeWowDir).
+// Every World of Warcraft folder that exists: in the Wine prefixes under
+// `home`, then the native install (see nativeWowDir).
+function wowDirs(home = os.homedir(), native = {}) {
+	const out = [];
+	for (const prefix of prefixesUnder(home)) for (const parts of WOW_DIRS) out.push(path.join(prefix, 'drive_c', ...parts));
+	const nativeDir = nativeWowDir(native);
+	if (nativeDir) out.push(nativeDir);
+	return out.filter(isDir);
+}
+
+// -> [{ addons, client, kind, flavor }] for every Forever client found in
+// wowDirs: a client folder counts when its .flavor.info says Forever.
 function detectAddonsDirs(home = os.homedir(), native = {}) {
 	const out = [];
 	const seen = new Set();
-	const wowDirs = [];
-	for (const prefix of prefixesUnder(home)) for (const parts of WOW_DIRS) wowDirs.push(path.join(prefix, 'drive_c', ...parts));
-	const nativeDir = nativeWowDir(native);
-	if (nativeDir) wowDirs.push(nativeDir);
-	for (const wow of wowDirs) {
-		if (!isDir(wow)) continue;
+	for (const wow of wowDirs(home, native)) {
 		for (const name of fs.readdirSync(wow).sort()) {
 			if (!/^_.+_$/.test(name)) continue;
 			const client = path.join(wow, name);
@@ -141,4 +148,30 @@ function pickAddonsDir(found) {
 	return left.length > 1 ? { several: left } : { pick: left[0] };
 }
 
-module.exports = { detectAddonsDirs, pickAddonsDir, nativeWowDir, foreverKind, isDir };
+// The AddOns folders a reader of installed addons searches, best first:
+// $WOW_FOREVER_ADDONS when it is a folder, then every detected client's, live
+// (`forever`) clients before others. `native` as for detectAddonsDirs.
+function searchAddonsDirs({ env = process.env, home = os.homedir(), native = {} } = {}) {
+	const out = [];
+	if (env.WOW_FOREVER_ADDONS && isDir(env.WOW_FOREVER_ADDONS)) out.push(path.resolve(env.WOW_FOREVER_ADDONS));
+	const found = detectAddonsDirs(home, native);
+	for (const f of [...found.filter((c) => c.kind === 'forever'), ...found.filter((c) => c.kind !== 'forever')]) {
+		if (isDir(f.addons) && !out.includes(f.addons)) out.push(f.addons);
+	}
+	return out;
+}
+
+// The AddOns folder to read: `explicit` (a command's flag) when given, null
+// when that is not a folder; else the first of searchAddonsDirs, or null.
+function resolveAddonsDir(explicit, opts = {}) {
+	if (explicit) return isDir(explicit) ? path.resolve(explicit) : null;
+	return searchAddonsDirs(opts)[0] || null;
+}
+
+// <AddOns>/<folder> in the first of searchAddonsDirs that holds it, or null.
+function findInstalledAddon(folder, opts = {}) {
+	for (const dir of searchAddonsDirs(opts)) if (isDir(path.join(dir, folder))) return path.join(dir, folder);
+	return null;
+}
+
+module.exports = { wowDirs, detectAddonsDirs, pickAddonsDir, searchAddonsDirs, resolveAddonsDir, findInstalledAddon, nativeWowDir, foreverKind, isDir };

@@ -5,7 +5,6 @@ const path = require('node:path');
 const { parseArgs } = require('node:util');
 const { buildData } = require('../lib/data/build');
 const { detectQuestie, questieDbDir } = require('../lib/data/questie');
-const { detectAddonsDirs } = require('../lib/addons');
 
 const usage = `usage: node tools/polestar.js data build [options]
 
@@ -78,7 +77,7 @@ async function run(argv) {
 			return 2;
 		}
 	} else if (!values['no-questie']) {
-		questieDir = detectQuestie(detectAddonsDirs) || undefined;
+		questieDir = detectQuestie() || undefined;
 		console.error(questieDir ? `QuestieDB: ${questieDir}` : 'QuestieDB: not found in a Forever client; building without it (pass --questie <dir>)');
 	}
 	const { outDir, meta } = await buildData({

@@ -462,10 +462,12 @@ function questieDbDir(dir) {
 	return null;
 }
 
-// First Forever client (tools/lib/addons.js detection) with QuestieDB installed.
-function detectQuestie(detectAddonsDirs, home) {
-	for (const found of detectAddonsDirs(home)) {
-		const d = questieDbDir(found.addons);
+// QuestieDB in the first AddOns folder holding it (tools/lib/addons.js
+// searchAddonsDirs: $WOW_FOREVER_ADDONS, then the detected clients).
+function detectQuestie(opts = {}) {
+	const { searchAddonsDirs } = require('../addons');
+	for (const dir of searchAddonsDirs(opts)) {
+		const d = questieDbDir(dir);
 		if (d) return d;
 	}
 	return null;

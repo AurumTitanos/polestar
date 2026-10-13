@@ -37,8 +37,8 @@ const usage = `usage: node tools/polestar.js record <subcommand> [options]
 
 options:
   --sv <file>            SavedVariables file to use (repeatable); skips auto-detection
-  --wtf <dir>            WTF folder to search (default: the Forever install,
-                         e.g. ~/Games/drive_c/Program Files (x86)/World of Warcraft/_classic_beta_/WTF;
+  --wtf <dir>            WTF folder to search (default: the detected Forever client's,
+                         e.g. <Wine prefix>/drive_c/Program Files (x86)/World of Warcraft/_forever_/WTF;
                          POLESTAR_WTF overrides)
   --out <dir|file>       import/watch/list: recordings folder (default data/recordings);
                          draft: output .guide file or folder (default <pack>/drafts)

@@ -34,6 +34,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { luaToJson } = require('../lua');
+const { findInstalledAddon } = require('../addons');
 const { pickSpawn } = require('../dsl/resolve');
 
 const FOLDER = 'ForeverDungeonJournal';
@@ -106,17 +107,11 @@ function isDir(p) {
 	}
 }
 
-// The installed addon folder: --source, WOW_FOREVER_ADDONS, else the Forever
-// clients `install` detects. -> dir | null
+// The installed addon folder: --source, else the first AddOns folder holding
+// it (tools/lib/addons.js findInstalledAddon). -> dir | null
 function findDungeonJournal({ source, env = process.env, home = os.homedir() } = {}) {
 	if (source) return isDir(source) ? path.resolve(source) : null;
-	if (env.WOW_FOREVER_ADDONS && isDir(path.join(env.WOW_FOREVER_ADDONS, FOLDER))) return path.join(env.WOW_FOREVER_ADDONS, FOLDER);
-	const { detectAddonsDirs } = require('../addons');
-	for (const c of detectAddonsDirs(home)) {
-		const dir = path.join(c.addons, FOLDER);
-		if (isDir(dir)) return dir;
-	}
-	return null;
+	return findInstalledAddon(FOLDER, { env, home });
 }
 
 // `## Key: value` lines of the addon's TOC -> { title, version, author, interface }.

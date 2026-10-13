@@ -27,7 +27,8 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { addonsDir, addonVersion, readAddonLua } = require('./lua');
+const { resolveAddonsDir } = require('../addons');
+const { addonVersion, readAddonLua } = require('./lua');
 
 const CORE = 'AtlasLootClassic';
 const MODULES = ['DungeonsAndRaids', 'Collections', 'Crafting', 'Factions', 'PvP'];
@@ -676,7 +677,7 @@ function readModule(dir, coreDir, module, opts) {
 }
 
 // -> { meta, instances, droprates, collections, crafting, factions, pvp }
-function readAtlasLoot(dir = addonsDir(), opts = {}) {
+function readAtlasLoot(dir = resolveAddonsDir(), opts = {}) {
 	const started = Date.now();
 	const meta = { source: 'AtlasLootClassic', version: null, licence: 'GPL-2.0', modules: [], files: [], warnings: [] };
 	const out = { meta, instances: [], droprates: {}, collections: [], sets: [], crafting: [], factions: [], pvp: [] };

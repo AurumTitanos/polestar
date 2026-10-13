@@ -5,8 +5,9 @@
 // table constructors, string concatenation, local constants and the small
 // amount of setup code data files carry all evaluate exactly as in the game.
 //
-//   const { addonsDir, readAddonLua } = require('./lua');
-//   const dir = addonsDir();                      // the Forever client's Interface/AddOns
+//   const { resolveAddonsDir } = require('../addons');
+//   const { readAddonLua } = require('./lua');
+//   const dir = resolveAddonsDir();               // the Forever client's Interface/AddOns
 //   const out = readAddonLua({
 //     files: [path.join(dir, 'X', 'Data.lua')],
 //     addonName: 'X',
@@ -30,46 +31,6 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { luaToJson } = require('../lua');
-
-// Fixed client folders Forever has used, newest first.
-const CLIENT_FOLDERS = ['_forever_', '_classic_beta_'];
-const WOW_PATHS = [
-	['Games', 'drive_c', 'Program Files (x86)', 'World of Warcraft'],
-	['.wine', 'drive_c', 'Program Files (x86)', 'World of Warcraft'],
-];
-
-function isDir(p) {
-	try {
-		return fs.statSync(p).isDirectory();
-	} catch {
-		return false;
-	}
-}
-
-// -> absolute path of the Forever client's Interface/AddOns, or null.
-// explicit > $POLESTAR_ADDONS > $WOW_FOREVER_ADDONS > `install`'s detection >
-// the usual Wine install paths.
-function addonsDir(explicit, env = process.env, home = os.homedir()) {
-	if (explicit) return isDir(explicit) ? path.resolve(explicit) : null;
-	for (const key of ['POLESTAR_ADDONS', 'WOW_FOREVER_ADDONS']) {
-		if (env[key] && isDir(env[key])) return path.resolve(env[key]);
-	}
-	try {
-		const { detectAddonsDirs } = require('../addons');
-		const found = detectAddonsDirs(home);
-		const live = found.find((f) => f.kind === 'forever') || found[0];
-		if (live && isDir(live.addons)) return live.addons;
-	} catch {
-		// detection is a convenience; fall through to the fixed paths
-	}
-	for (const parts of WOW_PATHS) {
-		for (const client of CLIENT_FOLDERS) {
-			const p = path.join(home, ...parts, client, 'Interface', 'AddOns');
-			if (isDir(p)) return p;
-		}
-	}
-	return null;
-}
 
 // Version line of an addon's TOC (the first TOC found, or `toc` when given).
 function addonVersion(dir, toc) {
@@ -156,4 +117,4 @@ function pairsToObject(list) {
 	return out;
 }
 
-module.exports = { addonsDir, addonVersion, readAddonLua, pairsToObject, luaQuote };
+module.exports = { addonVersion, readAddonLua, pairsToObject, luaQuote };

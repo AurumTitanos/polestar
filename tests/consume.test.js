@@ -10,7 +10,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { readAtlasLoot } = require('../tools/lib/consume/atlasloot');
 const { readRareScanner, coord, point } = require('../tools/lib/consume/rarescanner');
-const { addonsDir } = require('../tools/lib/consume/lua');
+const { resolveAddonsDir } = require('../tools/lib/addons');
 const { tmpdir } = require('./helpers/tmp');
 
 const FIX = path.join(__dirname, 'fixtures', 'codex', 'addons');
@@ -249,7 +249,7 @@ test('RareScanner: missing tables and a missing addon are tolerated', () => {
 	assert.equal(none.meta.warnings.length, 1);
 });
 
-const REAL = addonsDir();
+const REAL = resolveAddonsDir();
 const hasReal = !!REAL && fs.existsSync(path.join(REAL, 'AtlasLootClassic_DungeonsAndRaids')) && fs.existsSync(path.join(REAL, 'RareScanner'));
 
 test('real installed addons import with sane counts', { skip: !hasReal && 'Forever AddOns (AtlasLoot, RareScanner) not installed' }, () => {

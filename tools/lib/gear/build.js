@@ -17,7 +17,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { readForeverLevelingBiS } = require('../consume/foreverlevelingbis');
-const { addonsDir: addonsDirOf } = require('../consume/lua');
+const { resolveAddonsDir } = require('../addons');
 const { buildForeverPack } = require('./leveling');
 const { weightBands, racials, emitSpecData } = require('./specdata');
 const { emitToc, packFiles, packageVersion, ADDON: ITEMDB } = require('../itemdb/build');
@@ -41,7 +41,7 @@ async function buildGear({ addons, root = ROOT, wowsimsCache, log = () => {} } =
 	if (!fs.existsSync(eraFile)) throw new Error(`${path.relative(root, eraFile)} missing: run \`itemdb build\` first`);
 
 	// 1. ForeverLevelingBiS -> Polestar_ItemDB/Forever.lua
-	const addonsRoot = addonsDirOf(addons);
+	const addonsRoot = resolveAddonsDir(addons);
 	const flb = readForeverLevelingBiS({ addons });
 	const pack = buildForeverPack(flb, fs.readFileSync(eraFile, 'utf8'));
 	writeAtomic(path.join(itemDir, 'Forever.lua'), pack.lua);

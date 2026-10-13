@@ -1030,8 +1030,8 @@ async function loadInputs({ addons, offline = false, dataDir, sourcesDir, build 
 		dungeons: j('dungeons.json', true),
 	};
 	const warnings = [];
-	const { addonsDir } = require('../consume/lua');
-	const dir = addonsDir(addons);
+	const { resolveAddonsDir } = require('../addons');
+	const dir = resolveAddonsDir(addons);
 	let atlasloot = null;
 	let rarescanner = null;
 	let flbis = null;

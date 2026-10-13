@@ -19,7 +19,7 @@ const path = require('node:path');
 const sim = require('./index');
 const { loadParamsFile, saveParamsFile, effective, PRIORS } = require('./params');
 const { table } = require('./report');
-const { addonsDir } = require('../consume/lua');
+const { findInstalledAddon } = require('../addons');
 const { FOLDER: FDJ_FOLDER } = require('../data/dungeonjournal');
 
 // `[id] = xp` pairs inside FDJ.FOREVER_QUEST_XP_FALLBACK = { ... }.
@@ -36,8 +36,7 @@ function parseForeverXp(text) {
 // The installed ForeverDungeonJournal folder (null when not found).
 function fdjDir(explicit) {
 	if (explicit) return path.resolve(explicit);
-	const addons = addonsDir();
-	return addons ? path.join(addons, FDJ_FOLDER) : null;
+	return findInstalledAddon(FDJ_FOLDER);
 }
 
 function loadForeverXp(dir) {

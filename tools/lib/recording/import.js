@@ -14,15 +14,14 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { luaToJson } = require('../lua');
-const { detectAddonsDirs, nativeWowDir } = require('../addons');
+const { detectAddonsDirs, wowDirs } = require('../addons');
 
 const ROOT = path.join(__dirname, '..', '..', '..');
 const DEFAULT_OUT = path.join(ROOT, 'data', 'recordings');
 const SV_FILE = 'Polestar_Recorder.lua';
 
-// Fixed install paths for each client folder Forever has used, newest first:
-// "_forever_" after launch, "_classic_beta_" during the beta. They cover
-// installs whose client folder has no .flavor.info for `install` to detect.
+// Client folders Forever has used, newest first: "_forever_" after launch,
+// "_classic_beta_" during the beta; then older Classic folders.
 const FLAVORS = [
 	['forever', '_forever_'],
 	['beta', '_classic_beta_'],
@@ -30,10 +29,11 @@ const FLAVORS = [
 	[null, '_classic_ptr_'],
 ];
 
-// WTF folders to search, best first: $POLESTAR_WTF; then every launch client
-// (detected by `install` in any Wine/Proton/Faugus/Lutris/Bottles prefix, then
-// the fixed paths), then every beta client, so a leftover beta WTF never
-// shadows the live one; then older fixed paths.
+// WTF folders to search, best first: $POLESTAR_WTF; then for each client
+// folder above, the detected clients of that kind (tools/lib/addons.js: any
+// Wine/Proton/Faugus/Lutris/Bottles prefix or the native install), then that
+// folder in every World of Warcraft folder there (a client without a
+// .flavor.info), so a leftover beta WTF never shadows the live one.
 // `native` ({ platform, root }, tools/lib/addons.js nativeWowDir): which native
 // install to check; tests inject it so they never reach a real one.
 function defaultWtfDirs(home = os.homedir(), native = {}) {
@@ -43,12 +43,7 @@ function defaultWtfDirs(home = os.homedir(), native = {}) {
 	};
 	if (process.env.POLESTAR_WTF) add(process.env.POLESTAR_WTF);
 	const detected = detectAddonsDirs(home, native);
-	const installs = [
-		path.join(home, 'Games', 'drive_c', 'Program Files (x86)', 'World of Warcraft'),
-		path.join(home, '.wine', 'drive_c', 'Program Files (x86)', 'World of Warcraft'),
-	];
-	const nativeDir = nativeWowDir(native);
-	if (nativeDir) installs.push(nativeDir);
+	const installs = wowDirs(home, native);
 	for (const [kind, folder] of FLAVORS) {
 		for (const c of detected) if (kind && c.kind === kind) add(path.join(c.client, 'WTF'));
 		for (const base of installs) add(path.join(base, folder, 'WTF'));
