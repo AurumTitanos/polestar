@@ -81,15 +81,4 @@ function routeSequence(run, route) {
 	return { kind: Int32Array.from(kind), q: Int32Array.from(q), task: Int32Array.from(task), pt: Int32Array.from(pt), unknown: [], guides: [] };
 }
 
-// Quest ids a sequence turns in (for overlap tables).
-function turnedIn(events) {
-	const out = [];
-	const seen = new Set();
-	for (const e of events) if (e.t === 'turnin' && !seen.has(e.q)) {
-		seen.add(e.q);
-		out.push(Number(e.q));
-	}
-	return out;
-}
-
-module.exports = { compileSequence, routeSequence, turnedIn };
+module.exports = { compileSequence, routeSequence };

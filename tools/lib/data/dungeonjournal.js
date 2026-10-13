@@ -649,7 +649,6 @@ function shareableOf(ctx, id) {
 
 module.exports = {
 	FOLDER,
-	WEB_POSITIONS,
 	TRAVEL,
 	findDungeonJournal,
 	readToc,
@@ -659,7 +658,6 @@ module.exports = {
 	npcNameOf,
 	saysInside,
 	slug,
-	raceOk,
 	ALLIANCE_RACES,
 	HORDE_RACES,
 };

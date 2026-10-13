@@ -145,4 +145,4 @@ async function run(argv) {
 	return 0;
 }
 
-module.exports = { name: 'draft', summary: 'Generate a first-draft leveling route (.guide) from the reference data', usage, run, parseArgs, toOptions };
+module.exports = { name: 'draft', summary: 'Generate a first-draft leveling route (.guide) from the reference data', usage, run };

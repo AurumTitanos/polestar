@@ -406,5 +406,5 @@ async function readWowsims({ cacheDir = 'data/sources/wowsims', fetch = false, l
 
 module.exports = {
 	readWowsims, parseSimTs, mapWeights, normalize, percentScale, parseGearPresets, parseGearSet, gearPhase,
-	SNAPSHOTS, SIMS, MAIN_STAT, STAT_MAP, CLASSIC_HEAD, CLASSIC_CUTOVER, SLOTS,
+	STAT_MAP, CLASSIC_HEAD, SLOTS,
 };

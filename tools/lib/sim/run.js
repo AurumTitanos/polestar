@@ -446,6 +446,6 @@ function makeTables(run, p) {
 }
 
 module.exports = {
-	compileRun, makeTables, questOpen, raceBit, hasBit, SKYBORNE_BIT,
-	RACE_BITS, CLASS_BITS, K_ACCEPT, K_TASK, K_TURNIN, K_GRIND, K_DUNGEON, W_DUNGEON, W_KILL, W_USE, W_ESCORT, W_BUY, W_VISIT, NEAR_K, MOBL, LEVEL_XP, questXpShare,
+	compileRun, makeTables, hasBit, SKYBORNE_BIT,
+	CLASS_BITS, K_ACCEPT, K_TASK, K_TURNIN, K_GRIND, K_DUNGEON, W_KILL, W_USE, W_ESCORT, W_BUY, NEAR_K, MOBL, LEVEL_XP, questXpShare,
 };

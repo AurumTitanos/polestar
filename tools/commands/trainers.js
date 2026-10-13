@@ -84,4 +84,4 @@ async function run(argv) {
 	return 0;
 }
 
-module.exports = { name: 'trainers', summary: 'Build trainers.json and Core/ClassTrainers.lua (class trainers)', usage, run, classTrainersLua };
+module.exports = { name: 'trainers', summary: 'Build trainers.json and Core/ClassTrainers.lua (class trainers)', usage, run };

@@ -9,6 +9,7 @@ const path = require('node:path');
 const { tmpdir, quiet, fakeAddons } = require('./fixtures/dsl/helpers');
 const { TOC_MARKER } = require('../tools/lib/pack/format');
 const install = require('../tools/commands/install');
+const { detectAddonsDirs } = require('../tools/lib/addons');
 
 function compiledAddons() {
 	const root = fakeAddons(tmpdir());
@@ -130,19 +131,19 @@ test('auto-detect finds the Forever client in Wine/Proton/Faugus prefixes by its
 	flavorClient(wow, '_anniversary_', 'wow_anniversary');
 	// A "_classic_beta_" without a flavor file is not trusted.
 	flavorClient(path.join(home, '.wine', 'drive_c', 'Program Files (x86)', 'World of Warcraft'), '_classic_beta_', null);
-	let found = install.detectAddonsDirs(home, NO_NATIVE);
+	let found = detectAddonsDirs(home, NO_NATIVE);
 	assert.deepEqual(found.map((f) => [f.addons, f.kind]), [[path.join(beta, 'Interface', 'AddOns'), 'beta']]);
 	assert.deepEqual(install.chooseDest({}, {}, home, NO_NATIVE).dir, path.join(beta, 'Interface', 'AddOns'));
 
 	// After launch: a _forever_ client in a Faugus prefix wins over the beta.
 	const live = flavorClient(path.join(home, 'Faugus', 'battlenet', 'drive_c', 'Program Files (x86)', 'World of Warcraft'), '_forever_', 'wow_forever');
-	found = install.detectAddonsDirs(home, NO_NATIVE);
+	found = detectAddonsDirs(home, NO_NATIVE);
 	assert.equal(found.length, 2);
 	assert.deepEqual(install.chooseDest({}, {}, home, NO_NATIVE).dir, path.join(live, 'Interface', 'AddOns'));
 
 	// Proton prefixes keep drive_c under pfx/.
 	const proton = flavorClient(path.join(home, '.local', 'share', 'Steam', 'steamapps', 'compatdata', '12345', 'pfx', 'drive_c', 'Program Files (x86)', 'World of Warcraft'), '_forever_', 'wow_forever');
-	assert.ok(install.detectAddonsDirs(home, NO_NATIVE).some((f) => f.client === proton));
+	assert.ok(detectAddonsDirs(home, NO_NATIVE).some((f) => f.client === proton));
 	const two = install.chooseDest({}, {}, home, NO_NATIVE);
 	assert.match(two.error, /several Forever clients found/);
 });
@@ -303,7 +304,7 @@ test('auto-detect finds native Windows and macOS installs by .flavor.info (platf
 	const winRoot = tmpdir();
 	const win = flavorClient(path.join(winRoot, 'Program Files (x86)', 'World of Warcraft'), '_classic_era_', 'wow_forever');
 	flavorClient(path.join(winRoot, 'Program Files (x86)', 'World of Warcraft'), '_retail_', 'wow');
-	assert.deepEqual(install.detectAddonsDirs(home, { platform: 'win32', root: winRoot }).map((f) => [f.addons, f.kind]), [[path.join(win, 'Interface', 'AddOns'), 'forever']]);
+	assert.deepEqual(detectAddonsDirs(home, { platform: 'win32', root: winRoot }).map((f) => [f.addons, f.kind]), [[path.join(win, 'Interface', 'AddOns'), 'forever']]);
 	assert.equal(install.chooseDest({}, {}, home, { platform: 'win32', root: winRoot }).dir, path.join(win, 'Interface', 'AddOns'));
 	// install itself takes the same injection.
 	const { result, out } = await quiet(() => install.run(['--addons', compiledAddons()], { HOME: home }, { platform: 'win32', root: winRoot }));
@@ -311,8 +312,8 @@ test('auto-detect finds native Windows and macOS installs by .flavor.info (platf
 	assert.deepEqual(fs.readdirSync(path.join(win, 'Interface', 'AddOns')).sort(), ['Polestar', 'Polestar_Guides']);
 	const macRoot = tmpdir();
 	const mac = flavorClient(path.join(macRoot, 'Applications', 'World of Warcraft'), '_classic_era_', 'wow_forever');
-	assert.deepEqual(install.detectAddonsDirs(home, { platform: 'darwin', root: macRoot }).map((f) => f.client), [mac]);
+	assert.deepEqual(detectAddonsDirs(home, { platform: 'darwin', root: macRoot }).map((f) => f.client), [mac]);
 	// Each platform checks only its own native folder.
-	assert.deepEqual(install.detectAddonsDirs(home, { platform: 'darwin', root: winRoot }), []);
-	assert.deepEqual(install.detectAddonsDirs(home, { platform: 'linux', root: macRoot }), []);
+	assert.deepEqual(detectAddonsDirs(home, { platform: 'darwin', root: winRoot }), []);
+	assert.deepEqual(detectAddonsDirs(home, { platform: 'linux', root: macRoot }), []);
 });

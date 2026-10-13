@@ -225,4 +225,4 @@ function extractItems(tables) {
 	return { items, skipped };
 }
 
-module.exports = { extractItems, extractItem, indexTables, equipStats, encode, decode, dps, STAT_KEYS, EQUIPPABLE, ITEM_MODS, SOD_ITEM_MIN };
+module.exports = { extractItems, indexTables, encode, decode, dps, STAT_KEYS, EQUIPPABLE };

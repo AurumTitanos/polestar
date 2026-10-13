@@ -16,9 +16,7 @@ const { reduceSpawns, spawnRecord, round2 } = require('./spawns');
 const { luaGet, luaPairs, luaList, dropRate } = require('./questie');
 
 const SOURCE = 'questie-forever';
-// Classic races plus Forever's Skyborne bits (2^32 Alliance, 2^33 Horde).
-const SKYBORNE_ALLIANCE = 2 ** 32;
-const SKYBORNE_HORDE = 2 ** 33;
+// Classic race and class bits.
 const CLASSIC_RACES = 1 | 2 | 4 | 8 | 16 | 32 | 64 | 128;
 const ALL_CLASSES = 1 | 2 | 4 | 8 | 16 | 64 | 128 | 256 | 1024;
 // Questie npcFlags (Classic values) -> npcs.json roles.
@@ -536,4 +534,4 @@ function applyQuestie(tables, qz, ctx) {
 	return stats;
 }
 
-module.exports = { applyQuestie, questieSpawns, raceMask, classMask, mergeQuest, mergeNpc, mergeItem, questRecord, SOURCE, SKYBORNE_ALLIANCE, SKYBORNE_HORDE };
+module.exports = { applyQuestie, raceMask, classMask, SOURCE };

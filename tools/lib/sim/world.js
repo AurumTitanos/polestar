@@ -1398,4 +1398,4 @@ function getWorld(opts) {
 	return w;
 }
 
-module.exports = { hasBit, maskForFaction, SKYBORNE_BIT, buildWorld, getWorld, worldFile, loadSimData, dataHash, cluster, spacingOf, FACTION_MASK, STARTS, ISLANDS, ISLE_MAPS, BUILDER_VERSION, DANGER_CELL };
+module.exports = { hasBit, SKYBORNE_BIT, buildWorld, getWorld, worldFile, dataHash, cluster, FACTION_MASK, ISLANDS, ISLE_MAPS };

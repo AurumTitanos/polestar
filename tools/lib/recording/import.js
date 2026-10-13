@@ -326,16 +326,9 @@ function importFile(svPath, { outDir = DEFAULT_OUT, now = new Date() } = {}) {
 
 module.exports = {
 	DEFAULT_OUT,
-	SV_FILE,
 	defaultWtfDirs,
 	findSavedVariables,
-	accountOf,
-	archiveRaw,
-	readDb,
 	normalizeSession,
-	mergeSessions,
-	writeSession,
-	sessionPath,
 	importFile,
 	safeName,
 };

@@ -183,4 +183,4 @@ function buildForeverPack(flb, eraText) {
 	return { lua: lines.join('\n'), counts, warnings };
 }
 
-module.exports = { buildForeverPack, recordOf, sourceTokens, readEraItems, PROFESSIONS, SCRAPED };
+module.exports = { buildForeverPack, PROFESSIONS };

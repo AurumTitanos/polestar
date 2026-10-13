@@ -1155,4 +1155,4 @@ async function buildCodex(opts = {}) {
 	return { codex: out, files, outDir, packDir, bytes, memory, warnings: [...(inputs.warnings || []), ...mergeWarnings], ms: Date.now() - t0 };
 }
 
-module.exports = { buildCodex, loadInputs, mergeCodex, clientFacts, summarize, cluster, spawnsOf, measureMemory, sortKeysDeep, slug, BUILD, TABLES };
+module.exports = { buildCodex, loadInputs, mergeCodex, clientFacts, cluster, slug, BUILD, TABLES };

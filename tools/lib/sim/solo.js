@@ -34,7 +34,6 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { parseCsv } = require('../data/csv');
 
-const QUEST_INFO = { elite: 1, pvp: 41, raid: 62, dungeon: 81 }; // QuestInfo.csv ids of the categories
 const CATEGORIES = ['dungeon', 'raid', 'pvp', 'elite', 'rareDrop', 'reputation', 'repeatable'];
 const FRIENDLY = 3000; // reputation points; more needs grinding a faction
 const HIGH_DROPPER = 5; // a dropper this many levels above the quest is not soloed
@@ -137,4 +136,4 @@ function loadQuestAreas(sourcesDir) {
 	return { build: path.basename(dir), files, areas: instanceAreas(maps, areas) };
 }
 
-module.exports = { QUEST_INFO, CATEGORIES, FRIENDLY, HIGH_DROPPER, MIN_DROP, OVERRIDES, compileOverrides, instanceAreas, loadQuestAreas, foreverBuild };
+module.exports = { CATEGORIES, FRIENDLY, HIGH_DROPPER, MIN_DROP, OVERRIDES, compileOverrides, instanceAreas, loadQuestAreas, foreverBuild };

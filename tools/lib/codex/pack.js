@@ -452,4 +452,4 @@ function packOrder(files) {
 		.filter((l) => l && !l.startsWith('#'));
 }
 
-module.exports = { emitPack, packOrder, emitToc, foldName, ADDON, SCHEMA, CHUNK, FROM, SOURCE, ITEM_KINDS, SEARCH_KINDS };
+module.exports = { emitPack, packOrder, emitToc, foldName, ADDON, SCHEMA, CHUNK, FROM, SOURCE };

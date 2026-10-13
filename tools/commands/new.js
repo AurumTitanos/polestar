@@ -253,4 +253,4 @@ async function run(argv) {
 	return 0;
 }
 
-module.exports = { name: 'new', summary: 'Start a guide pack in a new folder from the template', usage, run, publicUrl };
+module.exports = { name: 'new', summary: 'Start a guide pack in a new folder from the template', usage, run };

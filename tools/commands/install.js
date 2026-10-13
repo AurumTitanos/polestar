@@ -10,7 +10,7 @@ const os = require('node:os');
 const path = require('node:path');
 const { parseArgs, resolvePath, printDiagnostics, plural } = require('../lib/dsl/cli');
 const { ROOT, releaseAddons, packDirRefusal, writePackDir } = require('../lib/dsl/project');
-const { detectAddonsDirs, pickAddonsDir, foreverKind, isDir } = require('../lib/addons');
+const { detectAddonsDirs, pickAddonsDir, isDir } = require('../lib/addons');
 const { PACK_OPTIONS, PACK_USAGE, otherPack, buildPack, folderIn } = require('../lib/pack/build');
 
 // Data addons built locally from inputs that may not be redistributed
@@ -255,4 +255,4 @@ async function run(argv, env = process.env, native = {}) {
 	return installFolders(names.map((name) => ({ src: path.join(source, name), name })), opts, ctx);
 }
 
-module.exports = { name: 'install', summary: 'Install the addons into the Forever client', usage, run, detectAddonsDirs, chooseDest, foreverKind };
+module.exports = { name: 'install', summary: 'Install the addons into the Forever client', usage, run, chooseDest };
