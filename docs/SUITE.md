@@ -67,10 +67,18 @@ their versions in its `meta`.
 | `Polestar_ItemDB` | client item tables | yes | on demand |
 | `Polestar_QuestDB` | `data/forever` (includes QuestieDB) | no (local) | on demand |
 | `Polestar_Codex` | `data/forever/codex` | no (local) | on demand (first search, tooltip or lookup) |
+| community guide packs (`PolestarPack_*` by default) | a pack's `.guide` files, by its author (`docs/PACKS.md`) | in the author's repository | always, when installed |
 
 Local packs are generated into gitignored folders and installed by
 `node tools/polestar.js install` like the rest. Without them the core still
 works: Lookup and Dungeons say what is missing instead of failing.
+
+Guide packs (ours and the community's) register through one registry
+(`Core/Guides.lua`, ARCHITECTURE "Guide data"): each owns its guide-id prefix,
+a refusal is recorded against its pack and shown on Options > Guide packs, and
+a pack the player switches off hides its guides everywhere (`PACKS_CHANGED`).
+The tools treat every pack alike (`lint`, `compile`, `playtest`, `play`,
+`dev`, `pack`, `install`); `docs/PACK_FORMAT.md` is the contract.
 
 ## Runtime services (core)
 
@@ -85,6 +93,9 @@ works: Lookup and Dungeons say what is missing instead of failing.
   not saved) and opens it in a new tab.
 - `Hooks`: item and unit tooltips, chat item links, target and mouseover. One
   handler per hook, so modules add lines instead of fighting over the tooltip.
+- `Guides`: the guide registry: packs and their statuses (`Guides.Packs()`),
+  the guides of packs that are on, suggestions from the chosen source
+  (`behavior.suggestFrom`, our guides filling in).
 
 ## UI
 
@@ -92,3 +103,8 @@ One hub, grown from the guide menu: Guides, Lookup, Dungeons and Rares as
 top-level sections, Options at the rail's foot, all in Polestar's world (the UI brief
 [`docs/UI_BRIEF.md`](UI_BRIEF.md)). New surfaces extend that world;
 they never introduce another look.
+
+Small windows outside the hub share its look: the guide window, the route
+choice, the first-run welcome (`UI/Welcome.lua`), the copy window
+(`UI/Copy.lua`, `PolestarCopy`: text to copy, such as `/polestar where`'s
+lines) and the rare alert. Options carries a Guide packs page (`UI/Packs.lua`).

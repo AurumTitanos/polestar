@@ -10,10 +10,10 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { runAddon, ROOT } = require('./helpers/lua');
-const { compileSources, buildPackFiles, packMeta } = require('../tools/lib/dsl/project');
+const { compileSources } = require('../tools/lib/dsl/project');
 const { loadData } = require('../tools/lib/dsl/data');
 const { format } = require('../tools/lib/dsl/diag');
-const { tmpdir } = require('./helpers/tmp');
+const { writeTestPack } = require('./fixtures/dsl/helpers');
 
 const DATA = path.join(ROOT, 'tests', 'fixtures', 'dsl', 'data');
 
@@ -39,25 +39,19 @@ step Back to the abbey
   turnin 7
 `;
 
-// Compile GUIDE into a pack on disk; return the Lua files in Pack.xml order.
+// Compile GUIDE into our pack on disk; return the Lua files in TOC order.
 function compilePack() {
 	const data = loadData(DATA);
 	const { guides, diag } = compileSources([{ file: 'e2e.guide', text: GUIDE }], data);
 	assert.deepEqual(diag.errors.map(format), []);
-	const files = buildPackFiles({ guides, meta: packMeta('0.0.0-e2e'), data });
-	const dir = tmpdir('polestar-e2e-');
-	for (const [rel, content] of Object.entries(files)) {
-		fs.mkdirSync(path.dirname(path.join(dir, rel)), { recursive: true });
-		fs.writeFileSync(path.join(dir, rel), content);
-	}
-	const order = [...files['Pack.xml'].matchAll(/<Script file="([^"]+)"/g)].map((m) => path.join(dir, m[1].replace(/\\/g, '/')));
-	return { dir, order };
+	const { dir, scripts } = writeTestPack(guides, data);
+	return { dir, order: scripts };
 }
 
 test('a compiled guide drives the real engine, guide window and arrow through a quest flow', () => {
 	const { dir, order } = compilePack();
 	try {
-		const loads = order.map((f) => `dofile(${JSON.stringify(f)})`).join('\n');
+		const loads = `do local ns = {}\n${order.map((f) => `assert(loadfile(${JSON.stringify(f)}))("Polestar_Guides", ns)`).join('\n')}\nend`;
 		const { emitted } = runAddon({
 			stubs: ['stub_world.lua'],
 			before: `

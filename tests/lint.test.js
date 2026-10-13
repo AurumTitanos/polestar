@@ -8,9 +8,11 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 
-const { soloExclusions } = require('../tools/commands/lint');
+const lint = require('../tools/commands/lint');
+const { soloExclusions } = lint;
 const { dataHash } = require('../tools/lib/sim/world');
 const { ROOT } = require('../tools/lib/dsl/project');
+const { quiet } = require('./fixtures/dsl/helpers');
 
 test('a cached world from other data or an older builder is ignored (reported stale), a current one is used', (t) => {
 	const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'polestar-lint-'));
@@ -28,4 +30,17 @@ test('a cached world from other data or an older builder is ignored (reported st
 	assert.deepEqual(r.stale, ['Alliance']);
 	assert.equal(r.excluded.Alliance, undefined);
 	assert.equal(r.excluded.Horde.get(3441).category, 'elite');
+});
+
+test('the note about a stale cached world is for our guides only, not another pack', async (t) => {
+	const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'polestar-lint-'));
+	t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+	fs.writeFileSync(path.join(dir, 'world-alliance.json'), JSON.stringify({ dataHash: 'builder 15', excluded: [] }));
+	const guides = path.join(dir, 'guides');
+	fs.mkdirSync(guides);
+	fs.writeFileSync(path.join(guides, 'a.guide'), 'guide forever/test/a\ntitle A\nlevels 1-2\n\nstep S\n  level 2\n');
+	const ours = await quiet(() => lint.run(['--guides', guides, '--sim', dir]));
+	assert.match(ours.out, /note: solo-filter checks skipped for Alliance/);
+	const pack = await quiet(() => lint.run(['--pack', path.join(__dirname, 'fixtures', 'packs', 'plays'), '--sim', dir]));
+	assert.doesNotMatch(pack.out, /solo-filter|sim world/);
 });

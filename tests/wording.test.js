@@ -1,0 +1,92 @@
+'use strict';
+// The wording rule: player-facing text, the pack docs and the pack template
+// name no other guide product and never invite players to bring or convert
+// other guides. Every path listed must exist, so a moved folder fails here
+// instead of being scanned as nothing. Names are matched as whole tokens, so
+// the game's own "rested XP" (two tokens) is not a product name.
+
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const crypto = require('node:crypto');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const ROOT = path.join(__dirname, '..');
+const PATHS = ['addon', 'README.md', 'docs/PACKS.md', 'docs/PACK_FORMAT.md', 'docs/GUIDE_FORMAT.md', 'tools/templates'];
+// Names of other guide products, kept as hashes so the repository never
+// spells them: SHA-256 of each name's lower-case form.
+const NAME_HASHES = new Set([
+	'380d1810dc2d0473959dea98e3428eb772588b3cb0c4d2d32768987a85b74e8c',
+	'ec9eefd3b3811601e900635d5b02d34c6f13aed885de2fe3a748f6d497354b1a',
+	'3c6efb268bde2923e4f7cbc086995f6158a606e66df45e307829e6b28f7aaf0e',
+	'766f4a2eab6065a164747b05230961a0330679e107cfec7d32398233a16e06c0',
+]);
+// "import your existing guides", "converting paid guides", "bring your paid guides"...
+// (\b: "report other guides" or "support other guides" is not an invitation).
+const INVITE = /\b(import|convert|port|bring)(ing)? (your )?(existing|paid|other)[^\n]{0,40}guides?/i;
+
+const sha256 = (s) => crypto.createHash('sha256').update(s).digest('hex');
+
+// Each lower-case alphanumeric token of text whose hash is in hashes, with its index.
+function namedTokens(text, hashes) {
+	const out = [];
+	for (const m of text.toLowerCase().matchAll(/[a-z0-9]+/g)) {
+		if (hashes.has(sha256(m[0]))) out.push({ token: m[0], index: m.index });
+	}
+	return out;
+}
+
+// Every file under p (p itself when it is a file), skipping binary ones (a NUL byte).
+function textFiles(p) {
+	const st = fs.statSync(p);
+	if (st.isFile()) {
+		const buf = fs.readFileSync(p);
+		return buf.includes(0) ? [] : [{ file: p, text: buf.toString('utf8') }];
+	}
+	return fs.readdirSync(p).sort().flatMap((name) => textFiles(path.join(p, name)));
+}
+
+function scan() {
+	const files = [];
+	for (const rel of PATHS) {
+		const abs = path.join(ROOT, rel);
+		assert.ok(fs.existsSync(abs), `${rel} is listed for the wording rule but does not exist`);
+		files.push(...textFiles(abs));
+	}
+	return files;
+}
+
+const where = (file, text, index) => `${path.relative(ROOT, file)}:${text.slice(0, index).split('\n').length}`;
+
+test('no other guide product is named', () => {
+	const files = scan();
+	assert.ok(files.length > 20, `expected the addon, docs and template files, got ${files.length}`);
+	const hits = [];
+	for (const { file, text } of files) {
+		for (const { token, index } of namedTokens(text, NAME_HASHES)) hits.push(`${where(file, text, index)}: ${token}`);
+	}
+	assert.deepEqual(hits, []);
+});
+
+test('nothing invites bringing or converting other guides', () => {
+	const hits = [];
+	for (const { file, text } of scan()) {
+		const re = new RegExp(INVITE.source, 'gi');
+		for (const m of text.matchAll(re)) hits.push(`${where(file, text, m.index)}: ${m[0]}`);
+	}
+	assert.deepEqual(hits, []);
+});
+
+test('the checks catch what they are for, and the game\'s rested XP passes', () => {
+	assert.equal(NAME_HASHES.size, 4);
+	for (const h of NAME_HASHES) assert.match(h, /^[0-9a-f]{64}$/);
+	const sample = new Set([sha256('acmeguides')]);
+	assert.deepEqual(namedTokens('Works like AcmeGuides does', sample), [{ token: 'acmeguides', index: 11 }]);
+	assert.deepEqual(namedTokens('Works like Acme Guides does', sample), []);
+	assert.deepEqual(namedTokens('You have rested XP; Rested XP doubles kill XP', NAME_HASHES), []);
+	assert.match('Import your existing guides here', INVITE);
+	assert.match('converting paid guides is easy', INVITE);
+	assert.match('Bring your paid guides into Polestar', INVITE);
+	assert.doesNotMatch('Guide packs are addons made by other players.', INVITE);
+	assert.doesNotMatch('Report other guides\' problems to their authors', INVITE);
+});

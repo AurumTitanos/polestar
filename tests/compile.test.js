@@ -8,9 +8,9 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
-const { runAddon, xmlFiles, ROOT } = require('./helpers/lua');
-const { compile, guideText, tmpdir, plain, fixtureData, GUIDES_DIR, DATA_DIR } = require('./fixtures/dsl/helpers');
-const { compileProject, buildPackFiles, writePackDir, packMeta } = require('../tools/lib/dsl/project');
+const { runAddon, ROOT } = require('./helpers/lua');
+const { compile, guideText, tmpdir, plain, GUIDES_DIR, DATA_DIR, ourManifest, writeTestPack } = require('./fixtures/dsl/helpers');
+const { compileProject } = require('../tools/lib/dsl/project');
 
 const CLI = path.join(ROOT, 'tools', 'polestar.js');
 
@@ -22,17 +22,18 @@ function luaString(s) {
 	return JSON.stringify(s);
 }
 
-// Load a pack folder the way the client does (Pack.xml order) with Core/Init.lua
-// and stand-ins for the registration functions; return what got registered.
-function loadPack(dir) {
-	const files = xmlFiles(path.join(dir, 'Pack.xml'));
+// Load a pack folder the way the client does (its TOC's files in order) with
+// Core/Init.lua and stand-ins for the registration functions; return what got
+// registered.
+function loadPack(pack) {
+	const files = pack.scripts;
 	const [out] = runAddon({
 		addons: [{ name: 'Polestar', files: ['Core/Init.lua'] }],
 		script: `
 			local packs, guides, frames = {}, {}, {}
 			Polestar.RegisterPack = function(m) packs[#packs + 1] = m end
 			Polestar.RegisterGuide = function(g) guides[#guides + 1] = g; return true end
-			Polestar.RegisterMapFrames = function(f) frames[#frames + 1] = f end
+			Polestar.RegisterMapFrames = function(f, p) frames[#frames + 1] = { frames = f, pack = p } end
 			local ns = {}
 			for _, f in ipairs({ ${files.map(luaString).join(', ')} }) do
 				local chunk = assert(loadfile(f))
@@ -57,23 +58,35 @@ function readTree(dir) {
 }
 
 test('the compiled pack loads under Lua 5.1 with Core/Init.lua and round-trips to the compiled structure', () => {
-	const { guides, diag, data } = compileProject({ guidesDir: GUIDES_DIR, dataDir: DATA_DIR });
+	const manifest = ourManifest();
+	const { guides, diag, data } = compileProject({ packDir: GUIDES_DIR, manifest, dataDir: DATA_DIR });
 	assert.equal(diag.hasErrors(), false);
-	const dir = tmpdir();
-	writePackDir(dir, buildPackFiles({ guides, meta: packMeta('9.9.9'), data }));
-	const loaded = loadPack(dir);
-	assert.deepEqual(loaded.packs, [{ id: 'guides', title: 'Polestar Guides', version: '9.9.9' }]);
+	const pack = writeTestPack(guides, data, manifest);
+	const loaded = loadPack(pack);
+	assert.deepEqual(loaded.packs, [
+		{
+			addon: 'Polestar_Guides',
+			id: 'guides',
+			format: 1,
+			title: 'Polestar Guides',
+			author: 'Polestar',
+			version: manifest.version,
+			license: 'GPL-3.0-only',
+			notes: 'Leveling, profession, reputation and collectible guides for Polestar.',
+		},
+	]);
 	assert.deepEqual(loaded.guides, plain(guides));
 	assert.deepEqual(loaded.guides.map((g) => g.id), ['forever/alliance/human/01-northshire', 'forever/alliance/human/02-elwynn']);
+	assert.deepEqual(loaded.guides.map((g) => g.pack), ['guides', 'guides']);
 	// Era bounds only for maps the guides reference (all fixture goals are in Elwynn Forest).
-	assert.deepEqual(loaded.frames, [{ era: { 1429: { c: 1415, left: 1535.4166, right: -1941.6666, top: 1300, bottom: -1060.4166 } } }]);
+	assert.deepEqual(loaded.frames, [{ frames: { era: { 1429: { c: 1415, left: 1535.4166, right: -1941.6666, top: 1300, bottom: -1060.4166 } } }, pack: 'guides' }]);
 	// Files leak no globals beyond Polestar's registration calls.
 	assert.deepEqual(loaded.globals, { ADDON: true, ns: true });
-	// The manifest lists every Lua file in the folder, Pack.lua first.
-	const lua = Object.keys(readTree(dir)).filter((f) => f.endsWith('.lua')).sort();
-	assert.deepEqual(loaded.files.map((f) => path.relative(dir, f).split(path.sep).join('/')).sort(), lua);
+	// The TOC lists every Lua file in the folder, Pack.lua first.
+	const lua = Object.keys(readTree(pack.dir)).filter((f) => f.endsWith('.lua')).sort();
+	assert.deepEqual(loaded.files.map((f) => path.relative(pack.dir, f).split(path.sep).join('/')).sort(), lua);
 	assert.equal(path.basename(loaded.files[0]), 'Pack.lua');
-	assert.match(fs.readFileSync(path.join(dir, 'LICENSE-DATA.txt'), 'utf8'), /pfQuest[\s\S]*MIT License[\s\S]*Copyright \(c\) 2017-2021 Eric Mauser \(Shagu\)/);
+	assert.match(fs.readFileSync(path.join(pack.dir, 'LICENSE-DATA.txt'), 'utf8'), /pfQuest[\s\S]*MIT License[\s\S]*Copyright \(c\) 2017-2021 Eric Mauser \(Shagu\)/);
 });
 
 test('strings with quotes, backslashes, control characters and UTF-8 survive the trip through Lua', () => {
@@ -92,9 +105,7 @@ test('strings with quotes, backslashes, control characters and UTF-8 survive the
 	]);
 	const r = compile(src);
 	assert.deepEqual(r.errors, []);
-	const dir = tmpdir();
-	writePackDir(dir, buildPackFiles({ guides: r.guides, meta: packMeta('1'), data: fixtureData() }));
-	const loaded = loadPack(dir);
+	const loaded = loadPack(writeTestPack(r.guides));
 	assert.deepEqual(loaded.guides, plain(r.guides));
 	const g = loaded.guides[0];
 	assert.equal(g.title, tricky);
@@ -113,9 +124,7 @@ test('folder, keywords and collects compile into the guide table and load in the
 	assert.equal(r.guides[0].folder, 'Mounts · Level 40');
 	assert.deepEqual(r.guides[0].keywords, ['Pinto Bridle', 'Chestnut Mare']);
 	assert.deepEqual(r.guides[0].collects, [2414, 5655]);
-	const dir = tmpdir();
-	writePackDir(dir, buildPackFiles({ guides: r.guides, meta: packMeta('1'), data: fixtureData() }));
-	assert.deepEqual(loadPack(dir).guides, plain(r.guides));
+	assert.deepEqual(loadPack(writeTestPack(r.guides)).guides, plain(r.guides));
 });
 
 test('compile output is byte-identical across runs and skips drafts', () => {
@@ -127,14 +136,8 @@ test('compile output is byte-identical across runs and skips drafts', () => {
 	}
 	const ta = readTree(a);
 	const tb = readTree(b);
-	assert.deepEqual(Object.keys(ta).sort(), [
-		'Guides/forever/alliance/human/01-northshire.lua',
-		'Guides/forever/alliance/human/02-elwynn.lua',
-		'LICENSE-DATA.txt',
-		'MapFrames.lua',
-		'Pack.lua',
-		'Pack.xml',
-	]);
+	assert.deepEqual(Object.keys(ta).sort(), ['Guides.lua', 'LICENSE-DATA.txt', 'Polestar_Guides.toc', 'MapFrames.lua', 'Pack.lua'].sort());
+	assert.match(ta['Guides.lua'].toString(), /-- Source: forever\/alliance\/human\/01-northshire\.guide\n[\s\S]*-- Source: forever\/alliance\/human\/02-elwynn\.guide\n/);
 	for (const f of Object.keys(ta)) assert.ok(ta[f].equals(tb[f]), `${f} differs between runs`);
 });
 
@@ -146,16 +149,21 @@ test('compile with errors exits non-zero and writes nothing; --include-drafts pu
 	assert.equal(fs.existsSync(out), false);
 });
 
-test('recompiling removes guides that no longer exist and keeps files compile does not own', () => {
+test('recompiling replaces the old Pack.xml layout and keeps files compile does not own', () => {
 	const out = tmpdir();
 	fs.mkdirSync(path.join(out, 'Guides', 'old'), { recursive: true });
 	fs.writeFileSync(path.join(out, 'Guides', 'old', 'gone.lua'), '-- stale\n');
 	fs.writeFileSync(path.join(out, 'Pack.xml'), '<Ui>\n\t<!-- Generated by `node tools/polestar.js compile`. Do not edit. -->\n</Ui>\n');
-	fs.writeFileSync(path.join(out, 'Polestar_Guides.toc'), '## Title: kept\n');
+	fs.writeFileSync(path.join(out, 'Polestar_Guides.toc'), '## Title: old\n\nPack.xml\n');
+	fs.writeFileSync(path.join(out, 'README.txt'), 'kept\n');
 	const r = cli('compile', '--guides', GUIDES_DIR, '--data', DATA_DIR, '--out', out);
 	assert.equal(r.status, 0, r.stderr);
-	assert.equal(fs.existsSync(path.join(out, 'Guides', 'old')), false);
-	assert.equal(fs.readFileSync(path.join(out, 'Polestar_Guides.toc'), 'utf8'), '## Title: kept\n');
+	assert.equal(fs.existsSync(path.join(out, 'Guides')), false);
+	assert.equal(fs.existsSync(path.join(out, 'Pack.xml')), false);
+	assert.match(fs.readFileSync(path.join(out, 'Polestar_Guides.toc'), 'utf8'), /^## X-Polestar-Pack: guides$/m);
+	assert.equal(fs.readFileSync(path.join(out, 'README.txt'), 'utf8'), 'kept\n');
+	// Recompiling into the folder it generated works.
+	assert.equal(cli('compile', '--guides', GUIDES_DIR, '--data', DATA_DIR, '--out', out).status, 0);
 });
 
 test('lint runs the same checks without writing, with matching exit codes', () => {
@@ -171,22 +179,22 @@ test('lint runs the same checks without writing, with matching exit codes', () =
 
 test('a missing data directory is a warning; guides with explicit names still compile', () => {
 	const guides = tmpdir();
-	fs.writeFileSync(path.join(guides, 'a.guide'), guideText(['guide t/a', 'title A', 'levels 1-2', 'zone map 1429', '', 'step S', '  accept 424243 "New Quest" @50,50', '  turnin 424243 "New Quest"']));
+	fs.writeFileSync(path.join(guides, 'a.guide'), guideText(['guide forever/a', 'title A', 'levels 1-2', 'zone map 1429', '', 'step S', '  accept 424243 "New Quest" @50,50', '  turnin 424243 "New Quest"']));
 	const out = tmpdir();
 	const r = cli('compile', '--guides', guides, '--data', path.join(guides, 'nope'), '--out', out);
 	assert.equal(r.status, 0, r.stderr);
 	assert.match(r.stderr, /warning: reference data not found/);
-	assert.ok(fs.existsSync(path.join(out, 'Guides', 't', 'a.lua')));
+	assert.match(fs.readFileSync(path.join(out, 'Guides.lua'), 'utf8'), /id = "forever\/a"/);
 	assert.match(fs.readFileSync(path.join(out, 'LICENSE-DATA.txt'), 'utf8'), /No reference data sources were recorded/);
 });
 
-test('compile never clears a Guides folder that is not a generated pack (case-insensitive --out at the repo)', () => {
+test('compile never writes into a folder that is not a generated pack (case-insensitive --out at the repo)', () => {
 	const out = tmpdir();
 	fs.mkdirSync(path.join(out, 'Guides', 'forever'), { recursive: true });
 	fs.writeFileSync(path.join(out, 'Guides', 'forever', 'precious.guide'), 'guide t/x\n');
 	const r = cli('compile', '--guides', GUIDES_DIR, '--data', DATA_DIR, '--out', out);
 	assert.equal(r.status, 1);
-	assert.match(r.stderr, /refusing to replace .*Guides: .* is not a generated guide pack/);
+	assert.match(r.stderr, /refusing to write into .*: it is not a generated guide pack/);
 	assert.equal(fs.readFileSync(path.join(out, 'Guides', 'forever', 'precious.guide'), 'utf8'), 'guide t/x\n');
-	assert.equal(fs.existsSync(path.join(out, 'Pack.xml')), false);
+	assert.deepEqual(fs.readdirSync(out), ['Guides']);
 });

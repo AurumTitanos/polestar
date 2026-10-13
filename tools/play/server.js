@@ -79,13 +79,17 @@ function staticFile(res, dir, rel) {
 	return true;
 }
 
-// opts: { port, host, dataDir, artDir, fresh, log }
+// opts: { port, host, dataDir, artDir, fresh, packs, log }; packs: other guide
+// packs' built folders, loaded after ours (see Session).
+// -> { server, url, port, session, reload, close }: reload({ packs?, why? })
+// saves, restarts the Lua session (with the new pack folders when given) and
+// tells the page on its next frame; `polestar dev` calls it after a rebuild.
 async function startServer(opts = {}) {
-	const { port = 8077, host = '127.0.0.1', dataDir = path.join(ROOT, 'data', 'play'), artDir = null, fresh = false, log = () => {} } = opts;
+	const { port = 8077, host = '127.0.0.1', dataDir = path.join(ROOT, 'data', 'play'), artDir = null, fresh = false, packs = [], log = () => {} } = opts;
 	if (fresh) fs.rmSync(dataDir, { recursive: true, force: true });
 	fs.mkdirSync(dataDir, { recursive: true });
 	let config = readConfig(dataDir);
-	const session = new Session({ dataDir, artDir, config, log });
+	const session = new Session({ dataDir, artDir, config, packs, log });
 	await session.start();
 	let notice = null; // what the next frame tells the page (a restart, its reason)
 	let busy = Promise.resolve();
@@ -209,10 +213,16 @@ return out`);
 		return undefined;
 	});
 
-	await new Promise((resolve, reject) => {
-		server.once('error', reject);
-		server.listen(port, host, resolve);
-	});
+	try {
+		await new Promise((resolve, reject) => {
+			server.once('error', reject);
+			server.listen(port, host, resolve);
+		});
+	} catch (err) {
+		// The port is taken (or not ours): the Lua session must not outlive the call.
+		await session.stop({ save: false });
+		throw err;
+	}
 	const address = server.address();
 	const url = `http://${host === '0.0.0.0' ? '127.0.0.1' : host}:${address.port}/`;
 
@@ -225,7 +235,14 @@ return out`);
 		await session.stop({ save });
 	}
 
-	return { server, url, port: address.port, session, close };
+	function reload({ packs: next = null, why = 'Guide pack rebuilt; UI reloaded.' } = {}) {
+		return serial(async () => {
+			if (next) session.packs = next;
+			await relog({ why });
+		});
+	}
+
+	return { server, url, port: address.port, session, reload, close };
 }
 
 module.exports = { startServer };

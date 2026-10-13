@@ -508,8 +508,13 @@ end
 
 local TOGGLE_W, TOGGLE_H, KNOB = 30, 16, 12
 
+local function toggleValue(self)
+	if self.lsGet then return self.lsGet() and true or false end
+	return ns.Get(self.lsPath) and true or false
+end
+
 local function toggleRefresh(self)
-	local on = ns.Get(self.lsPath) and true or false
+	local on = toggleValue(self)
 	local enabled = W.Enabled(self)
 	dimRow(self, enabled)
 	if on then
@@ -532,9 +537,12 @@ local function toggleRefresh(self)
 	self.checked = on
 end
 
-function W.Toggle(parent, label, path, desc, depends)
+-- opts.get() / opts.set(value) stand in for reading and writing the path when
+-- one switch stands for several settings (set(nil) on right-click: defaults).
+function W.Toggle(parent, label, path, desc, depends, opts)
 	local row = settingRow(parent, label, desc)
 	row.Track = pill(row, TOGGLE_W, TOGGLE_H)
+	row.lsGet, row.lsSet = opts and opts.get, opts and opts.set
 	row.Track:SetPoint("RIGHT", row, "RIGHT", -12, 0)
 	row.Knob = row.Track:CreateTexture(nil, "OVERLAY")
 	row.Knob:SetTexture(Theme.Media("circle"))
@@ -544,12 +552,40 @@ function W.Toggle(parent, label, path, desc, depends)
 	row:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 	row:SetScript("OnClick", function(self, button)
 		if not W.Enabled(self) then return end
-		if button == "RightButton" then ns.Set(self.lsPath, nil) else ns.Set(self.lsPath, not ns.Get(self.lsPath)) end
+		if self.lsSet then
+			if button == "RightButton" then self.lsSet(nil) else self.lsSet(not toggleValue(self)) end
+		elseif button == "RightButton" then
+			ns.Set(self.lsPath, nil)
+		else
+			ns.Set(self.lsPath, not ns.Get(self.lsPath))
+		end
 	end)
 	row:SetScript("OnEnter", rowEnter)
 	row:SetScript("OnLeave", hideTip)
 	row.Refresh = toggleRefresh
 	return W.Bind(row, path, depends)
+end
+
+-- The same switch without a row or a setting, for state that is not a
+-- setting (a guide pack shown or hidden): get() -> on, set(on). Click
+-- flips it; the owner repaints it with :Refresh().
+function W.Switch(parent, get, set, tip)
+	local b = CreateFrame("Button", nil, parent)
+	b:SetSize(TOGGLE_W + 8, 24)
+	b.Track = pill(b, TOGGLE_W, TOGGLE_H)
+	b.Track:SetPoint("CENTER", b, "CENTER", 0, 0)
+	b.Knob = b.Track:CreateTexture(nil, "OVERLAY")
+	b.Knob:SetTexture(Theme.Media("circle"))
+	b.Knob:SetSize(KNOB, KNOB)
+	b.lsGet, b.lsTip = get, tip
+	b:SetScript("OnClick", function(self)
+		set(not toggleValue(self))
+		self:Refresh()
+	end)
+	b:SetScript("OnEnter", simpleTip)
+	b:SetScript("OnLeave", hideTip)
+	b.Refresh = toggleRefresh
+	return W.Painter(b, toggleRefresh)
 end
 
 ---------------------------------------------------------------------------
@@ -1059,6 +1095,52 @@ function W.SearchBox(parent, placeholder, onChange)
 	return e
 end
 
+-- A read-only field holding text to copy (a link, a report, a position):
+-- the search field's well and border, the text selected whenever it takes
+-- focus, typing puts the text back. opts.lines > 1: a multi-line box that
+-- tall. W.SetCopyText(box, text) fills it.
+function W.CopyBox(parent, opts)
+	opts = opts or {}
+	local e = CreateFrame("EditBox", nil, parent)
+	local lines = opts.lines or 1
+	e:SetAutoFocus(false)
+	Theme.Font(e, "label")
+	W.Color(e, "text")
+	if lines > 1 then
+		e:SetMultiLine(true)
+		e:SetHeight(lines * 16 + 16)
+		e:SetTextInsets(10, 10, 8, 8)
+	else
+		e:SetHeight(30)
+		e:SetTextInsets(10, 10, 0, 0)
+	end
+	Theme.Skin(e, "editbox")
+	e:SetScript("OnEditFocusGained", function(self)
+		Theme.SetFocused(self, true)
+		self:HighlightText()
+	end)
+	e:SetScript("OnEditFocusLost", function(self)
+		Theme.SetFocused(self, false)
+		self:HighlightText(0, 0)
+	end)
+	e:SetScript("OnMouseUp", function(self) self:SetFocus(); self:HighlightText() end)
+	e:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+	e:SetScript("OnEnterPressed", function(self) self:ClearFocus() end)
+	e:SetScript("OnTextChanged", function(self, userInput)
+		if userInput and self:GetText() ~= self.lsText then
+			self:SetText(self.lsText or "")
+			self:HighlightText()
+		end
+	end)
+	return e
+end
+
+function W.SetCopyText(e, text)
+	e.lsText = text or ""
+	e:SetText(e.lsText)
+	e:SetCursorPosition(0)
+end
+
 ---------------------------------------------------------------------------
 -- Scroll area: a ScrollFrame with a thin thumb strip. Wheel scrolls; the
 -- thumb can be dragged.
@@ -1212,13 +1294,23 @@ local function navButton(f, i)
 	b.Count = W.Text(b, "number", "textMuted")
 	b.Count:SetJustifyH("RIGHT")
 	b.Count:SetPoint("RIGHT", b, "RIGHT", -SHELL.side, 0)
-	b:SetScript("OnClick", function(self) if f.lsOnNav then f.lsOnNav(self.lsKey) end end)
+	-- A warning dot: something on that page needs the player's attention.
+	b.Dot = b:CreateTexture(nil, "ARTWORK")
+	b.Dot:SetTexture(Theme.Media("circle"))
+	b.Dot:SetSize(6, 6)
+	b.Dot:SetPoint("RIGHT", b, "RIGHT", -SHELL.side, 0)
+	W.Color(b.Dot, "warning")
+	b.Dot:Hide()
+	b:SetScript("OnClick", function(self) if f.lsOnNav and not self.lsHeading then f.lsOnNav(self.lsKey) end end)
 	f.navButtons[i] = b
 	return b
 end
 
--- items: { { key, label, icon, count }, ... }; the active one is marked. A
--- row whose count is 0 recedes (no number, faded) but stays reachable.
+-- items: { { key, label, icon, count, dot }, ... }; the active one is marked.
+-- A row whose count is 0 recedes (no number, faded) but stays reachable; a
+-- row with `dot` carries a warning dot at its right edge (no count then).
+-- { heading = true, label } is a muted heading over the rows after it, at
+-- the text edge, not a choice.
 --
 -- The rows live in their own scroll area, from 12px under the search down
 -- to the line of the main column's footer bar (SHELL.footer from the
@@ -1226,6 +1318,7 @@ end
 -- many rows there are: past that line the list scrolls (wheel, thumb) and
 -- the active row is scrolled into view.
 local NAV_ROW = 40
+local NAV_COUNT_W = 32 -- room kept right of a row's label for its count or dot
 function W.ShellNav(f, items, active, onSelect)
 	f.lsOnNav = onSelect
 	local sf = f.NavScroll
@@ -1239,12 +1332,30 @@ function W.ShellNav(f, items, active, onSelect)
 		b.Label:SetText(item.label)
 		b.Count:SetText(item.count or "")
 		b.Count:SetShown(item.count ~= nil and not empty)
+		b.Dot:SetShown(item.dot and true or false)
+		if item.dot then b.Count:Hide() end
 		b.Selected:SetShown(on)
 		b.Bar:SetShown(on)
 		W.Color(b.Label, on and "text" or (empty and "textMuted" or "textDim"))
 		W.Color(b.Icon, on and "accent" or (empty and "textMuted" or "textDim"))
 		b:SetAlpha((empty and not on) and 0.55 or 1)
 		b.lsEmpty = empty
+		b.lsHeading = item.heading and true or false
+		b.Icon:SetShown(not item.heading)
+		-- The label ends short of the count (or dot) so a long one is cut
+		-- with an ellipsis rather than running under it or off the sidebar.
+		b.Label:ClearAllPoints()
+		if item.heading then
+			b.Label:SetPoint("LEFT", b, "LEFT", SHELL.side, 0)
+			b.Label:SetPoint("RIGHT", b, "RIGHT", -SHELL.side, 0)
+			W.Color(b.Label, "textMuted")
+			b:SetAlpha(1)
+			b:Disable()
+		else
+			b.Label:SetPoint("LEFT", b.Icon, "RIGHT", 12, 0)
+			b.Label:SetPoint("RIGHT", b, "RIGHT", -(SHELL.side + NAV_COUNT_W), 0)
+			b:Enable()
+		end
 		b:ClearAllPoints()
 		b:SetPoint("TOPLEFT", sf.Child, "TOPLEFT", 0, -y)
 		b:SetPoint("TOPRIGHT", sf.Child, "TOPRIGHT", 0, -y)
@@ -1519,6 +1630,9 @@ function W.Shell(name, opts)
 	f.Band:SetTexCoord(Theme.BandCoords(Wd - RAIL - SB - 2, SHELL.header))
 	f.Title = W.Text(head, "hero", "text")
 	f.Title:SetPoint("TOPLEFT", head, "TOPLEFT", SHELL.pad, -32)
+	-- Clear of the close button (28px, 12px in, 12px gap): a long title (a
+	-- guide pack's) ends in an ellipsis.
+	f.Title:SetPoint("TOPRIGHT", head, "TOPRIGHT", -(12 + 28 + 12), -32)
 	f.Title:SetText(opts.title or "")
 	f.Subtitle = W.Text(head, "note", "textDim")
 	f.Subtitle:SetPoint("TOPLEFT", f.Title, "BOTTOMLEFT", 0, -8)

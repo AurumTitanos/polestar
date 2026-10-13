@@ -838,7 +838,7 @@ end
 buildMinimap()
 
 ---------------------------------------------------------------------------
--- The guide simulator's goal logic (tests/helpers/guide-sim.js)
+-- The guide simulator's goal logic (tools/lib/playtest.js)
 ---------------------------------------------------------------------------
 
 local actorSource, actorGuide, actor

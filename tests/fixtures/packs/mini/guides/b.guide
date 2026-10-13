@@ -1,0 +1,8 @@
+guide mini/b
+title Mini B
+faction Alliance
+levels 2-6
+zone Elwynn Forest
+
+step Kobold camp
+  goto 47.6,35.1 "Kobold camp"

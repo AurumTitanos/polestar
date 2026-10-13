@@ -20,7 +20,8 @@ Reference material, checked out locally (gitignored):
 | Addon folder | Purpose |
 |---|---|
 | `addon/Polestar/` | Engine, navigation, UI. |
-| `addon/Polestar_Guides/` | Guide pack. **Generated** by `tools/polestar.js compile`. |
+| `addon/Polestar_Guides/` | Our guide pack (pack id `guides`). **Generated** by `tools/polestar.js compile`. |
+| community guide packs | Addons by other authors (`X-Polestar-Pack` in their TOC), built by the same compiler from their own repositories (`docs/PACKS.md`, `docs/PACK_FORMAT.md`). |
 | `addon/Polestar_ItemDB/` | Item stats for gear advice, load-on-demand. **Generated** by `tools/polestar.js gear build`. |
 | `addon/Polestar_Recorder/` | Standalone data recorder for authoring. |
 | `addon/Polestar_QuestDB/` | Quest database, load-on-demand. **Generated** locally by `tools/polestar.js questdb build` (gitignored). |
@@ -92,7 +93,8 @@ Messages:
 
 | Message | Args | Fired by |
 |---|---|---|
-| `GUIDES_REGISTERED` | — | Core, once at PLAYER_LOGIN after packs registered |
+| `GUIDES_REGISTERED` | — | Core, once at PLAYER_LOGIN after packs registered (and installed packs scanned) |
+| `PACKS_CHANGED` | packId | `Guides.SetPackShown`: a pack's guides were hidden or shown |
 | `GUIDE_CHANGED` | guideId or nil | Engine |
 | `STEP_CHANGED` | stepIndex | Engine |
 | `STEP_UPDATED` | stepIndex | Engine (goal status/progress changed, same step) |
@@ -104,6 +106,8 @@ Messages:
 | `TOGGLE_FRAME` / `SHOW_FRAME` / `HIDE_FRAME` | — | commands, keybinds → UI |
 | `SHOW_PICKER` | — | commands → UI |
 | `SHOW_OPTIONS` | section or nil | commands → UI |
+| `SHOW_WELCOME` | page or nil | About's "Show the welcome again", `/polestar welcome` → UI/Welcome.lua |
+| `SHOW_COPY` | title, text | `/polestar where` → UI/Copy.lua |
 
 ### Settings
 
@@ -114,8 +118,12 @@ Polestar.Set("ui.scale", 1.1)            -- writes PolestarDB.settings, fires SE
 Polestar.CharState()                      -- PolestarCharDB, always a table
 ```
 
-`PolestarDB = { schema = 1, settings = { [section] = { ... } } }`
-`PolestarCharDB = { schema = 1, guide = id|nil, manual = { [guideId] = { ["s:g"] = true|"tick" } }, skipped = { [guideId] = { [stepIndex] = true, ["s:g"] = true } }, pins = { [guideId] = { step, done } }, offers = { [questID] = level }, shapes = { [guideId] = shape }, stepKeys = { [guideId] = { hash, ... } }, flags = { fp = { [name] = true }, ... } }`
+`PolestarDB = { schema = 1, settings = { [section] = { ... } }, packs = { [packId] = { off = true } }, welcomeSeen = 1 }`
+`PolestarCharDB = { schema = 1, guide = id|nil, tabs = { guideId, ... }, activeTab = n, absentAt = { [guideId] = place }, manual = { [guideId] = { ["s:g"] = true|"tick" } }, skipped = { [guideId] = { [stepIndex] = true, ["s:g"] = true } }, pins = { [guideId] = { step, done } }, offers = { [questID] = level }, shapes = { [guideId] = shape }, stepKeys = { [guideId] = { hash, ... } }, flags = { fp = { [name] = true }, ... } }`
+
+`packs[<id>].off` hides a pack's guides account-wide (the Guide packs page's
+switch); `welcomeSeen` is the version of the welcome last seen (UI/Welcome.lua).
+`behavior.suggestFrom` (default `"guides"`) is the pack suggestions come from.
 
 `manual` holds the player's ticks (`"tick"`, any goal but a note) **and**
 latched results (`true`): NPC interactions (talk/train/vendor) are latched
@@ -141,8 +149,17 @@ Polestar.RegisterCommand(name, fn(argString), help)
 registered commands. Core registers: `guides`, `options`, `show`, `hide`,
 `next`, `prev` (look at the next/previous step; nothing changes), `skip`
 (skip the step shown, for good), `reset` (clear ticks, latches, skips and
-the saved view for the current guide), `guide <id>`, `status`, `debug`; Nav
-adds `arrow` and `way`.
+the saved view for the current guide), `guide <id>`, `status`, `tabs`,
+`tab <n>`, `close`, `path` (the route choice), `welcome` (`SHOW_WELCOME`),
+`packs` (Options at Guide packs), `where`, `debug`; Nav adds `arrow`, `way`
+and `route`; modules add theirs (`xp`, `gear`, `instances`, `dungeons`,
+`lookup`, `mount`, `rares`, `questdb`).
+
+`where` prints the player's map and position as two guide lines, `zone map
+<uiMapID>` and `goto <x>,<y> live` (two decimals, the client's live frame,
+marked `live` because typed coordinates are read in the Era frame), then "For
+another goal, add @x,y live", and fires `SHOW_COPY` with the two lines. In an
+instance or on a map without a position it prints why instead.
 
 ### Localization
 
@@ -195,8 +212,13 @@ Plaguelands, Redridge Mountains, Stormwind City), and more may. Packs embed
 the Era world bounds for every map they reference:
 
 ```lua
-Polestar.RegisterMapFrames({ era = { [uiMapID] = { c = continentMapID, left = wy0, right = wy1, top = wx0, bottom = wx1 }, ... } })
+Polestar.RegisterMapFrames({ era = { [uiMapID] = { c = continentMapID, left = wy0, right = wy1, top = wx0, bottom = wx1 }, ... } }, packId)
 ```
+
+`packId` nil is Polestar itself (its data addons, class trainers). Frames from
+Polestar and our pack (`guides`) win for a map both cover, whatever the load
+order; another pack only adds maps they lack (lint warns where its frame
+differs).
 
 For frame `"e"`: `wx = top + (bottom - top) * y/100`, `wy = left + (right - left) * x/100`.
 `Compat.MapToWorld(map, x, y, "e")` uses that; everything downstream (distance,
@@ -207,11 +229,17 @@ Forever) and use `C_Map.GetWorldPosFromMapPos` directly.
 ## Guide data (compiled Lua) — the toolchain/Engine contract
 
 Generated by `tools/polestar.js compile` from `.guide` sources
-(`docs/GUIDE_FORMAT.md`). One file per guide under
-`addon/Polestar_Guides/Guides/`.
+(`docs/GUIDE_FORMAT.md`) into the pack's addon folder: the generated TOC,
+`Pack.lua`, `MapFrames.lua`, `Guides.lua` (one `RegisterGuide` per guide, each
+built in its own function) and `LICENSE-DATA.txt`, plus `LICENSE.txt` (the
+pack's `LICENSE`) when the pack folder has one. Ours is
+`addon/Polestar_Guides/`; a community pack's is `<pack>/dist/<folder>/`. The
+full contract for pack authors' tools is `docs/PACK_FORMAT.md`.
 
 ```lua
-Polestar.RegisterPack({ id = "guides", title = "Polestar Guides", version = "0.1.0" })
+local ADDON = ...
+Polestar.RegisterPack({ addon = ADDON, id = "guides", format = 1, title = "Polestar Guides",
+  author = "Polestar", version = "0.1.0", license = "GPL-3.0-only" })   -- optional: website, source, notes
 
 Polestar.RegisterGuide({
   id = "forever/alliance/human/01-northshire",
@@ -283,14 +311,73 @@ taken or done the giver never offers it again) and `preTitles` (titles of the
 quests those name, for the reason texts). `only !Class` compiles to the list of
 the other eight classes, so compiled guides never contain negations.
 
+### The guide registry (`Core/Guides.lua`)
+
+Every guide belongs to a registered pack. The rules:
+
+1. **Ids.** Pack ids match `^[a-z0-9][a-z0-9-]{1,31}$`; `guides`, `forever`,
+   `lookup`, `draft` and `polestar` are reserved (`Guides.RESERVED`). Our
+   pack `guides` (addon `Polestar_Guides`) owns guide ids under `forever/` and
+   `draft/`, the internal `lookup` pack (Lookup's generated guides, registered
+   with `internal = true`, never listed or switchable) owns `lookup/`, every
+   other pack `<id>/` (`Guides.OwnsId`).
+2. **No overrides.** A guide outside its pack's prefix is refused; a pack
+   registering one of its own ids again replaces that guide in its slot.
+3. **Clashes.** A second pack with a taken id is refused whole, the
+   problem naming both addons; a pack with a reserved id is refused whole
+   with "Pack id <id> is reserved for Polestar.". Either way the guides and map frames its files register
+   for that id while it loads (until its `ADDON_LOADED`) are dropped, never
+   given to the holder, and the dropped guides are counted in the problem
+   (" 1 guide dropped." / " <n> guides dropped."); a guide registered before its pack is refused (when
+   the pack comes) and one for a pack never registered is dropped.
+4. **Format.** `Guides.FORMATS` holds the formats this Polestar reads (`1`).
+   A pack in another is `too-new`, its reason from its TOC's
+   `X-Polestar-Needs`; an unknown verb or malformed field refuses only that
+   guide (`Guides.Validate`, the `REQUIRED` verb table, `Guides.VERBS`).
+5. **Problems.** Each refusal is recorded on the pack's record,
+   `problems = { { kind = "pack-refused"|"guide-refused"|"no-guides", guide?, message } }`,
+   and printed by `ns.Debug`.
+6. **Text prints literally.** Every string a pack registers is escaped once
+   at registration (`ns.EscapeText`: `|` doubled), ids excepted.
+7. **Packs on disk.** At login, before `GUIDES_REGISTERED`,
+   `Guides.ScanInstalled` lists every addon whose TOC has `X-Polestar-Pack`,
+   loaded or not, and gives the ones that never registered a record from
+   their TOC.
+
+A pack record: `id`, `addon`, `format`, `title`, `author`, `version`,
+`license`, `website`, `source`, `notes`, `official` (ours), `status`,
+`reason`, `needs`, `problems`, `guides` (ids), `guideCount`. Status, in
+priority order for an unregistered pack: `too-new` > `disabled` (off in the
+AddOns list) > `not-loaded` (the client's reason) > `broken` (loaded, no
+guides); a registered one is `on`/`off` (`PolestarDB.packs[id].off`),
+`refused`, `too-new`, or `broken` when it registered no guides.
+
+```lua
+Polestar.RegisterPack(meta) -> ok, err
+Polestar.RegisterGuide(def) -> ok, err      -- def.pack must be registered and own def.id; validates shape
+Polestar.RegisterMapFrames(frames, packId)
+Polestar.Guides.Packs() -> { record, ... }  -- every pack but internal ones, ours first, then by title
+Polestar.Guides.Pack(id) -> record | nil
+Polestar.Guides.PackShown(id) -> bool
+Polestar.Guides.SetPackShown(id, shown)     -- PolestarDB.packs[id].off; fires PACKS_CHANGED(id)
+Polestar.Guides.ProblemCount() -> n         -- over every listed pack (the Options dot)
+Polestar.Guides.OwnsId(packId, guideId) -> bool
+Polestar.Guides.SuggestSources() -> { packId, ... }  -- "guides", then shown packs with leveling guides
+Polestar.Guides.SuggestSource() -> packId   -- behavior.suggestFrom when it can, else "guides"
+Polestar.Guides.OfferedBy(id) -> { guide, ... }      -- shown guides whose route choice offers id
+```
+
+Only guides of shown packs (`on`, plus the internal `lookup`) are visible to
+`Get`, `List`, `Suggestions`, `Suggest`, `OfferedBy`, search and
+`Lookup.CuratedGuide`. `PACKS_CHANGED` refreshes the picker, search, the guide
+window, Lookup and the Engine's tabs ("Tabs", absent guides).
+
 ## Engine
 
 ```lua
-Polestar.RegisterGuide(def) -> ok, err      -- validates shape; duplicate id: last wins, warns in debug
-Polestar.RegisterPack(meta)
 Polestar.Guides.Get(id) -> guide | nil
 Polestar.Guides.List() -> { header, ... }   -- header = guide without steps, plus stepCount
-Polestar.Guides.Suggestions() -> { id, ... } -- every leveling guide for the player's faction/race/class/level, best first; none fits: the nearest upcoming one alone
+Polestar.Guides.Suggestions() -> { id, ... } -- the leveling guides of the suggestion source (Guides.SuggestSource) for the player's faction/race/class/level, best first; ours fill in where it has none; none fits: the nearest upcoming one alone
 Polestar.Guides.Suggest() -> id | nil       -- the first of Suggestions()
 
 Polestar.Engine.GetGuide() -> guide | nil
@@ -530,6 +617,16 @@ tab. `autoNextGuide` replaces the finished guide within its own tab. On login,
 saved tabs reopen; `Guides.Suggest()` opens a first tab only when none survive
 (SavedVariables can come back nil).
 
+**Absent guides keep their place.** A saved tab whose guide is not
+registered (its pack missing) or hidden (its pack switched off) is **absent**:
+it is not opened, but it stays in `CharState().tabs` after the open ones, with
+its place in `CharState().absentAt = { [guideId] = place }`, and its saved
+view (`pins`) is kept. At login and on `PACKS_CHANGED`, an absent guide that is
+shown again reopens at its old place, up to the tab limit; on
+`PACKS_CHANGED`, open tabs whose guide is gone close together and become
+absent (the active one hands over to its right neighbour, as `CloseTab`).
+Check-offs are keyed by guide id and survive regardless.
+
 Step view (render-ready; the UI never re-derives status):
 
 ```lua
@@ -750,7 +847,8 @@ The built-in pages are grouped by what the player is doing: **Guide** (10:
 Window, Arrow & routes, Automation), **Appearance** (20: Colour & type,
 Windows, Arrow), **Map** (30), **Questing** (40: Quests, Rewards & gear,
 Buttons), **Discovery** (50: Lookup, Dungeons, Rares), **Quality of Life** (60:
-Travel, Social, Vendors, Trackers), Recorder, About. The options window
+Travel, Social, Vendors, Trackers), **Guide packs** (70, a custom page:
+`UI/Packs.lua`), Recorder, About. The options window
 declares every tab and section of the module-filled pages, in order, and the
 modules register their controls into them by name (`page = L["Questing"]`,
 `tab = L["Rewards & gear"]`, `section = L["Gear advice"]`): Quests, QoL and
@@ -766,7 +864,12 @@ over an alias.
 The sidebar's page list is its own scroll area (`f.NavScroll`, `W.ShellNav`)
 from 12px under the search to the footer bar's line, so the version and stage
 chip below it are never crowded, whatever the page count, font or menu scale;
-the selected row is scrolled into view. The hub shares it.
+the selected row is scrolled into view. The hub shares it. Its items are
+`{ key, label, icon, count, dot }`: `dot` puts a warning dot at the row's
+right edge instead of the count (a page spec's `dot = function() end`, the
+Guide packs page while a pack has problems), and `{ heading = true, label }`
+is a muted heading over the rows after it, not a choice (the menu's "Guide
+packs").
 
 The settings window is a rail shell like the hub (`W.Shell` with `rail`): it
 shows the hub's sections (`UI.Picker.RailItems()`) with Options marked, and a
@@ -918,6 +1021,39 @@ Reading flow: `docs/UI_BRIEF.md` (READING FLOW).
   shows past the painting's edges. Only the base and overlay tiles the band
   shows get a texture, from per-band pools. Used by the route choice cards
   and the menu; the night band stands in without the art.
+- **Guide packs in the menu.** Our categories (Leveling, Professions, …)
+  list only our guides; All, Favorites, Current, Recent and search cover every
+  shown guide. A "Guide packs" heading in the sidebar (a `W.ShellNav` heading
+  row), present only while a shown pack has guides, lists one entry per such
+  pack (`pack:<id>`, "<title> · <author>"), its guides grouped as ours are.
+  Pack guides carry their pack's title in rows and results; the details pane
+  has a credits line for every guide ("By <author> · <pack title> <version> ·
+  <licence>", plus the pack's `source`; ours "By Polestar"). The empty states
+  name both Polestar Guides and guide packs.
+- **Guide packs page** (`UI/Packs.lua`, Options order 70, `/polestar
+  packs`): one row per `Guides.Packs()` record: title, credits, guide count,
+  website in a copy box, source, and a `W.Switch` (`Guides.SetPackShown`) or
+  the status text ("turned off in the AddOns list" with **Enable and reload**,
+  "not loaded: <reason>", "needs Polestar <v> or newer", "broken: registered
+  no guides", "refused: <reason>"); with problems a warning chip, **Show**
+  (the list) and **Copy report** (`P.Report`: pack, versions, client build,
+  every problem). Then **Suggest guides from** (`behavior.suggestFrom`,
+  `Guides.SuggestSources()`) and the docs link (`ns.DocsURL()`: the TOC's
+  `X-Website` + `/blob/HEAD/docs/PACKS.md`, else "docs/PACKS.md in Polestar's
+  source"). While `Guides.ProblemCount() > 0` the page's sidebar row carries
+  the warning dot (a page spec's `dot`). Nothing goes to chat.
+- **Welcome** (`UI/Welcome.lua`, `SHOW_WELCOME`): four pages with Back, Next
+  and Skip: Welcome to Polestar; Our routes are still alpha (while
+  `ns.routesAlpha`); Set up (quest automation, the guide at login, the colour
+  scheme); Guide packs (with the docs link, then Start <suggested guide> or
+  Choose a guide, and Browse guides). Once per account
+  (`PolestarDB.welcomeSeen`), 2 s after login, never in combat or over the
+  route choice; any close marks it seen. About's "Show the welcome again" and
+  `/polestar welcome` reopen it.
+- **Copy window** (`UI/Copy.lua`, frame `PolestarCopy`, `UI.ShowCopy(title,
+  text)` or `SHOW_COPY`): a small window with the band, a title, a read-only
+  `W.CopyBox` holding the text, selected and focused, and how to copy it; ✕
+  and Escape close it. `/polestar where` uses it.
 - **Per-character UI state** in `CharState().ui`: `recentGuides` (ids, newest
   first, at most 10), `favoriteGuides` (id -> true), `pickerSelected` (id).
 
@@ -1366,6 +1502,35 @@ module.exports = { name, summary, usage, async run(argv) { return 0 /* exit code
 The dispatcher discovers them; adding a command never edits a shared file.
 Shared helpers: `tools/lib/lua.js` (run Lua 5.1, convert Lua data to JSON),
 `tools/lib/tga.js` (anti-aliased TGA textures).
+
+### Guide packs (pack mode)
+
+The guide commands work on a pack: the folder given as their one argument
+or in `--pack <dir>` (one of the two; it must hold `pack.json`), else the
+nearest folder holding a `pack.json` (this one or a parent), else our
+`guides/` (`tools/lib/pack/locate.js`). `tools/lib/pack/manifest.js` reads and
+checks `pack.json`; `tools/lib/pack/format.js` holds the contract constants
+(`FORMAT`, `NEEDS`, the id rule, reserved ids, the generated-folder marker);
+`tools/lib/pack/build.js` builds a pack's files; `tools/lib/dsl/project.js`
+loads a pack with our guides as context (their `next` targets and chains seen,
+their own diagnostics not reported).
+
+| Command | In a pack |
+|---|---|
+| `new [dir]` | writes a pack from `tools/templates/pack/` (the CI workflow and devcontainer only when the clone has an `origin`) |
+| `lint`, `compile` | checks with our guides as context; writes `<pack>/dist/<folder>/`; `--format text\|json\|github` |
+| `doctor` | Node, Lua, reference data, AddOns folder, `pack.json` |
+| `find` | quests, NPCs, objects, items and our guides as guide lines (`--json`) |
+| `playtest` | every guide to the end per class (`tools/lib/playtest.js`, also behind `tests/guides.test.js`) |
+| `play`, `dev` | the playground with the pack built into a temp folder; `dev` watches and builds into AddOns |
+| `install`, `pack` | builds and installs the pack; writes `<pack>/dist/<folder>-<version>.zip` |
+| `record draft`, `sim compare` | drafts into `<pack>/drafts/` under `<id>/draft/`; scores the pack's chain beside ours |
+
+The folder rule (`packDirRefusal` in `tools/lib/dsl/project.js`): `compile`,
+`pack`, `install`, `dev` and `play` write a pack folder only when it is
+absent, empty, or carrying the generated marker for the same pack id;
+anything else is refused. Lint's pack rules mirror the runtime's (`tests/packs-parity.test.js`);
+our house rules (elites in Leveling guides) are warnings in other packs.
 
 ### Zone art overlays (`maps overlays`)
 

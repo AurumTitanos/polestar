@@ -21,7 +21,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { runAddon, ROOT } = require('./helpers/lua');
-const { buildSimPack, luaValue } = require('./helpers/guide-sim');
+const { buildSimPack, luaValue } = require('../tools/lib/playtest');
 
 const skip = fs.existsSync(path.join(ROOT, 'data', 'forever', 'quests.json'))
 	? false

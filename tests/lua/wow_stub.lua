@@ -34,6 +34,8 @@ stub = {
 	popups = {},
 	addonsLoaded = {},
 	addonMeta = {},
+	addons = {}, -- the AddOns list: { name, title, loaded, reason ("DISABLED", "INTERFACE_VERSION"...), enabled }
+	enabledAddOns = {}, -- names passed to C_AddOns.EnableAddOn
 	inCombat = false,
 	cursor = { 960, 540 },
 }
@@ -230,16 +232,26 @@ function Methods.GetShadowColor(self)
 	local c = self.shadowColor or { 0, 0, 0, 0 }
 	return c[1], c[2], c[3], c[4]
 end
-function Methods.GetStringWidth(self)
+-- As in the client: GetStringWidth ignores word wrap but includes
+-- truncation (a single-line string, SetWordWrap(false), is cut at its set
+-- width); GetUnboundedStringWidth is the whole text's width.
+function Methods.SetWordWrap(self, on) self.wordWrap = not not on end
+function Methods.GetWordWrap(self) return self.wordWrap ~= false end
+function Methods.GetUnboundedStringWidth(self)
 	local size = (self.font and self.font[2]) or 12
 	return #tostring(self.text or "") * size * 0.5
 end
-function Methods.GetUnboundedStringWidth(self) return self:GetStringWidth() end
+function Methods.GetStringWidth(self)
+	local full = self:GetUnboundedStringWidth()
+	local w = self.width or 0
+	if self.wordWrap == false and w > 0 and full > w then return w end
+	return full
+end
 function Methods.GetStringHeight(self)
 	local size = (self.font and self.font[2]) or 12
 	local w = self.width or 0
 	if w <= 0 then return size end
-	local lines = math.max(1, math.ceil(self:GetStringWidth() / w))
+	local lines = math.max(1, math.ceil(self:GetUnboundedStringWidth() / w))
 	return lines * size
 end
 function Methods.GetLineHeight(self) return (self.font and self.font[2]) or 12 end
@@ -731,12 +743,45 @@ function StopSound() end
 function ReloadUI() stub.reloaded = true end
 
 C_AddOns = {}
-function C_AddOns.IsAddOnLoaded(name) return stub.addonsLoaded[name] == true end
+-- stub.addons entry by index or name.
+local function addonEntry(key)
+	if type(key) == "number" then return stub.addons[key] end
+	for _, a in ipairs(stub.addons) do
+		if a.name == key then return a end
+	end
+end
+function C_AddOns.IsAddOnLoaded(name)
+	local a = addonEntry(name)
+	return stub.addonsLoaded[name] == true or (a ~= nil and a.loaded == true)
+end
 function C_AddOns.LoadAddOn(name) return stub.addonsLoaded[name] == true, stub.addonsLoaded[name] and nil or "MISSING" end
 function C_AddOns.GetAddOnMetadata(name, field)
+	if type(name) == "number" then name = stub.addons[name] and stub.addons[name].name end
 	local meta = stub.addonMeta[name]
 	if meta and meta[field] ~= nil then return meta[field] end
 	if field == "Version" then return "0.1.0-test" end
+	local a = addonEntry(name)
+	if field == "Title" and a then return a.title end
+end
+function C_AddOns.GetNumAddOns() return #stub.addons end
+-- -> name, title, notes, loadable, reason, security, updateAvailable
+function C_AddOns.GetAddOnInfo(key)
+	local a = addonEntry(key)
+	if not a then return nil, nil, nil, false, "MISSING", nil, false end
+	return a.name, a.title or a.name, a.notes, a.reason == nil, a.reason, "INSECURE", false
+end
+function C_AddOns.GetAddOnEnableState(name)
+	local a = addonEntry(name)
+	if not a or a.enabled == false or a.reason == "DISABLED" then return 0 end
+	return 2
+end
+function C_AddOns.EnableAddOn(name)
+	table.insert(stub.enabledAddOns, name)
+	local a = addonEntry(name)
+	if a then
+		a.enabled = true
+		if a.reason == "DISABLED" then a.reason = nil end
+	end
 end
 IsAddOnLoaded = C_AddOns.IsAddOnLoaded
 GetAddOnMetadata = C_AddOns.GetAddOnMetadata

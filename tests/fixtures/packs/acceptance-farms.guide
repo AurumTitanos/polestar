@@ -1,0 +1,16 @@
+# The acceptance pack's second guide (tests/acceptance-packs.test.js),
+# added after `polestar new` writes the pack.
+guide acceptance-good/farms
+title The Westfall Farms
+faction Alliance
+levels 10-12
+zone Westfall
+author Ann Example
+
+step Sentinel Hill
+  tip The tower at the crossroads in the middle of Westfall.
+  goto 56.3,47.5 "Sentinel Hill" r 30
+
+step The Molsen Farm
+  tip North of Sentinel Hill, past the road to the Jangolode Mine.
+  goto 45.2,35.4 "The Molsen Farm" r 30

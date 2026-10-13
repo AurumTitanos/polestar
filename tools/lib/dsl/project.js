@@ -1,144 +1,239 @@
 'use strict';
-// Whole-project compilation: find .guide files, parse, resolve, validate, and
-// build/write pack folders. Used by the compile, lint and pack commands.
+// Whole-project compilation: find a pack's .guide files, parse, resolve,
+// validate, and build/write the pack's addon folder. Used by the compile,
+// lint and pack commands.
 
 const fs = require('node:fs');
 const path = require('node:path');
 const { Diagnostics } = require('./diag');
 const { parseGuide } = require('./parse');
 const { resolveGuide } = require('./resolve');
-const { validateGuides } = require('./validate');
+const { validateGuides, validatePackFrames, forEachGoalMap } = require('./validate');
 const { loadData } = require('./data');
-const { emitGuide, emitPack, emitMapFrames, emitPackXml, emitLicense } = require('./emit');
+const { emitGuides, emitPack, emitToc, emitMapFrames, emitLicense } = require('./emit');
+const { ownsGuideId, GENERATED_MARKER } = require('../pack/format');
 
 const ROOT = path.join(__dirname, '..', '..', '..');
+// Our own pack: guides/pack.json and the guides beside it.
+const OFFICIAL_DIR = path.join(ROOT, 'guides');
 
 function packageVersion() {
 	return JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8')).version;
+}
+
+// The whole `## Interface:` value of addon/Polestar/Polestar.toc (a
+// multi-version line like "11507, 16001" included), copied into every pack's TOC.
+function coreInterface(tocFile = path.join(ROOT, 'addon', 'Polestar', 'Polestar.toc')) {
+	const m = /^## Interface:\s*(.+?)\s*$/m.exec(fs.readFileSync(tocFile, 'utf8'));
+	if (!m) throw new Error(`${tocFile} has no ## Interface line`);
+	return m[1];
 }
 
 function toPosix(p) {
 	return p.split(path.sep).join('/');
 }
 
-// Sorted .guide paths (relative to guidesDir, forward slashes). Drafts live
-// under drafts/ and are skipped unless asked for.
-function findGuideFiles(guidesDir, includeDrafts = false) {
+// Sorted .guide paths (relative to packDir, forward slashes): every .guide in
+// the pack folder except under dist/ (build output) and drafts/ (Recorder
+// drafts, only with includeDrafts); dot folders and node_modules are skipped.
+function findGuideFiles(packDir, includeDrafts = false) {
 	const out = [];
-	if (!fs.existsSync(guidesDir)) return out;
+	if (!fs.existsSync(packDir)) return out;
 	const walk = (abs, rel) => {
 		for (const d of fs.readdirSync(abs, { withFileTypes: true })) {
 			if (d.name.startsWith('.')) continue;
 			const r = rel ? `${rel}/${d.name}` : d.name;
 			if (d.isDirectory()) {
-				if (!includeDrafts && r === 'drafts') continue;
+				if (d.name === 'node_modules' || r === 'dist' || (!includeDrafts && r === 'drafts')) continue;
 				walk(path.join(abs, d.name), r);
 			} else if (d.isFile() && d.name.endsWith('.guide')) out.push(r);
 		}
 	};
-	walk(guidesDir, '');
+	walk(packDir, '');
 	return out.sort();
 }
 
-// Compile every guide under guidesDir. Returns { guides, diag, data, files }.
-// Diagnostics name files relative to the working directory.
-function compileProject({ guidesDir, dataDir, includeDrafts = false, data = null }) {
-	const diag = new Diagnostics();
-	if (!data) {
-		data = loadData(dataDir);
-		if (!fs.existsSync(dataDir)) {
-			diag.warn(dataDir, 0, 'reference data not found (run `node tools/polestar.js data build` or pass --data); nothing can be filled in');
-		} else if (data.missingCore.length) {
-			// professions.json / factions.json are reported where a guide needs them.
-			diag.warn(dataDir, 0, `missing ${data.missingCore.join(', ')}`);
-		}
+// Reference data from dataDir; a missing folder or core file is a warning in diag.
+function loadProjectData(dataDir, diag) {
+	const data = loadData(dataDir);
+	if (!fs.existsSync(dataDir)) {
+		diag.warn(dataDir, 0, 'reference data not found (run `node tools/polestar.js data build` or pass --data); nothing can be filled in');
+	} else if (data.missingCore.length) {
+		// professions.json / factions.json are reported where a guide needs them.
+		diag.warn(dataDir, 0, `missing ${data.missingCore.join(', ')}`);
 	}
-	const files = findGuideFiles(guidesDir, includeDrafts);
-	const sources = files.map((rel) => {
-		const abs = path.join(guidesDir, rel);
+	return data;
+}
+
+// [{ source, file, text }] for the .guide paths `sources` (relative to dir);
+// `file` is relative to the working directory when inside it.
+function readSources(dir, sources) {
+	return sources.map((rel) => {
+		const abs = path.join(dir, rel);
 		const shown = path.relative(process.cwd(), abs);
 		return { source: rel, file: shown.startsWith('..') ? abs : toPosix(shown), text: fs.readFileSync(abs, 'utf8') };
 	});
-	return { ...compileSources(sources, data, diag), data, files };
 }
 
-// Parse, resolve and validate in-memory sources: [{ file, text, source? }]
-// (`file` names it in diagnostics, `source` in the emitted header comment).
-function compileSources(sources, data, diag = new Diagnostics()) {
+// Compile every guide of the pack in packDir; its guides carry the pack id of
+// `manifest` (pack.json, tools/lib/pack/manifest.js) and must own their ids.
+// Returns { guides, diag, data, sources } with sources the .guide paths
+// relative to packDir.
+// With `contextDir` (our guides, for another pack): its guides are parsed,
+// resolved (with `contextData`, else `contextDataDir`, else the pack's data)
+// and validated together with the pack's, so `next` and turn-in checks see
+// their chains; their own diagnostics are dropped and nothing of them is
+// returned or emitted. Folders the user named are checked by commandPack; a
+// missing default context data folder is loadProjectData's warning.
+// Diagnostics name files relative to the working directory.
+function compileProject({ packDir, manifest, dataDir, includeDrafts = false, data = null, contextDir = null, contextData = null, contextDataDir = null }) {
+	const diag = new Diagnostics();
+	if (!data) data = loadProjectData(dataDir, diag);
+	const sources = findGuideFiles(packDir, includeDrafts);
+	let context = null;
+	if (contextDir) {
+		if (!contextData) contextData = contextDataDir && path.resolve(contextDataDir) !== path.resolve(dataDir || '') ? loadProjectData(contextDataDir, diag) : data;
+		context = { sources: readSources(contextDir, findGuideFiles(contextDir)), data: contextData };
+	}
+	return { ...compileSources(readSources(packDir, sources), data, diag, { pack: manifest && manifest.id, author: manifest && manifest.author, context }), data, sources };
+}
+
+// Parse and resolve sources into guides of `pack` (ours when absent); a
+// guide without an `author` header is credited to `author` (the pack's).
+function resolveSources(sources, data, diag, pack, author) {
 	const guides = [];
 	for (const s of sources) {
 		const ast = parseGuide(s.text, s.file, diag);
 		if (!ast || !ast.id) continue;
 		ast.source = s.source || s.file;
-		guides.push(resolveGuide(ast, data, diag));
+		guides.push(resolveGuide(ast, data, diag, { pack, author }));
 	}
-	validateGuides(guides, data, diag);
-	return { guides, diag };
+	return guides;
 }
 
-function guideFile(id) {
-	return `Guides/${id}.lua`;
+// Parse, resolve and validate in-memory sources: [{ file, text, source? }]
+// (`file` names it in diagnostics, `source` in the emitted comment). The
+// guides belong to pack `opts.pack` (ours when absent), by `opts.author`
+// (the pack's author) unless they name their own; when `opts.pack` is given,
+// each guide id must be one the pack owns. `opts.context` ({ sources, data }):
+// our guides, read as context (see compileProject).
+function compileSources(sources, data, diag = new Diagnostics(), opts = {}) {
+	const guides = resolveSources(sources, data, diag, opts.pack, opts.author);
+	if (opts.pack !== undefined) {
+		for (const g of guides) {
+			if (ownsGuideId(g.pack, g.id)) continue;
+			const prefix = g.pack === 'guides' ? '"forever/" or "draft/"' : `"${g.pack}/"`;
+			diag.error(g._ast.file, g._ast.lines.guide || g._ast.line, `guide id "${g.id}" is outside pack "${g.pack}": its guide ids start with ${prefix}`, `start the id with \`${g.pack === 'guides' ? 'forever' : g.pack}/\``);
+		}
+	}
+	if (!opts.context) {
+		validateGuides(guides, data, diag);
+		return { guides, diag };
+	}
+	const ours = resolveSources(opts.context.sources, opts.context.data, new Diagnostics(), 'guides');
+	const ourFiles = new Set(opts.context.sources.map((s) => s.file));
+	// Ours first: a pack guide reusing one of our ids is the duplicate reported.
+	const all = new Diagnostics();
+	validateGuides([...ours, ...guides], data, all);
+	for (const d of all.list) if (!ourFiles.has(d.file)) diag.list.push(d);
+	validatePackFrames(guides, data, ours, opts.context.data, diag);
+	return { guides, diag };
 }
 
 // Era bounds for every map any emitted coordinate uses: the goal's own
 // map/x/y and any coordinate list on it (smart-target `candidates`).
 function referencedFrames(guides, data) {
 	const frames = {};
-	const add = (map) => {
-		if (map === undefined || frames[map]) return;
+	forEachGoalMap(guides, (map) => {
+		if (frames[map]) return;
 		const fr = data.eraFrame(map);
 		if (fr) frames[map] = { c: fr.c, left: fr.left, right: fr.right, top: fr.top, bottom: fr.bottom };
-	};
-	for (const g of guides) {
-		for (const s of g.steps) {
-			for (const goal of s.goals) {
-				add(goal.map);
-				for (const v of Object.values(goal)) {
-					if (!Array.isArray(v)) continue;
-					for (const el of v) if (el && typeof el === 'object' && el.map !== undefined) add(el.map);
-				}
-			}
-		}
-	}
+	});
 	return frames;
 }
 
-// The files of a pack folder as { relPath: content }, deterministic.
-function buildPackFiles({ guides, meta, data }) {
-	const sorted = guides.slice().sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
-	const files = {};
-	files['Pack.lua'] = emitPack(meta);
-	files['MapFrames.lua'] = emitMapFrames(referencedFrames(sorted, data));
-	const scripts = ['Pack.lua', 'MapFrames.lua'];
-	for (const g of sorted) {
-		const rel = guideFile(g.id);
-		files[rel] = emitGuide(g, g._ast && g._ast.source ? g._ast.source : null);
-		scripts.push(rel);
-	}
-	files['Pack.xml'] = emitPackXml(scripts);
-	files['LICENSE-DATA.txt'] = emitLicense(data.meta);
+// A pack's addon folder as { name: content }, deterministic: exactly
+// <folder>.toc, Pack.lua, MapFrames.lua, Guides.lua and LICENSE-DATA.txt,
+// plus LICENSE.txt holding `license` (the pack's LICENSE file) when given.
+function buildPackFiles({ guides, manifest, data, license = null }) {
+	const files = {
+		[`${manifest.folder}.toc`]: emitToc(manifest, coreInterface()),
+		'Pack.lua': emitPack(manifest),
+		'MapFrames.lua': emitMapFrames(referencedFrames(guides, data), manifest.id),
+		'Guides.lua': emitGuides(guides.map((g) => ({ guide: g, source: g._ast && g._ast.source ? g._ast.source : null }))),
+		'LICENSE-DATA.txt': emitLicense(data.meta),
+	};
+	if (license != null) files['LICENSE.txt'] = license;
 	return files;
 }
 
-// Write a pack folder: Guides/ is replaced wholesale so removed guides do not
-// linger; other generated files are overwritten; anything else is left alone.
-// An existing Guides/ is only removed when the folder is a pack we generated
-// (its Pack.xml carries the "Generated by" marker): `--out` pointed at the
-// repository on a case-insensitive filesystem must never delete guides/.
+// Whether dir is a folder we generated: a TOC carrying the marker, or the
+// old layout's Pack.xml carrying it.
+function isGeneratedDir(dir) {
+	let entries;
+	try {
+		entries = fs.readdirSync(dir, { withFileTypes: true });
+	} catch {
+		return false;
+	}
+	const has = (name) => fs.readFileSync(path.join(dir, name), 'utf8').includes(GENERATED_MARKER);
+	return entries.some((e) => e.isFile() && (e.name.toLowerCase().endsWith('.toc') || e.name === 'Pack.xml') && has(e.name));
+}
+
+// The pack id a generated TOC names (its `## X-Polestar-Pack:` line).
+const PACK_ID_LINE = /^## X-Polestar-Pack:[ \t]*(\S+)[ \t]*$/m;
+
+// The pack id dir's generated TOC names, or null.
+function generatedPackId(dir) {
+	let entries;
+	try {
+		entries = fs.readdirSync(dir, { withFileTypes: true });
+	} catch {
+		return null;
+	}
+	for (const e of entries) {
+		if (!e.isFile() || !e.name.toLowerCase().endsWith('.toc')) continue;
+		const text = fs.readFileSync(path.join(dir, e.name), 'utf8');
+		const m = text.includes(GENERATED_MARKER) && PACK_ID_LINE.exec(text);
+		if (m) return m[1];
+	}
+	return null;
+}
+
+// The one rule for replacing a pack folder (compile, dev, install, pack,
+// play): an absent or empty folder, or one we generated (isGeneratedDir),
+// may be replaced; with `packId`, a generated folder of another pack may not
+// (two packs can default to the same folder name). -> null, or why not (the
+// caller names its action): `--out` pointed at the repository on a
+// case-insensitive filesystem, or at someone's own addon, must never be touched.
+function packDirRefusal(dir, packId = null) {
+	let entries;
+	try {
+		entries = fs.readdirSync(dir);
+	} catch {
+		return fs.existsSync(dir) ? 'it is not a folder' : null;
+	}
+	if (!entries.length) return null;
+	if (!isGeneratedDir(dir)) return `it is not a generated guide pack (no TOC with the "${GENERATED_MARKER}" line); move it away first`;
+	const owner = packId ? generatedPackId(dir) : null;
+	if (owner && owner !== packId) return `it holds the guide pack "${owner}", not "${packId}"; set "folder" in pack.json to a folder name of your own`;
+	return null;
+}
+
+// Write a pack folder where packDirRefusal allows it (for the pack the
+// files' TOC names). The old layout (Pack.xml, Guides/) is removed, and a
+// LICENSE.txt the build no longer has; generated files are replaced;
+// anything else is left alone.
 function writePackDir(outDir, files) {
-	const guidesDir = path.join(outDir, 'Guides');
-	if (fs.existsSync(guidesDir)) {
-		const xml = path.join(outDir, 'Pack.xml');
-		const ours = fs.existsSync(xml) && fs.readFileSync(xml, 'utf8').includes('Generated by `node tools/polestar.js compile`');
-		if (!ours) throw new Error(`refusing to replace ${guidesDir}: ${outDir} is not a generated guide pack (no generated Pack.xml)`);
-	}
+	const toc = Object.keys(files).find((name) => name.toLowerCase().endsWith('.toc'));
+	const m = toc ? PACK_ID_LINE.exec(String(files[toc])) : null;
+	const refusal = packDirRefusal(outDir, m ? m[1] : null);
+	if (refusal) throw new Error(`refusing to write into ${outDir}: ${refusal}`);
 	fs.mkdirSync(outDir, { recursive: true });
-	fs.rmSync(guidesDir, { recursive: true, force: true });
-	for (const rel of Object.keys(files).sort()) {
-		const abs = path.join(outDir, ...rel.split('/'));
-		fs.mkdirSync(path.dirname(abs), { recursive: true });
-		fs.writeFileSync(abs, files[rel]);
-	}
+	fs.rmSync(path.join(outDir, 'Guides'), { recursive: true, force: true });
+	fs.rmSync(path.join(outDir, 'Pack.xml'), { force: true });
+	if (!('LICENSE.txt' in files)) fs.rmSync(path.join(outDir, 'LICENSE.txt'), { force: true });
+	for (const name of Object.keys(files).sort()) fs.writeFileSync(path.join(outDir, name), files[name]);
 }
 
 // Addon folders of the release: always these, plus the generated data addons
@@ -152,22 +247,20 @@ function releaseAddons(addonsDir) {
 	return { names: [...RELEASE_ADDONS, ...RELEASE_DATA_ADDONS.filter((n) => !skipped.includes(n))], skipped };
 }
 
-function packMeta(version) {
-	return { id: 'guides', title: 'Polestar Guides', version };
-}
-
 module.exports = {
 	ROOT,
+	OFFICIAL_DIR,
 	packageVersion,
+	coreInterface,
 	findGuideFiles,
+	loadProjectData,
 	compileProject,
 	compileSources,
 	buildPackFiles,
+	packDirRefusal,
 	writePackDir,
 	referencedFrames,
-	packMeta,
 	RELEASE_ADDONS,
 	RELEASE_DATA_ADDONS,
 	releaseAddons,
-	guideFile,
 };

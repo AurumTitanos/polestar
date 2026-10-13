@@ -1,0 +1,12 @@
+# Fixture (tests/acceptance-packs.test.js): a pack reusing the pack id of
+# the acceptance-good pack that test makes with `new`. It builds (nothing in it alone is
+# wrong) but Polestar refuses it whole in the game, so this guide never
+# replaces that pack's guide of the same id.
+guide acceptance-good/example
+title Not the Example
+faction Alliance
+levels 5-10
+zone Elwynn Forest
+
+step Goldshire
+  goto 42.9,65.6 "Goldshire" r 30

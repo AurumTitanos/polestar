@@ -5,12 +5,15 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { runAddon } = require('./helpers/lua');
+const { TEST_PACK, TEST_SOURCE } = require('./helpers/packs');
 
 const CORE = { name: 'Polestar', files: ['Core/Core.xml'] };
 
 const GUIDE = `
+${TEST_PACK}
+${TEST_SOURCE}
 Polestar.RegisterGuide({
-	id = "test/auto", title = "Automation", minLevel = 1, maxLevel = 10,
+	id = "test/auto", pack = "test", title = "Automation", minLevel = 1, maxLevel = 10,
 	steps = {
 		{ goals = { { t = "accept", quest = 783, title = "A Threat Within" } } },
 		{ goals = {

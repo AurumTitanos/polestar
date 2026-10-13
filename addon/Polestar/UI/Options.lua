@@ -96,6 +96,7 @@ local function add(spec, builtin)
 	local p = pageOf(spec.page, spec.icon, spec.order, builtin)
 	if spec.subtitle then p.subtitle = spec.subtitle end
 	if spec.custom then p.custom = spec.custom end
+	if spec.dot then p.dot = spec.dot end
 	local s = sectionOf(tabOf(p, spec.tab), spec.section)
 	for _, c in ipairs(spec.controls or {}) do
 		c.page, c.tab, c.section = p, spec.tab, spec.section
@@ -520,6 +521,8 @@ local function buildAbout(view)
 		.. hex .. "/polestar guides|r   " .. L["choose a guide"] .. "\n"
 		.. hex .. "/polestar next, prev, skip|r   " .. L["move through steps"] .. "\n"
 		.. hex .. "/polestar help|r   " .. L["every command"])
+	local welcome = W.Button(view, L["Show the welcome again"], function() ns.Fire("SHOW_WELCOME") end)
+	view.Welcome = welcome
 	local credH, credText = block(L["Credits"], L["Inter typeface by The Inter Project Authors, SIL Open Font License 1.1."] .. "\n"
 		.. L["Wordmark set in Cinzel by The Cinzel Project Authors, SIL Open Font License 1.1."] .. "\n"
 		.. L["Quest and map data includes pfQuest by shagu (MIT License)."] .. "\n"
@@ -560,6 +563,13 @@ local function buildAbout(view)
 			pair[2]:ClearAllPoints()
 			pair[2]:SetPoint("TOPLEFT", view, "TOPLEFT", SH.pad, -y)
 			y = y + pair[2]:GetStringHeight() + 8
+			-- The welcome again, under the commands that it introduces.
+			if pair[1] == cmdH then
+				y = y + 4
+				welcome:ClearAllPoints()
+				welcome:SetPoint("TOPLEFT", view, "TOPLEFT", SH.pad, -y)
+				y = y + welcome:GetHeight() + 12
+			end
 		end
 		maintH:ClearAllPoints()
 		maintH:SetPoint("TOPLEFT", view, "TOPLEFT", SH.pad, -y)
@@ -574,6 +584,8 @@ local function buildAbout(view)
 	end
 end
 
+add({ page = L["Guide packs"], icon = "layers", order = 70, subtitle = L["Guides made by other players: switch them on or off, and choose where suggestions come from."],
+	custom = UI.Packs.Build, dot = UI.Packs.HasProblems }, true)
 add({ page = REC, icon = "record", order = 90, subtitle = L["The data recorder for guide authors."], custom = buildRecorder }, true)
 add({ page = ABOUT, icon = "info", order = 100, subtitle = L["Why Polestar exists, its commands and its credits."], custom = buildAbout }, true)
 
@@ -846,7 +858,7 @@ end
 local function navItems()
 	local items = {}
 	for _, p in ipairs(pageList) do
-		if pageShown(p) or p == current then items[#items + 1] = { key = p.key, label = p.name, icon = p.icon } end
+		if pageShown(p) or p == current then items[#items + 1] = { key = p.key, label = p.name, icon = p.icon, dot = p.dot and p.dot() or nil } end
 	end
 	return items
 end

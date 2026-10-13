@@ -11,6 +11,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { runAddon } = require('./helpers/lua');
+const { TEST_PACK, TEST_SOURCE } = require('./helpers/packs');
 const { writeCodexPack } = require('./helpers/codex');
 
 const FIXTURE = path.join(__dirname, 'fixtures', 'codex', 'lookup.json');
@@ -204,14 +205,18 @@ test('sources: an already finished quest is not offered as available', () => {
 // ---------------------------------------------------------------------------
 
 const GUIDES = `
+${TEST_PACK}
+${TEST_SOURCE}
 local function g(id, extra)
-	local def = { id = id, title = id, category = "Collectibles", steps = { { goals = { { t = "note", text = "x" } } } } }
+	local def = { id = id, pack = "test", title = id, category = "Collectibles", steps = { { goals = { { t = "note", text = "x" } } } } }
 	for k, v in pairs(extra) do def[k] = v end
 	assert(Polestar.RegisterGuide(def))
 end
 g("test/horde-strider", { faction = "Horde", collects = { 8000 } })
 g("test/alliance-strider", { faction = "Alliance", collects = { 8000, 8013 } })
 g("test/shadowsteed", { keywords = { "Warlock", "Summon Shadowsteed" } })
+-- A leveling guide makes the test pack a suggestion source (TEST_SOURCE).
+g("test/route", { category = "Leveling", minLevel = 1, maxLevel = 60 })
 `;
 
 test('curated guides: the one for this character, and class mounts by keyword', () => {
@@ -236,7 +241,7 @@ test('generated guides: registered unsaved in pack "lookup", opened in a tab, re
 		emit({ L.Guide("item", 8004) })
 		local g = Polestar.Guides.Get("lookup/item/8004")
 		emit({ pack = g.pack, category = g.category, title = g.title, steps = #g.steps, step1 = g.steps[1].title,
-			goals = { g.steps[1].goals[1].t, g.steps[1].goals[2].t, g.steps[1].goals[3].t }, pack2 = Polestar.Guides.packs.lookup.id })
+			goals = { g.steps[1].goals[1].t, g.steps[1].goals[2].t, g.steps[1].goals[3].t }, pack2 = Polestar.Guides.Pack("lookup").id })
 		emit({ L.Guide("item", 8004, 2) })
 		local t = Polestar.Engine.GetTabs(); local ids = {}
 		for i, x in ipairs(t) do ids[i] = x.guideId end
@@ -248,6 +253,26 @@ test('generated guides: registered unsaved in pack "lookup", opened in a tab, re
 	assert.deepEqual(second, ['lookup/item/8004']);
 	assert.deepEqual(tabs, ['lookup/item/8004']);
 	assert.equal(step, 'Thornback Boar');
+});
+
+test('Polestar holds the internal lookup pack from load: a pack claiming it later is refused, listed, and Lookup still works', () => {
+	const [claim, rows, held, opened] = run(`
+		emit({ Polestar.RegisterPack({ addon = "SneakyLookup", id = "lookup", format = 1, title = "Mine", author = "X", version = "1", license = "MIT", internal = true }) })
+		stub.addonLoaded("SneakyLookup")
+		local rows = {}
+		for _, r in ipairs(Polestar.Guides.Packs()) do rows[#rows + 1] = { id = r.id, addon = r.addon or false, status = r.status, reason = r.reason or false } end
+		emit(rows)
+		local p = Polestar.Guides.Pack("lookup")
+		emit({ internal = p.internal or false, status = p.status, addon = p.addon or false })
+		emit({ Polestar.Lookup.Guide("item", 8004) })
+	`);
+	assert.equal(claim[0], false);
+	const sneaky = rows.filter((r) => r.addon === 'SneakyLookup');
+	assert.equal(sneaky.length, 1, JSON.stringify(rows));
+	assert.equal(sneaky[0].status, 'refused');
+	assert.match(sneaky[0].reason, /internal/);
+	assert.deepEqual(held, { internal: true, status: 'on', addon: false });
+	assert.deepEqual(opened, ['lookup/item/8004']);
 });
 
 test('generated guides: no guide for sources without a place; disabled module', () => {
@@ -276,9 +301,11 @@ test('generated guides: a saved Lookup tab is rebuilt before the Engine reopens 
 // ---------------------------------------------------------------------------
 
 const SEARCH_GUIDES = `
-assert(Polestar.RegisterGuide({ id = "test/pathfinder", title = "Amber Vale Pathfinder", zoneName = "Amber Vale", minLevel = 15, maxLevel = 20,
+${TEST_PACK}
+${TEST_SOURCE}
+assert(Polestar.RegisterGuide({ id = "test/pathfinder", pack = "test", title = "Amber Vale Pathfinder", zoneName = "Amber Vale", minLevel = 15, maxLevel = 20,
 	keywords = { "strider" }, steps = { { goals = { { t = "note", text = "x" } } } } }))
-assert(Polestar.RegisterGuide({ id = "lookup/item/1", title = "Amber Generated", steps = { { goals = { { t = "note", text = "x" } } } } }))
+assert(Polestar.RegisterGuide({ id = "lookup/item/1", pack = "lookup", title = "Amber Generated", steps = { { goals = { { t = "note", text = "x" } } } } }))
 local function q(text, opts)
 	local res, counts = Polestar.Search.Query(text, opts)
 	local out = {}
@@ -350,7 +377,9 @@ test('search and sources: obtainable before retired, curated-guide-backed before
 	const own = writeCodexPack(extra);
 	try {
 		const [res, rows, guide] = run(`
-			assert(Polestar.RegisterGuide({ id = "test/sabers", title = "Striped Sabers", collects = { 8102 },
+			${TEST_PACK}
+${TEST_SOURCE}
+			assert(Polestar.RegisterGuide({ id = "test/sabers", pack = "test", title = "Striped Sabers", collects = { 8102 },
 				steps = { { goals = { { t = "note", text = "x" } } } } }))
 			local res = Polestar.Search.Query("saber")
 			local out = {}

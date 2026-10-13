@@ -5,7 +5,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { tmpdir } = require('../../helpers/tmp');
 const { loadData } = require('../../../tools/lib/dsl/data');
-const { compileSources } = require('../../../tools/lib/dsl/project');
+const { compileSources, OFFICIAL_DIR } = require('../../../tools/lib/dsl/project');
+const { readManifest } = require('../../../tools/lib/pack/manifest');
+const { writePackInto } = require('../../../tools/lib/playtest');
+const { TOC_MARKER } = require('../../../tools/lib/pack/format');
 const { format } = require('../../../tools/lib/dsl/diag');
 
 const FIXTURES = __dirname;
@@ -33,12 +36,13 @@ function lineOf(text, needle) {
 	return i + 1;
 }
 
-// compile({ 'a.guide': text, ... } | text) -> { guides, diag, errors, warnings }
-// errors/warnings are "file:line: message" strings.
-function compile(sources, data = fixtureData()) {
+// compile({ 'a.guide': text, ... } | text, data?, { pack }?) -> { guides, diag, errors, warnings }
+// errors/warnings are "file:line: message" strings; the guides belong to
+// `pack` (ours when absent).
+function compile(sources, data = fixtureData(), opts = {}) {
 	const map = typeof sources === 'string' ? { 'test.guide': sources } : sources;
 	const list = Object.keys(map).map((file) => ({ file, text: map[file] }));
-	const { guides, diag } = compileSources(list, data);
+	const { guides, diag } = compileSources(list, data, undefined, opts);
 	const strip = (d) => `${d.file}:${d.line}: ${d.message}`;
 	return {
 		guides,
@@ -67,16 +71,30 @@ function plain(v) {
 	return JSON.parse(JSON.stringify(v));
 }
 
-// Minimal addon folders with TOCs, for pack/install tests.
+// Our pack's manifest (guides/pack.json).
+function ourManifest() {
+	return readManifest(OFFICIAL_DIR, { official: true }).manifest;
+}
+
+// Build compiled guides into a pack folder (named after the manifest's folder,
+// in a temp dir removed at exit) -> { dir, files, scripts }: scripts are the
+// files its TOC loads, absolute, in load order.
+function writeTestPack(guides, data = fixtureData(), manifest = ourManifest()) {
+	return writePackInto(tmpdir(), { guides, manifest, data });
+}
+
+// Minimal addon folders with TOCs, for pack/install tests; Polestar_Guides is
+// a generated pack (its TOC carries the marker) without guides.
 function fakeAddons(root, names = ['Polestar', 'Polestar_Guides', 'Polestar_Recorder'], version = '0.1.0') {
 	for (const n of names) {
 		const dir = path.join(root, n);
 		fs.mkdirSync(dir, { recursive: true });
-		fs.writeFileSync(path.join(dir, `${n}.toc`), `## Interface: 16001\n## Title: ${n}\n## Version: ${version}\n\n${n === 'Polestar_Guides' ? 'Pack.xml' : 'Main.lua'}\n`);
+		const files = n === 'Polestar_Guides' ? `${TOC_MARKER}\n\nPack.lua\nMapFrames.lua\nGuides.lua` : '\nMain.lua';
+		fs.writeFileSync(path.join(dir, `${n}.toc`), `## Interface: 16001\n## Title: ${n}\n## Version: ${version}\n${files}\n`);
 		if (n !== 'Polestar_Guides') fs.writeFileSync(path.join(dir, 'Main.lua'), `local ADDON, ns = ...\n-- ${n}\n`);
 		fs.writeFileSync(path.join(dir, '.hidden'), 'not shipped\n');
 	}
 	return root;
 }
 
-module.exports = { FIXTURES, DATA_DIR, GUIDES_DIR, fixtureData, guideText, lineOf, compile, tmpdir, quiet, plain, fakeAddons };
+module.exports = { FIXTURES, DATA_DIR, GUIDES_DIR, fixtureData, guideText, lineOf, compile, tmpdir, quiet, plain, ourManifest, writeTestPack, fakeAddons };

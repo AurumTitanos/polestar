@@ -13,15 +13,36 @@ Polestar = ns
 ns.name = ADDON
 ns.version = (C_AddOns and C_AddOns.GetAddOnMetadata and C_AddOns.GetAddOnMetadata(ADDON, "Version")) or "dev"
 -- The release stage, the one place it is set: shown as a chip beside the
--- version (the shell sidebar, About) and the reason for the first-run beta
--- notice (UI/BetaNotice.lua). nil once Polestar is released.
+-- version (the shell sidebar, About). nil once Polestar is released.
 ns.stage = "Beta"
+-- The leveling routes are planned and played in the simulator but not yet
+-- followed through the live game: the first-run welcome (UI/Welcome.lua)
+-- says so on its own page while this is true. The owner turns it off once
+-- they have been.
+ns.routesAlpha = true
+
+-- The pack docs online: the TOC's X-Website (the public repository, added at
+-- publication) plus the path of docs/PACKS.md. nil without that field.
+function ns.DocsURL()
+	local site = C_AddOns and C_AddOns.GetAddOnMetadata and C_AddOns.GetAddOnMetadata(ADDON, "X-Website")
+	site = type(site) == "string" and site:gsub("/+$", "") or ""
+	if site == "" then return nil end
+	return site .. "/blob/HEAD/docs/PACKS.md"
+end
 
 local pcall, type, pairs, select, tostring = pcall, type, pairs, select, tostring
 
 -- enUS only for now; a missing key renders as itself.
 local L = setmetatable({}, { __index = function(_, key) return key end })
 ns.L = L
+
+-- Text that prints literally in a FontString: every `|` (the client's escape
+-- character) doubled. Packs' strings go through this once, at registration.
+function ns.EscapeText(s)
+	if type(s) ~= "string" then s = tostring(s) end
+	if not s:find("|", 1, true) then return s end
+	return (s:gsub("|", "||"))
+end
 
 -- Run a callback; report its error without stopping the caller's loop.
 local function call(fn, ...)

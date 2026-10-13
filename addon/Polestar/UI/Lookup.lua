@@ -959,7 +959,7 @@ local function renderDetails(loaded, reason)
 	elseif curated then
 		local cg = guideHeader(curated)
 		primary = L["Open guide"]
-		note = format(L["A Polestar guide covers this: %s."], cg and cg.title or curated)
+		note = format(L["A guide covers this: %s."], cg and cg.title or curated)
 	elseif not (Lk and Lk.Guide) then
 		note = L["Guides from the Codex need the Lookup module."]
 	elseif best then
@@ -1611,10 +1611,12 @@ ns.On("CODEX_LOADED", function()
 	stale()
 	refresh()
 end)
-ns.On("GUIDES_REGISTERED", function()
+local function guidesChanged()
 	stale()
 	LK.Render()
-end)
+end
+ns.On("GUIDES_REGISTERED", guidesChanged)
+ns.On("PACKS_CHANGED", guidesChanged)
 -- Quality colours are lifted against the ground and the icon's hairline is
 -- set by hand: a scheme change paints them again.
 Theme.OnChanged(function() LK.Render() end)

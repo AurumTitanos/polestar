@@ -1,0 +1,9 @@
+# Fixture: tests/packs-parity.test.js. Lint rejects it; the runtime refuses its compiled twin.
+guide forever/parity-outside
+title Parity id-outside
+faction Alliance
+levels 1-10
+zone Elwynn Forest
+
+step S
+  level 2

@@ -1,0 +1,10 @@
+# Fixture: tests/packs-parity.test.js. Lint rejects it; the runtime refuses its compiled twin.
+guide parity/talk-npcname
+title Parity talk-npcname
+faction Alliance
+levels 1-10
+zone Elwynn Forest
+
+step S
+  level 2
+  talk 999999

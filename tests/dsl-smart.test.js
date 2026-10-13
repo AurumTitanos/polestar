@@ -9,9 +9,9 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { runAddon } = require('./helpers/lua');
-const { compile, guideText, lineOf, plain, fixtureData, tmpdir, quiet, DATA_DIR } = require('./fixtures/dsl/helpers');
+const { TEST_PACK } = require('./helpers/packs');
+const { compile, guideText, lineOf, plain, fixtureData, tmpdir, quiet, writeTestPack, DATA_DIR } = require('./fixtures/dsl/helpers');
 const { loadData } = require('../tools/lib/dsl/data');
-const { buildPackFiles, writePackDir, packMeta } = require('../tools/lib/dsl/project');
 const trainersCmd = require('../tools/commands/trainers');
 
 const head = (faction, extra = []) => ['guide t/s', 'title S', ...(faction ? [`faction ${faction}`] : []), 'levels 1-60', 'zone Elwynn Forest', ...extra, ''];
@@ -213,17 +213,16 @@ test('accept goals carry the quest level and prerequisites for grey-quest skippi
 
 test('smart goals emit Lua the real engine registry accepts, and round-trip', () => {
 	const src = [...head(null), 'step S', '  train Mining', '  train class', '  buy 159 nearest', '  vendor nearest', '  sethome nearest', '  accept 9500'];
-	const r = compile(`${src.join('\n')}\n`);
+	const r = compile(`${src.join('\n')}\n`.replace(/^guide t\//, 'guide test/'), undefined, { pack: 'test' });
 	assert.deepEqual(r.errors, []);
-	const dir = tmpdir();
-	writePackDir(dir, buildPackFiles({ guides: r.guides, meta: packMeta('1'), data: fixtureData() }));
-	const file = path.join(dir, 'Guides', 't', 's.lua');
+	const file = path.join(writeTestPack(r.guides).dir, 'Guides.lua');
 	const lua = fs.readFileSync(file, 'utf8');
 	assert.match(lua, /\{ t = "train", class = true, candidates = \{ \{ npc = 911, npcName = "Llane Beshere", map = 1429, x = 50\.2, y = 42\.3, f = "e", faction = "A", classes = \{ "WARRIOR" \} \}/);
 	assert.match(lua, /\{ t = "accept", quest = 9500, title = "Either Way", npc = 823, npcName = "Deputy Willem", minLevel = 1, qlvl = 3, pre = \{ 9201, 783 \},/);
 	const [out] = runAddon({
 		addons: [{ name: 'Polestar', files: ['Core/Core.xml'] }],
 		script: `
+			${TEST_PACK}
 			local got, results = nil, {}
 			local real = Polestar.RegisterGuide
 			Polestar.RegisterGuide = function(g) got = g; local ok, e = real(g); results[#results + 1] = ok and "ok" or e; return ok, e end
@@ -290,10 +289,7 @@ test('every Era-frame coordinate in an emitted pack, candidates included, has it
 	for (const f of fixtureGuides) sources[f] = fs.readFileSync(path.join(require('./fixtures/dsl/helpers').GUIDES_DIR, f), 'utf8');
 	const r = compile(sources);
 	assert.deepEqual(r.errors, []);
-	const dir = tmpdir();
-	const files = buildPackFiles({ guides: r.guides, meta: packMeta('1'), data: fixtureData() });
-	writePackDir(dir, files);
-	const order = [...files['Pack.xml'].matchAll(/<Script file="([^"]+)"/g)].map((m) => path.join(dir, m[1].replace(/\\/g, '/')));
+	const { files, scripts: order } = writeTestPack(r.guides);
 	const [out] = runAddon({
 		addons: [{ name: 'Polestar', files: ['Core/Init.lua'] }],
 		script: `

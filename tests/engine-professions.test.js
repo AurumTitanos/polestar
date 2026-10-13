@@ -6,6 +6,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { runAddon } = require('./helpers/lua');
+const { TEST_PACK, TEST_SOURCE } = require('./helpers/packs');
 
 const CORE = { name: 'Polestar', files: ['Core/Core.xml'] };
 
@@ -19,8 +20,10 @@ w.addAchievement(9002, "Legacy: Elwynn", { { "A", 1 }, { "B", 1 }, { "C", 1 } })
 `;
 
 const GUIDE = `
+${TEST_PACK}
+${TEST_SOURCE}
 Polestar.RegisterGuide({
-	id = "test/alchemy", title = "Alchemy 1-60", category = "Professions", minLevel = 5, maxLevel = 60,
+	id = "test/alchemy", pack = "test", title = "Alchemy 1-60", category = "Professions", minLevel = 5, maxLevel = 60,
 	steps = {
 		{ goals = { { t = "skill", skill = "Alchemy", skillLine = 171, level = 50 } } },
 		{ goals = { { t = "learn", spell = 2333, spellName = "Elixir of Lesser Agility", skillLine = 171, npc = 1215, npcName = "Alchemist Mallory" } } },
@@ -200,9 +203,10 @@ test('RegisterGuide accepts the new verbs and rejects malformed ones', () => {
 	const [out] = runAddon({
 		stubs: ['stub_world.lua'],
 		addons: [CORE],
-		script: `
+		script: `${TEST_PACK}
+${TEST_SOURCE}
 			local function try(goal)
-				local ok, err = Polestar.RegisterGuide({ id = "v", title = "V", steps = { { goals = { goal } } } })
+				local ok, err = Polestar.RegisterGuide({ id = "test/v", pack = "test", title = "V", steps = { { goals = { goal } } } })
 				return ok and "ok" or err
 			end
 			emit({
@@ -239,8 +243,9 @@ test('Suggest only picks leveling guides; other categories are left to the playe
 	const [out] = runAddon({
 		stubs: ['stub_world.lua'],
 		addons: [CORE],
-		script: `
-			local function g(id, cat) Polestar.RegisterGuide({ id = id, title = id, category = cat, minLevel = 1, maxLevel = 60,
+		script: `${TEST_PACK}
+${TEST_SOURCE}
+			local function g(id, cat) Polestar.RegisterGuide({ id = "test/" .. id, pack = "test", title = id, category = cat, minLevel = 1, maxLevel = 60,
 				steps = { { goals = { { t = "level", level = 60 } } } } }) end
 			g("prof", "Professions"); g("legacy", "Legacy")
 			local none = Polestar.Guides.Suggest()
@@ -248,5 +253,5 @@ test('Suggest only picks leveling guides; other categories are left to the playe
 			emit({ none = none or false, pick = Polestar.Guides.Suggest() })
 		`,
 	}).emitted;
-	assert.deepEqual(out, { none: false, pick: 'lvl' });
+	assert.deepEqual(out, { none: false, pick: 'test/lvl' });
 });

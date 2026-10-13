@@ -35,6 +35,7 @@ ns.RegisterDefaults("behavior", {
 	skipGrey = false,
 	routeChoice = "ask", -- "ask" | "recommended": what happens where a guide offers several next zones
 	trainReminder = "2", -- "2" | "1" | "off": remind to visit the class trainer every 2 levels, every level, never
+	suggestFrom = "guides", -- pack id the suggestions come from (Guides.SuggestSource); ours fill in
 })
 
 local outleveled = {} -- guideId -> true, GUIDE_OUTLEVELED once per session
@@ -1746,25 +1747,56 @@ local function checkShape(g)
 	if stored ~= h or type(s.stepKeys[g.id]) ~= "table" then s.stepKeys[g.id] = Own.stepKeys(g) end
 end
 
--- CharState().tabs = { guideId, ... }, .activeTab, and .guide (the active
+-- Tabs of guides that are not there (pack missing or switched off), oldest
+-- first: { id, at } with `at` the tab's place when it was last open. They
+-- stay saved, with their pins, and reopen there when the guide is back.
+local absent = {}
+
+local function forgetAbsent(id)
+	for i = #absent, 1, -1 do
+		if absent[i].id == id then table.remove(absent, i) end
+	end
+end
+
+local function rememberAbsent(id, at)
+	forgetAbsent(id)
+	absent[#absent + 1] = { id = id, at = at }
+	while #absent > MAX_TABS do table.remove(absent, 1) end
+end
+
+-- CharState().tabs = { guideId, ... } (open tabs, then the absent ones),
+-- .absentAt = { [guideId] = place }, .activeTab, and .guide (the active
 -- tab's guide, as before tabs existed). Saved views (pins) are kept for open
--- guides only.
+-- and absent guides only. A guide open in a tab is never absent too: however
+-- it got into the tab (OpenTab, SetGuide, a `next` chain, a route choice),
+-- its absent entry goes here, so closing it later forgets it.
 local function persist()
 	sync()
 	local s = ns.CharState()
-	local ids, open = {}, {}
+	local ids, keep = {}, {}
 	for i = 1, #tabs do
 		ids[i] = tabs[i].guide.id
-		open[ids[i]] = true
+		keep[ids[i]] = true
 		markStarted(ids[i])
 		checkShape(tabs[i].guide)
 	end
+	for i = #absent, 1, -1 do
+		if keep[absent[i].id] then table.remove(absent, i) end
+	end
+	local at
+	for _, a in ipairs(absent) do
+		ids[#ids + 1] = a.id
+		keep[a.id] = true
+		at = at or {}
+		at[a.id] = a.at
+	end
 	s.tabs = ids
+	s.absentAt = at
 	s.activeTab = activeIndex > 0 and activeIndex or nil
 	s.guide = ids[activeIndex]
 	if type(s.pins) == "table" then
 		for id in pairs(s.pins) do
-			if not open[id] then s.pins[id] = nil end
+			if not keep[id] then s.pins[id] = nil end
 		end
 	end
 end
@@ -2373,6 +2405,7 @@ function Engine.OpenTab(id, activate)
 		return open
 	end
 	if #tabs >= MAX_TABS then return nil end
+	forgetAbsent(id)
 	local tab = { guide = g, passedUpTo = 0, autoChain = false, sawIncomplete = false, placing = GetTime() + PLACE_SECONDS }
 	tabs[#tabs + 1] = tab
 	local index = #tabs
@@ -3193,26 +3226,68 @@ function Engine.WantsQuest(verb, questID, span)
 	return found
 end
 
--- Reopen the saved tabs (registered guides only, no duplicates, at most
--- MAX_TABS); with none left, one tab with Guides.Suggest(). A fresh start at
--- the bottom of a level bracket whose guide is one of a route choice also
--- offers that choice (the suggested route stays loaded meanwhile).
+-- A saved tab coming back: at the step the player was looking at (a pack
+-- update carries it to the step's new place first).
+local function restoredTab(g)
+	checkShape(g)
+	local pins = ns.CharState().pins
+	local p = type(pins) == "table" and pins[g.id]
+	return { guide = g, passedUpTo = 0, autoChain = true, sawIncomplete = false, placing = GetTime() + PLACE_SECONDS,
+		pin = type(p) == "table" and tonumber(p.step) or nil, pinDone = type(p) == "table" and p.done or nil }
+end
+
+local function byPlace(list)
+	for i, a in ipairs(list) do a.order = i end
+	table.sort(list, function(x, y)
+		if x.at ~= y.at then return x.at < y.at end
+		return x.order < y.order
+	end)
+	return list
+end
+
+-- Reopen the saved tabs (registered and shown guides only, no duplicates, at
+-- most MAX_TABS); a guide that was absent returns to its old place, and the
+-- tabs of guides still absent stay saved. With none open, one tab with
+-- Guides.Suggest(). A fresh start at the bottom of a level bracket whose
+-- guide is one of a route choice also offers that choice (the suggested
+-- route stays loaded meanwhile).
 ns.OnLogin(function()
 	fpTable()
 	refreshPlayer()
 	local s = ns.CharState()
-	local ids, seen = {}, {}
+	local ids, seen, back = {}, {}, {}
 	local function add(id)
 		if type(id) == "string" and not seen[id] and #ids < MAX_TABS and Guides.Get(id) then
 			ids[#ids + 1] = id
 			seen[id] = true
 		end
 	end
-	if type(s.tabs) == "table" then
-		for i = 1, MAX_TABS * 2 do add(s.tabs[i]) end
+	local list = type(s.tabs) == "table" and s.tabs or {}
+	local absentAt = type(s.absentAt) == "table" and s.absentAt or {}
+	for i = 1, MAX_TABS * 2 do
+		local id = list[i]
+		if type(id) == "string" and not seen[id] then
+			local at = tonumber(absentAt[id])
+			if not Guides.Get(id) then
+				seen[id] = true
+				rememberAbsent(id, at or i)
+			elseif at then
+				seen[id] = true
+				back[#back + 1] = { id = id, at = at }
+			else
+				add(id)
+			end
+		end
+	end
+	for _, b in ipairs(byPlace(back)) do
+		if #ids < MAX_TABS then
+			table.insert(ids, math.min(math.max(b.at, 1), #ids + 1), b.id)
+		else
+			rememberAbsent(b.id, b.at)
+		end
 	end
 	add(s.guide) -- saved before tabs existed
-	local activeId = type(s.tabs) == "table" and s.tabs[tonumber(s.activeTab) or 0] or s.guide
+	local activeId = s.tabs and list[tonumber(s.activeTab) or 0] or s.guide
 	local offerFrom
 	if #ids == 0 and ns.Get("behavior.autoSelectGuide") then
 		local suggested = Guides.Suggest()
@@ -3225,15 +3300,8 @@ ns.OnLogin(function()
 		persist()
 		return
 	end
-	-- Each tab comes back at the step the player was looking at (a pack
-	-- update carries it to the step's new place first).
-	local pins = s.pins
 	for i = 1, #ids do
-		local g = Guides.Get(ids[i])
-		checkShape(g)
-		local p = type(pins) == "table" and pins[ids[i]]
-		tabs[i] = { guide = g, passedUpTo = 0, autoChain = true, sawIncomplete = false, placing = GetTime() + PLACE_SECONDS,
-			pin = type(p) == "table" and tonumber(p.step) or nil, pinDone = type(p) == "table" and p.done or nil }
+		tabs[i] = restoredTab(Guides.Get(ids[i]))
 		if ids[i] == activeId then activeIndex = i end
 	end
 	if activeIndex == 0 then activeIndex = 1 end
@@ -3244,4 +3312,68 @@ ns.OnLogin(function()
 	ns.Fire("GUIDE_CHANGED", guide.id)
 	evaluate()
 	if offerFrom then ns.Fire("ROUTE_CHOICE", offerFrom) end
+end)
+
+-- A pack switched off (or on): tabs whose guide is gone close and stay saved
+-- where they were; saved tabs whose guide is back reopen there, up to the
+-- tab limit, at their pinned step.
+ns.On("PACKS_CHANGED", function()
+	if not ns.IsLoggedIn() then return end
+	sync()
+	-- Tabs whose guide is gone close together and become absent at their
+	-- place before anything is saved, so their pins stay. The active tab, if
+	-- it goes, hands over to its right neighbour (else the left), as CloseTab.
+	local activeTab, activeGone, before = tabs[activeIndex], false, 0
+	local gone = {}
+	for i = #tabs, 1, -1 do
+		local id = tabs[i].guide.id
+		if not Guides.Get(id) then
+			if i == activeIndex then activeGone = true elseif i < activeIndex then before = before + 1 end
+			table.insert(gone, 1, { id = id, at = i })
+			table.remove(tabs, i)
+		end
+	end
+	if #gone > 0 then
+		for _, t in ipairs(gone) do rememberAbsent(t.id, t.at) end
+		tabsDirty = true
+		if activeGone then
+			activeIndex = math.min(activeIndex - before, #tabs)
+		else
+			for i = 1, #tabs do
+				if tabs[i] == activeTab then activeIndex = i end
+			end
+		end
+		useActive()
+		persist()
+		if activeGone then announceActive() end
+		evaluate()
+	end
+	local back = {}
+	for _, a in ipairs(absent) do
+		if Guides.Get(a.id) then back[#back + 1] = { id = a.id, at = a.at } end
+	end
+	if #back == 0 then return end
+	local activeTab = tabs[activeIndex]
+	local opened = false
+	for _, b in ipairs(byPlace(back)) do
+		if #tabs >= MAX_TABS then break end
+		forgetAbsent(b.id)
+		if not tabIndexOf(b.id) then
+			table.insert(tabs, math.min(math.max(b.at, 1), #tabs + 1), restoredTab(Guides.Get(b.id)))
+			opened = true
+		end
+	end
+	if not opened then
+		persist()
+		return
+	end
+	tabsDirty = true
+	activeIndex = 1
+	for i = 1, #tabs do
+		if tabs[i] == activeTab then activeIndex = i end
+	end
+	useActive()
+	persist()
+	if not activeTab then announceActive() end
+	evaluate()
 end)

@@ -1,0 +1,369 @@
+# Writing guide packs
+
+A guide pack is an addon of your own guides for Polestar. Players install it
+like any addon; its guides then appear in Polestar's guide menu beside ours,
+under "Guide packs", with your name on them. You write guides as plain text
+(`.guide` files, [GUIDE_FORMAT.md](GUIDE_FORMAT.md)), and Polestar's tools
+check them, play them to the end without the game, and build the addon.
+
+This handbook covers setting up, a first pack, the ways to write guides,
+testing, publishing and updating, and every problem the tools or the game can
+report with its fix. The exact contract the tools write is in
+[PACK_FORMAT.md](PACK_FORMAT.md).
+
+## Setup
+
+A pack lives in its own folder (usually its own git repository). The tools
+come from a clone of Polestar:
+
+```sh
+git clone <Polestar's repository URL> polestar
+cd polestar
+npm link                 # puts `polestar` on your PATH; the tools have no npm dependencies
+polestar doctor          # checks everything below and prints the fix for each
+cd ..                    # back out: your pack gets its own folder beside the clone, not inside it
+```
+
+Without `npm link`, run `node <polestar clone>/tools/polestar.js <command>`
+wherever this page says `polestar <command>`.
+
+You need:
+
+| | Windows | macOS | Linux |
+|---|---|---|---|
+| Node 24 or newer (every command) | `winget install OpenJS.NodeJS.LTS`, then a new terminal | `brew install node` | your package manager, or `nvm install 24` |
+| Lua 5.1 or LuaJIT (`play`, `playtest`, `record import`) | `winget install DEVCOM.LuaJIT`, then a new terminal | `brew install luajit` | `sudo apt install lua5.1` (Debian, Ubuntu), `sudo pacman -S lua51` (Arch), `sudo dnf install luajit` (Fedora; or `sudo dnf install compat-lua`, then `export LUA=lua-5.1`) |
+| The reference data, `data/forever/` in the clone (every guide command) | `node tools/polestar.js data build` in the clone | same | same |
+| The game's AddOns folder (`install`, `dev`) | found automatically, or set `WOW_FOREVER_ADDONS`, or pass `--dest` | same | same (Wine, Proton, Lutris, Bottles and Faugus prefixes are searched) |
+
+`$LUA` picks a Lua interpreter when you have several. `polestar doctor` exits
+with code 1 when Node or the reference data is missing, since every command
+needs them.
+
+The reference data is what fills in quest titles, givers and coordinates.
+`data build` assembles it from sources described in Polestar's README
+("Data"); until Polestar ships the open data, it reads some of them from
+addons installed with your game.
+
+**Codespaces.** A pack made by `polestar new` from a Polestar clone whose
+origin is an http(s) or SSH URL carries `.devcontainer/devcontainer.json`: open the pack's
+repository in GitHub Codespaces and you get Node 24, Lua 5.1 and the tools
+linked, with nothing to install. (`install` and `dev` need the game, so in a
+codespace use `play` and `playtest` instead.)
+
+## A first pack in 15 minutes
+
+```sh
+# in the folder that holds your Polestar clone, not inside the clone
+polestar new joes-routes          # asks for the id, title, author and licence
+cd joes-routes
+polestar dev --play               # lint and build on every save, with the playground
+```
+
+1. **`polestar new [dir]`** asks for the pack id, title, author and licence
+   (or takes `--id`, `--title`, `--author`, `--license`; `--yes` accepts the
+   defaults: the id from the folder name, the author from `git config
+   user.name`, CC-BY-4.0). Without a terminal to ask in (a script, a CI job)
+   it writes nothing and exits 1 unless all four or `--yes` are given. It
+   refuses a folder that is not empty, and a folder holding only `.git`
+   counts as not empty: run `new` first, then `git init` in the folder. It
+   writes:
+   - `pack.json` (the manifest, PACK_FORMAT.md) and `guides/example.guide`, a
+     short guide that lints clean, plays to the end and hands over to one of
+     Polestar's guides (it has no `author` line: a guide without one takes
+     the pack's author);
+   - `README.md` for players (install, credits) and for you (build, test);
+   - `LICENSE` for the licence you chose: for MIT the full text with your
+     name and the year; for GPL-3.0-only your pack's title, `Copyright (c)
+     <year> <author>` and the short GPL notice, then the licence text; for
+     CC-BY-4.0 and CC0-1.0 the name and official address; for any other
+     licence a one-line reminder to paste its full text;
+   - `.gitignore` (`dist/`, `drafts/`);
+   - `.vscode/tasks.json`: lint as the default build task, so VS Code
+     underlines the lines with problems;
+   - `.github/workflows/pack.yml` (lint and playtest on every push, with
+     read-only access to your repository; on a version tag the same job
+     builds the zip, and a second job, run only once that passes, attaches
+     it to a GitHub release: the only job allowed to write) and
+     `.devcontainer/` (Codespaces). Both clone Polestar and build its
+     reference data with `polestar data build --no-web-xp`: that skips the
+     quest XP lookups on community web sites, but the build still clones
+     pfQuest and downloads the client tables from wago.tools. So they need
+     the address of Polestar's public repository. `new` reads it from your
+     clone's `git remote get-url origin` and writes it as https, quoted: an
+     SSH address (`git@host:owner/repo.git`, `ssh://`) or an `http://` one
+     becomes its https form, and any user name, password, query (`?…`) or
+     fragment (`#…`) is dropped. With no origin, or one that is neither
+     http(s) nor SSH (a local path, say), it leaves both out and says why.
+2. **`polestar dev`** watches `pack.json` and the `.guide` files. On every
+   save it lints (printing the problems) and, without errors, builds the pack
+   into the game's AddOns folder (`--dest <dir>` picks another; `--no-game`
+   skips it). With `--play` it also starts the playground and reloads it on
+   every build. In AddOns it keeps the folder rule: it writes the pack's
+   folder only when that folder is absent, empty, or carrying the generated
+   marker for the same pack id; anything else is refused.
+3. **`polestar play`** (or `dev --play`) runs the real Polestar against a
+   simulated world, with your pack loaded after our guides, and prints the
+   address to open in your browser: open the guide menu, find your pack under "Guide packs", load a guide and
+   play it with the side panel. Options > Guide packs shows your pack's row
+   and any problems.
+4. **`polestar install`** inside the pack (or `polestar install <dir>`
+   from anywhere) builds it and installs it into the game, when you are not
+   running `dev`.
+5. **In game:** the first time, restart the game so the client sees the new
+   addon; after that, `/reload` shows every change. Open the guide menu
+   (`/polestar guides`) and pick your guide under "Guide packs".
+
+## Three ways to write guides
+
+[GUIDE_FORMAT.md](GUIDE_FORMAT.md) is the language, with a cookbook of
+examples. Whatever way you start, finish with lint and playtest (below).
+
+### By playing
+
+Record your own play and turn it into a draft:
+
+```sh
+polestar install --recorder        # in the Polestar clone (not the pack): installs Polestar_Recorder with Polestar
+# in game: /lsrec on, play the route, then log out
+polestar record import             # copies the sessions out of SavedVariables
+polestar record list
+polestar record draft <session>    # writes drafts/<faction>-<race>-<date>-<time>.guide
+```
+
+Inside a pack, `record draft` writes into the pack's `drafts/` folder with a
+guide id under `<pack id>/draft/`. A draft carries `coords live` (your
+recorded positions are in the client's own map frame). Edit it, give it a
+proper id, move it out of `drafts/` into your guides, and lint it. Drafts are
+compiled only with `--include-drafts`.
+
+### From the simulator
+
+`polestar sim export --result <file> --out <dir>` turns a simulator route
+into skeleton guides, one per zone visit, with a `visits.json`. Their ids
+are `sim/<faction>/<race>/NN-zone`, which lint refuses in a pack: rename each
+under `<pack id>/` and update the `next` lines that chain them. The best
+routes Polestar's simulator has found ship with Polestar once its open data
+lands; until then a result exists only where you ran the simulator yourself
+(docs/SIMULATION.md).
+
+### By hand
+
+Look up every id instead of guessing it:
+
+```sh
+polestar find "westfall stew"
+#   accept 36  # Westfall Stew, level 10: Verna Furlbrow, Westfall 59.9,19.4
+#   turnin 36  # Westfall Stew: Salma Saldean, Westfall 56.4,30.5
+polestar find "kobold camp cleanup"
+#   accept 7  # Kobold Camp Cleanup, level 2: Marshal McBride, Elwynn Forest 48.9,41.6
+#   turnin 7  # Kobold Camp Cleanup: Marshal McBride, Elwynn Forest 48.9,41.6
+#   # 7.1 = kill Kobold Vermin x10
+polestar find Hogger --kind npc --faction Alliance
+polestar find westfall --kind guide --race Human   # our guides a Human can follow, for `next`
+polestar find 36 --json                 # ids, levels, zones, coordinates as JSON
+```
+
+`find` searches quests, NPCs, objects, items and Polestar's guides; a number
+matches ids exactly. Each result is a guide line ready to paste. A quest also
+prints its turn-in line and its objectives, `7.1 = kill Kobold Vermin x10`:
+write `quest 7.1` on the goal that works it (`kill 6 x10 quest 7.1`). A guide
+prints its level range, who it is for (`Alliance`, `Dwarf/Gnome only`,
+`Alliance Paladin only`) and its own `next`. `--faction`, `--race` and
+`--class` keep what such a character can use.
+
+`--json` prints the results as one JSON array, and `lint --format
+json|github` its problems, for editors, scripts and CI. Every result has
+`kind`, `id`, `name` and `line` (the guide line), quests and guides also
+`notes` (the comment lines printed under it); besides:
+
+| Kind | Fields |
+|---|---|
+| `quest` | `level`, `zone`, `x`, `y` (where it starts), `starts` and `ends` (`kind`, `id`, `name`, `zone`, `x`, `y` of the NPC, object or item), `turnin` (the turn-in line), `objectives` (`index`, `kind`: `kill`, `item`, `object` or `event`, `id`, `name`, `count`; `id` and `count` may be `null`) |
+| `npc` | `level`, `zone`, `x`, `y` (its first spawn) |
+| `object` | `zone`, `x`, `y` |
+| `item` | — |
+| `guide` | `level` (its first), `levels` (`min`, `max`), `zone`, `faction`, `races` and `classes` (`null` when the guide names none), `next` (the guide ids its `next` offers: several are a route choice) |
+
+Fields with nothing to say are left out (a quest with no starter has no `x`).
+
+In game, **`/polestar where`** prints where you stand as two guide lines and
+puts them in a box to copy:
+
+```
+zone map 1429
+goto 42.11,65.93 live
+```
+
+`live` marks the coordinates as the client's own map frame. Typed
+coordinates are read in the Era frame unless marked (GUIDE_FORMAT.md,
+`coords`), and Forever moved some zones, so keep the `live`. For any other
+goal, add the `@x,y live` form chat prints (`kill 299 @42.11,65.93 live`). A
+guide written mostly from `/polestar where` can say `coords live` in its
+header once instead.
+
+A pack's guide may hand over to any of Polestar's guides with `next`
+(GUIDE_FORMAT.md, "Handing over to our guides"). Pick one every character of
+your guide can follow: check its races, classes and levels with `polestar find
+--kind guide <zone> --race <Race>` (and `--class <Class>` for a class guide).
+Lint stops a `next` that no character of the guide can follow.
+
+## Testing
+
+Every command below works on the pack in the folder you run it in (or the
+nearest parent holding `pack.json`); give a pack folder as its one argument
+(`polestar lint ../joes-routes`, the same as `--pack ../joes-routes`) to work
+on another.
+
+| Command | What it checks |
+|---|---|
+| `polestar lint` | every check `compile` makes, writing nothing; exit code 1 on errors. `--format json` prints one document on stdout and no summary: `{ "ok", "errors", "warnings", "diagnostics" }`, `ok` true without errors, `errors` and `warnings` the counts, and `diagnostics` one object per problem with `file`, `line`, `severity` (`error` or `warning`), `message` and, when there is one, `hint`. `--quiet` leaves the warnings out of the list (text, JSON and annotations alike); the JSON counts still include them. `--format github` prints workflow annotations. `--include-drafts` checks `drafts/` too |
+| `polestar playtest [--filter text] [--class C]` | plays every guide (with `--filter`, those whose file or id contains the text) to the end in the real addon against a simulated world, once per class it branches on plus one it never names, as each race that can reach it (only race and class pairs the game has); Polestar's guides join where yours hand over. Prints per guide, race and class `ok  joe/elwynn (Human Warrior)`, `stuck … at step N "title": goal M (…) stays active`, `fail …` (a problem found while playing, such as a goal with no location) or, for a hand-over that does not land on the next guide with something to do or lands on one the character cannot follow (`no Human can follow it`), a `stuck` line naming the hand-over; exit code 1 when any is stuck or fails, when nothing played, or when the pack does not compile |
+| `polestar play` | the playground: your guides, your row on the Guide packs page and its problems, in the browser |
+| `polestar sim compare --faction F [--race R]` | inside a pack: scores your leveling chain beside Polestar's under the simulator's model (hours to level 10, 20 … 60); a chain starting above level 1 is scored after Polestar's own chain up to the level yours starts at, and a chain whose guides name no race is scored for every race of the faction. Needs the simulator's world (docs/SIMULATION.md) |
+| `polestar doctor` | the setup, and the pack's `pack.json` |
+
+Lint and compile read Polestar's guides as context, so your `next` is
+checked against them, and so are quests across the hand-over: a quest your
+guide accepts counts as turned in when our guide you hand over to turns it
+in, but your guide cannot turn in a quest that only our guides accept (that
+is the "never accepted earlier" error). Problems in our own guides are not
+shown.
+
+## Publishing
+
+```sh
+polestar pack       # lints, builds and writes dist/<folder>-<version>.zip
+```
+
+The zip holds the addon folder, byte for byte reproducible, with the pack's
+`LICENSE` as `LICENSE.txt` when the pack folder has one. Upload it to:
+
+- **CurseForge** and **Wago**: a new addon project for World of Warcraft:
+  Forever (the Classic game version matching the TOC's Interface). Mark
+  **Polestar as a required dependency** on the listing, so the app installs it
+  with your pack.
+- **GitHub**: with the template's workflow, push a version tag (`v1.2.0`) and
+  the workflow builds the zip and attaches it to a release.
+
+Raise `version` in `pack.json` for every release. The guides' licence is the
+one in `pack.json` (`license`, and the `LICENSE` file `new` wrote, which the
+zip ships). For a licence `new` has no text for, it writes one placeholder
+line into `LICENSE`; lint warns until you replace it with the licence's text.
+Polestar's [LICENSE-EXCEPTION.md](../LICENSE-EXCEPTION.md) lets you
+distribute packs built by its compiler, including the reference data the
+compiler places in them, under terms of your choice; the pack's
+`LICENSE-DATA.txt` names that data's sources. It does not cover guide text
+copied from Polestar's own guides.
+
+Players see your title, author, version, licence, guide count, website and
+`source` on the Guide packs page, and "By <author> · <pack title> <version> ·
+<licence>" in each guide's details. Each pack is made and supported by its
+author: put where to report problems in your README and on the listing.
+
+Polestar suggests the next guide from its own guides unless the player picks
+your pack under **Suggest guides from** (Options > Guide packs); only packs
+with Leveling guides are offered there. With your pack picked, Polestar's
+guides still fill in wherever yours have nothing for the character (another
+race, another level range).
+
+## Updating
+
+- Change the guides, raise `version`, run `polestar pack` and upload.
+- Players' progress is keyed to guide ids: keep a guide's id when you revise
+  it. Removing a guide only closes its tabs; a player's tabs come back if it
+  returns.
+- **After a game patch** raises the client's interface number, the game
+  marks every addon built for the old one out of date. Update your Polestar
+  clone (`git pull`), rebuild (`polestar pack`) and upload: the TOC takes the
+  interface number from Polestar's. Until then players can tick **Load out of
+  date AddOns** in the game's AddOns list.
+- When Polestar adds a new pack format, packs in the old one keep working
+  (PACK_FORMAT.md, "Versioning").
+
+## In game: statuses and problems
+
+Options > **Guide packs** (`/polestar packs`) lists every pack the game has
+installed, ours first. Each row has a status:
+
+| Status | The row says | Fix |
+|---|---|---|
+| `on` | the switch on, the guide count | — |
+| `off` | the switch off: the player hid the pack's guides | switch it on; its tabs come back |
+| `disabled` | "turned off in the AddOns list", with **Enable and reload** | press it, or enable the addon in the AddOns list |
+| `not-loaded` | "not loaded: <the client's reason>" (out of date, a dependency missing) | out of date: rebuild with an updated clone, or tick "Load out of date AddOns"; dependency missing: install or enable the addons on the pack's `## Dependencies` line (the AddOns list names them) |
+| `too-new` | "needs Polestar <version> or newer", or "needs a newer Polestar" when its TOC gives no `X-Polestar-Needs` | update Polestar |
+| `refused` | "refused: <reason>" | one of the pack problems below |
+| `broken` | "broken: registered no guides" | see `no-guides` below |
+
+While any pack has problems, the page's entry in the Options sidebar carries a
+dot, and the row shows "<n> problems" with **Show** (the list) and **Copy
+report** (the pack, its version, Polestar's version, the client build and
+every problem, selected for copying: players can paste it into a bug report).
+Problems have three kinds:
+
+| Kind | Message | Fix |
+|---|---|---|
+| `pack-refused` | Pack id <id> is not valid: 2 to 32 lower-case letters, digits or hyphens, starting with a letter or digit. | fix `id` in `pack.json` and rebuild |
+| `pack-refused` | Pack id <id> is reserved for Polestar. — plus " 1 guide dropped." or " <n> guides dropped." when it dropped any | pick another id |
+| `pack-refused` | Pack id <id> is already taken by <addon>; <addon> was refused. — plus " 1 guide dropped." or " <n> guides dropped." when it dropped any | the refused pack's guides stay out, even under the holder's ids. Two installed addons claim one id: pick an id of your own (`<author>-<name>`); players remove one of the two |
+| `pack-refused` | The pack is missing format. / The pack is missing <field>. | rebuild with `polestar compile`; a hand-written `Pack.lua` needs every field (PACK_FORMAT.md) |
+| `pack-refused` | Needs Polestar <version> or newer. / Needs a newer Polestar. (no `X-Polestar-Needs` in the TOC) | the player updates Polestar |
+| `pack-refused` | Only Polestar's own Lookup pack may register as internal. | remove `internal` from `RegisterPack` |
+| `guide-refused` | Guide <id> was refused: its id must start with <prefix>. | start every guide id with `<pack id>/` |
+| `guide-refused` | Guide <id> was refused: it was registered before its pack. | `Pack.lua` must load first: rebuild with `polestar compile` |
+| `guide-refused` | Guide <id> was refused: <reason> (`missing title`, `no steps`, `step 3 goal 2: unknown verb …`, `kill needs target`, `coordinates outside 0-100`, …). | the guide's table breaks the format: rebuild with `polestar compile`, which never writes such a table; with your own tools, PACK_FORMAT.md |
+| `no-guides` | Registered no guides. | the addon loaded but registered nothing, usually a Lua error in its files: turn on `/console scriptErrors 1`, `/reload`, and read the error; rebuilding with `polestar compile` fixes a damaged folder |
+
+Nothing goes to chat: every refusal happens while the packs load or in the
+scan at login, so the row's **Show** and **Copy report** are where to read
+them.
+
+## Lint messages
+
+Every message comes with `file:line: error|warning: message`, and most with a
+`hint:` line saying how to fix it. Errors stop `compile`, `pack`, `install`
+and `dev`; warnings print. These are the pack-specific ones; the guide
+checks are listed in GUIDE_FORMAT.md ("Validation").
+
+| Message | Fix |
+|---|---|
+| no pack.json in <dir> | create `pack.json` with `id`, `title`, `author`, `version` and `license` (or run `polestar new`) |
+| pack.json is not valid JSON (…) | a missing value, quote or comma; JSON allows no trailing commas or comments |
+| pack.json must hold one JSON object | write `{ "id": "...", "title": "...", "author": "...", "version": "...", "license": "..." }` |
+| missing `<key>` | add the key with your own value |
+| `<key>` must be a string | put the value in quotes |
+| `<key>` contains control characters | keep the value on one line |
+| `<key>` is N characters long; at most M fit | shorten it |
+| pack id "<id>" is malformed | pick an id like `<author>-<name>`, e.g. `joe-routes` |
+| pack id "<id>" is reserved for Polestar | pick another id |
+| version "<v>" is malformed | write a version like `1.2.0` |
+| website "<url>" must start with https:// or http:// | write the full address |
+| folder "<name>" is malformed / looks like one of Polestar's own addons | pick a folder like `PolestarPack_JoesRoutes`, or leave `folder` out |
+| unknown key `<key>` (ignored) (warning) | remove it; `pack.json` takes the keys in PACK_FORMAT.md |
+| `<key>` contains "\|", which prints literally in game (warning; also for guide titles, notes, tips and labels) | drop the `\|`: Polestar shows text as written, so colour and link codes do not work |
+| guide id "<id>" is outside pack "<pack>": its guide ids start with <prefix> | start the id with `<pack id>/` |
+| `next` points to unknown guide "<id>" | a guide of your pack or one of Polestar's: list ours with `polestar find --kind guide <text>` |
+| `next` offers <faction> guide "<id>" after a <faction> guide | hand over to a guide of the same faction |
+| no <races> character can follow <id> (it is for <its races> only) | the `next` guide's `race` or `class` leaves out every character of yours: pick one for the same races (or classes) with `polestar find --kind guide <zone> --race <Race>` |
+| LICENSE still holds the placeholder line `polestar new` writes, not the licence text (warning) | replace the line with the full text of your licence |
+| map <id>: this pack's Era frame differs from the one Polestar's guides register (warning) | in game Polestar's frame wins, so coordinates on that map may be off: mark them `live` or retake them with `/polestar where` |
+| `kill` npc <id> (<name>) is elite; … / <item> drops only from elites (<names>); … / quest <id> (<title>) is elite … (warning in packs) | Polestar's own house rule (errors in our guides): in a Leveling guide make the goal `optional` with the tip "<name> is elite: grouping up is advised." |
+
+The folder rule: `compile`, `pack`, `install`, `dev` and `play` write a pack
+folder only when it is absent, empty, or carrying the generated marker (a
+TOC with the "Generated by `node tools/polestar.js compile`" line) for the
+same pack id; anything else is refused:
+
+| Message | Fix |
+|---|---|
+| refusing to write into <dir>: it is not a generated guide pack (no TOC with the "Generated by …" line); move it away first | a folder of the same name that Polestar did not write is in the way (in AddOns or `dist/`): move or rename it, or set `folder` in `pack.json` |
+| refusing to write into <dir>: it holds the guide pack "<other id>", not "<id>"; set "folder" in pack.json to a folder name of your own | another pack builds into the same folder name (folder names come from titles, so two packs titled alike collide): set `folder` in `pack.json` |
+
+## Where things are
+
+- [GUIDE_FORMAT.md](GUIDE_FORMAT.md): the guide language, its checks and a
+  cookbook.
+- [PACK_FORMAT.md](PACK_FORMAT.md): `pack.json`, the TOC and the Lua the
+  compiler writes.
+- `polestar help <command>`: every option of every command.

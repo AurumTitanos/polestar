@@ -86,6 +86,42 @@ P.CATEGORY_ICON = CATEGORY_ICON
 
 local categoryOf = UI.Category
 
+-- Community guide packs: their guides are not in our categories but under
+-- the "Guide packs" heading, one entry per pack (key "pack:<id>"); All,
+-- Favorites and search cover every shown guide.
+local PACK = "pack:"
+
+-- The community pack a guide (header) comes from; nil for ours (`guides`)
+-- and Polestar's internal packs.
+local function packOf(g)
+	local id = g and g.pack
+	if id == nil or id == "guides" then return nil end
+	local G = ns.Guides
+	local r = G and G.Pack and G.Pack(id)
+	if r and not r.internal then return r end
+	return nil
+end
+P.PackOf = packOf
+
+-- Where a guide is listed: its pack's entry, else its category.
+local function bucketOf(g)
+	local r = packOf(g)
+	return r and (PACK .. r.id) or categoryOf(g)
+end
+
+-- The pack record behind a "pack:<id>" key, or nil.
+local function packOfKey(key)
+	if type(key) ~= "string" or key:sub(1, #PACK) ~= PACK then return nil end
+	local G = ns.Guides
+	return G and G.Pack and G.Pack(key:sub(#PACK + 1)) or nil
+end
+
+-- A category's or a pack entry's name.
+local function bucketLabel(key)
+	local r = packOfKey(key)
+	return r and (r.title or r.id) or L[key]
+end
+
 local function categoryLess(a, b)
 	local ra, rb = CATEGORY_RANK[a] or 100, CATEGORY_RANK[b] or 100
 	if ra ~= rb then return ra < rb end
@@ -220,7 +256,7 @@ function P.Entries(filter, q, cat)
 		end
 		local okFaction = filter == "All" or g.faction == nil or g.faction == filter
 		if okFaction and hit then
-			local c = categoryOf(g)
+			local c = bucketOf(g)
 			counts[c] = (counts[c] or 0) + 1
 			if cat == "All" or c == cat then picked[#picked + 1] = g end
 		end
@@ -495,12 +531,24 @@ local function paintRow(r, g, note, width)
 	r.Bar:SetShown(sel)
 	local done = guideState(g.id) == "done"
 	r.Check:SetShown(done)
+	r.Title:SetWidth(0) -- measured below from scratch, as the note
 	r.Title:SetText(g.title or g.id)
 	W.Color(r.Title, sel and "text" or (done and "textDim" or "text"))
 	local lv = UI.LevelRange(g.minLevel, g.maxLevel)
 	r.Range:SetText(lv and ("(" .. lv .. ")") or "")
+	-- A pack's guide carries its pack's title, except in that pack's own list.
+	local pack = packOf(g)
+	if pack and not (view == "browse" and category == PACK .. pack.id) then
+		note = note and (note .. DOT .. (pack.title or pack.id)) or (pack.title or pack.id)
+	end
+	-- A pooled row keeps its last note's width, and GetStringWidth includes
+	-- truncation: measure from an unbounded width.
+	r.Note:SetWidth(0)
 	r.Note:SetText(note or "")
-	local room = width - TEXT_X * 2 - (note and (r.Note:GetStringWidth() + 12) or 0) - (lv and (r.Range:GetStringWidth() + 5) or 0)
+	-- The note never takes more than 45% of the row: a long pack title is cut.
+	local noteW = note and min(floor(r.Note:GetStringWidth() + 1), floor(width * 0.45)) or 0
+	r.Note:SetWidth(noteW)
+	local room = width - TEXT_X * 2 - (note and (noteW + 12) or 0) - (lv and (r.Range:GetStringWidth() + 5) or 0)
 	r.Title:SetWidth(max(40, min(room, floor(r.Title:GetStringWidth() + 1))))
 	r:SetWidth(width)
 end
@@ -693,6 +741,16 @@ local function buildDetails()
 	-- The facts, under a hairline (factRow).
 	d.FactRule = W.Divider(d)
 	d.Facts = {}
+	-- Credits under the facts: who wrote it and, for a pack's guide, the
+	-- pack; the pack's source on its own line.
+	d.Credits = W.Text(d, "small", "textMuted")
+	d.Credits:SetWordWrap(true)
+	d.Credits:SetJustifyH("LEFT")
+	d.Credits:SetWidth(inner)
+	d.Source = W.Text(d, "note", "textDim")
+	d.Source:SetWordWrap(true)
+	d.Source:SetJustifyH("LEFT")
+	d.Source:SetWidth(inner)
 
 	-- Pitch, pros and cons scroll between the facts and the buttons.
 	d.Scroll = W.Scroll(d)
@@ -738,13 +796,32 @@ local function setPrimary(b, on)
 	W.RepaintButton(b)
 end
 
+-- A guide's credits: "By <author>" for ours; for a pack's guide "By
+-- <author> · <pack title> <version> · <licence>". The author is the guide's
+-- own, else its pack's. -> text or nil, the pack's source or nil
+function P.Credits(g)
+	if not g then return nil end
+	local G = ns.Guides
+	local own = g.pack and G and G.Pack and G.Pack(g.pack) or nil
+	local author = type(g.author) == "string" and g.author ~= "" and g.author or (own and own.author)
+	local pack = packOf(g)
+	local parts = {}
+	if author then parts[1] = string.format(L["By %s"], author) end
+	if pack then
+		parts[#parts + 1] = (pack.title or pack.id) .. (pack.version and (" " .. pack.version) or "")
+		if pack.license then parts[#parts + 1] = pack.license end
+	end
+	if #parts == 0 then return nil end
+	return table.concat(parts, DOT), pack and pack.source or nil
+end
+
 local function renderDetails(byId, tabs, active)
 	local d = details
 	local inner = DETAIL_W - DPAD * 2
 	local id = P.Selected()
 	local g = id and byId[id]
 	local E = ns.Engine
-	local parts = { d.Star, d.Title, d.ProgLabel, d.ProgPct, d.Prog, d.FactRule, d.Scroll, d.Load, d.NewTab }
+	local parts = { d.Star, d.Title, d.ProgLabel, d.ProgPct, d.Prog, d.FactRule, d.Scroll, d.Load, d.NewTab, d.Credits, d.Source }
 	if not g then
 		d.lsArt = ZoneArt.Paint(d.Art, nil, nil, nil, 1)
 		for _, p in ipairs(parts) do p:Hide() end
@@ -863,6 +940,24 @@ local function renderDetails(byId, tabs, active)
 	end
 	if #facts > 0 then y = y - FACT_GAP + 20 end
 
+	-- Credits, and the pack's source.
+	local credits, source = P.Credits(g)
+	d.Credits:SetShown(credits ~= nil)
+	d.Source:SetShown(source ~= nil)
+	if credits then
+		d.Credits:SetText(credits)
+		d.Credits:ClearAllPoints()
+		d.Credits:SetPoint("TOPLEFT", d, "TOPLEFT", DPAD, -y)
+		y = y + d.Credits:GetStringHeight() + 6
+	end
+	if source then
+		d.Source:SetText("\226\128\156" .. source .. "\226\128\157")
+		d.Source:ClearAllPoints()
+		d.Source:SetPoint("TOPLEFT", d, "TOPLEFT", DPAD, -y)
+		y = y + d.Source:GetStringHeight() + 6
+	end
+	if credits or source then y = y + 10 end
+
 	-- Pitch, pros, cons.
 	local bottom = DPAD + 32 + 16
 	d.Scroll:ClearAllPoints()
@@ -923,7 +1018,8 @@ local function renderDetails(byId, tabs, active)
 		setButtonWidth(d.Load, inner)
 		setPrimary(d.Load, true)
 	end
-	P.detail = { id = g.id, art = d.lsArt, state = state, tab = tabIndex, label = label, frac = frac, facts = shownFacts }
+	P.detail = { id = g.id, art = d.lsArt, state = state, tab = tabIndex, label = label, frac = frac, facts = shownFacts,
+		credits = credits, source = source }
 end
 
 ---------------------------------------------------------------------------
@@ -933,15 +1029,35 @@ end
 -- The categories: one with no guide for any faction is left out (one empty
 -- only for this faction stays, faded by ShellNav).
 local function navItems(counts, total)
-	local exists = {}
-	for _, g in ipairs(ns.Guides and ns.Guides.List and ns.Guides.List() or {}) do exists[categoryOf(g)] = true end
+	local exists, packs, seen = {}, {}, {}
+	for _, g in ipairs(ns.Guides and ns.Guides.List and ns.Guides.List() or {}) do
+		local r = packOf(g)
+		if not r then
+			exists[categoryOf(g)] = true
+		elseif not seen[r.id] then
+			seen[r.id] = true
+			packs[#packs + 1] = r
+		end
+	end
 	local items = { { key = "All", label = L["All guides"], icon = "compact", count = total } }
 	for _, c in ipairs(CATEGORIES) do
 		if exists[c] then items[#items + 1] = { key = c, label = L[c], icon = CATEGORY_ICON[c], count = counts[c] or 0 } end
 	end
 	items[#items + 1] = { key = "Favorites", label = L["Favorites"], icon = CATEGORY_ICON.Favorites, count = counts.Favorites or 0 }
+	-- Guide packs: one entry per shown pack with guides, "<title> · <author>".
+	if #packs > 0 then
+		table.sort(packs, function(a, b) return (a.title or a.id):lower() < (b.title or b.id):lower() end)
+		items[#items + 1] = { key = "", heading = true, label = L["Guide packs"] }
+		for _, r in ipairs(packs) do
+			local label = r.title or r.id
+			if r.author then label = label .. DOT .. r.author end
+			items[#items + 1] = { key = PACK .. r.id, label = label, icon = "layers", count = counts[PACK .. r.id] or 0 }
+		end
+	end
 	P.categories = {}
-	for i, it in ipairs(items) do P.categories[i] = it.key end
+	for _, it in ipairs(items) do
+		if not it.heading then P.categories[#P.categories + 1] = it.key end
+	end
 	return items
 end
 
@@ -1114,6 +1230,21 @@ function P.Render()
 	end
 	for _, s in ipairs(sections) do if s.lsFrame then s.lsFrame:Hide() end end
 	local filter = factionFilter()
+	-- A pack entry whose pack was hidden or holds no guides, or a category no
+	-- shown guide is in (its pack was switched off): back to All.
+	if category:sub(1, #PACK) == PACK then
+		local r = packOfKey(category)
+		if not (r and r.status == "on" and (r.guideCount or 0) > 0) then category = "All" end
+	elseif category ~= "All" and category ~= "Favorites" then
+		local shown = false
+		for _, g in ipairs(ns.Guides and ns.Guides.List and ns.Guides.List() or {}) do
+			if not packOf(g) and categoryOf(g) == category then
+				shown = true
+				break
+			end
+		end
+		if not shown then category = "All" end
+	end
 	local entries, n, counts = P.Entries(filter, query, view == "browse" and category or "All")
 	local total = 0
 	for c, k in pairs(counts) do if c ~= "Favorites" then total = total + k end end
@@ -1132,7 +1263,7 @@ function P.Render()
 	-- The header: where you are, and what the list holds.
 	local title, subtitle
 	if view == "browse" then
-		title = query ~= "" and L["Search"] or (category == "All" and L["All guides"] or L[category])
+		title = query ~= "" and L["Search"] or (category == "All" and L["All guides"] or bucketLabel(category))
 		if query ~= "" then
 			subtitle = n == 1 and string.format(L["1 result for \226\128\156%s\226\128\157"], query)
 				or string.format(L["%d results for \226\128\156%s\226\128\157"], n, query)
@@ -1213,13 +1344,15 @@ function P.Render()
 		end
 		if n == 0 and not (query ~= "" and UI.LookupCount and UI.LookupCount() > 0) then
 			if #(ns.Guides and ns.Guides.List and ns.Guides.List() or {}) == 0 then
-				empty = L["No guides installed. Enable the Polestar Guides addon, then reload."]
+				empty = (UI.Packs and UI.Packs.AnySwitchedOff())
+					and L["No guides shown: the guide packs are switched off. Turn one on under Options, Guide packs (/polestar packs)."]
+					or L["No guides installed. Enable Polestar Guides or a guide pack in the AddOns list on the character screen, then reload."]
 			elseif query ~= "" then
 				empty = string.format(L["No guides match \226\128\156%s\226\128\157."], query)
 			elseif category == "Favorites" then
 				empty = L["No favorites yet. Select a guide and click its star."]
 			elseif category ~= "All" then
-				empty = string.format(L["No %s guides for this faction."], L[category])
+				empty = string.format(L["No %s guides for this faction."], bucketLabel(category))
 			else
 				empty = L["No guides for this faction."]
 			end
@@ -1450,8 +1583,10 @@ end)
 ns.On("SETTING_CHANGED", function(path)
 	if path == "ui.pickerFaction" or path == "" or path == "ui" then P.Render() end
 end)
-ns.On("GUIDES_REGISTERED", function()
+local function guidesChanged()
 	factCache = {}
 	P.Render()
-end)
+end
+ns.On("GUIDES_REGISTERED", guidesChanged)
+ns.On("PACKS_CHANGED", guidesChanged)
 ns.On("TABS_CHANGED", function() P.Render() end)

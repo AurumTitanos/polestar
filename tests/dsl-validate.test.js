@@ -32,6 +32,31 @@ test('`next` must point to a known guide', () => {
 	assert.deepEqual(ok.errors, []);
 });
 
+test('`next` and every route option must be a guide the characters can follow: races, classes, and what each race can be', () => {
+	const errorsOf = (fromExtra, toExtra) => {
+		const from = text('t/a', ['step S', '  level 2'], [...fromExtra, 'next t/b, t/c']);
+		const r = compile({ 'a.guide': from, 'b.guide': text('t/b', ['step S', '  level 3']), 'c.guide': text('t/c', ['step S', '  level 3'], toExtra) });
+		return r.diag.errors.map((d) => `${d.line === lineOf(from, 'next t/b, t/c') ? 'next' : d.line}: ${d.message}${d.hint ? ` | ${d.hint}` : ''}`);
+	};
+	assert.deepEqual(errorsOf(['race Human'], ['race Dwarf, Gnome']), [
+		'next: no Human character can follow t/c (it is for Dwarf/Gnome only) | pick a guide for the same races: `polestar find --kind guide <zone> --race Human`',
+	]);
+	// A faction-wide target, or one sharing a race, is fine.
+	assert.deepEqual(errorsOf(['race Human'], []), []);
+	assert.deepEqual(errorsOf(['race Human, Dwarf'], ['race Dwarf, Gnome']), []);
+	// Classes alone.
+	assert.deepEqual(errorsOf(['class Paladin'], ['class Mage, Warlock']), [
+		'next: no Alliance Paladin character can follow t/c (it is for Alliance Mage/Warlock only) | pick a guide for the same classes: `polestar find --kind guide <zone> --class Paladin`',
+	]);
+	assert.deepEqual(errorsOf(['class Paladin'], []), []);
+	assert.deepEqual(errorsOf(['class Paladin, Mage'], ['class Mage']), []);
+	// A Human cannot be a Shaman (races.json), so a Shaman guide is no option.
+	assert.deepEqual(errorsOf(['race Human'], ['class Shaman']), [
+		'next: no Human character can follow t/c (it is for Alliance Shaman only) | pick a guide for the same races: `polestar find --kind guide <zone> --race Human`',
+	]);
+	assert.deepEqual(errorsOf(['race Dwarf'], ['class Shaman']), []);
+});
+
 test('ids unknown in data are errors without a name and warnings with one', () => {
 	const src = guideText(['step S', '  accept 424242', '  accept 424243 "New Forever Quest"', '  kill 77777', '  kill 77778 "Sky Raider" @50,50', '  collect 88888', '  interact 99999 "Odd Totem" @1,1', '  talk 66666']);
 	const r = compile(src);
@@ -266,6 +291,40 @@ test('an accept that is never turned in later on the route warns, per route choi
 	const part = guideText(['step S', '  accept 7', '  turnin 7 only Human']);
 	assert.deepEqual(only(compile(part).warnings, /never turned in/), [`test.guide:${lineOf(part, '  accept 7')}: quest 7 (Kobold Camp Cleanup) is accepted but never turned in later in this guide or a guide after it for some of the characters it applies to`]);
 	assert.deepEqual(only(compile(guideText(['step S', '  accept 7 only Human', '  turnin 7 only Human'])).warnings, /never turned in/), []);
+});
+
+test('a next guide whose races leave out the characters says why its turn-ins do not count; the warning has a hint', () => {
+	const one = text('t/one', ['step S', '  accept 7'], ['race Human, Dwarf', 'next t/two']);
+	const two = text('t/two', ['step S', '  turnin 7'], ['race Dwarf']);
+	const r = compile({ '1.guide': one, '2.guide': two });
+	const warns = r.diag.warnings.filter((d) => /never turned in/.test(d.message));
+	assert.deepEqual(
+		warns.map((d) => [d.line, d.message, d.hint]),
+		[
+			[
+				lineOf(one, '  accept 7'),
+				'quest 7 (Kobold Camp Cleanup) is accepted but never turned in later in this guide or a guide after it for some of the characters it applies to ("t/two" is for Dwarf only, so its turn-ins do not count)',
+				'turn it in later in this guide, or pick a `next` guide these characters can follow, or make the accept `optional` when the player may leave it',
+			],
+		],
+	);
+	// Per route: the route through a Dwarf guide says so; a plain miss does not.
+	const choice = text('t/one', ['step S', '  accept 7'], ['race Human, Dwarf', 'next t/two, t/three']);
+	const three = text('t/three', ['step S', '  turnin 7'], ['pitch Three']);
+	const split = compile({ '1.guide': choice, '2.guide': text('t/two', ['step S', '  turnin 7'], ['race Dwarf', 'pitch Two']), '3.guide': three });
+	assert.deepEqual(only(split.warnings, /never turned in/), [
+		`1.guide:${lineOf(choice, '  accept 7')}: quest 7 (Kobold Camp Cleanup) is accepted but never turned in on the route through "t/two" for some of the characters it applies to (it is for Dwarf only, so its turn-ins do not count)`,
+	]);
+	const lone = compile(guideText(['step S', '  accept 7'])).diag.warnings.find((d) => /never turned in/.test(d.message));
+	assert.equal(lone.hint, 'turn it in later in this guide or in a guide after it, or make the accept `optional` when the player may leave it');
+});
+
+test('an objective index past the quest\'s objectives names them, with a hint', () => {
+	const src = guideText(['step S', '  accept 7', '  kill 6 quest 7.2', '  turnin 7']);
+	const d = compile(src).diag.warnings.find((x) => /objective\(s\) in data/.test(x.message));
+	assert.equal(d.line, lineOf(src, '  kill 6 quest 7.2'));
+	assert.equal(d.message, 'quest 7 has 1 objective(s) in data, not 2: 7.1 = kill Kobold Vermin x10');
+	assert.equal(d.hint, 'write `quest 7.<n>` with one of these (`polestar find 7` lists them)');
 });
 
 test('`complete` on a quest without objectives warns: the turn-in is the action', () => {

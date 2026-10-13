@@ -2,7 +2,7 @@
 // Argument parsing and diagnostics printing shared by the toolchain commands.
 
 const path = require('node:path');
-const { format } = require('./diag');
+const { FORMATS, format, formatDiagnostics } = require('./diag');
 
 // parseArgs(argv, { flags: ['--link'], options: ['--dest'] })
 // -> { opts: { link: true, dest: '...' }, positional: [], error }
@@ -41,15 +41,31 @@ function resolvePath(value, fallbackFromRoot, root) {
 	return value ? path.resolve(value) : path.join(root, fallbackFromRoot);
 }
 
-function printDiagnostics(diag, { quiet = false } = {}) {
-	for (const d of diag.sorted()) {
-		if (quiet && d.severity === 'warning') continue;
-		(d.severity === 'error' ? console.error : console.warn)(format(d));
+// diag: a Diagnostics, or an array of diagnostics already in order (pack.json's).
+// `format` (FORMATS): text goes to stderr, one line (plus its hint) per
+// diagnostic; json (one document) and github annotations go to stdout.
+// `quiet` leaves the warnings out; json still counts them.
+function printDiagnostics(diag, { quiet = false, format: fmt = 'text' } = {}) {
+	const all = Array.isArray(diag) ? diag : diag.sorted();
+	const items = all.filter((d) => !(quiet && d.severity === 'warning'));
+	if (fmt === 'json') {
+		console.log(formatDiagnostics(items, 'json', all));
+		return;
 	}
+	if (fmt === 'github') {
+		if (items.length) console.log(formatDiagnostics(items, 'github'));
+		return;
+	}
+	for (const d of items) (d.severity === 'error' ? console.error : console.warn)(format(d));
+}
+
+// The --format option's error, or null.
+function formatError(value) {
+	return value === undefined || FORMATS.includes(value) ? null : `unknown --format ${value} (use ${FORMATS.join(', ')})`;
 }
 
 function plural(n, word) {
 	return `${n} ${word}${n === 1 ? '' : 's'}`;
 }
 
-module.exports = { parseArgs, resolvePath, printDiagnostics, plural };
+module.exports = { parseArgs, resolvePath, printDiagnostics, formatError, plural };

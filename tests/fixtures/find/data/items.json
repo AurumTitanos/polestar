@@ -1,0 +1,12 @@
+{
+	"2832": {
+		"id": 2832,
+		"name": "Verna's Westfall Stew Recipe",
+		"drops": {
+			"npc": {},
+			"object": {}
+		},
+		"vendors": [],
+		"questItem": true
+	}
+}

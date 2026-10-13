@@ -6,6 +6,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { runAddon } = require('./helpers/lua');
+const { TEST_PACK, TEST_SOURCE } = require('./helpers/packs');
 
 const CORE = { name: 'Polestar', files: ['Core/Core.xml'] };
 
@@ -19,7 +20,7 @@ w.race, w.faction, w.class, w.className, w.level = "Orc", "Horde", "WARRIOR", "W
 // The Crossroads: Thork (3429) twice, Gazrog (3464), Zargh (3489), then a
 // field step, then accept/kill/turn-in at one NPC.
 const GUIDE = `
-Polestar.RegisterGuide({ id = "xr", title = "Crossroads", faction = "Horde", minLevel = 10, maxLevel = 20, zone = 1413, steps = {
+Polestar.RegisterGuide({ id = "test/xr", pack = "test", title = "Crossroads", faction = "Horde", minLevel = 10, maxLevel = 20, zone = 1413, steps = {
 	{ title = "The Crossroads", goals = {
 		{ t = "turnin", quest = 840, title = "Conscript of the Horde", npc = 3429, npcName = "Thork", map = 1413, x = 51.5, y = 30.3 },
 		{ t = "accept", quest = 842, title = "Crossroads Conscription", npc = 3429, npcName = "Thork", map = 1413, x = 51.5, y = 30.3 },
@@ -46,7 +47,9 @@ function run({ before = '', guides = GUIDE, script }) {
 		stubs: ['stub_world.lua'],
 		before: WORLD + before,
 		addons: [CORE],
-		script: `${guides}
+		script: `${TEST_PACK}
+${TEST_SOURCE}
+			${guides}
 			E = Polestar.Engine
 			function flush() stub.advance(0.25) end
 			function groups(i)
@@ -58,7 +61,7 @@ function run({ before = '', guides = GUIDE, script }) {
 				return { groups = out, focus = v.focus or false }
 			end
 			stub.login()
-			E.SetGuide("xr")
+			E.SetGuide("test/xr")
 			Polestar.Set("behavior.autoAccept", false)
 			Polestar.Set("behavior.autoTurnin", false)
 			${script}`,
@@ -164,10 +167,10 @@ test('skipped and unavailable goals do not hold the focus', () => {
 	});
 });
 
-// Camp Taurajo after the Bristleback camp (04-barrens step 14): Mangletooth's
+// Camp Taurajo after the Bristleback camps (04-the-barrens step 31): Mangletooth's
 // chain, then optional item quests, then a note.
 const TAURAJO = `
-	Polestar.RegisterGuide({ id = "tj", title = "Taurajo", faction = "Horde", minLevel = 10, maxLevel = 30, steps = {
+	Polestar.RegisterGuide({ id = "test/tj", pack = "test", title = "Taurajo", faction = "Horde", minLevel = 10, maxLevel = 30, steps = {
 		{ title = "Camp Taurajo", goals = {
 			{ t = "turnin", quest = 878, title = "Tribes at War", npc = 3430, npcName = "Mangletooth", map = 1413, x = 44.8, y = 59.1 },
 			{ t = "accept", quest = 879, title = "Betrayal from Within", npc = 3430, npcName = "Mangletooth", map = 1413, x = 44.8, y = 59.1 },
@@ -187,7 +190,7 @@ test('a done step viewed with Prev has no focus and no waypoint, even with an op
 		guides: TAURAJO,
 		before: 'stub.world.complete({ 878 }); stub.world.onQuest(879, { 1 })',
 		script: `
-			E.SetGuide("tj")
+			E.SetGuide("test/tj")
 			local r = { at = E.GetStepIndex() }
 			E.Prev(); flush()
 			local v = E.GetStepView(E.GetStepIndex())
@@ -203,7 +206,7 @@ test('the waypoint never leaves the focus group: an unlocated focus points nowhe
 		guides: TAURAJO,
 		before: 'stub.world.complete({ 878 }); stub.world.onQuest(879, { 1 })',
 		script: `
-			E.SetGuide("tj")
+			E.SetGuide("test/tj")
 			local r = { at = E.GetStepIndex() }
 			r.wp = E.GetWaypoint() or false
 			emit(r)
@@ -215,13 +218,13 @@ test('the waypoint never leaves the focus group: an unlocated focus points nowhe
 
 	const [split] = run({
 		guides: `
-			Polestar.RegisterGuide({ id = "sp", title = "Split", faction = "Horde", minLevel = 1, maxLevel = 60, steps = { { goals = {
+			Polestar.RegisterGuide({ id = "test/sp", pack = "test", title = "Split", faction = "Horde", minLevel = 1, maxLevel = 60, steps = { { goals = {
 				{ t = "turnin", quest = 840, title = "Conscript of the Horde", npc = 3429, npcName = "Thork" },
 				{ t = "accept", quest = 869, title = "Raptor Thieves", npc = 3464, npcName = "Gazrog", map = 1413, x = 51.9, y = 30.8 },
 			} } } })
 		`,
 		before: 'stub.world.onQuest(840, {})',
-		script: 'E.SetGuide("sp"); emit({ focus = groups(1).focus, wp = E.GetWaypoint() or false })',
+		script: 'E.SetGuide("test/sp"); emit({ focus = groups(1).focus, wp = E.GetWaypoint() or false })',
 	});
 	// Thork has no location here: the arrow must not jump to Gazrog, whom the window does not show yet.
 	assert.deepEqual(split, { focus: 1, wp: false });
@@ -229,7 +232,7 @@ test('the waypoint never leaves the focus group: an unlocated focus points nowhe
 
 test('smart candidates group by the chosen NPC', () => {
 	const guides = `
-		Polestar.RegisterGuide({ id = "sm", title = "Smart", faction = "Horde", minLevel = 1, maxLevel = 60, steps = { { goals = {
+		Polestar.RegisterGuide({ id = "test/sm", pack = "test", title = "Smart", faction = "Horde", minLevel = 1, maxLevel = 60, steps = { { goals = {
 			{ t = "train", skill = "First Aid", skillLine = 129, rank = 1, candidates = {
 				{ npc = 3373, npcName = "Arnok", map = 1413, x = 52, y = 31, faction = "H" },
 				{ npc = 5943, npcName = "Rawrk", map = 1413, x = 20, y = 80, faction = "H" },
@@ -246,7 +249,7 @@ test('smart candidates group by the chosen NPC', () => {
 	const [out] = run({
 		guides,
 		script: `
-			E.SetGuide("sm")
+			E.SetGuide("test/sm")
 			local r = { near = groups(1) }
 			E.CycleCandidate(1, 2) -- the learn goes to Rawrk now
 			r.cycled = groups(1)
@@ -266,13 +269,13 @@ test('smart candidates group by the chosen NPC', () => {
 test('GuideFocus gives the live-frame position of the first goal on the guide zone', () => {
 	const [out] = run({
 		guides: GUIDE + `
-			Polestar.RegisterMapFrames({ era = { [1413] = { c = 1, left = 1100, right = -900, top = 1100, bottom = -2900 } } })
-			Polestar.RegisterGuide({ id = "era", title = "Era", faction = "Horde", minLevel = 1, maxLevel = 60, zone = 1413, steps = {
+			Polestar.RegisterMapFrames({ era = { [1413] = { c = 1, left = 1100, right = -900, top = 1100, bottom = -2900 } } }, "test")
+			Polestar.RegisterGuide({ id = "test/era", pack = "test", title = "Era", faction = "Horde", minLevel = 1, maxLevel = 60, zone = 1413, steps = {
 				{ goals = { { t = "goto", map = 1411, x = 10, y = 10 }, { t = "goto", map = 1413, x = 50, y = 50, f = "e" } } } } })
 		`,
 		script: `
-			local x, y = E.GuideFocus("xr")
-			local ex, ey = E.GuideFocus("era")
+			local x, y = E.GuideFocus("test/xr")
+			local ex, ey = E.GuideFocus("test/era")
 			emit({ { x, y }, { math.floor(ex * 100 + 0.5) / 100, math.floor(ey * 100 + 0.5) / 100 }, E.GuideFocus("nope") or false })
 		`,
 	});
@@ -282,23 +285,23 @@ test('GuideFocus gives the live-frame position of the first goal on the guide zo
 test('GuideFocus follows the current step of a guide open in a tab, and its start otherwise', () => {
 	const [out] = run({
 		guides: GUIDE + `
-			Polestar.RegisterGuide({ id = "away", title = "Away", faction = "Horde", minLevel = 10, maxLevel = 20, zone = 1413, steps = {
+			Polestar.RegisterGuide({ id = "test/away", pack = "test", title = "Away", faction = "Horde", minLevel = 10, maxLevel = 20, zone = 1413, steps = {
 				{ goals = { { t = "goto", map = 1413, x = 40, y = 60 } } },
 				{ goals = { { t = "goto", map = 1411, x = 10, y = 10 } } },
 			} })
 		`,
 		script: `
 			local function at(id) local x, y = E.GuideFocus(id); return { x or false, y or false } end
-			local r = { first = at("xr") }
+			local r = { first = at("test/xr") }
 			E.Goto(2); flush()
-			r.field = at("xr")
+			r.field = at("test/xr")
 			E.Goto(3); flush()
-			r.gazrog = at("xr")
-			E.OpenTab("away")
+			r.gazrog = at("test/xr")
+			E.OpenTab("test/away")
 			E.Goto(2); flush()
-			r.awayElsewhere = at("away")
+			r.awayElsewhere = at("test/away")
 			E.CloseTab(1); flush()
-			r.closed = at("xr")
+			r.closed = at("test/xr")
 			emit(r)
 		`,
 	});

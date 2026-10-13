@@ -232,7 +232,9 @@ test('a rare drop out of reach: chance, the reason, Guide me off; a curated guid
 	assert.equal(out.drop.enabled, false);
 	assert.match(out.drop.note, /No source is open/);
 	assert.equal(out.curated.primary, 'Open guide');
-	assert.match(out.curated.note, /Westfall/);
+	// Neutral wording: the curated guide may come from a guide pack.
+	assert.match(out.curated.note, /^A guide covers this: .*Westfall.*\.$/);
+	assert.doesNotMatch(out.curated.note, /Polestar/);
 	assert.deepEqual(out.call, ['mount', 8631, false]);
 	assert.match(out.failed, /nosource/);
 	assert.equal(out.still, true);

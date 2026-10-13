@@ -1,0 +1,14 @@
+# Fixture: a step no class can finish (tests/playtest.test.js): its goto is
+# on a map the game has no frame for, so the player can never arrive.
+guide stuck/northshire
+title Stuck Fixture
+faction Alliance
+race Human
+levels 1-6
+zone Elwynn Forest
+
+step Northshire Abbey
+  goto 48.2,42.0 "Northshire Abbey"
+
+step Never finished
+  goto 50,50 map 9999 "Nowhere"

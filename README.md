@@ -46,6 +46,11 @@ start, and keeps the one that reaches 60 soonest under its model; the guides
 are written from that route and scored under the same model
 ([How the routes are made](#how-the-routes-are-made)).
 
+Guide packs written by other players install the same way, next to Polestar
+([Installing a guide pack](#installing-a-guide-pack)). On the first login a short welcome walks
+through the guide window, setup and guide packs (`/polestar welcome` shows it
+again).
+
 > [!NOTE]
 > **Beta.** Every guide compiles, lints and plays to the end in a simulator
 > for every race and class it serves, but nothing has been play-tested on
@@ -281,6 +286,9 @@ finds any setting.
 | `mount` | Look up the mount of your target (or mouseover) and how to get it |
 | `rares [test]` | Open Rares, or show a sample rare alert |
 | `questdb` | Quest database status |
+| `packs` | Open Options > Guide packs |
+| `welcome` | Show the welcome again |
+| `where` | Print your map and position as guide lines (`zone map <id>`, `goto x,y live`), in a box to copy |
 | `debug` | Toggle debug output |
 
 The Recorder has its own: `/lsrec on | off | mark <text> | clear` and a
@@ -441,6 +449,31 @@ on one line):
 Every verb, modifier and condition is in
 [docs/GUIDE_FORMAT.md](docs/GUIDE_FORMAT.md).
 
+### Writing a guide pack
+
+Anyone can write guides for Polestar and publish them as a **guide pack**: an
+addon that depends on Polestar. The tools work on a pack the way they work on
+ours: run them inside the pack's folder, or give them the pack's folder
+(`polestar lint ../joes-routes`, or `--pack <dir>`).
+[docs/PACKS.md](docs/PACKS.md) is the handbook for writing one (setup, a first
+pack in 15 minutes, testing, publishing);
+[docs/PACK_FORMAT.md](docs/PACK_FORMAT.md) is the format.
+
+| Command | What it does |
+|---|---|
+| `new [dir]` | Start a pack from the template |
+| `doctor` | Check Node, Lua, the reference data, the AddOns folder and `pack.json` |
+| `dev` | Lint and build into the game on every save (`--play`: with the playground) |
+| `find <text>` | Look up quests, NPCs, objects, items and guides as guide lines |
+| `lint`, `compile` | Check (`--format` rewrites the files in the canonical layout), and build into `dist/<folder>/` |
+| `playtest [--filter text]` | Play every guide to the end for every class |
+| `play` | The playground with the pack loaded |
+| `install` | Build the pack and install it into the game |
+| `pack` | Build `dist/<folder>-<version>.zip`: exactly the pack's files, its LICENSE as `LICENSE.txt`, byte for byte reproducible |
+| `record draft`, `sim compare` | A draft from recorded play into `drafts/`; the pack's chain scored beside ours |
+
+`npm link` in a clone puts `polestar` on the PATH for these.
+
 ## Install
 
 1. Download `Polestar-0.1.0.zip` from the
@@ -455,6 +488,16 @@ Every verb, modifier and condition is in
    - `World of Warcraft/_classic_beta_/Interface/AddOns/` during the beta
 3. Restart the game completely. A `/reload` does not pick up new addon
    folders.
+
+### Installing a guide pack
+
+Packs written by other players install like any addon: extract the pack's zip
+into the same AddOns folder, next to the `Polestar` folders, and restart the
+game. Its guides appear in the hub under "Guide packs", credited to their
+author. Options > Guide packs (`/polestar packs`) lists every installed pack
+with its status and problems, switches a pack's guides off and on, and picks
+where the guide for your level is suggested from. Each pack is made and
+supported by its author.
 
 Optional: `Polestar_Recorder-0.1.0.zip`, extracted the same way, records
 your sessions to improve the routes. It does nothing until you turn it on.
@@ -489,7 +532,7 @@ node tools/polestar.js version            # the release version in package.json 
 node tools/polestar.js pack               # release zips and SHA256SUMS into dist/
 ```
 
-The suite (984 tests) runs on every push in
+The suite (1186 tests) runs on every push in
 [CI](.github/workflows/ci.yml), where the tests that need the locally built
 data skip with a reason; with the data built, all pass locally. `install`
 finds the client under Wine, Proton and similar prefixes in your home
@@ -510,16 +553,21 @@ the steps and what each zip carries.
 | `codex` | Build Lookup's Codex (`data/forever/codex` and the `Polestar_Codex` pack) |
 | `compile` | Compile `.guide` files into the `Polestar_Guides` addon |
 | `data` | Build the reference data (`data/forever/*.json`) |
+| `dev` | Lint and build a guide pack into the game on every save |
+| `doctor` | Check the setup for writing a guide pack |
 | `draft` | Generate a first-draft leveling route (`.guide`) from the reference data |
 | `dungeons` | Build the dungeon data (`data/forever/dungeons.json`) |
+| `find` | Look up quests, NPCs, objects, items and guides as guide lines |
 | `gear` | Build the upgrade-advice data (item stats, reward choices, stat weights) |
 | `install` | Install the addons into the Forever client |
 | `itemdb` | Build the `Polestar_ItemDB` data addon from client tables |
 | `lint` | Check `.guide` files without writing output |
 | `maps` | Build world map data (zone level ranges, zone art overlays) |
 | `media` | Regenerate the addon's textures from code (`tools/media`) |
-| `pack` | Build the release zips |
+| `new` | Start a guide pack from the template |
+| `pack` | Build the release zips, or a guide pack's zip |
 | `play` | Play with the real addon in the browser |
+| `playtest` | Play guides to the end for every class in the simulator |
 | `preview` | Render the UI to `docs/preview/*.svg` |
 | `profession` | Build profession data; draft a 1-300 profession guide |
 | `qol` | Build the Quality of Life data (spirit healers, flight masters) |
@@ -629,6 +677,12 @@ The Inter typeface (SIL Open Font License 1.1) ships with the addon; the
 POLESTAR wordmark is cut from Cinzel (SIL Open Font License 1.1) and ships
 only as images. The README's banner, logo and charts are drawn by
 [`tools/readme`](tools/readme) from the same sources.
+
+[LICENSE-EXCEPTION.md](LICENSE-EXCEPTION.md) adds a permission under section
+7: guide packs produced by Polestar's compiler, including the reference data
+it places in them, may be distributed under terms of the pack author's
+choice (not guide text copied from Polestar's own guides, nor Polestar's
+code).
 
 <p align="center"><img src="docs/assets/emblem.svg" width="28" alt=""></p>
 

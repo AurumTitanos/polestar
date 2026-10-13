@@ -6,6 +6,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { runAddon } = require('./helpers/lua');
+const { TEST_PACK, TEST_SOURCE } = require('./helpers/packs');
 
 const CORE = { name: 'Polestar', files: ['Core/Core.xml'] };
 
@@ -20,7 +21,7 @@ w.titles[871] = "Disrupt the Attacks"; w.titles[872] = "Supplies for the Crossro
 // Quest 872 needs 871 done (pre), 880 needs level 14, 870 is simply not
 // offered (another chain), all from Thork (3429) at the Crossroads.
 const GUIDE = `
-Polestar.RegisterGuide({ id = "xr", title = "Crossroads", faction = "Horde", minLevel = 10, maxLevel = 20, steps = {
+Polestar.RegisterGuide({ id = "test/xr", pack = "test", title = "Crossroads", faction = "Horde", minLevel = 10, maxLevel = 20, steps = {
 	{ title = "Thork", goals = {
 		{ t = "accept", quest = 872, title = "Supplies for the Crossroads", npc = 3429, npcName = "Thork", pre = { 871 }, map = 1413, x = 51, y = 30 },
 		{ t = "accept", quest = 880, title = "Altered Beings", npc = 3429, npcName = "Thork", minLevel = 14 },
@@ -44,7 +45,9 @@ function run({ before = '', guides = GUIDE, script }) {
 		stubs: ['stub_world.lua'],
 		before: WORLD + before,
 		addons: [CORE],
-		script: `${guides}
+		script: `${TEST_PACK}
+${TEST_SOURCE}
+${guides}
 			E = Polestar.Engine
 			function flush() stub.advance(0.25) end
 			function brief(i)
@@ -53,7 +56,7 @@ function run({ before = '', guides = GUIDE, script }) {
 				return out
 			end
 			stub.login()
-			E.SetGuide("xr")
+			E.SetGuide("test/xr")
 			Polestar.Set("behavior.autoAccept", false) -- the tests take quests themselves
 			${script}`,
 	}).emitted;
@@ -152,7 +155,7 @@ test('the marks clear on level-up and on any turn-in, and the guide goes back to
 test('prerequisites: every `preAll` must be done, one `pre` suffices; the text names the missing one', () => {
 	// 890 needs 871 and 873 (preAll); 891 needs 871 or 873 (pre). Only 871 is done.
 	const guide = `
-	Polestar.RegisterGuide({ id = "xr", title = "Crossroads", faction = "Horde", minLevel = 10, maxLevel = 20, steps = {
+	Polestar.RegisterGuide({ id = "test/xr", pack = "test", title = "Crossroads", faction = "Horde", minLevel = 10, maxLevel = 20, steps = {
 		{ title = "Thork", goals = {
 			{ t = "accept", quest = 890, title = "Both First", npc = 3429, npcName = "Thork", preAll = { 871, 873 }, preTitles = { [873] = "The Other Errand" } },
 			{ t = "accept", quest = 891, title = "Either First", npc = 3429, npcName = "Thork", pre = { 871, 873 } },
@@ -175,7 +178,7 @@ test('an accept closed for good (its breadcrumb target or an exclusive quest tak
 	// 1483 leads to 1093 (a breadcrumb); 1507 is exclusive with 1472 (the
 	// Undercity version of the chain).
 	const guide = `
-	Polestar.RegisterGuide({ id = "xr", title = "Ratchet", faction = "Horde", minLevel = 10, maxLevel = 30, steps = {
+	Polestar.RegisterGuide({ id = "test/xr", pack = "test", title = "Ratchet", faction = "Horde", minLevel = 10, maxLevel = 30, steps = {
 		{ title = "Givers", goals = {
 			{ t = "accept", quest = 1483, title = "Ziz Fizziks", npc = 3442, npcName = "Sputtervalve", closedBy = { 1093 }, preTitles = { [1093] = "Super Reaper 6000" }, map = 1413, x = 62, y = 37 },
 			{ t = "accept", quest = 1507, title = "Devourer of Souls", npc = 5875, npcName = "Gan'rul Bloodeye", closedBy = { 1472 }, preTitles = { [1472] = "Devourer of Souls" } },
@@ -198,7 +201,7 @@ test('an accept closed for good (its breadcrumb target or an exclusive quest tak
 
 test('when a mark moves the guide on, the guide window says which quest was skipped and why; a normal completion says nothing', () => {
 	const guide = `
-	Polestar.RegisterGuide({ id = "xr", title = "Crossroads", faction = "Horde", minLevel = 10, maxLevel = 30, steps = {
+	Polestar.RegisterGuide({ id = "test/xr", pack = "test", title = "Crossroads", faction = "Horde", minLevel = 10, maxLevel = 30, steps = {
 		{ title = "Thork", goals = { { t = "accept", quest = 870, title = "The Forgotten Pools", npc = 3429, npcName = "Thork", map = 1413, x = 51.5, y = 30.3 } } },
 		{ title = "Gazrog", goals = { { t = "accept", quest = 869, title = "Raptor Thieves", npc = 3464, npcName = "Gazrog", map = 1413, x = 51.9, y = 30.8 } } },
 		{ goals = { { t = "level", level = 30 } } },
@@ -207,12 +210,14 @@ test('when a mark moves the guide on, the guide window says which quest was skip
 		stubs: ['stub_world.lua'],
 		before: WORLD,
 		addons: ['Polestar'],
-		script: `${guide}
+		script: `${TEST_PACK}
+${TEST_SOURCE}
+${guide}
 			local E, w = Polestar.Engine, stub.world
 			local B = Polestar.UI.GuideFrame.parts.banner
 			local function banner() return B:IsShown() and B.Text:GetText() or false end
 			stub.login()
-			E.SetGuide("xr")
+			E.SetGuide("test/xr")
 			stub.fire("QUEST_LOG_UPDATE") -- the client fills the quest log after login
 			Polestar.Set("behavior.autoAccept", false)
 			stub.advance(0.5)
@@ -232,7 +237,7 @@ test('when a mark moves the guide on, the guide window says which quest was skip
 
 // Farm spots for `collect 2589 x20 nearest` (Linen Cloth).
 const FARM = (spots) => `
-	Polestar.RegisterGuide({ id = "farm", title = "Linen", category = "Professions", minLevel = 1, maxLevel = 60, steps = {
+	Polestar.RegisterGuide({ id = "test/farm", pack = "test", title = "Linen", category = "Professions", minLevel = 1, maxLevel = 60, steps = {
 		{ goals = { { t = "collect", item = 2589, itemName = "Linen Cloth", count = 20, candidates = { ${spots} } } } },
 		{ goals = { { t = "level", level = 60 } } },
 	} })
@@ -243,10 +248,12 @@ function farmPick(spots, before = '') {
 		stubs: ['stub_world.lua'],
 		before: WORLD + before,
 		addons: [CORE],
-		script: `${FARM(spots)}
+		script: `${TEST_PACK}
+${TEST_SOURCE}
+${FARM(spots)}
 			E = Polestar.Engine
 			stub.login()
-			E.SetGuide("farm")
+			E.SetGuide("test/farm")
 			local v = E.GetStepView(1).goals[1]
 			emit({ name = v.npcName or false, lvl = v.lvl or false, alts = v.alternatives, detail = v.detail or false })`,
 	}).emitted;

@@ -1,9 +1,12 @@
 # Polestar guide format (v1)
 
-Guides are written as `.guide` text files under `guides/` and compiled to Lua
-by `node tools/polestar.js compile`. The compiler fills in names, titles and
-coordinates from the reference data in `data/forever/`, so a line can be as
-short as `accept 783`. Anything you write explicitly wins over the data.
+Guides are written as `.guide` text files in a guide pack (Polestar's own:
+`guides/`; a community pack: any folder holding a `pack.json`, see
+[PACKS.md](PACKS.md)) and compiled to Lua by `node tools/polestar.js compile`.
+The compiler fills in names, titles and coordinates from the reference data in
+`data/forever/`, so a line can be as short as `accept 783`. Anything you write
+explicitly wins over the data. Worked examples of every goal are in the
+Cookbook at the end of this page.
 
 ```
 guide forever/alliance/human/01-northshire
@@ -50,7 +53,7 @@ Every line before the first `step`.
 
 | Key | Required | Value |
 |---|---|---|
-| `guide` | yes, first line | id: `[a-z0-9/_-]+`, unique across all guides |
+| `guide` | yes, first line | id: `[a-z0-9/_-]+`, unique across all guides; it starts with the pack's id and `/` (`joe-routes/elwynn`; Polestar's own guides: `forever/`) |
 | `title` | yes | rest of line |
 | `levels` | yes | `<min>-<max>` |
 | `zone` | yes | default zone: map name from `data/forever/zones.json`, or `map <uiMapID>` |
@@ -62,19 +65,20 @@ Every line before the first `step`.
 | `folder` | no | the guide menu folder this guide is listed under, any category (e.g. `Mounts · Level 40`, `Companion pets · Vendors`). Guides sharing a folder sort by faction (yours first), then level. Without it: the category's folder (Leveling: by faction and level band). |
 | `keywords` | no | comma list of extra words the guide menu search matches (e.g. the colours a mount guide covers); an empty entry is an error, a repeated one a warning |
 | `collects` | no | comma list of item ids this guide obtains (a mount guide: every colour it sells). Compiled as `collects = { ... }`; the Lookup module opens this guide for those items instead of building one. Malformed or repeated ids are errors; an id missing from `items.json` is a warning. |
-| `author` | no | default `Polestar` |
+| `author` | no | default: the pack's author (`pack.json`) |
 | `version` | no | integer, default `1` |
 | `coords` | no | `era` (default) or `live`: the map frame of coordinates typed in this guide (`@x,y`, `goto`, `explore`). Era-frame ones compile with `f = "e"`; on a map without Era bounds they compile live. `record draft` writes `coords live`. |
 | `pitch` | no | one line selling the zone, shown on its card in the route choice window (required, as a warning, when the guide is a route option) |
 | `pro` / `con` | no | repeatable: one advantage / disadvantage per line, shown under the pitch. Keep them short, factual and true for every race that can choose the route. |
 
-A route choice, as excerpts of two guides' headers:
+A route choice, as excerpts of two guides' headers (a pack's Tirisfal guide
+offering our Barrens or its own Silverpine):
 
 ```
-# guides/forever/horde/undead/01-tirisfal.guide
-next forever/horde/02-barrens, forever/horde/02-silverpine
+# guides/tirisfal.guide
+next forever/horde/02-the-barrens, joe-routes/silverpine
 
-# guides/forever/horde/02-silverpine.guide
+# guides/silverpine.guide
 pitch Undercity's backyard: a compact forest with the Forsaken's own story and short walks between quests.
 pro Ends in the Undercity, where the next guide starts: no zeppelin ride
 con Hunters, Shamans and Druids have no trainer here: they train next in Orgrimmar at about 22
@@ -237,6 +241,12 @@ Errors fail `compile` and `lint`; warnings print.
 Errors:
 - syntax errors, unknown verbs or modifiers, malformed IDs or coordinates
 - duplicate guide ids; `next` pointing to an unknown guide
+- a `next` guide (or route option) no character of this guide can follow: of
+  the other faction, or whose `race` or `class` leaves none of this guide's
+  characters (no race in common, no class in common, or no race of this guide
+  that can be one of its classes): `no Human character can follow
+  forever/alliance/dwarf-gnome/01-dun-morogh (it is for Dwarf/Gnome only)`.
+  A partial overlap is fine
 - a step with no goals
 - quest, npc, item or object id unknown in data **and** no explicit name/title
 - profession, faction or spell unknown in data **and** no quoted name; a faction
@@ -255,7 +265,7 @@ Errors:
 - `accept` for a quest whose `races`/`classes` exclude every character the
   step or goal can apply to
 - coordinates outside 0–100
-- required elite work in a `Leveling` guide (elite work may appear there only as
+- required elite work in a `Leveling` guide (a warning in other packs; elite work may appear there only as
   an `optional` extra, with the tip `<Target> is elite: grouping up is advised.`):
   a non-`optional` `kill` of an npc of rank 1–3 (elite, rare elite, boss) hostile
   to a side the goal applies to (a friendly one is a talk credit), or `collect` of
@@ -270,11 +280,16 @@ Warnings:
   earlier in the chain: the game does not offer it while that quest is in the
   log or done
 - a non-`optional` `accept` never turned in later in the guide or the guides
-  after it, checked for every route choice
+  after it, checked for every route choice; when a next guide's race or class
+  leaves out the characters still holding the quest, the warning says so (its
+  turn-ins do not count for them)
 - `complete` on a quest with no objectives: the turn-in is the action; use `turnin`
 - explicit coordinates more than 50 yards from every known spawn of the entity
 - ids missing from data but given explicit names/coordinates (new Forever content)
 - objective-capable goals with no coordinates
+- `quest Q.O` past the quest's objectives (the warning lists them as
+  `7.1 = kill Kobold Vermin x10`), or an objective goal whose target is none
+  of the quest's objectives
 - a `craft` before any `learn` of that spell earlier in the chain (free starter
   recipes excepted); `until <N>` past the recipe's grey skill
 - a coordinate on a map other than the step's zone that the guide never sets as
@@ -289,11 +304,245 @@ Warnings:
   `elite` is an error, above)
 
 These quest checks count a goal only for the characters its `only` (and the
-quest's own race and class masks) leaves.
+quest's own race and class masks) leaves. Most messages carry a `hint:` line
+saying how to fix them.
 
 ## Output
 
-One Lua file per guide at `addon/Polestar_Guides/Guides/<id>.lua` (nested by the `/` in the id), plus
-`MapFrames.lua` (Era bounds for referenced maps), `Pack.lua` and the
-`Pack.xml` manifest. Output is deterministic: the same inputs give
-byte-identical files.
+`compile` writes the pack's addon folder (Polestar's: `addon/Polestar_Guides/`;
+another pack's: `dist/<folder>/`): the generated TOC, `Pack.lua`,
+`MapFrames.lua` (Era bounds for referenced maps), `Guides.lua` (one
+`RegisterGuide` per guide, each in its own function) and `LICENSE-DATA.txt`,
+plus the pack folder's `LICENSE` copied as `LICENSE.txt` when it has one.
+[PACK_FORMAT.md](PACK_FORMAT.md) describes them. Output is deterministic: the
+same inputs give byte-identical files.
+
+## Cookbook
+
+Worked examples, from guides that lint clean and play to the end. Every id
+here was looked up with `polestar find`; look up yours the same way.
+
+### Quests: `accept`, `complete`, `collect`, `turnin`
+
+```
+step Goldshire
+  tip Marshal Dughan and Remy stand in front of the inn.
+  accept 62
+  accept 47
+
+step Fargodeep Mine
+  goto 39.5,80.0 "Fargodeep Mine"
+  complete 62                          -- Walk through the mine
+  collect 773 x10 quest 47.1           -- Gold Dust from the kobolds
+
+step Back in Goldshire
+  turnin 62
+  turnin 47
+```
+
+The compiler fills in each quest's title, giver, turn-in NPC and coordinates.
+`quest 47.1` ties the collect to the quest's first objective, so the guide
+window counts it from the quest log. `complete` finishes every objective of a
+quest with nothing more specific to track.
+
+### Killing: `kill`
+
+```
+  kill 299 x8 optional                -- Young Wolves around the camp
+  kill 6 x10 quest 7.1
+```
+
+A `kill` with `quest Q.O` counts from the quest log; without it the player
+ticks it ("Patterns" below). Kill and drop goals get spawn areas from the
+data, so the arrow leads to the nearest camp. `polestar find <quest id>`
+lists a quest's objectives as `7.1 = kill Kobold Vermin x10`: the `7.1` is
+the `quest 7.1` to write.
+
+### Places: `goto`, `explore`
+
+```
+  goto 39.5,80.0 "Fargodeep Mine"
+  goto 46.0,55.0 live "Lift to the bluff"
+  explore 39.5,80.0 "Fargodeep Mine"
+```
+
+Typed coordinates are in the Era map frame unless the guide says `coords
+live` or the goal says `live`. In game, `/polestar where` gives your own
+position as `zone map <id>` and `goto <x>,<y> live`, ready to paste, and the
+`@x,y live` form for any other goal.
+
+### People and things: `talk`, `interact`, `use`
+
+```
+  talk 295 optional
+  interact 176793 quest 5545.1        -- Bundles of wood lie under the trees
+  use 5411 quest 754.1 @51.8,68.4     -- Winterhoof Cleansing Totem
+```
+
+### Travel: `sethome`, `hearth`, `getfp`, `fly`
+
+```
+  sethome "Goldshire" npc 295         -- Innkeeper Farley, inside
+  hearth "Goldshire"
+  getfp "Thunder Bluff" npc 2995      -- Tal, on the top of the bluff
+  fly "Crossroads"
+```
+
+Locations are written as the game names them. `sethome nearest` binds at the
+nearest inn of the player's faction instead.
+
+### Errands: `train`, `buy`, `vendor`, `level`, `note`
+
+```
+  vendor nearest
+  buy 159 x5 nearest                  -- Refreshing Spring Water
+  train class
+  level 9
+  note You can train First Aid with any trainer of it in a city.
+```
+
+`nearest` and `train class` pick the trainer or vendor at runtime, by the
+player's faction and where they stand.
+
+### Professions: `train`, `learn`, `craft`, `skill`
+
+```
+step First Aid
+  train First Aid
+  learn 3275
+  craft 3275 until 40
+  skill "First Aid" 40
+```
+
+### Reputation and challenges: `rep`, `achieve`
+
+```
+  rep Stormwind Friendly optional
+  achieve 6 "Level 10" optional
+```
+
+`achieve` always needs the achievement's quoted name.
+
+### Class- and race-only steps
+
+A header `race` or `class` limits the whole guide; `only` limits one step or
+one goal:
+
+```
+guide joe-routes/mulgore
+title Bloodhoof Village
+faction Horde
+race Tauren
+levels 6-10
+zone Mulgore
+
+step Hunters only
+  only Hunter
+  train class                         -- your next spells
+
+step Class quests
+  note "Your class quest starts in Thunder Bluff." only Warrior,Shaman
+```
+
+A goal's `only` comes after its arguments, so a `note` with one needs its text
+in quotes. `only !Hunter` is every class but Hunters. Playtest plays each
+class a guide names, plus one it never names.
+
+### Route choices
+
+`next` with several ids lets the player choose where to level next; the first
+is the default. Each option needs a `pitch`, and may have `pro` and `con`
+lines:
+
+```
+guide joe-routes/mulgore
+next joe-routes/thunder-bluff, forever/horde/02-the-barrens
+
+guide joe-routes/thunder-bluff
+pitch Train, shop and take the flight to the Crossroads.
+pro Every trainer in one city
+con A long ride down the lift
+next forever/horde/02-the-barrens
+```
+
+### Optional extras
+
+`optional` goals never hold the step: side quests, a rare, a reputation along
+the way. An elite in a Leveling guide belongs here, with the tip
+"<Name> is elite: grouping up is advised."
+
+```
+  accept 184 optional                -- Only if you looted a Westfall Deed: right-click it
+  kill 299 x8 optional
+```
+
+### Handing over to our guides
+
+A pack's guide may end by handing over to any of Polestar's guides. Pick one
+its characters can follow: `polestar find --kind guide <zone>` prints each
+guide's level range and who it is for, and `--race`/`--class` keep only the
+ones such a character can follow:
+
+```sh
+polestar find --kind guide westfall --race Human
+#   next forever/alliance/02-westfall  # Westfall (12-17), Alliance
+#   # its next: forever/alliance/03-darkshore
+```
+
+A guide for Humans cannot hand over to the Dwarf and Gnome guide
+(`… # Dun Morogh (1-13), Dwarf/Gnome only`): lint stops it. Start the next
+guide near the level yours ends at, and put its id in `next`:
+
+```
+next forever/alliance/02-westfall
+```
+
+Lint and playtest load Polestar's guides beside yours, so the handover is
+checked and played: a hand-over that does not land on our guide with
+something to do, or lands on one that does not apply to the character
+(`no Human can follow it`), is reported as stuck at the hand-over. Turn-ins
+in our guide of quests your guide accepted count too.
+
+### Patterns
+
+**Several objectives at once.** The goals of one step are open together:
+each counts as soon as it is done, in any order, and the step ends when every
+goal that holds it is done. The arrow leads to the first open one (click a
+row to aim at another). Put objectives the player works in the same area in
+one step:
+
+```
+step Kobolds and wolves
+  kill 6 x10 quest 7.1                -- Kobold Vermin
+  collect 750 x8 quest 33.1           -- Tough Wolf Meat, from the wolves
+```
+
+**An optional side chain.** Mark every goal of the side quest `optional`:
+it never holds a step, the player may dismiss it, and lint does not ask for
+its turn-in. Keep it in steps that also have a goal that holds them: a step
+of `optional` goals only is done at once, and the guide moves past it.
+
+```
+step Deputy Willem
+  turnin 783
+  accept 7
+  accept 5261 optional                -- a short errand to Eagan Peltskinner
+
+step Kobolds
+  kill 6 x10 quest 7.1
+  turnin 5261 optional                -- Eagan stands by the path
+```
+
+**Leveling up before moving on.** `level <N>` holds its step until the
+character reaches level N. End a guide with it when the next guide's zone
+needs a level the route may not reach by itself:
+
+```
+step Ready for Westfall
+  level 12
+```
+
+**A bare `kill <npc>`** (no `quest`) is a check-off: Polestar does not count
+the kills, so the player ticks the goal in the guide window, and until they
+do it holds the step, unless it is `optional`. Tie a kill that serves a quest
+to the objective with `quest Q.O` so the quest log counts it.

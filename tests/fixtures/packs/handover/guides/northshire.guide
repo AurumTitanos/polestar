@@ -1,0 +1,31 @@
+# Fixture: a hand-over that happens in the middle of the simulator's last
+# act (tests/playtest.test.js). Step 1 does our Northshire Abbey step, so our
+# guide opens further in; the last goal of the four-goal step 3 hands over.
+guide handover/northshire
+title Hand-over Mid-act
+faction Alliance
+race Human
+levels 1-6
+zone Elwynn Forest
+next forever/alliance/human/01-elwynn-forest
+
+step Northshire Abbey
+  accept 33
+  accept 91743
+  accept 91745
+  accept 92124
+  turnin 92124
+  accept 783
+  turnin 783
+  accept 91758
+  accept 7
+  accept 5261
+
+step The steps
+  goto 48.2,42.0 "Northshire Abbey"
+
+step Around the Abbey
+  goto 48.0,41.0 "North"
+  goto 49.0,42.0 "East"
+  goto 48.0,43.0 "South"
+  goto 47.0,42.0 "West"

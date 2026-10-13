@@ -6,8 +6,10 @@
 // tools/play/driver.lua. Each interaction runs one Lua chunk, lets stub time
 // run, dumps the visible frames and draws them with tools/preview/render.js,
 // returning the SVG, the hit map (tools/play/public/hit.js) and the state.
+// `packs`: other guide packs' built folders (absolute), loaded by their TOC
+// after Polestar_Guides, as the client loads them.
 //
-//   const s = new Session({ dataDir, artDir, config });
+//   const s = new Session({ dataDir, artDir, config, packs });
 //   await s.start();
 //   const frame = await s.act({ type: 'click', id, x, y });   // { svg, glyphs, hits, state, errors, timing }
 //   await s.stop({ save: true });
@@ -24,9 +26,9 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { findLua } = require('../lib/lua');
-const { tocFiles } = require('../../tests/helpers/lua');
+const { tocFiles, dirFiles } = require('../../tests/helpers/lua');
 const { localPacks } = require('../../tests/helpers/profile');
-const { SIMULATE, HOME, luaValue } = require('../../tests/helpers/guide-sim');
+const { SIMULATE, HOME, luaValue } = require('../lib/playtest');
 const { Font } = require('../preview/font');
 const { svg, TextureCache, readTGA, png } = require('../preview/render');
 
@@ -43,12 +45,12 @@ const CLASS_IDS = { WARRIOR: 1, PALADIN: 2, HUNTER: 3, ROGUE: 4, PRIEST: 5, SHAM
 const CLASS_NAMES = { WARRIOR: 'Warrior', PALADIN: 'Paladin', HUNTER: 'Hunter', ROGUE: 'Rogue', PRIEST: 'Priest', SHAMAN: 'Shaman', MAGE: 'Mage', WARLOCK: 'Warlock', DRUID: 'Druid' };
 const RACE_NAMES = { Human: 'Human', Orc: 'Orc', Dwarf: 'Dwarf', NightElf: 'Night Elf', Scourge: 'Undead', Tauren: 'Tauren', Gnome: 'Gnome', Troll: 'Troll', Skyborne: 'Skyborne' };
 
-// The goal logic of the guide simulator (tests/helpers/guide-sim.js): its
+// The goal logic of the guide simulator (tools/lib/playtest.js): its
 // setup and act(), without the loop that plays the whole guide.
 const SIM_CUT = 'local visited, stuck, guard';
 function simActSource() {
 	const cut = SIMULATE.indexOf(SIM_CUT);
-	if (cut < 0) throw new Error(`tests/helpers/guide-sim.js SIMULATE no longer has "${SIM_CUT}": update tools/play/session.js`);
+	if (cut < 0) throw new Error(`tools/lib/playtest.js SIMULATE no longer has "${SIM_CUT}": update tools/play/session.js`);
 	return SIMULATE.slice(0, cut);
 }
 
@@ -208,8 +210,9 @@ function hitMap(layout) {
 const ADVANCE = { hover: 0.25, leave: 0.25, dragMove: 0.05, dragStart: 0.05, render: 0, default: 0.4 };
 
 class Session {
-	constructor({ dataDir, artDir = null, config = {}, timeoutMs = 60000, log = () => {} }) {
+	constructor({ dataDir, artDir = null, config = {}, packs = [], timeoutMs = 60000, log = () => {} }) {
 		this.dataDir = dataDir;
+		this.packs = packs;
 		this.artDir = artDir && fs.existsSync(path.join(artDir, 'maps.json')) ? artDir : null;
 		this.config = config;
 		this.timeoutMs = timeoutMs;
@@ -294,6 +297,7 @@ end`);
 		if (fs.existsSync(path.join(ROOT, 'addon', 'Polestar_Travel', 'Polestar_Travel.toc'))) {
 			lines.push(`__load("Polestar_Travel", { ${tocFiles('Polestar_Travel').map(luaString).join(', ')} }, {})`);
 		}
+		for (const dir of this.packs) lines.push(`__load(${luaString(path.basename(dir))}, { ${dirFiles(dir).map(luaString).join(', ')} }, {})`);
 		lines.push('stub.login()', 'stub.advance(1)', 'play.serve()');
 		return lines.join('\n');
 	}
@@ -301,6 +305,8 @@ end`);
 	async start() {
 		this.generation++;
 		fs.mkdirSync(this.dataDir, { recursive: true });
+		// A restart's program replaces the last one; stop() removes the final file.
+		if (this.programFile) fs.rmSync(this.programFile, { force: true });
 		const file = path.join(os.tmpdir(), `polestar-play-${process.pid}-${this.generation}.lua`);
 		fs.writeFileSync(file, this.program());
 		this.programFile = file;

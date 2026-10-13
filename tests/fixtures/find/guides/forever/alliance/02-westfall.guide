@@ -1,0 +1,9 @@
+# Fixture: a guide header for tests/find.test.js.
+guide forever/alliance/02-westfall
+title Westfall
+faction Alliance
+levels 7-16
+zone Westfall
+
+step Sentinel Hill
+  goto 56.4,30.5 "Sentinel Hill"

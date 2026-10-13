@@ -7,11 +7,12 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { tmpdir, quiet, fakeAddons } = require('./fixtures/dsl/helpers');
+const { TOC_MARKER } = require('../tools/lib/pack/format');
 const install = require('../tools/commands/install');
 
 function compiledAddons() {
 	const root = fakeAddons(tmpdir());
-	fs.writeFileSync(path.join(root, 'Polestar_Guides', 'Pack.xml'), '<Ui>\n\t<Script file="Guides\\a.lua"/>\n</Ui>\n');
+	fs.writeFileSync(path.join(root, 'Polestar_Guides', 'Guides.lua'), 'do\n\tlocal function register()\n\t\tPolestar.RegisterGuide({ id = "forever/a" })\n\tend\n\tregister()\nend\n');
 	return root;
 }
 
@@ -68,7 +69,7 @@ test('the built data addons (Polestar_QuestDB, Polestar_ItemDB, Polestar_Codex) 
 	assert.equal(result, 0, out);
 	assert.match(out, /note: Polestar_ItemDB not built \(no Polestar_ItemDB\/Polestar_ItemDB\.toc\); skipping it/);
 	assert.match(out, /note: Polestar_Codex not built \(no Polestar_Codex\/Polestar_Codex\.toc\); skipping it/);
-	assert.deepEqual(fs.readdirSync(dest).sort(), ['OtherAddon', 'Polestar', 'Polestar_Guides', 'Polestar_QuestDB']);
+	assert.deepEqual(fs.readdirSync(dest).sort(), ['Polestar', 'Polestar_Guides', 'Polestar_QuestDB', 'OtherAddon'].sort());
 	fakeAddons(src, ['Polestar_ItemDB', 'Polestar_Codex']);
 	const dry = await quiet(() => install.run(['--dest', dest, '--addons', src, '--dry-run'], {}));
 	assert.match(dry.out, /would replace Polestar_QuestDB[\s\S]*would add Polestar_ItemDB[\s\S]*would add Polestar_Codex/);
@@ -79,13 +80,13 @@ test('--dest copies only the Polestar folders, replacing old copies and leaving 
 	const dest = liveAddOns();
 	const { result, out } = await quiet(() => install.run(['--dest', dest, '--addons', src], {}));
 	assert.equal(result, 0, out);
-	assert.deepEqual(fs.readdirSync(dest).sort(), ['OtherAddon', 'Polestar', 'Polestar_Guides']);
+	assert.deepEqual(fs.readdirSync(dest).sort(), ['Polestar', 'Polestar_Guides', 'OtherAddon'].sort());
 	const after = snapshot(dest);
 	assert.equal(after['OtherAddon/OtherAddon.toc'], 'other\n');
 	assert.equal(after['Polestar/old-file.lua'], undefined, 'old copy replaced, not merged');
 	assert.equal(after['Polestar/Polestar.toc'], fs.readFileSync(path.join(src, 'Polestar', 'Polestar.toc'), 'utf8'));
 	assert.equal(after['Polestar/.hidden'], undefined, 'hidden files are not installed');
-	assert.ok(after['Polestar_Guides/Pack.xml']);
+	assert.ok(after['Polestar_Guides/Guides.lua']);
 	assert.equal(fs.existsSync(path.join(dest, 'Polestar_Recorder')), false, 'recorder only on request');
 });
 
@@ -116,6 +117,10 @@ test('$WOW_FOREVER_ADDONS is used when --dest is absent; --dest wins over it', a
 	assert.match(missing.out, /is not a folder/);
 });
 
+// Auto-detect tests pass this as the platform so they never reach a native
+// install on the machine running them (C:\Program Files (x86)\... or /Applications/...).
+const NO_NATIVE = { platform: 'linux' };
+
 test('auto-detect finds the Forever client in Wine/Proton/Faugus prefixes by its .flavor.info', () => {
 	const home = tmpdir();
 	const wow = path.join(home, 'Games', 'drive_c', 'Program Files (x86)', 'World of Warcraft');
@@ -125,20 +130,20 @@ test('auto-detect finds the Forever client in Wine/Proton/Faugus prefixes by its
 	flavorClient(wow, '_anniversary_', 'wow_anniversary');
 	// A "_classic_beta_" without a flavor file is not trusted.
 	flavorClient(path.join(home, '.wine', 'drive_c', 'Program Files (x86)', 'World of Warcraft'), '_classic_beta_', null);
-	let found = install.detectAddonsDirs(home);
+	let found = install.detectAddonsDirs(home, NO_NATIVE);
 	assert.deepEqual(found.map((f) => [f.addons, f.kind]), [[path.join(beta, 'Interface', 'AddOns'), 'beta']]);
-	assert.deepEqual(install.chooseDest({}, {}, home).dir, path.join(beta, 'Interface', 'AddOns'));
+	assert.deepEqual(install.chooseDest({}, {}, home, NO_NATIVE).dir, path.join(beta, 'Interface', 'AddOns'));
 
 	// After launch: a _forever_ client in a Faugus prefix wins over the beta.
 	const live = flavorClient(path.join(home, 'Faugus', 'battlenet', 'drive_c', 'Program Files (x86)', 'World of Warcraft'), '_forever_', 'wow_forever');
-	found = install.detectAddonsDirs(home);
+	found = install.detectAddonsDirs(home, NO_NATIVE);
 	assert.equal(found.length, 2);
-	assert.deepEqual(install.chooseDest({}, {}, home).dir, path.join(live, 'Interface', 'AddOns'));
+	assert.deepEqual(install.chooseDest({}, {}, home, NO_NATIVE).dir, path.join(live, 'Interface', 'AddOns'));
 
 	// Proton prefixes keep drive_c under pfx/.
 	const proton = flavorClient(path.join(home, '.local', 'share', 'Steam', 'steamapps', 'compatdata', '12345', 'pfx', 'drive_c', 'Program Files (x86)', 'World of Warcraft'), '_forever_', 'wow_forever');
-	assert.ok(install.detectAddonsDirs(home).some((f) => f.client === proton));
-	const two = install.chooseDest({}, {}, home);
+	assert.ok(install.detectAddonsDirs(home, NO_NATIVE).some((f) => f.client === proton));
+	const two = install.chooseDest({}, {}, home, NO_NATIVE);
 	assert.match(two.error, /several Forever clients found/);
 });
 
@@ -148,10 +153,10 @@ test('auto-detected installs create Interface/AddOns when the client has none ye
 	fs.mkdirSync(client, { recursive: true });
 	fs.writeFileSync(path.join(client, '.flavor.info'), 'Product Flavor!STRING:0\nwow_classic_beta\n');
 	const src = compiledAddons();
-	const { result, out } = await quiet(() => install.run(['--addons', src], { HOME: home }));
+	const { result, out } = await quiet(() => install.run(['--addons', src], { HOME: home }, NO_NATIVE));
 	assert.equal(result, 0, out);
 	assert.deepEqual(fs.readdirSync(path.join(client, 'Interface', 'AddOns')).sort(), ['Polestar', 'Polestar_Guides']);
-	const none = await quiet(() => install.run(['--addons', src], { HOME: tmpdir() }));
+	const none = await quiet(() => install.run(['--addons', src], { HOME: tmpdir() }, NO_NATIVE));
 	assert.equal(none.result, 1);
 	assert.match(none.out, /no World of Warcraft: Forever client found/);
 });
@@ -178,4 +183,136 @@ test('install refuses to replace its own source, install into the source, or rep
 	assert.equal(fs.readFileSync(path.join(dest, 'Polestar', 'notes.txt'), 'utf8'), 'mine\n');
 	// Sources are untouched by all of the above.
 	for (const n of ['Polestar', 'Polestar_Guides']) assert.ok(fs.existsSync(path.join(src, n, `${n}.toc`)), n);
+});
+
+// Pack mode: a temp copy of the mini fixture pack, built with the fixture data
+// and the context fixture standing in for our guides.
+const PACKS = path.join(__dirname, 'fixtures', 'packs');
+const { DATA_DIR } = require('./fixtures/dsl/helpers');
+
+function miniCopy(manifest = null) {
+	const dir = tmpdir();
+	fs.cpSync(path.join(PACKS, 'mini'), dir, { recursive: true });
+	if (manifest) fs.writeFileSync(path.join(dir, 'pack.json'), JSON.stringify(manifest, null, '\t'));
+	return dir;
+}
+
+const packArgs = (dir) => ['--pack', dir, '--data', DATA_DIR, '--context', path.join(PACKS, 'context'), '--context-data', DATA_DIR];
+
+test('inside a pack, install builds it and installs its folder; a second install replaces it', async () => {
+	const pack = miniCopy();
+	const dest = liveAddOns();
+	const first = await quiet(() => install.run([...packArgs(pack), '--dest', dest], {}));
+	assert.equal(first.result, 0, first.out);
+	assert.match(first.out, /added PolestarPack_MiniPack/);
+	const folder = path.join(dest, 'PolestarPack_MiniPack');
+	assert.deepEqual(fs.readdirSync(folder).sort(), ['Guides.lua', 'LICENSE-DATA.txt', 'PolestarPack_MiniPack.toc', 'MapFrames.lua', 'Pack.lua'].sort());
+	assert.match(fs.readFileSync(path.join(folder, 'PolestarPack_MiniPack.toc'), 'utf8'), /## Title: Mini Pack/);
+	assert.ok(fs.existsSync(path.join(pack, 'dist', 'PolestarPack_MiniPack', 'Guides.lua')), 'built into the pack\'s dist/');
+	assert.deepEqual(fs.readdirSync(dest).sort(), ['Polestar', 'PolestarPack_MiniPack', 'OtherAddon'].sort(), 'only the pack folder is installed');
+	fs.writeFileSync(path.join(pack, 'guides', 'b.guide'), fs.readFileSync(path.join(pack, 'guides', 'b.guide'), 'utf8').replace('title Mini B', 'title Mini B2'));
+	const second = await quiet(() => install.run([...packArgs(pack), '--dest', dest], {}));
+	assert.equal(second.result, 0, second.out);
+	assert.match(second.out, /replaced PolestarPack_MiniPack/);
+	assert.match(fs.readFileSync(path.join(folder, 'Guides.lua'), 'utf8'), /Mini B2/);
+	const dry = await quiet(() => install.run([...packArgs(pack), '--dest', dest, '--dry-run'], {}));
+	assert.equal(dry.result, 0, dry.out);
+	assert.match(dry.out, /would replace PolestarPack_MiniPack/);
+});
+
+test('install refuses to replace a hand-made folder with the pack folder\'s name', async () => {
+	const pack = miniCopy();
+	const dest = tmpdir();
+	fs.mkdirSync(path.join(dest, 'PolestarPack_MiniPack'));
+	fs.writeFileSync(path.join(dest, 'PolestarPack_MiniPack', 'PolestarPack_MiniPack.toc'), '## Title: mine\n');
+	const before = snapshot(dest);
+	const { result, out } = await quiet(() => install.run([...packArgs(pack), '--dest', dest], {}));
+	assert.equal(result, 1, out);
+	assert.match(out, /refusing to install: .*PolestarPack_MiniPack: it is not a generated guide pack/);
+	assert.deepEqual(snapshot(dest), before);
+});
+
+test('install replaces an empty folder with the pack folder\'s name (the one folder rule)', async () => {
+	const pack = miniCopy();
+	const dest = tmpdir();
+	fs.mkdirSync(path.join(dest, 'PolestarPack_MiniPack'));
+	const { result, out } = await quiet(() => install.run([...packArgs(pack), '--dest', dest], {}));
+	assert.equal(result, 0, out);
+	assert.match(out, /replaced PolestarPack_MiniPack/);
+	assert.ok(fs.existsSync(path.join(dest, 'PolestarPack_MiniPack', 'Guides.lua')));
+});
+
+test('install refuses a generated folder of another pack with the same folder name, pointing to "folder" in pack.json', async () => {
+	const dest = tmpdir();
+	// Another pack titled "Mini Pack" (its own id) was installed into the same default folder.
+	const other = path.join(dest, 'PolestarPack_MiniPack');
+	fs.mkdirSync(other);
+	fs.writeFileSync(path.join(other, 'PolestarPack_MiniPack.toc'), `## Title: Mini Pack\n${TOC_MARKER}\n## X-Polestar-Pack: other-mini\n`);
+	const before = snapshot(dest);
+	const { result, out } = await quiet(() => install.run([...packArgs(miniCopy()), '--dest', dest], {}));
+	assert.equal(result, 1, out);
+	assert.match(out, /refusing to install: .*PolestarPack_MiniPack: it holds the guide pack "other-mini", not "mini"; set "folder" in pack\.json/);
+	assert.deepEqual(snapshot(dest), before);
+});
+
+test('install <dir> works on that pack: a dry run plans only its folder; two folders are a usage error', async () => {
+	const pack = miniCopy();
+	const dest = liveAddOns();
+	const before = snapshot(dest);
+	const ctx = ['--data', DATA_DIR, '--context', path.join(PACKS, 'context'), '--context-data', DATA_DIR];
+	const dry = await quiet(() => install.run([pack, ...ctx, '--dest', dest, '--dry-run'], {}));
+	assert.equal(dry.result, 0, dry.out);
+	assert.deepEqual(dry.out.split('\n').filter((l) => /^\s+would (add|replace)/.test(l)).map((l) => l.trim().split(' ').slice(0, 3).join(' ')), ['would add PolestarPack_MiniPack']);
+	assert.deepEqual(snapshot(dest), before);
+	const two = await quiet(() => install.run([pack, miniCopy(), '--dest', dest, '--dry-run'], {}));
+	assert.equal(two.result, 2, two.out);
+	assert.match(two.out, /one pack folder only, got 2/);
+	const none = await quiet(() => install.run([tmpdir(), '--dest', dest, '--dry-run'], {}));
+	assert.equal(none.result, 2, none.out);
+	assert.match(none.out, /no pack\.json in /);
+});
+
+test('a --context folder that does not exist is a usage error, not a crash', async () => {
+	const pack = miniCopy();
+	const dest = tmpdir();
+	const missing = path.join(tmpdir(), 'missing');
+	const { result, out } = await quiet(() => install.run(['--pack', pack, '--data', DATA_DIR, '--context', missing, '--dest', dest], {}));
+	assert.equal(result, 2, out);
+	assert.match(out, /--context .*missing is not a folder/);
+	assert.deepEqual(fs.readdirSync(dest), []);
+});
+
+test('a pack.json folder like ../x never reaches install: lint fails first and nothing is written', async () => {
+	const base = JSON.parse(fs.readFileSync(path.join(PACKS, 'mini', 'pack.json'), 'utf8'));
+	for (const folder of ['../x', '..', 'a/b', '/tmp/x']) {
+		const pack = miniCopy({ ...base, folder });
+		const root = tmpdir();
+		const dest = path.join(root, 'AddOns');
+		fs.mkdirSync(dest);
+		const { result, out } = await quiet(() => install.run([...packArgs(pack), '--dest', dest], {}));
+		assert.equal(result, 1, out);
+		assert.match(out, /folder ".*" is malformed/);
+		assert.deepEqual(fs.readdirSync(root), ['AddOns'], folder);
+		assert.deepEqual(fs.readdirSync(dest), [], folder);
+		assert.equal(fs.existsSync(path.join(pack, 'dist')), false, folder);
+	}
+});
+
+test('auto-detect finds native Windows and macOS installs by .flavor.info (platform and root injected)', async () => {
+	const home = tmpdir();
+	const winRoot = tmpdir();
+	const win = flavorClient(path.join(winRoot, 'Program Files (x86)', 'World of Warcraft'), '_classic_era_', 'wow_forever');
+	flavorClient(path.join(winRoot, 'Program Files (x86)', 'World of Warcraft'), '_retail_', 'wow');
+	assert.deepEqual(install.detectAddonsDirs(home, { platform: 'win32', root: winRoot }).map((f) => [f.addons, f.kind]), [[path.join(win, 'Interface', 'AddOns'), 'forever']]);
+	assert.equal(install.chooseDest({}, {}, home, { platform: 'win32', root: winRoot }).dir, path.join(win, 'Interface', 'AddOns'));
+	// install itself takes the same injection.
+	const { result, out } = await quiet(() => install.run(['--addons', compiledAddons()], { HOME: home }, { platform: 'win32', root: winRoot }));
+	assert.equal(result, 0, out);
+	assert.deepEqual(fs.readdirSync(path.join(win, 'Interface', 'AddOns')).sort(), ['Polestar', 'Polestar_Guides']);
+	const macRoot = tmpdir();
+	const mac = flavorClient(path.join(macRoot, 'Applications', 'World of Warcraft'), '_classic_era_', 'wow_forever');
+	assert.deepEqual(install.detectAddonsDirs(home, { platform: 'darwin', root: macRoot }).map((f) => f.client), [mac]);
+	// Each platform checks only its own native folder.
+	assert.deepEqual(install.detectAddonsDirs(home, { platform: 'darwin', root: winRoot }), []);
+	assert.deepEqual(install.detectAddonsDirs(home, { platform: 'linux', root: macRoot }), []);
 });

@@ -8,6 +8,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { runAddon } = require('./helpers/lua');
+const { TEST_PACK, TEST_SOURCE } = require('./helpers/packs');
 
 const CORE = { name: 'Polestar', files: ['Core/Core.xml'] };
 
@@ -19,7 +20,7 @@ w.class, w.className, w.level = "WARRIOR", "Warrior", 8
 `;
 
 const GUIDE = `
-Polestar.RegisterGuide({ id = "ns", title = "Northshire", faction = "Alliance", minLevel = 1, maxLevel = 10, steps = {
+Polestar.RegisterGuide({ id = "test/ns", pack = "test", title = "Northshire", faction = "Alliance", minLevel = 1, maxLevel = 10, steps = {
 	{ goals = { { t = "accept", quest = 783, title = "A Threat Within" } } },
 	{ goals = { { t = "talk", npc = 197, npcName = "Marshal McBride" } } },
 	{ only = { classes = { "WARRIOR" } }, goals = { { t = "train", npc = 911, npcName = "Llane Beshere" } } },
@@ -36,7 +37,9 @@ function run({ before = '', guides = GUIDE, saved, script }) {
 		before: WORLD + before,
 		addons: [CORE],
 		saved,
-		script: `${guides}
+		script: `${TEST_PACK}
+${TEST_SOURCE}
+${guides}
 			E = Polestar.Engine
 			function flush() stub.advance(0.25) end
 			stub.login()
@@ -48,13 +51,13 @@ test('lost SavedVariables or /polestar reset never rewind to soft steps before l
 	const [lost] = run({
 		before: 'stub.world.complete({ 783 }); stub.world.onQuest(7, {})',
 		saved: { Polestar: 'PolestarDB = nil; PolestarCharDB = nil' },
-		script: 'E.SetGuide("ns"); emit({ at = E.GetStepIndex(), latched = PolestarCharDB.manual.ns })',
+		script: 'E.SetGuide("test/ns"); emit({ at = E.GetStepIndex(), latched = PolestarCharDB.manual["test/ns"] })',
 	});
 	assert.deepEqual(lost, { at: 7, latched: { '2:1': true, '3:1': true, '4:1': true } });
 
 	const [reset] = run({
 		before: 'stub.world.complete({ 783 }); stub.world.onQuest(7, {})',
-		script: 'E.SetGuide("ns"); SlashCmdList.POLESTAR("reset"); flush(); emit(E.GetStepIndex())',
+		script: 'E.SetGuide("test/ns"); SlashCmdList.POLESTAR("reset"); flush(); emit(E.GetStepIndex())',
 	});
 	assert.equal(reset, 7);
 
@@ -62,17 +65,17 @@ test('lost SavedVariables or /polestar reset never rewind to soft steps before l
 	const [early] = run({
 		before: 'stub.world.onQuest(783, {})',
 		saved: { Polestar: 'PolestarCharDB = nil' },
-		script: 'E.SetGuide("ns"); emit(E.GetStepIndex())',
+		script: 'E.SetGuide("test/ns"); emit(E.GetStepIndex())',
 	});
 	assert.equal(early, 2);
 });
 
 test('a guide loaded at login is placed from the quest log even with stored check-offs, once the log is readable', () => {
-	const saved = { Polestar: 'PolestarCharDB = { schema = 1, tabs = { "ns" }, activeTab = 1, manual = { ns = { ["2:1"] = true } } }' };
+	const saved = { Polestar: 'PolestarCharDB = { schema = 1, tabs = { "test/ns" }, activeTab = 1, manual = { ["test/ns"] = { ["2:1"] = true } } }' };
 	const [atLogin] = run({
 		before: 'stub.world.complete({ 783 }); stub.world.onQuest(7, {})',
 		saved,
-		script: 'emit({ at = E.GetStepIndex(), latched = PolestarCharDB.manual.ns })',
+		script: 'emit({ at = E.GetStepIndex(), latched = PolestarCharDB.manual["test/ns"] })',
 	});
 	assert.deepEqual(atLogin, { at: 7, latched: { '2:1': true, '3:1': true, '4:1': true } });
 
@@ -94,11 +97,11 @@ test('after placement, soft steps hold during play: a quest taken out of order n
 		before: 'stub.world.onQuest(783, {})',
 		saved: { Polestar: 'PolestarCharDB = nil' },
 		script: `
-			E.SetGuide("ns")
+			E.SetGuide("test/ns")
 			stub.fire("QUEST_LOG_UPDATE"); flush()
 			local placed = E.GetStepIndex()
 			stub.world.turnIn(783); stub.world.accept(7, {}); flush()
-			emit({ placed = placed, after = E.GetStepIndex(), latched = PolestarCharDB.manual.ns or false })
+			emit({ placed = placed, after = E.GetStepIndex(), latched = PolestarCharDB.manual["test/ns"] or false })
 		`,
 	});
 	assert.deepEqual(out, { placed: 2, after: 2, latched: false });
@@ -107,7 +110,7 @@ test('after placement, soft steps hold during play: a quest taken out of order n
 test('class and race steps are no evidence for placement: their chains run on their own schedule', () => {
 	const [out] = run({
 		guides: `
-			Polestar.RegisterGuide({ id = "cls", title = "Class", minLevel = 1, maxLevel = 10, steps = {
+			Polestar.RegisterGuide({ id = "test/cls", pack = "test", title = "Class", minLevel = 1, maxLevel = 10, steps = {
 				{ goals = { { t = "train", npc = 911, npcName = "Llane Beshere" } } },
 				{ only = { classes = { "WARRIOR" } }, goals = { { t = "accept", quest = 50, title = "Class Chain" } } },
 				{ goals = { { t = "accept", quest = 51, title = "Next" } } },
@@ -115,15 +118,15 @@ test('class and race steps are no evidence for placement: their chains run on th
 		`,
 		before: 'stub.world.complete({ 50 })',
 		saved: { Polestar: 'PolestarCharDB = nil' },
-		script: 'E.SetGuide("cls"); emit(E.GetStepIndex())',
+		script: 'E.SetGuide("test/cls"); emit(E.GetStepIndex())',
 	});
 	assert.equal(out, 1);
 });
 
 test('check-offs and skips are discarded when the guide changes shape, kept otherwise', () => {
-	const saved = (shape) => `PolestarCharDB = { schema = 1, tabs = { "ns" }, activeTab = 1, shapes = { ns = ${shape} },
-		manual = { ns = { ["2:1"] = true } }, skipped = { ns = { [3] = true } } }`;
-	const script = 'emit({ shape = PolestarCharDB.shapes.ns, manual = PolestarCharDB.manual.ns or false, skipped = PolestarCharDB.skipped.ns or false, at = E.GetStepIndex() })';
+	const saved = (shape) => `PolestarCharDB = { schema = 1, tabs = { "test/ns" }, activeTab = 1, shapes = { ["test/ns"] = ${shape} },
+		manual = { ["test/ns"] = { ["2:1"] = true } }, skipped = { ["test/ns"] = { [3] = true } } }`;
+	const script = 'emit({ shape = PolestarCharDB.shapes["test/ns"], manual = PolestarCharDB.manual["test/ns"] or false, skipped = PolestarCharDB.skipped["test/ns"] or false, at = E.GetStepIndex() })';
 	const before = 'stub.world.onQuest(783, {})';
 	const [first] = run({ before, saved: { Polestar: saved('nil') }, script });
 	assert.deepEqual(first.manual, { '2:1': true }); // no fingerprint yet: kept
@@ -137,7 +140,7 @@ test('check-offs and skips are discarded when the guide changes shape, kept othe
 test('the waypoint prefers blocking goals over optional ones and notes', () => {
 	const [out] = run({
 		guides: `
-			Polestar.RegisterGuide({ id = "wp", title = "WP", minLevel = 1, maxLevel = 60, steps = { { goals = {
+			Polestar.RegisterGuide({ id = "test/wp", pack = "test", title = "WP", minLevel = 1, maxLevel = 60, steps = { { goals = {
 				{ t = "note", text = "Look", map = 1429, x = 10, y = 10 },
 				{ t = "collect", item = 1, itemName = "Cave loot", optional = true, map = 1429, x = 20, y = 20 },
 				{ t = "goto", map = 1429, x = 30, y = 30, text = "Camp" },
@@ -145,7 +148,7 @@ test('the waypoint prefers blocking goals over optional ones and notes', () => {
 			} } } })
 		`,
 		script: `
-			E.SetGuide("wp")
+			E.SetGuide("test/wp")
 			local first = E.GetWaypoint().goalIndex
 			stub.world.moveTo(1429, 30, 30); stub.advance(1)
 			emit({ first, E.GetWaypoint() and E.GetWaypoint().goalIndex or false })
@@ -157,16 +160,16 @@ test('the waypoint prefers blocking goals over optional ones and notes', () => {
 test('switching to a guide whose first waypoint sits at the same spot still announces it', () => {
 	const [out] = run({
 		guides: `
-			Polestar.RegisterGuide({ id = "first", title = "First", minLevel = 1, maxLevel = 60, steps = {
+			Polestar.RegisterGuide({ id = "test/first", pack = "test", title = "First", minLevel = 1, maxLevel = 60, steps = {
 				{ goals = { { t = "goto", map = 1429, x = 48, y = 42, text = "Deputy Willem" } } } } })
-			Polestar.RegisterGuide({ id = "second", title = "Second", minLevel = 1, maxLevel = 60, steps = {
+			Polestar.RegisterGuide({ id = "test/second", pack = "test", title = "Second", minLevel = 1, maxLevel = 60, steps = {
 				{ goals = { { t = "goto", map = 1429, x = 48, y = 42, text = "Willem at the gate", r = 4 } } } } })
 		`,
 		script: `
-			E.SetGuide("first")
+			E.SetGuide("test/first")
 			local seen = {}
 			Polestar.On("WAYPOINT_CHANGED", function(wp) seen[#seen + 1] = wp and (wp.label .. "/" .. wp.r) or "nil" end)
-			E.SetGuide("second")
+			E.SetGuide("test/second")
 			emit(seen)
 		`,
 	});
@@ -176,11 +179,11 @@ test('switching to a guide whose first waypoint sits at the same spot still anno
 test('unlabeled Era-frame coordinates are shown in the live frame', () => {
 	const [out] = run({
 		guides: `
-			Polestar.RegisterMapFrames({ era = { [1429] = { c = 0, left = 1600, right = -1400, top = 600, bottom = -1400 } } })
-			Polestar.RegisterGuide({ id = "era", title = "Era", minLevel = 1, maxLevel = 60, steps = {
+			Polestar.RegisterMapFrames({ era = { [1429] = { c = 0, left = 1600, right = -1400, top = 600, bottom = -1400 } } }, "guides")
+			Polestar.RegisterGuide({ id = "test/era", pack = "test", title = "Era", minLevel = 1, maxLevel = 60, steps = {
 				{ goals = { { t = "goto", map = 1429, x = 50, y = 50, f = "e" } } } } })
 		`,
-		script: 'E.SetGuide("era"); emit({ E.GetStepView(1).goals[1].text, E.GetWaypoint().label })',
+		script: 'E.SetGuide("test/era"); emit({ E.GetStepView(1).goals[1].text, E.GetWaypoint().label })',
 	});
 	assert.deepEqual(out, ['Go to 46.7, 45.0', 'Go to 46.7, 45.0']);
 });
@@ -190,7 +193,7 @@ test('guide-level races, classes and faction must be strings, so Suggest can nev
 		guides: '',
 		script: `
 			local function try(extra)
-				local def = { id = "x", title = "X", steps = { { goals = { { t = "level", level = 2 } } } } }
+				local def = { id = "test/x", pack = "test", title = "X", steps = { { goals = { { t = "level", level = 2 } } } } }
 				for k, v in pairs(extra) do def[k] = v end
 				local ok, err = Polestar.RegisterGuide(def)
 				return ok and "ok" or err
@@ -199,20 +202,20 @@ test('guide-level races, classes and faction must be strings, so Suggest can nev
 				Polestar.Guides.Suggest() or false })
 		`,
 	});
-	assert.deepEqual(out, ['bad races', 'bad classes', 'bad faction', 'ok', 'x']);
+	assert.deepEqual(out, ['bad races', 'bad classes', 'bad faction', 'ok', 'test/x']);
 });
 
 test('an achievement earned only by another character on the account is not done', () => {
 	const [out] = run({
 		guides: `
-			Polestar.RegisterGuide({ id = "lg", title = "Legacy", category = "Legacy", minLevel = 1, maxLevel = 60, steps = {
+			Polestar.RegisterGuide({ id = "test/lg", pack = "test", title = "Legacy", category = "Legacy", minLevel = 1, maxLevel = 60, steps = {
 				{ goals = { { t = "achieve", achievement = 9001, achievementName = "Legacy: Northshire" } } },
 				{ goals = { { t = "level", level = 60 } } },
 			} })
 		`,
 		before: 'stub.world.addAchievement(9001, "Legacy: Northshire", { { "A", 1 } }); stub.world.achievements[9001].account = true',
 		script: `
-			E.SetGuide("lg")
+			E.SetGuide("test/lg")
 			local before = { E.GetStepIndex(), Polestar.Compat.GetAchievement(9001).completed }
 			stub.world.criteria(9001, 1, 1); flush()
 			emit({ before = before, after = E.GetStepIndex() })

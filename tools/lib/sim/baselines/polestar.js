@@ -66,33 +66,70 @@ function shortNamer(ids, faction) {
 	return (id) => (counts.get(base(id)) === 1 ? base(id) : rel(id));
 }
 
-// Routes for a race: { default, variants: [{ label, choices, sequence }], graph }
+// Guide id -> its file (relative to dir); resolved guides drop it.
+function filesOf(dir, sources, into = new Map()) {
+	for (const rel of sources) {
+		const m = fs.readFileSync(path.join(dir, rel), 'utf8').match(/^guide\s+(\S+)/m);
+		if (m && !into.has(m[1])) into.set(m[1], rel);
+	}
+	return into;
+}
+
+// The race's first leveling guide: the lowest minLevel, then the id. With
+// `anyRace`, a guide naming no race (one for the whole faction) counts too.
+function firstFor(guides, rFile, { anyRace = false } = {}) {
+	return guides
+		.filter((g) => (g.races ? g.races.includes(rFile) : anyRace))
+		.sort((a, b) => (a.minLevel ?? 99) - (b.minLevel ?? 99) || (a.id < b.id ? -1 : 1))[0];
+}
+
+// Routes for a race: { default, variants: [{ label, choices, sequence }], graph, prefix }
 // or null when no Polestar guide starts that race. Event objects are shared
 // between the sequences; treat them as read-only.
-function loadPolestarRoutes({ guidesDir, dataDir, data = null, faction = null, race, cls = null, quests = null, maxPaths = MAX_ENUMERATED } = {}) {
+// With `pack` ({ dir, manifest }: another guide pack), the routes are that
+// pack's chain instead, compiled with our guides (guidesDir) as context: it
+// starts at the pack's first leveling guide for the race and follows `next`
+// and route choices, into our guides too. When it starts above level 1, our
+// default chain comes first (`prefix`, its guide ids): the race's starting
+// guide, then `next` (else the first route choice), up to and including the
+// guide whose maxLevel reaches the pack chain's first level.
+function loadPolestarRoutes({ guidesDir, dataDir, data = null, faction = null, race, cls = null, quests = null, maxPaths = MAX_ENUMERATED, pack = null } = {}) {
 	const rFile = raceFile(race);
 	// A one-side race implies its faction; Skyborne (both sides) needs one given.
 	const sides = Object.keys((RACES[lower(race).replace(/[\s_-]/g, '')] || {}).sides || {});
 	const fac = faction || (sides.length === 1 ? sides[0] : null);
 	if (!fac) throw new Error(`polestar: faction needed for race ${race}`);
-	const compiled = compileProject({ guidesDir, dataDir, data });
+	const compiled = compileProject({ packDir: guidesDir, dataDir, data });
 	if (!quests) quests = compiled.data && compiled.data.quests;
-	// Guide id -> its file (relative to guidesDir); resolved guides drop it.
-	const fileOf = new Map();
-	for (const rel of compiled.files) {
-		const m = fs.readFileSync(path.join(guidesDir, rel), 'utf8').match(/^guide\s+(\S+)/m);
-		if (m && !fileOf.has(m[1])) fileOf.set(m[1], rel);
+	const fileOf = filesOf(guidesDir, compiled.sources);
+	let guides = compiled.guides;
+	let packGuides = null;
+	if (pack) {
+		const p = compileProject({ packDir: pack.dir, manifest: pack.manifest, dataDir, data: compiled.data, contextDir: guidesDir, contextData: compiled.data });
+		packGuides = new Set(p.guides.map((g) => g.id));
+		filesOf(pack.dir, p.sources, fileOf);
+		guides = [...compiled.guides.filter((g) => !packGuides.has(g.id)), ...p.guides];
 	}
 	const clsFile = cls ? (CLASSES[lower(cls)] || {}).file || String(cls).toUpperCase() : null;
 	const ctx = { faction: fac, race: rFile, cls: clsFile };
 
-	const leveling = compiled.guides.filter((g) => g.category === 'Leveling' && (!g.faction || g.faction === fac));
+	const leveling = guides.filter((g) => g.category === 'Leveling' && (!g.faction || g.faction === fac));
 	const byId = new Map(leveling.map((g) => [g.id, g]));
-	const starts = leveling
-		.filter((g) => g.races && g.races.includes(rFile))
-		.sort((a, b) => (a.minLevel ?? 99) - (b.minLevel ?? 99) || (a.id < b.id ? -1 : 1));
-	const start = starts[0];
+	// A pack's chain may start at a guide for the whole faction; ours starts at the race's own guide.
+	const start = packGuides ? firstFor(leveling.filter((g) => packGuides.has(g.id)), rFile, { anyRace: true }) : firstFor(leveling, rFile);
 	if (!start) return null;
+	const lead = [];
+	const packFrom = start.minLevel ?? 1;
+	if (packGuides && packFrom > 1) {
+		const ours = (id) => byId.has(id) && !packGuides.has(id) && !lead.includes(id);
+		for (let g = firstFor(leveling.filter((x) => !packGuides.has(x.id)), rFile); g; ) {
+			lead.push(g.id);
+			if ((g.maxLevel ?? g.minLevel ?? 0) >= packFrom) break;
+			const nx = [g.next, ...(g.nextChoices || [])].find((id) => id && ours(id));
+			g = nx ? byId.get(nx) : null;
+		}
+	}
+	const name = pack ? pack.manifest.id : 'Polestar';
 
 	const options = (g) => {
 		const list = g.nextChoices && g.nextChoices.length ? g.nextChoices : g.next ? [g.next] : [];
@@ -122,7 +159,9 @@ function loadPolestarRoutes({ guidesDir, dataDir, data = null, faction = null, r
 		return eventCache.get(id);
 	};
 
-	const makeSequence = (ids, label) => {
+	// A sequence plays `lead` (our chain up to the pack's first level) before the path.
+	const makeSequence = (route, label) => {
+		const ids = [...lead, ...route];
 		const events = [];
 		for (const id of ids) events.push(...eventsOf(id));
 		const qids = [];
@@ -216,7 +255,7 @@ function loadPolestarRoutes({ guidesDir, dataDir, data = null, faction = null, r
 		}
 	}
 
-	const first = start.minLevel ?? 1;
+	const first = byId.get(lead.length ? lead[0] : start.id).minLevel ?? 1;
 	const rangeOf = (ids) => {
 		const last = byId.get(ids[ids.length - 1]);
 		return `${first}-${last.maxLevel ?? last.minLevel ?? '?'}`;
@@ -224,14 +263,15 @@ function loadPolestarRoutes({ guidesDir, dataDir, data = null, faction = null, r
 	const variants = paths.map((ids) => {
 		const choices = choicesOf(ids);
 		const label = labelOf(choices);
-		return { label, choices, sequence: makeSequence(ids, `Polestar ${rangeOf(ids)} ${label}`) };
+		return { label, choices, sequence: makeSequence(ids, `${name} ${rangeOf(ids)} ${label}`) };
 	});
-	const defKey = defIds.join('>');
+	const defKey = [...lead, ...defIds].join('>');
 	const defVariant = variants.find((v) => v.sequence.guides.map((x) => x.id).join('>') === defKey);
 	return {
-		default: defVariant ? defVariant.sequence : makeSequence(defIds, `Polestar ${rangeOf(defIds)} default`),
+		default: defVariant ? defVariant.sequence : makeSequence(defIds, `${name} ${rangeOf(defIds)} default`),
 		variants,
 		graph: { nodes, edges },
+		prefix: lead,
 		mode: count <= maxPaths ? 'all' : 'single-change',
 		pathCount: count > maxPaths ? null : count,
 	};

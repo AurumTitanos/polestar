@@ -13,9 +13,8 @@ const {
 const { watchSavedVariables } = require('../lib/recording/watch');
 const { draftGuide } = require('../lib/recording/draft');
 const { buildReport, formatReport } = require('../lib/recording/report');
-
-const ROOT = path.join(__dirname, '..', '..');
-const DRAFTS = path.join(ROOT, 'guides', 'drafts');
+const { resolvePack } = require('../lib/pack/locate');
+const { printDiagnostics } = require('../lib/dsl/cli');
 
 const usage = `usage: node tools/polestar.js record <subcommand> [options]
 
@@ -26,7 +25,9 @@ const usage = `usage: node tools/polestar.js record <subcommand> [options]
   watch                  Import again whenever the client rewrites the file
                          (keeps sessions safe from the cold-start SavedVariables reset)
   draft <session|file>   Write a draft guide from a session key or JSON file
-                         to guides/drafts/<faction>-<race>-<date>-<time>.guide
+                         to <pack>/drafts/<faction>-<race>-<date>-<time>.guide: the
+                         pack is --pack, else the nearest pack.json, else our
+                         guides/; another pack's draft id starts with "<pack id>/"
   list                   List imported sessions
   report                 Measure the guides from recorded play (Polestar + Recorder):
                          per step passes, median/p75 time, XP, XP/hr, combat share,
@@ -40,7 +41,8 @@ options:
                          e.g. ~/Games/drive_c/Program Files (x86)/World of Warcraft/_classic_beta_/WTF;
                          POLESTAR_WTF overrides)
   --out <dir|file>       import/watch/list: recordings folder (default data/recordings);
-                         draft: output .guide file or folder (default guides/drafts)
+                         draft: output .guide file or folder (default <pack>/drafts)
+  --pack <dir>           draft: the guide pack the draft belongs to
   --recordings <dir>     draft/report: where sessions are read (default data/recordings)
   --interval <ms>        watch: polling interval (default 1000)
   --force                draft: overwrite an existing draft
@@ -62,6 +64,7 @@ function parse(argv) {
 		else if (a === '--recordings') opts.recordings = value();
 		else if (a === '--interval') opts.interval = Number(value());
 		else if (a === '--force') opts.force = true;
+		else if (a === '--pack') opts.pack = value();
 		else if (a === '--guide') opts.guide = value();
 		else if (a === '--top') {
 			opts.top = Number(value());
@@ -146,8 +149,14 @@ function doDraft(opts) {
 	}
 	const file = resolveSession(arg, opts);
 	const session = JSON.parse(fs.readFileSync(file, 'utf8'));
-	const { id, name, text } = draftGuide(session);
-	let out = path.join(DRAFTS, `${name}.guide`);
+	const pack = resolvePack({ pack: opts.pack });
+	if (!pack.manifest) {
+		printDiagnostics(pack.diags);
+		console.error(`record draft: ${path.join(pack.dir, 'pack.json')} is invalid`);
+		return 1;
+	}
+	const { id, name, text } = draftGuide(session, { pack: pack.manifest.id });
+	let out = path.join(pack.dir, 'drafts', `${name}.guide`);
 	if (opts.out) out = opts.out.endsWith('.guide') ? path.resolve(opts.out) : path.join(path.resolve(opts.out), `${name}.guide`);
 	if (fs.existsSync(out) && !opts.force) {
 		console.error(`${rel(out)} exists (an author may have edited it); use --force to overwrite`);

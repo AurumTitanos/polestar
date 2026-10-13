@@ -143,6 +143,22 @@ class Data {
 		return (r && r[side] && r[side].classes) || [];
 	}
 
+	// A quest's objectives in data order as [{ index (1-based, the `O` of
+	// `quest Q.O`), kind (kill, item, object or event), id (null when the
+	// data has none), name, count (null when the data has none) }]; [] for an
+	// unknown quest or one without objectives.
+	questObjectives(questId) {
+		const q = this.quest(questId);
+		if (!q || !Array.isArray(q.objectives)) return [];
+		return q.objectives.map((o, i) => {
+			const kind = o && o.type ? String(o.type) : 'event';
+			const id = o && o.id != null ? o.id : null;
+			const e = id == null ? null : kind === 'kill' ? this.npc(id) : kind === 'item' ? this.item(id) : kind === 'object' ? this.object(id) : null;
+			const name = (e && e.name && String(e.name)) || (o && o.text ? String(o.text) : null);
+			return { index: i + 1, kind, id, name, count: o && Number(o.count) > 0 ? Number(o.count) : null };
+		});
+	}
+
 	indexProfessions(raw) {
 		this.professions = new Map(); // skillLine -> profession
 		this.professionByName = new Map();
@@ -272,4 +288,13 @@ class Data {
 	}
 }
 
-module.exports = { loadData, Data };
+// The guide verb for each objective kind (an event has none: the game ticks it).
+const OBJECTIVE_VERB = { kill: 'kill', item: 'collect', object: 'interact' };
+
+// One objective of questObjectives as "7.1 = kill Kobold Vermin x10".
+function objectiveLabel(questId, o) {
+	const what = o.name || (o.id != null ? `${o.kind} ${o.id}` : 'unnamed');
+	return `${questId}.${o.index} = ${OBJECTIVE_VERB[o.kind] || o.kind} ${what}${o.count ? ` x${o.count}` : ''}`;
+}
+
+module.exports = { loadData, Data, objectiveLabel };

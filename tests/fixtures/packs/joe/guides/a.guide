@@ -1,0 +1,11 @@
+# Fixture: a community pack (tests/pack-lint.test.js). Accepts quest 33,
+# which b turns in.
+guide joe/a
+title Joe A
+faction Alliance
+levels 6-8
+zone Elwynn Forest
+next joe/b
+
+step Wolves
+  accept 33

@@ -14,7 +14,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { luaToJson } = require('../lua');
-const { detectAddonsDirs } = require('../addons');
+const { detectAddonsDirs, nativeWowDir } = require('../addons');
 
 const ROOT = path.join(__dirname, '..', '..', '..');
 const DEFAULT_OUT = path.join(ROOT, 'data', 'recordings');
@@ -34,19 +34,21 @@ const FLAVORS = [
 // (detected by `install` in any Wine/Proton/Faugus/Lutris/Bottles prefix, then
 // the fixed paths), then every beta client, so a leftover beta WTF never
 // shadows the live one; then older fixed paths.
-function defaultWtfDirs(home = os.homedir()) {
+// `native` ({ platform, root }, tools/lib/addons.js nativeWowDir): which native
+// install to check; tests inject it so they never reach a real one.
+function defaultWtfDirs(home = os.homedir(), native = {}) {
 	const dirs = [];
 	const add = (d) => {
 		if (!dirs.includes(d)) dirs.push(d);
 	};
 	if (process.env.POLESTAR_WTF) add(process.env.POLESTAR_WTF);
-	const detected = detectAddonsDirs(home);
+	const detected = detectAddonsDirs(home, native);
 	const installs = [
 		path.join(home, 'Games', 'drive_c', 'Program Files (x86)', 'World of Warcraft'),
 		path.join(home, '.wine', 'drive_c', 'Program Files (x86)', 'World of Warcraft'),
 	];
-	if (process.platform === 'win32') installs.push('C:\\Program Files (x86)\\World of Warcraft');
-	if (process.platform === 'darwin') installs.push('/Applications/World of Warcraft');
+	const nativeDir = nativeWowDir(native);
+	if (nativeDir) installs.push(nativeDir);
 	for (const [kind, folder] of FLAVORS) {
 		for (const c of detected) if (kind && c.kind === kind) add(path.join(c.client, 'WTF'));
 		for (const base of installs) add(path.join(base, folder, 'WTF'));
@@ -56,9 +58,9 @@ function defaultWtfDirs(home = os.homedir()) {
 
 // All WTF/Account/*/SavedVariables/Polestar_Recorder.lua files. `sv` paths
 // win outright; otherwise `wtf` (one dir) or the default install locations.
-function findSavedVariables({ sv = [], wtf = null, home } = {}) {
+function findSavedVariables({ sv = [], wtf = null, home, native = {} } = {}) {
 	if (sv.length) return sv.map((p) => path.resolve(p));
-	const dirs = wtf ? [wtf] : defaultWtfDirs(home);
+	const dirs = wtf ? [wtf] : defaultWtfDirs(home, native);
 	const found = [];
 	for (const dir of dirs) {
 		const accounts = path.join(dir, 'Account');

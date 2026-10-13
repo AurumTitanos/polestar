@@ -1,0 +1,10 @@
+# Fixture: one error (an unknown quest, with a hint) and one warning (the
+# quest is never turned in) for lint's output formats (tests/lint-format.test.js).
+guide fmt/a
+title Format
+faction Alliance
+levels 1-6
+zone Elwynn Forest
+
+step Somewhere
+  accept 999999

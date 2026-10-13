@@ -1,0 +1,11 @@
+# Fixture: a stand-in for our guides, read as context when another pack is linted (tests/pack-lint.test.js).
+guide forever/alliance/01-start
+title Start
+faction Alliance
+levels 1-6
+zone Elwynn Forest
+next forever/alliance/02-next
+
+step Deputy Willem
+  accept 783
+  turnin 783

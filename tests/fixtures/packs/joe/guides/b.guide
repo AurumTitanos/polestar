@@ -1,0 +1,12 @@
+# Fixture: turns in quest 33 from joe/a, kills an elite (a house rule: a
+# warning in a pack) and hands over to our guides.
+guide joe/b
+title Joe B
+faction Alliance
+levels 6-8
+zone Elwynn Forest
+next forever/alliance/02-next
+
+step Back with the meat
+  turnin 33
+  kill 95003

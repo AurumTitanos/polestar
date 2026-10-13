@@ -1,0 +1,11 @@
+# Fixture: a race-limited guide header for tests/find.test.js.
+guide forever/alliance/human/01-elwynn-forest
+title Elwynn Forest
+faction Alliance
+race Human
+levels 1-13
+zone Elwynn Forest
+next forever/alliance/02-westfall
+
+step Northshire
+  goto 48.2,42.0 "Northshire Abbey"

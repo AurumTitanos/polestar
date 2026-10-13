@@ -47,16 +47,10 @@ test('pack zips Polestar + Polestar_Guides and the recorder separately, reproduc
 		'Polestar/Main.lua',
 		'Polestar/Polestar.toc',
 		'Polestar_Guides/',
-		'Polestar_Guides/Guides/',
-		'Polestar_Guides/Guides/forever/',
-		'Polestar_Guides/Guides/forever/alliance/',
-		'Polestar_Guides/Guides/forever/alliance/human/',
-		'Polestar_Guides/Guides/forever/alliance/human/01-northshire.lua',
-		'Polestar_Guides/Guides/forever/alliance/human/02-elwynn.lua',
+		'Polestar_Guides/Guides.lua',
 		'Polestar_Guides/LICENSE-DATA.txt',
 		'Polestar_Guides/MapFrames.lua',
 		'Polestar_Guides/Pack.lua',
-		'Polestar_Guides/Pack.xml',
 		'Polestar_Guides/Polestar_Guides.toc',
 	]);
 	assert.equal(python('-t', path.join(zips[0], `Polestar-${VERSION}.zip`)).status, 0);
@@ -150,4 +144,76 @@ test('zip: an entry that inflates past its declared size, or an archive past the
 	bomb.writeUInt32LE(16, cd + 24);
 	assert.throws(() => readZip(bomb), /corrupt entry/);
 	assert.throws(() => readZip(buildZip([{ name: 'a', data: Buffer.alloc(4096) }]), { maxTotal: 1024 }), /exceed the 1024-byte limit/);
+});
+
+test('inside a pack, pack writes dist/<folder>-<version>.zip with exactly its five files, reproducibly', () => {
+	const PACKS = path.join(__dirname, 'fixtures', 'packs');
+	const dir = tmpdir();
+	fs.cpSync(path.join(PACKS, 'mini'), dir, { recursive: true });
+	const cli = () =>
+		spawnSync(process.execPath, [path.join(__dirname, '..', 'tools', 'polestar.js'), 'pack', '--data', DATA_DIR, '--context', path.join(PACKS, 'context'), '--context-data', DATA_DIR], {
+			cwd: path.join(dir, 'guides'),
+			encoding: 'utf8',
+		});
+	const first = cli();
+	assert.equal(first.status, 0, first.stderr);
+	assert.deepEqual(fs.readdirSync(path.join(dir, 'dist')), ['PolestarPack_MiniPack-0.3.0.zip']);
+	const zip = path.join(dir, 'dist', 'PolestarPack_MiniPack-0.3.0.zip');
+	const bytes = fs.readFileSync(zip);
+	const entries = readZip(zip);
+	assert.deepEqual(
+		entries.map((e) => e.name),
+		['PolestarPack_MiniPack/', ...['Guides.lua', 'LICENSE-DATA.txt', 'MapFrames.lua', 'Pack.lua', 'PolestarPack_MiniPack.toc'].map((f) => `PolestarPack_MiniPack/${f}`)],
+	);
+	assert.match(entries.find((e) => e.name.endsWith('.toc')).data.toString('utf8'), /## Version: 0\.3\.0/);
+	const second = cli();
+	assert.equal(second.status, 0, second.stderr);
+	assert.ok(fs.readFileSync(zip).equals(bytes), 'identical across runs');
+});
+
+test("a pack's LICENSE ships in the zip as LICENSE.txt, byte for byte; its placeholder line warns until replaced", async () => {
+	const dir = tmpdir();
+	fs.cpSync(path.join(__dirname, 'fixtures', 'packs', 'mini'), dir, { recursive: true });
+	const args = ['--pack', dir, '--data', DATA_DIR, '--context', path.join(__dirname, 'fixtures', 'packs', 'context'), '--context-data', DATA_DIR];
+	const text = 'Mini Pack by Ann is dedicated to the public domain.\n\nThe full licence text.\n';
+	fs.writeFileSync(path.join(dir, 'LICENSE'), text);
+	const first = await quiet(() => pack.run(args));
+	assert.equal(first.result, 0, first.out);
+	const zip = path.join(dir, 'dist', 'PolestarPack_MiniPack-0.3.0.zip');
+	const entry = readZip(zip).find((e) => e.name === 'PolestarPack_MiniPack/LICENSE.txt');
+	assert.equal(entry && entry.data.toString('utf8'), text);
+	const bytes = fs.readFileSync(zip);
+	await quiet(() => pack.run(args));
+	assert.ok(fs.readFileSync(zip).equals(bytes), 'identical across runs');
+	// The line `new` writes for a licence it has no text for.
+	fs.writeFileSync(path.join(dir, 'LICENSE'), 'Licensed under CC0-1.0: replace this line with the full text of that licence.\n');
+	const lint = await quiet(() => require('../tools/commands/lint').run(args));
+	assert.equal(lint.result, 0, lint.out);
+	assert.match(lint.out, /LICENSE:1: warning: LICENSE still holds the placeholder line `polestar new` writes, not the licence text\n {2}hint: replace the line with the full text of the CC0-1\.0 licence: the built addon ships LICENSE as LICENSE\.txt/);
+});
+
+test('pack refuses a pack with errors and writes nothing', async () => {
+	const dir = tmpdir();
+	fs.cpSync(path.join(__dirname, 'fixtures', 'packs', 'mini'), dir, { recursive: true });
+	fs.writeFileSync(path.join(dir, 'pack.json'), JSON.stringify({ id: 'mini', title: 'Mini', author: 'Ann', version: '1', license: 'CC0-1.0', folder: '../escape' }));
+	const { result, out } = await quiet(() => pack.run(['--pack', dir, '--data', DATA_DIR, '--context', path.join(__dirname, 'fixtures', 'packs', 'context'), '--context-data', DATA_DIR]));
+	assert.equal(result, 1, out);
+	assert.match(out, /folder "\.\.\/escape" is malformed/);
+	assert.equal(fs.existsSync(path.join(dir, 'dist')), false);
+});
+
+test('our release: the guide pack folder is not checked for a TOC before it is generated, and write errors are reported', async () => {
+	const addons = fakeAddons(tmpdir(), ['Polestar', 'Polestar_Recorder']);
+	const dist = tmpdir();
+	const ok = await quiet(() => pack.run(['--guides', GUIDES_DIR, '--data', DATA_DIR, '--addons', addons, '--dist', dist]));
+	assert.equal(ok.result, 0, ok.out);
+	assert.doesNotMatch(ok.out, /Polestar_Guides\.toc says version/);
+	assert.ok(fs.existsSync(path.join(addons, 'Polestar_Guides', 'Polestar_Guides.toc')));
+	// A Polestar_Guides folder we did not generate is refused cleanly.
+	const foreign = fakeAddons(tmpdir(), ['Polestar', 'Polestar_Recorder']);
+	fs.mkdirSync(path.join(foreign, 'Polestar_Guides'));
+	fs.writeFileSync(path.join(foreign, 'Polestar_Guides', 'mine.txt'), 'mine\n');
+	const bad = await quiet(() => pack.run(['--guides', GUIDES_DIR, '--data', DATA_DIR, '--addons', foreign, '--dist', tmpdir()]));
+	assert.equal(bad.result, 1, bad.out);
+	assert.match(bad.out, /^pack failed: refusing to write into .*Polestar_Guides/m);
 });

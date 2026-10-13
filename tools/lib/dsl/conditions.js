@@ -169,6 +169,41 @@ function maskExcludes(set, quest) {
 	return null;
 }
 
+// The characters every layer allows (applicable), as "race|class" keys, each
+// race only with the classes `classesOf(race, side)` lists (class files; an
+// empty list, or no `classesOf`, allows every class). Two layers fit a common
+// character when their key sets share one.
+function characterKeys(layers, classesOf = null) {
+	const set = applicable(layers);
+	const out = new Set();
+	for (const race of set.races) {
+		for (const side of raceSides(race)) {
+			if (!set.factions.includes(side)) continue;
+			const can = classesOf ? classesOf(race, side) : null;
+			for (const cls of set.classes) if (!can || !can.length || can.includes(cls)) out.add(`${race}|${cls}`);
+		}
+	}
+	return out;
+}
+
+// Names as guides write them: race files except Scourge (written Undead),
+// classes in title case.
+function raceLabel(file) {
+	return file === 'Scourge' ? 'Undead' : file;
+}
+
+function classLabel(file) {
+	return file.charAt(0) + file.slice(1).toLowerCase();
+}
+
+// Who a layer ({ faction, races, classes }) is for: "Dwarf/Gnome", "Human
+// Paladin", "Alliance Paladin", "Alliance" or "both factions".
+function whoLabel({ faction = null, races = null, classes = null }) {
+	const r = races && races.length ? races.map(raceLabel).join('/') : faction;
+	const c = classes && classes.length ? classes.map(classLabel).join('/') : null;
+	return [r, c].filter(Boolean).join(' ') || 'both factions';
+}
+
 module.exports = {
 	CLASSES,
 	CLASS_FILES,
@@ -181,4 +216,8 @@ module.exports = {
 	applicable,
 	raceSides,
 	maskExcludes,
+	characterKeys,
+	raceLabel,
+	classLabel,
+	whoLabel,
 };

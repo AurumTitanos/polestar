@@ -202,7 +202,9 @@ local function guideList()
 end
 
 if ns.On then
+	-- Guides.List leaves hidden packs' guides out: re-index when one switches.
 	ns.On("GUIDES_REGISTERED", function() guideIndex = nil end)
+	ns.On("PACKS_CHANGED", function() guideIndex = nil end)
 end
 
 ---------------------------------------------------------------------------

@@ -58,3 +58,11 @@ URL: https://wago.tools/db2?build=1.60.1.70338
 Revision: wow_classic_beta 1.60.1.70338
 License: Blizzard Entertainment game client data; factual map geometry, names and race/class combinations only
 World of Warcraft (c) Blizzard Entertainment, Inc.
+
+Guide pack permission
+---------------------
+This folder was produced by Polestar's compiler. Polestar's LICENSE-EXCEPTION.md
+gives permission to distribute guide packs produced by the compiler, including
+the parts of Polestar's reference data placed in them, under terms of your
+choice. It does not cover guide text copied from Polestar's own guides, or
+Polestar's code.

@@ -1,0 +1,131 @@
+'use strict';
+// polestar playtest: a pack's guides played to the end for every class they
+// branch on plus one they never name, with our guides loaded beside them.
+//
+// Needs data/forever and Lua 5.1; skips without them.
+
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const { spawnSync } = require('node:child_process');
+const { quiet, tmpdir } = require('./fixtures/dsl/helpers');
+const { ROOT } = require('./helpers/lua');
+const { findLua } = require('../tools/lib/lua');
+const cmd = require('../tools/commands/playtest');
+const { playtest } = require('../tools/lib/playtest');
+const { commandPack } = require('../tools/lib/pack/locate');
+
+const PACKS = path.join(__dirname, 'fixtures', 'packs');
+const CLI = path.join(__dirname, '..', 'tools', 'polestar.js');
+const hasLua = (() => {
+	try {
+		return !!findLua();
+	} catch {
+		return false;
+	}
+})();
+const skip = !fs.existsSync(path.join(ROOT, 'data', 'forever', 'quests.json')) ? 'reference data not built' : !hasLua ? 'no Lua 5.1' : false;
+
+const lines = (out) => out.split('\n').filter(Boolean);
+
+test('a stuck step is reported with guide, step, title and class; exit 1', { skip }, async () => {
+	const { result, out } = await quiet(() => cmd.run(['--pack', path.join(PACKS, 'stuck')]));
+	assert.equal(result, 1);
+	const stuck = lines(out).filter((l) => l.startsWith('stuck '));
+	assert.deepEqual(stuck, ['stuck stuck/northshire (Human Warrior) at step 2 "Never finished": goal 1 (goto "Go to Nowhere") stays active']);
+	assert.match(out, /playtest failed: 1 guide, 1 play: 1 stuck/);
+});
+
+test('a guide that plays through, handing over to one of ours, prints ok with race and class for each class it branches on that the race can be, plus one it never names; exit 0', { skip }, async () => {
+	const { result, out } = await quiet(() => cmd.run(['--filter', 'northshire', '--pack', path.join(PACKS, 'plays')]));
+	assert.equal(result, 0, out);
+	// Its Shaman and Druid step is not played: no Human is either.
+	assert.deepEqual(lines(out).filter((l) => l.startsWith('ok ')), ['ok  plays/northshire (Human Warrior)', 'ok  plays/northshire (Human Paladin)']);
+	assert.match(out, /playtest ok: 1 guide, 2 plays: 0 stuck, 0 failed/);
+});
+
+test('a hand-over to one of ours that does not land is stuck at the hand-over; exit 1', { skip }, async () => {
+	const { result, out } = await quiet(() => cmd.run(['--pack', path.join(PACKS, 'plays')]));
+	assert.equal(result, 1, out);
+	assert.deepEqual(lines(out).filter((l) => l.startsWith('stuck ')), [
+		'stuck plays/done-on-arrival (Human Warrior) at hand-over to forever/alliance/human/01-elwynn-forest: Polestar did not open it (plays/done-on-arrival stayed open)',
+	]);
+	assert.match(out, /playtest failed: 2 guides, 3 plays: 1 stuck, 0 failed/);
+});
+
+test('a hand-over in the middle of the last act stops the simulator on the pack guide and lands on ours', { skip }, async () => {
+	const { result, out } = await quiet(() => cmd.run(['--filter', 'northshire', path.join(PACKS, 'handover')]));
+	assert.equal(result, 0, out);
+	assert.deepEqual(lines(out), ['ok  handover/northshire (Human Warrior)', 'playtest ok: 1 guide, 1 play: 0 stuck, 0 failed']);
+});
+
+test('a hand-over must land on a guide the character can follow: a Human handed to a Dwarf and Gnome guide is stuck', { skip }, async () => {
+	const { result, out } = await quiet(() => cmd.run(['--pack', path.join(PACKS, 'misfit')]));
+	assert.equal(result, 1, out);
+	assert.deepEqual(lines(out).filter((l) => /^(ok|stuck) /.test(l)), [
+		'stuck misfit/northshire (Human Warrior) at hand-over to forever/alliance/dwarf-gnome/01-dun-morogh: no Human can follow it',
+		'ok  misfit/northshire (Dwarf Warrior)',
+	]);
+});
+
+test('a route choice lands on whichever option the engine recommends, not only the first', { skip }, () => {
+	const pack = commandPack({ pack: path.join(PACKS, 'handover') });
+	const { results } = playtest({ dir: pack.dir, manifest: pack.manifest, filter: 'tirisfal', contextDir: pack.contextDir, contextDataDir: pack.contextDataDir });
+	assert.equal(results.length, 1);
+	assert.equal(results[0].ok, true, JSON.stringify(results[0]));
+	assert.equal(results[0].landed, 'forever/horde/03-silverpine-forest', 'the recommended option here is the second one');
+});
+
+test('--class plays only that class; a filter matching nothing exits 1; a class no race can be plays nothing, exit 1', { skip }, async () => {
+	const one = await quiet(() => cmd.run(['--filter', 'northshire', '--pack', path.join(PACKS, 'plays'), '--class', 'mage']));
+	assert.equal(one.result, 0, one.out);
+	assert.deepEqual(lines(one.out).filter((l) => l.startsWith('ok ')), ['ok  plays/northshire (Human Mage)']);
+	const none = await quiet(() => cmd.run(['--pack', path.join(PACKS, 'plays'), '--filter', 'nothing-here']));
+	assert.equal(none.result, 1);
+	assert.match(none.out, /no guide matches "nothing-here"/);
+	const shaman = await quiet(() => cmd.run(['--filter', 'northshire', '--pack', path.join(PACKS, 'plays'), '--class', 'shaman']));
+	assert.equal(shaman.result, 1, shaman.out);
+	assert.match(shaman.out, /playtest failed: nothing played: 1 guide, but no race can play a Shaman/);
+	const bad = await quiet(() => cmd.run(['--class', 'Monk']));
+	assert.equal(bad.result, 2);
+});
+
+test('context folders go through the same checks as compile: a typo is a usage error', async () => {
+	const missing = path.join(tmpdir(), 'missing');
+	for (const flag of ['--context', '--context-data']) {
+		const r = await quiet(() => cmd.run(['--pack', path.join(PACKS, 'plays'), flag, missing]));
+		assert.equal(r.result, 2, r.out);
+		assert.match(r.out, new RegExp(`${flag} .*missing is not a folder`));
+	}
+});
+
+test('missing reference data is an error naming data build, not a stuck or empty run', { skip: hasLua ? false : 'no Lua 5.1' }, async () => {
+	const empty = tmpdir();
+	const r = await quiet(() => cmd.run(['--pack', path.join(PACKS, 'plays'), '--data', empty, '--context-data', empty]));
+	assert.equal(r.result, 1, r.out);
+	assert.match(r.out, /error: reference data missing quests\.json.*: run node tools\/polestar\.js data build/);
+	assert.match(r.out, /playtest failed: no reference data to play against/);
+	assert.doesNotMatch(r.out, /`lint`/);
+	assert.doesNotMatch(r.out, /^(ok|stuck) /m);
+});
+
+test('without Lua 5.1 playtest says so and points to doctor, without a stack trace; exit 1', () => {
+	const bin = tmpdir();
+	const r = spawnSync(process.execPath, [CLI, 'playtest', path.join(PACKS, 'plays')], { encoding: 'utf8', env: { ...process.env, PATH: bin, LUA: path.join(bin, 'no-lua') } });
+	assert.equal(r.status, 1, r.stderr);
+	assert.match(r.stderr, /playtest failed: No Lua 5\.1 interpreter found .* Run `polestar doctor` for the install steps\./);
+	assert.doesNotMatch(r.stderr, /\n\s+at /, 'no stack trace');
+});
+
+test('the pack folder is the one argument; two folders, or a folder and --pack, are a usage error', async () => {
+	const two = await quiet(() => cmd.run([path.join(PACKS, 'plays'), path.join(PACKS, 'stuck')]));
+	assert.equal(two.result, 2, two.out);
+	assert.match(two.out, /one pack folder only/);
+	const both = await quiet(() => cmd.run([path.join(PACKS, 'plays'), '--pack', path.join(PACKS, 'stuck')]));
+	assert.equal(both.result, 2, both.out);
+	assert.match(both.out, /the pack folder is named twice/);
+	const none = await quiet(() => cmd.run([tmpdir()]));
+	assert.equal(none.result, 2, none.out);
+	assert.match(none.out, /no pack\.json in /);
+});

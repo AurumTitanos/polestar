@@ -164,10 +164,6 @@ local KIND_COLOR = {
 	skill = "skill", spell = "spell", faction = "faction", area = "area", achievement = "achievement",
 }
 
-local function escape(s)
-	return (tostring(s):gsub("|", "||"))
-end
-
 -- The goal's main line. The Engine's `text` is the truth (it carries author
 -- overrides and counts such as "Kill 5 Young Wolf"); the subject is coloured
 -- by its kind wherever it appears in that text. Done goals render plain (the
@@ -182,12 +178,12 @@ function UI.GoalText(goal)
 			text = (subject ~= "" and subject) or verb or ""
 		end
 	end
-	if goal.status == "done" then return escape(text) end
+	if goal.status == "done" then return text end
 	local kind = KIND_COLOR[goal.subjectKind]
-	if not kind or type(subject) ~= "string" or subject == "" then return escape(text) end
+	if not kind or type(subject) ~= "string" or subject == "" then return text end
 	local a, b = text:find(subject, 1, true)
-	if not a then return escape(text) end
-	return escape(text:sub(1, a - 1)) .. "|c" .. Theme.Hex(kind) .. escape(subject) .. "|r" .. escape(text:sub(b + 1))
+	if not a then return text end
+	return text:sub(1, a - 1) .. "|c" .. Theme.Hex(kind) .. subject .. "|r" .. text:sub(b + 1)
 end
 
 -- The goal's main line without colour codes (skipped goals).
@@ -201,7 +197,7 @@ function UI.PlainGoalText(goal)
 			text = (subject ~= "" and subject) or verb or ""
 		end
 	end
-	return escape(text)
+	return text
 end
 
 -- "from Kobold Vermin (lvl 5–7)" for a farm spot (a collect goal whose
@@ -222,7 +218,7 @@ function UI.GoalDetail(goal)
 	if goal.unavailable then
 		local why = goal.unavailableText
 		if type(why) ~= "string" or why == "" then why = L["Not offered"] end
-		return escape(why)
+		return why
 	end
 	local parts = {}
 	local farm = farmSpot(goal)
@@ -237,7 +233,7 @@ function UI.GoalDetail(goal)
 	end
 	if goal.note then parts[#parts + 1] = goal.note end
 	if #parts == 0 then return nil end
-	return escape(table.concat(parts, "  \194\183  "))
+	return table.concat(parts, "  \194\183  ")
 end
 
 -- "1,050" for XP amounts.
@@ -263,7 +259,7 @@ local function rewardItem(it)
 	local C = ns.Compat
 	local q = (C and C.GetItemQuality and C.GetItemQuality(it.item)) or it.quality
 	local hex = q and C and C.ItemQualityHex and C.ItemQualityHex(q) or Theme.Hex("item")
-	return "|c" .. hex .. escape(it.itemName or ("#" .. it.item)) .. "|r"
+	return "|c" .. hex .. (it.itemName or ("#" .. it.item)) .. "|r"
 end
 
 local function itemList(list, joiner)
@@ -389,7 +385,7 @@ function UI.GoalSubline(goal, shownMap)
 	if note then parts[#parts + 1] = note end
 	local rewards = goal.t == "turnin" and goal.status ~= "done" and goal.status ~= "skipped" and UI.GoalRewards(goal) or nil
 	if #parts == 0 then return rewards end
-	local line = escape(table.concat(parts, "  \194\183  "))
+	local line = table.concat(parts, "  \194\183  ")
 	return rewards and (line .. "  \194\183  " .. rewards) or line
 end
 
@@ -473,7 +469,7 @@ function UI.GoalBar(goal)
 	local name = p.label
 	if name and kind == "skill" and goal.text and goal.text:find(name, 1, true) then name = nil end
 	local numbers = format("%d/%d", p.cur or 0, p.max)
-	return frac, name and (escape(name) .. "  " .. numbers) or numbers
+	return frac, name and (name .. "  " .. numbers) or numbers
 end
 
 -- One-line summary for an upcoming step.

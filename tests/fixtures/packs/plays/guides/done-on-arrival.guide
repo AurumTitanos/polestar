@@ -1,0 +1,13 @@
+# Fixture: a hand-over that cannot land (tests/playtest.test.js): the guide is
+# finished the moment it opens (a new character is level 1 already), so the
+# engine never chains into our guide.
+guide plays/done-on-arrival
+title Done on Arrival
+faction Alliance
+race Human
+levels 1-6
+zone Elwynn Forest
+next forever/alliance/human/01-elwynn-forest
+
+step Arrive
+  level 1

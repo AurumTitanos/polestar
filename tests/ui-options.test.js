@@ -64,8 +64,9 @@ test('pages: by order, a page with nothing to set left out, Recorder and About l
 			tabs = (function() local t = {} for _, b in ipairs(PolestarOptions.tabButtons) do if b:IsShown() then t[#t + 1] = b.Label:GetText() end end return t end)(),
 			footer = footer() })`, { between: FAKE_PAGE });
 	// Questing, Discovery and Quality of Life fill from modules not loaded
-	// here; Gear registered no control: all left out of the list.
-	assert.deepEqual(out.nav, ['Guide', 'Appearance', 'Map', 'Quests', 'Recorder', 'About']);
+	// here; Gear registered no control: all left out of the list. Guide packs
+	// (a custom page) is always there.
+	assert.deepEqual(out.nav, ['Guide', 'Appearance', 'Map', 'Quests', 'Guide packs', 'Recorder', 'About']);
 	assert.equal(out.title, 'Guide');
 	assert.deepEqual(out.tabs, ['Window', 'Arrow & routes', 'Automation']);
 	assert.deepEqual(out.pages.find((p) => p.name === 'Quests'), { name: 'Quests', key: 'quests', builtin: false, tabs: ['Map'] });

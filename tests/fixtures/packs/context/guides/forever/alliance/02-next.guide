@@ -1,0 +1,12 @@
+# Fixture: accepts quest 7, which 01-start does not. The kobold kill is
+# required elite work (an error in our pack) and quest 7 is never turned in
+# (a deliberate warning); neither is reported when another pack is linted.
+guide forever/alliance/02-next
+title Next
+faction Alliance
+levels 2-8
+zone Elwynn Forest
+
+step Kobolds
+  accept 7
+  kill 95003

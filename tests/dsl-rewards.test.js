@@ -8,8 +8,8 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { runAddon } = require('./helpers/lua');
-const { compile, guideText, lineOf, plain, fixtureData, tmpdir } = require('./fixtures/dsl/helpers');
-const { buildPackFiles, writePackDir, packMeta } = require('../tools/lib/dsl/project');
+const { compile, guideText, lineOf, plain, writeTestPack } = require('./fixtures/dsl/helpers');
+const { TEST_PACK, TEST_SOURCE } = require('./helpers/packs');
 
 const LINES = ['step S', '  accept 783', '  turnin 783 choose 159 750 "Wolf Steak" uncommon reward 990010 "Miner\'s Lantern" rare xp 1050 money 1g7s'];
 
@@ -68,10 +68,8 @@ test('rewards: malformed lists, unknown unnamed items, bad money and other verbs
 });
 
 test('rewards: emitted Lua passes the engine registry and the step view carries them', () => {
-	const r = compile(guideText(LINES));
-	const dir = tmpdir();
-	writePackDir(dir, buildPackFiles({ guides: r.guides, meta: packMeta('1'), data: fixtureData() }));
-	const file = path.join(dir, 'Guides', 't', 'main.lua');
+	const r = compile(guideText(LINES).replace(/^guide t\//, 'guide test/'), undefined, { pack: 'test' });
+	const file = path.join(writeTestPack(r.guides).dir, 'Guides.lua');
 	assert.match(fs.readFileSync(file, 'utf8'), /rewards = \{ choices = \{ \{ item = 159, itemName = "Refreshing Spring Water" \}, \{ item = 750, itemName = "Wolf Steak", quality = 2 \} \}, items = \{ \{ item = 990010, itemName = "Miner's Lantern", quality = 3 \} \}, money = 10700, xp = 1050 \}/);
 	const [out] = runAddon({
 		stubs: ['stub_world.lua'],
@@ -81,10 +79,11 @@ test('rewards: emitted Lua passes the engine registry and the step view carries 
 			local res = {}
 			local real = Polestar.RegisterGuide
 			Polestar.RegisterGuide = function(g) local ok, e = real(g); res[#res + 1] = ok and "ok" or e; return ok, e end
-			Polestar.RegisterPack({ id = "guides", title = "T", version = "1" })
+			${TEST_PACK}
+			${TEST_SOURCE}
 			assert(loadfile(${JSON.stringify(file)}))("Polestar_Guides", {})
 			stub.login()
-			Polestar.Engine.SetGuide("t/main")
+			Polestar.Engine.SetGuide("test/main")
 			stub.advance(0.6)
 			local view = Polestar.Engine.GetStepView(1)
 			emit({ res = res, rewards = view.goals[2].rewards })`,
@@ -93,7 +92,8 @@ test('rewards: emitted Lua passes the engine registry and the step view carries 
 	assert.deepEqual(out.rewards, turnin(r).rewards);
 	const bad = runAddon({
 		addons: [{ name: 'Polestar', files: ['Core/Core.xml'] }],
-		script: `emit({ Polestar.RegisterGuide({ id = "t/bad", title = "B", steps = { { goals = { { t = "turnin", quest = 1, title = "Q", rewards = { choices = { { itemName = "x" } } } } } } } }) })`,
+		script: `${TEST_PACK}
+${TEST_SOURCE}\nemit({ Polestar.RegisterGuide({ id = "test/bad", pack = "test", title = "B", steps = { { goals = { { t = "turnin", quest = 1, title = "Q", rewards = { choices = { { itemName = "x" } } } } } } } }) })`,
 	}).emitted[0];
 	assert.deepEqual(bad, [false, 'step 1 goal 1: bad reward 1']);
 });

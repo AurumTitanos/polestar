@@ -8,6 +8,8 @@
 	<Script file="Lookup.lua"/>
 	<Script file="Dungeons.lua"/>
 	<Script file="RouteChoice.lua"/>
-	<Script file="BetaNotice.lua"/>
+	<Script file="Welcome.lua"/>
+	<Script file="Copy.lua"/>
+	<Script file="Packs.lua"/>
 	<Script file="Options.lua"/>
 </Ui>

@@ -1,38 +1,49 @@
 'use strict';
-// pack: release archives: dist/Polestar-<version>.zip (Polestar, Polestar_Guides
-// and the built data addons) and dist/Polestar_Recorder-<version>.zip, each
-// with the GPL in its first folder (and the player's README.txt in Polestar/),
-// plus dist/SHA256SUMS for both.
+// pack: release archives. In the repository: dist/Polestar-<version>.zip
+// (Polestar, Polestar_Guides and the built data addons) and
+// dist/Polestar_Recorder-<version>.zip, each with the GPL in its first folder
+// (and the player's README.txt in Polestar/), plus dist/SHA256SUMS for both.
+// Given another pack (a folder argument, --pack, or the nearest pack.json):
+// <pack>/dist/<folder>-<version>.zip holding the built pack folder.
 
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 const { parseArgs, resolvePath, printDiagnostics, plural } = require('../lib/dsl/cli');
 const project = require('../lib/dsl/project');
+const { commandPack, packArgument } = require('../lib/pack/locate');
+const { PACK_OPTIONS, PACK_USAGE, otherPack, buildPack, folderIn } = require('../lib/pack/build');
 const { writeZip, directoryEntries } = require('../lib/zip');
 
-const usage = `usage: node tools/polestar.js pack [options]
+const usage = `usage: node tools/polestar.js pack [<dir>] [options]
 
-Compiles the guides, then writes dist/Polestar-<version>.zip (Polestar,
-Polestar_Guides, and Polestar_QuestDB / Polestar_ItemDB when built),
+In the repository: compiles our guides, then writes dist/Polestar-<version>.zip
+(Polestar, Polestar_Guides, and Polestar_QuestDB / Polestar_ItemDB when built),
 dist/Polestar_Recorder-<version>.zip and dist/SHA256SUMS. Polestar/ in the
 zip also carries LICENSE and README.txt (install steps), Polestar_Recorder/
 the LICENSE.
 
-options:
-  --guides <dir>   guide sources (default guides/)
-  --data <dir>     reference data (default data/forever/)
-  --addons <dir>   addon source folder (default addon/)
-  --dist <dir>     output folder (default dist/)`;
+Given another guide pack (<dir>, --pack, or run inside one): lints and builds it with our
+guides as context, then writes <pack>/dist/<folder>-<version>.zip holding its
+addon folder, the version taken from pack.json. Both are byte for byte
+reproducible.
 
-function compile(dirs) {
-	const result = project.compileProject({ guidesDir: dirs.guides, dataDir: dirs.data });
-	printDiagnostics(result.diag, { quiet: true });
-	if (result.diag.hasErrors()) {
-		console.error(`pack failed: ${plural(result.diag.errors.length, 'error')} in guides (run lint for details)`);
+options:
+${PACK_USAGE}
+  --guides <dir>        our guide sources (default guides/; not with a pack folder)
+  --addons <dir>        addon source folder (default addon/)
+  --dist <dir>          output folder (default dist/, <pack>/dist/ for a pack)`;
+
+// Our guides (in dirs.guides) built in memory; null (reported) on errors.
+function compile(ours, dirs) {
+	// pack.json's diagnostics are printed already.
+	const built = buildPack({ ...ours, diags: [] }, { dataDir: dirs.data });
+	printDiagnostics(built.diag, { quiet: true });
+	if (!built.ok) {
+		console.error(`pack failed: ${plural(built.diag.errors.length, 'error')} in guides (run lint for details)`);
 		return null;
 	}
-	return result;
+	return built;
 }
 
 function tocVersion(dir, name) {
@@ -88,6 +99,14 @@ function sha256(file) {
 }
 
 function pack(dirs, version) {
+	const ours = commandPack({ guides: dirs.guides });
+	const { manifest, diags } = ours;
+	printDiagnostics(diags);
+	if (!manifest) {
+		console.error('pack failed: guides/pack.json is invalid');
+		return 1;
+	}
+	if (manifest.version !== version) console.warn(`warning: guides/pack.json says version ${manifest.version}, package.json says ${version}`);
 	const product = project.releaseAddons(dirs.addons);
 	for (const n of product.skipped) console.log(`note: ${n} not built (no ${n}/${n}.toc); leaving it out of the zip`);
 	const license = { name: 'LICENSE', data: fs.readFileSync(path.join(project.ROOT, 'LICENSE')) };
@@ -96,7 +115,8 @@ function pack(dirs, version) {
 		{ file: `Polestar_Recorder-${version}.zip`, names: ['Polestar_Recorder'], extras: { Polestar_Recorder: [license] } },
 	];
 	for (const { names } of archives) {
-		for (const n of names) {
+		// Our guide pack's TOC is generated below.
+		for (const n of names.filter((x) => x !== manifest.folder)) {
 			if (!fs.existsSync(path.join(dirs.addons, n, `${n}.toc`))) {
 				console.error(`missing ${path.join(dirs.addons, n, `${n}.toc`)}`);
 				return 1;
@@ -105,34 +125,69 @@ function pack(dirs, version) {
 			if (v !== version) console.warn(`warning: ${n}.toc says version ${v}, package.json says ${version}`);
 		}
 	}
-	const result = compile(dirs);
-	if (!result) return 1;
-	const guidesDir = path.join(dirs.addons, 'Polestar_Guides');
-	project.writePackDir(guidesDir, project.buildPackFiles({ guides: result.guides, meta: project.packMeta(version), data: result.data }));
-	const sums = [];
-	for (const { file, names, extras } of archives) {
-		const out = path.join(dirs.dist, file);
-		writeZip(out, archiveEntries(dirs.addons, names, extras));
-		sums.push(`${sha256(out)}  ${file}\n`);
-		console.log(`wrote ${path.relative(process.cwd(), out)}`);
+	const built = compile(ours, dirs);
+	if (!built) return 1;
+	try {
+		project.writePackDir(path.join(dirs.addons, manifest.folder), built.files);
+		const sums = [];
+		for (const { file, names, extras } of archives) {
+			const out = path.join(dirs.dist, file);
+			writeZip(out, archiveEntries(dirs.addons, names, extras));
+			sums.push(`${sha256(out)}  ${file}\n`);
+			console.log(`wrote ${path.relative(process.cwd(), out)}`);
+		}
+		const sumsFile = path.join(dirs.dist, 'SHA256SUMS');
+		fs.writeFileSync(sumsFile, sums.join(''));
+		console.log(`wrote ${path.relative(process.cwd(), sumsFile)}`);
+	} catch (e) {
+		console.error(`pack failed: ${e.message}`);
+		return 1;
 	}
-	const sumsFile = path.join(dirs.dist, 'SHA256SUMS');
-	fs.writeFileSync(sumsFile, sums.join(''));
-	console.log(`wrote ${path.relative(process.cwd(), sumsFile)}`);
-	console.log(`guide pack: ${plural(result.guides.length, 'guide')}`);
+	console.log(`guide pack: ${plural(built.guides.length, 'guide')}`);
+	return 0;
+}
+
+// Another pack: <dist>/<folder>-<version>.zip from the build, in memory.
+function packOther(other, opts) {
+	const built = buildPack(other, { dataDir: resolvePath(opts.data, 'data/forever', project.ROOT) });
+	printDiagnostics(built.diag, { quiet: true });
+	if (!built.ok) {
+		console.error(`pack failed: ${plural(built.diag.errors.length, 'error')} (run lint for details)`);
+		return 1;
+	}
+	const { manifest, files } = built;
+	try {
+		const dist = opts.dist ? path.resolve(opts.dist) : path.join(other.dir, 'dist');
+		const folder = manifest.folder;
+		const out = `${folderIn(dist, folder)}-${manifest.version}.zip`;
+		const entries = [{ name: `${folder}/` }, ...Object.keys(files).sort().map((name) => ({ name: `${folder}/${name}`, data: files[name] }))];
+		writeZip(out, entries);
+		console.log(`wrote ${path.relative(process.cwd(), out)} (${plural(built.guides.length, 'guide')})`);
+	} catch (e) {
+		console.error(`pack failed: ${e.message}`);
+		return 1;
+	}
 	return 0;
 }
 
 async function run(argv) {
-	const { opts, error } = parseArgs(argv, { flags: [], options: ['--guides', '--data', '--addons', '--dist'] });
+	const { opts, positional, error } = parseArgs(argv, { flags: [], options: [...PACK_OPTIONS, '--guides', '--addons', '--dist'] });
 	if (opts.help) {
 		console.log(usage);
 		return 0;
 	}
-	if (error) {
-		console.error(`${error}\n\n${usage}`);
+	const arg = error ? {} : packArgument(opts, positional);
+	const usageError = error || arg.error || (opts.guides && arg.pack !== undefined ? '--guides and a pack folder cannot be used together' : null);
+	if (usageError) {
+		console.error(`${usageError}\n\n${usage}`);
 		return 2;
 	}
+	const other = opts.guides ? null : otherPack(opts, positional);
+	if (other && other.error) {
+		console.error(`${other.error}\n\n${usage}`);
+		return 2;
+	}
+	if (other) return packOther(other, opts);
 	const dirs = {
 		guides: resolvePath(opts.guides, 'guides', project.ROOT),
 		data: resolvePath(opts.data, 'data/forever', project.ROOT),
@@ -142,4 +197,4 @@ async function run(argv) {
 	return pack(dirs, project.packageVersion());
 }
 
-module.exports = { name: 'pack', summary: 'Build the release zips', usage, run };
+module.exports = { name: 'pack', summary: 'Build the release zips, or a guide pack\'s zip', usage, run };

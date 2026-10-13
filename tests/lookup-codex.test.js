@@ -3,14 +3,14 @@
 // codex build`) end to end: searching a mount's name finds it, it has ranked
 // sources, the curated guide that collects it is the one Lookup opens, and the
 // guide Lookup builds from its best source plays to the end in the real engine
-// (tests/helpers/guide-sim.js). Skips when the pack has not been built.
+// (tools/lib/playtest.js). Skips when the pack has not been built.
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { runAddon, ROOT } = require('./helpers/lua');
-const { SIMULATE, luaValue } = require('./helpers/guide-sim');
+const { SIMULATE, luaValue } = require('../tools/lib/playtest');
 
 const PACK = path.join(ROOT, 'addon', 'Polestar_Codex');
 const TOC = path.join(PACK, 'Polestar_Codex.toc');

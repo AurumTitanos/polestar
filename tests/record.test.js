@@ -198,6 +198,8 @@ test('a session already imported keeps the longer event list; sessions missing f
 
 test('auto-detection prefers the launch "_forever_" client in any Wine prefix over a leftover beta', () => {
 	const home = tmpdir('polestar-record-');
+	// Never the machine's own native install (C:\... or /Applications/...).
+	const native = { platform: 'linux' };
 	const client = (prefix, name, flavor) => {
 		const dir = path.join(home, ...prefix, 'drive_c', 'Program Files (x86)', 'World of Warcraft', name);
 		fs.mkdirSync(dir, { recursive: true });
@@ -209,18 +211,25 @@ test('auto-detection prefers the launch "_forever_" client in any Wine prefix ov
 	try {
 		const beta = client(['Games'], '_classic_beta_', 'wow_classic_beta');
 		const betaSv = writeSv(beta, svText());
-		assert.deepEqual(findSavedVariables({ home }), [betaSv]);
+		assert.deepEqual(findSavedVariables({ home, native }), [betaSv]);
 
 		// After launch the client lives in a Faugus prefix as _forever_; the old beta WTF stays behind.
 		const live = client(['Faugus', 'battlenet'], '_forever_', 'wow_forever');
 		const liveSv = writeSv(live, svText({ undead: null }));
-		assert.deepEqual(findSavedVariables({ home }), [liveSv]);
+		assert.deepEqual(findSavedVariables({ home, native }), [liveSv]);
 
 		// A _forever_ folder without a .flavor.info under the fixed install path is still found.
 		const plain = path.join(home, '.wine', 'drive_c', 'Program Files (x86)', 'World of Warcraft', '_forever_');
 		fs.rmSync(path.join(home, 'Faugus'), { recursive: true });
 		const plainSv = writeSv(plain, svText());
-		assert.deepEqual(findSavedVariables({ home }), [plainSv]);
+		assert.deepEqual(findSavedVariables({ home, native }), [plainSv]);
+
+		// A native install is searched too, at the injected root.
+		const root = tmpdir('polestar-record-');
+		const mac = path.join(root, 'Applications', 'World of Warcraft', '_forever_');
+		fs.rmSync(path.join(home, '.wine'), { recursive: true });
+		const macSv = writeSv(mac, svText());
+		assert.deepEqual(findSavedVariables({ home, native: { platform: 'darwin', root } }), [macSv]);
 	} finally {
 		if (saved !== undefined) process.env.POLESTAR_WTF = saved;
 	}
@@ -486,4 +495,28 @@ test('normalizing tolerates a session written by an older or damaged recorder', 
 	assert.equal(s.session, 'k');
 	assert.deepEqual(s.char, { name: null, realm: null, race: null, class: null, faction: null });
 	assert.deepEqual(s.maps, {});
+});
+
+test('record draft inside a guide pack writes a pack-prefixed draft into <pack>/drafts/', () => {
+	const dir = tmpdir('polestar-record-');
+	const out = path.join(dir, 'recordings');
+	importFile(writeSv(dir, svText()), { outDir: out });
+	const session = readJson(path.join(out, `${HUMAN}.json`));
+	assert.equal(draftGuide(session, { pack: 'joe' }).id, 'joe/draft/alliance/human/2026-10-03-0400');
+	assert.equal(draftGuide(session, { pack: 'guides' }).id, 'draft/alliance/human/2026-10-03-0400');
+
+	const pack = tmpdir('polestar-pack-');
+	fs.cpSync(path.join(__dirname, 'fixtures', 'packs', 'joe'), pack, { recursive: true });
+	const r = spawnSync(process.execPath, [CLI, 'record', 'draft', HUMAN, '--recordings', out], { cwd: path.join(pack, 'guides'), encoding: 'utf8' });
+	assert.equal(r.status, 0, r.stderr);
+	const file = path.join(pack, 'drafts', 'alliance-human-2026-10-03-0400.guide');
+	const text = fs.readFileSync(file, 'utf8');
+	assert.equal(text, EXPECTED_DRAFT.replace('guide draft/', 'guide joe/draft/'));
+	assert.match(r.stdout, /joe\/draft\/alliance\/human\/2026-10-03-0400/);
+	// --pack names the pack from anywhere.
+	const other = tmpdir('polestar-pack-');
+	fs.cpSync(path.join(__dirname, 'fixtures', 'packs', 'mini'), other, { recursive: true });
+	const r2 = spawnSync(process.execPath, [CLI, 'record', 'draft', HUMAN, '--recordings', out, '--pack', other], { encoding: 'utf8' });
+	assert.equal(r2.status, 0, r2.stderr);
+	assert.match(fs.readFileSync(path.join(other, 'drafts', 'alliance-human-2026-10-03-0400.guide'), 'utf8'), /^guide mini\/draft\/alliance\/human\/2026-10-03-0400$/m);
 });

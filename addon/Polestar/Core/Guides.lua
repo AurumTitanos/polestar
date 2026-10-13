@@ -3,6 +3,7 @@
 -- Contract: docs/ARCHITECTURE.md, "Guide data" and "Engine".
 
 local ADDON, ns = ...
+local L = ns.L
 
 local type, pairs, ipairs, tostring, tonumber = type, pairs, ipairs, tostring, tonumber
 
@@ -12,10 +13,12 @@ ns.Guides = Guides
 local guides = {} -- id -> guide
 local order = {} -- ids in first-registration order
 local headers = {} -- id -> header (guide without steps, plus stepCount)
-local packs = {}
-Guides.packs = packs
+local packs = {} -- pack id -> the record holding that id
+local records = {} -- every pack record, refused ones included, in registration order
+local early = {} -- pack id -> { guide id, ... } registered before their pack
 
 ns.MapFrames = ns.MapFrames or { era = {} }
+local ourFrames = {} -- uiMapID -> true: a frame from Polestar itself or our guide pack
 
 ---------------------------------------------------------------------------
 -- Conditions (`only` on steps and goals, races/classes on guides)
@@ -303,48 +306,266 @@ end
 Guides.Validate = validate
 
 ---------------------------------------------------------------------------
--- Registration (called by guide packs at load time)
+-- Packs (docs/ARCHITECTURE.md, "Guide data"). A pack registers once, then
+-- its guides; every guide id lives under its pack's prefix. Refusals are
+-- recorded on the pack's record (problems) and printed by ns.Debug.
 ---------------------------------------------------------------------------
 
-function ns.RegisterPack(meta)
-	if type(meta) ~= "table" or not isStr(meta.id) then
-		ns.Debug("RegisterPack: rejected a pack without an id")
-		return false, "missing id"
+Guides.FORMATS = { [1] = true }
+Guides.RESERVED = { guides = true, forever = true, lookup = true, draft = true, polestar = true }
+local OFFICIAL_ADDON = "Polestar_Guides"
+local REQUIRED_META = { "addon", "title", "author", "version", "license" }
+local OPTIONAL_META = { "website", "source", "notes" }
+
+local find, gsub = string.find, string.gsub
+
+-- Does pack `packId` own guide id `guideId`? Ours (`guides`) owns forever/
+-- and draft/, the internal `lookup` pack lookup/, every other pack `<id>/`.
+function Guides.OwnsId(packId, guideId)
+	if type(packId) ~= "string" or type(guideId) ~= "string" then return false end
+	if packId == "guides" then return guideId:sub(1, 8) == "forever/" or guideId:sub(1, 6) == "draft/" end
+	if packId == "lookup" then return guideId:sub(1, 7) == "lookup/" end
+	return guideId:sub(1, #packId + 1) == packId .. "/"
+end
+local ownsId = Guides.OwnsId
+
+local function prefixOf(packId)
+	if packId == "guides" then return "forever/, draft/" end
+	return packId .. "/"
+end
+
+local function validPackId(id)
+	return type(id) == "string" and #id >= 2 and #id <= 32 and find(id, "^[a-z0-9][a-z0-9%-]*$") ~= nil
+end
+
+-- A pack holding its id takes guides; a refused or too-new one only keeps
+-- the id so its guides drop without a problem each.
+local function accepted(r)
+	return r.status == "on" or r.status == "off"
+end
+
+local function problem(r, kind, message, guideId)
+	r.problems[#r.problems + 1] = { kind = kind, guide = guideId, message = message }
+	ns.Debug(("pack %s: %s"):format(tostring(r.id), message))
+end
+
+-- Author text prints literally: every `|` doubled, once, at registration.
+local escape = ns.EscapeText
+local ID_KEYS = { id = true, pack = true, next = true, nextChoices = true }
+local function escapeTree(t, seen, skip)
+	seen[t] = true
+	for k, v in pairs(t) do
+		if not (skip and skip[k]) then
+			local tv = type(v)
+			if tv == "string" then
+				if find(v, "|", 1, true) then t[k] = escape(v) end
+			elseif tv == "table" and not seen[v] then
+				escapeTree(v, seen)
+			end
+		end
 	end
-	packs[meta.id] = meta
+end
+
+local function newRecord(meta, addon)
+	local r = {
+		id = type(meta.id) == "string" and meta.id or tostring(meta.id),
+		addon = type(addon) == "string" and addon or nil,
+		format = meta.format,
+		official = meta.id == "guides" and addon == OFFICIAL_ADDON,
+		problems = {},
+		guides = {},
+		guideCount = 0,
+	}
+	for _, key in ipairs(REQUIRED_META) do
+		if key ~= "addon" and type(meta[key]) == "string" then r[key] = escape(meta[key]) end
+	end
+	for _, key in ipairs(OPTIONAL_META) do
+		if type(meta[key]) == "string" then r[key] = escape(meta[key]) end
+	end
+	records[#records + 1] = r
+	return r
+end
+
+local function refuse(r, message)
+	r.status = "refused"
+	r.reason = message
+	r.refusal = message
+	problem(r, "pack-refused", message)
+	r.refusalProblem = r.problems[#r.problems]
+	return false, message
+end
+
+-- The refused record whose addon is loading now: a pack refused for an id
+-- another pack holds (or reserved for ours) is refused whole, so the guides
+-- its files register next under that id are dropped, never given to the
+-- holder. Cleared when that addon's files are done (ADDON_LOADED).
+local loadingRefused = nil
+ns.RegisterEvent("ADDON_LOADED", function() loadingRefused = nil end)
+
+-- Counts a guide dropped with refused record r in r's problem.
+local function dropGuide(r, id)
+	r.dropped = (r.dropped or 0) + 1
+	local n = r.dropped == 1 and L["1 guide dropped."] or (L["%d guides dropped."]):format(r.dropped)
+	r.reason = r.refusal .. " " .. n
+	r.refusalProblem.message = r.reason
+	ns.Debug(("guide %s dropped: pack %s from %s was refused"):format(id, tostring(r.id), tostring(r.addon)))
+	return false, "pack refused"
+end
+
+-- meta = { addon, id, format, title, author, version, license, website?,
+-- source?, notes? }; Polestar's own Lookup registers { id = "lookup", title,
+-- internal = true } as its files load (Lookup/Guide.lua), before any pack
+-- can: a later claim on it is refused and listed like any other. -> ok, err
+function ns.RegisterPack(meta)
+	if type(meta) ~= "table" then
+		ns.Debug("RegisterPack: the pack is not a table")
+		return false, "pack is not a table"
+	end
+	local id = meta.id
+	if id == "lookup" and meta.internal and not packs[id] then
+		local r = newRecord(meta, nil)
+		r.internal = true
+		packs[id] = r
+		r.status = "on"
+		return true
+	end
+	-- Every other pack, refused ones included, is listed on the Guide packs page.
+	local addon = meta.addon
+	local r = newRecord(meta, addon)
+	loadingRefused = nil
+	if meta.internal then
+		-- Refused for the flag, but a reserved or taken id still drops what
+		-- it registers while loading.
+		if Guides.RESERVED[id] or packs[id] then loadingRefused = r end
+		return refuse(r, L["Only Polestar's own Lookup pack may register as internal."])
+	end
+	if not validPackId(id) then
+		return refuse(r, (L["Pack id %s is not valid: 2 to 32 lower-case letters, digits or hyphens, starting with a letter or digit."]):format(escape(r.id)))
+	end
+	if Guides.RESERVED[id] and not (id == "guides" and addon == OFFICIAL_ADDON) then
+		loadingRefused = r
+		return refuse(r, (L["Pack id %s is reserved for Polestar."]):format(id))
+	end
+	local holder = packs[id]
+	if holder then
+		loadingRefused = r
+		return refuse(r, (L["Pack id %s is already taken by %s; %s was refused."]):format(id,
+			escape(tostring(holder.addon or "?")), escape(tostring(addon or "?"))))
+	end
+	packs[id] = r
+	if type(meta.format) ~= "number" then return refuse(r, L["The pack is missing format."]) end
+	if not Guides.FORMATS[meta.format] then
+		local needs = type(addon) == "string" and C_AddOns and C_AddOns.GetAddOnMetadata
+			and C_AddOns.GetAddOnMetadata(addon, "X-Polestar-Needs") or nil
+		r.status = "too-new"
+		r.needs = type(needs) == "string" and needs ~= "" and escape(needs) or nil
+		r.reason = r.needs and (L["Needs Polestar %s or newer."]):format(r.needs) or L["Needs a newer Polestar."]
+		problem(r, "pack-refused", r.reason)
+		return false, r.reason
+	end
+	for _, key in ipairs(REQUIRED_META) do
+		if not isStr(meta[key]) then return refuse(r, (L["The pack is missing %s."]):format(key)) end
+	end
+	r.status = "on"
+	local before = early[id]
+	if before then
+		early[id] = nil
+		for _, gid in ipairs(before) do
+			problem(r, "guide-refused", (L["Guide %s was refused: it was registered before its pack."]):format(escape(gid)), gid)
+		end
+	end
 	return true
 end
 
+-- def: a compiled guide (ARCHITECTURE, "Guide data"); def.pack names its
+-- registered pack, which must own def.id. A pack registering one of its own
+-- ids again replaces that guide in its first slot. -> ok, err
 function ns.RegisterGuide(def)
-	local err = validate(def)
-	if err then
-		local id = type(def) == "table" and tostring(def.id) or "?"
-		ns.Debug(("guide %s rejected: %s"):format(id, err))
+	if type(def) ~= "table" or not isStr(def.id) then
+		local err = type(def) ~= "table" and "guide is not a table" or "missing id"
+		ns.Debug("RegisterGuide: rejected:", err)
 		return false, err
 	end
-	if guides[def.id] then
-		ns.Debug(("guide %s registered twice; the last one wins"):format(def.id))
-	else
-		order[#order + 1] = def.id
+	local id, packId = def.id, def.pack
+	if not isStr(packId) then
+		ns.Debug(("guide %s rejected: no pack"):format(id))
+		return false, "no pack"
 	end
-	guides[def.id] = def
+	if loadingRefused and loadingRefused.id == packId then return dropGuide(loadingRefused, id) end
+	local r = packs[packId]
+	if not r then
+		local list = early[packId]
+		if not list then
+			list = {}
+			early[packId] = list
+		end
+		list[#list + 1] = id
+		ns.Debug(("guide %s rejected: pack %s is not registered"):format(id, packId))
+		return false, "pack not registered"
+	end
+	if not accepted(r) then
+		ns.Debug(("guide %s dropped: pack %s was not loaded"):format(id, packId))
+		return false, "pack " .. r.status
+	end
+	if not ownsId(packId, id) then
+		local message = (L["Guide %s was refused: its id must start with %s."]):format(escape(id), prefixOf(packId))
+		problem(r, "guide-refused", message, id)
+		return false, message
+	end
+	local err = validate(def)
+	if err then
+		problem(r, "guide-refused", (L["Guide %s was refused: %s."]):format(escape(id), escape(err)), id)
+		return false, err
+	end
+	escapeTree(def, {}, ID_KEYS)
+	if not guides[id] then
+		order[#order + 1] = id
+		r.guides[#r.guides + 1] = id
+		r.guideCount = #r.guides
+	end
+	guides[id] = def
 	local h = {}
 	for k, v in pairs(def) do
 		if k ~= "steps" then h[k] = v end
 	end
 	h.stepCount = #def.steps
-	headers[def.id] = h
+	headers[id] = h
 	return true
 end
 
--- { era = { [uiMapID] = { c, left, right, top, bottom } } }; merges.
-function ns.RegisterMapFrames(frames)
+-- { era = { [uiMapID] = { c, left, right, top, bottom } } }; merges. packId
+-- nil is Polestar itself (its data addons, class trainers). Frames of
+-- Polestar and our pack (`guides`) win for a map both cover, whatever the
+-- load order; another pack only adds maps they lack.
+function ns.RegisterMapFrames(frames, packId)
 	if type(frames) ~= "table" then return end
 	local era = frames.era
 	if type(era) ~= "table" then return end
+	-- A refused pack is refused whole: its frames go too, even under a
+	-- holder's id.
+	if loadingRefused and loadingRefused.id == packId then
+		ns.Debug("RegisterMapFrames: pack", tostring(packId), "was refused")
+		return
+	end
+	local ours = packId == nil or packId == "guides"
+	if not ours then
+		local r = packs[packId]
+		if not (r and accepted(r)) then
+			ns.Debug("RegisterMapFrames: pack not registered", tostring(packId))
+			return
+		end
+	end
 	for map, b in pairs(era) do
 		if type(b) == "table" and isNum(b.c) and isNum(b.left) and isNum(b.right) and isNum(b.top) and isNum(b.bottom) then
-			ns.MapFrames.era[tonumber(map) or map] = b
+			local key = tonumber(map) or map
+			if ours then
+				ns.MapFrames.era[key] = b
+				ourFrames[key] = true
+			elseif not ourFrames[key] then
+				ns.MapFrames.era[key] = b
+			else
+				ns.Debug("RegisterMapFrames: pack", packId, "differs from ours for map", tostring(map))
+			end
 		else
 			ns.Debug("RegisterMapFrames: bad bounds for map", tostring(map))
 		end
@@ -352,16 +573,200 @@ function ns.RegisterMapFrames(frames)
 end
 
 ---------------------------------------------------------------------------
--- Queries
+-- Switching packs off and on (account-wide: PolestarDB.packs[id].off)
+---------------------------------------------------------------------------
+
+local function packState(id)
+	local db = PolestarDB
+	local all = type(db) == "table" and db.packs
+	local p = type(all) == "table" and all[id]
+	return type(p) == "table" and p or nil
+end
+
+-- Is pack `id` shown? Internal packs always are.
+function Guides.PackShown(id)
+	local r = packs[id]
+	if r and r.internal then return true end
+	local p = packState(id)
+	return not (p and p.off)
+end
+local packShown = Guides.PackShown
+
+-- A registered pack's guides are visible while it is on and shown.
+local function visible(g)
+	local r = packs[g.pack]
+	return r ~= nil and (r.status == "on" or r.status == "off") and packShown(g.pack)
+end
+
+local function syncStatus(r)
+	if r.status == "on" or r.status == "off" then r.status = packShown(r.id) and "on" or "off" end
+	return r
+end
+
+-- Hides or shows pack `id`'s guides; fires PACKS_CHANGED(id) when that changes.
+function Guides.SetPackShown(id, shown)
+	if type(id) ~= "string" or (packs[id] and packs[id].internal) then return end
+	shown = shown and true or false
+	if packShown(id) == shown then return end
+	local db = ns.DB()
+	if type(db.packs) ~= "table" then db.packs = {} end
+	if shown then
+		local p = db.packs[id]
+		if type(p) == "table" then
+			p.off = nil
+			if next(p) == nil then db.packs[id] = nil end
+		end
+	else
+		if type(db.packs[id]) ~= "table" then db.packs[id] = {} end
+		db.packs[id].off = true
+	end
+	if packs[id] then syncStatus(packs[id]) end
+	ns.Fire("PACKS_CHANGED", id)
+end
+
+function Guides.Pack(id)
+	if id == nil then return nil end
+	local r = packs[id]
+	if r then return syncStatus(r) end
+	for i = 1, #records do
+		if records[i].id == id then return syncStatus(records[i]) end
+	end
+	return nil
+end
+
+-- Every pack record but internal ones (registered and installed, refused
+-- ones too): ours first, then by title.
+function Guides.Packs()
+	local out = {}
+	for i = 1, #records do
+		if not records[i].internal then out[#out + 1] = syncStatus(records[i]) end
+	end
+	table.sort(out, function(a, b)
+		if a.official ~= b.official then return a.official end
+		local ta, tb = (a.title or a.id):lower(), (b.title or b.id):lower()
+		if ta ~= tb then return ta < tb end
+		if a.id ~= b.id then return a.id < b.id end
+		return tostring(a.addon) < tostring(b.addon)
+	end)
+	return out
+end
+
+-- Problems over every listed pack (the Guide packs page's dot).
+function Guides.ProblemCount()
+	local n = 0
+	for _, r in ipairs(Guides.Packs()) do n = n + #r.problems end
+	return n
+end
+
+---------------------------------------------------------------------------
+-- Packs on disk: every addon whose TOC carries X-Polestar-Pack, loaded or
+-- not, merged with the registered records (run at login; idempotent).
+---------------------------------------------------------------------------
+
+local installed = {} -- addon name -> record made from its TOC
+
+local function meta(addon, field)
+	local v = C_AddOns.GetAddOnMetadata(addon, field)
+	return type(v) == "string" and v ~= "" and v or nil
+end
+
+-- The record `addon` registered itself (RegisterPack), refused or not.
+local function registeredBy(addon)
+	for i = 1, #records do
+		local r = records[i]
+		if r.addon == addon and r ~= installed[addon] then return r end
+	end
+end
+
+local function forget(r)
+	for i = #records, 1, -1 do
+		if records[i] == r then table.remove(records, i) end
+	end
+end
+
+local function noGuides(r)
+	r.status = "broken"
+	r.reason = L["Registered no guides."]
+	if not r.noGuides then
+		r.noGuides = true
+		problem(r, "no-guides", r.reason)
+	end
+end
+
+-- A pack that never registered, from its TOC and the client's state.
+-- Priority: too-new > disabled > not-loaded > broken.
+local function fromToc(r, name, reason, enabled)
+	r.title = escape(meta(name, "Title") or name)
+	for key, field in pairs({ author = "Author", version = "Version", license = "X-License", website = "X-Website" }) do
+		local v = meta(name, field)
+		r[key] = v and escape(v) or nil
+	end
+	r.format = tonumber(meta(name, "X-Polestar-Format"))
+	local needs = meta(name, "X-Polestar-Needs")
+	r.needs = needs and escape(needs) or nil
+	r.reason = nil
+	if r.format and not Guides.FORMATS[r.format] then
+		r.status = "too-new"
+		r.reason = r.needs and (L["Needs Polestar %s or newer."]):format(r.needs) or L["Needs a newer Polestar."]
+	elseif reason == "DISABLED" or not enabled then
+		r.status = "disabled"
+	elseif not C_AddOns.IsAddOnLoaded(name) then
+		r.status = "not-loaded"
+		local text = type(reason) == "string" and reason ~= "" and (_G["ADDON_" .. reason] or reason) or nil
+		r.reason = text and escape(text) or nil
+	else
+		noGuides(r)
+	end
+end
+
+function Guides.ScanInstalled()
+	local A = C_AddOns
+	if not (A and A.GetNumAddOns and A.GetAddOnInfo and A.GetAddOnMetadata and A.IsAddOnLoaded) then return end
+	local player = UnitName and UnitName("player") or nil
+	for i = 1, A.GetNumAddOns() do
+		local name, _, _, _, reason = A.GetAddOnInfo(i)
+		local id = type(name) == "string" and meta(name, "X-Polestar-Pack") or nil
+		if id then
+			local r = registeredBy(name)
+			if r then
+				if installed[name] then
+					forget(installed[name])
+					installed[name] = nil
+				end
+				if (r.status == "on" or r.status == "off") and r.guideCount == 0 then noGuides(r) end
+			else
+				r = installed[name]
+				if not r then
+					r = newRecord({ id = id }, name)
+					installed[name] = r
+				end
+				local enabled = true
+				if A.GetAddOnEnableState then
+					local ok, state = pcall(A.GetAddOnEnableState, name, player)
+					enabled = not (ok and state == 0)
+				end
+				fromToc(r, name, reason, enabled)
+			end
+		end
+	end
+end
+
+---------------------------------------------------------------------------
+-- Queries (guides of hidden packs are left out)
 ---------------------------------------------------------------------------
 
 function Guides.Get(id)
-	return id and guides[id] or nil
+	local g = id and guides[id]
+	if g and visible(g) then return g end
+	return nil
 end
 
 function Guides.List()
 	local out = {}
-	for i = 1, #order do out[i] = headers[order[i]] end
+	for i = 1, #order do
+		local g = guides[order[i]]
+		if visible(g) then out[#out + 1] = headers[order[i]] end
+	end
 	return out
 end
 
@@ -386,12 +791,13 @@ local function guideStart(g)
 end
 Guides.Start = guideStart
 
--- Guides whose route choice (`nextChoices`) offers `id`, in registration order.
+-- Shown guides whose route choice (`nextChoices`) offers `id`, in
+-- registration order.
 function Guides.OfferedBy(id)
 	local out = {}
 	for i = 1, #order do
 		local g = guides[order[i]]
-		if g.nextChoices then
+		if g.nextChoices and visible(g) then
 			for _, c in ipairs(g.nextChoices) do
 				if c == id then
 					out[#out + 1] = g
@@ -403,31 +809,59 @@ function Guides.OfferedBy(id)
 	return out
 end
 
+local function hasLeveling(r)
+	for _, id in ipairs(r.guides) do
+		local g = guides[id]
+		if g and (g.category == nil or g.category == "Leveling") then return true end
+	end
+	return false
+end
+
+-- Can pack `id` be where suggestions come from? Registered, not internal,
+-- shown, with leveling guides. Ours always can.
+local function canSuggest(id)
+	if id == "guides" then return true end
+	local r = type(id) == "string" and packs[id]
+	return r and not r.internal and (r.status == "on" or r.status == "off") and packShown(id) and hasLeveling(r) or false
+end
+
+-- The packs suggestions can come from, ours ("guides") first, then the
+-- others as Guides.Packs orders them (the Guide packs page's choices).
+function Guides.SuggestSources()
+	local out = { "guides" }
+	for _, r in ipairs(Guides.Packs()) do
+		if r.id ~= "guides" and packs[r.id] == r and canSuggest(r.id) then out[#out + 1] = r.id end
+	end
+	return out
+end
+
+-- Where suggestions come from: behavior.suggestFrom when that pack can
+-- (SuggestSources), else ours ("guides").
+function Guides.SuggestSource()
+	local from = ns.Get and ns.Get("behavior.suggestFrom")
+	if type(from) == "string" and canSuggest(from) then return from end
+	return "guides"
+end
+
 -- Travel times this close count as a tie (the race's own chain wins).
 local TRAVEL_TIE = 120 -- seconds
 
--- Leveling guides for the player, best first (category "Leveling" or none;
--- other categories are only ever picked by the player). Faction/race/class
--- must match. Every guide whose level range contains the player's level, in
--- this order: the player's current zone first, then the nearest by travel
--- (in 2-minute bands), then race- or class-specific (the race's own chain),
--- then the narrowest range, the lowest minLevel and registration order. If
--- none contains the level: the nearest upcoming guide, else the highest one
--- below, alone. -> { id, ... }
-function Guides.Suggestions()
-	local player = ns.Compat.GetPlayerInfo()
-	local level = player.level or 1
-	local here = ns.PlayerPoint()
-	local zone = ns.Compat.GetZoneText()
-	local fitting, best, bestKey = {}, nil, nil
-	local function less(a, b)
-		for i = 1, #a do
-			if a[i] ~= b[i] then return a[i] < b[i] end
-		end
-		return false
+local function less(a, b)
+	for i = 1, #a do
+		if a[i] ~= b[i] then return a[i] < b[i] end
 	end
-	for i = 1, #order do
-		local g = guides[order[i]]
+	return false
+end
+
+-- One pack's leveling guides for the player: the fitting ones, ranked, and
+-- the best of the rest. -> fitting { id, ... }, best id | nil
+local function rank(packId, player, here, zone)
+	local r = packs[packId]
+	if not (r and (r.status == "on" or r.status == "off") and packShown(packId)) then return {}, nil end
+	local level = player.level or 1
+	local fitting, best, bestKey = {}, nil, nil
+	for i, id in ipairs(r.guides) do
+		local g = guides[id]
 		if (g.category == nil or g.category == "Leveling") and guideMatches(g, player) then
 			local lo, hi = g.minLevel or 1, g.maxLevel or g.minLevel or 1
 			if hi < lo then hi = lo end
@@ -447,11 +881,34 @@ function Guides.Suggestions()
 			end
 		end
 	end
-	if #fitting == 0 then return { best } end
 	table.sort(fitting, function(a, b) return less(a.key, b.key) end)
 	local out = {}
 	for i = 1, #fitting do out[i] = fitting[i].id end
-	return out
+	return out, best
+end
+
+-- Leveling guides for the player, best first (category "Leveling" or none;
+-- other categories are only ever picked by the player), from the suggestion
+-- source (SuggestSource); where it has nothing for the player, ours fill in.
+-- Faction/race/class must match. Every guide whose level range contains the
+-- player's level, in this order: the player's current zone first, then the
+-- nearest by travel (in 2-minute bands), then race- or class-specific (the
+-- race's own chain), then the narrowest range, the lowest minLevel and
+-- registration order. If none contains the level: the nearest upcoming
+-- guide, else the highest one below, alone. -> { id, ... }
+function Guides.Suggestions()
+	local player = ns.Compat.GetPlayerInfo()
+	local here = ns.PlayerPoint()
+	local zone = ns.Compat.GetZoneText()
+	local source = Guides.SuggestSource()
+	local fitting, best = rank(source, player, here, zone)
+	if #fitting > 0 then return fitting end
+	if source ~= "guides" then
+		local ours, oursBest = rank("guides", player, here, zone)
+		if #ours > 0 then return ours end
+		best = oursBest or best
+	end
+	return { best }
 end
 
 -- The best leveling guide for the player: the first of Suggestions().
@@ -460,5 +917,6 @@ function Guides.Suggest()
 end
 
 ns.OnLogin(function()
+	Guides.ScanInstalled()
 	ns.Fire("GUIDES_REGISTERED")
 end)

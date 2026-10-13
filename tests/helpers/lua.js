@@ -14,8 +14,10 @@
 // Addons load the way the client loads them: every file listed by the TOC, XML
 // manifests expanded in order, each chunk called with (addonName, namespace).
 // An addon entry may be { name, files: [...] } (paths relative to the addon
-// folder, .xml expanded) to load a subset. emit(value) prints one JSON line;
-// runAddon returns those values parsed, in order. A Lua error fails loudly.
+// folder, .xml expanded) to load a subset, or { name, dir } to load the addon
+// folder `dir` (outside addon/, e.g. a pack built into a temp folder) by its
+// TOC. emit(value) prints one JSON line; runAddon returns those values parsed,
+// in order. A Lua error fails loudly.
 
 const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
@@ -73,9 +75,13 @@ function tocEntries(addonDir) {
 		.filter((l) => l && !l.startsWith('#'));
 }
 
-function tocFiles(addonName) {
-	const dir = path.join(ADDONS, addonName);
+// The files an addon folder's TOC loads, in order (the folder may be anywhere).
+function dirFiles(dir) {
 	return expand(dir, tocEntries(dir));
+}
+
+function tocFiles(addonName) {
+	return dirFiles(path.join(ADDONS, addonName));
 }
 
 function luaString(s) {
@@ -101,7 +107,7 @@ function buildProgram(opts) {
 end`);
 	for (const entry of opts.addons || []) {
 		const name = typeof entry === 'string' ? entry : entry.name;
-		const files = typeof entry === 'string' || !entry.files ? tocFiles(name) : expand(path.join(ADDONS, name), entry.files);
+		const files = entry.dir ? expand(entry.dir, tocEntries(entry.dir)) : typeof entry === 'string' || !entry.files ? tocFiles(name) : expand(path.join(ADDONS, name), entry.files);
 		const saved = opts.saved && opts.saved[name] ? `function() ${opts.saved[name]} end` : 'nil';
 		lines.push(`__load(${luaString(name)}, { ${files.map(luaString).join(', ')} }, ${saved})`);
 	}
@@ -133,4 +139,4 @@ function runAddon(opts = {}) {
 	}
 }
 
-module.exports = { runAddon, tocFiles, tocEntries, xmlFiles, ROOT, ADDONS };
+module.exports = { runAddon, tocFiles, dirFiles, tocEntries, xmlFiles, ROOT, ADDONS };

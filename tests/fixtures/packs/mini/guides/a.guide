@@ -1,0 +1,11 @@
+# Fixture: a two-guide pack (tests/compile-pack.test.js).
+guide mini/a
+title Mini A
+faction Alliance
+levels 1-6
+zone Elwynn Forest
+next mini/b
+
+step Deputy Willem
+  accept 783
+  turnin 783

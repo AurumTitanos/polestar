@@ -1,19 +1,26 @@
 'use strict';
 // Cross-guide validation (docs/GUIDE_FORMAT.md, "Validation"): duplicate ids,
-// `next` targets, quests turned in / worked on without an earlier accept in
+// `next` targets (known, and followable by the guide's faction, races and
+// classes), quests turned in / worked on without an earlier accept in
 // the guide or any guide chaining into it, accepts the guide's characters can
 // never take, missing prerequisites, accepts above the plausible level,
 // accepts closed by an exclusive quest taken earlier, accepts never turned in
-// on a route, `complete` on quests without objectives, and required elite
-// work in Leveling guides.
+// on a route, `complete` on quests without objectives, required elite work in
+// Leveling guides, and `|` in player-facing text.
+//
+// Our house rules (required elite work, the solo filter) are errors in our
+// pack (`guides`) and warnings in every other.
 //
 // validateGuides(guides, data, diag) — guides are resolver output (resolve.js).
 // validateSoloPolicy(guides, excluded, diag) — lint only: leveling goals on
 // quests the simulator's solo filter excludes (tools/lib/sim/solo.js).
+// validatePackFrames(guides, data, ours, ourData, diag) — another pack's map
+// frames that differ from the ones our guides register.
 
-const { applicable, maskExcludes, raceSides, RACE_BY_FILE } = require('./conditions');
+const { applicable, maskExcludes, raceSides, characterKeys, raceLabel, classLabel, whoLabel, RACE_BY_FILE } = require('./conditions');
 const { blockingPrereqs } = require('../data/prereqs');
 const SOLO = require('../sim/solo');
+const { PIPE_HINT } = require('../pack/manifest');
 
 // Classic XP needed to go from level L to L+1 (index L). Game facts.
 const XP_TO_NEXT = [
@@ -45,6 +52,23 @@ function guideLayer(g) {
 	return { factions: g.faction ? [g.faction] : null, races: g.races || null, classes: g.classes || null };
 }
 
+// A `next` option no character of guide g can follow: the races or classes
+// of `other` (with what each race can be, from races.json) leave none of
+// g's characters. -> { message, hint } | null. Unknown race names are not
+// checked; a faction mismatch is reported on its own.
+function followProblem(g, other, data) {
+	if ([g, other].some((x) => (x.races || []).some((r) => !RACE_BY_FILE[r]))) return null;
+	const classesOf = (r, s) => data.raceClasses(r, s);
+	if (!characterKeys([guideLayer(g)], classesOf).size) return null;
+	if (characterKeys([guideLayer(g), guideLayer(other)], classesOf).size) return null;
+	const flags = `${g.races ? ` --race ${raceLabel(g.races[0])}` : ''}${g.classes ? ` --class ${classLabel(g.classes[0])}` : ''}`;
+	const same = g.classes ? (g.races ? 'races and classes' : 'classes') : 'races';
+	return {
+		message: `no ${whoLabel(g)} character can follow ${other.id} (it is for ${whoLabel(other)} only)`,
+		hint: `pick a guide for the same ${same}: \`polestar find --kind guide <zone>${flags}\``,
+	};
+}
+
 // Elite work: Leveling guides route solo characters, so it may appear only as
 // an `optional` extra. An elite is an npcs.json rank 1-3 (elite, rare elite,
 // boss) hostile to a side the goal applies to; a friendly one is a talk credit
@@ -60,6 +84,99 @@ function isElite(rank, faction, sides) {
 
 function eliteTip(target) {
 	return `in a Leveling guide make the goal \`optional\` with the tip "${target} is elite: grouping up is advised."`;
+}
+
+// Our house rules: errors in our pack, warnings in every other.
+function houseRule(diag, g) {
+	return g.pack === 'guides' ? diag.error.bind(diag) : diag.warn.bind(diag);
+}
+
+function hasPipe(s) {
+	return typeof s === 'string' && s.includes('|');
+}
+
+// Header keys (as parsed) and the keyword the author writes them with.
+const PIPE_HEADER = [
+	['title', 'title'],
+	['folder', 'folder'],
+	['pitch', 'pitch'],
+	['pros', 'pro'],
+	['cons', 'con'],
+	['author', 'author'],
+];
+// Names a goal line may give in quotes (parsed key -> what it is).
+const PIPE_NAMES = [
+	['title', 'the quest title'],
+	['target', 'the target name'],
+	['npcName', 'the NPC name'],
+	['itemName', 'the item name'],
+	['objName', 'the object name'],
+	['spellName', 'the spell name'],
+	['factionName', 'the faction name'],
+	['achievementName', 'the achievement name'],
+];
+
+// Player-facing text exactly as the author wrote it (the parsed guide, so
+// names filled in from data and defaults such as the pack's author are not
+// reported): header title, folder, pitch, pros, cons and author; step titles
+// and tips; goal texts, notes and quoted names (rewards included). Polestar
+// shows it as written (every `|` is escaped when a guide registers), so a `|`
+// prints literally.
+function checkPipes(g, diag) {
+	const ast = g._ast;
+	const warn = (line, what) => diag.warn(ast.file, line, `${what} contains "|", which prints literally in game`, PIPE_HINT);
+	const h = ast.header || {};
+	for (const [key, keyword] of PIPE_HEADER) {
+		const v = h[key];
+		if ((Array.isArray(v) ? v : [v]).some(hasPipe)) warn(ast.lines[keyword] || ast.line, `\`${keyword}\``);
+	}
+	for (const s of ast.steps || []) {
+		if (hasPipe(s.title)) warn(s.line, 'the step title');
+		if (hasPipe(s.tip)) warn(s.line, 'the step tip');
+		for (const goal of s.goals) {
+			if (hasPipe(goal.text)) warn(goal.line, 'the goal text');
+			if (hasPipe(goal.note)) warn(goal.line, 'the goal note');
+			for (const [key, what] of PIPE_NAMES) if (hasPipe(goal[key])) warn(goal.line, what);
+			if ([...(goal.rewardChoices || []), ...(goal.rewardItems || [])].some((r) => hasPipe(r.itemName))) warn(goal.line, 'the item name');
+		}
+	}
+}
+
+// fn(map, guide, goal) for every map an emitted coordinate uses: the goal's
+// own map/x/y and any coordinate list on it (smart-target `candidates`).
+function forEachGoalMap(guides, fn) {
+	for (const g of guides) {
+		for (const s of g.steps) {
+			for (const goal of s.goals) {
+				if (goal.map !== undefined) fn(goal.map, g, goal);
+				for (const v of Object.values(goal)) {
+					if (!Array.isArray(v)) continue;
+					for (const el of v) if (el && typeof el === 'object' && el.map !== undefined) fn(el.map, g, goal);
+				}
+			}
+		}
+	}
+}
+
+const FRAME_KEYS = ['c', 'left', 'right', 'top', 'bottom'];
+
+// Another pack's Era frame for a map our guides also use, with other bounds
+// (from other reference data): in game our frame wins, so the pack's
+// coordinates on that map would land elsewhere. Once per map, at its first use.
+function validatePackFrames(guides, data, ours, ourData, diag) {
+	const ourFrames = new Map();
+	forEachGoalMap(ours, (map) => {
+		if (!ourFrames.has(map)) ourFrames.set(map, ourData.eraFrame(map));
+	});
+	const seen = new Set();
+	forEachGoalMap(guides, (map, g, goal) => {
+		if (seen.has(map)) return;
+		seen.add(map);
+		const mine = data.eraFrame(map);
+		const theirs = ourFrames.get(map);
+		if (!mine || !theirs || FRAME_KEYS.every((k) => mine[k] === theirs[k])) return;
+		diag.warn(g._ast.file, goal._line, `map ${map}: this pack's Era frame differs from the one Polestar's guides register; in game Polestar's wins, so coordinates on this map may be off`);
+	});
 }
 
 // The message for a `kill` of an elite, or a `collect` of an item whose every
@@ -138,12 +255,15 @@ function validateGuides(guides, data, diag) {
 	for (const g of byId.values()) {
 		for (const to of g.nextChoices || (g.next ? [g.next] : [])) {
 			if (!byId.has(to)) {
-				diag.error(g._ast.file, g._ast.lines.next, `\`next\` points to unknown guide "${to}"`);
+				diag.error(g._ast.file, g._ast.lines.next, `\`next\` points to unknown guide "${to}"`, 'list guide ids with `polestar find --kind guide <text>`');
 				continue;
 			}
 			const other = byId.get(to);
 			if (g.faction && other.faction && other.faction !== g.faction) {
 				diag.error(g._ast.file, g._ast.lines.next, `\`next\` offers ${other.faction} guide "${to}" after a ${g.faction} guide`);
+			} else {
+				const why = followProblem(g, other, data);
+				if (why) diag.error(g._ast.file, g._ast.lines.next, why.message, why.hint);
 			}
 			if (!preds.has(to)) preds.set(to, []);
 			preds.get(to).push(g);
@@ -248,6 +368,7 @@ function validateGuides(guides, data, diag) {
 
 	for (const g of byId.values()) {
 		const file = g._ast.file;
+		checkPipes(g, diag);
 		const accepted = new Set();
 		const turnedIn = new Set();
 		const learned = new Set();
@@ -274,7 +395,7 @@ function validateGuides(guides, data, diag) {
 			if (leveling && !goal.optional) {
 				const elite = eliteGoal(goal, applicable([gl, step._only, goal._only]).factions, data);
 				if (elite) {
-					diag.error(file, ln, elite);
+					houseRule(diag, g)(file, ln, elite);
 					eliteReported.add(goal);
 				}
 			}
@@ -357,13 +478,21 @@ function validateGuides(guides, data, diag) {
 				const c = covered(s, a.goal.quest);
 				return { s, left: c ? minus(open, c) : new Set() };
 			});
+			// A next guide whose race, class or faction leaves out every character
+			// still holding the quest: its turn-ins never count for them.
+			const outside = (r) => !meets(r.left, characters([guideLayer(r.s)]));
+			const why = (r, it) => (outside(r) ? ` (${it} is for ${whoLabel(r.s)} only, so its turn-ins do not count)` : '');
+			const hint = (excluded) =>
+				`turn it in later in this guide${excluded ? ', or pick a `next` guide these characters can follow' : ' or in a guide after it'}, or make the accept \`optional\` when the player may leave it`;
 			const failing = routes.filter((r) => r.left.size);
 			if (!routes.length || failing.length === routes.length) {
 				const left = new Set(routes.length ? failing.flatMap((r) => [...r.left]) : open);
-				diag.warn(file, a.goal._line, `quest ${name} is accepted but never turned in later in this guide or a guide after it${some(left)}`);
+				const reasons = failing.filter(outside).map((r) => why(r, `"${r.s.id}"`).slice(2, -1));
+				const because = reasons.length ? ` (${reasons.join('; ')})` : '';
+				diag.warn(file, a.goal._line, `quest ${name} is accepted but never turned in later in this guide or a guide after it${some(left)}${because}`, hint(reasons.length > 0));
 				return;
 			}
-			for (const r of failing) diag.warn(file, a.goal._line, `quest ${name} is accepted but never turned in on the route through "${r.s.id}"${some(r.left)}`);
+			for (const r of failing) diag.warn(file, a.goal._line, `quest ${name} is accepted but never turned in on the route through "${r.s.id}"${some(r.left)}${why(r, 'it')}`, hint(outside(r)));
 		});
 
 		if (data.hasXp) {
@@ -404,7 +533,7 @@ function validateSoloPolicy(guides, excluded, diag) {
 					if (!why) continue;
 					const title = e.title || goal.title;
 					if (why === 'elite') {
-						diag.error(g._ast.file, goal._line, `quest ${goal.quest} (${title}) is elite (solo filter: ${e.reason}); ${eliteTip(title)}`);
+						houseRule(diag, g)(g._ast.file, goal._line, `quest ${goal.quest} (${title}) is elite (solo filter: ${e.reason}); ${eliteTip(title)}`);
 					} else {
 						diag.warn(g._ast.file, goal._line, `quest ${goal.quest} (${title}) is excluded from solo leveling (${why}: ${e.reason}); make the goal \`optional\``);
 					}
@@ -415,4 +544,4 @@ function validateSoloPolicy(guides, excluded, diag) {
 	}
 }
 
-module.exports = { validateGuides, validateSoloPolicy, xpAt, levelAt };
+module.exports = { validateGuides, validateSoloPolicy, validatePackFrames, forEachGoalMap, xpAt, levelAt };

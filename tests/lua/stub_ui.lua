@@ -578,6 +578,8 @@ end
 -- whole ranked list when a test needs more than one.
 function Guides.Suggestions() return uistub.suggestions or { uistub.suggest } end
 function Guides.Suggest() return Guides.Suggestions()[1] end
+-- The scenes' guides are all ours.
+function Guides.SuggestSource() return "guides" end
 
 local Nav = {}
 function Nav.SetTarget(map, x, y, label, f)
@@ -624,6 +626,9 @@ function uistub.install(opts)
 		for _, k in ipairs({ "GetTabs", "OpenTab", "CloseTab", "SelectTab", "MoveTab", "GetGuideState" }) do Engine[k] = nil end
 	end
 	Polestar.Engine = Engine
+	-- The real registry stays reachable for pages that show its records
+	-- (the Guide packs page): Polestar.Guides = uistub.realGuides.
+	if Polestar.Guides ~= Guides then uistub.realGuides = Polestar.Guides end
 	Polestar.Guides = Guides
 	if not opts.noNav then Polestar.Nav = Nav end
 	Polestar.Compat = Compat
@@ -636,9 +641,9 @@ function uistub.install(opts)
 	if Polestar.GetDefault("behavior.autoAccept") == nil then
 		Polestar.RegisterDefaults("behavior", { autoAccept = true, autoTurnin = true, autoNextGuide = true, autoSelectGuide = true, skipGrey = false })
 	end
-	-- An account that has seen the first-run beta notice, so it never opens
-	-- over windows under test; tests/ui-beta.test.js clears it.
-	Polestar.DB().betaNoticeSeen = true
+	-- An account that has seen the first-run welcome, so it never opens over
+	-- windows under test; tests/ui-welcome.test.js restores the saved value.
+	Polestar.DB().welcomeSeen = 1
 end
 
 -- Show guide `id` at step `step` in the active tab (opening a first tab).

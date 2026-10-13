@@ -9,10 +9,10 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { runAddon } = require('./helpers/lua');
-const { compile, guideText, lineOf, plain, fixtureData, tmpdir, DATA_DIR } = require('./fixtures/dsl/helpers');
+const { TEST_PACK } = require('./helpers/packs');
+const { compile, guideText, lineOf, plain, fixtureData, tmpdir, writeTestPack, DATA_DIR } = require('./fixtures/dsl/helpers');
 const { loadData } = require('../tools/lib/dsl/data');
-const { buildPackFiles, writePackDir, packMeta } = require('../tools/lib/dsl/project');
-const { emitGuide } = require('../tools/lib/dsl/emit');
+const { emitGuides } = require('../tools/lib/dsl/emit');
 
 // Fixture data without professions.json and factions.json (as while they are being built).
 function dataWithout(...names) {
@@ -272,17 +272,16 @@ test('new verbs emit Lua that loads under Lua 5.1 and round-trips, with reagents
 	]);
 	const r = compile(src);
 	assert.deepEqual(r.errors, []);
-	const dir = tmpdir();
-	writePackDir(dir, buildPackFiles({ guides: r.guides, meta: packMeta('1'), data: fixtureData() }));
-	const lua = fs.readFileSync(path.join(dir, 'Guides', 't', 'prof.lua'), 'utf8');
+	const file = path.join(writeTestPack(r.guides).dir, 'Guides.lua');
+	const lua = fs.readFileSync(file, 'utf8');
 	assert.match(lua, /reagents = \{ \{ item = 2589, itemName = "Linen Cloth", count = 2 \} \}/);
-	assert.equal(lua, emitGuide(r.guides[0], 'test.guide'));
+	assert.equal(lua, emitGuides([{ guide: r.guides[0], source: 'test.guide' }]));
 	const [out] = runAddon({
 		addons: [{ name: 'Polestar', files: ['Core/Init.lua'] }],
 		script: `
 			local got
 			Polestar.RegisterGuide = function(g) got = g end
-			assert(loadfile(${JSON.stringify(path.join(dir, 'Guides', 't', 'prof.lua'))}))("Polestar_Guides", {})
+			assert(loadfile(${JSON.stringify(file)}))("Polestar_Guides", {})
 			emit(got)`,
 	}).emitted;
 	assert.deepEqual(out, plain(r.guides[0]));
@@ -292,18 +291,20 @@ test('new verbs emit Lua that loads under Lua 5.1 and round-trips, with reagents
 
 test('the compiled new-verb goals pass the real engine registry', () => {
 	const r = compile(
-		guideText(['step S', '  learn 3276', '  craft 3276 x2', '  skill First Aid 150', '  rep 72 Friendly', '  explore 42,65 "Goldshire"', '  achieve 6 "Level 10" criteria 1']),
+		guideText(['step S', '  learn 3276', '  craft 3276 x2', '  skill First Aid 150', '  rep 72 Friendly', '  explore 42,65 "Goldshire"', '  achieve 6 "Level 10" criteria 1']).replace(/^guide t\//, 'guide test/'),
+		undefined,
+		{ pack: 'test' },
 	);
 	assert.deepEqual(r.errors, []);
-	const dir = tmpdir();
-	writePackDir(dir, buildPackFiles({ guides: r.guides, meta: packMeta('1'), data: fixtureData() }));
+	const file = path.join(writeTestPack(r.guides).dir, 'Guides.lua');
 	const [ok] = runAddon({
 		addons: [{ name: 'Polestar', files: ['Core/Core.xml'] }],
 		script: `
+			${TEST_PACK}
 			local res = {}
 			local real = Polestar.RegisterGuide
 			Polestar.RegisterGuide = function(g) local ok, e = real(g); res[#res + 1] = ok and "ok" or e; return ok, e end
-			assert(loadfile(${JSON.stringify(path.join(dir, 'Guides', 't', 'main.lua'))}))("Polestar_Guides", {})
+			assert(loadfile(${JSON.stringify(file)}))("Polestar_Guides", {})
 			emit(res)`,
 	}).emitted;
 	assert.deepEqual(ok, ['ok']);

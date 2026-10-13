@@ -299,15 +299,15 @@ add("forever/horde/30-40/01-desolace", "Desolace & Hillsbrad Foothills", "Horde"
 -- themselves (addon/Polestar_Guides), so the facts (quests, zones, the guide
 -- after it) are the real ones. They replace the samples of the same id.
 do
-	local register = Polestar.RegisterGuide
-	Polestar.RegisterGuide = function(def)
+	local register, defs = Polestar.RegisterGuide, {}
+	Polestar.RegisterGuide = function(def) defs[def.id] = def end
+	dofile("addon/Polestar_Guides/Guides.lua")
+	Polestar.RegisterGuide = register
+	for _, rel in ipairs({ "orc-troll/01-durotar", "orc-troll/02-the-barrens", "02-the-barrens", "03-silverpine-forest", "04-the-barrens", "05-stonetalon-mountains" }) do
+		local def = defs["forever/horde/" .. rel]
 		if not U[def.id] then table.insert(uistub.order, def.id) end
 		U[def.id] = def
 	end
-	for _, rel in ipairs({ "orc-troll/01-durotar", "orc-troll/02-the-barrens", "02-the-barrens", "03-silverpine-forest", "04-the-barrens", "05-stonetalon-mountains" }) do
-		dofile("addon/Polestar_Guides/Guides/forever/horde/" .. rel .. ".lua")
-	end
-	Polestar.RegisterGuide = register
 end`;
 function pickerScene(script) {
 	return `${clientArtLua()}${PICKER_SETUP}\n${script}`;
@@ -341,6 +341,38 @@ end`;
 // the arrow in your own colours.
 const CUSTOM_LOOK = `Polestar.Set("ui.borderAccent", true); Polestar.Set("ui.borderSize", 2); Polestar.Set("ui.band", false); Polestar.Set("ui.shadow", false)
 Polestar.Set("nav.arrowColor", { 0.45, 0.7, 1 }); Polestar.Set("nav.arrowNearColor", { 1, 0.55, 0.85 })`;
+// The Guide packs page over the real registry (uistub.realGuides in place
+// of stub_ui's fake): ours and Joe's on, Ann's with two problems, Sam's
+// too new for this Polestar, Kim's turned off in the AddOns list.
+const PACKS_ADDONS = `stub.addons = {
+	{ name = "Polestar", loaded = true }, { name = "Polestar_Guides", loaded = true }, { name = "JoeRoutes", loaded = true },
+	{ name = "AnnDungeons", loaded = true }, { name = "SamProfessions", reason = "INTERFACE_VERSION" }, { name = "KimQuests", reason = "DISABLED", enabled = false },
+}
+stub.addonMeta.Polestar = { ["X-Website"] = "https://github.com/polestar-wow/polestar" }
+stub.addonMeta.Polestar_Guides = { ["X-Polestar-Pack"] = "guides", ["X-Polestar-Format"] = "1" }
+stub.addonMeta.JoeRoutes = { ["X-Polestar-Pack"] = "joe", ["X-Polestar-Format"] = "1" }
+stub.addonMeta.AnnDungeons = { ["X-Polestar-Pack"] = "ann", ["X-Polestar-Format"] = "1" }
+stub.addonMeta.SamProfessions = { ["X-Polestar-Pack"] = "sam", ["X-Polestar-Format"] = "2", ["X-Polestar-Needs"] = "0.3.0", Title = "Sam's Professions", Author = "Sam", Version = "0.9.0", ["X-License"] = "MIT" }
+stub.addonMeta.KimQuests = { ["X-Polestar-Pack"] = "kim", ["X-Polestar-Format"] = "1", Title = "Kim's Quests", Author = "Kim", Version = "2.1.0", ["X-License"] = "CC0-1.0", ["X-Website"] = "https://github.com/kim/quests" }`;
+const PACKS_SCENE = `local realGuides = uistub.realGuides
+Polestar.Guides = realGuides
+local function guide(id, pack, n, extra)
+	for i = 1, n do
+		local g = { id = id .. i, pack = pack, title = id .. i, minLevel = 1, maxLevel = 10, steps = { { goals = { { t = "level", level = 2 } } } } }
+		for k, v in pairs(extra or {}) do g[k] = v end
+		Polestar.RegisterGuide(g)
+	end
+end
+Polestar.RegisterPack({ addon = "Polestar_Guides", id = "guides", format = 1, title = "Polestar Guides", author = "Polestar", version = "0.1.0", license = "GPL-3.0" })
+guide("forever/g", "guides", 173)
+Polestar.RegisterPack({ addon = "JoeRoutes", id = "joe", format = 1, title = "Joe's Routes", author = "Joe", version = "1.2.0", license = "CC-BY-4.0",
+	website = "https://github.com/joe/routes", source = "Written from my own play" })
+guide("joe/r", "joe", 58)
+Polestar.RegisterPack({ addon = "AnnDungeons", id = "ann", format = 1, title = "Ann's Dungeons", author = "Ann", version = "0.4.0", license = "MIT" })
+guide("ann/d", "ann", 12, { category = "Dungeons" })
+guide("dungeons/deadmines", "ann", 1)
+Polestar.RegisterGuide({ id = "ann/broken", pack = "ann", title = "Broken", steps = {} })
+realGuides.ScanInstalled()`;
 
 // The route choice window, filled the way Engine.GetRouteChoice fills it, with
 // each zone's pitch, pros and cons read from its guide file. The shipped
@@ -533,7 +565,8 @@ w.accept(33, { { text = "Tough Wolf Meat: 0/8", type = "item", required = 8 } })
 stub.advance(0.3)`;
 // A guide on the step that takes on the kobolds and hands in the wolf meat:
 // those quests' markers are highlighted, the others dimmed (qol.guideDim).
-const QUEST_GUIDE = `Polestar.RegisterGuide({ id = "preview/elwynn", title = "Elwynn Forest", faction = "Alliance", minLevel = 1, maxLevel = 10, zone = 1429, steps = {
+const QUEST_GUIDE = `Polestar.RegisterPack({ addon = "Polestar_Preview", id = "preview", format = 1, title = "Preview", author = "Polestar", version = "1", license = "GPL-3.0-only" })
+Polestar.RegisterGuide({ id = "preview/elwynn", pack = "preview", title = "Elwynn Forest", faction = "Alliance", minLevel = 1, maxLevel = 10, zone = 1429, steps = {
 	{ title = "Kobold Camp", goals = {
 		{ t = "kill", quest = 7, target = "Kobold Vermin", count = 10, map = 1429, x = 47.8, y = 35.8 },
 		{ t = "turnin", quest = 33, title = "Wolves Across the Border", npc = 196, npcName = "Eagan Peltskinner", map = 1429, x = 48.9, y = 40.2 },
@@ -605,10 +638,13 @@ const SCENES = [
 		],
 	},
 	{
-		file: 'beta-notice.svg',
-		title: 'The first-run beta notice, once per account after login; About carries the same note',
+		file: 'welcome.svg',
+		title: 'The first-run welcome, once per account after login: Welcome, Our routes are still alpha, Set up, Guide packs',
 		panels: [
-			{ roots: ['PolestarBetaNotice'], script: 'Polestar.UI.BetaNotice.Show()' },
+			{ roots: ['PolestarWelcome'], script: 'Polestar.UI.Welcome.Show("welcome")' },
+			{ roots: ['PolestarWelcome'], script: 'Polestar.UI.Welcome.Show("alpha")' },
+			{ roots: ['PolestarWelcome'], script: 'Polestar.UI.Welcome.Show("setup")' },
+			{ roots: ['PolestarWelcome'], script: 'Polestar.UI.Welcome.Show("packs")' },
 		],
 	},
 	{
@@ -716,6 +752,15 @@ uistub.update()`,
 		panels: [
 			{ roots: OPTIONS, before: RECORDER, script: 'Polestar.UI.ShowOptions("recorder")' },
 			{ roots: OPTIONS, script: 'Polestar.UI.ShowOptions("about")' },
+		],
+	},
+	{
+		file: 'options-packs.svg',
+		title: 'Options: Guide packs: ours and a community pack on, one with problems and its report, one turned off, one too new; where suggestions come from',
+		panels: [
+			{ roots: OPTIONS, before: PACKS_ADDONS, script: `${PACKS_SCENE}; Polestar.UI.ShowOptions("guidepacks")` },
+			{ roots: OPTIONS, before: PACKS_ADDONS, script: `${PACKS_SCENE}; Polestar.UI.ShowOptions("guidepacks")
+				for _, r in ipairs(Polestar.UI.Packs.view.rows) do if r:IsShown() and r.lsRecord.id == "ann" then r.ShowList:Click(); r.CopyReport:Click() end end` },
 		],
 	},
 	{

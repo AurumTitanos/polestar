@@ -163,8 +163,8 @@ function parseGuide(text, file, diag) {
 	let step = null;
 	let sawContent = false;
 
-	const err = (ln, msg) => diag.error(file, ln, msg);
-	const warn = (ln, msg) => diag.warn(file, ln, msg);
+	const err = (ln, msg, hint) => diag.error(file, ln, msg, hint);
+	const warn = (ln, msg, hint) => diag.warn(file, ln, msg, hint);
 
 	for (let idx = 0; idx < lines.length; idx++) {
 		const ln = idx + 1;
@@ -208,7 +208,7 @@ function parseGuide(text, file, diag) {
 				continue;
 			}
 			if (!kw || !HEADER_KEYS.includes(kw)) {
-				err(ln, `unknown header key "${toks[0].text}"`);
+				err(ln, `unknown header key "${toks[0].text}"`, `header keys: ${HEADER_KEYS.join(', ')}`);
 				continue;
 			}
 			const repeatable = kw === 'pro' || kw === 'con';
@@ -257,7 +257,7 @@ function parseGuide(text, file, diag) {
 			continue;
 		}
 		if (!kw || !MODS[kw]) {
-			err(ln, toks[0].quoted ? 'expected a verb, found a string' : `unknown verb "${toks[0].text}"`);
+			err(ln, toks[0].quoted ? 'expected a verb, found a string' : `unknown verb "${toks[0].text}"`, `verbs: ${VERBS.join(', ')}`);
 			continue;
 		}
 		const goal = parseGoal(kw, line, lex, ln, err, warn);

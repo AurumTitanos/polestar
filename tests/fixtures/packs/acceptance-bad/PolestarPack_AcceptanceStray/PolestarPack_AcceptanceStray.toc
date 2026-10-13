@@ -1,0 +1,15 @@
+## Interface: 16001
+## Title: Acceptance Stray
+## Notes: Guide pack for Polestar
+## Author: Bo
+## Version: 0.1.0
+## Dependencies: Polestar
+## X-Polestar-Pack: acceptance-stray
+## X-Polestar-Format: 1
+## X-Polestar-Needs: 0.1.0
+## X-License: MIT
+# Fixture (tests/acceptance-packs.test.js), written by hand: lint refuses a
+# guide id outside the pack's prefix, so only a hand-made pack can try one.
+
+Pack.lua
+Guides.lua

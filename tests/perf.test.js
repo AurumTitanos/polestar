@@ -25,7 +25,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { ROOT } = require('./helpers/lua');
-const { buildSimPack, playGuide, luaValue, SIMULATE } = require('./helpers/guide-sim');
+const { buildSimPack, playGuide, luaValue, SIMULATE } = require('../tools/lib/playtest');
 const { localPacks } = require('./helpers/profile');
 
 const DATA = path.join(ROOT, 'data', 'forever');

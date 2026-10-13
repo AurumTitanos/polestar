@@ -1,0 +1,25 @@
+# Fixture: a guide that plays to the end for every class and hands over to
+# one of ours (tests/playtest.test.js). It names Shamans and Druids, which no
+# Human can be: they are never played.
+guide plays/northshire
+title Plays Through
+faction Alliance
+race Human
+levels 1-6
+zone Elwynn Forest
+next forever/alliance/human/01-elwynn-forest
+
+step Northshire Abbey
+  goto 48.2,42.0 "Northshire Abbey"
+
+step Warriors see Llane
+  only Warrior
+  goto 50.2,42.3 "Llane Beshere"
+
+step Shamans and Druids
+  only Shaman, Druid
+  goto 50.2,42.3 "Llane Beshere"
+
+step Deputy Willem
+  accept 783
+  turnin 783

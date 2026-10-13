@@ -1,6 +1,6 @@
 'use strict';
 // Profiles the whole addon while the guide simulator plays a guide
-// (tests/lua/profile.lua inside the harness of tests/helpers/guide-sim.js).
+// (tests/lua/profile.lua inside the harness of tools/lib/playtest.js).
 //
 //   const { profileGuide } = require('./helpers/profile');
 //   const r = profileGuide(pack, guide, { race: 'Orc', faction: 'Horde', cls: 'WARRIOR', sample: 1000, packs: true });
@@ -24,7 +24,7 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { buildSimPack, playGuide, SIMULATE } = require('./guide-sim');
+const { buildSimPack, playGuide, SIMULATE } = require('../../tools/lib/playtest');
 const { tocFiles, ADDONS } = require('./lua');
 
 const PACKS = ['Polestar_QuestDB', 'Polestar_Codex', 'Polestar_ItemDB'];

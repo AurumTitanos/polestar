@@ -1,0 +1,71 @@
+{
+	"36": {
+		"id": 36,
+		"title": "Westfall Stew",
+		"level": 10,
+		"minLevel": 9,
+		"races": 77,
+		"classes": null,
+		"start": {
+			"npc": [
+				238
+			],
+			"object": [],
+			"item": []
+		},
+		"end": {
+			"npc": [
+				235
+			],
+			"object": []
+		},
+		"zone": 1436
+	},
+	"840": {
+		"id": 840,
+		"title": "Conscript of the Horde",
+		"level": 10,
+		"minLevel": 10,
+		"races": 178,
+		"classes": null,
+		"start": {
+			"npc": [
+				3336
+			],
+			"object": [],
+			"item": []
+		},
+		"end": {
+			"npc": [
+				3336
+			],
+			"object": []
+		},
+		"zone": 1411
+	},
+	"900": {
+		"id": 900,
+		"title": "Stew for Everyone",
+		"level": 12,
+		"minLevel": 10,
+		"races": null,
+		"classes": null,
+		"start": {
+			"npc": [],
+			"object": [
+				33
+			],
+			"item": []
+		},
+		"end": {
+			"npc": [],
+			"object": []
+		},
+		"objectives": [
+			{ "type": "kill", "id": 6, "count": 10, "text": "Kobold Vermin" },
+			{ "type": "item", "id": 2832, "count": null, "text": "Verna's Westfall Stew Recipe" },
+			{ "type": "event", "id": null, "count": null, "text": "Taste the stew" }
+		],
+		"zone": 1436
+	}
+}

@@ -24,7 +24,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { runAddon } = require('./helpers/lua');
 const { writeCodexPack } = require('./helpers/codex');
-const { SIMULATE, luaValue } = require('./helpers/guide-sim');
+const { SIMULATE, luaValue } = require('../tools/lib/playtest');
 const { buildJournal, emitJournal } = require('../tools/lib/codex/journal');
 
 const { codex, inputs } = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'codex', 'dungeon-pickup.json'), 'utf8'));

@@ -1,0 +1,21 @@
+# An example to start from: a short walk from Goldshire to the Westfall
+# border that hands over to Polestar's Westfall guide. Lines starting with #
+# are notes for you; players never see them. Replace it with your own route.
+guide {{id}}/example
+title Goldshire to Westfall
+faction Alliance
+levels 5-10
+zone Elwynn Forest
+next forever/alliance/02-westfall
+
+step Goldshire
+  tip Start at the Lion's Pride Inn in Goldshire, at the crossroads in the middle of Elwynn Forest.
+  goto 42.9,65.6 "Goldshire" r 30
+
+step The Westbrook Garrison
+  tip Follow the road west out of Goldshire. The garrison's watchtower stands where the road crosses the stream.
+  goto 24.2,74.5 "Westbrook Garrison" r 30
+
+step Into Westfall
+  tip Keep west over the bridge. The road climbs into the dry fields of Westfall, where the next guide picks you up.
+  goto 20.6,80.5 "The Westfall border" r 30

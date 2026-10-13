@@ -128,7 +128,9 @@ function abandonedIndices(events) {
 	return dropped;
 }
 
-function draftGuide(session) {
+// session -> { id, name, text }. `pack`: the id of the guide pack the draft
+// belongs to; another pack's drafts are `<pack>/draft/...`, ours `draft/...`.
+function draftGuide(session, { pack = 'guides' } = {}) {
 	const events = Array.isArray(session.events) ? session.events : [];
 	const maps = session.maps || {};
 	const char = session.char || {};
@@ -316,7 +318,7 @@ function draftGuide(session) {
 	const faction = char.faction === 'Alliance' || char.faction === 'Horde' ? char.faction : null;
 	const race = raceName(char.race);
 	const slug = (s) => String(s || 'any').toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '') || 'any';
-	const id = `draft/${slug(faction)}/${slug(race)}/${date}-${time}`;
+	const id = `${pack === 'guides' ? '' : `${pack}/`}draft/${slug(faction)}/${slug(race)}/${date}-${time}`;
 	const name = `${slug(faction)}-${slug(race)}-${date}-${time}`;
 	const zoneName = maps[String(firstMap)]?.name;
 

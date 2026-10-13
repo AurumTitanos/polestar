@@ -1,7 +1,9 @@
 'use strict';
 // `sim compare` and `sim bench` (docs/SIMULATION.md §5): Polestar's guides
 // (the default route and every route choice) and the best route found, all
-// scored under the same calibrated model. Outputs go to data/bench/.
+// scored under the same calibrated model. Inside another guide pack (or with
+// --pack) compare also scores that pack's chain (after our default chain up
+// to the pack's first level when it starts above level 1). Outputs go to data/bench/.
 
 const fs = require('node:fs');
 const path = require('node:path');
@@ -12,10 +14,13 @@ const { compileSequence, routeSequence } = require('./sequence');
 const { fmtH, table, mdTable } = require('./report');
 const { LEVEL_XP } = require('./xp');
 const { loadPolestarRoutes } = require('./baselines/polestar');
+const { resolvePack } = require('../pack/locate');
+const { printDiagnostics } = require('../dsl/cli');
+const { isDir } = require('../addons');
 
 let LEVELS = [10, 20, 30, 40, 50, 60];
 
-// Every source for one character: [{ id, label, source, events | route, family? }]
+// Every source for one character: [{ id, label, source, events | route, family?, guides? }]
 function sources(o, faction, race, run, runD) {
 	const out = [];
 	const warn = [];
@@ -23,14 +28,30 @@ function sources(o, faction, race, run, runD) {
 	if (res) out.push({ id: 'best', label: 'Best found (solo)', source: 'sim', route: sim.routeFromKeys(run, res.best.route) });
 	const resD = loadResult(o, faction, race, 'dungeons', run.world, warn);
 	if (resD) out.push({ id: 'best-dungeons', label: 'Best found (dungeons)', source: 'sim', route: sim.routeFromKeys(runD, resD.best.route), family: 'dungeons' });
+	const guidesDir = o.guidesDir || path.join(sim.ROOT, 'guides');
 	try {
-		const L = loadPolestarRoutes({ guidesDir: o.guidesDir || path.join(sim.ROOT, 'guides'), dataDir: o.dataDir, faction, race, cls: null });
+		const L = loadPolestarRoutes({ guidesDir, dataDir: o.dataDir, faction, race, cls: null });
 		if (L) {
 			out.push({ id: 'polestar', label: 'Polestar default', source: 'polestar', events: L.default.events });
 			L.variants.forEach((v, i) => out.push({ id: `polestar-${i + 1}`, label: `Polestar ${v.label}`, source: 'polestar-variant', events: v.sequence.events }));
 		}
 	} catch (err) {
 		warn.push(`Polestar: ${err.message}`);
+	}
+	if (o.pack) {
+		const id = o.pack.manifest.id;
+		const ids = (seq) => seq.guides.map((g) => g.id);
+		try {
+			const P = loadPolestarRoutes({ guidesDir, dataDir: o.dataDir, faction, race, cls: null, pack: o.pack });
+			if (P) {
+				out.push({ id: 'pack', label: `${id} default`, source: 'pack', events: P.default.events, guides: ids(P.default) });
+				P.variants.forEach((v, i) => out.push({ id: `pack-${i + 1}`, label: `${id} ${v.label}`, source: 'pack-variant', events: v.sequence.events, guides: ids(v.sequence) }));
+			} else {
+				warn.push(`${id}: no leveling guide of the pack starts ${race}`);
+			}
+		} catch (err) {
+			warn.push(`${id}: ${err.message}`);
+		}
 	}
 	return { list: out, warn };
 }
@@ -108,6 +129,7 @@ async function compare(o) {
 				grindSeconds: r.endTime && r.endLevel < 59.5 ? r.endGrind : r.grindSeconds,
 				segment20to30: r.levelTimes[30] && (r.endLevel == null || r.endLevel >= 29.5) ? (r.levelTimes[20] ? r.levelTimes[30] - r.levelTimes[20] : null) : null,
 				unknown: seq.unknown.length, unknownIds: seq.unknown,
+				...(src.guides ? { guides: src.guides } : {}),
 				trace,
 			});
 		}
@@ -129,30 +151,58 @@ function fmtRow(x) {
 const makeHead = () => ['route', 'levels', ...LEVELS.map((l) => `to ${l}`), '20->30', 'quests', 'dungeons', 'travel', 'grind', 'unknown'];
 let HEAD = makeHead();
 
+// The other pack compare scores: --pack, else the nearest pack.json; null for ours.
+// -> { pack } or { error }
+function comparePack(args) {
+	const r = resolvePack({ pack: args.pack });
+	if (r.official) return { pack: null };
+	if (!r.manifest) {
+		printDiagnostics(r.diags);
+		return { error: `${path.join(r.dir, 'pack.json')} is invalid` };
+	}
+	return { pack: { dir: r.dir, manifest: r.manifest } };
+}
+
 async function compareCommand(args, o) {
-	const opts = { ...sim.DEFAULTS, ...o, faction: args.faction, race: args.race, guidesDir: args.guides ? path.resolve(args.guides) : undefined };
+	// A mistyped --guides would score nothing of ours, silently.
+	if (args.guides && !isDir(args.guides)) {
+		console.error(`sim compare: --guides ${args.guides} is not a folder`);
+		return 2;
+	}
+	const { pack, error } = comparePack(args);
+	if (error) {
+		console.error(`sim compare: ${error}`);
+		return 1;
+	}
+	const opts = { ...sim.DEFAULTS, ...o, faction: args.faction, race: args.race, guidesDir: args.guides ? path.resolve(args.guides) : undefined, pack };
 	if (args.to) LEVELS = String(args.to).split(',').map(Number).filter((l) => l >= 2 && l <= 60);
 	HEAD = makeHead();
 	const res = await compare(opts);
 	fs.mkdirSync(opts.benchDir, { recursive: true });
+	// [name, variant source, row label prefix] for ours and the pack.
+	const kinds = [['Polestar', 'polestar-variant', /^Polestar /], ...(pack ? [[pack.manifest.id, 'pack-variant', new RegExp(`^${pack.manifest.id} `)]] : [])];
 	for (const c of res) {
-		const main = c.rows.filter((x) => x.source !== 'polestar-variant');
-		const variants = c.rows.filter((x) => x.source === 'polestar-variant').sort((a, b) => a.seconds - b.seconds);
-		const shown = main.slice();
-		if (variants.length) {
-			shown.push({ ...variants[0], label: `Polestar best choice: ${variants[0].label.replace(/^Polestar /, '')}` });
-			shown.push({ ...variants[variants.length - 1], label: `Polestar worst choice: ${variants[variants.length - 1].label.replace(/^Polestar /, '')}` });
+		const shown = c.rows.filter((x) => !kinds.some(([, src]) => x.source === src));
+		const choices = [];
+		for (const [name, src, prefix] of kinds) {
+			const variants = c.rows.filter((x) => x.source === src).sort((a, b) => a.seconds - b.seconds);
+			if (!variants.length) continue;
+			shown.push({ ...variants[0], label: `${name} best choice: ${variants[0].label.replace(prefix, '')}` });
+			shown.push({ ...variants[variants.length - 1], label: `${name} worst choice: ${variants[variants.length - 1].label.replace(prefix, '')}` });
+			choices.push([name, variants]);
 		}
 		console.log(`\n== ${c.faction} ${c.race}: same calibrated model (times are /played hours; grind = time spent grinding incl. after the guide ends) ==`);
 		console.log(table(HEAD, shown.map(fmtRow)));
-		if (variants.length) {
-			console.log(`\nPolestar route choices (${variants.length} complete paths):`);
+		for (const [name, variants] of choices) {
+			console.log(`\n${name} route choices (${variants.length} complete paths):`);
 			console.log(table(HEAD, variants.map(fmtRow)));
 		}
 		for (const w of c.warn) console.log(`warning: ${w}`);
-		const file = path.join(opts.benchDir, `compare-${c.faction.toLowerCase()}-${c.race.toLowerCase()}.json`);
-		fs.writeFileSync(file, `${JSON.stringify({ ...c, rows: c.rows.map(({ trace, ...x }) => x) }, null, 1)}\n`);
-		fs.writeFileSync(file.replace(/\.json$/, '.md'), `# ${c.faction} ${c.race}: route comparison\n\n${mdTable(HEAD, shown.map(fmtRow))}\n\n## Polestar route choices\n\n${mdTable(HEAD, variants.map(fmtRow))}\n`);
+		// A pack's comparison is its own file, so ours is never overwritten.
+		const file = path.join(opts.benchDir, `compare-${c.faction.toLowerCase()}-${c.race.toLowerCase()}${pack ? `-${pack.manifest.id}` : ''}.json`);
+		fs.writeFileSync(file, `${JSON.stringify({ ...c, ...(pack ? { pack: pack.manifest.id } : {}), rows: c.rows.map(({ trace, ...x }) => x) }, null, 1)}\n`);
+		const md = choices.length ? choices.map(([name, variants]) => `## ${name} route choices\n\n${mdTable(HEAD, variants.map(fmtRow))}\n`).join('\n') : `## Polestar route choices\n\n${mdTable(HEAD, [])}\n`;
+		fs.writeFileSync(file.replace(/\.json$/, '.md'), `# ${c.faction} ${c.race}${pack ? ` (${pack.manifest.id})` : ''}: route comparison\n\n${mdTable(HEAD, shown.map(fmtRow))}\n\n${md}`);
 		console.log(`wrote ${path.relative(process.cwd(), file)} (+ .md)`);
 	}
 	return 0;

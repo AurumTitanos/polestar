@@ -4,15 +4,18 @@
 // coordinates, objective indexes and counts from reference data
 // (docs/GUIDE_FORMAT.md, "What the compiler fills in").
 //
-// resolveGuide(ast, data, diag, { pack }) -> guide
+// resolveGuide(ast, data, diag, { pack, author }) -> guide (`author`: the pack's, for a guide without one)
 // Compiled goals and steps carry non-enumerable `_line` (source line) for the
 // validator; everything enumerable is part of the compiled schema.
 
 const SPAWN_CHECK_YARDS = 50;
+// The fix hint for an id that is not in the reference data.
+const FIND_ID_HINT = 'find the id with `polestar find <name>`, or give its name in quotes';
 
 const { buildCandidates } = require('./candidates');
 const { farmSpots } = require('./farmspots');
 const { applicable, raceSides } = require('./conditions');
+const { objectiveLabel } = require('./data');
 const { blockingPrereqs } = require('../data/prereqs');
 const { clusterPoints, scaleOf } = require('../questdb/cluster');
 
@@ -247,8 +250,8 @@ function onlyOf(c) {
 
 function resolveGuide(ast, data, diag, opts = {}) {
 	const file = ast.file;
-	const err = (ln, msg) => diag.error(file, ln, msg);
-	const warn = (ln, msg) => diag.warn(file, ln, msg);
+	const err = (ln, msg, hint) => diag.error(file, ln, msg, hint);
+	const warn = (ln, msg, hint) => diag.warn(file, ln, msg, hint);
 	const h = ast.header;
 	const zoneCache = new Map();
 
@@ -310,7 +313,9 @@ function resolveGuide(ast, data, diag, opts = {}) {
 	setIf(guide, 'pitch', h.pitch);
 	setIf(guide, 'pros', h.pros);
 	setIf(guide, 'cons', h.cons);
-	guide.author = h.author || 'Polestar';
+	// A guide without `author` is its pack's author's (opts.author, from
+	// pack.json); ours when no pack author is given.
+	guide.author = h.author || opts.author || 'Polestar';
 	guide.version = h.version !== undefined ? h.version : 1;
 	guide.steps = [];
 	hidden(guide, '_ast', ast);
@@ -492,7 +497,7 @@ function resolveGoal(g, zoneMap, prev, data, err, warn, ctx = { sides: ['Allianc
 		const name = explicit || nameOf(data, kind, id);
 		const known = kind === 'npc' ? data.npc(id) : kind === 'object' ? data.object(id) : data.item(id);
 		if (!name) {
-			err(ln, `${kind} ${id} is not in data; give its name: \`${v} ${id} "${label}"\``);
+			err(ln, `${kind} ${id} is not in data; give its name: \`${v} ${id} "${label}"\``, FIND_ID_HINT);
 		} else if (!known) {
 			warn(ln, `${kind} ${id} is not in data; using the explicit name (new Forever content?)`);
 		}
@@ -542,7 +547,7 @@ function resolveGoal(g, zoneMap, prev, data, err, warn, ctx = { sides: ['Allianc
 			const q = data.quest(g.quest);
 			goal.quest = g.quest;
 			const title = g.title || (q && q.title ? String(q.title) : null);
-			if (!title) err(ln, `quest ${g.quest} is not in data; give its title: \`${v} ${g.quest} "Title"\``);
+			if (!title) err(ln, `quest ${g.quest} is not in data; give its title: \`${v} ${g.quest} "Title"\``, FIND_ID_HINT);
 			else if (!q) warn(ln, `quest ${g.quest} is not in data; using the explicit title (new Forever content?)`);
 			goal.title = title || undefined;
 			if (v === 'complete') break;
@@ -599,7 +604,7 @@ function resolveGoal(g, zoneMap, prev, data, err, warn, ctx = { sides: ['Allianc
 						const known = data.item(it.item);
 						const out = { item: it.item };
 						const name = it.itemName || (known && known.name ? String(known.name) : null);
-						if (!name) err(ln, `reward item ${it.item} is not in data; give its name: \`${it.item} "Item name"\``);
+						if (!name) err(ln, `reward item ${it.item} is not in data; give its name: \`${it.item} "Item name"\``, FIND_ID_HINT);
 						else out.itemName = name;
 						const quality = it.quality !== undefined ? it.quality : known && Number.isInteger(known.quality) ? known.quality : undefined;
 						setIf(out, 'quality', quality);
@@ -904,15 +909,21 @@ function resolveGoal(g, zoneMap, prev, data, err, warn, ctx = { sides: ['Allianc
 		if (q && q.title) goal.title = String(q.title);
 		let oi = g.oi;
 		if (q && Array.isArray(q.objectives)) {
+			// "7.1 = kill Kobold Vermin x10, 7.2 = ...": what `quest Q.O` can name.
+			const listed = () => data.questObjectives(g.quest).map((o) => objectiveLabel(g.quest, o)).join(', ');
 			if (oi !== undefined && oi > q.objectives.length) {
-				warn(ln, `quest ${g.quest} has ${q.objectives.length} objective(s) in data, not ${oi}`);
+				warn(
+					ln,
+					`quest ${g.quest} has ${q.objectives.length} objective(s) in data, not ${oi}${q.objectives.length ? `: ${listed()}` : ''}`,
+					q.objectives.length ? `write \`quest ${g.quest}.<n>\` with one of these (\`polestar find ${g.quest}\` lists them)` : `drop the \`.${oi}\`: write \`quest ${g.quest}\``,
+				);
 			}
 			if (oi === undefined) {
 				const kind = v === 'kill' ? 'kill' : v === 'collect' ? 'item' : v === 'interact' ? 'object' : null;
 				const id = v === 'kill' ? g.npc : v === 'interact' ? g.object : g.item;
 				if (id !== undefined) oi = objectiveFor(q, kind, id) || undefined;
 				if (oi === undefined && q.objectives.length) {
-					warn(ln, `quest ${g.quest} has no objective for this ${v === 'kill' ? 'npc' : v === 'interact' ? 'object' : 'item'}; write \`quest ${g.quest}.<objective>\``);
+					warn(ln, `quest ${g.quest} has no objective for this ${v === 'kill' ? 'npc' : v === 'interact' ? 'object' : 'item'}; write \`quest ${g.quest}.<objective>\``, `its objectives: ${listed()}`);
 				}
 			}
 			if (oi !== undefined && g.count === undefined && (v === 'kill' || v === 'collect')) {
@@ -1000,7 +1011,7 @@ function resolveGoal(g, zoneMap, prev, data, err, warn, ctx = { sides: ['Allianc
 	setIf(goal, 'note', g.note);
 
 	if ((v === 'kill' || v === 'collect' || v === 'interact' || v === 'use') && goal.x === undefined && !goal.candidates && !g.nearest) {
-		warn(ln, `\`${v}\` has no coordinates (no known spawns; add @x,y)`);
+		warn(ln, `\`${v}\` has no coordinates (no known spawns; add @x,y)`, 'add @x,y where the player finds the target (the map coordinates the game shows), so the arrow can lead there');
 	}
 	return goal;
 }
@@ -1027,8 +1038,10 @@ function checkNear(data, kinds, map, x, y, frame, ln, warn) {
 	if (!any) return;
 	if (!onMap && otherFrame) return; // known spawns on this map are in the other frame: not comparable
 	const what = kinds.length === 1 ? `${kinds[0].kind} ${kinds[0].id}` : 'the target';
-	if (!onMap) warn(ln, `explicit coordinates ${x},${y}: ${what} has no known spawn on map ${map}`);
-	else warn(ln, `explicit coordinates ${x},${y} are more than ${SPAWN_CHECK_YARDS} yards from every known spawn of ${what}`);
+	const look = kinds.length === 1 ? `\`polestar find ${kinds[0].id} --kind ${kinds[0].kind}\`` : '`polestar find <id>`';
+	const hint = `${look} prints a known spawn: check the coordinates against it, or keep them when the target stands elsewhere in Forever`;
+	if (!onMap) warn(ln, `explicit coordinates ${x},${y}: ${what} has no known spawn on map ${map}`, hint);
+	else warn(ln, `explicit coordinates ${x},${y} are more than ${SPAWN_CHECK_YARDS} yards from every known spawn of ${what}`, hint);
 }
 
 module.exports = { resolveGuide, pickSpawn, round2 };

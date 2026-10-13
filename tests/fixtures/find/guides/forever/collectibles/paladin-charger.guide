@@ -1,0 +1,10 @@
+# Fixture: a class-limited guide header for tests/find.test.js.
+guide forever/collectibles/paladin-charger
+title Paladin Charger
+faction Alliance
+class Paladin
+levels 60-60
+zone Elwynn Forest
+
+step Stormwind
+  goto 42.1,65.9 "Goldshire"

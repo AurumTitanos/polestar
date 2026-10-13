@@ -4,25 +4,34 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { parseArgs, resolvePath, printDiagnostics, plural } = require('../lib/dsl/cli');
-const { ROOT, compileProject } = require('../lib/dsl/project');
+const { resolvePath, printDiagnostics, plural } = require('../lib/dsl/cli');
+const { ROOT } = require('../lib/dsl/project');
 const { validateSoloPolicy } = require('../lib/dsl/validate');
+const { packCommand, buildPack } = require('../lib/pack/build');
 const { worldFile, dataHash } = require('../lib/sim/world');
 
-const usage = `usage: node tools/polestar.js lint [options]
+const usage = `usage: node tools/polestar.js lint [<dir>] [options]
 
-Runs every compile check (syntax, data lookups, cross-guide validation) on
-guides/**/*.guide without writing anything. Exit code 1 on errors. When the
-simulator has cached a world (\`sim\`), also warns on leveling goals its solo
-filter excludes.
+Runs every compile check (syntax, data lookups, cross-guide validation) on a
+guide pack without writing anything: the pack in <dir> (or --pack), else the nearest
+folder holding a pack.json (this one or a parent), else our guides/. Exit
+code 1 on errors. Another pack is checked with our guides as context (its
+\`next\` and turn-ins see our chains; their own diagnostics are not shown).
+When the simulator has cached a world (\`sim\`), also warns on leveling goals
+its solo filter excludes.
 
 options:
-  --guides <dir>      guide sources (default guides/)
-  --data <dir>        reference data (default data/forever/)
-  --sim <dir>         simulator cache with world-<faction>.json (default
-                      data/sim/, used only with the default --data)
-  --include-drafts    also check guides/drafts/**
-  --quiet             print errors only`;
+  <dir>, --pack <dir>   the pack folder (holding pack.json)
+  --guides <dir>        our pack's guide sources in another folder (default guides/)
+  --data <dir>          reference data (default data/forever/)
+  --context <dir>       our guides, read as context for another pack (default guides/)
+  --context-data <dir>  reference data for the context (default data/forever/)
+  --sim <dir>           simulator cache with world-<faction>.json (default
+                        data/sim/, used only with the default --data)
+  --include-drafts      also check the pack's drafts/**
+  --format <f>          text (default), json (one document on stdout, no
+                        summary) or github (workflow annotations)
+  --quiet               print errors only`;
 
 // Faction -> Map(quest id -> world.excluded entry) from the cached worlds in
 // simDir; a faction without one is not checked, nor one whose cache was
@@ -48,34 +57,24 @@ function soloExclusions(simDir, dataDir) {
 }
 
 async function run(argv) {
-	const { opts, error } = parseArgs(argv, { flags: ['--include-drafts', '--quiet'], options: ['--guides', '--data', '--sim'] });
-	if (opts.help) {
-		console.log(usage);
-		return 0;
-	}
-	if (error) {
-		console.error(`${error}\n\n${usage}`);
-		return 2;
-	}
+	const cmd = packCommand(argv, { name: 'lint', usage, flags: ['--include-drafts', '--quiet'], options: ['--pack', '--guides', '--data', '--context', '--context-data', '--sim', '--format'] });
+	if (cmd.exit !== undefined) return cmd.exit;
+	const { opts, pack, out } = cmd;
 	const dataDir = resolvePath(opts.data, 'data/forever', ROOT);
-	const { guides, diag, files } = compileProject({
-		guidesDir: resolvePath(opts.guides, 'guides', ROOT),
-		dataDir,
-		includeDrafts: !!opts.includeDrafts,
-	});
+	const { guides, diag, sources } = buildPack(pack, { dataDir, includeDrafts: !!opts.includeDrafts, files: false });
 	// The default cache was built from the default data; other data needs its own --sim.
 	const simDir = opts.sim || !opts.data ? resolvePath(opts.sim, 'data/sim', ROOT) : null;
 	const { excluded, stale } = soloExclusions(simDir, dataDir);
 	validateSoloPolicy(guides, excluded, diag);
-	printDiagnostics(diag, { quiet: !!opts.quiet });
-	if (stale.length) console.error(`note: solo-filter checks skipped for ${stale.join(' and ')}: the simulator's cached world is from other data or an older builder (\`node tools/polestar.js sim world\` rebuilds it)`);
-	const summary = `${plural(files.length, 'file')}, ${plural(guides.length, 'guide')}: ${plural(diag.errors.length, 'error')}, ${plural(diag.warnings.length, 'warning')}`;
-	if (diag.hasErrors()) {
-		console.error(`lint failed: ${summary}`);
-		return 1;
+	printDiagnostics(diag, out);
+	// Another pack: the simulator's world is ours to rebuild, not the pack author's.
+	if (stale.length && pack.official) console.error(`note: solo-filter checks skipped for ${stale.join(' and ')}: the simulator's cached world is from other data or an older builder (\`node tools/polestar.js sim world\` rebuilds it)`);
+	const summary = `${plural(sources.length, 'file')}, ${plural(guides.length, 'guide')}: ${plural(diag.errors.length, 'error')}, ${plural(diag.warnings.length, 'warning')}`;
+	if (out.format !== 'json') {
+		if (diag.hasErrors()) console.error(`lint failed: ${summary}`);
+		else console.log(`lint ok: ${summary}`);
 	}
-	console.log(`lint ok: ${summary}`);
-	return 0;
+	return diag.hasErrors() ? 1 : 0;
 }
 
 module.exports = { name: 'lint', summary: 'Check .guide files without writing output', usage, run, soloExclusions };

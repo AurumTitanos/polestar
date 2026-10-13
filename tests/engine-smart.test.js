@@ -6,6 +6,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { runAddon } = require('./helpers/lua');
+const { TEST_PACK, TEST_SOURCE } = require('./helpers/packs');
 
 const CORE = { name: 'Polestar', files: ['Core/Core.xml'] };
 
@@ -34,7 +35,7 @@ const TRAINERS = `{
 }`;
 
 const GUIDE = `
-Polestar.RegisterGuide({ id = "fa", title = "First Aid", category = "Professions", minLevel = 1, maxLevel = 60, steps = {
+Polestar.RegisterGuide({ id = "test/fa", pack = "test", title = "First Aid", category = "Professions", minLevel = 1, maxLevel = 60, steps = {
 	{ goals = { { t = "train", skill = "First Aid", skillLine = 129, rank = 2, candidates = ${TRAINERS} } } },
 	{ goals = { { t = "train", class = true, candidates = {
 		{ npc = 4568, npcName = "Anastasia Hartwell", map = 1420, x = 40, y = 40, faction = "H", classes = { "MAGE" } },
@@ -56,7 +57,9 @@ function run({ before = '', guides = GUIDE, saved, script, login = true }) {
 		before: WORLD + before,
 		addons: [CORE],
 		saved,
-		script: `${guides}
+		script: `${TEST_PACK}
+${TEST_SOURCE}
+${guides}
 			E = Polestar.Engine
 			function flush() stub.advance(0.25) end
 			${login ? 'stub.login()' : ''}
@@ -67,7 +70,7 @@ function run({ before = '', guides = GUIDE, saved, script, login = true }) {
 test('an Undead Horde player in the Barrens is sent to the nearest Horde trainer, never an Alliance one; cycling walks the ranking', () => {
 	const [out] = run({
 		script: `
-			E.SetGuide("fa")
+			E.SetGuide("test/fa")
 			local function g() local v = E.GetStepView(1).goals[1]; return { v.npc, v.npcName, v.map, v.x, v.y, v.alternatives } end
 			local first, wp = g(), E.GetWaypoint()
 			local cycled = {}
@@ -88,7 +91,7 @@ test('candidates are re-picked on zone change and landing, not on every move; Na
 	const [out] = run({
 		script: `
 			local w = stub.world
-			E.SetGuide("fa")
+			E.SetGuide("test/fa")
 			local function npc() return E.GetStepView(1).goals[1].npc end
 			local at = { npc() }
 			w.moveTo(1420, 52, 52) -- teleported into Tirisfal, no event yet
@@ -111,7 +114,7 @@ test('a profession train completes from the skill cap at any trainer; a trainer 
 	const [out] = run({
 		script: `
 			local w = stub.world
-			E.SetGuide("fa")
+			E.SetGuide("test/fa")
 			local r = { manual = E.GetStepView(1).goals[1].manual }
 			w.trainer(5943); w.close(); flush()
 			r.afterWindow = E.GetStepIndex()
@@ -130,7 +133,7 @@ test('train class completes on any candidate trainer window during the step; set
 		before: 'stub.world.learnSkill(129, "First Aid", 75, 150)',
 		script: `
 			local w = stub.world
-			E.SetGuide("fa")
+			E.SetGuide("test/fa")
 			local r = { start = E.GetStepIndex(), classNpc = E.GetStepView(2).goals[1].npcName, alts = E.GetStepView(2).goals[1].alternatives }
 			w.trainer(1234); w.close(); flush()   -- some other trainer
 			r.other = E.GetStepIndex()
@@ -156,7 +159,7 @@ test('train class completes on any candidate trainer window during the step; set
 test('Scourge and Undead are the same race in only, guide races and candidates', () => {
 	const [out] = run({
 		guides: `
-			Polestar.RegisterGuide({ id = "u", title = "Undead", faction = "Horde", races = { "Undead" }, minLevel = 1, maxLevel = 60, steps = {
+			Polestar.RegisterGuide({ id = "test/u", pack = "test", title = "Undead", faction = "Horde", races = { "Undead" }, minLevel = 1, maxLevel = 60, steps = {
 				{ only = { races = { "Undead" } }, goals = { { t = "level", level = 30 } } },
 				{ goals = { { t = "level", level = 60, only = { races = { "!Undead" } } }, { t = "level", level = 50 } } },
 			} })
@@ -167,35 +170,35 @@ test('Scourge and Undead are the same race in only, guide races and candidates',
 				m = { Polestar.Guides.Matches({ races = { "Scourge" } }, { race = "Undead" }), Polestar.Guides.Matches({ races = { "Undead" } }, { race = "Scourge" }) } })
 		`,
 	});
-	assert.deepEqual(out, { suggest: 'u', s1: 'current', g2: 'na', m: [true, true] });
+	assert.deepEqual(out, { suggest: 'test/u', s1: 'current', g2: 'na', m: [true, true] });
 });
 
 test('Suggest prefers the current zone, then the nearest by travel; race chains win ties', () => {
 	const guides = `
 		local function g(id, zone, x, races)
-			Polestar.RegisterGuide({ id = id, title = id, faction = "Horde", races = races, minLevel = 15, maxLevel = 25, zone = zone, steps = {
+			Polestar.RegisterGuide({ id = id, pack = "test", title = id, faction = "Horde", races = races, minLevel = 15, maxLevel = 25, zone = zone, steps = {
 				{ goals = { { t = "goto", map = zone, x = x, y = 50 } } },
 			} })
 		end
-		g("silverpine", 1420, 50, { "Undead" })   -- the race's own chain, other continent
-		g("stonetalon", 1411, 50, nil)            -- same continent, ~1970 yd
-		g("barrens", 1413, 50, nil)               -- the player's zone
-		g("barrens-undead", 1413, 52, { "Scourge" })
+		g("test/silverpine", 1420, 50, { "Undead" })   -- the race's own chain, other continent
+		g("test/stonetalon", 1411, 50, nil)            -- same continent, ~1970 yd
+		g("test/barrens", 1413, 50, nil)               -- the player's zone
+		g("test/barrens-undead", 1413, 52, { "Scourge" })
 	`;
 	const [inZone] = run({ guides, login: false, script: 'emit(Polestar.Guides.Suggest())' });
-	assert.equal(inZone, 'barrens-undead'); // in zone; travel tie; race chain first
+	assert.equal(inZone, 'test/barrens-undead'); // in zone; travel tie; race chain first
 	const [nearest] = run({ guides, login: false, before: 'stub.world.moveTo(1454, 50, 100); stub.world.zone = "Orgrimmar"', script: 'emit(Polestar.Guides.Suggest())' });
-	assert.equal(nearest, 'stonetalon');
+	assert.equal(nearest, 'test/stonetalon');
 	const [home] = run({ guides, login: false, before: 'stub.world.moveTo(1420, 50, 50); stub.world.zone = "Tirisfal Glades"', script: 'emit(Polestar.Guides.Suggest())' });
-	assert.equal(home, 'silverpine');
+	assert.equal(home, 'test/silverpine');
 });
 
 test('GUIDE_OUTLEVELED fires once per guide when the level passes maxLevel + 2', () => {
 	const [out] = run({
 		before: 'stub.world.level = 5',
 		guides: `
-			Polestar.RegisterGuide({ id = "low", title = "Low", faction = "Horde", minLevel = 1, maxLevel = 6, steps = { { goals = { { t = "level", level = 60 } } } } })
-			Polestar.RegisterGuide({ id = "mid", title = "Mid", faction = "Horde", minLevel = 7, maxLevel = 20, steps = { { goals = { { t = "level", level = 60 } } } } })
+			Polestar.RegisterGuide({ id = "test/low", pack = "test", title = "Low", faction = "Horde", minLevel = 1, maxLevel = 6, steps = { { goals = { { t = "level", level = 60 } } } } })
+			Polestar.RegisterGuide({ id = "test/mid", pack = "test", title = "Mid", faction = "Horde", minLevel = 7, maxLevel = 20, steps = { { goals = { { t = "level", level = 60 } } } } })
 		`,
 		script: `
 			local fired = {}
@@ -208,24 +211,24 @@ test('GUIDE_OUTLEVELED fires once per guide when the level passes maxLevel + 2',
 			emit({ at7 = at7, fired = fired, guide = E.GetGuide().id })
 		`,
 	});
-	assert.deepEqual(out, { at7: 0, fired: ['low>mid'], guide: 'low' });
+	assert.deepEqual(out, { at7: 0, fired: ['test/low>test/mid'], guide: 'test/low' });
 });
 
 test('skipGrey skips grey accepts the chain does not need, keeps the rest, and never auto-accepts them', () => {
 	const guides = `
-		Polestar.RegisterGuide({ id = "g1", title = "G1", faction = "Horde", minLevel = 1, maxLevel = 30, next = "g2", steps = {
+		Polestar.RegisterGuide({ id = "test/g1", pack = "test", title = "G1", faction = "Horde", minLevel = 1, maxLevel = 30, next = "test/g2", steps = {
 			{ goals = { { t = "accept", quest = 101, title = "Grey alone", qlvl = 2 } } },
 			{ goals = { { t = "accept", quest = 102, title = "Grey turned in", qlvl = 3 } } },
 			{ goals = { { t = "accept", quest = 103, title = "Grey prerequisite", qlvl = 4 } } },
 			{ goals = { { t = "accept", quest = 104, title = "Current", qlvl = 19 } } },
 			{ goals = { { t = "turnin", quest = 102, title = "Grey turned in" } } },
 		} })
-		Polestar.RegisterGuide({ id = "g2", title = "G2", faction = "Horde", minLevel = 20, maxLevel = 30, steps = {
+		Polestar.RegisterGuide({ id = "test/g2", pack = "test", title = "G2", faction = "Horde", minLevel = 20, maxLevel = 30, steps = {
 			{ goals = { { t = "accept", quest = 105, title = "Follow-up", qlvl = 20, pre = { 103 } } } },
 		} })
 	`;
 	const script = `
-		E.SetGuide("g1")
+		E.SetGuide("test/g1")
 		local s = {}
 		for i = 1, 4 do s[i] = E.GetStepView(i).goals[1].status end
 		local w = stub.world
@@ -241,13 +244,13 @@ test('skipGrey skips grey accepts the chain does not need, keeps the rest, and n
 test('learn goals with candidates point at the nearest usable trainer and complete when the spell is known', () => {
 	const [out] = run({
 		guides: `
-			Polestar.RegisterGuide({ id = "lr", title = "Learn", category = "Professions", minLevel = 1, maxLevel = 60, steps = {
+			Polestar.RegisterGuide({ id = "test/lr", pack = "test", title = "Learn", category = "Professions", minLevel = 1, maxLevel = 60, steps = {
 				{ goals = { { t = "learn", spell = 3275, spellName = "Linen Bandage", skillLine = 129, candidates = ${TRAINERS} } } },
 				{ goals = { { t = "level", level = 60 } } },
 			} })
 		`,
 		script: `
-			E.SetGuide("lr")
+			E.SetGuide("test/lr")
 			local v = E.GetStepView(1).goals[1]
 			local r = { npc = v.npc, detail = v.detail, alts = v.alternatives, wp = E.GetWaypoint().map }
 			stub.world.learnRecipe(3275); flush()
@@ -259,7 +262,7 @@ test('learn goals with candidates point at the nearest usable trainer and comple
 });
 
 const CRAFT = `
-	Polestar.RegisterGuide({ id = "cook", title = "Cooking", category = "Professions", minLevel = 1, maxLevel = 60, steps = {
+	Polestar.RegisterGuide({ id = "test/cook", pack = "test", title = "Cooking", category = "Professions", minLevel = 1, maxLevel = 60, steps = {
 		{ goals = { { t = "collect", item = 769, itemName = "Chunk of Boar Meat", count = 4 } } },
 		{ goals = {
 			{ t = "collect", item = 2672, itemName = "Stringy Wolf Meat", count = 10 },
@@ -275,7 +278,7 @@ test('a crafting step completes even when crafting uses up the reagents its coll
 		before: 'stub.world.learnSkill(185, "Cooking", 1, 75); stub.world.items[769] = 4',
 		script: `
 			local w = stub.world
-			E.SetGuide("cook")
+			E.SetGuide("test/cook")
 			local r = { start = E.GetStepIndex() }
 			w.addItem(2672, 10); flush()
 			r.collected = E.GetStepView(2).goals[1].status
@@ -294,9 +297,9 @@ test('the in-step latch survives a reload and is cleared when the step is left b
 		guides: CRAFT,
 		before: 'stub.world.learnSkill(185, "Cooking", 1, 75); stub.world.items[769] = 4',
 		script: `
-			E.SetGuide("cook")
+			E.SetGuide("test/cook")
 			stub.world.addItem(2672, 10); flush()
-			emit(PolestarCharDB.manual.cook)
+			emit(PolestarCharDB.manual["test/cook"])
 		`,
 	});
 	assert.deepEqual(first, { '1:1': true, '2:1': true }); // step 1 passed, step 2 in-step
@@ -305,12 +308,12 @@ test('the in-step latch survives a reload and is cleared when the step is left b
 		guides: CRAFT,
 		// Reloaded with the meat already cooked away.
 		before: 'stub.world.learnSkill(185, "Cooking", 30, 75); stub.world.items[769] = 4',
-		saved: { Polestar: 'PolestarCharDB = { schema = 1, tabs = { "cook" }, activeTab = 1, manual = { cook = { ["2:1"] = true } } }' },
+		saved: { Polestar: 'PolestarCharDB = { schema = 1, tabs = { "test/cook" }, activeTab = 1, manual = { ["test/cook"] = { ["2:1"] = true } } }' },
 		script: `
 			local r = { at = E.GetStepIndex(), collect = E.GetStepView(2).goals[1].status }
 			E.Prev(); flush()
 			r.prev = E.GetStepIndex()
-			r.latch = PolestarCharDB.manual.cook["2:1"] or false
+			r.latch = PolestarCharDB.manual["test/cook"]["2:1"] or false
 			E.Next(); flush()
 			r.back = { E.GetStepIndex(), E.GetStepView(2).goals[1].status }
 			emit(r)
@@ -338,7 +341,7 @@ w.addMap(1438, { name = "Teldrassil", c = 1, top = 11000, bottom = 9000, left = 
 function firstAid(frame) {
 	const f = frame ? ', f = "e"' : '';
 	return `
-		Polestar.RegisterGuide({ id = "fa2", title = "First Aid", category = "Professions", minLevel = 1, maxLevel = 60, steps = {
+		Polestar.RegisterGuide({ id = "test/fa2", pack = "test", title = "First Aid", category = "Professions", minLevel = 1, maxLevel = 60, steps = {
 			{ goals = { { t = "train", skill = "First Aid", skillLine = 129, rank = 1, candidates = {
 				{ npc = 3373, npcName = "Rawrk", map = 1411, x = 54, y = 42, faction = "H"${f} },
 				{ npc = 4211, npcName = "Byancie", map = 1438, x = 55, y = 57, faction = "A"${f} },
@@ -357,7 +360,7 @@ function pickFrom({ race, faction, map, x, y, eraWithoutFrames }) {
 			w.race, w.faction = "${race}", "${faction}"
 			w.moveTo(${map}, ${x}, ${y})`,
 		guides: firstAid(eraWithoutFrames),
-		script: 'E.SetGuide("fa2"); emit(E.GetStepView(1).goals[1].npcName)',
+		script: 'E.SetGuide("test/fa2"); emit(E.GetStepView(1).goals[1].npcName)',
 	});
 	return out;
 }

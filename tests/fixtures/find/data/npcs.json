@@ -1,0 +1,70 @@
+{
+	"6": {
+		"id": 6,
+		"name": "Kobold Vermin",
+		"level": 1,
+		"faction": null,
+		"spawns": {
+			"1429": {
+				"f": "e",
+				"pts": [
+					[
+						47.57,
+						36.37
+					]
+				]
+			}
+		}
+	},
+	"235": {
+		"id": 235,
+		"name": "Salma Saldean",
+		"level": 20,
+		"faction": "A",
+		"spawns": {
+			"1436": {
+				"f": "e",
+				"pts": [
+					[
+						56.42,
+						30.52
+					]
+				]
+			}
+		}
+	},
+	"238": {
+		"id": 238,
+		"name": "Verna Furlbrow",
+		"level": 20,
+		"faction": "A",
+		"spawns": {
+			"1436": {
+				"f": "e",
+				"pts": [
+					[
+						59.92,
+						19.42
+					]
+				]
+			}
+		}
+	},
+	"3336": {
+		"id": 3336,
+		"name": "Takrin Pathseeker",
+		"level": 12,
+		"faction": "H",
+		"spawns": {
+			"1411": {
+				"f": "e",
+				"pts": [
+					[
+						50.85,
+						43.59
+					]
+				]
+			}
+		}
+	}
+}

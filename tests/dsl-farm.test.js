@@ -9,10 +9,10 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { runAddon } = require('./helpers/lua');
-const { compile, plain, fixtureData, tmpdir, DATA_DIR } = require('./fixtures/dsl/helpers');
+const { TEST_PACK } = require('./helpers/packs');
+const { compile, plain, fixtureData, writeTestPack, DATA_DIR } = require('./fixtures/dsl/helpers');
 const { loadData } = require('../tools/lib/dsl/data');
 const { farmSpots } = require('../tools/lib/dsl/farmspots');
-const { buildPackFiles, writePackDir, packMeta } = require('../tools/lib/dsl/project');
 
 const head = (faction) => ['guide t/f', 'title F', ...(faction ? [`faction ${faction}`] : []), 'levels 1-60', 'zone Elwynn Forest', ''];
 
@@ -78,17 +78,16 @@ test('a faction with no safe farm spot gets a warning when the goal serves it', 
 });
 
 test('farm spots and prerequisite titles emit Lua that the engine registry accepts and round-trips', () => {
-	const r = compile(src(null, ['  collect 4306 x20 nearest', '  accept 9500']));
+	const r = compile(src(null, ['  collect 4306 x20 nearest', '  accept 9500']).replace(/^guide t\//, 'guide test/'), undefined, { pack: 'test' });
 	assert.deepEqual(r.errors, []);
-	const dir = tmpdir();
-	writePackDir(dir, buildPackFiles({ guides: r.guides, meta: packMeta('1'), data: fixtureData() }));
-	const file = path.join(dir, 'Guides', 't', 'f.lua');
+	const file = path.join(writeTestPack(r.guides).dir, 'Guides.lua');
 	const lua = fs.readFileSync(file, 'utf8');
 	assert.match(lua, /\{ npcName = "Cloth Kobold", map = 1429, x = 65\.4, y = 75\.3, f = "e", faction = "A", lvl = \{ min = 5, max = 5 \}, rate = 0\.3, spawns = 4 \}/);
 	assert.match(lua, /pre = \{ 9201, 783 \}, preTitles = \{ \[783\] = "A Threat Within", \[9201\] = "The First Step" \}/);
 	const [out] = runAddon({
 		addons: [{ name: 'Polestar', files: ['Core/Core.xml'] }],
 		script: `
+			${TEST_PACK}
 			local got, res
 			local real = Polestar.RegisterGuide
 			Polestar.RegisterGuide = function(g) got = g; local ok, e = real(g); res = ok and "ok" or e; return ok, e end

@@ -1,6 +1,6 @@
 'use strict';
 // Guides Lookup builds on the spot (Lookup.Guide) are played to the end in
-// the real engine with the shared guide simulator (tests/helpers/guide-sim.js):
+// the real engine with the shared guide simulator (tools/lib/playtest.js):
 // a vendor mount, a drop, a treasure, a dungeon drop, a quest reward behind a
 // prerequisite chain, a craft, a reputation reward, and the NPC, quest and
 // dungeon kinds. Every one must finish without a stuck step and without an
@@ -17,7 +17,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { runAddon, ROOT } = require('./helpers/lua');
 const { writeCodexPack } = require('./helpers/codex');
-const { SIMULATE, luaValue } = require('./helpers/guide-sim');
+const { SIMULATE, luaValue } = require('../tools/lib/playtest');
 
 const FIXTURE = path.join(__dirname, 'fixtures', 'codex', 'lookup.json');
 const FRAMES = path.join(ROOT, 'data', 'forever', 'map-frames.json');

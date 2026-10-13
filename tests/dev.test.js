@@ -1,0 +1,203 @@
+'use strict';
+// polestar dev: watches a pack, rebuilds into <dest>/<folder> on
+// every save, says once that a new addon needs a restart, and never replaces
+// a folder it did not generate. Runs the real command in a child process.
+
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const net = require('node:net');
+const os = require('node:os');
+const path = require('node:path');
+const { spawn, spawnSync } = require('node:child_process');
+const { tmpdir, DATA_DIR } = require('./fixtures/dsl/helpers');
+const { TOC_MARKER } = require('../tools/lib/pack/format');
+
+const CLI = path.join(__dirname, '..', 'tools', 'polestar.js');
+const PACKS = path.join(__dirname, 'fixtures', 'packs');
+const FOLDER = 'PolestarPack_MiniPack';
+const RESTART = /New addon: restart the game once so it sees PolestarPack_MiniPack; after that \/reload shows every change\./g;
+
+function miniCopy() {
+	const dir = tmpdir();
+	fs.cpSync(path.join(PACKS, 'mini'), dir, { recursive: true });
+	return dir;
+}
+
+// Start `dev` in the folder cwd (the pack, unless a test names it) into dest
+// (extra arguments after; a repeated option wins); the playground's
+// SavedVariables and client art (no maps) are temp folders.
+// -> { child, out(), waitFor(re), exited, stop(), playData }.
+function dev(cwd, dest, ...extra) {
+	const args = [CLI, 'dev', ...(dest ? ['--dest', dest] : []), '--data', DATA_DIR, '--context', path.join(PACKS, 'context'), '--context-data', DATA_DIR, ...extra];
+	const playData = path.join(tmpdir(), 'play');
+	const art = tmpdir();
+	fs.writeFileSync(path.join(art, 'maps.json'), '{}\n');
+	const env = { ...process.env, POLESTAR_PLAY_DATA: playData, POLESTAR_CLIENT_ART: art };
+	const child = spawn(process.execPath, args, { cwd, env, stdio: ['ignore', 'pipe', 'pipe'] });
+	let text = '';
+	const waiters = [];
+	const feed = (chunk) => {
+		text += chunk;
+		for (const w of [...waiters]) if (w.re.test(text)) w.resolve();
+	};
+	child.stdout.setEncoding('utf8').on('data', feed);
+	child.stderr.setEncoding('utf8').on('data', feed);
+	const exited = new Promise((resolve) => child.on('exit', resolve));
+	return {
+		child,
+		exited,
+		playData,
+		out: () => text,
+		waitFor(re, ms = 5000) {
+			if (re.test(text)) return Promise.resolve();
+			return new Promise((resolve, reject) => {
+				const w = { re, resolve: () => (clearTimeout(timer), resolve()) };
+				const timer = setTimeout(() => reject(new Error(`timed out waiting for ${re}; output:\n${text}`)), ms);
+				waiters.push(w);
+			});
+		},
+		async stop() {
+			child.kill('SIGINT');
+			return exited;
+		},
+	};
+}
+
+async function until(fn, ms = 5000) {
+	const t0 = Date.now();
+	for (;;) {
+		if (fn()) return;
+		if (Date.now() - t0 > ms) throw new Error('timed out');
+		await new Promise((r) => setTimeout(r, 50));
+	}
+}
+
+test('dev builds into <dest>/<folder>, rebuilds on save and asks for one restart only', { timeout: 30000 }, async () => {
+	const pack = miniCopy();
+	const dest = tmpdir();
+	const d = dev(pack, dest);
+	try {
+		await d.waitFor(/watching/);
+		const guides = path.join(dest, FOLDER, 'Guides.lua');
+		assert.match(fs.readFileSync(guides, 'utf8'), /"Mini B"/);
+		assert.equal((d.out().match(RESTART) || []).length, 1, d.out());
+		const src = path.join(pack, 'guides', 'b.guide');
+		fs.writeFileSync(src, fs.readFileSync(src, 'utf8').replace('title Mini B', 'title Mini B Edited'));
+		await until(() => fs.readFileSync(guides, 'utf8').includes('"Mini B Edited"'));
+		await d.waitFor(/built 2 guides[\s\S]*built 2 guides/);
+		assert.equal((d.out().match(RESTART) || []).length, 1, 'the second build does not ask for a restart');
+		// A save with an error prints it and keeps the last good build.
+		fs.writeFileSync(src, fs.readFileSync(src, 'utf8').replace('goto 47.6,35.1', 'goto nowhere'));
+		await d.waitFor(/b\.guide:\d+: error/);
+		assert.match(fs.readFileSync(guides, 'utf8'), /"Mini B Edited"/);
+	} finally {
+		await d.stop();
+	}
+});
+
+test('dev refuses to replace a folder it did not generate', { timeout: 30000 }, async () => {
+	const pack = miniCopy();
+	const dest = tmpdir();
+	fs.mkdirSync(path.join(dest, FOLDER));
+	fs.writeFileSync(path.join(dest, FOLDER, 'notes.txt'), 'mine\n');
+	const d = dev(pack, dest);
+	try {
+		await d.waitFor(/refusing to write into .*PolestarPack_MiniPack: it is not a generated guide pack/);
+		assert.deepEqual(fs.readdirSync(path.join(dest, FOLDER)), ['notes.txt']);
+		assert.doesNotMatch(d.out(), RESTART);
+	} finally {
+		await d.stop();
+	}
+});
+
+test('dev refuses a generated folder of another pack with the same folder name, pointing to "folder" in pack.json', { timeout: 30000 }, async () => {
+	const pack = miniCopy();
+	const dest = tmpdir();
+	const other = path.join(dest, FOLDER);
+	fs.mkdirSync(other);
+	const toc = `## Title: Mini Pack\n${TOC_MARKER}\n## X-Polestar-Pack: someone-else\n`;
+	fs.writeFileSync(path.join(other, `${FOLDER}.toc`), toc);
+	const d = dev(pack, dest);
+	try {
+		await d.waitFor(/refusing to write into .*PolestarPack_MiniPack: it holds the guide pack "someone-else", not "mini"; set "folder" in pack\.json/);
+		assert.equal(fs.readFileSync(path.join(other, `${FOLDER}.toc`), 'utf8'), toc);
+		assert.deepEqual(fs.readdirSync(other), [`${FOLDER}.toc`]);
+	} finally {
+		await d.stop();
+	}
+});
+
+test('dev builds into an empty folder of the pack\'s name (the one folder rule) and asks for the restart', { timeout: 30000 }, async () => {
+	const pack = miniCopy();
+	const dest = tmpdir();
+	fs.mkdirSync(path.join(dest, FOLDER));
+	const d = dev(pack, dest);
+	try {
+		await d.waitFor(/watching/);
+		assert.ok(fs.existsSync(path.join(dest, FOLDER, 'Guides.lua')), d.out());
+		assert.equal((d.out().match(RESTART) || []).length, 1, d.out());
+	} finally {
+		await d.stop();
+	}
+});
+
+test('dev takes the pack folder as its one argument; two folders, or one without pack.json, are a usage error', { timeout: 30000 }, async () => {
+	const pack = miniCopy();
+	const dest = tmpdir();
+	const d = dev(tmpdir(), dest, pack);
+	try {
+		await d.waitFor(/watching/);
+		assert.ok(fs.existsSync(path.join(dest, FOLDER, 'Guides.lua')), d.out());
+	} finally {
+		await d.stop();
+	}
+	const two = spawnSync(process.execPath, [CLI, 'dev', pack, miniCopy(), '--no-game'], { cwd: tmpdir(), encoding: 'utf8' });
+	assert.equal(two.status, 2, two.stderr);
+	assert.match(two.stderr, /one pack folder only/);
+	const none = spawnSync(process.execPath, [CLI, 'dev', '../my-pack', '--no-game'], { cwd: miniCopy(), encoding: 'utf8' });
+	assert.equal(none.status, 2, none.stderr);
+	assert.match(none.stderr, /no pack\.json in \.\.\/my-pack/);
+});
+
+test('dev prints the missing reference data warning, as lint does', { timeout: 30000 }, async () => {
+	const d = dev(miniCopy(), tmpdir(), '--data', path.join(tmpdir(), 'no-data'));
+	try {
+		await d.waitFor(/no-data: warning: reference data not found/);
+	} finally {
+		await d.stop();
+	}
+});
+
+const noPlay = !fs.existsSync(path.join(__dirname, '..', 'data', 'forever', 'races.json')) ? 'reference data not built' : false;
+
+test('dev --play on a taken port exits 1 promptly and leaves no Lua session behind', { skip: noPlay, timeout: 60000 }, async () => {
+	const holder = net.createServer();
+	await new Promise((resolve) => holder.listen(0, '127.0.0.1', resolve));
+	const { port } = holder.address();
+	try {
+		const d = dev(miniCopy(), null, '--no-game', '--play', '--port', String(port));
+		const t0 = Date.now();
+		const timer = setTimeout(() => d.child.kill('SIGKILL'), 30000);
+		const code = await d.exited;
+		clearTimeout(timer);
+		assert.equal(code, 1, d.out());
+		assert.ok(Date.now() - t0 < 30000, 'exits on its own');
+		assert.match(d.out(), new RegExp(`the playground could not start: .*port ${port} is taken`));
+		assert.ok(fs.existsSync(d.playData), 'the playground used the temp SavedVariables folder');
+		const tag = `polestar-play-${d.child.pid}-`;
+		assert.deepEqual(fs.readdirSync(os.tmpdir()).filter((f) => f.startsWith(tag)), [], 'no Lua program file left');
+		if (fs.existsSync('/proc')) {
+			const left = fs.readdirSync('/proc').filter((p) => /^\d+$/.test(p)).filter((p) => {
+				try {
+					return fs.readFileSync(`/proc/${p}/cmdline`, 'utf8').includes(tag);
+				} catch {
+					return false;
+				}
+			});
+			assert.deepEqual(left, [], 'no Lua process left');
+		}
+	} finally {
+		holder.close();
+	}
+});

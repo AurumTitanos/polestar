@@ -1,0 +1,11 @@
+# Fixture: a guide for two races with a route choice, for tests/find.test.js.
+guide forever/alliance/dwarf-gnome/02-elwynn
+title Elwynn for Dwarves and Gnomes
+faction Alliance
+race Dwarf, Gnome
+levels 5-12
+zone Elwynn Forest
+next forever/alliance/02-westfall, forever/collectibles/paladin-charger
+
+step Goldshire
+  goto 42.1,65.9 "Goldshire"

@@ -109,12 +109,19 @@ function Lookup.CuratedGuide(kind, id)
 		return nil
 	end
 	local player = ns.Compat.GetPlayerInfo()
+	-- The suggestion source's guides first, then ours: one for this character,
+	-- else one for anyone.
+	local source = ns.Guides.SuggestSource()
+	local from = source == "guides" and { "guides" } or { source, "guides" }
+	local list = ns.Guides.List()
 	local fallback
-	for _, h in ipairs(ns.Guides.List()) do
-		if type(h.id) == "string" and h.id:sub(1, #PREFIX) ~= PREFIX
-			and ((itemId and holds(h.collects, itemId)) or (spellName and keywordMatch(h.keywords, spellName))) then
-			if ns.Guides.GuideMatches(h, player) then return h.id end
-			fallback = fallback or h.id
+	for _, pack in ipairs(from) do
+		for _, h in ipairs(list) do
+			if h.pack == pack and type(h.id) == "string" and h.id:sub(1, #PREFIX) ~= PREFIX
+				and ((itemId and holds(h.collects, itemId)) or (spellName and keywordMatch(h.keywords, spellName))) then
+				if ns.Guides.GuideMatches(h, player) then return h.id end
+				fallback = fallback or h.id
+			end
 		end
 	end
 	return fallback
@@ -529,15 +536,12 @@ end
 -- Registering and opening
 ---------------------------------------------------------------------------
 
-local packRegistered = false
-local function ensurePack()
-	if packRegistered then return end
-	packRegistered = true
-	ns.RegisterPack({ id = "lookup", title = L["Lookup"] })
-end
+-- Polestar's own internal pack, held from the moment Polestar's files load:
+-- packs load after Polestar (their Dependencies), so a later claim on
+-- `lookup` is refused like any other and listed on the Guide packs page.
+ns.RegisterPack({ id = "lookup", title = L["Lookup"], internal = true })
 
 local function register(def)
-	ensurePack()
 	return ns.RegisterGuide(def)
 end
 

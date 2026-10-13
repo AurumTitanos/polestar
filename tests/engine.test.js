@@ -6,6 +6,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { runAddon } = require('./helpers/lua');
+const { TEST_PACK, TEST_SOURCE } = require('./helpers/packs');
 
 const CORE = { name: 'Polestar', files: ['Core/Core.xml'] };
 
@@ -21,7 +22,6 @@ w.titles[783] = "A Threat Within"; w.titles[7] = "Kobold Camp Cleanup"
 // A Northshire-shaped route: accept -> turn in -> accept -> goto + kill ->
 // class training (one step per class) -> turn in + level.
 const NORTHSHIRE = `
-Polestar.RegisterPack({ id = "test", title = "Test", version = "0" })
 Polestar.RegisterGuide({
 	id = "test/01-northshire", pack = "test", title = "Northshire Valley",
 	faction = "Alliance", races = { "Human" }, minLevel = 1, maxLevel = 6,
@@ -91,7 +91,8 @@ function run({ guides = NORTHSHIRE, before = '', saved, script, login = true }) 
 		before: WORLD + before,
 		addons: [CORE],
 		saved,
-		script: `${guides}\n${RECORDER}\n${login ? 'stub.login()' : ''}\n${script}`,
+		script: `${TEST_PACK}
+${TEST_SOURCE}\n${guides}\n${RECORDER}\n${login ? 'stub.login()' : ''}\n${script}`,
 	}).emitted;
 }
 
@@ -229,7 +230,7 @@ test('goto is done once a later goal in its step is done, without arriving', () 
 test('a kill goal with spawn areas points at the area nearest the player, switching only once another is clearly nearer', () => {
 	// Elwynn here is 30 yd per map percent across: the two areas are 600 yd apart, radius 30.
 	const SPOTS = `
-Polestar.RegisterGuide({ id = "test/spots", title = "Spots", zone = 1429, steps = {
+Polestar.RegisterGuide({ id = "test/spots", pack = "test", title = "Spots", zone = 1429, steps = {
 	{ goals = { { t = "kill", target = "Kobold Vermin", npc = 6, count = 10, quest = 7, oi = 1, map = 1429, x = 40, y = 50,
 		spots = { { x = 40, y = 50, r = 30, n = 5 }, { x = 60, y = 50, r = 30, n = 4 } } } } },
 	{ goals = { { t = "level", level = 60 } } },
@@ -271,7 +272,7 @@ Polestar.RegisterGuide({ id = "test/spots", title = "Spots", zone = 1429, steps 
 // An area objective: three spots along y = 50 (Elwynn here: 30 yd per map
 // percent across), radius 30 each.
 const SEARCH = `
-Polestar.RegisterGuide({ id = "test/search", title = "Search", zone = 1429, steps = {
+Polestar.RegisterGuide({ id = "test/search", pack = "test", title = "Search", zone = 1429, steps = {
 	{ goals = { { t = "collect", item = 5062, itemName = "Raptor Head", count = 12, quest = 7, oi = 1, map = 1429, x = 20, y = 50, spread = true,
 		spots = { { x = 20, y = 50, r = 30, n = 3 }, { x = 40, y = 50, r = 30, n = 2 }, { x = 80, y = 50, r = 30, n = 1 } } } } },
 	{ goals = { { t = "level", level = 60 } } },
@@ -347,7 +348,7 @@ test('a circuit of waypoints in one step costs one pass over the step, and a lat
 	const n = 22;
 	const gotos = Array.from({ length: n }, (_, i) => `{ t = "goto", map = 1429, x = ${10 + i * 3}, y = 70, r = 5 }`).join(',\n');
 	const guide = `
-		Polestar.RegisterGuide({ id = "test/circuit", title = "Circuit", minLevel = 1, maxLevel = 60, steps = {
+		Polestar.RegisterGuide({ id = "test/circuit", pack = "test", title = "Circuit", minLevel = 1, maxLevel = 60, steps = {
 			{ goals = { ${gotos}, { t = "level", level = 3 } } },
 			{ goals = { { t = "level", level = 60 } } },
 		} })
@@ -378,8 +379,8 @@ test('a circuit of waypoints in one step costs one pass over the step, and a lat
 
 test('Era-frame goto coordinates convert through the registered Era bounds', () => {
 	const guide = `
-		Polestar.RegisterMapFrames({ era = { [1429] = { c = 0, left = 1600, right = -1400, top = 600, bottom = -1400 } } })
-		Polestar.RegisterGuide({ id = "test/era", title = "Era", minLevel = 1, maxLevel = 60, steps = {
+		Polestar.RegisterMapFrames({ era = { [1429] = { c = 0, left = 1600, right = -1400, top = 600, bottom = -1400 } } }, "guides")
+		Polestar.RegisterGuide({ id = "test/era", pack = "test", title = "Era", minLevel = 1, maxLevel = 60, steps = {
 			{ goals = { { t = "goto", map = 1429, x = 50, y = 50, f = "e" } } },
 			{ goals = { { t = "level", level = 60 } } },
 		} })
@@ -400,7 +401,7 @@ test('Era-frame goto coordinates convert through the registered Era bounds', () 
 
 test('check-offs are stored per guide, survive recomputes and a reload, and toggle off; any goal ticks, not only manual ones', () => {
 	const guide = `
-		Polestar.RegisterGuide({ id = "test/manual", title = "Manual", minLevel = 1, maxLevel = 10, steps = {
+		Polestar.RegisterGuide({ id = "test/manual", pack = "test", title = "Manual", minLevel = 1, maxLevel = 10, steps = {
 			{ goals = { { t = "talk", npc = 197, npcName = "Marshal McBride" } } },
 			{ goals = { { t = "kill", target = "Young Wolf", count = 5 }, { t = "level", level = 2 } } },
 			{ goals = { { t = "hearth", location = "Goldshire" } } },
@@ -470,7 +471,7 @@ test('nil SavedVariables at login still resume the right step from live quest st
 
 test('Suggest matches faction, race and class, then level, preferring specific and narrow guides', () => {
 	const guides = `
-		local function g(id, t) t.id = id; t.title = id; t.steps = { { goals = { { t = "level", level = 60 } } } }; Polestar.RegisterGuide(t) end
+		local function g(id, t) t.id = "test/" .. id; t.pack = "test"; t.title = id; t.steps = { { goals = { { t = "level", level = 60 } } } }; Polestar.RegisterGuide(t) end
 		g("human-1", { faction = "Alliance", races = { "Human" }, minLevel = 1, maxLevel = 6 })
 		g("dwarf-1", { faction = "Alliance", races = { "Dwarf", "Gnome" }, minLevel = 1, maxLevel = 6 })
 		g("alliance-5", { faction = "Alliance", minLevel = 5, maxLevel = 12 })
@@ -496,7 +497,7 @@ test('Suggest matches faction, race and class, then level, preferring specific a
 		`,
 	});
 	assert.deepEqual(out, [
-		'human-1', 'dwarf-1', 'human-1', 'alliance-5', 'alliance-5', 'warrior-10', 'horde-1', 'alliance-10', 'horde-1',
+		'test/human-1', 'test/dwarf-1', 'test/human-1', 'test/alliance-5', 'test/alliance-5', 'test/warrior-10', 'test/horde-1', 'test/alliance-10', 'test/horde-1',
 	]);
 });
 
@@ -505,7 +506,7 @@ test('Suggest matches faction, race and class, then level, preferring specific a
 // non-leveling one; when nothing fits, the nearest upcoming guide alone.
 test('Suggestions lists every leveling guide for the level, best first; else the nearest upcoming one', () => {
 	const guides = `
-		local function g(id, t) t.id = id; t.title = id; t.steps = { { goals = { { t = "level", level = 60 } } } }; Polestar.RegisterGuide(t) end
+		local function g(id, t) t.id = "test/" .. id; t.pack = "test"; t.title = id; t.steps = { { goals = { { t = "level", level = 60 } } } }; Polestar.RegisterGuide(t) end
 		g("human-1", { faction = "Alliance", races = { "Human" }, minLevel = 1, maxLevel = 6 })
 		g("alliance-5", { faction = "Alliance", minLevel = 5, maxLevel = 12 })
 		g("alliance-wide", { faction = "Alliance", minLevel = 1, maxLevel = 20 })
@@ -526,7 +527,7 @@ test('Suggestions lists every leveling guide for the level, best first; else the
 			emit({ s(5), s(25) })
 		`,
 	});
-	assert.deepEqual(out, [['human-1', 'alliance-5', 'alliance-wide'], ['alliance-30']]);
+	assert.deepEqual(out, [['test/human-1', 'test/alliance-5', 'test/alliance-wide'], ['test/alliance-30']]);
 });
 
 // A quest that starts from an item the player must first get (here a rare
@@ -534,7 +535,7 @@ test('Suggestions lists every leveling guide for the level, best first; else the
 // says which of the two rows stands for both, and how the item is got.
 test('a quest started by a dropped item is one line: the collect stands for it, then the accept; a Go to naming the step is its header', () => {
 	const guides = `
-		Polestar.RegisterGuide({ id = "fog", title = "Field", faction = "Horde", minLevel = 10, maxLevel = 20, steps = {
+		Polestar.RegisterGuide({ id = "test/fog", pack = "test", title = "Field", faction = "Horde", minLevel = 10, maxLevel = 20, steps = {
 			{ title = "Field of Giants", goals = {
 				{ t = "goto", text = "Field of Giants", map = 1429, x = 44.7, y = 70.7 },
 				{ t = "collect", item = 10621, itemName = "Runed Scroll", count = 1, map = 1429, x = 46, y = 70, note = "Aean Swiftriver",
@@ -548,7 +549,7 @@ test('a quest started by a dropped item is one line: the collect stands for it, 
 		guides,
 		before: 'stub.world.faction = "Horde"; stub.world.race = "Undead"; stub.world.class = "WARLOCK"; stub.world.level = 18',
 		script: `
-			E.SetGuide("fog"); flush()
+			E.SetGuide("test/fog"); flush()
 			local function shape()
 				local v = E.GetStepView(1)
 				local c, a = v.goals[2], v.goals[3]
@@ -581,12 +582,12 @@ test('RegisterGuide rejects malformed guides with a debug message instead of err
 			local function try(def) local ok, err = Polestar.RegisterGuide(def); results[#results + 1] = ok and "ok" or err end
 			try("nope")
 			try({ title = "No id", steps = { { goals = { { t = "level", level = 2 } } } } })
-			try({ id = "a", title = "No steps", steps = {} })
-			try({ id = "b", title = "Empty step", steps = { { goals = {} } } })
-			try({ id = "c", title = "Bad verb", steps = { { goals = { { t = "dance" } } } } })
-			try({ id = "d", title = "Missing quest", steps = { { goals = { { t = "accept", title = "X" } } } } })
-			try({ id = "e", title = "Bad coords", steps = { { goals = { { t = "goto", map = 1, x = 120, y = 5 } } } } })
-			try({ id = "f", title = "Good", minLevel = 1, maxLevel = 2, steps = { { goals = { { t = "note", text = "hi", extra = 1 } } } } })
+			try({ id = "test/a", pack = "test", title = "No steps", steps = {} })
+			try({ id = "test/b", pack = "test", title = "Empty step", steps = { { goals = {} } } })
+			try({ id = "test/c", pack = "test", title = "Bad verb", steps = { { goals = { { t = "dance" } } } } })
+			try({ id = "test/d", pack = "test", title = "Missing quest", steps = { { goals = { { t = "accept", title = "X" } } } } })
+			try({ id = "test/e", pack = "test", title = "Bad coords", steps = { { goals = { { t = "goto", map = 1, x = 120, y = 5 } } } } })
+			try({ id = "test/f", pack = "test", title = "Good", minLevel = 1, maxLevel = 2, steps = { { goals = { { t = "note", text = "hi", extra = 1 } } } } })
 			local ids = {}
 			for i, h in ipairs(Polestar.Guides.List()) do ids[i] = h.id .. ":" .. h.stepCount .. ":" .. tostring(h.steps) end
 			emit({ results = results, ids = ids, debugLines = #stub.messages })
@@ -602,14 +603,14 @@ test('RegisterGuide rejects malformed guides with a debug message instead of err
 		'step 1 goal 1: coordinates outside 0-100',
 		'ok',
 	]);
-	assert.deepEqual(out.ids, ['f:1:nil']);
+	assert.deepEqual(out.ids, ['test/f:1:nil']);
 	assert.equal(out.debugLines, 7);
 });
 
 test('completing a guide chains to `next` when autoNextGuide is on, and not when it is off', () => {
 	const guides = `
-		Polestar.RegisterGuide({ id = "test/a", title = "A", minLevel = 1, maxLevel = 2, next = "test/b", steps = { { goals = { { t = "level", level = 2 } } } } })
-		Polestar.RegisterGuide({ id = "test/b", title = "B", minLevel = 2, maxLevel = 3, steps = { { goals = { { t = "level", level = 3 } } } } })
+		Polestar.RegisterGuide({ id = "test/a", pack = "test", title = "A", minLevel = 1, maxLevel = 2, next = "test/b", steps = { { goals = { { t = "level", level = 2 } } } } })
+		Polestar.RegisterGuide({ id = "test/b", pack = "test", title = "B", minLevel = 2, maxLevel = 3, steps = { { goals = { { t = "level", level = 3 } } } } })
 	`;
 	const [on] = run({
 		guides,
@@ -695,7 +696,7 @@ test('Prev walks back over every applicable step, done or skipped, and Next walk
 			for k, v in pairs(extra or {}) do step[k] = v end
 			return step
 		end
-		Polestar.RegisterGuide({ id = "walk", title = "Walk", minLevel = 1, maxLevel = 60, steps = {
+		Polestar.RegisterGuide({ id = "test/walk", pack = "test", title = "Walk", minLevel = 1, maxLevel = 60, steps = {
 			accept(901),                                 -- done (turned in)
 			accept(902),                                 -- open, skipped earlier
 			accept(903, { only = { classes = { "MAGE" } } }), -- not for a Warrior
@@ -707,18 +708,18 @@ test('Prev walks back over every applicable step, done or skipped, and Next walk
 	const [out] = run({
 		guides,
 		before: 'w.complete({ 901 }); w.onQuest(904, {})',
-		saved: { Polestar: 'PolestarCharDB = { schema = 1, guide = "walk", skipped = { walk = { [2] = true } } }' },
+		saved: { Polestar: 'PolestarCharDB = { schema = 1, guide = "test/walk", skipped = { ["test/walk"] = { [2] = true } } }' },
 		script: `
 			local back, forward = {}, {}
 			local start = E.GetStepIndex()
 			for k = 1, 4 do E.Prev(); flush(); back[k] = E.GetStepIndex() .. ":" .. E.GetStepView(E.GetStepIndex()).goals[1].status end
 			for k = 1, 3 do E.Next(); flush(); forward[k] = E.GetStepIndex() end
 			local skips = {}
-			for s in pairs(PolestarCharDB.skipped.walk) do skips[#skips + 1] = s end
+			for s in pairs(PolestarCharDB.skipped["test/walk"]) do skips[#skips + 1] = s end
 			table.sort(skips)
 			E.Next(); flush()
 			local after = {}
-			for s in pairs(PolestarCharDB.skipped.walk) do after[#after + 1] = s end
+			for s in pairs(PolestarCharDB.skipped["test/walk"]) do after[#after + 1] = s end
 			emit({ start = start, back = back, forward = forward, skips = skips, skipNext = E.GetStepIndex(), live = E.GetLiveStep(), after = after })
 		`,
 	});
@@ -736,7 +737,7 @@ test('Prev walks back over every applicable step, done or skipped, and Next walk
 
 test('talk, sethome, getfp, fly, vendor, buy, collect and hearth complete from interactions', () => {
 	const guide = `
-		Polestar.RegisterGuide({ id = "test/actions", title = "Actions", minLevel = 1, maxLevel = 10, steps = {
+		Polestar.RegisterGuide({ id = "test/actions", pack = "test", title = "Actions", minLevel = 1, maxLevel = 10, steps = {
 			{ goals = { { t = "talk", npc = 197, npcName = "Marshal McBride" } } },
 			{ goals = { { t = "sethome", location = "Goldshire", npc = 295, npcName = "Innkeeper Farley" } } },
 			{ goals = { { t = "getfp", location = "Stormwind", npc = 352, npcName = "Dungar Longdrink" } } },
@@ -793,7 +794,7 @@ test('talk, sethome, getfp, fly, vendor, buy, collect and hearth complete from i
 
 test('a step that hearths and then flies completes when the flight lands: the hearth counts as done once a later goal is', () => {
 	const guide = `
-		Polestar.RegisterGuide({ id = "test/travel", title = "Travel", minLevel = 1, maxLevel = 10, steps = {
+		Polestar.RegisterGuide({ id = "test/travel", pack = "test", title = "Travel", minLevel = 1, maxLevel = 10, steps = {
 			{ goals = { { t = "hearth", location = "Goldshire" }, { t = "fly", location = "Stormwind City" } } },
 			{ goals = { { t = "level", level = 99 } } },
 		} })
