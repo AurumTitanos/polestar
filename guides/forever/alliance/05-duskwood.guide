@@ -68,7 +68,6 @@ step Viktori Prism'Antras
 
 step Tranquil Gardens Cemetery
   tip Skeletal Warriors and Skeletal Mages walk among the graves south-east of Darkshire, below Blind Mary's house on the hill. Every skeleton in Duskwood can drop a Skeleton Finger.
-  goto 79.3,70.5 "Tranquil Gardens Cemetery"
   kill 48 quest 56                        -- Skeletal Warrior
   kill 203 quest 56                       -- Skeletal Mage
   collect 2378 quest 101                  -- Skeleton Finger
@@ -98,7 +97,6 @@ step Raven Hill
 
 step Raven Hill Cemetery, south
   tip The cemetery lies north of the village. Skeletal Fiends walk its southern half. Mor'Ladim, an elite, wanders the graves: keep away from him.
-  goto 19.9,44.2 "Raven Hill Cemetery"
   kill 531 quest 57                       -- Skeletal Fiend
   collect 2378 quest 101                  -- Skeleton Finger
 
@@ -115,7 +113,6 @@ step Abercrombie
 
 step Wolves, spiders and ghouls
   tip Rabid Dire Wolves roam the woods around the cemetery and Abercrombie, Starving Dire Wolves the hills north-east of him. Pygmy Venom Web Spiders crawl east of the cemetery and drop the venom. Every ghoul of the cemetery's northern half can drop a fang.
-  goto 28.3,32.6 "Around Abercrombie"
   kill 565 quest 226                      -- Rabid Dire Wolf
   kill 213 quest 226                      -- Starving Dire Wolf
   kill 539 quest 245                      -- Pygmy Venom Web Spider
@@ -193,7 +190,6 @@ step Abercrombie
 
 step Ghoul Ribs
   tip Every ghoul of the Raven Hill Cemetery's northern half can drop a rib: Flesh Eaters, Bone Chewers, Plague Spreaders and Brain Eaters.
-  goto 23.1,32.7 "Raven Hill Cemetery, north"
   collect 884 quest 133
 
 step Abercrombie

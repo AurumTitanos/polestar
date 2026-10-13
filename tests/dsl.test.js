@@ -40,7 +40,7 @@ test('the GUIDE_FORMAT.md example parses without errors into the documented stru
 		ast.steps.map((s) => [s.title, s.goals.length]),
 		[
 			['Deputy Willem', 4],
-			['Kobold camp', 3],
+			['Kobold camp', 2],
 			['Back to the abbey', 3],
 		],
 	);
@@ -48,16 +48,15 @@ test('the GUIDE_FORMAT.md example parses without errors into the documented stru
 	const g = goals(ast);
 	assert.deepEqual(
 		g.map((x) => x.verb),
-		['accept', 'turnin', 'accept', 'accept', 'goto', 'kill', 'collect', 'turnin', 'train', 'level'],
+		['accept', 'turnin', 'accept', 'accept', 'kill', 'collect', 'turnin', 'train', 'level'],
 	);
 	assert.equal(g[0].note, 'He stands at the abbey gate');
 	assert.equal(g[3].npc, 196);
-	assert.deepEqual([g[4].x, g[4].y, g[4].text], [47.6, 35.1, 'Kobold camp']);
-	assert.deepEqual([g[5].npc, g[5].count, g[5].quest, g[5].oi], [6, 10, 7, 1]);
-	assert.deepEqual([g[6].item, g[6].count, g[6].quest, g[6].oi, g[6].optional], [750, 8, 33, 1, true]);
-	assert.deepEqual(g[8].only, { classes: ['WARRIOR', 'PALADIN'], races: null, factions: null });
-	assert.equal(g[8].note, 'Llane Beshere is inside the abbey');
-	assert.equal(g[9].level, 4);
+	assert.deepEqual([g[4].npc, g[4].count, g[4].quest, g[4].oi], [6, 10, 7, 1]);
+	assert.deepEqual([g[5].item, g[5].count, g[5].quest, g[5].oi, g[5].optional], [750, 8, 33, 1, true]);
+	assert.deepEqual(g[7].only, { classes: ['WARRIOR', 'PALADIN'], races: null, factions: null });
+	assert.equal(g[7].note, 'Llane Beshere is inside the abbey');
+	assert.equal(g[8].level, 4);
 });
 
 // Each malformed line is placed inside an otherwise valid guide; the parser must

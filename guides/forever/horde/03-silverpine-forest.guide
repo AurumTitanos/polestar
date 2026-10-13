@@ -118,7 +118,6 @@ step Rane Yorick
 
 step Worgs and murlocs
   tip Mottled Worgs prowl the hills around the house. Then walk south along the lake shore: the Vile Fin Shredders and Tidehunters there drop the murloc eyes.
-  goto 55.0,15.0 "Hills east of the house"
   collect 3164 quest 429.1
   collect 730 quest 91920.1
 
@@ -155,7 +154,6 @@ step The Ivar Patch
 
 step Fenris Isle
   tip Follow the lake shore south-east and swim out to Fenris Isle. Rot Hide gnolls cover the island; every type drops ichor. Stay out of Fenris Keep on its north side unless you go for the optional niche: the gnolls there are level 18-22.
-  goto 66.5,28.5 "Fenris Isle"
   collect 3236 quest 443.1
   collect 3317 optional               -- A Talking Head: a rare drop from the gnolls
   accept 460 optional
@@ -174,19 +172,16 @@ step The Sepulcher
 
 step Ambermill
   tip South-east down the road to Ambermill. Protectors guard the outskirts and Mages the town; both drop pendants. Wizards and Watchers patrol the roads around it. Stay out of the middle, where Archmage Ataeric stands.
-  goto 60.0,65.0 "Ambermill"
   collect 3354 quest 479.1
   kill 1889 quest 95981.1
   kill 1888 quest 95981.2
 
 step Moonrage Bloodhowlers
   tip The Bloodhowlers prowl the woods south-west of Ambermill, east of Pyrewood; they drop the Worgen Bits.
-  goto 51.0,78.0 "Moonrage Bloodhowlers"
   collect 280375 quest 98298.1
 
 step The refugees
   tip The Sickly and Haggard Refugees shamble along the road south of Pyrewood toward the Greymane Wall.
-  goto 46.0,85.0 "Refugees"
   kill 2054 quest 98299.1
   kill 2053 quest 98299.2
 

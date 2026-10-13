@@ -90,7 +90,6 @@ step Nesingwary's camp
 
 step Young tigers and panthers
   tip Young Stranglethorn Tigers prowl west of the camp, Young Panthers south and east of it.
-  goto 33.0,11.0 "Around Nesingwary's camp"
   kill 681 quest 185
   kill 683 quest 190
 
@@ -102,13 +101,11 @@ step Nesingwary's camp
 
 step Tigers and panthers
   tip Stranglethorn Tigers and Panthers (32-33) roam the hills east of the camp, along the lake shore.
-  goto 43.3,19.6 "East of the camp"
   kill 682 quest 186
   kill 736 quest 191
 
 step Raptors and the Bloodscalp trolls
   tip Head west past the camp. Stranglethorn Raptors (33-34) hunt the clearings, and the Bloodscalp trolls hold the ruins on the coast: every Bloodscalp can drop a tusk. A Pendant of Myzrael is a very rare drop from them: if one drops, read it.
-  goto 26.0,16.0 "Bloodscalp ruins"
   kill 685 quest 194
   collect 3901 quest 581
   collect 4614 x1 optional
@@ -123,7 +120,6 @@ step Nesingwary's camp
 
 step Elder tigers and Lashtail raptors
   tip The Elder Stranglethorn Tigers (34-35) roam the hills south-west of the camp; the Lashtail Raptors (35-36) hunt further south, towards Grom'gol.
-  goto 33.4,18.5 "Elder tiger hills"
   kill 1085 quest 187
   kill 686 quest 195
 
@@ -147,7 +143,6 @@ step Nesingwary's camp
 
 step Bloodscalp headhunters
   tip The Bloodscalp Headhunters (36-37) in the village on the coast carry the shrunken heads.
-  goto 23.0,12.0 "Bloodscalp village"
   collect 1532 quest 582
 
 # ---------------------------------------------------------------- Booty Bay
@@ -173,12 +168,10 @@ step Fly to Grom'gol
 step The camp by the river
   tip Krazek's missing hunters' camp is Nesingwary's: walk among its tents and the investigation completes. River Crocolisks lie along the river below the camp.
   complete 201
-  goto 37.4,11.1 "River below the camp"
   collect 4053 quest 575
 
 step Basilisks and the Bloodscalp village
   tip West past the camp, Crystal Spine Basilisks (34-35) sit on the rocks; every Bloodscalp in the village beyond can drop an ear.
-  goto 23.0,12.0 "Bloodscalp village"
   collect 3918 quest 605
   collect 1519 quest 189
 
@@ -203,7 +196,6 @@ step Fly to Grom'gol
 
 step Lashtail raptors
   tip The Lashtail Raptors (35-36) hunt the jungle just north-east of Grom'gol.
-  goto 35.3,23.5 "North-east of Grom'gol"
   kill 686 quest 568
 
 step Commander Aggro'gosh
@@ -212,13 +204,11 @@ step Commander Aggro'gosh
 
 step Mosh'Ogg camp
   tip The Mosh'Ogg ogres camp in the hills just east of Grom'gol. Kill one Brute and one Witch Doctor (36-37); pull them one at a time.
-  goto 37.0,31.0 "Mosh'Ogg camp"
   kill 1142 quest 569.1
   kill 1144 quest 569.2
 
 step Shadowmaw jungle and the Snapjaw river
   tip East of the ogres, Shadowmaw Panthers (37-38) stalk unseen until they strike; the Stranglethorn Tigresses roam the same ground and now and then drop a pristine fang. Snapjaw Crocolisks line the river just west of the jungle; keep their skins for Drizzlik.
-  goto 42.4,32.5 "Shadowmaw jungle"
   collect 3838 quest 570.1
   collect 3839 quest 570.2
   collect 4104 quest 577 @39.9,28.4
@@ -237,7 +227,6 @@ step The Vile Reef
 
 step Bloodscalp ruins
   tip The Bloodscalp trolls hold the ruins up the coast north of the reef and the village beyond; every one can drop a Bloody Bone Necklace. Keep looting pages of The Green Hills of Stranglethorn.
-  goto 26.0,16.0 "Bloodscalp ruins"
   collect 3915 quest 596
 
 step Grom'gol
@@ -279,7 +268,6 @@ step Green Hills pages
 
 step Shadowmaw panthers
   tip The Shadowmaw Panthers (37-38) stalk the jungle east of the Mosh'Ogg hills and north-east towards the lake; they strike from stealth. Loot every Green Hills page you find on the way.
-  goto 46.5,24.0 "Shadowmaw jungle"
   kill 684 quest 192
 
 step Green Hills pages
@@ -316,7 +304,6 @@ step Hearth to Grom'gol
 
 step Jungle Stalkers
   tip The Jungle Stalkers (40-41) hunt the coast south of Grom'gol. They are well above you: pull one at a time and rest between fights.
-  goto 28.8,45.1 "Jungle Stalker coast"
   collect 3863 quest 572
 
 step Far Seer Mok'thardin
@@ -325,7 +312,6 @@ step Far Seer Mok'thardin
 
 step Mistvale gorillas
   tip Take the road south towards Booty Bay. The Elder Mistvale Gorillas (40-41) live in Mistvale Valley, east of the road; about one in twenty carries an aged sinew.
-  goto 32.8,64.4 "Mistvale Valley"
   collect 3862 quest 571
 
 # ---------------------------------------------------------------- Booty Bay and the Venture Co.
@@ -343,7 +329,6 @@ step Fly to Grom'gol
 
 step Venture Co. camp
   tip Ride north past Nesingwary's camp to the lake. The Venture Co. Geologists (34-36) work the camps along its western shore; they carry the Tumbled Crystals.
-  goto 43.3,19.6 "Venture Co. camp"
   collect 4106 quest 213
 
 step Hearth to Booty Bay

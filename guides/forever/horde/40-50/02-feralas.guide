@@ -99,7 +99,6 @@ step Gadgetzan
 
 step Eastern Wastewander camps
   tip The bandits and thieves camp in the dunes east of Gadgetzan. Every Wastewander can carry a water pouch: keep ten, five for each of Luglunket's bounties.
-  goto 62.0,28.5 "Eastern Wastewander camps"
   kill 5618 quest 1690.1
   kill 5616 quest 1690.2
   collect 8483 quest 1707.1
@@ -114,7 +113,6 @@ step Gadgetzan
 
 step Southern Wastewander camps
   tip The shadow mages, rogues and assassins camp south-east of Gadgetzan.
-  goto 62.0,37.5 "Southern Wastewander camps"
   kill 5617 quest 1691.1
   kill 5615 quest 1691.2
   kill 5623 quest 1691.3
@@ -131,7 +129,6 @@ step Steamwheedle Port
 
 step Lost Rigger Cove
   tip South along the coast, the Southsea pirates hold the cove. Andre Firebeard and the stolen cargo are on the docks at its far end. Any pirate can drop a hat, the kidnappers most often.
-  goto 71.5,45.0 "Lost Rigger Cove"
   kill 7855 quest 8366.1
   kill 7856 quest 8366.2
   kill 7857 quest 8366.3
@@ -173,13 +170,10 @@ step Camp Mojache
 
 step Woodpaw north camp
   tip The Woodpaw gnolls camp in the hills just north-west of Mojache; any of them can drop a mane.
-  goto 72.8,36.8 "Woodpaw north camp"
   collect 9237 quest 2862.1
 
 step Gordunni Outpost
   tip North of the gnolls the ogres hold a hilltop outpost; pull the ogre-magi to you. The cobalt is in the dirt mounds around the outpost, and the scroll lies on the ground inside it.
-  goto 75.0,27.2 "Gordunni Outpost"
-  goto 76.8,32.0 "Southern outpost"
   kill 5229 quest 2975.1
   kill 5232 quest 2975.2
   kill 5237 quest 2975.3
@@ -200,9 +194,7 @@ step Camp Mojache
 
 step Sprite darters and Woodpaw alphas
   tip The sprite darters flit over the grove just west of Mojache; nearly every one drops a wing. The Woodpaw alphas lead the camps south-west of it: kill them within the hour.
-  goto 68.0,47.5 "Sprite darter grove"
   collect 9369 quest 2973.1
-  goto 69.2,54.3 "Woodpaw alphas"
   kill 5258 quest 2863.1
 
 step Camp Mojache
@@ -213,7 +205,6 @@ step Camp Mojache
 
 step Grimtotem camp
   tip The Grimtotem tauren camp beside the sprite darters' grove; raiders, naturalists and shamans all carry horns.
-  goto 67.1,47.0 "Grimtotem camp"
   collect 9460 quest 2974.1
 
 step Woodpaw battle map
@@ -223,11 +214,9 @@ step Woodpaw battle map
 
 step Southern Gordunni ruins
   tip Ride south-west to the ogre ruins below Feral Scar Vale. Shamans, warlocks and maulers fill them; the Mage-Lords at the southern end carry the orb.
-  goto 60.5,59.6 "Northern ruins"
   kill 5234 quest 2980.3
   kill 5240 quest 2980.2
   kill 5236 quest 2980.1
-  goto 60.1,69.9 "Southern ruins"
   collect 9371 quest 2979.1
 
 step Camp Mojache
@@ -242,7 +231,6 @@ step Camp Mojache
 
 step The Writhing Deep
   tip The Zukk'ash hive burrows into the hills south-east of the camp; Stinglasher waits in its deepest chamber.
-  goto 74.8,62.0 "The Writhing Deep"
   collect 18961 quest 7730.1
   collect 18962 quest 7731.1 @75.6,60.9
 
@@ -255,13 +243,11 @@ step Camp Mojache
 
 step Rogue Vale screechers
   tip Ride west into the middle of Feralas. Kill a Rogue Vale Screecher, use Yeh'kinya's Bramble on its body and kill the spirit that rises.
-  goto 45.0,38.0 "Rogue Vale screechers"
   use 10699 "Yeh'kinya's Bramble" @45.0,38.0
   kill 8612 quest 3520.1
 
 step The Forgotten Coast
   tip Keep riding west to the coast. The Coast Crawl Deepseers and Snapclaws on the beaches drop OOX-22/FE's distress beacon about one kill in forty; use it to start the quest.
-  goto 33.3,47.4 "Coast crawlers"
   collect 8705 "OOX-22/FE Distress Beacon"
   accept 2766
 

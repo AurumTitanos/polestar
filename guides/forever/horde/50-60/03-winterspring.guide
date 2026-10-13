@@ -60,7 +60,6 @@ step Everlook
 
 step Ice Thistle yetis
   tip The yeti hills start just south-east of Everlook. Every yeti drops fur; only Matriarchs and Patriarchs drop horns, so keep those for after the turn-in.
-  goto 68.5,41.5 "Ice Thistle Hills"
   collect 12366 quest 3783
 
 step Umi Rumplesnicker
@@ -69,7 +68,6 @@ step Umi Rumplesnicker
 
 step Pristine Yeti Horns
   tip Matriarchs and Patriarchs hit hard: pull them one at a time.
-  goto 69.3,40.8 "Ice Thistle Hills"
   collect 12367 quest 977
 
 step Umi Rumplesnicker
@@ -79,7 +77,6 @@ step Umi Rumplesnicker
 
 step Chillwind chimaeras
   tip The chimaeras roam the snowfields south and west of Everlook. Stay clear of Mazthoril's cave: its blue dragonkin are elite.
-  goto 58.1,43.8 "Chimaera snowfields"
   collect 12444 quest 4809
 
 step Felnok Steelspring
@@ -89,7 +86,6 @@ step Felnok Steelspring
 
 step Raging Owlbeasts
   tip Ride west along the road past Lake Kel'Theril; Raging Owlbeasts roam the hills north of it.
-  goto 53.5,31.0 "Owlbeast hills"
   kill 7451 quest 4521.1
 
 step Donova Snowden
@@ -110,7 +106,6 @@ step Salfa
 
 step Frostfire Winterfall camps
   tip Pathfinders, Den Watchers and Totemics share the furbolg camps around the hot springs; Ragged Owlbeasts roam the slopes between them. Kill Totemics first. Save every Runecloth you loot for Meilosh.
-  goto 31.6,36.6 "Frostfire Winterfall camp"
   kill 7441 quest 6241.1
   kill 7440 quest 6241.2
   kill 7442 quest 6241.3
@@ -141,7 +136,6 @@ step Darkwhisper Gorge
 
 step Winterfall Village
   tip The furbolg village fills the valley north-east of Everlook. Kill Shamans first; they heal. High Chief Winterfall in the cave at the back is elite: stay out.
-  goto 67.1,37.6 "Winterfall Village"
   kill 7439 quest 8464.1
   kill 7440 quest 8464.2
   kill 7438 quest 8464.3

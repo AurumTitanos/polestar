@@ -221,7 +221,6 @@ step Emerald Sanctuary
 
 step Southern Jaedenar
   tip Follow the road north-west. The south of Jaedenar, around its corrupted moon well, is held by Shadow Council cultists, adepts, guardsmen and their hounds.
-  goto 37.5,60.8 "Southern Jaedenar"
   kill 7125 quest 5155.1
   kill 7115 quest 5155.2
   kill 7112 quest 5155.3
@@ -244,7 +243,6 @@ step Emerald Sanctuary
 
 step Deadwood Village
   tip The Deadwood furbolg village lies just south of the Sanctuary. Every Deadwood kill also raises your Timbermaw Hold reputation; keep the headdress feathers.
-  goto 47.5,90.5 "Deadwood Village"
   kill 7153 quest 8460.1
   kill 7155 quest 8460.2
   kill 7154 quest 8460.3
@@ -301,7 +299,6 @@ step Shatter Scar Vale
 
 step Irontree Woods
   tip Follow the road north-east to Irontree Woods. The Warpwood Moss Flayers and Shredders on the east side of the woods each carry a Blood Amber; Angerclaw Grizzlies and Felpaw Ravagers roam the same woods for Talo.
-  goto 57.0,19.0 "Irontree Woods"
   collect 11503 quest 4102
   kill 8957 quest 4120.1
   kill 8961 quest 4120.2
@@ -313,7 +310,6 @@ step Nafien
 
 step Felpaw Village
   tip The Deadwood furbolg village just west of the tunnel. Chieftain Bloodmaw (56) stands among them. Meilosh, a friendly furbolg, sits at the north end of the village.
-  goto 62.0,9.0 "Felpaw Village"
   kill 7156 quest 8461.1
   kill 7157 quest 8461.2
   kill 7158 quest 8461.3

@@ -6,7 +6,8 @@
 // never take, missing prerequisites, accepts above the plausible level,
 // accepts closed by an exclusive quest taken earlier, accepts never turned in
 // on a route, `complete` on quests without objectives, required elite work in
-// Leveling guides, and `|` in player-facing text.
+// Leveling guides, `|` in player-facing text, and a `goto` placed right
+// before a goal that already leads to the same place.
 //
 // Our house rules (required elite work, the solo filter) are errors in our
 // pack (`guides`) and warnings in every other.
@@ -239,6 +240,71 @@ function questName(data, id, title) {
 	return t ? `${id} (${t})` : String(id);
 }
 
+// A `goto` is redundant when the goal right after it (notes skipped) has its
+// own location within GOTO_REDUNDANT_YARDS of the goto point: the arrow leads
+// to that goal directly. The yards run to the edge of the goal's nearest spawn
+// area (`spots`, radius r), else to its point. Kept: a goto followed by another
+// goto (a path), by a goal without a location, an optional one or one for other
+// characters (`only`), one on another map, or a kill or drop whose target has
+// no known spawn (an instance boss placed at the entrance the goto names); a
+// goto farther away (an approach over a long ride); gotos in steps that travel
+// (`fly`, `hearth`).
+const GOTO_REDUNDANT_YARDS = 200;
+const TRAVEL_VERBS = new Set(['fly', 'hearth']);
+
+// World position in yards of a compiled point on `map` (frame `f`: "e" Era,
+// else live, read with the Era bounds when the live ones are unknown), or null
+// when the map has no bounds.
+function worldPoint(data, map, x, y, f) {
+	const era = (data.mapFrames && data.mapFrames.era) || {};
+	const live = (data.mapFrames && data.mapFrames.forever) || {};
+	const b = f === 'e' ? era[map] : live[map] || era[map];
+	if (!b) return null;
+	return [b.left + ((b.right - b.left) * x) / 100, b.top + ((b.bottom - b.top) * y) / 100];
+}
+
+function goalLabel(goal) {
+	const what = goal.target || goal.itemName || goal.npcName || goal.objName || goal.title || goal.text;
+	return `\`${goal.t}${what ? ` ${what}` : ''}\``;
+}
+
+// A kill or collect whose target spawns nowhere in the data (inside an
+// instance, new content): its point only stands in for the target.
+function unspawnedTarget(data, goal) {
+	if (goal.t === 'kill') return goal.npc === undefined || !data.spawns('npc', goal.npc).length;
+	if (goal.t !== 'collect') return false;
+	const it = goal.item !== undefined ? data.item(goal.item) : null;
+	const drops = (it && it.drops) || {};
+	return !['npc', 'object'].some((kind) => Object.keys(drops[kind] || {}).some((id) => data.spawns(kind, Number(id)).length));
+}
+
+function checkRedundantGotos(g, data, diag) {
+	for (const step of g.steps) {
+		if (step.goals.some((goal) => TRAVEL_VERBS.has(goal.t))) continue;
+		step.goals.forEach((goto, i) => {
+			if (goto.t !== 'goto' || goto.x === undefined) return;
+			const next = step.goals.slice(i + 1).find((goal) => goal.t !== 'note');
+			if (!next || next.t === 'goto' || next.x === undefined || next.optional || next.map !== goto.map || unspawnedTarget(data, next)) return;
+			if (JSON.stringify(next.only || null) !== JSON.stringify(goto.only || null)) return;
+			const at = worldPoint(data, goto.map, goto.x, goto.y, goto.f);
+			if (!at) return;
+			let yards = Infinity;
+			for (const p of [{ x: next.x, y: next.y, r: 0 }, ...(next.spots || [])]) {
+				const w = worldPoint(data, next.map, p.x, p.y, next.f);
+				if (w) yards = Math.min(yards, Math.max(0, Math.hypot(w[0] - at[0], w[1] - at[1]) - (p.r || 0)));
+			}
+			if (yards > GOTO_REDUNDANT_YARDS) return;
+			const label = goalLabel(next);
+			diag.warn(
+				g._ast.file,
+				goto._line,
+				`\`goto ${goto.x},${goto.y}\`${goto.text ? ` "${goto.text}"` : ''} sends the player where ${label} (line ${next._line}) already leads, ${Math.round(yards)} yards away`,
+				`remove the goto: the arrow leads to ${label} directly`,
+			);
+		});
+	}
+}
+
 function validateGuides(guides, data, diag) {
 	const byId = new Map();
 	for (const g of guides) {
@@ -369,6 +435,7 @@ function validateGuides(guides, data, diag) {
 	for (const g of byId.values()) {
 		const file = g._ast.file;
 		checkPipes(g, diag);
+		checkRedundantGotos(g, data, diag);
 		const accepted = new Set();
 		const turnedIn = new Set();
 		const learned = new Set();

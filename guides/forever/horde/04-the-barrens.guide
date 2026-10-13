@@ -93,7 +93,6 @@ step Baron Longshore
 
 step Northwatch Hold
   tip Northwatch Hold, on the coast further south. The Theramore Marines and Preservers (15-16) drop the medals; Captain Fairmount (20) and the two cannoneers (19) stand in the keep and on its walls, and they are why the hold waits until now.
-  goto 61.0,54.5 "Northwatch Hold"
   collect 5078 quest 891.1
   kill 3393 quest 891.2
   kill 3455 quest 891.3
@@ -186,8 +185,7 @@ step Walton and Vrang
   zone The Barrens
   tip North to the Dry Hills. Walton's camp and Vrang Wildgore are a few steps apart below the hills.
   accept 95508                        -- Walton
-  goto 42.0,11.4 "Walton's camp"      -- Assist Walton: stay by him when Terry Longdrink and the Kul Tiras marines come up the ridge
-  turnin 95508
+  turnin 95508                        -- Assist Walton: stay by him when Terry Longdrink and the Kul Tiras marines come up the ridge
   accept 95621
   accept 95494                        -- Vrang Wildgore
   accept 95495
@@ -238,7 +236,6 @@ step Mission: Possible But Not Probable
 
 step Boulder Lode Mine
   tip The Venture Co. Overseers and Enforcers at the mine in the north-east corner of the zone drop the Cats Eye Emerald.
-  goto 61.0,4.2 "Boulder Lode Mine"
   collect 5097 quest 896.1
 
 step Hearth to the Crossroads
@@ -265,7 +262,6 @@ step Camp Taurajo
 
 step Bristleback camps
   tip The Bristleback quilboar camps spread over the plains north of Camp Taurajo, either side of the Gold Road. Every Bristleback drops a tusk and the Razormane Raiders among them carry Olgra's Adornments; Mankrik's wife lies at the north edge. Keep one Blood Shard. Lakota'mani, a grey kodo, sometimes wanders here: his hoof starts a quest.
-  goto 47.5,52.5 "Bristleback camps"
   collect 5085 quest 899.1
   collect 277277 quest 95774.1
   complete 4921 @49.3,50.3
@@ -336,7 +332,6 @@ step Camp Taurajo
 
 step Enraged Thunder Lizards
   tip Thunderheads graze on the plains just south of Camp Taurajo. Owatanka, a blue thunder lizard, roams among them: his Tailspike starts a quest.
-  goto 46.5,63.0 "Thunderheads"
   collect 5143 quest 907.1
   collect 5102 optional               -- Owatanka's Tailspike
   accept 884 optional
@@ -348,7 +343,6 @@ step Jorn Skyseer
 
 step Cry of the Thunderhawk
   tip Thunderhawk Cloudscrapers circle over the same plains south of the camp.
-  goto 47.3,62.4 "Thunderhawk Cloudscrapers"
   collect 5164 quest 913.1
 
 step Jorn Skyseer
@@ -358,7 +352,6 @@ step Jorn Skyseer
 
 step Field of Giants
   tip South of Camp Taurajo the Silithid Mounds dot the Field of Giants; the eggs lie in them, and Silithid Swarmers come out to defend them. The Burned-Out Remains of a campfire lie by the road at the south end. Silithid Harvesters are rare: if you see one, kill it for its head.
-  goto 45.0,71.0 "Field of Giants"
   collect 5058 quest 868.1
   accept 79192                        -- Burned-Out Remains. Keep it: Sun Rock Retreat, next guide
   collect 7119 quest 1824.1 only Warrior -- Twitching Antennae from the silithid
@@ -388,7 +381,6 @@ step Blackthorn Ridge
 
 step Bael Modan
   tip South of Gann, the Bael'dun dwarves dig at Bael Modan. Excavators and Foremen work the pit; Prospector Khazgorm carries the journal.
-  goto 47.5,85.3 "Bael Modan dig site"
   kill 3374 quest 843.1
   kill 3375 quest 843.2
   collect 5006 quest 843.3
@@ -399,7 +391,6 @@ step Gann Stonespire
 
 step Bael'dun fortress
   tip The Bael'dun Soldiers, Riflemen and Officers guard the fortress on the east side of the dig; all three items drop from them.
-  goto 49.0,84.2 "Bael'dun fortress"
   collect 5017 quest 846.1
   collect 5018 quest 846.2
   collect 5019 quest 846.3

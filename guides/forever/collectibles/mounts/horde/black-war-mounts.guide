@@ -23,7 +23,6 @@ step PvP rank 11
 
 step Raider Bork
   tip Raider Bork sells the mounts in the Hall of Legends in Orgrimmar's Valley of Honor, beside the other honor quartermasters such as Sergeant Ba'sha. The Forever client lists each at 100g; choose one.
-  goto 41.5,68.6 "Hall of Legends"
   vendor 12796 @41.5,68.6             -- Raider Bork
   buy 18245 npc 12796 @41.5,68.6 optional -- 100g
   buy 18246 npc 12796 @41.5,68.6 optional -- 100g

@@ -73,14 +73,12 @@ step Tarren Mill
 
 step Bears, creepers and lions
   tip West of Tarren Mill, Gray Bears, Forest Moss Creepers and Starving Mountain Lions roam the hills on the way down to the farms. The creepers drop Creeper Ichor rarely; you need only one.
-  goto 49.5,31.0 "Hills west of Tarren Mill"
   collect 3476 quest 496.1
   collect 3477 quest 496.2
   collect 3496 quest 501.1
 
 step Hillsbrad Fields
   tip The farms east of Hillsbrad town. Farmer Ray works the field by the northern farmhouse, Farmer Getz the one further south-east; Farmhands and Farmers are everywhere. Farmer Kalaba tends the field south of the farms.
-  goto 33.4,38.9 "Hillsbrad Fields"
   kill 2360 quest 527.1
   kill 2266 quest 527.2
   kill 232 quest 527.3
@@ -101,7 +99,6 @@ step Tarren Mill
 
 step Syndicate camps
   tip From Tarren Mill go south-east into the hills on the way to Durnholde Keep. Rogues and Watchmen hold the camps along the way.
-  goto 76.6,43.6 "Syndicate camps"
   kill 2260 quest 549.1
   kill 2261 quest 549.2
 
@@ -112,7 +109,6 @@ step Durnholde Keep
 
 step Mudsnout Blossoms
   tip South-west of Durnholde, the Mudsnout Blossoms grow on the hillsides above the river.
-  goto 64.4,61.3 "Mudsnout Blossoms"
   collect 3502 quest 509
 
 step Tarren Mill
@@ -130,7 +126,6 @@ step Stanley
 
 step Peasants and skulls
   tip The Peasants work the fields south of the farmhouses. Every Hillsbrad human drops skulls; the Peasants drop them most often.
-  goto 33.4,44.5 "Southern fields"
   kill 2267 quest 528.1
   collect 3692 quest 546.1
 
@@ -143,7 +138,6 @@ step Tarren Mill
 
 step The smithy
   tip The smithy stands in the middle of Hillsbrad town. Blacksmith Verringtan and his apprentices work at the forge; the Shipment of Iron is stacked beside it. Citizen Wilkes walks the street north of it.
-  goto 32.1,44.4 "Hillsbrad smithy"
   kill 2404 quest 529.1
   kill 2265 quest 529.2
   collect 3564 quest 529.3
@@ -155,7 +149,6 @@ step Tarren Mill
 
 step Town hall
   tip The town hall is on the west side of Hillsbrad. Magistrate Burnside (30) and Clerk Horrace Whitesteed are inside with the Town Registry; the Proclamation is pinned up beside it. Councilmen walk the town.
-  goto 29.7,41.8 "Hillsbrad town hall"
   kill 2335 quest 532.1
   kill 2387 quest 532.2
   collect 3657 quest 532.3
@@ -169,7 +162,6 @@ step Tarren Mill
 
 step Azurelode Mine
   tip The Azurelode Mine lies south of Hillsbrad town. Miners work the tunnels; Foreman Bonds (30) and Miner Hackett (29) are deep inside.
-  goto 30.0,55.0 "Azurelode Mine"
   kill 2269 quest 539.2
   kill 2305 quest 539.1
   kill 2450 quest 567.3
@@ -250,7 +242,6 @@ step Merchant Coast
 
 step Isha Awak
   tip Isha Awak, a big threshadon, swims in the shallows off the Merchant Coast, east of Mahren.
-  goto 64.4,50.0 "Off the Merchant Coast"
   collect 5104 quest 873
 
 step Ratchet

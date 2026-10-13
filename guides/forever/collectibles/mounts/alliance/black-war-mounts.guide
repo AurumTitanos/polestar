@@ -23,7 +23,6 @@ step PvP rank 11
 
 step Lieutenant Karter
   tip Lieutenant Karter sells the mounts in the Champions' Hall in Stormwind's Old Town, beside the other honor quartermasters such as Officer Areyn. The Forever client lists each at 100g; choose one.
-  goto 73.8,53.6 "Champions' Hall"
   vendor 12783 @73.8,53.6             -- Lieutenant Karter
   buy 18241 npc 12783 @73.8,53.6 optional -- 100g
   buy 18242 npc 12783 @73.8,53.6 optional -- 100g

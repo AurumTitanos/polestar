@@ -189,11 +189,15 @@ test('level gating inserts a level step only when the estimated XP falls short',
 	assert.equal(goals(run({ levels: [7, 9] }).text).filter((g) => g.verb === 'level').length, 0);
 });
 
-test('objective steps: goto at the densest spawn cluster, then kill/collect linked to the quest objective', () => {
-	const { steps } = parse(run().text);
+test('objective steps: kill/collect linked to the quest objective, planned at the densest spawn cluster', () => {
+	const { text, plan } = run();
+	const { steps } = parse(text);
 	const kobolds = steps.find((s) => s.goals.some((g) => g.verb === 'kill' && g.quest === 101));
 	assert.equal(kobolds.title, 'Kobold Vermin');
-	assert.deepEqual([kobolds.goals[0].x, kobolds.goals[0].y], [30, 30], 'the 6-spawn camp, not the 2 stragglers at 70,70');
+	// The kill leads there itself (spawn areas from the data): no goto first.
+	assert.equal(kobolds.goals[0].verb, 'kill');
+	const ev = plan.events.find((e) => (e.goals || []).some((g) => g.verb === 'kill' && g.q.id === 101));
+	assert.deepEqual([ev.pt.x, ev.pt.y], [30, 30], 'the 6-spawn camp, not the 2 stragglers at 70,70');
 	const kill = kobolds.goals.find((g) => g.verb === 'kill');
 	assert.deepEqual([kill.npc, kill.count, kill.oi], [5, 8, 1]);
 	// Wolf pelts (item drop) and the wolf kills share one stop.
@@ -343,12 +347,14 @@ test('object objectives: interact with the quest link, no count', () => {
 
 test('coordinates from live-frame (recorded) spawns are marked live', () => {
 	const data = fixture();
-	data.npcs['5'].spawns['9001'].f = 'l';
+	data.npcs['10'].spawns['9001'].f = 'l';
 	const { text } = run({}, data);
-	const kobold = goals(text).find((g) => g.verb === 'goto' && g.text === 'Kobold Vermin');
-	assert.equal(kobold.frame, 'live');
-	const wolves = goals(text).find((g) => g.verb === 'goto' && g.text === 'Prowler Wolf');
-	assert.equal(wolves.frame, undefined);
+	// The grind spot of the Bandit Lookouts (kill objectives get no goto).
+	const bandits = goals(text).filter((g) => g.verb === 'goto' && g.text === 'Bandit Lookout');
+	assert.ok(bandits.length > 0);
+	for (const g of bandits) assert.equal(g.frame, 'live');
+	const scout = goals(text).find((g) => g.verb === 'goto' && g.text === 'Scout the Old Mine');
+	assert.equal(scout.frame, undefined);
 });
 
 test('XP heuristics: Classic level-difference rules', () => {

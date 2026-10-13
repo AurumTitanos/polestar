@@ -92,10 +92,8 @@ step Ride into Azshara
 
 step Highborne and Haldarr satyrs
   tip The Highborne ghosts haunt the ruins just north of the shrine; the Haldarr satyrs camp a little further north.
-  goto 16.3,70.0 "Highborne ruins"
   kill 6116 quest 5535.1
   kill 6117 quest 5535.2
-  goto 20.2,61.9 "Haldarr Encampment"
   kill 6125 quest 5536.1
   kill 6126 quest 5536.2
   kill 6127 quest 5536.3
@@ -114,7 +112,6 @@ step Valormok
 
 step Undamaged Hippogryph Feathers
   tip The Thunderhead Hippogryphs fly over the hills just south of Valormok.
-  goto 18.2,55.3 "Hippogryph hills"
   collect 10450 quest 3381
 
 step Sanath Lim-yo
@@ -128,7 +125,6 @@ step Kim'jael
 
 step Thalassian Base Camp
   tip The blood elves' camp lies just south of Kim'jael. His four pieces of equipment lie in the crates around the camp.
-  goto 55.5,28.0 "Thalassian Base Camp"
   collect 10717 quest 3601
   collect 10715 quest 3601
   collect 10718 quest 3601
@@ -142,7 +138,6 @@ step Kim'jael
 
 step Ruins of Eldarath
   tip Ride south-west to the ruins. The four tablets lie among the ruins, guarded by Spitelash naga; any Siren or Myrmidon can carry Kim'jael's rune.
-  goto 43.4,53.8 "Ruins of Eldarath"
   collect 10538 quest 3517
   collect 10539 quest 3517
   collect 10540 quest 3517
@@ -187,7 +182,6 @@ step Grom'gol Base Camp
 
 step Ironjaw Basilisks
   tip Follow the road south; the basilisks bask on the rocks east of it in the middle of the jungle. Their shards drop often.
-  goto 43.2,47.8 "Ironjaw basilisk rocks"
   collect 3911 quest 589
 
 step Booty Bay
@@ -246,7 +240,6 @@ step Camp Mojache
 
 step Frayfeather Hippogryphs
   tip The hippogryphs nest on the hills south-west of the camp. Kill one, then use the Muisek Vessel on its body.
-  goto 55.5,67.0 "Frayfeather hills"
   collect 9595 quest 3124
 
 step Witch Doctor Uzer'i
@@ -255,7 +248,6 @@ step Witch Doctor Uzer'i
 
 step Sprite Darters
   tip The faerie dragons flit around the woods just west of the camp. Use the vessel on each one you kill.
-  goto 68.0,47.5 "Sprite Darter woods"
   collect 9596 quest 3125
 
 step Witch Doctor Uzer'i
@@ -279,13 +271,11 @@ step Zorbin Fandazzle
 
 step Zapped giants
   tip The Land Walkers and Cliff Giants roam the hills north of the dock. Zap each one with Zorbin's Ultra-Shrinker first: shrunken, they are no longer elite. Every zapped giant drops residue; use the Muisek Vessel on its body too.
-  goto 39.3,23.0 "Giants' hills"
   collect 18956 quest 7725
   collect 9597 quest 3127
 
 step Sea elementals
   tip The Sea Elementals and Sea Sprays wash along the shore around the dock.
-  goto 43.3,48.6 "Forgotten Coast"
   collect 18958 quest 7726
 
 step Zorbin Fandazzle

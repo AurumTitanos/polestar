@@ -87,7 +87,6 @@ step Zoram'gar Outpost
 
 step Naga heads
   tip Every Wrathtail naga along the strand north of the outpost drops heads.
-  goto 13.0,20.0 "Zoram Strand"
   collect 5490 quest 6442
 
 step Zoram'gar Outpost
@@ -112,7 +111,6 @@ step Ziz Fizziks
 
 step Windshear Crag
   tip East of Ziz, the Venture Company is clear-cutting Windshear Crag; one of the Operators carries the blueprints. Piznik mines in the small mine on the east side: stay with him while he mines, Venture Co. thugs come for him.
-  goto 67.5,52.0 "Windshear Crag"
   collect 5734 quest 1093
   accept 1090                         -- Piznik
   complete 1090
@@ -138,12 +136,10 @@ step Sun Rock Retreat
 
 step Gaea Seeds
   tip The Gaea Seeds lie in the grass around the southern shore of Mirkfallon Lake, north of Sun Rock.
-  goto 48.8,40.7 "Mirkfallon Lake"
   collect 16205 quest 6301
 
 step Stonetalon Peak
   tip Follow the road north toward Stonetalon Peak. Antlered Coursers graze along the way; the Sap Beasts, Twilight Runners and Fey Dragons roam the woods below the Peak, and the Cenarion druids hold the grove there.
-  goto 36.5,13.0 "Below Stonetalon Peak"
   collect 5585 quest 1058
   collect 5582 quest 1058
   collect 5584 quest 1058
@@ -167,7 +163,6 @@ step The note's trail
 
 step The Charred Vale
   tip South-west of Sun Rock lies the burned Charred Vale. Plant the Gaea Seeds in the dirt mounds on the valley floor; the fire elementals drop Incendrites. Bloodfury Harpies and Ambushers nest on the north side, Slayers and Roguefeathers to the south.
-  goto 32.9,67.9 "Charred Vale"
   interact 177929 quest 6381          -- Gaea Dirt Mounds
   collect 16312 quest 6393
   kill 4022 quest 6282.1

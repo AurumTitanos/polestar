@@ -70,7 +70,6 @@ step The bloodmages
 
 step The northern beasts
   tip The five quests share the same parts: gather them all in one sweep. West of the road the Black Slayer vultures, Starving Snickerfangs, Scorpok Stingers and Deatheye basilisks share the hills.
-  goto 47.0,22.0 "Northern hills"
   collect 8396 x10 quest 2603.1
   collect 8396 x2 quest 2601.2
   collect 8396 x2 quest 2585.2
@@ -84,7 +83,6 @@ step The northern beasts
 
 step The eastern slopes
   tip East of the road the Ashmane boars and Grunters root on the slopes beside the Redstone basilisks. Stay away from the level 52 Helboars further south.
-  goto 58.5,29.5 "Eastern slopes"
   collect 8392 x3 quest 2583.1
   collect 8392 x2 quest 2581.2
   collect 8392 x1 quest 2585.3
@@ -139,7 +137,6 @@ step Grim Message
   tip South of the lodge the Witherbark trolls hold their villages. Every one of them carries a skull: with twenty, use Nimboya's Pike to make the Laden Pike, then plant it inside the village.
   collect 9320 x20 "Witherbark Skull"
   use 15002 "Nimboya's Pike" @29.5,58.5
-  goto 29.5,58.5 "Witherbark village"
   use 9319 "Nimboya's Laden Pike" @29.5,58.5
   complete 2932
 
@@ -173,7 +170,6 @@ step Revantusk Village
 
 step Saltwater Snapjaws
   tip The big turtles crawl along the beaches north of the village. Whiskey Slim's port bottles lie on these beaches too, but his quest is not on this route. A snapjaw can drop OOX-09/HL's distress beacon, rarely: keep it.
-  goto 78.0,69.5 "Snapjaw beach"
   kill 2505 quest 7815.1
   collect 8704 optional                 -- OOX-09/HL Distress Beacon, a rare drop
 
@@ -190,13 +186,11 @@ step Lard's lunch
 
 step The Vilebranch temples
   tip West of the island, the Vilebranch scalpers hold the temples of Agol'watha and Shaol'watha. Slagtree's tools lie at one of the temples.
-  goto 69.0,46.5 "Agol'watha"
   kill 4466 quest 7844.1
   collect 19033 quest 7839.1
 
 step The central hills
   tip The Silvermane Stalkers, Savage Owlbeasts and Razorbeak Skylords share the hills between the temples and Skulk Rock. Use the Wildkin Muisek Vessel on the owlbeasts you kill. The Skylords also drop Long Elegant Feathers: keep ten for Otho's second message.
-  goto 63.0,50.0 "Central hills"
   kill 2926 quest 7828.1
   kill 2929 quest 7829.1
   collect 19025 quest 7830.1
@@ -205,7 +199,6 @@ step The central hills
 
 step Skulk Rock
   tip The crates of Hinterlands Honey Ripple lie around the abandoned Horde camp at Skulk Rock, among the oozes.
-  goto 57.0,41.5 "Skulk Rock"
   collect 8684 quest 77.1
 
 step OOX-09/HL
@@ -219,12 +212,10 @@ step OOX-09/HL
 
 step Silvermane Howlers
   tip South-west, the Silvermane Howlers roam the hills east of the Witherbark villages.
-  goto 44.5,56.0 "Howler hills"
   kill 2925 quest 7828.2
 
 step Highvale
   tip Back west to Quel'Danil Lodge; rangers and marksmen stay near the lodge, scouts and outrunners on the slopes south of it.
-  goto 31.0,47.5 "Highvale camps"
   kill 2691 quest 7841.1
   kill 2692 quest 7841.2
   kill 2693 quest 7841.3
@@ -238,7 +229,6 @@ step Gilveradin's camp
 
 step Vilebranch soothsayers
   tip On the way back east, the Vilebranch soothsayers hold the troll ruins south of the central hills.
-  goto 53.0,59.5 "Soothsayer ruins"
   kill 4467 quest 7844.2
   kill 4466 quest 7844.1
 
@@ -246,7 +236,6 @@ step Jintha'alor
   tip Huntsman Malkhor's skull lies on a pile below the Vilebranch ruins, his bones on a pile at the foot of Jintha'alor. The Vessels of Tainted Blood sit on the lower terraces, and Elder Torntusk is held at the top. Keep to the paths: the trolls inside are elite.
   collect 19069 quest 7849.1 @58.6,64.8
   collect 19070 quest 7849.2 @62.1,75.3
-  goto 62.0,69.0 "Lower terraces"
   collect 19071 quest 7850.1
   turnin 7845                           -- Elder Torntusk, at the top of Jintha'alor
   note His next request, going on to the Altar of Zul, is for a group.

@@ -113,7 +113,6 @@ step Ruins of Eldarath
 
 step Thalassian Base Camp
   tip The blood elves camp on the cliffs in the north-east, by the Bay of Storms.
-  goto 55.5,28.0 "Thalassian Base Camp"
   kill 6199 quest 3505.1
   kill 6198 quest 3505.2
 

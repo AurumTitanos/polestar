@@ -131,12 +131,10 @@ step Kodo Roundup
 
 step Khan Dez'hepah
   tip Ride north-east to Kolkar Village. Khan Dez'hepah walks among the tents on the east side with a guard or two: clear around him first.
-  goto 73.5,46.0 "Kolkar Village"
   collect 6066 quest 1365
 
 step Sargeron
   tip North along the eastern hills, the satyrs hold the ruins of Sargeron. The Shadowstalkers walk unseen; the four kinds you need do not.
-  goto 71.5,17.5 "Sargeron"
   kill 4670 quest 1434.1
   kill 4672 quest 1434.2
   kill 4673 quest 1434.3
@@ -144,7 +142,6 @@ step Sargeron
 
 step Thunder Axe Fortress
   tip Ride west to Thunder Axe Fortress. Beat a Burning Blade cultist down, then use the Burning Gem on it before it dies to fill one Infused Burning Gem. They also drop a Flayed Demon Skin now and then (1-5%); if one drops, read it.
-  goto 54.5,28.0 "Thunder Axe Fortress"
   collect 6435 quest 1435
   collect 20310 x1 optional
   accept 1480 optional
@@ -163,7 +160,6 @@ step Ghost Walker Post
 
 step Kolkar ears
   tip Back at Kolkar Village, every Kolkar can drop an ear.
-  goto 71.0,45.0 "Kolkar Village"
   collect 6067 quest 1366
 
 step Shadowstalker scalp
@@ -187,7 +183,6 @@ step Shadowprey Village
 
 step Clam beds
   tip Ride north up the coast. Giant Softshell Clams lie in the shallows and the Enraged Reef Crawlers walk the beach; open each clam in your bags for its meat.
-  goto 30.9,32.3 "Clam beds"
   collect 15924 quest 6142
 
 step Slitherblade Oracles
@@ -292,7 +287,6 @@ step Syndicate missives
 
 step Helcular's Rod
   tip South-west, the Cave and Ferocious Yetis (30-31) fill the caves in the hills west of Tarren Mill; about one in sixteen carries the rod.
-  goto 42.2,31.5 "Yeti caves"
   collect 3708 quest 552
 
 step The Dalaran traitors
@@ -320,7 +314,6 @@ step Gol'dir
   zone Alterac Mountains
   tip Ride north past Valik's camp to Strahnbrad, the Syndicate-held village (35-37). Jailor Borhuin carries the Rusted Iron Key; Gol'dir sits in a cage in the house on the north side.
   collect 3704 quest 503.2
-  goto 60.0,43.7 "Gol'dir's cage"
   turnin 503                          -- Gol'dir
   accept 506
 

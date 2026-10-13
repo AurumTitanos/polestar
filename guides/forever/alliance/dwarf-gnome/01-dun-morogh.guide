@@ -41,7 +41,6 @@ step Sten Stoutarm
 
 step Young wolves
   tip Ragged Young Wolves roam the snow just south of Anvilmar.
-  goto 28.3,73.6 "Ragged Young Wolves"
   collect 750 quest 179                       -- Tough Wolf Meat
 
 step Anvilmar
@@ -92,7 +91,6 @@ step Grelin Whitebeard
 
 step Grik'nir the Cold
   tip Grik'nir the Cold sits at the back of the troll cave, east of Grelin's camp.
-  goto 30.5,80.2 "Grik'nir the Cold"
   collect 2004 quest 218                      -- Grelin Whitebeard's Journal
 
 step Grelin Whitebeard

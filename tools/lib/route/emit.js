@@ -114,8 +114,11 @@ function emitGuide(plan, h) {
 			lines.push(`  level ${ev.level}`);
 			continue;
 		}
+		// Kill, drop and object goals get their spawn areas from the data, so the
+		// arrow leads to them without a goto (lint warns on one there).
+		const located = ev.goals.length && ['kill', 'collect', 'interact'].includes(ev.goals[0].verb);
 		const ownGoto = ev.goals.some((g) => g.verb === 'goto' && coord(g.o.pt) === coord(ev.pt) && g.o.pt.map === ev.pt.map);
-		if (ev.type === 'obj' && !ownGoto) lines.push(`  ${gotoLine(ev.pt, stepTitle(ev))}`);
+		if (ev.type === 'obj' && !ownGoto && !located) lines.push(`  ${gotoLine(ev.pt, stepTitle(ev))}`);
 		ev.goals.forEach((g, i) => {
 			const { s, note } = goalLine(g);
 			const own = shared ? '' : onlyKey(onlys[i]);

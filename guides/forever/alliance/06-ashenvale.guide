@@ -85,7 +85,6 @@ step Maestra's Post
 
 step Bathran's Haunt
   tip North of Maestra's Post, plant bundles lie around the ruins of Bathran's Haunt. Dark Strand cultists hold the ruins just south of them: any of them can drop the Glowing Soul Gem.
-  goto 31.7,23.0 "Bathran's Haunt"
   collect 5437 quest 1010                 -- Bathran's Hair, from the plant bundles
   collect 5366 quest 970                  -- Glowing Soul Gem
 
@@ -157,7 +156,6 @@ step Astranaar
 
 step Dal Bloodclaw
   tip Dal Bloodclaw (25) leads the Thistlefur gnolls at the camp north of Astranaar. Clear his guards first, one at a time.
-  goto 39.6,36.3 "Dal Bloodclaw"
   collect 5544 quest 1054                 -- Dal Bloodclaw's Skull
 
 step Elune's Tear
@@ -175,7 +173,6 @@ step Shael'dryn
 
 step The Foulweald
   tip The Foulweald furbolgs live in the woods south of the road, south-east of Astranaar. The Den Watcher and the Ursas guard the den.
-  goto 53.3,62.5 "Foulweald"
   kill 3746 quest 1025                    -- Foulweald Den Watcher
   kill 3749 quest 1025                    -- Foulweald Ursa
   kill 3750 quest 1025                    -- Foulweald Totemic
@@ -216,7 +213,6 @@ step Windshear Crag
 
 step Venture Co. loggers
   tip The Venture Co. clear the forest of Windshear Crag. Loggers and Deforesters work all over it; the Operators run the shredders and one carries the blueprints.
-  goto 68.0,52.0 "Windshear Crag"
   kill 3989 quest 1071                    -- Venture Co. Logger
   kill 3991 quest 1071                    -- Venture Co. Deforester
   collect 5734 quest 1093                 -- Super Reaper 6000 Blueprints
@@ -267,7 +263,6 @@ step Valstag Ironjaw
 
 step Bluegill Marsh
   tip Follow the coast north out of Menethil. Bluegill Murlocs fill the marsh; Gobbler walks with a pack in the middle of it.
-  goto 15.5,40.2 "Bluegill Marsh"
   kill 1024 quest 279                     -- Bluegill Murloc
   collect 3618 quest 279                  -- Gobbler's Head
 
@@ -303,7 +298,6 @@ step Whelgar's Excavation Site
 
 step The raptor hills
   tip Mottled Raptors and Screechers roam the hills west of the excavation site.
-  goto 25.5,49.5 "Raptor hills"
   kill 1021 quest 294                     -- Mottled Screecher
   kill 1020 quest 294                     -- Mottled Raptor
 
@@ -313,7 +307,6 @@ step Ormer Ironbraid
 
 step Raptor valley
   tip The bigger raptors hunt in the valley just west of the dig.
-  goto 34.0,48.0 "Raptor valley"
   kill 1022 quest 295                     -- Mottled Scytheclaw
   kill 1023 quest 295                     -- Mottled Razormaw
 
@@ -333,7 +326,6 @@ step The Green Belt
 
 step The Mosshide gnolls
   tip Mosshide Gnolls and Mongrels hold the hills south-east of the Green Belt.
-  goto 61.0,67.0 "Mosshide hills"
   kill 1007 quest 276                     -- Mosshide Gnoll
   kill 1008 quest 276                     -- Mosshide Mongrel
 
@@ -343,7 +335,6 @@ step Rethiel the Greenwarden
 
 step Crude Flint
   tip Mosshide Fenrunners and Mistweavers roam the riverbanks just west and south of Rethiel; almost every one drops flint.
-  goto 48.7,41.0 "Mosshide riverbank"
   collect 2611 quest 277
 
 step Rethiel the Greenwarden
@@ -352,7 +343,6 @@ step Rethiel the Greenwarden
 
 step Fen Creepers
   tip Fen Creepers hide in the marsh pools north-west of the Green Belt.
-  goto 35.7,33.2 "Fen Creeper pools"
   kill 1040 quest 275
 
 step Dun Modr

@@ -72,7 +72,6 @@ step The Crossroads
 
 step Plainstriders and raptors
   tip Plainstriders and Sunscale raptors roam the plains all around the Crossroads, thickest to the north.
-  goto 51.5,26.0 "North of the Crossroads"
   collect 5087 quest 844.1
   collect 5062 quest 869.1
 
@@ -161,7 +160,6 @@ step Ratchet
 
 step Southsea beach
   tip The pirates camp on the beach south of Ratchet. The piles of complicated parts lie in the sand among them.
-  goto 63.5,46.5 "Southsea camp"
   kill 3381 quest 887.1
   kill 3382 quest 887.2
   collect 277331 quest 97253.1
@@ -196,7 +194,6 @@ step The Crossroads
 
 step The Disruption Ends
   tip Back to the Razormane camp. Geomancers and Defenders hold its eastern half; Kreenig Snarlsnout walks among them.
-  goto 57.5,25.5 "Razormane camp"
   kill 3269 quest 872.1
   kill 3266 quest 872.2
   collect 5063 quest 872.3 @58.5,27.0
@@ -237,7 +234,6 @@ step Samophlange
 
 step The Dry Hills
   tip West to the Dry Hills. The Witchwing harpies nest all over them; any of them can drop a talon. Chen's Empty Keg lies in their hills.
-  goto 40.5,17.0 "Witchwing harpies"
   collect 5064 quest 867.1
   collect 4926 @37.9,16.2
   accept 819
@@ -248,7 +244,6 @@ step Regthar Deathgate
 
 step The Forgotten Pools
   tip The pools lie just north of Regthar. Walk into the water to explore them; the Laden Mushrooms for Helbrim grow around them. Kill every Kolkar you pass for bracers.
-  goto 45.3,22.8 "The Forgotten Pools"
   complete 870 @45.3,22.8
   collect 5012 quest 848.1
   collect 5030 quest 855.1
@@ -298,7 +293,6 @@ step The Crossroads
 
 step Lushwater Oasis
   tip Oasis Snapjaws crawl around Lushwater Oasis, south-west of the Crossroads, and around the Stagnant Oasis.
-  goto 47.0,39.5 "Lushwater Oasis"
   collect 5098 quest 880.1
 
 step The Crossroads
@@ -309,7 +303,6 @@ step The Crossroads
 
 step Harpy Lieutenants
   tip The Witchwing Slayers hold the western Dry Hills; they wear the rings.
-  goto 39.0,14.5 "Witchwing Slayers"
   collect 5065 quest 875.1
 
 step Wenikee Boltbucket
@@ -319,7 +312,6 @@ step Wenikee Boltbucket
 
 step Nugget Slugs
   tip The tool buckets with the slugs lie around the Venture Co. drill site in the Sludge Fen, east of Wenikee.
-  goto 56.2,8.2 "Sludge Fen tool buckets"
   collect 11143 quest 3922.1
 
 step Wenikee Boltbucket

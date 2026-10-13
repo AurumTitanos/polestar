@@ -70,7 +70,6 @@ step Darkshire
 
 step Nightbane Shadow Weavers
   tip The worgen hold the woods of Brightwood, west of Darkshire and north of the road. Pull them one at a time.
-  goto 63.1,53.1 "Brightwood"
   kill 533 quest 173                      -- Nightbane Shadow Weaver
 
 step Calor
@@ -79,7 +78,6 @@ step Calor
 
 step Nightbane Dark Runners
   tip The Dark Runners prowl the woods south of the road, west of Darkshire.
-  goto 64.0,58.9 "South of the road"
   kill 205 quest 221                      -- Nightbane Dark Runner
 
 step Calor
@@ -93,7 +91,6 @@ step Blind Mary
 
 step Nightbane Vile Fangs and the Insane Ghoul
   tip The strongest worgen roam the woods south of Darkshire, west and south of the Tranquil Gardens Cemetery. The Insane Ghoul hides in the small crypt by the cemetery.
-  goto 70.0,73.5 "South of the cemetery"
   kill 206 quest 222                      -- Nightbane Vile Fang
   kill 920 quest 222                      -- Nightbane Tainted One
   collect 1946 quest 177                  -- Mary's Looking Glass
@@ -113,7 +110,6 @@ step Abercrombie
 
 step Plague Spreaders
   tip The Plague Spreaders walk the northern half of the Raven Hill Cemetery. Mor'Ladim, an elite, wanders the graves: keep away from him.
-  goto 22.8,33.2 "Raven Hill Cemetery, north"
   kill 604 quest 58                       -- Plague Spreader
 
 step Sven's Camp
@@ -121,7 +117,6 @@ step Sven's Camp
 
 step Raven Hill Cemetery, west
   tip Skeletal Raiders, Healers and Warders hold the west part of the cemetery, just east of Sven's camp.
-  goto 16.3,36.2 "Raven Hill Cemetery, west"
   kill 1110 quest 323                     -- Skeletal Raider
   kill 787 quest 323                      -- Skeletal Healer
   kill 785 quest 323                      -- Skeletal Warder
@@ -175,7 +170,6 @@ step Bluegill Raiders
 
 step The wreck of the Third Fleet
   tip Keep following the coast north to the wrecked ship. Cursed Sailors walk the beach, Cursed Marines the deck; First Mate Snellig stands on the beach by the bow. Giant Wetlands Crocolisks lurk on the coast just north of it.
-  goto 13.9,29.4 "Shipwreck"
   kill 1157 quest 289                     -- Cursed Sailor
   kill 1158 quest 289                     -- Cursed Marine
   collect 3619 quest 289                  -- Snellig's Snuffbox: First Mate Snellig
@@ -207,7 +201,6 @@ step Whelgar's Excavation Site
 
 step The dig and Sarltooth
   tip The relics lie in the dig itself. Sarltooth, a big Razormaw, prowls the raptor valley just west of it.
-  goto 34.5,48.0 "The dig"
   collect 2658 quest 299                  -- Ados Fragment
   collect 2659 quest 299                  -- Modr Fragment
   collect 2660 quest 299                  -- Golm Fragment
@@ -220,7 +213,6 @@ step Ormer and Whelgar
 
 step Dragonmaw camp
   tip The Dragonmaw orcs camp east of the excavation site. Raiders and Swamprunners carry the war banners.
-  goto 45.7,44.8 "Dragonmaw camp"
   collect 3337 quest 464                  -- Dragonmaw War Banner
 
 step Captain Stoutfist
@@ -257,7 +249,6 @@ step Mirage Raceway
 
 step The salt flats
   tip Rocket Car Rubble lies all over the flats. Scorpid Reavers, Sparkleshell Tortoises and Saltstone Basilisks roam the north half, Crystalhides, Scorpid Terrors and Snappers the middle, and the Gazers (34) the far south. Vultures circle over all of it.
-  goto 76.0,62.0 "Shimmering Flats"
   collect 5798 quest 1110                 -- Rocket Car Parts
   collect 5794 quest 1104                 -- Salty Scorpid Venom
   collect 5795 quest 1105                 -- Hardened Tortoise Shell

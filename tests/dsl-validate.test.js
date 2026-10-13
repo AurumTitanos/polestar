@@ -234,7 +234,7 @@ test('objective-capable goals without coordinates warn', () => {
 	]);
 });
 
-test('the fixture guide set is valid: no errors, no warnings', () => {
+test('the fixture guide set is valid: no errors, and no warnings but its goto before the kobolds', () => {
 	const fs = require('node:fs');
 	const path = require('node:path');
 	const { GUIDES_DIR } = require('./fixtures/dsl/helpers');
@@ -242,7 +242,10 @@ test('the fixture guide set is valid: no errors, no warnings', () => {
 	const files = findGuideFiles(GUIDES_DIR);
 	assert.deepEqual(files, ['forever/alliance/human/01-northshire.guide', 'forever/alliance/human/02-elwynn.guide']);
 	const r = compile(Object.fromEntries(files.map((f) => [f, fs.readFileSync(path.join(GUIDES_DIR, f), 'utf8')])));
-	assert.equal(r.text, '');
+	// The fixture keeps a `goto` before its kill so the engine's goto steps stay covered.
+	assert.equal(r.warnings.length, 1);
+	assert.match(r.warnings[0], /^forever\/alliance\/human\/01-northshire\.guide:19: `goto 47\.6,35\.1` "Kobold camp" sends the player where `kill Kobold Vermin` \(line 20\) already leads, \d+ yards away$/);
+	assert.deepEqual(r.errors, []);
 });
 
 test('a bare unknown npc id on train or vendor is an error; a quoted name makes it a warning', () => {

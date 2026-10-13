@@ -82,12 +82,10 @@ step Marvon Rivetseeker
 
 step The Noxious Lair
   tip West, the Centipaar insects swarm around their hives; any of them drops the parts.
-  goto 33.5,44.5 "The Noxious Lair"
   collect 8587 quest 82.1
 
 step Dunemaul Compound
   tip South of the Noxious Lair the Dunemaul ogres hold their compound, with Gor'marok the Ravager at its eastern end. Dig up Gahz'ridian ornaments between the fights.
-  goto 39.5,55.5 "Dunemaul Compound"
   kill 5474 quest 5863.1
   kill 5472 quest 5863.2
   kill 12046 quest 5863.3 @41.5,57.8
@@ -95,7 +93,6 @@ step Dunemaul Compound
 
 step Thistleshrub Valley
   tip West of the compound the cactus creatures fill the valley; only the Dew Collectors carry a dew gland. Most mobs in Tanaris can drop OOX-17/TN's distress beacon, rarely: keep it if you see one.
-  goto 29.5,65.5 "Thistleshrub Valley"
   kill 5490 quest 3362.1
   kill 5485 quest 3362.2
   collect 8428 quest 2605.1 @29.2,66.1
@@ -187,7 +184,6 @@ step Kalaran Windblade
 
 step The Cauldron
   tip Heavy War Golems patrol the Cauldron below Kalaran and drop the oil; the Magma and Blazing Elementals drifting among them drop the hearts. The Dark Iron Taskmasters and Slavers drive the slaves on the paths; a Slaver may drop the Grimesilt Outhouse Key: keep it.
-  goto 40.0,44.0 "The Cauldron"
   kill 5854 quest 7723.1
   collect 10511 quest 3442.2
   collect 10509 quest 3442.1
@@ -201,7 +197,6 @@ step Kalaran Windblade
 
 step The Steamsmiths' furnaces
   tip The Dark Iron Steamsmiths work the furnaces in the middle of the Cauldron; half of them carry a Thorium Plated Dagger, one in ten the Smithing Tuyere. Slaves, Slavers and Taskmasters carry daggers too.
-  goto 40.0,50.0 "Steamsmiths' furnaces"
   collect 10551 quest 3443.1
   collect 18959 quest 7728.1
 
@@ -213,18 +208,15 @@ step Kalaran Windblade
 
 step The Slag Pit
   tip The Slag Pit opens in the north of the Cauldron. Incendosaurs swim in its lava pools: pull them to the edge. The secret plans lie on the pit's upper ledge.
-  goto 47.0,25.5 "Slag Pit lava pools"
   kill 9318 quest 7727.1
   collect 18922 quest 7722.1 @40.5,35.7
 
 step Greater Lava Spiders
   tip The Greater Lava Spiders roam the plateaus and lava pools in the south-west of the gorge.
-  goto 28.5,62.0 "South-western plateaus"
   kill 5858 quest 7724.1
 
 step Dark Iron Lookouts
   tip The Dark Iron Lookouts stand on the ridges around the sentry towers south of the Cauldron; about one in ten carries the Lookout's Spyglass.
-  goto 42.3,58.0 "Sentry towers"
   collect 18960 quest 7728.2
 
 step The Key to Freedom

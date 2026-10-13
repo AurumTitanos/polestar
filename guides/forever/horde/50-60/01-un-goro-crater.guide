@@ -94,20 +94,17 @@ step Out of the refuge
 
 step Lakkari Tar Pits
   tip The tar pits lie just south of the refuge. Tar Beasts, Lurkers and Creepers drop the Super Sticky Tar.
-  goto 50.0,22.0 "Lakkari Tar Pits"
   collect 11834 quest 4504
 
 # ---------------------------------------------------------------- Loop 1: west and south-west
 
 step Western jungle
   tip Ride south-west along the western cliffs. Frenzied Pterrordax fly over the west side, and Bloodpetal Trappers grow in the same jungle.
-  goto 25.0,45.0 "Western jungle"
   kill 9167 quest 4501.2
   kill 6512 quest 4145.4
 
 step Stegodons and ravasaurs
   tip South of the hot springs, Stegodons graze and Dinosaur Bones drop from them or lie on the ground; Diemetradons nearby carry the scales Shizzle wants. Ravasaurs hunt in packs in the south-west: their claws are for Jes'rimon, and one of them carries a Mangled Journal. Avoid Gruff, a level 57 Stegodon.
-  goto 33.0,70.0 "Stegodon fields"
   collect 11114 quest 3882
   collect 11830 quest 4503.1
   collect 11477 quest 4300
@@ -122,7 +119,6 @@ step Research Equipment
 
 step The Gorishi hive
   tip The silithid hive fills the south of the crater. Gorishi wasps and workers drop the scent gland; use the Scraping Vial on the egg mass inside the first chamber. The Hive Queen at the bottom is an elite boss: stay out of her chamber. Pterrordax nest on the cliffs above the hive; their scales are for Shizzle.
-  goto 48.0,82.0 "Gorishi hive"
   collect 11837 quest 4496.1
   collect 11131 quest 3883 @48.7,85.3
   kill 9166 quest 4501.1
@@ -163,7 +159,6 @@ step Torwa Pathfinder
 
 step Lashers and Threshers
   tip Ride north along the east side. Bloodpetal Lashers and Threshers fill the jungle.
-  goto 66.0,33.0 "Eastern jungle"
   kill 6509 quest 4145.1
   kill 6511 quest 4145.2
 
@@ -173,7 +168,6 @@ step Crate of Foodstuffs
 
 step Gorillas
   tip The gorillas live on the north-east plateau. Stay out of the deepest cave: U'cha lives there.
-  goto 66.0,16.0 "Gorilla plateau"
   collect 11478 quest 4289
   collect 11479 quest 4289
   collect 11480 quest 4289
@@ -184,7 +178,6 @@ step Gorillas
 
 step Bloodpetal Flayers
   tip Ride south-west to Fire Plume Ridge, the volcano in the middle of the crater. Bloodpetal Flayers grow around its foot.
-  goto 50.0,58.0 "Foot of Fire Plume Ridge"
   kill 6510 quest 4145.3
 
 step Power Crystals and soil
@@ -323,7 +316,6 @@ step Krom'Grul
 
 step Thaurissan dig site
   tip Ride west to the dig site. War Reaver golems (53) stomp around it and drop the shards often; the Tablet of the Seven stands in its middle among the Thaurissan dwarves. Copy it.
-  goto 54.6,37.5 "War Reavers"
   collect 11266 quest 4061
   collect 11470 quest 4296 @54.1,40.8
 
@@ -380,7 +372,6 @@ step Augustus the Touched
 
 step Termite mounds
   tip The Large Termite Mounds stand all over the hills east of Terrordale. Use the Empty Termite Jar on each mound you pass.
-  goto 28.0,24.0 "Termite mounds"
   collect 15043 quest 5901
 
 step Light's Hope Chapel

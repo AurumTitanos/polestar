@@ -73,7 +73,6 @@ step Shadow Priest Sarvis
 
 step Mindless Zombies
   tip The zombies shamble around the graveyard and the houses just east of the church.
-  goto 32.7,63.5 "Deathknell graveyard"
   kill 1501 quest 364.1
   kill 1502 quest 364.2
 
@@ -86,7 +85,6 @@ step Shadow Priest Sarvis
 
 step Rattlecages, scavengers and duskbats
   tip Rattlecage Skeletons wander the ruined houses in the north half of Deathknell. Young Scavengers and Duskbats roam all around the village; the Ragged Scavengers and Mangy Duskbats are on its east side.
-  goto 33.0,61.5 "North Deathknell"
   kill 1890 quest 3901.1
   collect 3265 quest 376.1
   collect 3264 quest 376.2
@@ -104,7 +102,6 @@ step Scavenging Deathknell
 
 step Night Web's Hollow
   tip Head west to the cave. The Young Night Web Spiders sit outside; the Night Web Spiders and the Webbed Victims are inside.
-  goto 27.5,58.0 "Night Web's Hollow"
   kill 1504 quest 380.1
   kill 1505 quest 380.2
   goto 24.8,59.6 "Webbed Victims"    -- Free six Webbed Victims inside the cave for Aramis
@@ -118,7 +115,6 @@ step Back to Deathknell
 
 step The Scarlet farm
   tip The Scarlet Converts and Initiates hold the farm east of Deathknell. Samuel Fipps wanders between the farmhouses: his remains are for Marla's Last Wish.
-  goto 37.5,64.5 "Scarlet farm"
   collect 3266 quest 381.1
   collect 16333                       -- Samuel's Remains, from Samuel Fipps
 
@@ -171,7 +167,6 @@ step Discipline
 
 step Doom Weed
   tip The Doom Weed grows in the graveyard fields just north of Brill.
-  goto 57.0,39.0 "North of Brill"
   collect 13702 quest 5482.1
 
 step Brill
@@ -194,7 +189,6 @@ step Eleanor Shackleton
 
 step Fields west of Brill
   tip Rotting Dead and Ravaged Corpses shamble through the fields just west of Brill; Darkhounds roam a little further west, toward Gordo.
-  goto 52.5,53.0 "Fields west of Brill"
   collect 2855 quest 404.1
   collect 2858 quest 367.1
 
@@ -233,7 +227,6 @@ step Greater Duskbats
 
 step Rot Hide graveyards
   tip The Rot Hide Graverobbers dig through the graveyards north of Brill; all the Rot Hides drop the ichor.
-  goto 55.5,42.0 "Rot Hide graveyards"
   kill 1941 quest 358.1
   collect 2834 quest 358.3
 
@@ -244,7 +237,6 @@ step Maggot Eye
 
 step Vile Fin murlocs
   tip The Vile Fin murlocs line the north shore.
-  goto 61.0,28.0 "North coast"
   collect 2859 quest 368.1
 
 step Brill
@@ -274,7 +266,6 @@ step Magistrate Sevren
 
 step Agamand Mills
   tip Follow the road north-west to Agamand Mills. Devlin Agamand walks the graveyard south of the mills; Nissa, Gregor and Thurman Agamand haunt the mills themselves. Rattlecage and Cracked Skull Soldiers drop the ribs, Darkeye Bonecasters the skulls, and any of them may drop A Letter to Yvette. From here on, kill the Duskbats and Darkhounds you pass: Shelene wants their wings and hides.
-  goto 46.5,36.0 "Agamand Mills"
   collect 2831 quest 362.1            -- Devlin Agamand
   collect 2828 quest 354.2            -- Nissa Agamand
   collect 2829 quest 354.1            -- Gregor Agamand
@@ -290,19 +281,16 @@ step Deathguard Simmer
 
 step Tirisfal Pumpkins
   tip The pumpkins grow in the Scarlet-held fields north-west of Solliden.
-  goto 34.5,49.0 "Pumpkin fields"
   collect 2846 quest 365.1
 
 step Crusader's Outpost
   tip Scarlet Warriors guard the outpost just west of the pumpkin fields. Bareth Dawnstone is held inside: talk to him and stay with him until he is out.
-  goto 32.0,47.5 "Crusader's Outpost"
   kill 1535 quest 427.1
   accept 99144                        -- Bareth Dawnstone
   goto 32.0,46.3 "Crusader's Outpost" -- Escort Bareth out of the outpost
 
 step Vile Fin shore
   tip More Vile Fin murlocs walk the shore just north of the outpost.
-  goto 30.5,43.5 "Shore north of the outpost"
   collect 278244 quest 97558.3
 
 step Whispering Forest
@@ -312,7 +300,6 @@ step Whispering Forest
 
 step Shadowvale
   tip Shadowvale is the hollow at the west edge of the glades. The Shadowvale Lurchers and Mystics drop the bones; the bottles lie on the ground among them, and the Glowing Crystal Fragment is at the south end.
-  goto 9.8,66.0 "Shadowvale"
   collect 286259 quest 99152.1
   collect 268801 quest 95314.1
   collect 286269 quest 99153.1
@@ -344,7 +331,6 @@ step Brill
 
 step The Scarlet camp
   tip Follow the road south-west from Brill to the Scarlet Crusade camp. Captain Perrine stands at its south end; every Scarlet there can drop a ring.
-  goto 50.0,66.5 "Scarlet camp"
   kill 1662 quest 370.1
   kill 1537 quest 370.2
   kill 1536 quest 370.3
@@ -370,27 +356,23 @@ step Hadric Harlson
 
 step Balnir Farmstead
   tip The Cult of the Damned holds the farm just south-east of the camp. The Necrotic Crystal Fragments lie on the ground among the cultists, and the cultists carry some too.
-  goto 67.5,64.0 "Cult camp"
   kill 267006 quest 96897.1
   kill 275437 quest 96897.2
   collect 275851 quest 96898.1
 
 step Balnir graves
   tip Follow the road east. Bleeding Horrors and Wandering Spirits haunt the graves on the east side of the farmstead, where the Tomb Weed grows.
-  goto 76.0,60.5 "Balnir graves"
   kill 1529 quest 356.1
   kill 1532 quest 356.2
   collect 286204 quest 99142.1
 
 step Captain Vachon
   tip The Scarlet Friars camp just north-east of the graves; Captain Vachon stands among them.
-  goto 79.0,56.0 "Scarlet camp"
   kill 1664 quest 371.1
   kill 1538 quest 371.2
 
 step Vicious Night Web Spiders
   tip The spiders lurk in the woods at the far east end of the glades.
-  goto 86.0,51.0 "Eastern woods"
   collect 2872 quest 369.1
 
 step Hides for the Forsaken
@@ -418,7 +400,6 @@ step Brill
 
 step Captain Melrache
   tip Follow the road north-east from Brill past Brightwater Lake. Captain Melrache and his two Scarlet Bodyguards hold the Scarlet watchtower on the north-east coast, north of the Scarlet Watch Post: pull the bodyguards first.
-  goto 79.5,25.5 "Scarlet watchtower"
   kill 1665 quest 372.1
   kill 1660 quest 372.2
 

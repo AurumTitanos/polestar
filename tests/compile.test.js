@@ -169,7 +169,8 @@ test('recompiling replaces the old Pack.xml layout and keeps files compile does 
 test('lint runs the same checks without writing, with matching exit codes', () => {
 	const ok = cli('lint', '--guides', GUIDES_DIR, '--data', DATA_DIR);
 	assert.equal(ok.status, 0, ok.stderr);
-	assert.match(ok.stdout, /lint ok: 2 files, 2 guides: 0 errors, 0 warnings/);
+	// One warning: the fixture's goto before the kobolds (tests/dsl-validate.test.js).
+	assert.match(ok.stdout, /lint ok: 2 files, 2 guides: 0 errors, 1 warning\n/);
 	const bad = cli('lint', '--guides', GUIDES_DIR, '--data', DATA_DIR, '--include-drafts');
 	assert.equal(bad.status, 1);
 	assert.match(bad.stderr, /wip\.guide:7: error: `turnin` for quest 999999 that is never accepted/);

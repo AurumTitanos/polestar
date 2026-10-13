@@ -58,7 +58,6 @@ step Brine
 step Shady Rest Inn
   zone Dustwallow Marsh
   tip Ride east from Camp Taurajo along the road into the marsh. The burned-out Shady Rest Inn stands beside it just past the border; the shield, the badge and the hoofprints are in and beside the ruin.
-  goto 29.7,48.0 "Shady Rest Inn"
   accept 1251
   accept 1268
   accept 1269
@@ -77,26 +76,22 @@ step Brackenwall Village
 
 step Questioning Reethe
   tip Ogron waits in the Quagmire east of the village. Follow him to Reethe and keep him alive through the fight that breaks out.
-  goto 41.0,36.7 "Ogron"
   accept 1273
   complete 1273
 
 step Muckshell crabs
   tip The Muckshell crabs line the pools east of the Quagmire; now and then one carries the Jeweled Pendant for Marg Speaks.
-  goto 50.5,39.5 "Muckshell pools"
   collect 5942 quest 1261
 
 # ---------------------------------------------------------------- Witch Hill
 
 step Stinky Ignatz
   tip Ride north to Witch Hill. Stinky stands at the foot of the hill; escort him while he gathers Bogbean Leaves just south of it.
-  goto 46.9,17.5 "Stinky Ignatz"
   accept 1270
   complete 1270
 
 step Mirefin murlocs
   tip The Mirefin murlocs crowd the coast east and north-east of Witch Hill; every kind drops heads.
-  goto 54.2,15.4 "Mirefin coast"
   collect 5847 quest 1177
 
 step Swamp Eye Jarl
@@ -108,12 +103,10 @@ step Swamp Eye Jarl
 
 step Darkfang spiders
   tip Ride west back across the marsh. The Darkfang Venomspitters on the ridges north of Brackenwall drop the venom sacs.
-  goto 35.7,14.8 "Darkfang ridges"
   collect 5959 quest 1322
 
 step Darkmist cavern
   tip The Darkmist spiders swarm the cavern mouth north-west of Brackenwall; every kind drops eyes.
-  goto 30.5,21.3 "Darkmist cavern"
   collect 5884 quest 1206
 
 step Brackenwall Village
@@ -147,7 +140,6 @@ step Shadowprey Village
 
 step Melizza Brimbuzzle
   tip Ride north-east to the Valley of Spears. Melizza is held in the Maraudine centaur camp; free her and escort her out east of the valley.
-  goto 33.9,53.5 "Melizza Brimbuzzle"
   accept 6132
   complete 6132
 
@@ -158,7 +150,6 @@ step Kodo Graveyard
 
 step Gizelton Caravan
   tip Rigger Gizelton's caravan stops on the road at the edge of Mannoroc Coven. Escort it east past the coven; demons attack it twice.
-  goto 45.4,75.3 "Gizelton caravan"
   accept 5943
   complete 5943
 
@@ -172,7 +163,6 @@ step Kormek's Hut
 
 step Kodo bones and ghosts
   tip Pick up the kodo bones scattered across the graveyard, and use the Crate of Ghost Magnets among the bones: the ghosts it draws drop the ghost-o-plasm.
-  goto 50.0,60.0 "Kodo Graveyard"
   collect 13703 quest 5501
   complete 6134
 
@@ -184,7 +174,6 @@ step Kormek's Hut
 
 step Thunder Axe Fortress
   tip The Burning Blade hold the fortress north-west of Kormek's Hut. Use the Demon Pick on the Demon Spirit in the fortress to get the Demon Box.
-  goto 55.0,26.6 "Thunder Axe Fortress"
   collect 13542 quest 5381
 
 # ---------------------------------------------------------------- The coast
@@ -195,7 +184,6 @@ step Ethel Rethor
 
 step Slitherblade coast
   tip The Slitherblade naga hold the coast north of Ethel Rethor, up to Sar'theris Strand. Lord Kragaru guards the Book of the Ancients at the far northern tip.
-  goto 31.4,20.0 "Slitherblade coast"
   kill 4714 quest 6143.1
   kill 4711 quest 6143.2
   kill 4712 quest 6143.3

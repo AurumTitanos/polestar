@@ -86,7 +86,6 @@ step Dalia the Collector
 
 step The standing stones
   tip Yala Windwatcher stands at the Thendal Standing Stones, east of the village. Roiling Winds and Al'Aketh Converts gather just north of her; the Elemental Convergence is just north-east of her.
-  goto 47.3,21.9 "Thendal Standing Stones"
   turnin 92464                        -- Yala Windwatcher
   accept 92465
   kill 251143 quest 92465.1
@@ -138,7 +137,6 @@ step Leaving Thendal Village
 
 step Shen'dar Village
   tip Follow the road south to Shen'dar Village, in the middle of the isle.
-  goto 44.5,44.8 "Shen'dar Village"
   turnin 96638                        -- Raan Wildwind
   turnin 92472                        -- Constable Aonda
   accept 92595                        -- Illaya Amberwind
@@ -180,7 +178,6 @@ step High Order Apprentices
 
 step The highland bandits
   tip The bandit camps are north-east of the village; "Badwind" Bennic holds the top camp. Bandits carry the stolen windstones.
-  goto 48.7,36.9 "Highland bandits"
   kill 251918 quest 92517.1
   kill 255534 quest 92517.2
   collect 257945 quest 93319.1
@@ -202,7 +199,6 @@ step Vulgara the Insatiable
 
 step Falaath Village
   tip Falaath Village lies south of Shen'dar. Missionary Jasaan meets you at its edge; search the wardrobe in the house behind him.
-  goto 46.8,56.4 "Falaath Village"
   turnin 92529                        -- Missionary Jasaan
   accept 92528
   complete 92528 @48.84,53.93         -- search the wardrobe
@@ -218,7 +214,6 @@ step Constable Aonda
 
 step Havoc in the Highlands
   tip Back at Falaath Village: Stormcallers and Living Lightning fill the village, the Supply Caches stand among the houses and Commander Cyclas waits at its south-east end.
-  goto 48.7,55.8 "Falaath Village"
   kill 252068 quest 92550.1
   kill 251662 quest 92550.2
   collect 252661 quest 92550.3
@@ -226,7 +221,6 @@ step Havoc in the Highlands
 
 step The West Pylon Watchtower
   tip Head south-west to the West Pylon Watchtower. Peacekeeper Vaaniel is at the top; the Bloody Note lies beside him.
-  goto 42.3,62.1 "West Pylon Watchtower"
   complete 93926 @42.34,62.1          -- talk to Peacekeeper Vaaniel
   turnin 93926
   accept 93927
@@ -240,7 +234,6 @@ step Skypriest Aanders
 
 step Hippogryph nests
   tip The hippogryph nests are north-west of the tower, west of Falaath Village; the Matriarch sits at the western end. Hippogryph Down lies on the ground around them, and the hippogryphs drop the Small Eggs.
-  goto 36.0,54.0 "Hippogryph nests"
   kill 251291 quest 92516.1
   kill 251284 quest 92516.2
   kill 251261 quest 92516.3
@@ -262,7 +255,6 @@ step Shen'dar Village, last time
 
 step To Valanaar
   tip Take the road south-east to Valanaar, the Skyborne town on the south coast. Nyalah and Alvarion stand at its western edge.
-  goto 61.0,73.0 "Valanaar"
   accept 93317                        -- Nyalah Brightfire
   accept 92679                        -- Alvarion Windfield
   talk 252448                         -- Alvarion Windfield
@@ -309,7 +301,6 @@ step Endaria Mistgaze
 
 step Windfield Orchard
   tip Windfield Orchard is west of Valanaar along the coast road.
-  goto 46.7,81.9 "Windfield Orchard"
   talk 252800                         -- Aamelia Windfield
   complete 92679 @46.7,81.95
   turnin 92679                        -- Aamelia Windfield
@@ -367,7 +358,6 @@ step Valennia Stormfist
 
 step The East Pylon Watchtower
   tip Ride north-east to the East Pylon Watchtower. The Al'Aketh camp is just west of it, with Commander Belguilos at its north end. Every cultist can drop a windstone charm.
-  goto 69.6,67.1 "East Pylon Watchtower"
   turnin 93320                        -- Yorana Windyreed
   accept 92642
   accept 92645
@@ -394,7 +384,6 @@ step Back to Valanaar
 
 step The turncoat
   tip The turncoat's house is in the Gustberry Lowlands north-west of Valanaar. Fendaal Windstone waits nearby; his assassins lurk around the house.
-  goto 56.0,58.8 "The turncoat's house"
   accept 98512                        -- Fendaal Windstone
   kill 254626 quest 98512.1
   complete 92643 @56.0,58.8           -- search the dead cultist in the house
@@ -424,7 +413,6 @@ step Desperate Times
 
 step The Shrine of Akir
   tip The Shrine of Akir is north of Valanaar. Fight through the guards up to Hyusaa Quickbreeze at its east side.
-  goto 62.0,50.5 "Shrine of Akir"
   kill 252762 quest 92947.1
   kill 252763 quest 92947.2
   kill 252765 quest 92947.3
@@ -439,7 +427,6 @@ step The Shrine of Akir
 
 step Elegael Thornpaw
   tip Head north into Shadowgale Forest; Elegael camps at its southern edge.
-  goto 61.7,39.3 "Shadowgale Forest"
   turnin 94484
   accept 94485
   accept 94486
@@ -460,7 +447,6 @@ step Elegael again
 
 step The Al'Aketh camp
   tip Commander Haalien, Jorel Windsinger and Naaleos Leafwhisper are in the cult camp east of Elegael. Vayn Moongaze stands at its edge. Haalien also drops a Ripped Missive: read it to start the next quest.
-  goto 64.5,35.5 "Al'Aketh camp"
   accept 93165                        -- Vayn Moongaze
   collect 265475 quest 94488.1
   kill 258130 quest 94489.1
@@ -478,7 +464,6 @@ step Elegael Thornpaw, last time
 
 step Windsong Lake
   tip The refugees' belongings lie along the north shore of Windsong Lake; Resaan Nimbuswalker is at its north-west end.
-  goto 57.0,31.0 "Windsong Lake"
   collect 266433 quest 94896.1
   collect 266434 quest 94897.1
 

@@ -90,7 +90,6 @@ step Vorsha the Lasher
 
 step Sapphires of Aku'Mai
   tip The Sapphires grow on the rocks at the far north end of the strand, by the Blackfathom Deeps ruins.
-  goto 13.5,12.5 "North end of the strand"
   collect 16784 quest 6563
 
 step Zoram'gar Outpost
@@ -102,13 +101,11 @@ step Zoram'gar Outpost
 
 step Thistlefur Village
   tip East of Zoram'gar, the Thistlefur furbolgs fill the village and the hills around their hold.
-  goto 34.3,38.1 "Thistlefur Village"
   kill 3925 quest 216.1
   kill 3924 quest 216.2
 
 step Thistlefur Hold
   tip Inside the hold, Troll Chests lie along the tunnels. Ruul Snowhoof is held deep inside: free him and protect him all the way out, then he runs home to Night Run.
-  goto 41.0,33.6 "Thistlefur Hold"
   collect 16602 quest 6462
   accept 6482                         -- Ruul Snowhoof
   complete 6482
@@ -142,7 +139,6 @@ step Tideress
 
 step King of the Foulweald
   tip The Foulweald furbolgs hold the woods east of Mystral Lake, south of the road. Place Karang's Banner on the Foulweald Totem Mound and guard it: the furbolgs come to tear it down. Chief Murgut comes last; his totem drops in the basket.
-  goto 56.4,63.5 "Foulweald Totem Mound"
   collect 16976 quest 6621
 
 step Torek's Assault
@@ -153,7 +149,6 @@ step Torek's Assault
 step Ashenvale Outrunners
   tip Kuray'bin stands at the lumber camp. The night elf Outrunners stalk the woods south-east of it; they stealth, so watch for them.
   accept 6503
-  goto 73.5,72.3 "Outrunner woods"
   kill 12856 quest 6503
   turnin 6503
 
@@ -178,7 +173,6 @@ step Sharptalon
 
 step Felmusk satyrs
   tip North-west of Splintertree, the Felmusk satyrs camp in the woods. Every satyr can drop horns.
-  goto 67.2,54.3 "Felmusk camp"
   collect 5481 quest 6441
 
 step Shadumbra
@@ -188,7 +182,6 @@ step Shadumbra
 
 step Mystral Lake
   tip Back south-west to Mystral Lake. Befouled Water Elementals drift around its shores; the gazebo stands on the island, overlooking the Alliance outpost.
-  goto 48.9,70.4 "Mystral Lake"
   kill 3917 quest 25.1
   goto 48.9,69.6 "Gazebo"
   complete 25
@@ -237,7 +230,6 @@ step Freewind Post
 
 step Galak centaurs
   tip The Galak camps fill the canyon north of Freewind; Scouts, Wranglers and Windchasers share every camp. A lone Galak Messenger walks between the camps: kill him when you meet him, his note starts a quest for Whitereach Post.
-  goto 43.6,38.9 "Galak camps"
   kill 4094 quest 4841.1
   kill 4093 quest 4841.2
   kill 4096 quest 4841.3
@@ -280,7 +272,6 @@ step Whitereach Post
 
 step Highperch
   tip West of Whitereach the wyverns nest on the Highperch cliffs; the eggs lie in the nests. Pao'ka Swiftmountain waits on the east side of the nesting grounds: free him and keep him alive on the walk back to Whitereach Post.
-  goto 13.4,37.3 "Highperch"
   collect 12356 quest 4767
   accept 4770                         -- Pao'ka Swiftmountain
   complete 4770
@@ -290,7 +281,6 @@ step Whitereach Post
 
 step Roguefeather Den
   tip South of Darkcloud, the harpies of Roguefeather Den. Grenka Bloodscreech (31) walks among them: thin out the harpies around her before you pull her.
-  goto 26.8,54.0 "Roguefeather Den"
   collect 5843 quest 1150
 
 step Freewind Post
@@ -323,7 +313,6 @@ step Mirage Raceway
 
 step The salt flats
   tip Rocket Car Rubble lies all over the flats north of the raceway. Scorpid Reavers and Sparkleshell Tortoises roam the north half, Salt Flats Scavengers circle overhead, and Saltstone Basilisks graze west of the track. The Crystalhides roam the middle of the flats and the Gazers (34) the far south.
-  goto 76.0,60.0 "North of the raceway"
   collect 5798 quest 1110
   collect 5794 quest 1104
   collect 5795 quest 1105

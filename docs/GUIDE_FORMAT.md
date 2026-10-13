@@ -25,7 +25,6 @@ step Deputy Willem
 
 step Kobold camp
   tip Pull one kobold at a time until level 3.
-  goto 47.6,35.1 "Kobold camp"
   kill 6 x10 quest 7.1
   collect 750 x8 quest 33.1 optional
 
@@ -319,6 +318,9 @@ Warnings:
 - a coordinate on a map other than the step's zone that the guide never sets as
   a zone (catches a target resolved onto another continent)
 - profession, faction or spell missing from data but given a quoted name
+- a `goto` right before a goal that already leads to the same place: the next
+  goal (notes skipped) is located within 200 yards of the goto point, measured to
+  the edge of its nearest spawn area (see `goto` under "Places")
 - a smart target with no candidate for a faction the goal applies to (and, for
   `train class`, for a class that faction's allowed races can be); a `train
   <Profession>` whose default rank needs more skill than any earlier `skill` target
@@ -404,6 +406,15 @@ Typed coordinates are in the Era map frame unless the guide says `coords
 live` or the goal says `live`. In game, `/polestar where` gives your own
 position as `zone map <id>` and `goto <x>,<y> live`, ready to paste, and the
 `@x,y live` form for any other goal.
+
+Use `goto` for travel and approach waypoints (a boat dock, a pass, a cave mouth
+on a long ride) and for objectives the data has no location for. Kill, drop,
+NPC and object goals carry their own location, so the arrow leads to them
+directly; lint warns on a `goto` whose next goal is located within 200 yards of
+it. It keeps a `goto` followed by another `goto`, by a goal without a location,
+an `optional` one, one for other characters (`only`) or one on another map, a
+kill or drop whose target spawns nowhere in the data (an instance boss placed at
+its entrance), and gotos in steps with `fly` or `hearth`.
 
 ### People and things: `talk`, `interact`, `use`
 
