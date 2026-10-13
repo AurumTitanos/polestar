@@ -56,13 +56,13 @@ step Auberdine
 # ---------------------------------------------------------------- The beach
 
 step The beach
-  tip Tide Crawlers scuttle along the shore below the village; Buzzbox 827 stands on the beach just south of the docks. Darkshore Threshers swim in the shallows. The Skeletal Sea Turtle lies on the beach west of the docks.
+  tip Tide Crawlers scuttle along the shore below the village; Buzzbox 827 stands on the beach just south of the docks. Darkshore Threshers swim in the shallows. The Beached Sea Creature lies on the shore just south of the village.
   collect 5385 quest 983                      -- Crawler Legs
   turnin 983                                  -- Buzzbox 827
   accept 1001
   collect 5412 quest 1001                     -- Thresher Eyes
   collect 12242 quest 3524                    -- Sea Creature Bones
-  collect 12238 quest 1141 optional           -- Darkshore Grouper: fish from the docks
+  collect 12238 quest 1141 optional @36.1,44.9 -- Darkshore Grouper: fish from the pier
 
 step Auberdine
   turnin 3524                                 -- Gwennyth Bly'Leggonde
@@ -288,7 +288,7 @@ step The naga
   kill 2183 quest 98013
 
 step Back south
-  hearth "Auberdine"
+  hearth "Auberdine"                          -- Hearthstone on cooldown? Follow the coast road back south.
   turnin 951                                  -- Onu, at the Grove
   turnin 98013                                -- Arbal
 

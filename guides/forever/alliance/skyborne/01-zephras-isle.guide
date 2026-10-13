@@ -11,11 +11,12 @@ next forever/alliance/02-westfall
 #
 # Flow: Thendal Grove (1-6) -> Shen'dar Village, the Highlands and Falaath
 # Village (6-9.5) -> Valanaar and the Gustberry Lowlands (9.5-12.5) -> the
-# Shrine of Akir and Shadowgale Forest (12.5-14.5) -> Valanaar -> the zeppelin
-# and the Skyborne portal to Stormwind at about 14.6, then on to Westfall.
-# The isle has no inn or flight master and the route sets no hearth; the
-# class trainers stand together in Thendal Grove (train at 2, 4 and 6). There
-# are no class quests on the isle and no grind stops: the quests carry you.
+# Shrine of Akir and Shadowgale Forest (12.5-14.5) -> Valanaar -> the skycutter
+# to Dalaran, Denaaris and the Skyborne portal to Stormwind at about 14.6,
+# Bolvar in Stormwind Keep, then on to Westfall.
+# The isle has no inn or flight master and the route sets no hearth. Every
+# class trains in Thendal Grove (2, 4, 6), Shen'dar (about 9) and Valanaar
+# (about 11 and 14). There are no grind stops: the quests carry you.
 #
 # Optional extra: WANTED: Vulgara the Insatiable (93318), not in the export;
 # Vulgara is elite, so it stays an optional extra.
@@ -32,9 +33,8 @@ next forever/alliance/02-westfall
 # - Shadowgale Forest: the Strange Hermit's quests are done together with the
 #   refugees' belongings, which lie in the same corner of the forest.
 #
-# Left out: The Magical City of Dalaran (94946), the breadcrumb Elaadrin
-# offers at the end; the route never turns it in (the portal goes straight
-# to Stormwind).
+# Carried on: Journey to Sentinel Hill (98021), from Bolvar, is turned in to
+# Gryan Stoutmantle at the start of the Westfall guide.
 
 # ---------------------------------------------------------------- Thendal Grove
 
@@ -110,7 +110,7 @@ step Aetheen of the Gales
   turnin 92470                                -- Aetheen of the Gales
   accept 92472
   accept 96638
-  train class                                 -- Level 6 spells: the last trainer before Stormwind
+  train class                                 -- Level 6 spells
 
 # ---------------------------------------------------------------- Shen'dar Village
 
@@ -220,6 +220,7 @@ step Shen'dar Village again
   accept 92701
   accept 93948
   turnin 94413                                -- Rathiril Sunlance
+  train class
 
 # ---------------------------------------------------------------- Valanaar
 
@@ -298,6 +299,7 @@ step Valanaar turn-ins
   accept 99260                                -- Fillion Flamebreeze
   turnin 99260                                -- Elaadrin Evengale
   accept 92840
+  train class
 
 step The Windstone Formations
   tip The Windstone Formations stand on the rise west of Fillion's camp.
@@ -444,7 +446,22 @@ step Valanaar, the fate of Zephras
   turnin 94369
   accept 93089
   turnin 93089                                -- Elaadrin Evengale
+  accept 94946                                -- Elaadrin Evengale: Denaaris Stargale waits by the Skyborne portal
+  train class
 
-step The zeppelin
-  tip The zeppelin docks at the tower south of Valanaar. Ride it, then take the Skyborne portal straight to Stormwind; Westfall is next.
-  goto 65.81,83.44 "Zeppelin to Stormwind"
+step The skycutter
+  tip The skycutter docks at the tower south of Valanaar. It lands by the Kirin Tor camp on the lake shore west of Dalaran.
+  goto 65.81,83.44 "Skycutter to Dalaran"
+
+step Denaaris Stargale
+  zone Alterac Mountains
+  tip Denaaris stands beside the Skyborne Portal where the zeppelin lands. The portal takes you to Stormwind.
+  turnin 94946                                -- Denaaris Stargale
+  accept 94947
+  interact 631299 quest 94947.1               -- Skyborne Portal to Stormwind
+
+step Stormwind Keep
+  zone Stormwind City
+  tip Bolvar Fordragon stands in the throne room of Stormwind Keep, at the north end of the city. Then leave by the main gate for Westfall.
+  turnin 94947                                -- Highlord Bolvar Fordragon
+  accept 98021                                -- For Gryan Stoutmantle at Sentinel Hill

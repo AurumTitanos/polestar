@@ -13,7 +13,8 @@ next forever/alliance/02-westfall
 # (hearth) -> Zenn and the Starbreeze moonwell -> Dolanaar -> east loop:
 # Starbreeze Village, Lake Al'Ameth -> Dolanaar -> west loop: Fel Rock, the
 # road ambushers, Ban'ethil Barrow Den, the Pools of Arlithrien, Gnarlpine
-# Hold -> hearth -> Ferocitas -> Dolanaar -> the Oracle Glade -> Ursal ->
+# Hold -> hearth -> Ferocitas -> Dolanaar -> the Oracle Glade (Arynia's
+# harpies) -> Ursal ->
 # Lake Al'Ameth -> Dolanaar -> Darnassus -> Rut'theran Village (flight path)
 # -> boat to Auberdine -> boat to Stormwind -> Westfall.
 #
@@ -33,6 +34,10 @@ next forever/alliance/02-westfall
 #   in to Sister Aquinne beside the Rut'theran portal.
 # - Flight to Auberdine (6342) is turned in at Laird on the Auberdine dock
 #   while changing boats, not on the later Darkshore visit.
+# - Added: The Enchanted Glade (937), Darkness in the Glade (98392) and The
+#   Oracle Tree (98398) from Sentinel Arynia Cloudsbreak at the Oracle Glade
+#   moonwell: every harpy lives around it. The chain's last steps go to
+#   Fandral at the far north of Darnassus and are not taken.
 #
 # Left out: Rellian Greenspyre (922) and Crown of the Earth (934, 935), which
 # the export accepts but never turns in (Rellian and Fandral are at the far
@@ -265,6 +270,27 @@ step The Oracle Glade
   tip The moonwell is in the middle of the glade. The Strange Fronded Plant grows at its north end.
   collect 18151 quest 7383.1 @38.4,34.1       -- Use the Amethyst Phial at the moonwell
   accept 931                                  -- Strange Fronded Plant
+  accept 937                                  -- Sentinel Arynia Cloudsbreak, by the moonwell
+
+step Bloodfeather harpies
+  tip The Bloodfeather harpies nest on the slopes west and north of the glade.
+  collect 5204 quest 937.1                    -- Bloodfeather Belt
+
+step Sentinel Arynia Cloudsbreak
+  tip Back to the moonwell. The Oracle Tree Bark lies just west of it.
+  turnin 937
+  accept 98392
+  accept 98398
+  turnin 98398                                -- Oracle Tree Bark
+
+step The named harpies
+  tip Hatescreech and Windmistress Gaedress fly just west of the moonwell, Witchmother Arysa further north.
+  collect 280831 quest 98392.1                -- Hatescreech's Amulet
+  collect 280832 quest 98392.2                -- Windmistress Gaedress' Amulet
+  collect 280834 quest 98392.3                -- Witchmother Arysa's Amulet
+
+step Sentinel Arynia again
+  turnin 98392
 
 step Ursal the Mauler
   tip Walk south along the west side of the island. Ursal prowls the far south, below the Pools of Arlithrien.

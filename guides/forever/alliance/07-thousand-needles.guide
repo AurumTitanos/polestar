@@ -16,17 +16,17 @@ next forever/alliance/30-40/01-hillsbrad-foothills
 # of Brightwood and the south, Blind Mary and the Insane Ghoul -> Darkshire
 # -> west: Abercrombie, the Plague Spreaders, Sven and the Raven Hill
 # Cemetery, the Defias strongbox, the Vul'Gol crate, Abercrombie -> hearth to
-# Darkshire -> fly to Menethil Harbor (hearth) -> the Bluegill Raiders, the
-# Third Fleet's wreck and the north coast -> Menethil -> the wreck ->
+# Darkshire -> fly to Menethil Harbor (hearth) -> the Third Fleet's wreck,
+# the Bluegill Raiders and the north coast -> Menethil -> the wreck ->
 # Menethil -> east: the dig, Sarltooth, the Dragonmaw ->
 # Menethil -> the Dragonmaw catapult -> hearth -> boat to Theramore -> the
-# Great Lift -> the Shimmering Flats -> hearth to Menethil -> Southshore.
+# Great Lift -> the Shimmering Flats -> hearth to Menethil -> boat to
+# Southshore.
 #
 # Deviations from the export:
-# - Look To The Stars (174-177) and Remember That I Love You (95161) are
-#   turned in on arrival in Darkshire instead of at the end of the visit:
-#   Viktori and Avette stand on the way, and the Insane Ghoul sits beside the
-#   worgen of the south.
+# - Look To The Stars (174-177) is turned in on arrival in Darkshire instead
+#   of at the end of the visit: Viktori stands on the way, and the Insane
+#   Ghoul sits beside the worgen of the south.
 # - Apprentice's Duties (471, accepted in the previous guide) is finished on
 #   the north coast beside the wreck and turned in here.
 # - Henrig Lonebrow's Journal (1100) is picked up at the foot of the Great
@@ -58,7 +58,6 @@ step Darkshire
   sethome "Darkshire" npc 6790            -- Innkeeper Trelayne, Scarlet Raven Tavern
   turnin 1243                             -- Watcher Backus, at the north entrance of town
   accept 1244
-  turnin 95161                            -- Avette Fellwood, by the tavern
   accept 66                               -- Madame Eva
   turnin 66                               -- Clerk Daltry, in the town hall
   accept 58                               -- Commander Althea Ebonlocke
@@ -163,17 +162,16 @@ step Menethil Harbor
   accept 526                              -- Glorin Steelbrow, upstairs in the inn
   accept 464                              -- Captain Stoutfist, by the keep
 
-step Bluegill Raiders
-  tip Follow the coast north. The Bluegill Raiders hold the north end of Bluegill Marsh.
-  goto 18.7,40.0 "Bluegill Raiders"
-  collect 2702 quest 526                  -- Lightforge Ingot
-
 step The wreck of the Third Fleet
-  tip Keep following the coast north to the wrecked ship. Cursed Sailors walk the beach, Cursed Marines the deck; First Mate Snellig stands on the beach by the bow. Giant Wetlands Crocolisks lurk on the coast just north of it.
+  tip Follow the coast north to the wrecked ship. Cursed Sailors walk the beach, Cursed Marines the deck; First Mate Snellig stands on the beach by the bow. Giant Wetlands Crocolisks lurk on the coast just north of it.
   kill 1157 quest 289                     -- Cursed Sailor
   kill 1158 quest 289                     -- Cursed Marine
   collect 3619 quest 289                  -- Snellig's Snuffbox: First Mate Snellig
   collect 3348 quest 471                  -- Giant Crocolisk Skin
+
+step Bluegill Raiders
+  tip Follow the coast north-east past the wreck: the Bluegill Raiders hold the marsh beyond the Giant Crocolisks.
+  collect 2702 quest 526                  -- Lightforge Ingot
 
 step Menethil Harbor
   turnin 526                              -- Glorin Steelbrow
@@ -248,7 +246,7 @@ step Mirage Raceway
   accept 1175                             -- Trackmaster Zherin
 
 step The salt flats
-  tip Rocket Car Rubble lies all over the flats. Scorpid Reavers, Sparkleshell Tortoises and Saltstone Basilisks roam the north half, Crystalhides, Scorpid Terrors and Snappers the middle, and the Gazers (34) the far south. Vultures circle over all of it.
+  tip Rocket Car Rubble lies all over the flats. Scorpid Reavers, Sparkleshell Tortoises and Saltstone Basilisks roam the north half, Crystalhides, Scorpid Terrors and Snappers the middle, and the Gazers (34-35, five levels above you: one at a time) the far south. Vultures circle over all of it.
   collect 5798 quest 1110                 -- Rocket Car Parts
   collect 5794 quest 1104                 -- Salty Scorpid Venom
   collect 5795 quest 1105                 -- Hardened Tortoise Shell
@@ -267,9 +265,14 @@ step Mirage Raceway
 
 # ---------------------------------------------------------------- Southshore
 
+step To Southshore
+  zone Wetlands
+  tip Hearth to Menethil and take the boat from the pier to Southshore.
+  hearth "Deepwater Tavern"
+  goto 4.5,56.7 "Boat to Southshore"
+
 step Southshore
   zone Hillsbrad Foothills
-  tip Hearth to Menethil, then ride north over the Thandol Span through Arathi Highlands into Hillsbrad Foothills; Southshore lies on the coast.
-  hearth "Deepwater Tavern"
   getfp "Southshore" npc 2432             -- Darla Harris
   sethome "Southshore" npc 2352           -- Innkeeper Anderson
+  turnin 98219 npc 2228                   -- Lieutenant Farren Orinelle

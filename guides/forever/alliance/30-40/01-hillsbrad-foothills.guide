@@ -151,3 +151,4 @@ step Deeprun Tram
   turnin 514                          -- Prospector Stormpike, Hall of Explorers
   accept 525
   accept 1453                         -- Roetten Stonehammer
+  train class                         -- Level 30 and 32 spells

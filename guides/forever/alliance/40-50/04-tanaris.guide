@@ -118,7 +118,7 @@ step The Broken Pillar
   turnin 3161
 
 step Dunemaul Compound
-  tip Ride south-west to the ogre compound. Brutes and Enforcers fill it; Gor'marok the Ravager stands in the middle with guards around him.
+  tip Ride south-west to the ogre compound. Brutes and Enforcers (46-48) fill it; Gor'marok the Ravager (49) stands in the middle with guards around him: clear them first.
   kill 5474 quest 5863                -- Dunemaul Brute
   kill 5472 quest 5863                -- Dunemaul Enforcer
   kill 12046 x1 quest 5863            -- Gor'marok the Ravager
@@ -128,7 +128,7 @@ step The Noxious Lair
   collect 8587 quest 82               -- Centipaar Insect Parts
 
 step Thistleshrub Valley
-  tip Ride south into Thistleshrub Valley. The Dew Collectors drop the glands; only some are full, so keep the Laden one. Gnarled Thistleshrubs and Rootshapers share the valley.
+  tip Ride south into Thistleshrub Valley. The Dew Collectors drop the glands; only some are full, so keep the Laden one. Gnarled Thistleshrubs and Rootshapers share the valley. The Thistleshrubs are 48-50, above you: pull one at a time.
   kill 5490 quest 3362                -- Gnarled Thistleshrub
   kill 5485 quest 3362                -- Thistleshrub Rootshaper
   collect 8428 x1 quest 2605          -- Laden Dew Gland

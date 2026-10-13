@@ -39,15 +39,21 @@ next forever/alliance/03-darkshore
 # is restored: taken at the last Sentinel Hill stop, turned in to Wiley the
 # Black on arrival in Lakeshire. 142 and 155 need 132-141 first (a trip back
 # from Redridge to Westfall and to Stormwind): skipped.
+#
+# Alba Fairmoon's chain runs on into Moonbrook Espionage (92747, crates in
+# Moonbrook, the next stop) and Explosive Consultation (92748, Sprite
+# Jumpsprocket at the Stormwind stop). A Dynamite Plan, which needs crafted
+# dynamite, is not taken. Skyborne turn in Journey to Sentinel Hill (98021).
 
 # ---------------------------------------------------------------- Sentinel Hill
 
 step Sentinel Hill
   zone Westfall
   tip Gryan Stoutmantle and Captain Danuvin stand at the top of the stone tower. Quartermaster Lewis is in the tower, Scout Galiaan and Alba Fairmoon on the south side of the hill, next to the inn and Thor the gryphon master.
-  accept 6181                                 -- Quartermaster Lewis
-  turnin 6181                                 -- Thor; skip the free flight it offers
+  accept 6181 only Human                      -- Quartermaster Lewis
+  turnin 6181 only Human                      -- Thor; skip the free flight it offers
   sethome "Sentinel Hill"
+  turnin 98021 only Skyborne                  -- Gryan Stoutmantle
   accept 12                                   -- Gryan Stoutmantle
   accept 102                                  -- Captain Danuvin
   accept 153                                  -- Scout Galiaan
@@ -137,6 +143,7 @@ step Sentinel Hill
   turnin 92742                                -- Alba Fairmoon
   turnin 92744
   turnin 92745
+  accept 92747                                -- Alba Fairmoon
   vendor nearest
 
 # ---------------------------------------------------------------- West and south
@@ -157,17 +164,21 @@ step Moonbrook and the Defias hills
   kill 121 quest 14
   kill 449 quest 14
   kill 122 quest 14
+  collect 254676 quest 92747.1                -- Suspicious Industrial Supplies, from the crates around Moonbrook
 
 step Back to Sentinel Hill
   hearth "Sentinel Hill"                      -- Hearthstone on cooldown? Follow the road north-east.
   turnin 14                                   -- Gryan Stoutmantle
   accept 65                                   -- For Wiley the Black in Lakeshire, Redridge
+  turnin 92747                                -- Alba Fairmoon
+  accept 92748                                -- For Sprite Jumpsprocket in Stormwind's Dwarven District
   vendor nearest
 
 # ---------------------------------------------------------------- Stormwind and the boat
 
 step Stormwind
   zone Stormwind City
-  tip Fly or ride to Stormwind. Trainers: Old Town (Warriors, Rogues), the Cathedral (Paladins, Priests), the Mage Quarter (Mages, Warlocks), the Park (Druids).
+  tip Fly or ride to Stormwind. Trainers: Old Town (Warriors, Rogues), the Cathedral (Paladins, Priests), the Mage Quarter (Mages, Warlocks), the Park (Druids). Sprite Jumpsprocket works in the Dwarven District.
   train class                                 -- Level 12, 14 and 16 spells
+  turnin 92748                                -- Sprite Jumpsprocket, Dwarven District
   goto 21.8,56.9 "Boat to Auberdine" live

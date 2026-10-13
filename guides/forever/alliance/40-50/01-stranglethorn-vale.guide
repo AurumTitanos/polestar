@@ -2,7 +2,8 @@
 # to ~43 (consensus visits 29 and 33-42). Flow: Theramore > one Dustwallow loop
 # (Sentry Point, Swamplight Manor, North Point Tower, the Darkmist spiders,
 # Mudcrush and the Shady Rest, back through Theramore, then the murlocs,
-# Jarl, Mudcrush and Balos Jacken) > hearth to Theramore > fly to Ratchet,
+# Jarl, Mudcrush and Balos Jacken) > hearth to Theramore > ride to Ratchet
+# (flight path),
 # boat to Booty Bay > Stranglethorn from Booty Bay (the Bloodsail, the
 # gorillas, Zanzil's village, the Crystalvein Mine and the Skullsplitters) >
 # fly to Stormwind > Swamp of Sorrows > hearth to Stormwind > Ironforge,
@@ -47,6 +48,10 @@
 # Duthorian Rall in Stormwind; Warlocks take Summon Felsteed (4488) from
 # Demisette Cloyce and hand it in at Ratchet at the end of the next guide.
 # Class training: Stormwind.
+# Riding: the Stormwind stop at about 42 is the first city after 40. Humans,
+# Night Elves and Skyborne are pointed to their riding trainer there, Dwarves
+# and Gnomes at the Ironforge stop; every goal is optional (100g).
+# The Bloodsail captains (608) are optional: 45-48 on decks of 42-45 pirates.
 guide forever/alliance/40-50/01-stranglethorn-vale
 title Stranglethorn Vale, Dustwallow Marsh & Swamp of Sorrows
 faction Alliance
@@ -161,8 +166,8 @@ step Theramore
 
 step Ratchet
   zone The Barrens
-  tip Take the boat to Booty Bay from Ratchet's dock.
-  fly "Ratchet"
+  tip Ride from Theramore west along the Dustwallow road into the Barrens and north to Ratchet on the coast. Learn the flight path from Bragok, then take the boat to Booty Bay from the dock.
+  getfp "Ratchet" npc 16227           -- Bragok
   goto 63.4,38.5 "Boat to Booty Bay"
 
 step Booty Bay
@@ -218,15 +223,15 @@ step Booty Bay
   turnin 576                          -- Dizzy One-Eye
 
 step The Bloodsail captains
-  tip The captains stand on the ships anchored off the Wild Shore, each with a crew: Stillwater and Keelhaul on the nearer decks, Fleet Master Firallon (level 48) on the flagship. Clear each deck first. Cortello's scroll lies on the wreck by the shore.
-  kill 2550 quest 608                 -- Captain Stillwater
-  kill 2548 quest 608                 -- Captain Keelhaul
-  kill 2546 quest 608                 -- Fleet Master Firallon
+  tip The captains stand on the ships anchored off the Wild Shore, each with a crew of 42-45 pirates: Stillwater (45) and Keelhaul (46) on the nearer decks, Fleet Master Firallon (48) on the flagship. At 42 this is a fight for a group or for the end of the guide; clear each deck first if you go. Cortello's scroll lies on the wreck by the shore.
+  kill 2550 quest 608 optional        -- Captain Stillwater
+  kill 2548 quest 608 optional        -- Captain Keelhaul
+  kill 2546 quest 608 optional        -- Fleet Master Firallon
   collect 4056                        -- Cortello's Riddle
   accept 624                          -- for the Swamp of Sorrows later
 
 step Booty Bay
-  turnin 608                          -- Fleet Master Seahorn
+  turnin 608 optional                 -- Fleet Master Seahorn
 
 # ---------------------------------------------------------------- North of the bay
 
@@ -306,6 +311,20 @@ step Stormwind
   accept 1448                         -- Brohann Caskbelly
   train class
 
+step Riding at 40
+  only Human,Skyborne
+  zone Elwynn Forest
+  tip At 40 with 100 gold you can learn to ride, and learning it gives you a mount. Randal Hunter teaches it at Eastvale Logging Camp in eastern Elwynn Forest, beside Katie Hunter's horses. Collectibles, Mounts · Level 40 lists every colour.
+  train 4732 optional                 -- Randal Hunter
+  vendor 384 optional                 -- Katie Hunter: other colours, 20g
+
+step Riding at 40
+  only NightElf
+  zone Teldrassil
+  tip At 40 with 100 gold you can learn to ride, and learning it gives you a mount. Jartsam teaches it in Darnassus, beside Lelanai's sabers. Any Alliance riding trainer teaches it, so Randal Hunter at Eastvale Logging Camp in Elwynn Forest, much nearer Stormwind, works as well. Collectibles, Mounts · Level 40 lists every colour.
+  train 4753 optional                 -- Jartsam
+  vendor 4730 optional                -- Lelanai: other colours, 20g
+
 step Paladin: The Tome of Nobility
   only Paladin
   accept 1661                         -- Duthorian Rall, in the Cathedral of Light
@@ -357,3 +376,12 @@ step Ironforge
   turnin 1467                         -- Roetten Stonehammer
   accept 707                          -- Prospector Stormpike: for Prospector Ironband in Loch Modan, keep it
   turnin 727                          -- Gerrig Bonegrip
+
+step Riding at 40
+  only Dwarf,Gnome
+  zone Dun Morogh
+  tip At 40 with 100 gold you can learn to ride, and learning it gives you a mount. Dwarves: Ultham Ironhorn at Amberstill Ranch, east of Kharanos on the road to Loch Modan, beside Veron Amberstill's rams. Gnomes: Binjy Featherwhistle at Steelgrill's Depot, just east of Kharanos, beside Milli Featherwhistle's mechanostriders. Collectibles, Mounts · Level 40 lists every colour.
+  train 4772 optional only Dwarf      -- Ultham Ironhorn
+  vendor 1261 optional only Dwarf     -- Veron Amberstill: other colours, 20g
+  train 7954 optional only Gnome      -- Binjy Featherwhistle
+  vendor 7955 optional only Gnome     -- Milli Featherwhistle: other colours, 20g

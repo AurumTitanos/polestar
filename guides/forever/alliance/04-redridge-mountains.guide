@@ -120,7 +120,7 @@ step Alther's Mill
   collect 3014 quest 20                       -- Battleworn Axe: any Blackrock orc
 
 step Galardell Valley
-  tip East past the mill and across the river. Shadowhide gnolls fill the valley; Lieutenant Fangore leads them at its north end. Stay out of Stonewatch Keep to the south: its orcs are elite.
+  tip East past the mill and across the river. Shadowhide gnolls fill the valley; Lieutenant Fangore (26, well above you) leads them at its north end: clear his escort first and fight him at full health. Stay out of Stonewatch Keep to the south: its orcs are elite.
   collect 1075 quest 91                       -- Shadowhide Pendant: any Shadowhide gnoll
   collect 3632 quest 180                      -- Lieutenant Fangore
 

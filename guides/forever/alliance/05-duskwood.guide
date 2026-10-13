@@ -12,12 +12,12 @@ next forever/alliance/06-ashenvale
 # Forever yet.
 #
 # Flow: Darkshire (every quest giver, the Bronze Tube from Herble) -> the
-# Tranquil Gardens Cemetery -> Darkshire -> west along the road: Skeletal
-# Horrors, Watcher Dodds, Raven Hill (Memory of Valor, Skeletal Fiends), Sven's
+# Tranquil Gardens Cemetery -> Darkshire -> west along the road: Watcher
+# Dodds, Raven Hill (Memory of Valor, Skeletal Horrors and Fiends), Sven's
 # camp, the Raven Hill Cemetery and Abercrombie (wolves, spiders, ghouls) ->
 # back east: Watcher Dodds, the Yorgen Farmstead -> hearth to Darkshire, Blind
 # Mary -> west: Abercrombie, Sven -> Darkshire -> the
-# Skeletal Horrors (Rot Blossoms) -> Darkshire -> west: Abercrombie, the
+# Skeletal Horrors south-east of town (Rot Blossoms) -> Darkshire -> west: Abercrombie, the
 # ghouls, Jitters, Sven (the end: ride north through Elwynn to Stormwind
 # Harbor for the Auberdine boat, where the next guide starts).
 #
@@ -81,12 +81,6 @@ step Darkshire
 
 # ---------------------------------------------------------------- West
 
-step Skeletal Horrors
-  tip Take the road west out of Darkshire. Skeletal Horrors wander the woods on both sides of it.
-  goto 44.8,51.5 "Skeletal Horrors"
-  kill 202 quest 57                       -- Skeletal Horror
-  collect 2378 quest 101                  -- Skeleton Finger
-
 step Watcher Dodds
   tip Watcher Dodds stands south of the road, at the Yorgen Farmstead.
   accept 245
@@ -96,7 +90,8 @@ step Raven Hill
   collect 281046 quest 96139              -- Raven Hill Tome, from the Memory of Valor
 
 step Raven Hill Cemetery, south
-  tip The cemetery lies north of the village. Skeletal Fiends walk its southern half. Mor'Ladim, an elite, wanders the graves: keep away from him.
+  tip The cemetery lies north of the village. Skeletal Horrors and Skeletal Fiends walk its southern half. Mor'Ladim, an elite, wanders the graves: keep away from him.
+  kill 202 quest 57                       -- Skeletal Horror
   kill 531 quest 57                       -- Skeletal Fiend
   collect 2378 quest 101                  -- Skeleton Finger
 
@@ -172,8 +167,7 @@ step Back to Darkshire
   accept 156
 
 step Rot Blossoms
-  tip Skeletal Horrors in the woods west of Darkshire drop the Rot Blossoms.
-  goto 44.8,51.5 "Skeletal Horrors"
+  tip Skeletal Horrors walk the hillside between Darkshire and the Tranquil Gardens Cemetery, south-east of town; they drop the Rot Blossoms.
   collect 1598 quest 156
 
 step Tavernkeep Smitts

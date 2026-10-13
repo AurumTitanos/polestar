@@ -44,6 +44,10 @@ next forever/alliance/07-thousand-needles
 #   Darkshire at once (next guide).
 # - Look To The Stars (174): the Bronze Tube was bought in Darkshire (previous
 #   guide), so nothing to loot in Stonetalon.
+# - Menethil Statuette: Return the Statuette (98189) and both A Friend of the
+#   Family steps (98190, 98191) follow Karl Boran's chain through Menethil
+#   Keep, Stormwind Keep and the Cathedral; The Shamed Lieutenant (98219) is
+#   carried to Southshore.
 #
 # Class quests: none on this route at these hubs. Class training in
 # Ironforge and Stormwind.
@@ -61,6 +65,10 @@ next forever/alliance/07-thousand-needles
 # Narassin, after 1167), which the route never does. The Absent Minded
 # Prospector (943) needs 942 from Uldaman's Greywhisker, and its Stone of Relu
 # is a 1.5% raptor drop.
+# Dropped: The Zoram Strand (1008): 20 heads from naga 6 levels below you,
+# at 80% XP. Remember That I Love You (95161): the Matron offers it only to
+# those who bring the Blood-Stained Letter out of the Ruins of Lordaeron
+# dungeon.
 
 # ---------------------------------------------------------------- Darkshore
 
@@ -103,7 +111,6 @@ step Astranaar
   turnin 990                              -- Raene Wolfrunner, in the inn
   accept 991
   accept 1054
-  accept 1008                             -- Shindrell Swiftfire
   accept 1070                             -- Sentinel Thenysil
   turnin 1020                             -- Pelturas Whitemoon
   accept 1033
@@ -128,7 +135,6 @@ step The Zoram Strand
   tip Follow the coast north to the Zoram Strand. Talen camps on the beach; Wrathtail nagas fill the shore.
   accept 1007                             -- Talen
   collect 5424 quest 1007 @14.2,20.6      -- Ancient Statuette, in the ruins on the shore
-  collect 5490 quest 1008
 
 step Talen
   turnin 1007
@@ -149,7 +155,6 @@ step Astranaar
   turnin 1023                             -- Raene Wolfrunner
   accept 1024
   accept 1025
-  turnin 1008                             -- Shindrell Swiftfire
   vendor nearest
 
 # ---------------------------------------------------------------- East
@@ -218,7 +223,7 @@ step Venture Co. loggers
   collect 5734 quest 1093                 -- Super Reaper 6000 Blueprints
 
 step Piznik
-  tip Piznik mines in the Windshear mine at the east end of the crag. Talk to him and fend off the Venture Co. raiders while he mines.
+  tip Piznik mines in the Windshear Mine at the east end of the crag. Talk to him and fend off the Venture Co. raiders while he mines.
   accept 1090
   complete 1090
   turnin 1090
@@ -235,7 +240,7 @@ step Webwinder Path
 
 step To Menethil Harbor
   zone Darkshore
-  hearth "Astranaar"
+  hearth "Astranaar"                      -- Hearthstone on cooldown? Ride back north through the Talondeep Path.
   fly "Auberdine"
   goto 32.4,43.8 "Boat to Menethil Harbor"
 
@@ -281,13 +286,18 @@ step The Bluegill hovels
 
 step Karl Boran
   turnin 286
+  accept 98189 npc 1242                   -- Karl Boran: for Captain Stoutfist in the keep
   vendor nearest
+
+step Captain Stoutfist
+  tip Captain Stoutfist stands in Menethil Keep, a short walk from Karl Boran.
+  turnin 98189 npc 2104                   -- Captain Stoutfist
+  accept 98190 npc 2104                   -- For Bolvar Fordragon in Stormwind Keep: keep it
 
 # ---------------------------------------------------------------- East Wetlands
 
 step Young crocolisks
-  tip Follow the road east. Young Wetlands Crocolisks lurk in the pools along the road below the excavation site.
-  goto 41.3,47.8 "Crocolisk pools"
+  tip Follow the road east. Young Wetlands Crocolisks lurk in the pools north of the excavation site.
   collect 3397 quest 484                  -- Young Crocolisk Skin
 
 step Whelgar's Excavation Site
@@ -314,8 +324,7 @@ step Ormer Ironbraid
   turnin 295
 
 step Black Oozes
-  tip Black Oozes creep through the marsh north-east of the excavation site, toward the Green Belt. Any ooze may hold Sida's bag.
-  goto 50.0,37.9 "Black Oozes"
+  tip Black Oozes creep through the marsh north of the Green Belt road, west of Einar's camp. Any ooze may hold Sida's bag.
   collect 3349 quest 470                  -- Sida's Bag
 
 step The Green Belt
@@ -384,13 +393,19 @@ step Cathedral of Light
   tip Take the Deeprun Tram from Tinker Town to Stormwind's Dwarven District, then walk to the Cathedral Square.
   accept 1274                             -- Thomas, in the Cathedral of Light
   accept 343                              -- Brother Kristoff, in the Cathedral Square
-  accept 95161                            -- Orphan Matron Nightingale, at the orphanage
 
 step Stormwind Keep
   turnin 1274                             -- Bishop DeLavey
   accept 1241
   turnin 343                              -- Milton Sheaf, in the Royal Library
+  turnin 98190 npc 1748                   -- Highlord Bolvar Fordragon
+  accept 98191 npc 1748
   turnin 337 optional                     -- Only if you looted An Old History Book in Duskwood
+
+step Lord Grayson Shadowbreaker
+  tip Back to the Cathedral of Light: Lord Grayson Shadowbreaker stands inside.
+  turnin 98191 npc 928                    -- Lord Grayson Shadowbreaker
+  accept 98219 npc 928                    -- For Lieutenant Farren Orinelle in Southshore: keep it
 
 step Mage Quarter
   tip The Slaughtered Lamb is in the Mage Quarter.
