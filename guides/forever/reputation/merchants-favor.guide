@@ -2,55 +2,62 @@ guide forever/reputation/merchants-favor
 title Merchant's Favor Reputation
 category Reputation
 levels 10-60
-zone Stormwind City
+zone Redridge Mountains
 # Azeroth Commerce Authority (2586, Alliance) and Durotar Supply and Logistics
-# (2587, Horde): Forever's new tradeskill factions ("Merchant's Favor"). Both
-# exist in the Blizzard Faction table (factions.json), but our Era-baseline
-# quests.json, npcs.json and items.json hold none of their NPCs, quests or
-# turn-in items (the factions came from Season of Discovery, which the data
-# does not cover). So this guide only tracks the standing (rep 2586/2587) with
-# honest notes; live Polestar_Recorder sessions will complete it with the
-# quartermasters, their turn-ins and coordinates. Nothing here is invented.
+# (2587, Horde): Forever's tradeskill factions, paid in Merchant's Favor.
+# Reputation comes from crate hand-ins at each faction's camp: mobs from level
+# 10 drop Waylaid Crates (Apprentice, Journeyman, Expert, Artisan); filled with
+# the goods on the label, a crate becomes a Sealed Crate for the faction's trade
+# representative ("A Sealed Crate", quests 91899/91900/91904/91905). Hand-in
+# NPCs: Marcy Baker (256390) at Three Corners, Redridge Mountains (live frame
+# 9.75,71.02), and Dokimi (256386) just outside the Crossroads (Era 50.15,29.35).
+# Same camps as collectibles/mounts/*/pack-kodo and collectibles/pets/minimule.
+# Sources: quests.json, npcs.json; Forever client 1.60.1.70338 ItemSparse
+# (Waylaid Crate 248702-248713, Sealed Crate 248765-248779);
+# https://www.wowhead.com/forever/currency=3402/merchants-favor ;
+# https://theforeverera.com/en/merchants-favor/ . How much reputation each
+# crate gives is not documented, so the steps track the standing only.
 
 step Azeroth Commerce Authority to Friendly
   only Alliance
-  tip The Azeroth Commerce Authority is the Alliance's tradeskill faction in Forever. In Season of Discovery its reputation came from turning in crafted and gathered goods to its supply officers in the capitals; Forever's version is not in our data yet; if it works the same way, a crafting or gathering profession is the way in. Forever's Legacy Diplomat perk increases reputation gains.
-  note Where the Azeroth Commerce Authority's representatives stand in Forever is not in our data yet; a live recording will add them here.
+  zone Redridge Mountains
+  tip The Azeroth Commerce Authority is the Alliance's tradeskill faction in Forever. Its camp is at Three Corners in western Redridge Mountains. From level 10 mobs drop Waylaid Crates: fill each with the goods its label asks for and hand the Sealed Crate to Marcy Baker at the camp for reputation and Merchant's Favor. Forever's Legacy Diplomat perk increases reputation gains.
+  goto 9.8,71.0 "Marcy Baker" live
   rep 2586 Friendly
 
 step Azeroth Commerce Authority to Honored
   only Alliance
-  tip Keep turning in goods to the Azeroth Commerce Authority.
+  tip Keep filling Waylaid Crates for Marcy Baker.
   rep 2586 Honored
 
 step Azeroth Commerce Authority to Revered
   only Alliance
-  tip Keep turning in goods to the Azeroth Commerce Authority.
+  tip Keep filling Waylaid Crates for Marcy Baker.
   rep 2586 Revered
 
 step Azeroth Commerce Authority to Exalted
   only Alliance
-  tip Keep turning in goods to the Azeroth Commerce Authority until Exalted.
+  tip Keep filling Waylaid Crates for Marcy Baker until Exalted.
   rep 2586 Exalted
 
 step Durotar Supply and Logistics to Friendly
   only Horde
-  zone Orgrimmar
-  tip Durotar Supply and Logistics is the Horde's tradeskill faction in Forever. In Season of Discovery its reputation came from turning in crafted and gathered goods to its supply officers in the capitals; Forever's version is not in our data yet; if it works the same way, a crafting or gathering profession is the way in. Forever's Legacy Diplomat perk increases reputation gains.
-  note Where Durotar Supply and Logistics' representatives stand in Forever is not in our data yet; a live recording will add them here.
+  zone The Barrens
+  tip Durotar Supply and Logistics is the Horde's tradeskill faction in Forever. Its camp is just outside the Crossroads in the Barrens. From level 10 mobs drop Waylaid Crates: fill each with the goods its label asks for and hand the Sealed Crate to Dokimi at the camp for reputation and Merchant's Favor. Forever's Legacy Diplomat perk increases reputation gains.
+  goto 50.2,29.4 "Dokimi"
   rep 2587 Friendly
 
 step Durotar Supply and Logistics to Honored
   only Horde
-  tip Keep turning in goods to Durotar Supply and Logistics.
+  tip Keep filling Waylaid Crates for Dokimi.
   rep 2587 Honored
 
 step Durotar Supply and Logistics to Revered
   only Horde
-  tip Keep turning in goods to Durotar Supply and Logistics.
+  tip Keep filling Waylaid Crates for Dokimi.
   rep 2587 Revered
 
 step Durotar Supply and Logistics to Exalted
   only Horde
-  tip Keep turning in goods to Durotar Supply and Logistics until Exalted.
+  tip Keep filling Waylaid Crates for Dokimi until Exalted.
   rep 2587 Exalted

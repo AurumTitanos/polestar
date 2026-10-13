@@ -33,7 +33,7 @@ step Argent Dawn Commission (Horde)
   turnin 5405
 
 step Minion's Scourgestones to Friendly
-  tip Ghouls and skeletons all over Western Plaguelands drop Minion's Scourgestones (half the time, per the data); this cluster is dense. Hand them in 20 at a time to any Argent Officer (Pureheart at Chillwind Camp, Garush at The Bulwark, Duke Nicholas Zverenhoff at Light's Hope Chapel). Each turn-in also pays an Argent Dawn Valor Token for the Argent quartermasters.
+  tip Ghouls and skeletons all over Western Plaguelands drop Minion's Scourgestones about half the time; this cluster is dense. Hand them in 20 at a time to any Argent Officer (Pureheart at Chillwind Camp, Garush at The Bulwark, Duke Nicholas Zverenhoff at Light's Hope Chapel). Each turn-in also pays an Argent Dawn Valor Token for the Argent quartermasters.
   collect 12840 x20 optional @41.8,70.4
   talk 10840 only Alliance optional -- Argent Officer Pureheart, Chillwind Camp
   talk 10839 only Horde optional -- Argent Officer Garush, The Bulwark
@@ -47,7 +47,7 @@ step Invader's Scourgestones to Honored
   rep 529 Honored
 
 step Corruptor's Scourgestones and dungeons to Revered
-  tip From Honored on, Corruptor's Scourgestones (one per turn-in) and Scourge kills in Stratholme and Scholomance carry the reputation. The data drops Corruptor's stones from Scourge bosses there (Darkmaster Gandling, Marduk Blackpool, Vectus) and from Araj the Summoner and Putridius in Western Plaguelands. Many dungeon runs pay off faster than any open-world farm.
+  tip From Honored on, Corruptor's Scourgestones (one per turn-in) and Scourge kills in Stratholme and Scholomance carry the reputation. Corruptor's stones drop from the Scourge bosses there (Darkmaster Gandling, Marduk Blackpool, Vectus) and from Araj the Summoner and Putridius in Western Plaguelands. Many dungeon runs pay off faster than any open-world farm.
   note Run Stratholme (both wings) and Scholomance, killing every Scourge you pass.
   talk 11039 optional -- Duke Nicholas Zverenhoff, Light's Hope Chapel
   rep 529 Revered

@@ -16,10 +16,14 @@ zone Felwood
 # completed, so those steps track the Timbermaw Hold standing (rep 576). Five
 # feathers or beads per turn-in is game knowledge, not data. The data lists
 # Grazle at two spots in Felwood; he is pinned to the southern one (by the
-# Emerald Sanctuary, as Timbermaw Ally's text says).
+# Emerald Sanctuary, as Timbermaw Ally's text says). The starting standing is
+# the Forever client's (Faction 576 ReputationBase -3500: Hostile, 2500/3000).
+# At Hostile the furbolgs in the tunnels attack; the Felwood quests and kills
+# usually bring a player to Unfriendly, when they let you pass
+# (https://www.icy-veins.com/wow-classic/timbermaw-hold-reputation-farming-guide).
 
 step Grazle
-  tip Timbermaw Hold starts out Unfriendly. Every Deadwood and Winterfall furbolg you kill raises it, so the quests below pay twice. Forever's Legacy Diplomat perk increases reputation gains.
+  tip Timbermaw Hold starts out Hostile, and its furbolgs in the tunnels attack until you reach Unfriendly. Every Deadwood and Winterfall furbolg you kill raises it, so the quests below pay twice. Forever's Legacy Diplomat perk increases reputation gains.
   accept 8460 @50.9,85
 
 step Deadwood Village
@@ -49,13 +53,13 @@ step Back to Nafien
 
 step Salfa
   zone Winterspring
-  tip Go through Timbermaw Hold to its Winterspring exit; Salfa stands just outside.
+  tip Go through Timbermaw Hold to its Winterspring exit; Salfa stands just outside. The quests and kills so far usually reach Unfriendly, and then the Timbermaw let you pass. If they still show red, kill more Deadwood by the tunnel first.
   turnin 8465 @27.7,34.5
   accept 8464 @27.7,34.5
 
 step Winterfall Village
   tip Winterfall Village sits on the eastern side of Winterspring. Keep every Winterfall Spirit Beads you loot: Salfa takes them.
-  kill 7439 quest 8464.1 @67.1,37.6
+  kill 7439 quest 8464.1
   kill 7440 quest 8464.2 @67.3,35.3
   kill 7438 quest 8464.3 @67.9,37.9
 
@@ -63,16 +67,16 @@ step Back to Salfa
   turnin 8464 @27.7,34.5
 
 step Feathers and beads to Friendly
-  tip Feathers for Grazle and Feathers for Nafien (Deadwood Headdress Feathers) and Beads for Salfa (Winterfall Spirit Beads) repeat as often as you like; every Deadwood or Winterfall kill counts as well. Winterfall Village is the densest bead spot in the data.
+  tip Feathers for Grazle and Feathers for Nafien (Deadwood Headdress Feathers) and Beads for Salfa (Winterfall Spirit Beads) repeat as often as you like; every Deadwood or Winterfall kill counts as well. Winterfall Village is the densest bead spot.
   collect 21383 x5 optional @67.1,37.6
-  talk 11556 optional -- Salfa: Beads for Salfa (8469)
+  talk 11556 optional -- Salfa: Beads for Salfa
   rep 576 Friendly
 
 step Feathers to Honored
   zone Felwood
-  tip The northern Deadwood camps by the tunnel are the densest feather spot in the data (35% drop chance there). Hand feathers to Nafien at the tunnel, or to Grazle in the south.
+  tip The northern Deadwood camps by the tunnel are the densest feather spot (35% drop chance there). Hand feathers to Nafien at the tunnel, or to Grazle in the south.
   collect 21377 x5 optional @62.2,9
-  talk 15395 optional -- Nafien: Feathers for Nafien (8467)
+  talk 15395 optional -- Nafien: Feathers for Nafien
   rep 576 Honored
 
 step Timbermaw Hold to Revered

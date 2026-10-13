@@ -30399,7 +30399,7 @@ do
 					only = { factions = { "Alliance" } },
 					goals = {
 						{ t = "talk", npc = 14983, npcName = "Field Marshal Oslight", map = 1417, x = 45.82, y = 45.46, f = "e", optional = true, note = "Field Marshal Oslight, Refuge Pointe" },
-						{ t = "note", text = "Field Marshal Oslight's The Battle for Arathi Basin! (assault every base) and Control Four Bases / Control Five Bases are one-time quests in the data; Sergeant Maclear beside him takes Arathi Resource Crates." },
+						{ t = "note", text = "Field Marshal Oslight's The Battle for Arathi Basin! (assault every base) and Control Four Bases / Control Five Bases are one-time quests; Sergeant Maclear beside him takes Arathi Resource Crates." },
 						{ t = "rep", faction = 509, factionName = "The League of Arathor", standing = 5 },
 					},
 				},
@@ -30434,7 +30434,7 @@ do
 					only = { factions = { "Horde" } },
 					goals = {
 						{ t = "talk", npc = 15021, npcName = "Deathmaster Dwire", map = 1417, x = 73.25, y = 29.73, f = "e", optional = true, note = "Deathmaster Dwire, Hammerfall" },
-						{ t = "note", text = "Deathmaster Dwire's The Battle for Arathi Basin! (assault every base) and Take Four Bases / Take Five Bases are one-time quests in the data; Deathstalker Mortis beside him takes Arathi Resource Crates." },
+						{ t = "note", text = "Deathmaster Dwire's The Battle for Arathi Basin! (assault every base) and Take Four Bases / Take Five Bases are one-time quests; Deathstalker Mortis beside him takes Arathi Resource Crates." },
 						{ t = "rep", faction = 510, factionName = "The Defilers", standing = 5 },
 					},
 				},
@@ -30504,7 +30504,7 @@ do
 				},
 				{
 					title = "Minion's Scourgestones to Friendly",
-					note = "Ghouls and skeletons all over Western Plaguelands drop Minion's Scourgestones (half the time, per the data); this cluster is dense. Hand them in 20 at a time to any Argent Officer (Pureheart at Chillwind Camp, Garush at The Bulwark, Duke Nicholas Zverenhoff at Light's Hope Chapel). Each turn-in also pays an Argent Dawn Valor Token for the Argent quartermasters.",
+					note = "Ghouls and skeletons all over Western Plaguelands drop Minion's Scourgestones about half the time; this cluster is dense. Hand them in 20 at a time to any Argent Officer (Pureheart at Chillwind Camp, Garush at The Bulwark, Duke Nicholas Zverenhoff at Light's Hope Chapel). Each turn-in also pays an Argent Dawn Valor Token for the Argent quartermasters.",
 					goals = {
 						{ t = "collect", item = 12840, itemName = "Minion's Scourgestone", count = 20, map = 1422, x = 41.8, y = 70.4, f = "e", spots = { { x = 41.8, y = 70.4, r = 136, n = 23 }, { x = 43.9, y = 72.3, r = 43, n = 7, alt = true }, { x = 39.3, y = 70.2, r = 61, n = 9, alt = true }, { x = 42.4, y = 74.2, r = 59, n = 9, alt = true }, { x = 42, y = 66.1, r = 59, n = 9, alt = true }, { x = 39.5, y = 67.4, r = 69, n = 10, alt = true }, { x = 44.9, y = 67.7, r = 62, n = 10, alt = true }, { x = 45.4, y = 69.8, r = 55, n = 13, alt = true }, { x = 45.6, y = 74.1, r = 62, n = 9, alt = true }, { x = 43.5, y = 63.3, r = 81, n = 11, alt = true }, { x = 45.8, y = 65.6, r = 50, n = 5, alt = true }, { x = 47.1, y = 71.6, r = 43, n = 7, alt = true }, { x = 48.2, y = 68.9, r = 62, n = 10, alt = true }, { x = 47.5, y = 64.5, r = 41, n = 5, alt = true }, { x = 46.1, y = 62.2, r = 59, n = 10, alt = true }, { x = 49.4, y = 65.7, r = 40, n = 6, alt = true }, { x = 50, y = 68, r = 42, n = 4, alt = true }, { x = 48.7, y = 63.3, r = 46, n = 6, alt = true }, { x = 37.8, y = 58.1, r = 54, n = 12, alt = true }, { x = 49.9, y = 77, r = 52, n = 11, alt = true }, { x = 48.4, y = 80.2, r = 49, n = 7, alt = true }, { x = 50.7, y = 75.7, r = 40, n = 5, alt = true }, { x = 47.6, y = 83, r = 40, n = 3, alt = true }, { x = 36.6, y = 56.4, r = 65, n = 23, alt = true }, { x = 50.2, y = 80.5, r = 40, n = 6, alt = true }, { x = 38.3, y = 55, r = 66, n = 27, alt = true }, { x = 49.3, y = 82.3, r = 40, n = 2, alt = true }, { x = 45.6, y = 54.8, r = 48, n = 7, alt = true }, { x = 52.6, y = 65.2, r = 52, n = 10, alt = true }, { x = 53.3, y = 67.5, r = 40, n = 10, alt = true }, { x = 53.4, y = 63.4, r = 40, n = 3, alt = true }, { x = 54.4, y = 65.7, r = 46, n = 6, alt = true }, { x = 45.7, y = 51.8, r = 77, n = 20, alt = true }, { x = 47.5, y = 52.7, r = 42, n = 7, alt = true }, { x = 54.2, y = 80.4, r = 40, n = 15, alt = true }, { x = 47.3, y = 50.3, r = 57, n = 28, alt = true }, { x = 62.1, y = 59.1, r = 68, n = 14, alt = true }, { x = 63.9, y = 56.8, r = 50, n = 15, alt = true }, { x = 64.6, y = 59.4, r = 69, n = 10, alt = true }, { x = 73.3, y = 54.8, r = 40, n = 1, alt = true }, { x = 75.6, y = 44.6, r = 40, n = 1, alt = true }, { x = 78.9, y = 56.5, r = 40, n = 1, alt = true }, { x = 83.3, y = 66.9, r = 40, n = 1, alt = true }, { x = 68.2, y = 19.7, r = 46, n = 4, alt = true }, { x = 69.3, y = 18, r = 40, n = 2, alt = true } }, optional = true },
 						{ t = "talk", npc = 10840, npcName = "Argent Officer Pureheart", map = 1422, x = 42.97, y = 83.55, f = "e", optional = true, only = { factions = { "Alliance" } }, note = "Argent Officer Pureheart, Chillwind Camp" },
@@ -30523,7 +30523,7 @@ do
 				},
 				{
 					title = "Corruptor's Scourgestones and dungeons to Revered",
-					note = "From Honored on, Corruptor's Scourgestones (one per turn-in) and Scourge kills in Stratholme and Scholomance carry the reputation. The data drops Corruptor's stones from Scourge bosses there (Darkmaster Gandling, Marduk Blackpool, Vectus) and from Araj the Summoner and Putridius in Western Plaguelands. Many dungeon runs pay off faster than any open-world farm.",
+					note = "From Honored on, Corruptor's Scourgestones (one per turn-in) and Scourge kills in Stratholme and Scholomance carry the reputation. Corruptor's stones drop from the Scourge bosses there (Darkmaster Gandling, Marduk Blackpool, Vectus) and from Araj the Summoner and Putridius in Western Plaguelands. Many dungeon runs pay off faster than any open-world farm.",
 					goals = {
 						{ t = "note", text = "Run Stratholme (both wings) and Scholomance, killing every Scourge you pass." },
 						{ t = "talk", npc = 11039, npcName = "Duke Nicholas Zverenhoff", map = 1423, x = 71.63, y = 50.09, optional = true, note = "Duke Nicholas Zverenhoff, Light's Hope Chapel" },
@@ -30551,7 +30551,7 @@ do
 			id = "forever/reputation/cenarion-circle",
 			pack = "guides",
 			title = "Cenarion Circle Reputation",
-			minLevel = 55,
+			minLevel = 57,
 			maxLevel = 60,
 			category = "Reputation",
 			zone = 1451,
@@ -30564,14 +30564,14 @@ do
 					note = "Cenarion Hold is the walled town in north-central Silithus. Bor and Huum Wildmane stand together inside. The Cenarion Circle starts out Neutral. Forever's Legacy Diplomat perk increases reputation gains.",
 					goals = {
 						{ t = "accept", quest = 8318, title = "Secret Communication", npc = 15306, npcName = "Bor Wildmane", minLevel = 57, qlvl = 60, map = 1451, x = 48.57, y = 37.78, f = "e" },
-						{ t = "accept", quest = 8320, title = "Twilight Geolords", npc = 15270, npcName = "Huum Wildmane", minLevel = 60, qlvl = 60, map = 1451, x = 48.62, y = 37.87, f = "e" },
+						{ t = "accept", quest = 8320, title = "Twilight Geolords", npc = 15270, npcName = "Huum Wildmane", minLevel = 60, qlvl = 60, map = 1451, x = 48.62, y = 37.87, f = "e", optional = true, note = "Twilight Geolords needs level 60" },
 					},
 				},
 				{
 					title = "Twilight Base Camp",
-					note = "Twilight's Hammer cultists hold the camps in western Silithus. Twilight Geolords and Stonecallers mix here; any cultist can drop an Encrypted Twilight Text. Every cultist kill also counts toward the Cenarion Circle.",
+					note = "Twilight's Hammer cultists hold the camps in western Silithus. Twilight Geolords and Stonecallers mix here; any cultist can drop an Encrypted Twilight Text. Every cultist kill also counts toward the Cenarion Circle. The Geolords count for Twilight Geolords only if you are 60 and took it.",
 					goals = {
-						{ t = "kill", quest = 8320, title = "Twilight Geolords", target = "Twilight Geolord", npc = 11881, count = 10, oi = 1, map = 1451, x = 26.2, y = 33.9, f = "e", spots = { { x = 26.2, y = 33.9, r = 119, n = 11 }, { x = 24.8, y = 36.7, r = 42, n = 5, alt = true }, { x = 37.8, y = 43.7, r = 65, n = 4, alt = true }, { x = 38.7, y = 41.6, r = 40, n = 3, alt = true }, { x = 40.4, y = 45.7, r = 54, n = 8, alt = true }, { x = 18.7, y = 80.2, r = 40, n = 1, alt = true }, { x = 21.1, y = 83.5, r = 40, n = 2, alt = true }, { x = 17.9, y = 84.1, r = 48, n = 5, alt = true }, { x = 20.7, y = 86.8, r = 45, n = 5, alt = true } } },
+						{ t = "kill", quest = 8320, title = "Twilight Geolords", target = "Twilight Geolord", npc = 11881, count = 10, oi = 1, map = 1451, x = 26.2, y = 33.9, f = "e", spots = { { x = 26.2, y = 33.9, r = 119, n = 11 }, { x = 24.8, y = 36.7, r = 42, n = 5, alt = true }, { x = 37.8, y = 43.7, r = 65, n = 4, alt = true }, { x = 38.7, y = 41.6, r = 40, n = 3, alt = true }, { x = 40.4, y = 45.7, r = 54, n = 8, alt = true }, { x = 18.7, y = 80.2, r = 40, n = 1, alt = true }, { x = 21.1, y = 83.5, r = 40, n = 2, alt = true }, { x = 17.9, y = 84.1, r = 48, n = 5, alt = true }, { x = 20.7, y = 86.8, r = 45, n = 5, alt = true } }, optional = true },
 						{ t = "collect", quest = 8318, title = "Secret Communication", item = 20404, itemName = "Encrypted Twilight Text", count = 10, oi = 1, map = 1451, x = 26.3, y = 32.9, f = "e" },
 					},
 				},
@@ -30579,7 +30579,7 @@ do
 					title = "Back to Cenarion Hold",
 					goals = {
 						{ t = "turnin", quest = 8318, title = "Secret Communication", npc = 15306, npcName = "Bor Wildmane", map = 1451, x = 48.57, y = 37.78, f = "e" },
-						{ t = "turnin", quest = 8320, title = "Twilight Geolords", npc = 15270, npcName = "Huum Wildmane", map = 1451, x = 48.62, y = 37.87, f = "e" },
+						{ t = "turnin", quest = 8320, title = "Twilight Geolords", npc = 15270, npcName = "Huum Wildmane", map = 1451, x = 48.62, y = 37.87, f = "e", optional = true },
 					},
 				},
 				{
@@ -30587,7 +30587,7 @@ do
 					note = "Encrypted Twilight Texts repeats: Bor Wildmane takes more texts again and again. The cultist camps are the place to farm them.",
 					goals = {
 						{ t = "collect", item = 20404, itemName = "Encrypted Twilight Text", count = 10, map = 1451, x = 26.3, y = 32.9, f = "e", optional = true, from = "Twilight Prophet", fromKind = "npc", fromRank = 1 },
-						{ t = "talk", npc = 15306, npcName = "Bor Wildmane", map = 1451, x = 48.57, y = 37.78, f = "e", optional = true, note = "Bor Wildmane: Encrypted Twilight Texts (8319)" },
+						{ t = "talk", npc = 15306, npcName = "Bor Wildmane", map = 1451, x = 48.57, y = 37.78, f = "e", optional = true, note = "Bor Wildmane: Encrypted Twilight Texts" },
 						{ t = "rep", faction = 609, factionName = "Cenarion Circle", standing = 5 },
 					},
 				},
@@ -30604,7 +30604,7 @@ do
 					title = "Cenarion Circle to Revered",
 					note = "From here on, the Ruins of Ahn'Qiraj raid and the Abyssal Council turn-ins (crests, signets, scepters) carry most of the reputation.",
 					goals = {
-						{ t = "note", text = "Abyssal Crests (8362), Abyssal Signets (8363) and Abyssal Scepters (8364) are repeatable at Bor Wildmane once their opening quests are done." },
+						{ t = "note", text = "Abyssal Crests, Abyssal Signets and Abyssal Scepters are repeatable at Bor Wildmane once their opening quests are done." },
 						{ t = "rep", faction = 609, factionName = "Cenarion Circle", standing = 7 },
 					},
 				},
@@ -30708,7 +30708,7 @@ do
 					note = "Additional Runecloth takes 20 Runecloth per turn-in and repeats as often as you like. Bring Runecloth in multiples of 20 and hand them all in at once, one turn-in after another. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true, from = "Stormwind Royal Guard", fromKind = "npc", fromRank = 1, fromFaction = "A" },
-						{ t = "talk", npc = 14727, npcName = "Vehena", map = 1454, x = 37.7, y = 87.9, f = "e", optional = true, note = "Additional Runecloth (7837)" },
+						{ t = "talk", npc = 14727, npcName = "Vehena", map = 1454, x = 37.7, y = 87.9, f = "e", optional = true, note = "Additional Runecloth" },
 						{ t = "rep", faction = 530, factionName = "Darkspear Trolls", standing = 6 },
 					},
 				},
@@ -30823,7 +30823,7 @@ do
 					note = "Additional Runecloth takes 20 Runecloth per turn-in and repeats as often as you like. Bring Runecloth in multiples of 20 and hand them all in at once, one turn-in after another. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true, from = "Stormwind Royal Guard", fromKind = "npc", fromRank = 1, fromFaction = "A" },
-						{ t = "talk", npc = 14725, npcName = "Raedon Duskstriker", map = 1457, x = 64.02, y = 23, f = "e", optional = true, note = "Additional Runecloth (7801)" },
+						{ t = "talk", npc = 14725, npcName = "Raedon Duskstriker", map = 1457, x = 64.02, y = 23, f = "e", optional = true, note = "Additional Runecloth" },
 						{ t = "rep", faction = 69, factionName = "Darnassus", standing = 6 },
 					},
 				},
@@ -30938,7 +30938,7 @@ do
 					note = "Additional Runecloth takes 20 Runecloth per turn-in and repeats as often as you like. Bring Runecloth in multiples of 20 and hand them all in at once, one turn-in after another. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true, from = "Stormwind Royal Guard", fromKind = "npc", fromRank = 1, fromFaction = "A" },
-						{ t = "talk", npc = 14724, npcName = "Bubulo Acerbus", map = 1455, x = 74.09, y = 48.22, f = "e", optional = true, note = "Additional Runecloth (7812)" },
+						{ t = "talk", npc = 14724, npcName = "Bubulo Acerbus", map = 1455, x = 74.09, y = 48.22, f = "e", optional = true, note = "Additional Runecloth" },
 						{ t = "rep", faction = 54, factionName = "Gnomeregan Exiles", standing = 6 },
 					},
 				},
@@ -30973,7 +30973,7 @@ do
 			id = "forever/reputation/hydraxian-waterlords",
 			pack = "guides",
 			title = "Hydraxian Waterlords Reputation",
-			minLevel = 55,
+			minLevel = 60,
 			maxLevel = 60,
 			category = "Reputation",
 			zone = 1447,
@@ -30991,7 +30991,7 @@ do
 				},
 				{
 					title = "Dust Stormers and Desert Rumblers",
-					note = "Both elementals roam northwestern Silithus; the Rumblers cluster a little further north.",
+					note = "Both elementals roam north-western Silithus; the Rumblers cluster a little further north.",
 					goals = {
 						{ t = "kill", quest = 6805, title = "Stormers and Rumblers", target = "Dust Stormer", npc = 11744, count = 15, oi = 1, map = 1451, x = 19.6, y = 26.4, f = "e", spots = { { x = 19.6, y = 26.4, r = 129, n = 21 }, { x = 21.6, y = 29.1, r = 45, n = 7, alt = true }, { x = 18.9, y = 21.7, r = 46, n = 9, alt = true }, { x = 19.2, y = 31.2, r = 71, n = 12, alt = true }, { x = 21.8, y = 22.6, r = 52, n = 9, alt = true }, { x = 23.2, y = 27.1, r = 40, n = 3, alt = true }, { x = 20.1, y = 18.8, r = 54, n = 7, alt = true }, { x = 29, y = 22, r = 40, n = 5, alt = true }, { x = 29.1, y = 18.5, r = 59, n = 10, alt = true }, { x = 30, y = 15.1, r = 56, n = 11, alt = true }, { x = 31.9, y = 17.5, r = 62, n = 9, alt = true }, { x = 33.1, y = 14.2, r = 44, n = 10, alt = true }, { x = 34.6, y = 12.9, r = 40, n = 5, alt = true } } },
 						{ t = "kill", quest = 6805, title = "Stormers and Rumblers", target = "Desert Rumbler", npc = 11746, count = 15, oi = 2, map = 1451, x = 24.1, y = 13.9, f = "e", spots = { { x = 24.1, y = 13.9, r = 121, n = 8 }, { x = 22.3, y = 16.7, r = 52, n = 7, alt = true }, { x = 21.5, y = 12.7, r = 49, n = 10, alt = true }, { x = 22.1, y = 9.9, r = 46, n = 6, alt = true }, { x = 27.2, y = 11.9, r = 33, n = 4, alt = true }, { x = 27.6, y = 14.2, r = 43, n = 7, alt = true }, { x = 22.5, y = 19.4, r = 23, n = 4, alt = true }, { x = 19.8, y = 16.5, r = 50, n = 8, alt = true } } },
@@ -31155,7 +31155,7 @@ do
 					note = "Additional Runecloth takes 20 Runecloth per turn-in and repeats as often as you like. Bring Runecloth in multiples of 20 and hand them all in at once, one turn-in after another. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true, from = "Stormwind Royal Guard", fromKind = "npc", fromRank = 1, fromFaction = "A" },
-						{ t = "talk", npc = 14723, npcName = "Mistina Steelshield", map = 1455, x = 43.22, y = 31.57, f = "e", optional = true, note = "Additional Runecloth (7806)" },
+						{ t = "talk", npc = 14723, npcName = "Mistina Steelshield", map = 1455, x = 43.22, y = 31.57, f = "e", optional = true, note = "Additional Runecloth" },
 						{ t = "rep", faction = 47, factionName = "Ironforge", standing = 6 },
 					},
 				},
@@ -31193,23 +31193,23 @@ do
 			minLevel = 10,
 			maxLevel = 60,
 			category = "Reputation",
-			zone = 1453,
-			zoneName = "Stormwind City",
+			zone = 1433,
+			zoneName = "Redridge Mountains",
 			author = "Polestar",
 			version = 1,
 			steps = {
 				{
 					title = "Azeroth Commerce Authority to Friendly",
-					note = "The Azeroth Commerce Authority is the Alliance's tradeskill faction in Forever. In Season of Discovery its reputation came from turning in crafted and gathered goods to its supply officers in the capitals; Forever's version is not in our data yet; if it works the same way, a crafting or gathering profession is the way in. Forever's Legacy Diplomat perk increases reputation gains.",
+					note = "The Azeroth Commerce Authority is the Alliance's tradeskill faction in Forever. Its camp is at Three Corners in western Redridge Mountains. From level 10 mobs drop Waylaid Crates: fill each with the goods its label asks for and hand the Sealed Crate to Marcy Baker at the camp for reputation and Merchant's Favor. Forever's Legacy Diplomat perk increases reputation gains.",
 					only = { factions = { "Alliance" } },
 					goals = {
-						{ t = "note", text = "Where the Azeroth Commerce Authority's representatives stand in Forever is not in our data yet; a live recording will add them here." },
+						{ t = "goto", text = "Marcy Baker", map = 1433, x = 9.8, y = 71 },
 						{ t = "rep", faction = 2586, factionName = "Azeroth Commerce Authority", standing = 5 },
 					},
 				},
 				{
 					title = "Azeroth Commerce Authority to Honored",
-					note = "Keep turning in goods to the Azeroth Commerce Authority.",
+					note = "Keep filling Waylaid Crates for Marcy Baker.",
 					only = { factions = { "Alliance" } },
 					goals = {
 						{ t = "rep", faction = 2586, factionName = "Azeroth Commerce Authority", standing = 6 },
@@ -31217,7 +31217,7 @@ do
 				},
 				{
 					title = "Azeroth Commerce Authority to Revered",
-					note = "Keep turning in goods to the Azeroth Commerce Authority.",
+					note = "Keep filling Waylaid Crates for Marcy Baker.",
 					only = { factions = { "Alliance" } },
 					goals = {
 						{ t = "rep", faction = 2586, factionName = "Azeroth Commerce Authority", standing = 7 },
@@ -31225,7 +31225,7 @@ do
 				},
 				{
 					title = "Azeroth Commerce Authority to Exalted",
-					note = "Keep turning in goods to the Azeroth Commerce Authority until Exalted.",
+					note = "Keep filling Waylaid Crates for Marcy Baker until Exalted.",
 					only = { factions = { "Alliance" } },
 					goals = {
 						{ t = "rep", faction = 2586, factionName = "Azeroth Commerce Authority", standing = 8 },
@@ -31233,16 +31233,16 @@ do
 				},
 				{
 					title = "Durotar Supply and Logistics to Friendly",
-					note = "Durotar Supply and Logistics is the Horde's tradeskill faction in Forever. In Season of Discovery its reputation came from turning in crafted and gathered goods to its supply officers in the capitals; Forever's version is not in our data yet; if it works the same way, a crafting or gathering profession is the way in. Forever's Legacy Diplomat perk increases reputation gains.",
+					note = "Durotar Supply and Logistics is the Horde's tradeskill faction in Forever. Its camp is just outside the Crossroads in the Barrens. From level 10 mobs drop Waylaid Crates: fill each with the goods its label asks for and hand the Sealed Crate to Dokimi at the camp for reputation and Merchant's Favor. Forever's Legacy Diplomat perk increases reputation gains.",
 					only = { factions = { "Horde" } },
 					goals = {
-						{ t = "note", text = "Where Durotar Supply and Logistics' representatives stand in Forever is not in our data yet; a live recording will add them here." },
+						{ t = "goto", text = "Dokimi", map = 1413, x = 50.2, y = 29.4, f = "e" },
 						{ t = "rep", faction = 2587, factionName = "Durotar Supply and Logistics", standing = 5 },
 					},
 				},
 				{
 					title = "Durotar Supply and Logistics to Honored",
-					note = "Keep turning in goods to Durotar Supply and Logistics.",
+					note = "Keep filling Waylaid Crates for Dokimi.",
 					only = { factions = { "Horde" } },
 					goals = {
 						{ t = "rep", faction = 2587, factionName = "Durotar Supply and Logistics", standing = 6 },
@@ -31250,7 +31250,7 @@ do
 				},
 				{
 					title = "Durotar Supply and Logistics to Revered",
-					note = "Keep turning in goods to Durotar Supply and Logistics.",
+					note = "Keep filling Waylaid Crates for Dokimi.",
 					only = { factions = { "Horde" } },
 					goals = {
 						{ t = "rep", faction = 2587, factionName = "Durotar Supply and Logistics", standing = 7 },
@@ -31258,7 +31258,7 @@ do
 				},
 				{
 					title = "Durotar Supply and Logistics to Exalted",
-					note = "Keep turning in goods to Durotar Supply and Logistics until Exalted.",
+					note = "Keep filling Waylaid Crates for Dokimi until Exalted.",
 					only = { factions = { "Horde" } },
 					goals = {
 						{ t = "rep", faction = 2587, factionName = "Durotar Supply and Logistics", standing = 8 },
@@ -31357,7 +31357,7 @@ do
 					note = "Additional Runecloth takes 20 Runecloth per turn-in and repeats as often as you like. Bring Runecloth in multiples of 20 and hand them all in at once, one turn-in after another. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true, from = "Stormwind Royal Guard", fromKind = "npc", fromRank = 1, fromFaction = "A" },
-						{ t = "talk", npc = 14726, npcName = "Rashona Straglash", map = 1454, x = 63.6, y = 51.23, f = "e", optional = true, note = "Additional Runecloth (7832)" },
+						{ t = "talk", npc = 14726, npcName = "Rashona Straglash", map = 1454, x = 63.6, y = 51.23, f = "e", optional = true, note = "Additional Runecloth" },
 						{ t = "rep", faction = 76, factionName = "Orgrimmar", standing = 6 },
 					},
 				},
@@ -31472,7 +31472,7 @@ do
 					note = "Additional Runecloth takes 20 Runecloth per turn-in and repeats as often as you like. Bring Runecloth in multiples of 20 and hand them all in at once, one turn-in after another. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true, from = "Stormwind Royal Guard", fromKind = "npc", fromRank = 1, fromFaction = "A" },
-						{ t = "talk", npc = 14722, npcName = "Clavicus Knavingham", map = 1453, x = 53.93, y = 81.69, optional = true, note = "Additional Runecloth (7796)" },
+						{ t = "talk", npc = 14722, npcName = "Clavicus Knavingham", map = 1453, x = 53.93, y = 81.69, optional = true, note = "Additional Runecloth" },
 						{ t = "rep", faction = 72, factionName = "Stormwind", standing = 6 },
 					},
 				},
@@ -31517,7 +31517,7 @@ do
 			steps = {
 				{
 					title = "Master Smith Burninate",
-					note = "Thorium Point, on the scaffolds in the northwest of Searing Gorge, is the Brotherhood's outpost. The Thorium Brotherhood starts out Neutral. Forever's Legacy Diplomat perk increases reputation gains.",
+					note = "Thorium Point, on the scaffolds in the north-west of Searing Gorge, is the Brotherhood's outpost. The Thorium Brotherhood starts out Neutral. Forever's Legacy Diplomat perk increases reputation gains.",
 					goals = {
 						{ t = "accept", quest = 7722, title = "What the Flux?", npc = 14624, npcName = "Master Smith Burninate", minLevel = 45, qlvl = 50, map = 1427, x = 38.8, y = 28.51, f = "e" },
 					},
@@ -31537,10 +31537,10 @@ do
 				},
 				{
 					title = "Fiery Flux supplies to Friendly",
-					note = "Restoring Fiery Flux Supplies repeats in three versions: Kingsblood, Iron Bars or Heavy Leather, each with Coal and an Incendosaur Scale. Incendosaurs (level 47-49) in the north of Searing Gorge drop a scale every time, per the data; Burninate himself sells Coal.",
+					note = "Restoring Fiery Flux Supplies repeats in three versions: Kingsblood, Iron Bars or Heavy Leather, each with Coal and an Incendosaur Scale. Incendosaurs (level 47-49) in the north of Searing Gorge drop a scale every time; Burninate himself sells Coal.",
 					goals = {
 						{ t = "collect", item = 18944, itemName = "Incendosaur Scale", map = 1427, x = 44.6, y = 24.9, f = "e", spots = { { x = 44.6, y = 24.9, r = 119, n = 5 }, { x = 49.5, y = 25.3, r = 30, n = 3, alt = true }, { x = 50.8, y = 31.9, r = 41, n = 3, alt = true }, { x = 50.8, y = 38.2, r = 24, n = 2, alt = true } }, optional = true, from = "Incendosaur", fromKind = "npc" },
-						{ t = "talk", npc = 14624, npcName = "Master Smith Burninate", map = 1427, x = 38.8, y = 28.51, f = "e", optional = true, note = "Master Smith Burninate: Restoring Fiery Flux Supplies (7736, 8241, 8242)" },
+						{ t = "talk", npc = 14624, npcName = "Master Smith Burninate", map = 1427, x = 38.8, y = 28.51, f = "e", optional = true, note = "Master Smith Burninate: Restoring Fiery Flux Supplies" },
 						{ t = "rep", faction = 59, factionName = "Thorium Brotherhood", standing = 5 },
 					},
 				},
@@ -31549,15 +31549,15 @@ do
 					note = "Lokhtos Darkbargainer trades in the Grim Guzzler inside Blackrock Depths. His Favor Amongst the Brotherhood turn-ins take Dark Iron Ore (mined from Dark Iron Deposits with Mining), Blood of the Mountain, Fiery Core, Lava Core and Core Leather. Lothos Riftwaker at the Blackrock Mountain entrance offers attunement to the Molten Core.",
 					goals = {
 						{ t = "goto", text = "Blackrock Mountain", map = 1427, x = 32.1, y = 94.7, f = "e" },
-						{ t = "note", text = "Dark Iron Ore: Favor Amongst the Brotherhood, Dark Iron Ore (6642) at Lokhtos, repeatable." },
+						{ t = "note", text = "Dark Iron Ore: Favor Amongst the Brotherhood, Dark Iron Ore at Lokhtos, repeatable." },
 						{ t = "rep", faction = 59, factionName = "Thorium Brotherhood", standing = 6 },
 					},
 				},
 				{
 					title = "Thorium Brotherhood to Revered",
-					note = "The Molten Core materials carry the rest: the data drops Fiery Cores from Firewalkers, Flameguards and Firelords and Lava Cores from Lava Elementals, Lava Reavers and Molten Destroyers there. Blood of the Mountain comes from Molten Destroyers and rarely elsewhere.",
+					note = "The Molten Core materials carry the rest: Fiery Cores drop from Firewalkers, Flameguards and Firelords, and Lava Cores from Lava Elementals, Lava Reavers and Molten Destroyers there. Blood of the Mountain comes from Molten Destroyers and rarely elsewhere.",
 					goals = {
-						{ t = "note", text = "Molten Core materials: Favor Amongst the Brotherhood, Fiery Core (6643), Lava Core (6644), Core Leather (6645), Blood of the Mountain (6646), all repeatable at Lokhtos." },
+						{ t = "note", text = "Molten Core materials: Favor Amongst the Brotherhood, Fiery Core, Lava Core, Core Leather and Blood of the Mountain, all repeatable at Lokhtos." },
 						{ t = "rep", faction = 59, factionName = "Thorium Brotherhood", standing = 7 },
 					},
 				},
@@ -31661,7 +31661,7 @@ do
 					note = "Additional Runecloth takes 20 Runecloth per turn-in and repeats as often as you like. Bring Runecloth in multiples of 20 and hand them all in at once, one turn-in after another. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true, from = "Stormwind Royal Guard", fromKind = "npc", fromRank = 1, fromFaction = "A" },
-						{ t = "talk", npc = 14728, npcName = "Rumstag Proudstrider", map = 1456, x = 43.05, y = 42.72, f = "e", optional = true, note = "Additional Runecloth (7825)" },
+						{ t = "talk", npc = 14728, npcName = "Rumstag Proudstrider", map = 1456, x = 43.05, y = 42.72, f = "e", optional = true, note = "Additional Runecloth" },
 						{ t = "rep", faction = 81, factionName = "Thunder Bluff", standing = 6 },
 					},
 				},
@@ -31706,7 +31706,7 @@ do
 			steps = {
 				{
 					title = "Grazle",
-					note = "Timbermaw Hold starts out Unfriendly. Every Deadwood and Winterfall furbolg you kill raises it, so the quests below pay twice. Forever's Legacy Diplomat perk increases reputation gains.",
+					note = "Timbermaw Hold starts out Hostile, and its furbolgs in the tunnels attack until you reach Unfriendly. Every Deadwood and Winterfall furbolg you kill raises it, so the quests below pay twice. Forever's Legacy Diplomat perk increases reputation gains.",
 					goals = {
 						{ t = "accept", quest = 8460, title = "Timbermaw Ally", npc = 11554, npcName = "Grazle", minLevel = 45, qlvl = 48, map = 1448, x = 50.9, y = 85, f = "e" },
 					},
@@ -31753,7 +31753,7 @@ do
 				},
 				{
 					title = "Salfa",
-					note = "Go through Timbermaw Hold to its Winterspring exit; Salfa stands just outside.",
+					note = "Go through Timbermaw Hold to its Winterspring exit; Salfa stands just outside. The quests and kills so far usually reach Unfriendly, and then the Timbermaw let you pass. If they still show red, kill more Deadwood by the tunnel first.",
 					goals = {
 						{ t = "turnin", quest = 8465, title = "Speak to Salfa", npc = 11556, npcName = "Salfa", map = 1452, x = 27.7, y = 34.5, f = "e" },
 						{ t = "accept", quest = 8464, title = "Winterfall Activity", npc = 11556, npcName = "Salfa", minLevel = 45, qlvl = 58, map = 1452, x = 27.7, y = 34.5, f = "e" },
@@ -31763,7 +31763,7 @@ do
 					title = "Winterfall Village",
 					note = "Winterfall Village sits on the eastern side of Winterspring. Keep every Winterfall Spirit Beads you loot: Salfa takes them.",
 					goals = {
-						{ t = "kill", quest = 8464, title = "Winterfall Activity", target = "Winterfall Shaman", npc = 7439, count = 8, oi = 1, map = 1452, x = 67.1, y = 37.6, f = "e", spots = { { x = 67.1, y = 37.6, r = 15, n = 0 }, { x = 68, y = 37.5, r = 32, n = 2, alt = true }, { x = 67.5, y = 39.8, r = 15, n = 1, alt = true }, { x = 67.5, y = 35.4, r = 15, n = 2, alt = true }, { x = 69.5, y = 38.3, r = 15, n = 1, alt = true } } },
+						{ t = "kill", quest = 8464, title = "Winterfall Activity", target = "Winterfall Shaman", npc = 7439, count = 8, oi = 1, map = 1452, x = 67.37, y = 35.22, f = "e", spots = { { x = 67.5, y = 35.4, r = 15, n = 2 }, { x = 68, y = 37.5, r = 32, n = 2 }, { x = 69.5, y = 38.3, r = 15, n = 1 }, { x = 67.5, y = 39.8, r = 15, n = 1 } } },
 						{ t = "kill", quest = 8464, title = "Winterfall Activity", target = "Winterfall Den Watcher", npc = 7440, count = 8, oi = 2, map = 1452, x = 67.3, y = 35.3, f = "e", spots = { { x = 67.3, y = 35.3, r = 118, n = 9 }, { x = 68.3, y = 34.7, r = 40, n = 2, alt = true }, { x = 41.6, y = 42.6, r = 40, n = 1, alt = true }, { x = 30.5, y = 36.3, r = 40, n = 3, alt = true } } },
 						{ t = "kill", quest = 8464, title = "Winterfall Activity", target = "Winterfall Ursa", npc = 7438, count = 8, oi = 3, map = 1452, x = 67.9, y = 37.9, f = "e", spots = { { x = 67.9, y = 37.9, r = 71, n = 3 }, { x = 67.2, y = 39.4, r = 48, n = 3, alt = true }, { x = 65.8, y = 37.6, r = 67, n = 5, alt = true } } },
 					},
@@ -31776,19 +31776,19 @@ do
 				},
 				{
 					title = "Feathers and beads to Friendly",
-					note = "Feathers for Grazle and Feathers for Nafien (Deadwood Headdress Feathers) and Beads for Salfa (Winterfall Spirit Beads) repeat as often as you like; every Deadwood or Winterfall kill counts as well. Winterfall Village is the densest bead spot in the data.",
+					note = "Feathers for Grazle and Feathers for Nafien (Deadwood Headdress Feathers) and Beads for Salfa (Winterfall Spirit Beads) repeat as often as you like; every Deadwood or Winterfall kill counts as well. Winterfall Village is the densest bead spot.",
 					goals = {
 						{ t = "collect", item = 21383, itemName = "Winterfall Spirit Beads", count = 5, map = 1452, x = 67.1, y = 37.6, f = "e", spots = { { x = 67.1, y = 37.6, r = 147, n = 5 }, { x = 68.2, y = 37.5, r = 45, n = 5, alt = true }, { x = 67.3, y = 39.5, r = 56, n = 4, alt = true }, { x = 65.5, y = 37.8, r = 51, n = 4, alt = true }, { x = 66.5, y = 34.9, r = 58, n = 6, alt = true }, { x = 68.2, y = 35, r = 40, n = 3, alt = true }, { x = 69.5, y = 38.3, r = 40, n = 2, alt = true }, { x = 42.4, y = 42.8, r = 40, n = 2, alt = true }, { x = 42.2, y = 44.4, r = 40, n = 2, alt = true }, { x = 41.1, y = 42.9, r = 51, n = 6, alt = true }, { x = 39.6, y = 43.5, r = 58, n = 7, alt = true }, { x = 34.7, y = 37, r = 40, n = 1, alt = true }, { x = 33.6, y = 36.5, r = 40, n = 3, alt = true }, { x = 32.8, y = 37.3, r = 45, n = 4, alt = true }, { x = 31.4, y = 36.3, r = 40, n = 1, alt = true }, { x = 31.2, y = 35, r = 40, n = 2, alt = true }, { x = 30.3, y = 36.3, r = 54, n = 8, alt = true }, { x = 27.9, y = 34.5, r = 40, n = 1, alt = true } }, optional = true },
-						{ t = "talk", npc = 11556, npcName = "Salfa", map = 1452, x = 27.73, y = 34.5, f = "e", optional = true, note = "Salfa: Beads for Salfa (8469)" },
+						{ t = "talk", npc = 11556, npcName = "Salfa", map = 1452, x = 27.73, y = 34.5, f = "e", optional = true, note = "Salfa: Beads for Salfa" },
 						{ t = "rep", faction = 576, factionName = "Timbermaw Hold", standing = 5 },
 					},
 				},
 				{
 					title = "Feathers to Honored",
-					note = "The northern Deadwood camps by the tunnel are the densest feather spot in the data (35% drop chance there). Hand feathers to Nafien at the tunnel, or to Grazle in the south.",
+					note = "The northern Deadwood camps by the tunnel are the densest feather spot (35% drop chance there). Hand feathers to Nafien at the tunnel, or to Grazle in the south.",
 					goals = {
 						{ t = "collect", item = 21377, itemName = "Deadwood Headdress Feather", count = 5, map = 1448, x = 62.2, y = 9, f = "e", spots = { { x = 62.2, y = 9, r = 117, n = 16 }, { x = 62.5, y = 7.2, r = 56, n = 8, alt = true }, { x = 60.8, y = 8.3, r = 44, n = 6, alt = true }, { x = 63.8, y = 6.4, r = 40, n = 2, alt = true }, { x = 63.1, y = 12.4, r = 45, n = 6, alt = true }, { x = 60.3, y = 6.2, r = 51, n = 7, alt = true }, { x = 49.7, y = 88.2, r = 40, n = 1, alt = true }, { x = 48.3, y = 89.2, r = 40, n = 6, alt = true }, { x = 46.3, y = 89.5, r = 53, n = 6, alt = true }, { x = 48.9, y = 91.5, r = 45, n = 12, alt = true }, { x = 47.8, y = 93.4, r = 87, n = 8, alt = true } }, optional = true },
-						{ t = "talk", npc = 15395, npcName = "Nafien", map = 1448, x = 64.77, y = 8.13, f = "e", optional = true, note = "Nafien: Feathers for Nafien (8467)" },
+						{ t = "talk", npc = 15395, npcName = "Nafien", map = 1448, x = 64.77, y = 8.13, f = "e", optional = true, note = "Nafien: Feathers for Nafien" },
 						{ t = "rep", faction = 576, factionName = "Timbermaw Hold", standing = 6 },
 					},
 				},
@@ -31903,7 +31903,7 @@ do
 					note = "Additional Runecloth takes 20 Runecloth per turn-in and repeats as often as you like. Bring Runecloth in multiples of 20 and hand them all in at once, one turn-in after another. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true, from = "Stormwind Royal Guard", fromKind = "npc", fromRank = 1, fromFaction = "A" },
-						{ t = "talk", npc = 14729, npcName = "Ralston Farnsley", map = 1458, x = 71.66, y = 29.23, f = "e", optional = true, note = "Additional Runecloth (7819)" },
+						{ t = "talk", npc = 14729, npcName = "Ralston Farnsley", map = 1458, x = 71.66, y = 29.23, f = "e", optional = true, note = "Additional Runecloth" },
 						{ t = "rep", faction = 68, factionName = "Undercity", standing = 6 },
 					},
 				},

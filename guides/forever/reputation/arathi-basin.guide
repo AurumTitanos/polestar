@@ -22,7 +22,7 @@ step League of Arathor to Friendly
   only Alliance
   tip The League of Arathor fights for Arathi Basin from Refuge Pointe. Their reputation comes from the battleground: the resources your team gathers pay it to everyone, so holding more bases for longer pays more. Queue at any battlemaster. Forever's Legacy Diplomat perk increases reputation gains.
   talk 14983 optional -- Field Marshal Oslight, Refuge Pointe
-  note Field Marshal Oslight's The Battle for Arathi Basin! (assault every base) and Control Four Bases / Control Five Bases are one-time quests in the data; Sergeant Maclear beside him takes Arathi Resource Crates.
+  note Field Marshal Oslight's The Battle for Arathi Basin! (assault every base) and Control Four Bases / Control Five Bases are one-time quests; Sergeant Maclear beside him takes Arathi Resource Crates.
   rep 509 Friendly
 
 step League of Arathor to Honored
@@ -45,7 +45,7 @@ step The Defilers to Friendly
   only Horde
   tip The Defilers fight for Arathi Basin from Hammerfall. Their reputation comes from the battleground: the resources your team gathers pay it to everyone, so holding more bases for longer pays more. Queue at any battlemaster. Forever's Legacy Diplomat perk increases reputation gains.
   talk 15021 optional -- Deathmaster Dwire, Hammerfall
-  note Deathmaster Dwire's The Battle for Arathi Basin! (assault every base) and Take Four Bases / Take Five Bases are one-time quests in the data; Deathstalker Mortis beside him takes Arathi Resource Crates.
+  note Deathmaster Dwire's The Battle for Arathi Basin! (assault every base) and Take Four Bases / Take Five Bases are one-time quests; Deathstalker Mortis beside him takes Arathi Resource Crates.
   rep 510 Friendly
 
 step The Defilers to Honored

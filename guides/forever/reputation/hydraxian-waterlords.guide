@@ -1,7 +1,7 @@
 guide forever/reputation/hydraxian-waterlords
 title Hydraxian Waterlords Reputation
 category Reputation
-levels 55-60
+levels 60-60
 zone Azshara
 # Built from the Era-baseline reference data: Duke Hydraxis on his island off
 # eastern Azshara and his chain (6804 Poisoned Water, 6805 Stormers and
@@ -23,7 +23,7 @@ step Duke Hydraxis
 
 step Dust Stormers and Desert Rumblers
   zone Silithus
-  tip Both elementals roam northwestern Silithus; the Rumblers cluster a little further north.
+  tip Both elementals roam north-western Silithus; the Rumblers cluster a little further north.
   kill 11744 x15 quest 6805.1 @19.6,26.4
   kill 11746 x15 quest 6805.2 @24.1,13.9
 
