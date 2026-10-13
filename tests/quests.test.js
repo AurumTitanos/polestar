@@ -390,6 +390,73 @@ emit(Q.NameplateIcons())
 	assert.deepEqual(done, {}, 'empty');
 });
 
+test('nameplate icons sit beside the health bar the player sees, above the frame that draws it', () => {
+	const [eui, out] = run(`
+Polestar.Set("qol.nameplateIcons", true)
+w.accept(7, { { text = "Kobold Vermin slain: 0/10", type = "monster", required = 10 } })
+stub.advance(0.3)
+local function frame(kind, parent, label, level, wd, ht)
+	local f = CreateFrame(kind, nil, parent)
+	f.label, f.level = label, level
+	if wd then f:SetSize(wd, ht) end
+	return f
+end
+-- Blizzard's own plate: the UnitFrame with its health bar.
+local function blizzard(plate)
+	plate.label, plate.level = "base", 3
+	plate.UnitFrame = frame("Frame", plate, "unitframe", 4)
+	plate.UnitFrame.healthBar = frame("StatusBar", plate.UnitFrame, "blizzard bar", 5, 120, 8)
+end
+local function where(unit)
+	local f = Q.NameplateIcon(unit)
+	local point, rel, relPoint, x, y = f:GetPoint(1)
+	return { at = point .. " " .. (rel.label or "?") .. " " .. relPoint .. " " .. x .. "," .. y,
+		parent = f:GetParent().label or "?", level = f:GetFrameLevel(), size = f:GetWidth() }
+end
+sq.addPlate("nameplate1", 6, false, function(plate) plate.label = "base" end)
+sq.addPlate("nameplate2", 6, false, blizzard)
+sq.addPlate("nameplate3", 6, false, function(plate) -- Plater-like
+	blizzard(plate)
+	plate.UnitFrame:SetAlpha(0)
+	plate.unitFrame = frame("Frame", plate, "plater", 6)
+	plate.unitFrame.healthBar = frame("StatusBar", plate.unitFrame, "plater bar", 7, 110, 12)
+end)
+sq.addPlate("nameplate4", 6, false, function(plate) -- an addon this code does not know
+	blizzard(plate)
+	plate.UnitFrame:Hide()
+	frame("Frame", plate, "decor", 8, 20, 20)
+	frame("StatusBar", frame("Frame", plate, "small", 8), "small bar", 9, 40, 4)
+	local holder = frame("Frame", plate, "generic", 8)
+	frame("StatusBar", frame("Frame", holder, "inner", 9), "generic bar", 10, 100, 18)
+end)
+-- EllesmereUI Nameplates builds its plate in its own NAME_PLATE_UNIT_ADDED
+-- handler (it may run after this one) and fades Blizzard's UnitFrame to alpha 0.
+sq.addPlate("nameplate5", 6, false, blizzard)
+local before = where("nameplate5")
+local base = C_NamePlate.GetNamePlateForUnit("nameplate5")
+local p = frame("Frame", base, "eui", 4)
+p.nameplate = base
+p.health = frame("StatusBar", p, "eui bar", 10, 140, 24)
+base.UnitFrame:SetAlpha(0)
+EllesmereNameplates_NS = { plates = { nameplate5 = p }, friendlyPlates = {} }
+stub.runTimers()
+emit({ before = before, after = where("nameplate5") })
+local out = {}
+for i = 1, 4 do out[i] = where("nameplate" .. i) end
+emit(out)
+`, { setup: 'w.complete({ 783 })' });
+	assert.deepEqual(eui, {
+		before: { at: 'RIGHT blizzard bar LEFT -3,0', parent: 'base', level: 10, size: 14 },
+		after: { at: 'RIGHT eui bar LEFT -3,0', parent: 'eui', level: 15, size: 20 },
+	});
+	assert.deepEqual(out, [
+		{ at: 'BOTTOM base TOP 0,-2', parent: 'base', level: 6, size: 16 },
+		{ at: 'RIGHT blizzard bar LEFT -3,0', parent: 'base', level: 10, size: 14 },
+		{ at: 'RIGHT plater bar LEFT -3,0', parent: 'plater', level: 12, size: 14 },
+		{ at: 'RIGHT generic bar LEFT -3,0', parent: 'generic', level: 15, size: 18 },
+	]);
+});
+
 test('turning the database off clears every layer', () => {
 	const [layers] = run(`
 w.accept(7, { { text = "Kobold Vermin slain: 0/10", type = "monster", required = 10 } })

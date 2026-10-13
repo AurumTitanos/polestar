@@ -162,27 +162,156 @@ local function plateFor(unit)
 	return nil
 end
 
-local function acquire(plate)
+-- Where the icon goes. Replacement nameplate addons hide or restyle Blizzard's
+-- plate and draw their own health bar, so the icon looks for the plate the
+-- player actually sees: a known addon's per-unit frame, then any shown child
+-- of the base plate that holds a status bar, then Blizzard's own health bar,
+-- then the base plate itself. Every access is guarded; a failure falls back
+-- to the base plate.
+local ICON_SIZE, ICON_MIN, ICON_MAX = 16, 14, 20
+local ICON_GAP = 3 -- px between the icon and the left end of the bar
+local ICON_LIFT = 5 -- frame levels above the frame the icon sits on
+local isIcon = setmetatable({}, { __mode = "k" })
+
+-- Shown and readable: forbidden frames (protected plates) are skipped.
+local function shown(f)
+	if type(f) ~= "table" or type(f.IsShown) ~= "function" then return false end
+	if f.IsForbidden and f:IsForbidden() then return false end
+	return f:IsShown() and true or false
+end
+
+-- EllesmereUI Nameplates keeps a per-unit frame in
+-- EllesmereNameplates_NS.plates (enemies) and .friendlyPlates, parented to
+-- the base plate, with its bar in .health; Blizzard's UnitFrame stays on the
+-- base plate at alpha 0.
+local EUI_LISTS = { "plates", "friendlyPlates" }
+
+-- host: the addon's frame for this unit; bar: its health bar (or nil).
+local function knownPlate(plate, unit)
+	local eui = _G.EllesmereNameplates_NS
+	if type(eui) == "table" then
+		for i = 1, #EUI_LISTS do
+			local list = eui[EUI_LISTS[i]]
+			local p = type(list) == "table" and list[unit]
+			if type(p) == "table" and p.nameplate == plate and shown(p) then return p, p.health end
+		end
+	end
+	local uf = plate.unitFrame -- Plater (.healthBar), ElvUI and other oUF plates (.Health)
+	if uf ~= plate.UnitFrame and shown(uf) then return uf, uf.healthBar or uf.Health end
+	local kui = plate.kui -- KuiNameplates
+	if shown(kui) then return kui, kui.HealthBar end
+	local tp = plate.TPFrame -- Threat Plates
+	if shown(tp) then return tp, type(tp.visual) == "table" and tp.visual.healthbar or nil end
+	return nil
+end
+
+-- The widest shown StatusBar at or up to two levels under `f`.
+local function statusBarIn(f, depth)
+	if f:IsObjectType("StatusBar") then return f end
+	if depth == 0 then return nil end
+	local best, bestW
+	local kids = { f:GetChildren() }
+	for i = 1, #kids do
+		local k = kids[i]
+		if not isIcon[k] and shown(k) then
+			local bar = statusBarIn(k, depth - 1)
+			local w = bar and bar:GetWidth() * bar:GetHeight()
+			if bar and (not best or w > bestW) then best, bestW = bar, w end
+		end
+	end
+	return best
+end
+
+-- Any other nameplate addon: the shown child of the base plate (not
+-- Blizzard's UnitFrame) holding the largest status bar.
+local function genericPlate(plate)
+	local host, bar, area
+	local kids = { plate:GetChildren() }
+	for i = 1, #kids do
+		local k = kids[i]
+		if k ~= plate.UnitFrame and not isIcon[k] and shown(k) then
+			local b = statusBarIn(k, 2)
+			local a = b and b:GetWidth() * b:GetHeight()
+			if b and (not host or a > area) then host, bar, area = k, b, a end
+		end
+	end
+	return host, bar
+end
+
+-- Blizzard's UnitFrame while it is on the plate and not faded out.
+local function blizzardPlate(plate)
+	local uf = plate.UnitFrame
+	if not (shown(uf) and uf:GetParent() == plate and uf:GetAlpha() > 0.01) then return nil end
+	return uf, shown(uf.healthBar) and uf.healthBar or nil
+end
+
+-- owner (icon parent), ref (frame the icon must sit above), bar, above (what
+-- the icon sits on when there is no bar), replaced (a replacement plate found).
+local function locate(plate, unit)
+	local host, bar = knownPlate(plate, unit)
+	if not host then host, bar = genericPlate(plate) end
+	if host then
+		-- Parented to the replacement frame: it follows that frame's alpha and
+		-- scale (non-target fading, target scaling) and hides with it.
+		if not shown(bar) then bar = nil end
+		local name = not bar and host.name
+		return host, bar or host, bar, shown(name) and name or host, true
+	end
+	local uf
+	uf, bar = blizzardPlate(plate)
+	if uf then
+		local name = not bar and uf.name
+		return plate, bar or uf, bar, shown(name) and name or plate, false
+	end
+	return plate, plate, nil, plate, false
+end
+
+-- Anchors `f` to what the player sees on `plate`. Returns ok, replaced.
+local function place(f, plate, unit)
+	local found, owner, ref, bar, above, replaced = pcall(locate, plate, unit)
+	if not found then owner, ref, bar, above, replaced = plate, plate, nil, plate, false end
+	local ok = pcall(function()
+		f:SetParent(owner)
+		f:ClearAllPoints()
+		if bar then
+			local s = math.floor(bar:GetHeight() + 0.5)
+			if s < ICON_MIN then s = ICON_MIN elseif s > ICON_MAX then s = ICON_MAX end
+			f:SetSize(s, s)
+			f:SetPoint("RIGHT", bar, "LEFT", -ICON_GAP, 0)
+		else
+			f:SetSize(ICON_SIZE, ICON_SIZE)
+			f:SetPoint("BOTTOM", above, "TOP", 0, above == plate and -2 or 2)
+		end
+		f:SetFrameStrata(ref:GetFrameStrata())
+		f:SetFrameLevel(ref:GetFrameLevel() + ICON_LIFT)
+	end)
+	if ok or owner == plate then return ok, ok and replaced end
+	ok = pcall(function()
+		f:SetParent(plate)
+		f:ClearAllPoints()
+		f:SetSize(ICON_SIZE, ICON_SIZE)
+		f:SetPoint("BOTTOM", plate, "TOP", 0, -2)
+	end)
+	return ok, false
+end
+
+local function acquire(plate, unit)
 	local f = pool[#pool]
 	if f then
 		pool[#pool] = nil
 	else
 		f = CreateFrame("Frame")
-		f:SetSize(16, 16)
 		f.tex = f:CreateTexture(nil, "OVERLAY")
 		f.tex:SetAllPoints(f)
+		isIcon[f] = true
 	end
-	local ok = pcall(function()
-		f:SetParent(plate)
-		f:ClearAllPoints()
-		f:SetPoint("BOTTOM", plate, "TOP", 0, -2)
-	end)
+	local ok, replaced = place(f, plate, unit)
 	if not ok then
 		f:Hide()
 		pool[#pool + 1] = f
 		return nil
 	end
-	return f
+	return f, replaced
 end
 
 local function release(unit)
@@ -207,9 +336,19 @@ local function updatePlate(unit)
 	if not f then
 		local plate = plateFor(unit)
 		if not plate then return end
-		f = acquire(plate)
+		local replaced
+		f, replaced = acquire(plate, unit)
 		if not f then return end
 		icons[unit] = f
+		-- Replacement plates are often built in the same event after this
+		-- handler, or a frame later: look again once on the next frame.
+		if not replaced and C_Timer and C_Timer.After then
+			C_Timer.After(0, function()
+				if icons[unit] ~= f then return end
+				local now = plateFor(unit)
+				if now then place(f, now, unit) end
+			end)
+		end
 	end
 	local style = o.kind == 1 and "icon-kill" or "icon-collect"
 	local c = Q.Color(o.kind == 1 and "danger" or "item")
@@ -255,6 +394,11 @@ function Q.NameplateIcons()
 	end
 	table.sort(out)
 	return out
+end
+
+-- The icon frame on a unit's nameplate, or nil (tests, debugging).
+function Q.NameplateIcon(unit)
+	return icons[unit]
 end
 
 local function refreshAll()

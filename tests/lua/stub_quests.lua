@@ -130,11 +130,14 @@ function C_NamePlate.GetNamePlateForUnit(unit)
 	return sq.plates[unit]
 end
 
-function sq.addPlate(unit, npc, secret)
+-- build(plate), when given, adds frames to the base plate before the event
+-- (a replacement nameplate addon that built its plate first).
+function sq.addPlate(unit, npc, secret, build)
 	local guid = world.npcGUID(npc)
 	if secret then sq.secret(guid) end
 	world.units[unit] = guid
 	sq.plates[unit] = CreateFrame("Frame", nil, UIParent)
+	if build then build(sq.plates[unit]) end
 	stub.fire("NAME_PLATE_UNIT_ADDED", unit)
 end
 

@@ -208,7 +208,8 @@ map. Renders of every window and state, drawn without the game, are in
 
 - **Quest markers**: givers, objectives and turn-ins on the world map and the
   minimap, with tooltip lines on the mobs and items a quest needs and quest
-  levels in the log.
+  levels in the log. Nameplate icons mark the mobs you still need, beside the
+  health bar of EllesmereUI and other replacement nameplates too.
 - **Rare and treasure spawns, dungeon entrances, flight masters, docks and
   inns** can mark the map too. Every map icon is off by default and turns on
   under **Map** in the options; the arrow's target, its spawn area and its
