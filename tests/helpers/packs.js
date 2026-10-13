@@ -1,6 +1,6 @@
 'use strict';
 // The guide pack tests put their guides in: pack `test`, guide ids under
-// `test/` (docs/ARCHITECTURE.md, "Guide data").
+// `test/` (docs/PACK_FORMAT.md, "Rules Polestar enforces").
 //
 //   TEST_PACK     the Lua line registering it
 //   TEST_SOURCE   the Lua line making it the suggestion source

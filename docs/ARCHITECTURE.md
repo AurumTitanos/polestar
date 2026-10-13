@@ -330,44 +330,34 @@ the other eight classes, so compiled guides never contain negations.
 
 ### The guide registry (`Core/Guides.lua`)
 
-Every guide belongs to a registered pack. The rules:
+Every guide belongs to a registered pack. The rules a pack meets (ids, no
+overrides, clashes, map frames, format, problems, literal text, packs on disk
+and their statuses) are in PACK_FORMAT.md, "Rules Polestar enforces"; lint
+applies the same ones (`tests/packs-parity.test.js`). Where `Core/Guides.lua`
+implements them:
 
-1. **Ids.** Pack ids match `^[a-z0-9][a-z0-9-]{1,31}$`; `guides`, `forever`,
-   `lookup`, `draft` and `polestar` are reserved (`Guides.RESERVED`). Our
-   pack `guides` (addon `Polestar_Guides`) owns guide ids under `forever/` and
-   `draft/`, the internal `lookup` pack (Lookup's generated guides, registered
-   with `internal = true`, never listed or switchable) owns `lookup/`, every
-   other pack `<id>/` (`Guides.OwnsId`).
-2. **No overrides.** A guide outside its pack's prefix is refused; a pack
-   registering one of its own ids again replaces that guide in its slot.
-3. **Clashes.** A second pack with a taken id is refused whole, the
-   problem naming both addons; a pack with a reserved id is refused whole
-   with "Pack id <id> is reserved for Polestar.". Either way the guides and map frames its files register
-   for that id while it loads (until its `ADDON_LOADED`) are dropped, never
-   given to the holder, and the dropped guides are counted in the problem
-   (" 1 guide dropped." / " <n> guides dropped."); a guide registered before its pack is refused (when
-   the pack comes) and one for a pack never registered is dropped.
-4. **Format.** `Guides.FORMATS` holds the formats this Polestar reads (`1`).
-   A pack in another is `too-new`, its reason from its TOC's
-   `X-Polestar-Needs`; an unknown verb or malformed field refuses only that
-   guide (`Guides.Validate`, the `REQUIRED` verb table, `Guides.VERBS`).
-5. **Problems.** Each refusal is recorded on the pack's record,
-   `problems = { { kind = "pack-refused"|"guide-refused"|"no-guides", guide?, message } }`,
-   and printed by `ns.Debug`.
-6. **Text prints literally.** Every string a pack registers is escaped once
-   at registration (`ns.EscapeText`: `|` doubled), ids excepted.
-7. **Packs on disk.** At login, before `GUIDES_REGISTERED`,
-   `Guides.ScanInstalled` lists every addon whose TOC has `X-Polestar-Pack`,
-   loaded or not, and gives the ones that never registered a record from
-   their TOC.
+- Ids: `Guides.RESERVED` (reserved pack ids) and `Guides.OwnsId` (which
+  prefix a pack owns: `forever/` and `draft/` for `guides`, `lookup/` for the
+  internal `lookup` pack, registered with `internal = true` and never listed
+  or switchable, `<id>/` for every other pack).
+- Clashes: guides and map frames a refused pack's files register are dropped
+  until that addon's `ADDON_LOADED`; guides registered before their pack wait
+  in a per-pack list until it comes.
+- Format: `Guides.FORMATS` (the formats this Polestar reads, `1`);
+  `Guides.Validate` checks each guide against the `REQUIRED` verb table
+  (`Guides.VERBS`).
+- Problems: each refusal goes on the pack's record,
+  `problems = { { kind = "pack-refused"|"guide-refused"|"no-guides", guide?, message } }`,
+  and to `ns.Debug`.
+- Literal text: `ns.EscapeText` (`|` doubled), ids excepted.
+- Packs on disk: `Guides.ScanInstalled`, at login before `GUIDES_REGISTERED`,
+  gives every addon whose TOC has `X-Polestar-Pack` and never registered a
+  record from its TOC.
 
 A pack record: `id`, `addon`, `format`, `title`, `author`, `version`,
-`license`, `website`, `source`, `notes`, `official` (ours), `status`,
-`reason`, `needs`, `problems`, `guides` (ids), `guideCount`. Status, in
-priority order for an unregistered pack: `too-new` > `disabled` (off in the
-AddOns list) > `not-loaded` (the client's reason) > `broken` (loaded, no
-guides); a registered one is `on`/`off` (`PolestarDB.packs[id].off`),
-`refused`, `too-new`, or `broken` when it registered no guides.
+`license`, `website`, `source`, `notes`, `official` (ours), `status` (the
+statuses of PACK_FORMAT rule 9; `off` from `PolestarDB.packs[id].off`),
+`reason`, `needs`, `problems`, `guides` (ids), `guideCount`.
 
 ```lua
 Polestar.RegisterPack(meta) -> ok, err
@@ -1576,11 +1566,10 @@ their own diagnostics not reported).
 | `install`, `pack` | builds and installs the pack; writes `<pack>/dist/<folder>-<version>.zip` |
 | `record draft`, `sim compare` | drafts into `<pack>/drafts/` under `<id>/draft/`; scores the pack's chain beside ours |
 
-The folder rule (`packDirRefusal` in `tools/lib/dsl/project.js`): `compile`,
-`pack`, `install`, `dev` and `play` write a pack folder only when it is
-absent, empty, or carrying the generated marker for the same pack id;
-anything else is refused. Lint's pack rules mirror the runtime's (`tests/packs-parity.test.js`);
-our house rules (elites in Leveling guides) are warnings in other packs.
+The folder rule (PACK_FORMAT.md, "TOC fields") is `packDirRefusal` in
+`tools/lib/dsl/project.js`. Lint's pack rules mirror the runtime's
+(`tests/packs-parity.test.js`); our house rules (elites in Leveling guides)
+are warnings in other packs.
 
 ### Zone art overlays (`maps overlays`)
 

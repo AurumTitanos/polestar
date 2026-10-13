@@ -126,11 +126,13 @@ before a pack is built (`tests/packs-parity.test.js` holds the two together).
 2. **No overrides.** A guide id outside its pack's prefix is refused. A pack
    may register one of its own ids again, which replaces that guide.
 3. **Clashes.** A pack whose id is already registered is refused whole, and
-   the problem names both addons; the guides it registers while it loads are
-   dropped (counted in the problem), even under the holder's ids. A guide
-   registered before its pack is refused (listed once the pack registers);
-   one for a pack that never registers is ignored, since there is no row to
-   list it on.
+   the problem names both addons; a pack with a reserved id is refused whole
+   with "Pack id <id> is reserved for Polestar.". Either way the guides and
+   map frames its files register for that id while it loads are dropped,
+   never given to the holder, and the dropped guides are counted in the
+   problem. A guide registered before its pack is refused (listed once the
+   pack registers); one for a pack that never registers is ignored, since
+   there is no row to list it on.
 4. **Map frames.** A pack may add Era map frames for maps Polestar's lack; for
    a map both cover, Polestar's win whatever the load order (lint warns).
 5. **Format.** A pack declaring a format Polestar does not read is refused
@@ -145,11 +147,12 @@ before a pack is built (`tests/packs-parity.test.js` holds the two together).
 8. **Missing guides keep their place.** Saved tabs of a guide whose pack is
    missing or switched off reopen in their old place when it comes back.
 9. **Packs on disk.** At login Polestar lists every addon whose TOC carries
-   `X-Polestar-Pack`, loaded or not, with a status: `on`, `off` (switched off
-   on the Guide packs page), `disabled` (turned off in the AddOns list),
-   `not-loaded` (the client did not load it: out of date, a dependency
-   missing), `too-new` (a newer format), `refused` or `broken` (registered no
-   guides).
+   `X-Polestar-Pack`, loaded or not, with a status. A registered pack is
+   `on`, `off` (switched off on the Guide packs page), `refused`, `too-new`
+   (a newer format) or `broken` (registered no guides). One that never
+   registered is, in this order of precedence, `too-new`, `disabled` (turned
+   off in the AddOns list), `not-loaded` (the client did not load it: out of
+   date, a dependency missing) or `broken`.
 
 Only guides of packs that are on are shown, searched and suggested.
 Suggestions come from Polestar's guides unless the player picks a pack under

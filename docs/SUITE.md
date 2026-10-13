@@ -77,7 +77,8 @@ Local packs are generated into gitignored folders and installed by
 works: Lookup and Dungeons say what is missing instead of failing.
 
 Guide packs (ours and the community's) register through one registry
-(`Core/Guides.lua`, ARCHITECTURE "Guide data"): each owns its guide-id prefix,
+(`Core/Guides.lua`, ARCHITECTURE "The guide registry"; the rules in
+PACK_FORMAT.md): each owns its guide-id prefix,
 a refusal is recorded against its pack and shown on Options > Guide packs, and
 a pack the player switches off hides its guides everywhere (`PACKS_CHANGED`).
 The tools treat every pack alike (`new`, `doctor`, `lint`, `compile`,

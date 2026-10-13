@@ -306,7 +306,8 @@ end
 Guides.Validate = validate
 
 ---------------------------------------------------------------------------
--- Packs (docs/ARCHITECTURE.md, "Guide data"). A pack registers once, then
+-- Packs (rules: docs/PACK_FORMAT.md, "Rules Polestar enforces"; API:
+-- docs/ARCHITECTURE.md, "The guide registry"). A pack registers once, then
 -- its guides; every guide id lives under its pack's prefix. Refusals are
 -- recorded on the pack's record (problems) and printed by ns.Debug.
 ---------------------------------------------------------------------------
