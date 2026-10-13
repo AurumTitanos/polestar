@@ -126,7 +126,7 @@ test('search covers titles, zones, categories and player-facing race names; typi
 	});
 });
 
-test('left pane: the rail holds the sections and Options; the sidebar holds the categories in order, Favorites last', () => {
+test('left pane: the rail holds the sections and Options; the sidebar holds the categories in order, Favourites last', () => {
 	const [out] = run(`
 		UI.ShowPicker()
 		local labels, rail = {}, {}
@@ -155,7 +155,7 @@ test('left pane: the rail holds the sections and Options; the sidebar holds the 
 	assert.equal(out.sections[0], 'Guides');
 	assert.equal(out.sections[1], 'Lookup');
 	assert.deepEqual(out.rail, ['Options', 'Guides*', ...out.sections.slice(1)]);
-	assert.deepEqual(out.labels, ['All guides 16', 'Leveling 9', 'Professions 3', 'Reputation 1', 'Exploration 1', 'Legacy 1', 'Collectibles 1', 'Favorites 0']);
+	assert.deepEqual(out.labels, ['All guides 16', 'Leveling 9', 'Professions 3', 'Reputation 1', 'Exploration 1', 'Legacy 1', 'Collectibles 1', 'Favourites 0']);
 	assert.match(out.icon, /\\star$/);
 	assert.deepEqual(out.r, {
 		view: 'browse', category: 'Professions', title: 'Professions', folders: ['Professions 3'],
@@ -473,7 +473,7 @@ test('Favorites: the star in the details toggles a guide in CharState().ui.favor
 		emit(r)`);
 	assert.deepEqual(out, {
 		before: false,
-		after: [true, 'Remove from favorites', true, '1'],
+		after: [true, 'Remove from favourites', true, '1'],
 		list: ['Westfall (12\u201317)'], folders: ['Alliance 1\u201330 1'],
 		removed: [false, 0, true],
 	});

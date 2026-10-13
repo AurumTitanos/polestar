@@ -4,7 +4,7 @@
 // character (PolestarCharDB.welcomeSeen = 1), with Set up only while the
 // account has not had one (PolestarDB.welcomeSeen = 1); never in combat,
 // never over the route choice; a first page that greets the character; four
-// pages (three once the routes are no longer alpha) whose setup choices write
+// pages (three once the routes are no longer in beta) whose setup choices write
 // their settings; opened from About and by /polestar welcome.
 
 const { test } = require('node:test');
@@ -88,8 +88,8 @@ test('a new character on an account that has had its welcome gets it without Set
 		SlashCmdList.POLESTAR("welcome")
 		local asked = titles()
 		emit({ login = login, asked = asked, char = PolestarCharDB.welcomeSeen })`, { saved: ACCOUNT_SEEN });
-	assert.deepEqual(out.login, ['Hello, Testchar', 'Our routes are still alpha', 'Guide packs']);
-	assert.deepEqual(out.asked, ['Hello, Testchar', 'Our routes are still alpha', 'Set up', 'Guide packs']);
+	assert.deepEqual(out.login, ['Hello, Testchar', 'Our routes are still in beta', 'Guide packs']);
+	assert.deepEqual(out.asked, ['Hello, Testchar', 'Our routes are still in beta', 'Set up', 'Guide packs']);
 	assert.equal(out.char, 1);
 });
 
@@ -184,7 +184,7 @@ test('it never opens over the route choice: it waits for that window to close, a
 	assert.equal(out.afterChoice, true);
 	assert.deepEqual(out.overWelcome, { welcome: false, choice: true, char: 1 }, 'stepped aside, already marked shown');
 	assert.equal(out.back, true);
-	assert.equal(out.page, 'Our routes are still alpha', 'it comes back on the page it left');
+	assert.equal(out.page, 'Our routes are still in beta', 'it comes back on the page it left');
 	assert.equal(out.step, '2 of 3', 'with the pages it started with');
 });
 
@@ -200,30 +200,30 @@ test('four pages with Next and Back; Next on the last page closes it', () => {
 		local lastNext = PolestarWelcome.Next.Label:GetText()
 		PolestarWelcome.Back:Click()
 		local back = title()
-		local alpha = uistub.findText(PolestarWelcome, "planned and timed in a simulator") ~= nil
+		local beta = uistub.findText(PolestarWelcome, "planned and timed in a simulator") ~= nil
 		PolestarWelcome.Back:Click()
-		local alphaText = uistub.findText(PolestarWelcome, "Nobody has followed them through the live game yet") ~= nil
+		local betaText = uistub.findText(PolestarWelcome, "Nobody has followed them through the live game yet") ~= nil
 		PolestarWelcome.Back:Click()
 		PolestarWelcome.Back:Click()
 		local firstBack = { title = title(), backShown = PolestarWelcome.Back:IsShown() }
 		for i = 1, 3 do PolestarWelcome.Next:Click() end
 		PolestarWelcome.Next:Click()
-		emit({ titles = titles, steps = steps, lastNext = lastNext, back = back, alpha = alpha, alphaText = alphaText,
+		emit({ titles = titles, steps = steps, lastNext = lastNext, back = back, beta = beta, betaText = betaText,
 			firstBack = firstBack, closed = not shown(), seen = PolestarDB.welcomeSeen })`);
-	assert.deepEqual(out.titles, ['Hello, Testchar', 'Our routes are still alpha', 'Set up', 'Guide packs']);
+	assert.deepEqual(out.titles, ['Hello, Testchar', 'Our routes are still in beta', 'Set up', 'Guide packs']);
 	assert.deepEqual(out.steps, ['1 of 4', '2 of 4', '3 of 4', '4 of 4']);
 	assert.equal(out.lastNext, 'Done');
 	assert.equal(out.back, 'Set up');
-	assert.equal(out.alpha, false, 'the alpha text is only on its own page');
-	assert.equal(out.alphaText, true);
+	assert.equal(out.beta, false, 'the beta text is only on its own page');
+	assert.equal(out.betaText, true);
 	assert.deepEqual(out.firstBack, { title: 'Hello, Testchar', backShown: false });
 	assert.equal(out.closed, true);
 	assert.equal(out.seen, 1);
 });
 
-test('the alpha page follows ns.routesAlpha: three pages once the routes are proven', () => {
+test('the beta page follows ns.routesBeta: three pages once the routes are proven', () => {
 	const [out] = run(`
-		Polestar.routesAlpha = false
+		Polestar.routesBeta = false
 		Wel.Show()
 		local titles = {}
 		for i = 1, 3 do titles[i] = title(); PolestarWelcome.Next:Click() end

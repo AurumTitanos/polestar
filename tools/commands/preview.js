@@ -639,10 +639,10 @@ const SCENES = [
 	},
 	{
 		file: 'welcome.svg',
-		title: 'The welcome, once per new character after login: Hello, Our routes are still alpha, Set up (on the account\'s first), Guide packs',
+		title: 'The welcome, once per new character after login: Hello, Our routes are still in beta, Set up (on the account\'s first), Guide packs',
 		panels: [
 			{ roots: ['PolestarWelcome'], script: 'Polestar.UI.Welcome.Show("welcome")' },
-			{ roots: ['PolestarWelcome'], script: 'Polestar.UI.Welcome.Show("alpha")' },
+			{ roots: ['PolestarWelcome'], script: 'Polestar.UI.Welcome.Show("beta")' },
 			{ roots: ['PolestarWelcome'], script: 'Polestar.UI.Welcome.Show("setup")' },
 			{ roots: ['PolestarWelcome'], script: 'Polestar.UI.Welcome.Show("packs")' },
 		],
@@ -804,7 +804,7 @@ Polestar.UI.ShowPicker(); Polestar.UI.Picker.SetView("recent"); Polestar.UI.Pick
 	},
 	{
 		file: 'picker-search.svg',
-		title: 'Guide menu: Favorites (star on), and a search with its first result selected',
+		title: 'Guide menu: Favourites (star on), and a search with its first result selected',
 		panels: [
 			{
 				roots: PICKER,

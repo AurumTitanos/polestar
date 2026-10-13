@@ -302,7 +302,7 @@ test('the welcome greets a new character on a profile that saw the beta notice, 
 			reopened = PolestarWelcome:IsShown(), title = PolestarWelcome.Title:GetText() })`, { saved });
 	assert.equal(out.first, true);
 	assert.ok(out.text.includes(out.guide), 'the hello names the suggested guide');
-	assert.deepEqual(out.pages, ['Hello, Testchar', 'Our routes are still alpha', 'Set up', 'Guide packs']);
+	assert.deepEqual(out.pages, ['Hello, Testchar', 'Our routes are still in beta', 'Set up', 'Guide packs']);
 	assert.equal(out.closed, true);
 	assert.equal(out.seen, 1);
 	assert.equal(out.char, 1);

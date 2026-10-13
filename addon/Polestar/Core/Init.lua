@@ -19,7 +19,7 @@ ns.stage = "Beta"
 -- followed through the live game: the welcome (UI/Welcome.lua) says so on
 -- its own page while this is true. The owner turns it off once they have
 -- been.
-ns.routesAlpha = true
+ns.routesBeta = true
 
 -- The pack docs online: the TOC's X-Website (the public repository, added at
 -- publication) plus the path of docs/PACKS.md. nil without that field.

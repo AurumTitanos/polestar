@@ -116,8 +116,10 @@ local function packOfKey(key)
 	return G and G.Pack and G.Pack(key:sub(#PACK + 1)) or nil
 end
 
--- A category's or a pack entry's name.
+-- A category's or a pack entry's name. The "Favorites" key is shown as
+-- "Favourites".
 local function bucketLabel(key)
+	if key == "Favorites" then return L["Favourites"] end
 	local r = packOfKey(key)
 	return r and (r.title or r.id) or L[key]
 end
@@ -702,7 +704,7 @@ local function buildDetails()
 	win.Close:SetParent(d.Art.Over)
 	win.Close:ClearAllPoints()
 	win.Close:SetPoint("TOPRIGHT", d.Art, "TOPRIGHT", -12, -12)
-	d.Star = W.IconButton(d.Art.Over, "star", 28, L["Add to favorites"], function()
+	d.Star = W.IconButton(d.Art.Over, "star", 28, L["Add to favourites"], function()
 		P.ToggleFavorite(P.Selected())
 	end, 14)
 	d.Star:SetPoint("RIGHT", win.Close, "LEFT", -4, 0)
@@ -837,7 +839,7 @@ local function renderDetails(byId, tabs, active)
 	d.lsArt = ZoneArt.Paint(d.Art, g.zone, fx, fy, skyIndex(g.id))
 	local fav = P.IsFavorite(g.id)
 	W.SetIconState(d.Star, fav)
-	d.Star.lsTip = fav and L["Remove from favorites"] or L["Add to favorites"]
+	d.Star.lsTip = fav and L["Remove from favourites"] or L["Add to favourites"]
 	d.Title:SetText(g.title or g.id)
 
 	-- Chips: levels, faction, races, classes; on two lines at most.
@@ -1037,7 +1039,7 @@ local function navItems(counts, total)
 	for _, c in ipairs(CATEGORIES) do
 		if exists[c] then items[#items + 1] = { key = c, label = L[c], icon = CATEGORY_ICON[c], count = counts[c] or 0 } end
 	end
-	items[#items + 1] = { key = "Favorites", label = L["Favorites"], icon = CATEGORY_ICON.Favorites, count = counts.Favorites or 0 }
+	items[#items + 1] = { key = "Favorites", label = L["Favourites"], icon = CATEGORY_ICON.Favorites, count = counts.Favorites or 0 }
 	-- Guide packs: one entry per shown pack with guides, "<title> · <author>".
 	if #packs > 0 then
 		table.sort(packs, function(a, b) return (a.title or a.id):lower() < (b.title or b.id):lower() end)
@@ -1347,7 +1349,7 @@ function P.Render()
 			elseif query ~= "" then
 				empty = string.format(L["No guides match \226\128\156%s\226\128\157."], query)
 			elseif category == "Favorites" then
-				empty = L["No favorites yet. Select a guide and click its star."]
+				empty = L["No favourites yet. Select a guide and click its star."]
 			elseif category ~= "All" then
 				empty = string.format(L["No %s guides for this faction."], bucketLabel(category))
 			else

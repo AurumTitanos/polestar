@@ -507,7 +507,7 @@ local function buildAbout(view)
 		L["Anyone can read the code, fix a step, sharpen a route or write a new guide, and contributions are welcome. The GPL keeps it that way: every copy and every fork stays open."],
 	}
 	if ns.stage then
-		paras[#paras + 1] = L["It is young. Polestar was made in about a day and is still in beta, so expect the odd wrong step, waypoint or quest. Every report and every fix tunes it, and together we'll get it where it should be."]
+		paras[#paras + 1] = L["It is young and still in beta, so expect the odd wrong step, waypoint or quest. Every report and every fix tunes it, and together we'll get it where it should be."]
 	end
 	local whyText = W.Text(view, "body", "textDim")
 	whyText:SetWordWrap(true)

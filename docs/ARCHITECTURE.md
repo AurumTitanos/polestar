@@ -1032,7 +1032,7 @@ Reading flow: `docs/UI_BRIEF.md` (READING FLOW).
   shows get a texture, from per-band pools. Used by the route choice cards
   and the menu; the night band stands in without the art.
 - **Guide packs in the menu.** Our categories (Leveling, Professions, …)
-  list only our guides; All, Favorites, Current, Recent and search cover every
+  list only our guides; All, Favourites, Current, Recent and search cover every
   shown guide. A "Guide packs" heading in the sidebar (a `W.ShellNav` heading
   row), present only while a shown pack has guides, lists one entry per such
   pack (`pack:<id>`, "<title> · <author>"), its guides grouped as ours are.
@@ -1056,7 +1056,7 @@ Reading flow: `docs/UI_BRIEF.md` (READING FLOW).
   Back, Next and Skip: Hello, <name> (the guide `Guides.Suggest()` picks, for
   the character's level, race, class and zone, else that there is none;
   then the guide window, the arrow and `/polestar guides`); Our
-  routes are still alpha (while `ns.routesAlpha`); Set up (quest automation,
+  routes are still in beta (while `ns.routesBeta`); Set up (quest automation,
   the guide at login, the colour scheme); Guide packs (with the docs link,
   then Start <suggested guide> or Choose a guide, and Browse guides). Once
   per new character (`PolestarCharDB.welcomeSeen`: 0 for a character with no

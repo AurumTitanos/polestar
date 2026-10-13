@@ -3,7 +3,7 @@
 --   1. Hello, <name>: the guide Polestar suggests for this character (its
 --      level, race, class and zone), then the guide window, the arrow and
 --      /polestar guides;
---   2. Our routes are still alpha: shown while ns.routesAlpha is true;
+--   2. Our routes are still in beta: shown while ns.routesBeta is true;
 --   3. Set up: quest automation (behavior.autoAccept and autoTurnin as one
 --      switch), the guide at login (behavior.autoSelectGuide), the colour
 --      scheme (ui.scheme);
@@ -168,9 +168,9 @@ PAGES[#PAGES + 1] = {
 }
 
 PAGES[#PAGES + 1] = {
-	key = "alpha",
-	shown = function() return ns.routesAlpha and true or false end,
-	title = function() return L["Our routes are still alpha"] end,
+	key = "beta",
+	shown = function() return ns.routesBeta and true or false end,
+	title = function() return L["Our routes are still in beta"] end,
 	build = function(p) p.Text = bodyText(p) end,
 	layout = function(p)
 		p.Text:SetText(L["Polestar's leveling routes were planned and timed in a simulator and played to the end, for every class, in a test copy of the addon. Nobody has followed them through the live game yet, so expect the odd wrong step. Skip it (/polestar skip) and report it where you got Polestar."])
@@ -460,7 +460,7 @@ local function open(why)
 	F:Raise()
 end
 
--- Open the welcome at `page` (a page key: "welcome", "alpha", "setup",
+-- Open the welcome at `page` (a page key: "welcome", "beta", "setup",
 -- "packs"; or its number among the pages shown), the first by default, with
 -- every page. Opens even when already seen (About, /polestar welcome, the
 -- preview).
