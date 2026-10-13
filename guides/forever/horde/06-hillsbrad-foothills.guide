@@ -57,7 +57,10 @@ next forever/horde/07-ashenvale
 #
 # Class quests: Shaman Call of Water (1536, from the previous guide): fill
 # the waterskin at the Spring Well in Tarren Mill and hand it to Brine south
-# of Camp Taurajo.
+# of Camp Taurajo, who gives the blue waterskin (1534) for the Ruins of
+# Stardust in forever/horde/07-ashenvale. Rogues who finished Mission:
+# Possible But Not Probable hand Hinott's Assistance (2479, 2480, optional:
+# Gallywix is elite) to Serge Hinott in Tarren Mill and learn Poisons.
 
 # ---------------------------------------------------------------- Tarren Mill
 
@@ -73,6 +76,14 @@ step Tarren Mill
   accept 501
   accept 509
   collect 7771 quest 1536 only Shaman -- Fill the Empty Red Waterskin at the Spring Well beside the inn
+
+step Serge Hinott
+  only Rogue
+  tip Only if Gallywix fell in the Barrens (Mission: Possible But Not Probable): Serge Hinott stands in Tarren Mill. Wait beside him while he brews the cure, then take your reward: Poisons.
+  turnin 2479 optional                -- Serge Hinott
+  accept 2480 optional
+  complete 2480 optional
+  turnin 2480 optional                -- Serge Hinott: Poisons
 
 # ---------------------------------------------------------------- West: the hills and Hillsbrad Fields
 
@@ -209,7 +220,7 @@ step Brine
   only Shaman
   tip Brine's hut stands on the ridge above the quilboar watering hole, south of Camp Taurajo, on the way to Bael Modan.
   turnin 1536                         -- Brine: the red waterskin from Tarren Mill
-  note Her next waterskin is filled in Ashenvale, off this route.
+  accept 1534                         -- Brine: the blue waterskin is filled in Ashenvale, next guide
 
 step Tear of the Moons
   tip Follow the road south to the dwarf dig site at Bael Modan. Feegly the Exiled hides at the south edge of the dig; General Twinbraid's Strongbox sits at the bottom of the excavation.

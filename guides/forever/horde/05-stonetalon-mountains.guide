@@ -46,7 +46,10 @@ next forever/horde/06-hillsbrad-foothills
 #
 # Left out: Bloodfury Bloodline (6283, an elite harpy matriarch), Ordanus
 # (1088, Alliance side of Ashenvale), Arachnophobia (6284, Besseleth is
-# elite and the export leaves it out). No class quests in this range.
+# elite and the export leaves it out).
+#
+# Class quests: Undead Priests hand Devouring Plague (5646, from Ur'kyo at
+# 20) to Aelthalyste on the Undercity stop.
 #
 # Added: Bloodfury Trinkets (86576, Forever): the sunstones drop from the
 # Charred Vale harpies the route kills for Harpies Threaten (6282).
@@ -188,6 +191,11 @@ step To the Undercity
   zone Undercity
   tip Ride east to the Crossroads and fly to Orgrimmar. Take the zeppelin from the towers outside Orgrimmar to Tirisfal Glades; the Undercity lies below the Ruins of Lordaeron. The bat handler is in the Trade Quarter.
   getfp "Undercity"
+
+step Aelthalyste
+  only Undead,Priest
+  tip Aelthalyste stands in the War Quarter.
+  turnin 5646                         -- Aelthalyste: Dark Sacrifice
 
 step Southpoint Tower
   zone Hillsbrad Foothills

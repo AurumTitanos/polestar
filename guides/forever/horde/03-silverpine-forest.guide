@@ -51,8 +51,14 @@ next forever/horde/04-the-barrens
 # Dalaran casters in the middle of the town at about level 18.5.
 #
 # Carried on: Journey to Hillsbrad Foothills (493, Tarren Mill, later guide).
-# Class quests: none on this stretch. Training at 16 and 19 in Orgrimmar
-# (Druids: `train class` sends you to Thunder Bluff).
+# Class quests: Hunters from Durotar hand Training the Beast (6081) to Ormak
+# Grimshot and Troll Priests Hex of Weakness (5654) to Ur'kyo on the first
+# Orgrimmar stop. Tauren Druids, who train in Thunder Bluff, start Aquatic
+# Form there (A Lesson to Learn 27, Trial of the Lake 28 in Moonglade) and
+# open the Strange Lockbox on the coast west of the Dead Field for Trial of
+# the Sea Lion (30); the chain ends at their Thunder Bluff training at about
+# 23 (forever/horde/04-the-barrens). Training at 16 and 19 in Orgrimmar
+# (Druids train in Thunder Bluff).
 
 # ---------------------------------------------------------------- Orgrimmar and the zeppelin
 
@@ -61,6 +67,30 @@ step To Orgrimmar
   tip From the Crossroads, follow the road north-east to Orgrimmar and walk in by the main gate. Doras, the wind rider master, stands on the tower in the Valley of Strength.
   getfp "Orgrimmar" npc 3310          -- Doras
   train class
+
+step Orgrimmar class quests
+  only Hunter,Priest
+  zone Orgrimmar
+  tip Ormak Grimshot stands in the Valley of Honor, Ur'kyo in the Valley of Spirits on the city's west side.
+  turnin 6081 only Hunter             -- Ormak Grimshot: Beast Training
+  turnin 5654 only Troll,Priest       -- Ur'kyo: Hex of Weakness
+
+step A Lesson to Learn
+  only Tauren,Druid
+  zone Thunder Bluff
+  tip Turak Runetotem trains you on Elder Rise in Thunder Bluff.
+  accept 27                           -- Turak Runetotem
+
+step Trial of the Lake
+  only Tauren,Druid
+  zone Moonglade
+  tip Cast Teleport: Moonglade; Dendrite Starblaze is in Nighthaven. The Shrine Baubles lie on the bed of Lake Elune'ara and fade within minutes: swim one straight to the Shrine of Remulos on the north-west shore, use it there and speak to Tajarri.
+  turnin 27                           -- Dendrite Starblaze
+  accept 28
+  complete 28
+  turnin 28                           -- Tajarri, at the Shrine of Remulos
+  accept 30
+  fly "Thunder Bluff"                 -- Bunthen Plainswind in Nighthaven flies druids there; then fly on to Orgrimmar for the zeppelin
 
 step Zeppelin to Tirisfal Glades
   zone Durotar
@@ -104,6 +134,11 @@ step The Dead Field
   tip North of the Sepulcher. Nightlash haunts the Dead Field: kill it, then walk across the field.
   collect 3622 quest 437.1
   complete 437 @45.1,21.7
+
+step Strange Lockbox
+  only Tauren,Druid
+  tip The Strange Lockbox lies on the coast west of the Dead Field. It holds the Half Pendant of Aquatic Endurance for Trial of the Sea Lion.
+  collect 15882
 
 step Malden's Orchard
   tip Follow the road north-east to the Yoricks' house at Malden's Orchard.

@@ -71,6 +71,17 @@ next forever/horde/30-40/04-dustwallow-marsh
 # Skipped: Sunken Treasure part 6 (670) and Death From Below (667): 670 is
 # taken from Seahorn only after 669, around level 40, and both end at
 # Faldir's Cove, which the route has left by then: a trip back to Arathi.
+#
+# Class quests:
+# - Warlock: the Felhunter chain from the previous two guides ends here.
+#   Jorah Annison in the Undercity takes the tome and manuscript (1803) on
+#   the way to Tarren Mill and sends you for three Rods of Channeling (1805)
+#   from the Dragonmaw on the Wetlands road; Strahad Farsan in Ratchet binds
+#   the Felhunter with you (1795).
+# - Warrior: The Islander (1718) from Sorek in Orgrimmar, The Affray (1719)
+#   on Fray Island, a short ride south of Ratchet: Berserker Stance. It waits
+#   for this point because Big Will is level 33. The follow-ups (The
+#   Windwatcher 1791, Cyclonian 1712) end in an elite fight and are left out.
 
 # ---------------------------------------------------------------- Tarren Mill
 
@@ -79,6 +90,13 @@ step Fly to Grom'gol
   tip From Booty Bay, fly to Grom'gol. The Undercity zeppelin leaves from the tower on the west side of the camp.
   fly "Grom'gol"
   goto 31.5,29.4 "Zeppelin to the Undercity"
+
+step Jorah Annison
+  only Warlock
+  zone Undercity
+  tip Ride down into the Undercity: Jorah Annison stands in the Magic Quarter.
+  turnin 1803                         -- Jorah Annison
+  accept 1805
 
 step Fly to Tarren Mill
   zone Hillsbrad Foothills
@@ -233,6 +251,12 @@ step Drum Fel
 
 # ---------------------------------------------------------------- Into the Badlands
 
+step Rods of Channeling
+  only Warlock
+  zone Wetlands
+  tip On the ride south through the Wetlands, the Dragonmaw Bonewarders and Shadowwarders hold the hills just east of the road: the rods drop from them.
+  collect 6930 quest 1805.1
+
 step Into the Badlands
   zone Badlands
   tip Ride south-west out of Arathi over Thandol Span, south through the Wetlands (keep clear of Menethil Harbor) and east into Loch Modan; the road leaves Loch Modan to the south into the Badlands. Follow it south to the goblin camp in the Valley of Fangs.
@@ -338,6 +362,7 @@ step Zeppelin to Orgrimmar
 step Orgrimmar
   zone Orgrimmar
   train class
+  accept 1718 only Warrior            -- Sorek, Valley of Honor
   fly "Crossroads"
 
 step Regthar Deathgate
@@ -351,3 +376,20 @@ step Ratchet
   sethome "Ratchet"
   buy 3713 x3 nearest                 -- Soothing Spices, for "Swamp Eye" Jarl in Dustwallow Marsh
   note The next guide heads into Dustwallow Marsh.
+
+step Strahad Farsan
+  only Warlock
+  tip Strahad stands on the hill in Ratchet. Use the Tome of the Cabal on the summoning circle beside him and defeat the felhunter to bind it.
+  turnin 1805                         -- Strahad Farsan
+  accept 1795
+  use 6999 @62.6,35.3                 -- Tome of the Cabal
+  kill 6268 quest 1795.1
+  turnin 1795                         -- Strahad Farsan: Summon Felhunter
+
+step The Affray
+  only Warrior
+  tip Ride south along the coast from Ratchet to Fray Island. Klannoc Macleod stands by the arena: step on the grate to start the fight; the challengers come one at a time, then Big Will (33).
+  turnin 1718                         -- Klannoc Macleod
+  accept 1719
+  complete 1719
+  turnin 1719                         -- Klannoc Macleod: Berserker Stance

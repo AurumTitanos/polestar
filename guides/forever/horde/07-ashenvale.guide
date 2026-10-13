@@ -72,7 +72,10 @@ next forever/horde/30-40/01-desolace
 # Schematics (1190, 1194) need News for Fizzle (1137, from the Badlands
 # chain 1108), not on this route.
 #
-# Class quests: none on this stretch of the route.
+# Class quests: Shamans fill Brine's blue waterskin (Call of Water 1534) at
+# the fountain in the Ruins of Stardust while hunting Ursangous and hand it to
+# Brine on the road south from Camp Taurajo; Vial of Purest Water (220) goes on
+# to Islen Waterseer in forever/horde/30-40/01-desolace.
 
 # ---------------------------------------------------------------- Zoram'gar Outpost
 
@@ -125,6 +128,11 @@ step Ursangous
   tip Follow the main road east past Astranaar (Alliance: keep to the road). Ursangous, a big grizzly, roams the Ruins of Stardust south of the road, west of Mystral Lake. His paw starts the next hunt quest.
   collect 16303
   accept 23 item 16303
+
+step Ruins of Stardust fountain
+  only Shaman
+  tip The fountain stands in the middle of the Ruins of Stardust: use the Empty Blue Waterskin there.
+  collect 7770 quest 1534.1
 
 step Alonso
   tip Alonso, a Forever addition, stands on the west shore of Mystral Lake with three quick Dragonslayer quests.
@@ -204,6 +212,14 @@ step Zoram'gar Outpost
   turnin 824                          -- Je'neu Sancrea
 
 # ---------------------------------------------------------------- Freewind Post
+
+step Brine
+  only Shaman
+  zone The Barrens
+  tip Fly to Camp Taurajo. Brine's hut stands on the ridge above the quilboar watering hole south of the camp, on the road to the Great Lift.
+  fly "Camp Taurajo"
+  turnin 1534                         -- Brine
+  accept 220                          -- for Islen Waterseer, south of Ratchet: next guide
 
 step The Great Lift
   zone The Barrens

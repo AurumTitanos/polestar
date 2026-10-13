@@ -38,7 +38,29 @@ next forever/horde/02-the-barrens
 #   before leaving the isle (about 14); every class has a trainer in each
 #   town, and the next guide would otherwise be the first training since 6.
 #
-# Class quests: none on the isle.
+# Class quests on the isle:
+# - Shaman: Call of Earth (92466-92468) from Windshaper Boro at 4; the Signet
+#   of Akir drops from the Al'Aketh by Hanaa's camp, the Minor Manifestation
+#   of Earth is at the Rise of Spirits east of the village. Call of Fire
+#   (97243-97257, Searing Totem and the Fire Totem) at about 12: Sessaria
+#   Skystride in Valanaar, Olariaan Swiftburn at the Shrine of Flames,
+#   Skypriest Faladiel west of the falls, Kuramaa in the Shen'dar Highlands,
+#   then the Eternal Flame run back to Valanaar. The Barrens Call of Fire
+#   (1524-1527) is not taken.
+# - Druid: The Great Ursera Spirit / Strength and Mercy (94006, 94638, Bear
+#   Form): Lotheluum in Valanaar, Urs'endris by the falls north of the East
+#   Pylon Watchtower, Ur'endra near the turncoat's house. On Kalimdor, Muln
+#   Earthfury at the landing sends you to Turak Runetotem in Thunder Bluff
+#   (Child of Nature 94911), who teaches Teleport: Moonglade (94913, handed
+#   to Dendrite on the Cat Form trip in forever/horde/04-the-barrens). The
+#   data has no Skyborne Aquatic Form quest; the Tauren one (27-31) is not
+#   offered to Skyborne.
+# - Warrior: The Skybreaker Bulwark (94003, Defensive Stance): Seena
+#   Skybreaker in Valanaar, Zaal Stormshield at the Shrine of Akir.
+# - Hunter: Taming the Beast (94978, 94979, 94013) and Training the Beast
+#   (94050) with Quel'ana Quickgale in Valanaar: a Windsong Crawler by the
+#   lakes north-west of town, a Vuldren Alpha at the orchard, an Ornery
+#   Galestrider in the fields west of town, done after the orchard.
 #
 # Added: The Earthen Ring (95349). The export accepts it but never turns it
 # in; its ender, Alaana Stormwalker, stands where the airship lands, so it is
@@ -114,6 +136,11 @@ step Thendal Village turn-ins
   accept 92473                        -- Valreaa Valewind
   train class
 
+step Windshaper Boro
+  only Shaman
+  tip Windshaper Boro stands in the village.
+  accept 92466                        -- Windshaper Boro
+
 step Scrawny Ursera
   tip Scrawny Ursera prowl the slopes south-west of the village, on the way to Hanaa.
   collect 251918 quest 92473.1
@@ -126,6 +153,11 @@ step Hanaa Nightwind
   kill 256935 quest 92544.3
   turnin 92544
 
+step Signet of Akir
+  only Shaman
+  tip The Al'Aketh cultists in the camp beyond Hanaa carry the signet.
+  collect 251924 quest 92466.1
+
 step Urs'anah
   tip The Ursera den is west of the village. Urs'anah, their matriarch, sits at its far end.
   kill 250937 quest 92470.1
@@ -137,6 +169,15 @@ step Leaving Thendal Village
   accept 92472
   accept 96638
   train class
+
+step Call of Earth
+  only Shaman
+  tip Windshaper Boro sends you to the Rise of Spirits, just east of the village: drink the Earth Sapta there to see the Minor Manifestation of Earth, then take the Rough Quartz back to him.
+  turnin 92466                        -- Windshaper Boro
+  accept 92467
+  turnin 92467                        -- Minor Manifestation of Earth
+  accept 92468
+  turnin 92468                        -- Windshaper Boro: Stoneskin Totem and your Earth Totem
 
 # ---------------------------------------------------------------- Shen'dar Village
 
@@ -346,6 +387,21 @@ step Alvarion and Riaani
   turnin 93737                        -- Riaani Nightwind
   accept 93738
 
+step Taming the Beast
+  only Hunter
+  tip Quel'ana Quickgale in Valanaar hands you a Taming Rod three times: tame a Windsong Crawler by the lakes north-west of town, a Vuldren Alpha at Windfield Orchard and an Ornery Galestrider in the fields west of town, returning to her after each. Quel'dora Quickgale stands beside her.
+  accept 94978                        -- Quel'ana Quickgale
+  kill 254588 quest 94978.1
+  turnin 94978
+  accept 94979
+  kill 250874 quest 94979.1
+  turnin 94979
+  accept 94013
+  kill 251707 quest 94013.1
+  turnin 94013                        -- Quel'ana Quickgale: Tame Beast
+  accept 94050
+  turnin 94050                        -- Quel'dora Quickgale: Beast Training
+
 step Belathaan Brightwish
   tip Belathaan waits on the road north of Valanaar, towards the Shrine of Akir.
   turnin 93738                        -- Ayessa Dawnsinger
@@ -361,6 +417,11 @@ step Valennia Stormfist
   turnin 92871
   accept 93320
 
+step Lotheluum Starbreeze
+  only Druid
+  tip Lotheluum stands on Valanaar's east side.
+  accept 94006                        -- Lotheluum Starbreeze
+
 step The East Pylon Watchtower
   tip Ride north-east to the East Pylon Watchtower. The Al'Aketh camp is just west of it, with Commander Belguilos at its north end. Every cultist can drop a windstone charm.
   turnin 93320                        -- Yorana Windyreed
@@ -374,6 +435,12 @@ step The East Pylon Watchtower
   turnin 92645
   accept 92880
 
+step Urs'endris
+  only Druid
+  tip Urs'endris waits by the falls just north of the watchtower.
+  turnin 94006                        -- Urs'endris
+  accept 94638
+
 step Back to Valanaar
   turnin 93740                        -- Ayessa Dawnsinger
   accept 94484                        -- Lotheluum Starbreeze
@@ -385,6 +452,16 @@ step Back to Valanaar
   accept 92643
   train class
 
+step The Skybreaker Bulwark
+  only Warrior
+  tip Seena Skybreaker stands in the middle of Valanaar.
+  accept 94003                        -- Seena Skybreaker
+
+step Sessaria Skystride
+  only Shaman
+  tip Sessaria Skystride stands on Valanaar's west side.
+  accept 97243                        -- Sessaria Skystride
+
 # ---------------------------------------------------------------- The turncoat
 
 step The turncoat
@@ -395,6 +472,37 @@ step The turncoat
   turnin 92643                        -- Dead Cultist
   accept 92644
   turnin 98512                        -- Fendaal Windstone
+
+step Ur'endra
+  only Druid
+  tip Ur'endra roams the slopes just south of the turncoat's house.
+  kill 258443 quest 94638.1
+
+step Olariaan Swiftburn
+  only Shaman
+  tip Take the Torch of Dormant Flame to Olariaan Swiftburn at the Shrine of Flames, south-west of Valanaar in the Gustberry Lowlands.
+  turnin 97243                        -- Olariaan Swiftburn
+  accept 97244
+
+step Skypriest Faladiel
+  only Shaman
+  tip Faladiel stands on the hill west of the falls, north of Valanaar.
+  collect 277267 quest 97244.1
+
+step Kuramaa
+  only Shaman
+  tip Back to Olariaan, then west into the Shen'dar Highlands: Kuramaa's home is in the hills south of the Windsong Crawlers' lakes.
+  turnin 97244                        -- Olariaan Swiftburn
+  accept 97245
+  collect 277269 quest 97245.1
+
+step The Eternal Flame
+  only Shaman
+  tip Back to Olariaan. Wait for him to light the Brazier of Offering, then carry the flame straight to the Brazier of Eternal Flame beside Sessaria in Valanaar before the timer runs out.
+  turnin 97245                        -- Olariaan Swiftburn
+  accept 97257
+  complete 97257
+  turnin 97257                        -- Sessaria Skystride: Searing Totem and your Fire Totem
 
 step Unfortunate News
   turnin 92644                        -- Talaanis Shadowsong
@@ -416,6 +524,11 @@ step Desperate Times
 
 # ---------------------------------------------------------------- Shrine of Akir
 
+step Strength and Mercy
+  only Druid
+  tip On the way north, back to Urs'endris by the falls.
+  turnin 94638                        -- Urs'endris: Bear Form
+
 step The Shrine of Akir
   tip The Shrine of Akir is north of Valanaar. Fight through the guards up to Hyusaa Quickbreeze at its east side.
   kill 252762 quest 92947.1
@@ -427,6 +540,11 @@ step The Shrine of Akir
   accept 93958
   turnin 93958                        -- Valennia Stormfist
   accept 92646
+
+step Zaal Stormshield
+  only Warrior
+  tip Zaal Stormshield holds the Skybreaker Bulwark on the west side of the shrine.
+  collect 263993 quest 94003.1 @56.5,50.5
 
 # ---------------------------------------------------------------- Shadowgale Forest
 
@@ -503,6 +621,10 @@ step The Fate of Zephras
   accept 95349                        -- Ayessa Dawnsinger
   train class
 
+step Seena Skybreaker
+  only Warrior
+  turnin 94003                        -- Seena Skybreaker: Defensive Stance
+
 # ---------------------------------------------------------------- To the Crossroads
 
 step The airship
@@ -514,11 +636,20 @@ step Northern Mulgore
   tip You leave the isle for good. Alaana Stormwalker waits where the airship lands.
   turnin 95349                        -- Alaana Stormwalker
   accept 95350                        -- Alaana Stormwalker: keep it, Thrall in Orgrimmar comes two guides later
+  accept 94911 only Druid             -- Muln Earthfury, by the landing: for Turak Runetotem in Thunder Bluff
 
 step Thunder Bluff
   zone Thunder Bluff
   tip Thunder Bluff is beside the landing: ride up a lift and learn the flight path from Tal, the wind rider master. Then follow the road south past Bloodhoof Village and through the eastern pass into the Barrens.
   getfp "Thunder Bluff" npc 2995      -- Tal
+
+step Turak Runetotem
+  only Druid
+  zone Thunder Bluff
+  tip Turak Runetotem trains druids on Elder Rise. He teaches you Teleport: Moonglade; Dendrite Starblaze's welcome waits for your Cat Form trip at about 23 (forever/horde/04-the-barrens).
+  turnin 94911                        -- Turak Runetotem
+  accept 94913
+  train class
 
 step The Crossroads
   zone The Barrens

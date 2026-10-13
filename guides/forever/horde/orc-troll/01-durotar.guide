@@ -34,13 +34,20 @@ next forever/horde/orc-troll/02-the-barrens
 #   drop the Hexed Pendants, and handed in on the way back.
 #
 # Class quests: Warlocks do Ruzan's Vile Familiars (1485, 1499) instead of
-# Zureetha's. At 10 in Razor Hill: Warriors take Veteran Uzzek (1505) and do
-# Path of Defense (1498) at Far Watch Post on the way out (Thun'grim 1502 and
-# Forged Steel 1503 follow in the Barrens guide); Shamans take Call of Fire
-# (2983), continued in the Barrens guide; Hunters tame their three beasts for
-# Thotar (6062, 6083, 6082) around Razor Hill. Training the Beast (6081),
-# Gan'rul's Summons (1506, Warlock) and The Shattered Hand (1963, Rogue) need
-# Orgrimmar, which this route does not visit before 19: take them there.
+# Zureetha's. Shamans take Call of Earth (1516-1518) from Canaga Earthcaller
+# at 4: the Felstalker hooves come from the slope below the Burning Blade
+# cave, Spirit Rock is just south of the Den. At 10 in Razor Hill: Warriors
+# take Veteran Uzzek (1505) and do Path of Defense (1498) at Far Watch Post on
+# the way out (Thun'grim 1502 and Forged Steel 1503 follow in the Barrens
+# guide); Shamans take Call of Fire (2983), continued in the Barrens guide;
+# Hunters tame their three beasts for Thotar (6062, 6083, 6082) around Razor
+# Hill and carry Training the Beast (6081) to Ormak Grimshot in Orgrimmar
+# (forever/horde/03-silverpine-forest, about 16); Warlocks take Gan'rul's
+# Summons (1506) from Ophek and get the Voidwalker (1501, 1504) on two short
+# trips into Orgrimmar, whose gate is a few steps from Skull Rock; Troll
+# Priests take Hex of Weakness (5654) from Tai'jin, handed to Ur'kyo in
+# Orgrimmar at about 16. The Shattered Hand (1963, Rogue) teaches no spell
+# and is left out.
 #
 # Left out: quests the route accepts and never turns in: The Admiral's Orders
 # (831, to Nazgrel), Need for a Cure (812), Neeru Fireblade (829).
@@ -118,15 +125,34 @@ step Back at the Den
   turnin 1499 only Warlock            -- Zureetha Fargaze
   accept 794
 
+step Canaga Earthcaller
+  only Shaman
+  tip Canaga stands just outside the Den.
+  accept 1516                         -- Canaga Earthcaller
+
 step Burning Blade Coven
   tip Yarrog Baneshadow waits at the back of the cave on the valley's north side.
   collect 4859 quest 794.1
+
+step Felstalker hooves
+  only Shaman
+  tip Felstalkers roam the slope below the cave, on the valley's north side.
+  collect 6640 quest 1516.1
 
 step Zureetha Fargaze
   turnin 794
   accept 805
   accept 96652                        -- the Lost Journal on the ground beside her
   train class
+
+step Call of Earth
+  only Shaman
+  tip Canaga stands outside the Den. Spirit Rock is the hill just south of it: drink the Earth Sapta there to see the Minor Manifestation of Earth, then take the Rough Quartz back to Canaga.
+  turnin 1516                         -- Canaga Earthcaller
+  accept 1517
+  turnin 1517                         -- Minor Manifestation of Earth, on Spirit Rock
+  accept 1518
+  turnin 1518                         -- Canaga Earthcaller: Stoneskin Totem and your Earth Totem
 
 step Ukor
   tip Ukor stands on the road at the valley's eastern exit.
@@ -314,6 +340,8 @@ step Razor Hill
   accept 1505 only Warrior            -- Tarshaw Jaggedscar
   accept 2983 only Shaman             -- Swart
   accept 6062 only Hunter             -- Thotar
+  accept 1506 only Warlock            -- Ophek, by the inn
+  accept 5654 only Troll,Priest       -- Tai'jin, for Ur'kyo in Orgrimmar: keep it
 
 step Fizzle Darkstorm
   tip Fizzle holds the Burning Blade camp on Thunder Ridge, north-west of Razor Hill. Hunters: tame a Dire Mottled Boar with the Taming Rod on the way.
@@ -344,13 +372,37 @@ step Margoz
   turnin 828
   accept 827
 
+step Gan'rul Bloodeye
+  only Warlock
+  zone Orgrimmar
+  tip Orgrimmar's main gate is just west of Skull Rock. Gan'rul stands in the Cleft of Shadow, the canyon under the Valley of Strength.
+  turnin 1506                         -- Gan'rul Bloodeye
+  accept 1501
+
 step Skull Rock
+  zone Durotar
   tip Burning Blade cultists hold the caves of Skull Rock to the north; any of them drops a Searing Collar. Gazz'uz, a level 14 warlock, stands deep inside and drops the Eye of Burning Shadow.
   collect 4871 quest 827.1
   collect 4903 "Eye of Burning Shadow"
   accept 832
 
+step Tablet of Verga
+  only Warlock
+  tip The Burning Blade Stash stands in Skull Rock, among the cultists you just fought.
+  collect 6535 quest 1501.1
+
+step The Binding
+  only Warlock
+  zone Orgrimmar
+  tip Back to Gan'rul in the Cleft of Shadow. Use the Glyphs of Summoning on the summoning circle there and defeat the voidwalker to bind it.
+  turnin 1501                         -- Gan'rul Bloodeye
+  accept 1504
+  use 7464 @49.3,50.0                 -- Glyphs of Summoning
+  kill 5676 quest 1504.1
+  turnin 1504                         -- Gan'rul Bloodeye: Summon Voidwalker
+
 step Margoz
+  zone Durotar
   turnin 827
 
 step Razor Hill
@@ -366,6 +418,7 @@ step Armored Scorpid
   tip Armored Scorpids crawl over the plains west of Razor Hill. Tame one, then return to Thotar.
   kill 3126 quest 6082.1              -- Tame it with the Taming Rod
   turnin 6082                         -- Thotar
+  accept 6081                         -- Thotar: Ormak Grimshot in Orgrimmar teaches Beast Training
 
 # ---------------------------------------------------------------- To the Crossroads
 

@@ -47,6 +47,11 @@ next forever/horde/02-the-barrens
 #   from Moonglade instead. The export's Razor Hill bind and hearth are
 #   dropped too: Thunder Ridge is a short walk from Razor Hill.
 #
+# Class quests at 4: Shamans take Call of Earth (1519-1521) from Seer
+# Ravenfeather when the ravine turn-ins in Camp Narache bring them to 4, then
+# walk back to Brambleblade Ravine for the Bristleback Shamans' Ritual Salve;
+# the Minor Manifestation of Earth waits on the mesa east of the camp.
+#
 # Class quests at 10 (Thunder Bluff stop):
 # - Warrior: Veteran Uzzek (1505), continued in the Barrens guide.
 # - Shaman: Call of Fire (1523), continued in the Barrens guide.
@@ -129,6 +134,25 @@ step Camp Narache
   turnin 757
   accept 763
   accept 96659
+
+step Seer Ravenfeather
+  only Shaman
+  tip Seer Ravenfeather stands in Camp Narache. Call of Earth needs level 4, which you reach with the turn-ins here.
+  accept 1519                         -- Seer Ravenfeather
+
+step Ritual Salve
+  only Shaman
+  tip Back east to Brambleblade Ravine: the Bristleback Shamans stand among the quilboar there.
+  collect 6634 quest 1519.1
+
+step Call of Earth
+  only Shaman
+  tip Back to Seer Ravenfeather in the camp. The Minor Manifestation of Earth waits on the mesa east of the camp: drink the Earth Sapta there to see it, then take the Rough Quartz back to the Seer.
+  turnin 1519                         -- Seer Ravenfeather
+  accept 1520
+  turnin 1520                         -- Minor Manifestation of Earth
+  accept 1521
+  turnin 1521                         -- Seer Ravenfeather: Stoneskin Totem and your Earth Totem
 
 # ---------------------------------------------------------------- Bloodhoof Village
 

@@ -51,8 +51,22 @@ next forever/horde/02-the-barrens
 #   zeppelin from the towers by the Ruins of Lordaeron, then the walk through
 #   Durotar to the Crossroads, where the next guide starts.
 #
-# Class quests: none on this route. Class training at Deathknell (2, 4) and in
-# Brill (6, 8, 10, 12).
+# Class quests: Paladins take A Difficult Path (98601) from Sarvis and
+# Rediscovering the Light (90902, Holy Light) from Aramis Hammerhand in
+# Deathknell; Warlocks do Piercing the Veil (1470, Summon Imp) with Venya
+# Marthand on the Rattlecage Skeletons. At about 10 from Brill: Warriors kill
+# Ulag the Cleaver north of town (1819, Defensive Stance); Warlocks take
+# Creature of the Void (1473) from Carendin Halgar in the Undercity on the way
+# to the Scarlet camp, where Egalin's Grimoire lies in Perrine's Chest, and
+# bind the Voidwalker (1471) in the Undercity before the zeppelin; Priests
+# learn Touch of Weakness (5658) from Aelthalyste on the same Undercity stop.
+# Class training at Deathknell (2, 4) and in Brill (6, 8, 10, 12).
+#
+# Left out for Paladins: A Lesson in Divinity (94427-94441, Redemption) runs
+# from Bandarion Keep on the west coast to the Undercity and Deathguard Falgan
+# at the far east end of the glades and back: three crossings of the zone for
+# a resurrection spell that solo leveling does not need. The Bandarion Keep
+# story quests (91208 onwards) teach no spell.
 #
 # Left out (accepted by the export but never turned in on its route): The
 # Prodigal Lich (405, Bethor Iceshard in the Undercity), Delivery to
@@ -83,11 +97,24 @@ step Shadow Priest Sarvis
   accept 98389                        -- Aramis Hammerhand
   train class                         -- The Deathknell trainers stand around the church
 
+step Aramis and Venya
+  only Paladin,Warlock
+  tip Aramis Hammerhand and Venya Marthand stand beside the church.
+  accept 98601 only Paladin           -- Shadow Priest Sarvis: the scroll for Aramis
+  turnin 98601 only Paladin           -- Aramis Hammerhand
+  accept 90902 only Paladin
+  accept 1470 only Warlock            -- Venya Marthand
+
 step Rattlecages, scavengers and duskbats
   tip Rattlecage Skeletons wander the ruined houses in the north half of Deathknell. Young Scavengers and Duskbats roam all around the village; the Ragged Scavengers and Mangy Duskbats are on its east side.
   kill 1890 quest 3901.1
   collect 3265 quest 376.1
   collect 3264 quest 376.2
+
+step Rattlecage skulls
+  only Warlock
+  tip The Rattlecage Skeletons in the ruined houses drop the skulls.
+  collect 6281 quest 1470.1
 
 step Back to the church
   turnin 3901                         -- Shadow Priest Sarvis
@@ -95,6 +122,12 @@ step Back to the church
   accept 3902                         -- Deathguard Saltain
   accept 380                          -- Executor Arren, in the church
   train class
+
+step Aramis and Venya
+  only Paladin,Warlock
+  tip Paladins: Rediscovering the Light is done once you have healed five Injured Deathguard around the church with Holy Light.
+  turnin 90902 only Paladin           -- Aramis Hammerhand: Holy Light
+  turnin 1470 only Warlock            -- Venya Marthand: Summon Imp
 
 step Scavenging Deathknell
   tip The Equipment Boxes lie beside the ruined houses in the north of Deathknell.
@@ -327,14 +360,33 @@ step Brill
   turnin 407                          -- The Captured Scarlet Zealot, in the town hall basement
   train class
 
+step Ulag the Cleaver
+  only Warrior
+  tip Deathguard Dillinger stands in Brill. Ulag waits in the mausoleum on the hill just north of town: open the gate and fight him.
+  accept 1819                         -- Deathguard Dillinger
+  kill 6390 quest 1819.1
+  turnin 1819                         -- Deathguard Dillinger: Defensive Stance
+
+step Carendin Halgar
+  only Warlock
+  zone Undercity
+  tip Walk south from Brill to the Ruins of Lordaeron and down into the Undercity. Carendin Halgar stands in the Magic Quarter. The Scarlet camp is just west of the ruins.
+  accept 1473                         -- Carendin Halgar
+
 # ---------------------------------------------------------------- The Scarlet camp
 
 step The Scarlet camp
+  zone Tirisfal Glades
   tip Follow the road south-west from Brill to the Scarlet Crusade camp. Captain Perrine stands at its south end; every Scarlet there can drop a ring.
   kill 1662 quest 370.1
   kill 1537 quest 370.2
   kill 1536 quest 370.3
   collect 2875 quest 374.1
+
+step Perrine's Chest
+  only Warlock
+  tip Perrine's Chest stands beside Captain Perrine at the camp's south end.
+  collect 6285 quest 1473.1
 
 step Brill
   turnin 374                          -- Deathguard Burgess
@@ -418,7 +470,20 @@ step Leonid Barthalomew
 step Hearth to Brill
   hearth "Gallows' End Tavern"
 
+step The Undercity
+  only Warlock,Priest
+  zone Undercity
+  tip The Undercity is under the Ruins of Lordaeron, beside the zeppelin towers. Carendin Halgar is in the Magic Quarter: use the Runes of Summoning on the summoning circle beside him and defeat the voidwalker. Aelthalyste is in the War Quarter.
+  turnin 1473 only Warlock            -- Carendin Halgar
+  accept 1471 only Warlock
+  use 6284 @86.6,27.1 only Warlock    -- Runes of Summoning
+  kill 5676 quest 1471.1 only Warlock
+  turnin 1471 only Warlock            -- Carendin Halgar: Summon Voidwalker
+  accept 5658 only Priest             -- Aelthalyste
+  turnin 5658 only Priest             -- Aelthalyste: Touch of Weakness
+
 step Zeppelin to Durotar
+  zone Tirisfal Glades
   tip Walk south-east from Brill to the zeppelin towers outside the Ruins of Lordaeron and board the zeppelin to Orgrimmar (the other one goes to Grom'gol).
   goto 60.7,58.9 "Zeppelin tower"
 

@@ -56,7 +56,12 @@ next forever/horde/30-40/03-arathi-highlands
 #   visit; they are at the start of forever/horde/30-40/03-arathi-highlands,
 #   where you are actually in Hammerfall.
 #
-# Class quests: none on this stretch.
+# Class quests: Shamans and Warlocks make one hop to Kalimdor from Grom'gol
+# once they are bound there: the zeppelin to Orgrimmar, then a flight to
+# Ratchet (Shaman: the Shard of Water to Islen Waterseer, Call of Water 96:
+# your Water Totem) or to Freewind Post (Warlock: the Tattered Manuscript in
+# the Damaged Chest north of the post, Tome of the Cabal 1803), and the hearth
+# back. Both quests started in forever/horde/30-40/01-desolace.
 #
 # Class training: none in Stranglethorn: the guide stays between Grom'gol and
 # Booty Bay. You train next in Orgrimmar at about 38, in the next guide.
@@ -80,6 +85,25 @@ step Grom'gol Base Camp
   getfp "Grom'gol" npc 1387           -- Thysta
   sethome "Grom'gol Base Camp" npc 5814 -- Innkeeper Thulbek
   accept 581                          -- Nimboya
+
+step Islen Waterseer
+  only Shaman
+  zone The Barrens
+  tip Take the Orgrimmar zeppelin from the tower on the west side of Grom'gol and fly to Ratchet. Islen Waterseer camps on the coast a short ride south of it.
+  fly "Ratchet"
+  turnin 96                           -- Islen Waterseer: Healing Stream Totem and your Water Totem
+
+step Damaged Chest
+  only Warlock
+  zone Thousand Needles
+  tip Take the Orgrimmar zeppelin from the tower on the west side of Grom'gol and fly to Freewind Post. The Damaged Chest lies in the canyon north of the post.
+  fly "Freewind Post"
+  collect 6997 quest 1803.2
+
+step Back to Grom'gol
+  only Shaman,Warlock
+  zone Stranglethorn Vale
+  hearth "Grom'gol Base Camp"
 
 # ---------------------------------------------------------------- Nesingwary's camp
 

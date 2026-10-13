@@ -65,9 +65,17 @@ next forever/horde/05-stonetalon-mountains
 # Class quests (training trip at 20): Warrior Speak with Ruga / Trial at the
 # Field of Giants / Speak with Thun'grim (1823-1825); Shaman Call of Water
 # (1528, 1530, 1535; 1536 waits at the Spring Well beside Tarren Mill); Warlock
-# succubus chain (1507-1513, The Binding on the last Orgrimmar trip); Rogue
-# The Shattered Salute / Deep Cover / Mission: Possible But Not Probable
-# (2460, 2458, 2478 optional).
+# succubus chain (1507-1513, The Binding on the last Orgrimmar trip); Troll
+# Priest Shadowguard (5680, Ur'kyo); Undead Priest Devouring Plague (5646,
+# Ur'kyo to Aelthalyste in the Undercity, about 25); Rogue The Shattered
+# Salute / Deep Cover / Mission: Possible But Not Probable (2460, 2458, 2478
+# optional) and, if Gallywix falls, Hinott's Assistance (2479, optional:
+# Serge Hinott in Tarren Mill teaches Poisons). Tauren Druids open the Sludge
+# Fen's Strange Lockbox for Trial of the Sea Lion (30). Druids train in
+# Thunder Bluff at 23 and take Cat Form there and in Moonglade (98340, the
+# Great Cat Spirit or, for Skyborne, the Windborne one, 98341; 98362);
+# Skyborne hand Turak's Moonglade welcome (94913) to Dendrite on the same
+# trip, Tauren finish Aquatic Form (30, 31).
 #
 # No grind stops: the export has none here.
 
@@ -162,6 +170,13 @@ step Shenthul
   turnin 2460
   accept 2458                         -- Deep Cover: Taskmaster Fizzule, by the Sludge Fen
 
+step Ur'kyo
+  only Priest
+  tip Ur'kyo stands in the Valley of Spirits, on the city's west side.
+  accept 5680 only Troll              -- Ur'kyo
+  turnin 5680 only Troll              -- Ur'kyo: Shadowguard
+  accept 5646 only Undead             -- Ur'kyo: Aelthalyste in the Undercity, two guides on
+
 step Back to the Crossroads
   zone The Barrens
   fly "Crossroads"
@@ -213,6 +228,11 @@ step Walton and Vrang
   turnin 95621
 
 # ---------------------------------------------------------------- The Sludge Fen
+
+step Strange Lockbox
+  only Tauren,Druid
+  tip The Strange Lockbox lies at the north edge of the Sludge Fen, by the Venture Co. tower. It holds the Half Pendant of Aquatic Agility for Trial of the Sea Lion.
+  collect 15883
 
 step Ignition
   tip East to the Sludge Fen. Wizzlecrank's Shredder stands inside the Venture Co. camp; Supervisor Lugwizzle carries the key.
@@ -464,6 +484,58 @@ step The Binding
 step Shenthul
   only Rogue
   turnin 2478 optional                -- Shenthul, Cleft of Shadow
+  accept 2479 optional                -- Serge Hinott in Tarren Mill teaches Poisons: keep it
+
+step The Great Cat Spirit
+  only Druid
+  zone Thunder Bluff
+  tip Turak Runetotem trains you on Elder Rise in Thunder Bluff.
+  accept 98340                        -- Turak Runetotem
+
+step Moonglade
+  only Druid
+  zone Moonglade
+  tip Cast Teleport: Moonglade. Tauren: join the two pendant halves at the Shrine of Remulos, on the north-west shore of the lake, before you see Dendrite Starblaze in Nighthaven.
+  collect 15885 quest 30.1 only Tauren -- Pendant of the Sea Lion: use a half at the Shrine of Remulos
+  turnin 30 only Tauren               -- Dendrite Starblaze
+  accept 31 only Tauren
+  turnin 94913 only Skyborne          -- Dendrite Starblaze: the welcome from Turak
+  turnin 98340                        -- Dendrite Starblaze
+  accept 98405 only Tauren
+  accept 98341 only Skyborne
+
+step The Stormrage Barrow Dens
+  only Druid
+  zone Moonglade
+  tip Tauren: the Great Cat Spirit waits on the southern hill above the bridge. Skyborne: the Avatar of Saeyleenan stands south of the twin bridges. Then the dens east of the lake: leave your form, click the statue at the entrance for five minutes of stealth, keep clear of the spirits inside and take one of each relic; the Relic of the Silent Shadow lies at the foot of the white cat statue.
+  turnin 98405 only Tauren            -- Great Cat Spirit
+  accept 98342 only Tauren
+  turnin 98341 only Skyborne          -- Avatar of Saeyleenan
+  accept 98404 only Skyborne
+  collect 280502 quest 98342.1 @72.4,66.0 only Tauren
+  collect 280679 quest 98342.2 @75.2,67.2 only Tauren
+  collect 280680 quest 98342.3 @74.4,65.4 only Tauren
+  collect 280502 quest 98404.1 @72.4,66.0 only Skyborne
+  collect 280679 quest 98404.2 @75.2,67.2 only Skyborne
+  collect 280680 quest 98404.3 @74.4,65.4 only Skyborne
+  turnin 98342 only Tauren            -- Great Cat Spirit
+  accept 98739 only Tauren
+  turnin 98404 only Skyborne          -- Avatar of Saeyleenan
+  accept 98738 only Skyborne
+
+step Dendrite Starblaze
+  only Druid
+  zone Moonglade
+  turnin 98739 only Tauren            -- Dendrite Starblaze, Nighthaven
+  turnin 98738 only Skyborne
+  accept 98362
+
+step Turak Runetotem
+  only Druid
+  zone Thunder Bluff
+  fly "Thunder Bluff"                 -- Bunthen Plainswind in Nighthaven flies druids there
+  turnin 31 only Tauren               -- Turak Runetotem: Aquatic Form
+  turnin 98362                        -- Turak Runetotem: Cat Form
 
 step Back to the Crossroads
   zone The Barrens
