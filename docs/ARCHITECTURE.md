@@ -1520,7 +1520,7 @@ their own diagnostics not reported).
 | `new [dir]` | writes a pack from `tools/templates/pack/` (the CI workflow and devcontainer only when the clone has an `origin`) |
 | `lint`, `compile` | checks with our guides as context; writes `<pack>/dist/<folder>/`; `--format text\|json\|github` |
 | `doctor` | Node, Lua, reference data, AddOns folder, `pack.json` |
-| `find` | quests, NPCs, objects, items and our guides as guide lines (`--json`) |
+| `find` | quests, NPCs, objects, items, inns, flight points and our guides as guide lines (`--json`); `--kind inn\|flight` without a text lists every inn or flight point (from `travel.json`) |
 | `playtest` | every guide to the end per class (`tools/lib/playtest.js`, also behind `tests/guides.test.js`) |
 | `play`, `dev` | the playground with the pack built into a temp folder; `dev` watches and builds into AddOns |
 | `install`, `pack` | builds and installs the pack; writes `<pack>/dist/<folder>-<version>.zip` |

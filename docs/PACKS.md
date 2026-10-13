@@ -175,7 +175,9 @@ ready to paste. A quest also prints its turn-in line and its objectives, `7.1
 6 x10 quest 7.1`). A guide prints its level range, who it is for
 (`Alliance`, `Dwarf/Gnome only`, `Alliance Paladin only`) and its own `next`.
 An inn prints the location `sethome` and `hearth` take (and the other names
-the game may report for it), a flight point the town `getfp` and `fly` take;
+the game may report for it), a flight point the town `getfp` and `fly` take
+(the flight map picks the node by it; where the landing area is named
+differently, a `fly` goal checks off only through a later goal of its step);
 a text also matches their zone, and `--kind inn` or `--kind flight` without
 a text lists them all. `--faction`, `--race` and `--class` keep what such a
 character can use.
