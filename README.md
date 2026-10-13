@@ -564,7 +564,7 @@ the steps and what each zip carries.
 | `doctor` | Check the setup for writing a guide pack |
 | `draft` | Generate a first-draft leveling route (`.guide`) from the reference data |
 | `dungeons` | Build the dungeon data (`data/forever/dungeons.json`) |
-| `find` | Look up quests, NPCs, objects, items and guides as guide lines |
+| `find` | Look up quests, NPCs, objects, items, inns, flight points and guides as guide lines |
 | `gear` | Build the upgrade-advice data (item stats, reward choices, stat weights) |
 | `install` | Install the addons into the Forever client |
 | `itemdb` | Build the `Polestar_ItemDB` data addon from client tables |

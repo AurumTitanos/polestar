@@ -123,10 +123,10 @@ A step must contain at least one goal.
 | `talk` | `<npcId>` | |
 | `interact` | `<objectId>` | Click a game object. |
 | `use` | `<itemId> ["Item name"]` | |
-| `sethome` | `"Location"` or `nearest` | Inn location as the game names it, e.g. `"Goldshire"`. `sethome nearest` binds at the nearest own-faction inn when the step comes up. |
-| `hearth` | `"Location"` | |
-| `getfp` | `"Location"` | Discover a flight path. |
-| `fly` | `"Location"` | Take a flight. |
+| `sethome` | `"Location"` or `nearest` | Inn location as the game names it (the bind location it reports), e.g. `"Goldshire"`. `sethome nearest` binds at the nearest own-faction inn when the step comes up. Lint warns about a location no inn has (`polestar find --kind inn`). |
+| `hearth` | `"Location"` | Done when the zone or subzone where you land has that name: an inn's location or the zone it is in. Lint warns about any other name. |
+| `getfp` | `"Location"` | Discover a flight path: the flight point's name (`"Stormwind, Elwynn"`) or its part before the comma (`"Stormwind"`). Lint warns about a name no flight point has (`polestar find --kind flight`). |
+| `fly` | `"Location"` | Take a flight. Done when the zone or subzone where you land has that name. Lint warns about a name that is no flight point's town, inn location or zone they are in. |
 | `train` | `[npcId]`, `<Profession> [Rank]`, or `class` | `train First Aid` / `train Mining Expert`: the nearest own-faction trainer of that profession and rank (`Apprentice`, `Journeyman`, `Expert`, `Artisan`; ranks taught by a book or quest point at its vendor or quest giver). Without a rank: the highest rank whose minimum skill (0/50/125/225) the last earlier `skill` (or `craft … until`) target for that profession in the guide reaches, Apprentice when there is none, and always above a rank the guide already trained. `train class`: the nearest trainer of the player's class. Resolved at runtime from the player's faction and position. |
 | `buy` | `<itemId> ["Item name"]` | Use `xN` for quantity. Add `nearest` to send the player to the closest own-faction vendor selling it. |
 | `vendor` | `[npcId]` or `nearest` | Sell junk / repair; `nearest` picks the closest own-faction vendor. |
@@ -298,6 +298,15 @@ Warnings:
 - a smart target with no candidate for a faction the goal applies to (and, for
   `train class`, for a class that faction's allowed races can be); a `train
   <Profession>` whose default rank needs more skill than any earlier `skill` target
+- a `sethome`, `hearth`, `getfp` or `fly` location the game never reports,
+  matched as the addon matches it, ignoring case: `sethome` against the inns'
+  bind locations, `hearth` against those and the zones the inns are in,
+  `getfp` against the flight points' names and their part before the comma,
+  `fly` against the flight points' towns, the inns' locations and the zones
+  they are in. The hint names the closest known places (`did you mean
+  "Feathermoon Stronghold"?`). Inns and flight points come from
+  `data/forever/travel.json`; without it (or without the inns or the flight
+  points in it) those goals are not checked
 - `lint` only, with a simulator world cached in `data/sim` (or `--sim <dir>`): a
   non-`optional` quest goal in a `Leveling` guide on a quest the solo filter
   excludes (dungeon, raid, pvp, rare drop, reputation, repeatable or profession;
@@ -388,8 +397,10 @@ position as `zone map <id>` and `goto <x>,<y> live`, ready to paste, and the
   fly "Crossroads"
 ```
 
-Locations are written as the game names them. `sethome nearest` binds at the
-nearest inn of the player's faction instead.
+Locations are written as the game names them; `polestar find --kind inn` and
+`polestar find --kind flight` list the names (every inn and flight point,
+with coordinates). `sethome nearest` binds at the nearest inn of the
+player's faction instead.
 
 ### Errands: `train`, `buy`, `vendor`, `level`, `note`
 

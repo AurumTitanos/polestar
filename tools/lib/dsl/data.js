@@ -2,15 +2,15 @@
 // Reference data (data/forever/*.json, schema in docs/ARCHITECTURE.md) with
 // the lookups the resolver needs. Missing files load as empty tables so a
 // guide made only of explicit names still compiles; the caller is told which
-// files were missing. The optional files (professions, factions) are also
-// treated as missing when they cannot be parsed, so a half-built data folder
-// never stops compilation.
+// files were missing. The optional files (professions, factions, trainers,
+// dungeons, races, travel) are also treated as missing when they cannot be
+// parsed, so a half-built data folder never stops compilation.
 
 const fs = require('node:fs');
 const path = require('node:path');
 
 const FILES = ['quests', 'npcs', 'objects', 'items', 'zones', 'map-frames', 'meta'];
-const OPTIONAL = ['professions', 'factions', 'trainers', 'dungeons', 'races'];
+const OPTIONAL = ['professions', 'factions', 'trainers', 'dungeons', 'races', 'travel'];
 
 // Quests only dungeons.json knows (new Forever dungeon quests DungeonJournal
 // records and quests.json lacks), as minimal quest records: title, levels and
@@ -102,6 +102,7 @@ class Data {
 		this.hasTrainers = !this.missing.includes('trainers.json');
 		this.trainersRaw = raw.trainers || {};
 		this.races = raw.races || {};
+		this.travel = raw.travel || {};
 		this.zoneByName = new Map();
 		for (const z of Object.values(this.zones)) {
 			if (!z || !z.name) continue;
@@ -241,6 +242,20 @@ class Data {
 			this._roles.set(role, ids);
 		}
 		return this._roles.get(role);
+	}
+
+	// Inns with an innkeeper (travel.json): [{ location, names (the bind
+	// locations the game may report, first = location), npc, npcName, map,
+	// x, y }]; [] without travel.json.
+	inns() {
+		return Array.isArray(this.travel.inns) ? this.travel.inns : [];
+	}
+
+	// Flight masters (travel.json): [{ id, name ("Stormwind, Elwynn"), short
+	// ("Stormwind"), npc, npcName, map, x, y, faction (1 Alliance, 2 Horde,
+	// 3 both) }]; [] without travel.json.
+	flightNodes() {
+		return this.travel.taxi && Array.isArray(this.travel.taxi.nodes) ? this.travel.taxi.nodes : [];
 	}
 
 	faction(id) {

@@ -162,20 +162,28 @@ polestar find "kobold camp cleanup"
 polestar find Hogger --kind npc --faction Alliance
 polestar find westfall --kind guide --race Human   # our guides a Human can follow, for `next`
 polestar find 36 --json                 # ids, levels, zones, coordinates as JSON
+polestar find --kind inn                # every inn, as `sethome` and `hearth` name it
+#   sethome "Goldshire"  # Innkeeper Farley (npc 295), Elwynn Forest 43.8,65.8
+polestar find --kind flight --faction Alliance   # every flight point, as `getfp` and `fly` name it
+#   getfp "Sentinel Hill"  # Sentinel Hill, Westfall, Alliance: Thor (npc 523), Westfall 56.6,52.7
 ```
 
-`find` searches quests, NPCs, objects, items and Polestar's guides; a number
-matches ids exactly. Each result is a guide line ready to paste. A quest also
-prints its turn-in line and its objectives, `7.1 = kill Kobold Vermin x10`:
-write `quest 7.1` on the goal that works it (`kill 6 x10 quest 7.1`). A guide
-prints its level range, who it is for (`Alliance`, `Dwarf/Gnome only`,
-`Alliance Paladin only`) and its own `next`. `--faction`, `--race` and
-`--class` keep what such a character can use.
+`find` searches quests, NPCs, objects, items, inns, flight points and
+Polestar's guides; a number matches ids exactly. Each result is a guide line
+ready to paste. A quest also prints its turn-in line and its objectives, `7.1
+= kill Kobold Vermin x10`: write `quest 7.1` on the goal that works it (`kill
+6 x10 quest 7.1`). A guide prints its level range, who it is for
+(`Alliance`, `Dwarf/Gnome only`, `Alliance Paladin only`) and its own `next`.
+An inn prints the location `sethome` and `hearth` take (and the other names
+the game may report for it), a flight point the town `getfp` and `fly` take;
+a text also matches their zone, and `--kind inn` or `--kind flight` without
+a text lists them all. `--faction`, `--race` and `--class` keep what such a
+character can use.
 
 `--json` prints the results as one JSON array, and `lint --format
 json|github` its problems, for editors, scripts and CI. Every result has
-`kind`, `id`, `name` and `line` (the guide line), quests and guides also
-`notes` (the comment lines printed under it); besides:
+`kind`, `id`, `name` and `line` (the guide line), quests, guides and inns
+with another name also `notes` (the comment lines printed under it); besides:
 
 | Kind | Fields |
 |---|---|
@@ -184,6 +192,8 @@ json|github` its problems, for editors, scripts and CI. Every result has
 | `object` | `zone`, `x`, `y` |
 | `item` | — |
 | `guide` | `level` (its first), `levels` (`min`, `max`), `zone`, `faction`, `races` and `classes` (`null` when the guide names none), `next` (the guide ids its `next` offers: several are a route choice) |
+| `inn` | `id` and `npc` (the innkeeper), `npcName`, `names` (every bind location the game may report; the first is `name`), `zone`, `map`, `x`, `y` |
+| `flight` | `id` (the flight point), `node` (its full name, `name` is its town), `faction` (`Alliance`, `Horde`, or `null` for both), `npc`, `npcName`, `zone`, `map`, `x`, `y` |
 
 Fields with nothing to say are left out (a quest with no starter has no `x`).
 
@@ -349,6 +359,7 @@ checks are listed in GUIDE_FORMAT.md ("Validation").
 | LICENSE still holds the placeholder line `polestar new` writes, not the licence text (warning) | replace the line with the full text of your licence |
 | map <id>: this pack's Era frame differs from the one Polestar's guides register (warning) | in game Polestar's frame wins, so coordinates on that map may be off: mark them `live` or retake them with `/polestar where` |
 | `kill` npc <id> (<name>) is elite; … / <item> drops only from elites (<names>); … / quest <id> (<title>) is elite … (warning in packs) | Polestar's own house rule (errors in our guides): in a Leveling guide make the goal `optional` with the tip "<name> is elite: grouping up is advised." |
+| sethome/hearth/getfp/fly "<location>": no inn has that bind location / no inn stands there / no flight point has that name / no flight point lands there; the game never reports that name, so the goal never checks off by itself (warning) | write the place as the game names it: the hint offers the closest known names (`did you mean "Grom'gol Base Camp"?`); `polestar find --kind inn` and `polestar find --kind flight` list them all. Checked against the inns and flight points of `data/forever/travel.json` (GUIDE_FORMAT.md, "Validation") |
 
 The folder rule: `compile`, `pack`, `install`, `dev` and `play` write a pack
 folder only when it is absent, empty, or carrying the generated marker (a

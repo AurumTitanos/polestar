@@ -16,6 +16,7 @@ const { buildCandidates } = require('./candidates');
 const { farmSpots } = require('./farmspots');
 const { applicable, raceSides } = require('./conditions');
 const { objectiveLabel } = require('./data');
+const { checkLocation } = require('./places');
 const { blockingPrereqs } = require('../data/prereqs');
 const { clusterPoints, scaleOf } = require('../questdb/cluster');
 
@@ -509,6 +510,11 @@ function resolveGoal(g, zoneMap, prev, data, err, warn, ctx = { sides: ['Allianc
 		if (!known) warn(ln, `${kind} ${id} is not in data; its name and position cannot be filled`);
 		return name;
 	};
+	// A location the game never reports (places.js): a warning with the closest names.
+	const placeWarning = (verb, location) => {
+		const bad = checkLocation(data, verb, location);
+		if (bad) warn(ln, bad.message, bad.hint);
+	};
 
 	// Smart targets: a candidate set the engine chooses from at runtime, for
 	// the factions this goal can apply to, ranked from the previous goal (else
@@ -722,6 +728,7 @@ function resolveGoal(g, zoneMap, prev, data, err, warn, ctx = { sides: ['Allianc
 		case 'train':
 		case 'vendor': {
 			if (g.location !== undefined) goal.location = g.location;
+			if (g.location !== undefined && (v === 'sethome' || v === 'getfp')) placeWarning(v, g.location);
 			if (v === 'train' && g.profession !== undefined) trainProfession(g, goal, data, ctx, err, warn, smart);
 			if (v === 'train' && g.classTrain) {
 				goal.class = true;
@@ -754,6 +761,7 @@ function resolveGoal(g, zoneMap, prev, data, err, warn, ctx = { sides: ['Allianc
 		case 'hearth':
 		case 'fly':
 			goal.location = g.location;
+			placeWarning(v, g.location);
 			break;
 		case 'buy': {
 			goal.item = g.item;

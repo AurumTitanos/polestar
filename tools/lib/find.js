@@ -1,9 +1,11 @@
 'use strict';
-// find: quests, NPCs, objects and items in the reference data, and our
-// guides, by id or name. Each result carries a guide line ready to
-// paste (it parses with tools/lib/dsl/parse.js), with what it is in a comment:
+// find: quests, NPCs, objects, items, inns and flight points in the
+// reference data, and our guides, by id or name. Each result carries a guide
+// line ready to paste (it parses with tools/lib/dsl/parse.js), with what it
+// is in a comment:
 //
 //   accept 36  # Westfall Stew, level 10: Verna Furlbrow, Westfall 59.9,19.4
+//   sethome "Goldshire"  # Innkeeper Farley (npc 295), Elwynn Forest 43.8,65.8
 //   next forever/alliance/02-westfall  # Westfall (12-17), Alliance
 
 const fs = require('node:fs');
@@ -14,7 +16,9 @@ const { findGuideFiles } = require('./dsl/project');
 const { objectiveLabel } = require('./dsl/data');
 const { RACES, applicable, characterKeys, maskExcludes, raceSides, raceLabel, classLabel, whoLabel } = require('./dsl/conditions');
 
-const KINDS = ['quest', 'npc', 'object', 'item', 'guide'];
+const KINDS = ['quest', 'npc', 'object', 'item', 'inn', 'flight', 'guide'];
+// The kinds `find` lists in full without a text.
+const LISTED = ['inn', 'flight'];
 const FACTIONS = ['Alliance', 'Horde'];
 
 // [{ id, title, faction, races, classes, levels, zone, next }] from the
@@ -143,6 +147,30 @@ function itemResult(i) {
 	return r;
 }
 
+// An inn: its bind location (what `sethome` and `hearth` name) and the other
+// names the game may report for it.
+function innResult(data, i) {
+	const names = (Array.isArray(i.names) && i.names.length ? i.names : [i.location]).map(String);
+	const r = { kind: 'inn', id: i.npc, name: String(i.location), names, npc: i.npc, npcName: i.npcName || null };
+	const zone = zoneName(data, i.map);
+	if (zone) r.zone = zone;
+	Object.assign(r, { map: i.map, x: i.x, y: i.y });
+	r.line = `sethome "${r.name}"  # ${r.npcName || 'innkeeper'} (npc ${i.npc}), ${spot(r)}`;
+	if (names.length > 1) r.notes = [`# the game may also report ${names.slice(1).map((n) => `"${n}"`).join(' or ')}`];
+	return r;
+}
+
+// A flight point: its town (what `getfp` and `fly` name) and the full node name.
+function flightResult(data, n) {
+	const town = String(n.name).split(',')[0];
+	const r = { kind: 'flight', id: n.id, name: town, node: String(n.name), faction: n.faction === 1 ? 'Alliance' : n.faction === 2 ? 'Horde' : null, npc: n.npc || null, npcName: n.npcName || null };
+	const zone = zoneName(data, n.map);
+	if (zone) r.zone = zone;
+	Object.assign(r, { map: n.map, x: n.x, y: n.y });
+	r.line = `getfp "${town}"  # ${r.node}${r.faction ? `, ${r.faction}` : ''}: ${r.npcName || 'flight master'}${r.npc ? ` (npc ${r.npc})` : ''}, ${spot(r)}`;
+	return r;
+}
+
 // Who a guide is for, after its level range: "Alliance", "Dwarf/Gnome only".
 function guideFor(g) {
 	return g.races || g.classes ? `${whoLabel(g)} only` : whoLabel(g);
@@ -167,13 +195,18 @@ function guideResult(g) {
 }
 
 // -> results, best first: exact names, then names starting with the text,
-// then the rest; by kind (quest, npc, object, item, guide), then id. A guide
-// also matches by id and zone. `race` (a race file) and `cls` (a class file)
-// keep what such a character can use: quests by race and class mask, NPCs by
-// the race's sides, guides by their faction, race and class conditions.
+// then the rest; by kind (quest, npc, object, item, inn, flight, guide), then
+// id (inns and flight points by name). A guide also matches by id and zone,
+// an inn by every name the game may report and its zone, a flight point by
+// its full name and zone. Without a text, --kind inn or flight lists them
+// all. `race` (a race file) and `cls` (a class file) keep what such a
+// character can use: quests by race and class mask, NPCs and inns by the
+// race's sides, flight points by their faction, guides by their faction,
+// race and class conditions.
 function find(data, guides, { text, kind = null, faction = null, race = null, cls = null, limit = 20 } = {}) {
 	const q = String(text || '').trim();
-	if (!q) return [];
+	const all = !q && LISTED.includes(kind);
+	if (!q && !all) return [];
 	const numeric = /^\d+$/.test(q);
 	const needle = q.toLowerCase();
 	const rank = (name) => {
@@ -183,12 +216,17 @@ function find(data, guides, { text, kind = null, faction = null, race = null, cl
 		return n.includes(needle) ? 2 : -1;
 	};
 	const hits = [];
-	// `also` (a guide's id and zone) matches as a plain substring.
-	const consider = (k, id, name, make, also = []) => {
+	// `also` (a guide's id and zone) matches as a plain substring; `names`
+	// are more names, ranked like the name; `by` sorts in place of the id.
+	const consider = (k, id, name, make, also = [], { names = [], by } = {}) => {
 		if (kind && kind !== k) return;
-		let r = numeric ? (String(id) === q ? 0 : -1) : rank(name);
-		if (r < 0 && also.some((a) => a && String(a).toLowerCase().includes(needle))) r = 2;
-		if (r >= 0) hits.push({ r, k: KINDS.indexOf(k), id, make });
+		let r = all ? 0 : numeric ? (String(id) === q ? 0 : -1) : rank(name);
+		for (const n of numeric ? [] : names) {
+			const rn = rank(n);
+			if (rn >= 0 && (r < 0 || rn < r)) r = rn;
+		}
+		if (r < 0 && !numeric && also.some((a) => a && String(a).toLowerCase().includes(needle))) r = 2;
+		if (r >= 0) hits.push({ r, k: KINDS.indexOf(k), id: by === undefined ? id : by, make });
 	};
 	const tag = faction ? TAG[faction] : null;
 	const who = [faction && { factions: [faction] }, race && { races: [race] }, cls && { classes: [cls] }];
@@ -205,6 +243,17 @@ function find(data, guides, { text, kind = null, faction = null, race = null, cl
 	}
 	for (const x of Object.values(data.objects)) if (x && x.name) consider('object', x.id, x.name, () => objectResult(data, x));
 	for (const x of Object.values(data.items)) if (x && x.name) consider('item', x.id, x.name, () => itemResult(x));
+	for (const x of data.inns()) {
+		const keeper = data.npc(x.npc);
+		const side = keeper && keeper.faction ? String(keeper.faction) : null;
+		if ((tag && side && !side.includes(tag)) || (raceTags && side && !raceTags.some((t) => side.includes(t)))) continue;
+		consider('inn', x.npc, x.location, () => innResult(data, x), [zoneName(data, x.map)], { names: x.names || [], by: String(x.location) });
+	}
+	const MASK = { A: 1, H: 2 };
+	for (const x of data.flightNodes()) {
+		if ((tag && !(x.faction & MASK[tag])) || (raceTags && !raceTags.some((t) => x.faction & MASK[t]))) continue;
+		consider('flight', x.id, String(x.name).split(',')[0], () => flightResult(data, x), [zoneName(data, x.map)], { names: [x.name], by: String(x.name) });
+	}
 	if (!numeric) {
 		const classesOf = (r, s) => data.raceClasses(r, s);
 		for (const g of guides || []) {
@@ -217,4 +266,4 @@ function find(data, guides, { text, kind = null, faction = null, race = null, cl
 	return hits.slice(0, limit).map((h) => h.make());
 }
 
-module.exports = { find, loadGuideHeaders, KINDS, FACTIONS };
+module.exports = { find, loadGuideHeaders, KINDS, LISTED, FACTIONS };
