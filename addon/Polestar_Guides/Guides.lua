@@ -9678,7 +9678,7 @@ do
 						{ t = "buy", npc = 384, npcName = "Katie Hunter", item = 2414, itemName = "Pinto Bridle", map = 1429, x = 84.15, y = 65.49, f = "e", optional = true, note = "Pinto Bridle, 20g" },
 						{ t = "buy", npc = 384, npcName = "Katie Hunter", item = 5655, itemName = "Chestnut Mare Bridle", map = 1429, x = 84.15, y = 65.49, f = "e", optional = true, note = "Chestnut Mare Bridle, 20g" },
 						{ t = "buy", npc = 384, npcName = "Katie Hunter", item = 5656, itemName = "Brown Horse Bridle", map = 1429, x = 84.15, y = 65.49, f = "e", optional = true, note = "Brown Horse Bridle, 20g" },
-						{ t = "note", text = "Black Stallion Bridle is not sold here: our data has it only from Unger Statforth in Menethil Harbor, and nothing confirms it is for sale." },
+						{ t = "note", text = "Black Stallion Bridle is in the client, but no vendor is confirmed to sell it in Forever." },
 					},
 				},
 			},
@@ -10566,7 +10566,7 @@ do
 			maxLevel = 60,
 			category = "Collectibles",
 			folder = "Mounts · Level 60",
-			keywords = { "Swift Blue Raptor", "Swift Olive Raptor", "Swift Green Raptor", "Swift Orange Raptor", "Troll", "Sen'jin Village", "Zjolnir", "Xar'Ti", "Riding" },
+			keywords = { "Swift Blue Raptor", "Swift Olive Raptor", "Swift Orange Raptor", "Troll", "Sen'jin Village", "Zjolnir", "Xar'Ti", "Riding" },
 			collects = { 18788, 18789, 18790 },
 			zone = 1411,
 			zoneName = "Durotar",
@@ -10588,7 +10588,7 @@ do
 					goals = {
 						{ t = "vendor", npc = 7952, npcName = "Zjolnir", map = 1411, x = 55.23, y = 75.65, f = "e", note = "Zjolnir" },
 						{ t = "buy", npc = 7952, npcName = "Zjolnir", item = 18788, itemName = "Swift Blue Raptor", map = 1411, x = 55.23, y = 75.65, f = "e", optional = true, note = "Swift Blue Raptor, 200g" },
-						{ t = "buy", npc = 7952, npcName = "Zjolnir", item = 18789, itemName = "Swift Olive Raptor", map = 1411, x = 55.23, y = 75.65, f = "e", optional = true, note = "200g; the client's name (our data: Swift Green Raptor)" },
+						{ t = "buy", npc = 7952, npcName = "Zjolnir", item = 18789, itemName = "Swift Olive Raptor", map = 1411, x = 55.23, y = 75.65, f = "e", optional = true, note = "Swift Olive Raptor, 200g" },
 						{ t = "buy", npc = 7952, npcName = "Zjolnir", item = 18790, itemName = "Swift Orange Raptor", map = 1411, x = 55.23, y = 75.65, f = "e", optional = true, note = "Swift Orange Raptor, 200g" },
 						{ t = "note", text = "Whistle of the Venomhide Ravasaur (level 60) is in the Forever client, but its source is not known yet." },
 					},
@@ -10913,7 +10913,7 @@ do
 				{
 					title = "Mor'zul Bloodbringer (Ironforge)",
 					note = "At 60 Jubahl Corpseseeker in Ironforge sends you to Mor'zul Bloodbringer in the Burning Steppes.",
-					only = { races = { "Dwarf", "Gnome", "NightElf" } },
+					only = { races = { "Gnome" } },
 					goals = {
 						{ t = "level", level = 60 },
 						{ t = "accept", quest = 7562, title = "Mor'zul Bloodbringer", npc = 6382, npcName = "Jubahl Corpseseeker", minLevel = 60, qlvl = 58, closedBy = { 7563 }, preTitles = { [7563] = "Rage of Blood" }, map = 1455, x = 52.7, y = 6.08, f = "e" },
@@ -10922,7 +10922,7 @@ do
 				{
 					title = "Mor'zul Bloodbringer (Orgrimmar)",
 					note = "At 60 Kurgul in the Cleft of Shadow sends you to Mor'zul Bloodbringer in the Burning Steppes.",
-					only = { races = { "Orc", "Troll", "Tauren" } },
+					only = { races = { "Orc", "Troll" } },
 					goals = {
 						{ t = "level", level = 60 },
 						{ t = "accept", quest = 7562, title = "Mor'zul Bloodbringer", npc = 5815, npcName = "Kurgul", minLevel = 60, qlvl = 58, closedBy = { 7563 }, preTitles = { [7563] = "Rage of Blood" }, map = 1454, x = 47.52, y = 46.72, f = "e" },
@@ -10981,7 +10981,7 @@ do
 				{
 					title = "Summon Felsteed (Ironforge)",
 					note = "At 40 Briarthorn in Ironforge sends you to Strahad Farsan in Ratchet.",
-					only = { races = { "Dwarf", "Gnome", "NightElf" } },
+					only = { races = { "Gnome" } },
 					goals = {
 						{ t = "level", level = 40 },
 						{ t = "accept", quest = 4487, title = "Summon Felsteed", npc = 5172, npcName = "Briarthorn", minLevel = 40, qlvl = 40, closedBy = { 3631, 4488, 4489 }, preTitles = { [3631] = "Summon Felsteed", [4488] = "Summon Felsteed", [4489] = "Summon Felsteed" }, map = 1455, x = 50.35, y = 5.66, f = "e" },
@@ -10990,7 +10990,7 @@ do
 				{
 					title = "Summon Felsteed (Orgrimmar)",
 					note = "At 40 Zevrost in the Cleft of Shadow sends you to Strahad Farsan in Ratchet.",
-					only = { races = { "Orc", "Troll", "Tauren" } },
+					only = { races = { "Orc", "Troll" } },
 					goals = {
 						{ t = "level", level = 40 },
 						{ t = "accept", quest = 3631, title = "Summon Felsteed", npc = 3326, npcName = "Zevrost", minLevel = 40, qlvl = 40, closedBy = { 4487, 4488, 4489 }, preTitles = { [4487] = "Summon Felsteed", [4488] = "Summon Felsteed", [4489] = "Summon Felsteed" }, map = 1454, x = 48.47, y = 45.43, f = "e" },
@@ -11010,8 +11010,8 @@ do
 					note = "Ratchet is on the Barrens coast east of the Crossroads; from the Alliance side, take the boat from Booty Bay. Strahad Farsan's follow-up teaches Summon Felsteed.",
 					goals = {
 						{ t = "turnin", quest = 4488, title = "Summon Felsteed", npc = 6251, npcName = "Strahad Farsan", map = 1413, x = 62.63, y = 35.5, f = "e", only = { races = { "Human" } } },
-						{ t = "turnin", quest = 4487, title = "Summon Felsteed", npc = 6251, npcName = "Strahad Farsan", map = 1413, x = 62.63, y = 35.5, f = "e", only = { races = { "Dwarf", "Gnome", "NightElf" } } },
-						{ t = "turnin", quest = 3631, title = "Summon Felsteed", npc = 6251, npcName = "Strahad Farsan", map = 1413, x = 62.63, y = 35.5, f = "e", only = { races = { "Orc", "Troll", "Tauren" } } },
+						{ t = "turnin", quest = 4487, title = "Summon Felsteed", npc = 6251, npcName = "Strahad Farsan", map = 1413, x = 62.63, y = 35.5, f = "e", only = { races = { "Gnome" } } },
+						{ t = "turnin", quest = 3631, title = "Summon Felsteed", npc = 6251, npcName = "Strahad Farsan", map = 1413, x = 62.63, y = 35.5, f = "e", only = { races = { "Orc", "Troll" } } },
 						{ t = "turnin", quest = 4489, title = "Summon Felsteed", npc = 6251, npcName = "Strahad Farsan", map = 1413, x = 62.63, y = 35.5, f = "e", only = { races = { "Scourge" } } },
 						{ t = "accept", quest = 4490, title = "Summon Felsteed", npc = 6251, npcName = "Strahad Farsan", minLevel = 40, qlvl = 40, pre = { 3631, 4487, 4488, 4489 }, preTitles = { [3631] = "Summon Felsteed", [4487] = "Summon Felsteed", [4488] = "Summon Felsteed", [4489] = "Summon Felsteed" }, map = 1413, x = 62.63, y = 35.5, f = "e" },
 						{ t = "turnin", quest = 4490, title = "Summon Felsteed", npc = 6251, npcName = "Strahad Farsan", map = 1413, x = 62.63, y = 35.5, f = "e" },
@@ -24842,8 +24842,8 @@ do
 					title = "Adventure: Lord Valthalak",
 					note = "The Lord Valthalak questline is a point. It is the level 60 dungeon-set chain: Deliana (Ironforge) or Mokvar (Orgrimmar) send you through In Search of Anthion and Anthion's Parting Words to Bodley at Blackrock Mountain, whose Three Kings of Flame, the Left and Right Pieces of Lord Valthalak's Amulet, Final Preparations and Mea Culpa, Lord Valthalak end with Return to Bodley. Back to the Beginning then leads to the class Saving the Best for Last quests.",
 					goals = {
-						{ t = "accept", quest = 8997, title = "Back to the Beginning", npc = 16033, npcName = "Bodley", minLevel = 58, qlvl = 60, pre = { 8996 }, preTitles = { [8996] = "Return to Bodley" }, map = 1428, x = 32.2, y = 25.8, f = "e", only = { factions = { "Alliance" } }, note = "Bodley offers it once Return to Bodley is turned in" },
-						{ t = "accept", quest = 8998, title = "Back to the Beginning", npc = 16033, npcName = "Bodley", minLevel = 58, qlvl = 60, pre = { 8996 }, preTitles = { [8996] = "Return to Bodley" }, map = 1428, x = 32.2, y = 25.8, f = "e", only = { factions = { "Horde" } }, note = "Bodley offers it once Return to Bodley is turned in" },
+						{ t = "accept", quest = 8997, title = "Back to the Beginning", npc = 16033, npcName = "Bodley", minLevel = 58, qlvl = 60, pre = { 8996 }, preTitles = { [8996] = "Return to Bodley" }, map = 1428, x = 32.2, y = 25.8, f = "e", optional = true, only = { factions = { "Alliance" } }, note = "Bodley offers it once Return to Bodley is turned in" },
+						{ t = "accept", quest = 8998, title = "Back to the Beginning", npc = 16033, npcName = "Bodley", minLevel = 58, qlvl = 60, pre = { 8996 }, preTitles = { [8996] = "Return to Bodley" }, map = 1428, x = 32.2, y = 25.8, f = "e", optional = true, only = { factions = { "Horde" } }, note = "Bodley offers it once Return to Bodley is turned in" },
 						{ t = "note", text = "Which quest Blizzard counts as the end of the questline (Return to Bodley or your class's Saving the Best for Last) is unconfirmed until the Legacy data is recorded." },
 					},
 				},
@@ -24852,7 +24852,7 @@ do
 					note = "Deliana then offers your class's Saving the Best for Last, the final upgrade of the dungeon set.",
 					only = { factions = { "Alliance" } },
 					goals = {
-						{ t = "turnin", quest = 8997, title = "Back to the Beginning", npc = 16013, npcName = "Deliana", map = 1455, x = 43.53, y = 52.64, f = "e", note = "Deliana, Ironforge" },
+						{ t = "turnin", quest = 8997, title = "Back to the Beginning", npc = 16013, npcName = "Deliana", map = 1455, x = 43.53, y = 52.64, f = "e", optional = true, note = "Deliana, Ironforge" },
 					},
 				},
 				{
@@ -24860,7 +24860,7 @@ do
 					note = "Mokvar then offers your class's Saving the Best for Last, the final upgrade of the dungeon set.",
 					only = { factions = { "Horde" } },
 					goals = {
-						{ t = "turnin", quest = 8998, title = "Back to the Beginning", npc = 16012, npcName = "Mokvar", map = 1454, x = 34.95, y = 38.29, f = "e", note = "Mokvar, Orgrimmar" },
+						{ t = "turnin", quest = 8998, title = "Back to the Beginning", npc = 16012, npcName = "Mokvar", map = 1454, x = 34.95, y = 38.29, f = "e", optional = true, note = "Mokvar, Orgrimmar" },
 					},
 				},
 				{

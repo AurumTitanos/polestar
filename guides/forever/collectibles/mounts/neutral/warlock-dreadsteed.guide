@@ -21,14 +21,14 @@ step Mor'zul Bloodbringer (Stormwind)
   accept 7562 npc 5520
 
 step Mor'zul Bloodbringer (Ironforge)
-  only Dwarf,Gnome,NightElf
+  only Gnome
   zone Ironforge
   tip At 60 Jubahl Corpseseeker in Ironforge sends you to Mor'zul Bloodbringer in the Burning Steppes.
   level 60
   accept 7562 npc 6382
 
 step Mor'zul Bloodbringer (Orgrimmar)
-  only Orc,Troll,Tauren
+  only Orc,Troll
   zone Orgrimmar
   tip At 60 Kurgul in the Cleft of Shadow sends you to Mor'zul Bloodbringer in the Burning Steppes.
   level 60

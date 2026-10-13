@@ -2,7 +2,7 @@ guide forever/collectibles/mounts/horde/swift-raptor
 title Swift Raptor
 category Collectibles
 folder Mounts · Level 60
-keywords Swift Blue Raptor, Swift Olive Raptor, Swift Green Raptor, Swift Orange Raptor, Troll, Sen'jin Village, Zjolnir, Xar'Ti, Riding
+keywords Swift Blue Raptor, Swift Olive Raptor, Swift Orange Raptor, Troll, Sen'jin Village, Zjolnir, Xar'Ti, Riding
 collects 18788, 18789, 18790
 faction Horde
 levels 60-60
@@ -32,6 +32,6 @@ step Pick a colour
   tip Zjolnir sells the other colours (200g each in the Forever client). Buy any you want, or none if the mount you were given is the one you like.
   vendor 7952                         -- Zjolnir
   buy 18788 npc 7952 optional         -- Swift Blue Raptor, 200g
-  buy 18789 "Swift Olive Raptor" npc 7952 optional -- 200g; the client's name (our data: Swift Green Raptor)
+  buy 18789 npc 7952 optional         -- Swift Olive Raptor, 200g
   buy 18790 npc 7952 optional         -- Swift Orange Raptor, 200g
   note Whistle of the Venomhide Ravasaur (level 60) is in the Forever client, but its source is not known yet.

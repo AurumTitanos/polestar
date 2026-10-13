@@ -34,4 +34,4 @@ step Pick a colour
   buy 2414 npc 384 optional           -- Pinto Bridle, 20g
   buy 5655 npc 384 optional           -- Chestnut Mare Bridle, 20g
   buy 5656 npc 384 optional           -- Brown Horse Bridle, 20g
-  note Black Stallion Bridle is not sold here: our data has it only from Unger Statforth in Menethil Harbor, and nothing confirms it is for sale.
+  note Black Stallion Bridle is in the client, but no vendor is confirmed to sell it in Forever.

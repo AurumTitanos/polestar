@@ -131,21 +131,21 @@ step Adventure: explore the world map
 step Adventure: Lord Valthalak
   zone Burning Steppes
   tip The Lord Valthalak questline is a point. It is the level 60 dungeon-set chain: Deliana (Ironforge) or Mokvar (Orgrimmar) send you through In Search of Anthion and Anthion's Parting Words to Bodley at Blackrock Mountain, whose Three Kings of Flame, the Left and Right Pieces of Lord Valthalak's Amulet, Final Preparations and Mea Culpa, Lord Valthalak end with Return to Bodley. Back to the Beginning then leads to the class Saving the Best for Last quests.
-  accept 8997 only Alliance   -- Bodley offers it once Return to Bodley is turned in
-  accept 8998 only Horde      -- Bodley offers it once Return to Bodley is turned in
+  accept 8997 only Alliance optional -- Bodley offers it once Return to Bodley is turned in
+  accept 8998 only Horde optional    -- Bodley offers it once Return to Bodley is turned in
   note Which quest Blizzard counts as the end of the questline (Return to Bodley or your class's Saving the Best for Last) is unconfirmed until the Legacy data is recorded.
 
 step Adventure: Back to the Beginning (Alliance)
   only Alliance
   zone Ironforge
   tip Deliana then offers your class's Saving the Best for Last, the final upgrade of the dungeon set.
-  turnin 8997                 -- Deliana, Ironforge
+  turnin 8997 optional        -- Deliana, Ironforge
 
 step Adventure: Back to the Beginning (Horde)
   only Horde
   zone Orgrimmar
   tip Mokvar then offers your class's Saving the Best for Last, the final upgrade of the dungeon set.
-  turnin 8998                 -- Mokvar, Orgrimmar
+  turnin 8998 optional        -- Mokvar, Orgrimmar
 
 # ---------------------------------------------------------------- Dungeons
 
