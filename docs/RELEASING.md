@@ -37,7 +37,7 @@ follow `x.y.z`; `0.x` releases are betas.
 
 Replace `0.2.0` with the new version throughout.
 
-1. Start from a clean, up-to-date `master` with the game client installed
+1. Start from a clean, up-to-date `main` with the game client installed
    (the data build reads its tables and installed addons).
 
 2. Set the version and rebuild the data, the data addons and the guides:
@@ -94,7 +94,7 @@ Replace `0.2.0` with the new version throughout.
    git add package.json addon/Polestar addon/Polestar_Guides addon/Polestar_ItemDB addon/Polestar_Recorder
    git commit -m "Release: 0.2.0"
    git tag -a v0.2.0 -m "Polestar 0.2.0"
-   git push origin master v0.2.0
+   git push origin main v0.2.0
    ```
 
 8. Write the release notes to `dist/notes-0.2.0.md` (`dist/` is not
