@@ -205,14 +205,11 @@ const GLYPHS = {
 	),
 	search: union(ring(10.5, 10.5, 6, 2.4), line(15, 15, 20.2, 20.2, 2.8)),
 	lock: union(box(12, 15.4, 7.2, 5.6, 1.4), arc(12, 9, 4.2, -180, 0, 2.3), line(7.8, 9, 7.8, 10.4, 2.3), line(16.2, 9, 16.2, 10.4, 2.3)),
-	unlock: union(box(12, 15.4, 7.2, 5.6, 1.4), arc(12, 7, 4.2, -180, 0, 2.3), line(16.2, 7, 16.2, 10.4, 2.3)),
 	menu: union(dot(5.5, 12, 2), dot(12, 12, 2), dot(18.5, 12, 2)),
 	skip: union(poly([[4.5, 5.5], [15, 12], [4.5, 18.5]]), line(18.5, 6, 18.5, 18, 2.6)),
 	star: star(12, 12.8, 10),
 	resize: union(line(20, 9, 9, 20, 1.8), line(20, 15, 15, 20, 1.8)),
 	compact: union(line(5, 8, 19, 8, 2.4), line(5, 12, 19, 12, 2.4), line(5, 16, 13, 16, 2.4)),
-	// The north star from the logo, alone, for tinting in the accent.
-	mark: poly([[12, 1.5], [13.4, 10.6], [20, 12], [13.4, 13.4], [12, 22.5], [10.6, 13.4], [4, 12], [10.6, 10.6]]),
 	reset: union(arc(12, 12.5, 7.2, -150, 160, 2.4), poly([[2.2, 4.4], [9.4, 6.2], [4.4, 11.4]])),
 	circle: (x, y) => Math.hypot(x - SIZE / 2, y - SIZE / 2) - (SIZE / 2 - 1),
 	// Options pages and shell controls.
