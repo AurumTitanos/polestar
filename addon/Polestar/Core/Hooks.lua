@@ -41,9 +41,7 @@ ns.Hooks = Hooks
 
 local type, pcall, tonumber, ipairs = type, pcall, tonumber, ipairs
 
-local function secret(v)
-	return v ~= nil and issecretvalue and issecretvalue(v) or false
-end
+local secret = ns.Compat.IsSecret
 
 local function report(err)
 	local handler = geterrorhandler and geterrorhandler()

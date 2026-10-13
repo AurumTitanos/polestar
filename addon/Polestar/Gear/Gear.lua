@@ -78,10 +78,7 @@ end
 local Client = {}
 Gear.Client = Client
 
-local function readable(v)
-	if v ~= nil and issecretvalue and issecretvalue(v) then return nil end
-	return v
-end
+local readable = ns.Compat.Readable
 
 function Client.PlayerClass()
 	if not UnitClass then return nil end

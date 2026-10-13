@@ -129,14 +129,7 @@ end
 -- Places
 ---------------------------------------------------------------------------
 
-local function zoneName(map)
-	if not map then return nil end
-	local C = Codex()
-	local z = C and C.Zone and C.Zone(map)
-	if z and z.name then return z.name end
-	return ns.Compat.GetMapName(map)
-end
-Lookup.ZoneName = zoneName
+local zoneName = ns.Compat.MapName
 
 -- Travel seconds between two points, nil when either cannot be placed (or
 -- the core's travel estimate is absent).
@@ -145,11 +138,6 @@ local function travel(from, to)
 	return ns.TravelCost(from, to)
 end
 Lookup.Travel = travel
-
-local function playerPoint()
-	return ns.PlayerPoint and ns.PlayerPoint() or nil
-end
-Lookup.PlayerPoint = playerPoint
 
 -- The spawn the player reaches soonest -> spawn, travel | nil. Without a
 -- player position (instances, loading) the first spawn, travel nil.
@@ -640,7 +628,7 @@ function Lookup.Sources(kind, id)
 	local key = kind .. ":" .. tostring(id)
 	local hit = cache[key]
 	if hit and now() - hit.at < CACHE_SECONDS and hit.level == p.level then return hit.list, hit.entity end
-	local from = playerPoint()
+	local from = ns.PlayerPoint()
 	local list, entity = {}, nil
 	if ITEM_KINDS[kind] then
 		list, entity = itemSources(tonumber(id), p, from)

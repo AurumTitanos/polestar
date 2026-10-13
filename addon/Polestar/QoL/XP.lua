@@ -18,7 +18,7 @@
 local ADDON, ns = ...
 local L = ns.L
 local QoL = ns.QoL
-local readable = QoL.Client.Readable
+local readable = ns.Compat.Readable
 
 local type, floor, ceil, min, max = type, math.floor, math.ceil, math.min, math.max
 local format = string.format

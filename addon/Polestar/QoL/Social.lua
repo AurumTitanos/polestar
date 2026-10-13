@@ -34,7 +34,7 @@
 local ADDON, ns = ...
 local L = ns.L
 local QoL = ns.QoL
-local readable = QoL.Client.Readable
+local readable = ns.Compat.Readable
 
 local format = string.format
 

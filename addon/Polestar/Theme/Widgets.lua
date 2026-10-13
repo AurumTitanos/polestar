@@ -485,7 +485,6 @@ local function settingRow(parent, label, desc)
 	row.lsTipAnchor = "ANCHOR_TOPLEFT"
 	return row
 end
-W.SettingRow = settingRow
 
 -- Bound the label on the left of a row's control.
 local function fitLabel(row, control)
@@ -1282,7 +1281,6 @@ end
 local function statusText()
 	return L["Version"] .. " " .. tostring(ns.version or "dev")
 end
-W.StatusText = statusText
 
 -- The release stage (ns.stage, "Beta") as a warning chip beside the version,
 -- or nothing once there is none. -> the chip's width (0 when hidden).
@@ -1752,7 +1750,6 @@ end
 -- the selection wash, a 2px accent bar at the window's edge and the accent
 -- icon.
 local RAIL_ROW = 56
-W.RAIL_ROW = RAIL_ROW
 
 local function railButton(f, i)
 	local b = f.railButtons[i]

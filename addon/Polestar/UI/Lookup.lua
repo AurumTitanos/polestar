@@ -114,7 +114,7 @@ local rowPool, folderPool = {}, {}
 -- Data
 ---------------------------------------------------------------------------
 
-local function secret(v) return issecretvalue and issecretvalue(v) end
+local secret = ns.Compat.IsSecret
 
 local function kinds()
 	local S = ns.Search

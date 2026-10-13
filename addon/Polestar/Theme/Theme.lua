@@ -26,7 +26,6 @@ local type, pairs, ipairs, pcall, floor = type, pairs, ipairs, pcall, math.floor
 local format = string.format
 
 local MEDIA = "Interface\\AddOns\\" .. ADDON .. "\\Media\\"
-Theme.MEDIA = MEDIA
 
 ---------------------------------------------------------------------------
 -- Palette data
@@ -34,7 +33,6 @@ Theme.MEDIA = MEDIA
 
 -- Polestar gold: the accent of every scheme.
 local DEFAULT_ACCENT = { 0.9, 0.73, 0.4 }
-Theme.DEFAULT_ACCENT = DEFAULT_ACCENT
 
 -- Status and subject colours: one set for every scheme (all schemes are
 -- night grounds), so a quest is the same gold everywhere.
@@ -561,7 +559,6 @@ for _, v in ipairs({ "accept", "turnin", "complete", "kill", "collect", "goto", 
 	"hearth", "getfp", "fly", "train", "buy", "vendor", "level", "note", "skill", "learn", "craft", "rep", "explore", "achieve" }) do
 	VERB_ICON[v] = MEDIA .. "UI\\icon-" .. v
 end
-Theme.VERBS = VERB_ICON
 
 function Theme.VerbIcon(t)
 	return VERB_ICON[t] or VERB_ICON.note
@@ -593,7 +590,6 @@ local ROLES = {
 	name = { "semibold", 15 },     -- the person to talk to now
 	mono = { "medium", 12 },
 }
-Theme.ROLES = ROLES
 
 -- Inter covers Latin, Greek and Cyrillic; these locales need the client font.
 local CJK = { zhCN = true, zhTW = true, koKR = true }
@@ -702,7 +698,6 @@ local function hideBorder(frame)
 	local e = frame.lsBorder
 	if e then for i = 1, 4 do e[i]:Hide() end end
 end
-Theme.HideBorder = hideBorder
 
 -- A soft drop shadow around a window: nine slices of Media/UI/shadow, offset
 -- down a little so it reads as depth, not a halo.
@@ -1022,7 +1017,6 @@ local function migrate()
 	end
 	P = nil
 end
-Theme.Migrate = migrate
 if ns.OnInit then ns.OnInit(migrate) end
 -- The class is certain once logged in; a palette read earlier is redone.
 if ns.OnLogin then ns.OnLogin(function() if get("ui.classAccent") then Theme.Refresh() end end) end

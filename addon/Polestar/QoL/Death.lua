@@ -15,7 +15,7 @@
 local ADDON, ns = ...
 local L = ns.L
 local QoL = ns.QoL
-local readable = QoL.Client.Readable
+local readable = ns.Compat.Readable
 
 local type, sqrt, floor, min, format = type, math.sqrt, math.floor, math.min, string.format
 

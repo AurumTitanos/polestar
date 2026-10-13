@@ -42,9 +42,7 @@ local type, pcall, ipairs = type, pcall, ipairs
 
 local MAX_AURAS = 40
 
-local function secret(v)
-	return v ~= nil and issecretvalue and issecretvalue(v) or false
-end
+local secret = ns.Compat.IsSecret
 
 local function on(key)
 	return ns.Get("lookup.enabled") and ns.Get(key) and true or false

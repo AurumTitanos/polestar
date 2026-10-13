@@ -239,7 +239,7 @@ const RARES_SETUP = `uistub.player.level = 10
 UnitLevel = function() return 10 end
 Polestar.Compat.GetPlayerMapPosition = function() return 1429, 86.5, 76.8 end
 local R = Polestar.Rares
-local now = R.Now()
+local now = GetServerTime()
 R.Record({ kind = "rare", id = 61, name = "Thuros Lightfingers", level = 11, source = "vignette" }, { map = 1429, x = 89.2, y = 79.1 }, now - 2 * 3600, true)
 R.Record({ kind = "rare", id = 471, name = "Mother Fang", level = 10, source = "nameplate" }, { map = 1429, x = 62.4, y = 50.1 }, now - 26 * 3600, true)
 R.Record({ kind = "treasure", id = 2843, name = "Battered Chest", source = "vignette" }, { map = 1429, x = 79.6, y = 55.7 }, now - 3 * 86400, false)

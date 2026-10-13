@@ -478,7 +478,7 @@ local function placeGuide(def)
 	for _, s in ipairs(def.steps) do
 		for _, g in ipairs(s.goals) do
 			if g.map then
-				def.zone, def.zoneName = g.map, Lookup.ZoneName(g.map)
+				def.zone, def.zoneName = g.map, ns.Compat.MapName(g.map)
 				return def
 			end
 		end
@@ -516,7 +516,7 @@ function Lookup.BuildGuide(kind, id, ranked)
 	local name = entityName(kind, entity) or tostring(id)
 	local ctx = {
 		kind = kind, id = ITEM_KINDS[kind] and tonumber(id) or id, name = name, entity = entity,
-		player = Lookup.PlayerInfo(), from = Lookup.PlayerPoint(),
+		player = Lookup.PlayerInfo(), from = ns.PlayerPoint(),
 	}
 	local steps, err = build(ctx, row)
 	if not steps then return nil, err end

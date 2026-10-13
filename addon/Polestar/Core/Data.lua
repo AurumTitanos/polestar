@@ -22,10 +22,7 @@ local lower = string.lower
 
 local state = {} -- name -> { loaded = bool, reason = string|nil }
 
-local function readable(v)
-	if v ~= nil and issecretvalue and issecretvalue(v) then return nil end
-	return v
-end
+local readable = ns.Compat.Readable
 
 local function alreadyLoaded(name)
 	local isLoaded = C_AddOns and C_AddOns.IsAddOnLoaded

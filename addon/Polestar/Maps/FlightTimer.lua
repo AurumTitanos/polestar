@@ -14,6 +14,7 @@
 local ADDON, ns = ...
 local Maps = ns.Maps
 local Client = Maps.Client
+local serverTime = ns.Compat.Now
 local L = ns.L
 
 local type, pairs, ipairs, floor, lower, huge = type, pairs, ipairs, math.floor, string.lower, math.huge
@@ -190,7 +191,7 @@ local function saveNow()
 	if flight then
 		s.flightNow = {
 			from = flight.from, to = flight.to, fromName = flight.fromName, toName = flight.toName,
-			started = Maps.Now() - floor(GetTime() - flight.start),
+			started = serverTime() - floor(GetTime() - flight.start),
 		}
 	else
 		s.flightNow = nil
@@ -341,7 +342,7 @@ ns.OnLogin(function()
 	-- A /reload mid-flight: pick the flight up again from the saved start.
 	local saved = ns.CharState().flightNow
 	if type(saved) == "table" and onTaxi() and type(saved.started) == "number" then
-		local ago = Maps.Now() - saved.started
+		local ago = serverTime() - saved.started
 		if ago >= 0 and ago < MAX_FLIGHT then
 			begin({ from = saved.from, to = saved.to, fromName = saved.fromName, toName = saved.toName, start = GetTime() - ago })
 			render()

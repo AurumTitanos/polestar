@@ -38,7 +38,6 @@ local function present(name)
 	if not (A.DoesAddOnExist and A.GetAddOnInfo) or not A.DoesAddOnExist(name) then return false end
 	return select(4, A.GetAddOnInfo(name)) and true or false
 end
-QoL.Present = present
 
 -- The EllesmereUI module doing `key`'s job, when it is there; nil otherwise.
 function QoL.CoveredBy(key)
@@ -243,11 +242,7 @@ end
 local Client = {}
 QoL.Client = Client
 
-local function readable(v)
-	if v ~= nil and issecretvalue and issecretvalue(v) then return nil end
-	return v
-end
-Client.Readable = readable
+local readable = ns.Compat.Readable
 
 Client.HEARTHSTONE = 6948
 Client.QUALITY_POOR = 0

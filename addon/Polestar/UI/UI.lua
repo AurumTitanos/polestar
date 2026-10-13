@@ -61,13 +61,10 @@ function UI.PlayerFaction()
 	return nil
 end
 
+-- A map's name, or "Map <id>" when nothing knows it.
+local mapName = ns.Compat.MapName
 function UI.MapName(map)
-	local C = ns.Compat
-	if map and C and C.GetMapName then
-		local ok, name = pcall(C.GetMapName, map)
-		if ok and name then return name end
-	end
-	return map and format(L["Map %d"], map) or nil
+	return mapName(map) or (map and format(L["Map %d"], map)) or nil
 end
 
 function UI.QuestTitle(quest)
@@ -209,7 +206,6 @@ local function farmSpot(goal)
 	if lv then return string.format(L["from %s (lvl %s)"], goal.npcName, lv) end
 	return string.format(L["from %s"], goal.npcName)
 end
-UI.FarmSpot = farmSpot
 
 -- Secondary line. An unavailable quest says why ("Needs level 14"); a farm
 -- spot names its mobs; a chosen candidate (trainer, vendor, inn, farm spot)

@@ -74,8 +74,9 @@ local function register()
 	for i = 1, #Q.OPTIONS do ns.RegisterOptions(Q.OPTIONS[i]) end
 end
 
--- The registry may load after this file (UI loads last): try at ADDON_LOADED,
--- and again at login.
+-- Registered once every file has loaded (ADDON_LOADED), and again at login,
+-- as Gear's page is: the registry (Theme/Widgets.lua) is there by then
+-- whichever files were loaded.
 ns.OnInit(register)
 ns.OnLogin(register)
 

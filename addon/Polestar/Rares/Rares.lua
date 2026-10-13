@@ -31,6 +31,8 @@ local L = ns.L
 local Rares = {}
 ns.Rares = Rares
 
+local serverTime, mapName = ns.Compat.Now, ns.Compat.MapName
+
 local type, pairs, tostring, tonumber, floor, sqrt, format = type, pairs, tostring, tonumber, math.floor, math.sqrt, string.format
 
 ns.RegisterDefaults("rares", {
@@ -71,11 +73,6 @@ Rares.SOUNDS = {
 
 local function get(key) return ns.Get("rares." .. key) end
 Rares.Get = get
-
-function Rares.Now()
-	if GetServerTime then return GetServerTime() end
-	return time and time() or 0
-end
 
 ---------------------------------------------------------------------------
 -- Keys and the decision
@@ -258,10 +255,6 @@ function Rares.Nearest(spawns, point)
 	return spawns[1], nil
 end
 
-function Rares.PlayerPoint()
-	return ns.PlayerPoint and ns.PlayerPoint() or nil
-end
-
 ---------------------------------------------------------------------------
 -- Text
 ---------------------------------------------------------------------------
@@ -293,21 +286,12 @@ end
 -- "just now", "12 min ago", "3 h ago", "2 days ago"
 function Rares.AgoText(t, now)
 	if not t then return nil end
-	local d = (now or Rares.Now()) - t
+	local d = (now or serverTime()) - t
 	if d < 60 then return L["just now"] end
 	if d < 3600 then return format(L["%d min ago"], floor(d / 60)) end
 	if d < 86400 then return format(L["%d h ago"], floor(d / 3600)) end
 	local days = floor(d / 86400)
 	return days == 1 and L["yesterday"] or format(L["%d days ago"], days)
-end
-
-function Rares.MapName(map)
-	if not map then return nil end
-	local name = ns.Compat.GetMapName and ns.Compat.GetMapName(map)
-	if name then return name end
-	local C = ns.Codex
-	local z = C and C.IsLoaded() and C.Zone(map)
-	return z and z.name or nil
 end
 
 ---------------------------------------------------------------------------
@@ -319,7 +303,7 @@ local HOLD_FOR = 60
 
 local function context()
 	return {
-		get = get, now = Rares.Now(), history = Rares.History(),
+		get = get, now = serverTime(), history = Rares.History(),
 		inCombat = ns.Compat.InCombat(), inInstance = ns.Compat.IsInInstance(), known = known,
 	}
 end
@@ -351,7 +335,7 @@ local function alertOf(s, where, exact)
 		elite = s.classification == "rareelite" or (info and info.elite) or false,
 		loot = info and #info.loot or nil,
 	}
-	local me = Rares.PlayerPoint()
+	local me = ns.PlayerPoint()
 	if exact and where and where.map then
 		a.map, a.x, a.y = where.map, where.x, where.y
 		a.yards = me and Rares.Yards(me, where)
@@ -364,7 +348,7 @@ local function alertOf(s, where, exact)
 			a.map, a.x, a.y = where.map, where.x, where.y
 		end
 	end
-	a.zone = Rares.MapName((me and me.map) or a.map)
+	a.zone = mapName((me and me.map) or a.map)
 	return a
 end
 Rares.AlertOf = alertOf
@@ -383,7 +367,7 @@ function Rares.Sighting(s, where)
 	local now = ctx.now
 	local exact = where ~= nil
 	if not where and (s.source == "nameplate" or s.source == "target" or s.source == "mouseover") then
-		where = Rares.PlayerPoint()
+		where = ns.PlayerPoint()
 	end
 	Rares.Record(s, where, now, action == "alert")
 	if action == "alert" then
@@ -398,10 +382,10 @@ end
 function Rares.Release()
 	local h = held
 	held = nil
-	if not h or Rares.Now() - h.at > HOLD_FOR then return false end
+	if not h or serverTime() - h.at > HOLD_FOR then return false end
 	local key = Rares.Key(h.s.kind, h.s.id, h.s.name)
 	local entry = key and Rares.History()[key]
-	if entry then entry.alerted = Rares.Now() end
+	if entry then entry.alerted = serverTime() end
 	fire(alertOf(h.s, h.where, h.exact))
 	return true
 end
@@ -416,7 +400,7 @@ end
 -- knows when it is loaded, else a stand-in at the player's level. It plays
 -- the sound and leaves the history alone.
 function Rares.ShowSample()
-	local me = Rares.PlayerPoint()
+	local me = ns.PlayerPoint()
 	local best, bestD
 	local list = Rares.ListOf and Rares.ListOf("rare")
 	for _, rec in ipairs(list or {}) do
@@ -426,12 +410,12 @@ function Rares.ShowSample()
 	if best then
 		local rec, s = best.rec, best.spawn
 		fire({ kind = "rare", id = rec.id, key = Rares.Key("rare", rec.id), name = rec.name, level = rec.level, levelMax = rec.levelMax,
-			elite = rec.elite, yards = bestD, zone = Rares.MapName(s.map), map = s.map, x = s.x, y = s.y, f = s.f, source = "sample" })
+			elite = rec.elite, yards = bestD, zone = mapName(s.map), map = s.map, x = s.x, y = s.y, f = s.f, source = "sample" })
 		return
 	end
 	local info = ns.Compat.GetPlayerInfo()
 	fire({ kind = "rare", name = L["A rare"], level = info.level, elite = false, inSight = true,
-		zone = Rares.MapName(me and me.map), source = "sample" })
+		zone = mapName(me and me.map), source = "sample" })
 end
 
 function Rares.ClearHistory()

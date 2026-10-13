@@ -72,12 +72,6 @@ function Maps.Allowed(mask, faction)
 	return mask == 3 or (faction ~= 0 and mask == faction)
 end
 
--- Seconds since the epoch, server clock (stable across sessions and alts).
-function Maps.Now()
-	if GetServerTime then return GetServerTime() end
-	return time()
-end
-
 -- A saved table under CharState(), recreated when SavedVariables came back nil.
 function Maps.CharTable(key)
 	local s = ns.CharState()
@@ -99,11 +93,7 @@ end
 local Client = {}
 Maps.Client = Client
 
-local function readable(v)
-	if v ~= nil and issecretvalue and issecretvalue(v) then return nil end
-	return v
-end
-Client.Readable = readable
+local readable = ns.Compat.Readable
 
 -- name, instanceType ("party"|"raid"|...), difficultyID, instanceID (map) | nil
 function Client.GetInstance()

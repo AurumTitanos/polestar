@@ -85,7 +85,7 @@ local function D() return ns.Dungeons end
 -- Helpers
 ---------------------------------------------------------------------------
 
-local function secret(v) return issecretvalue and issecretvalue(v) end
+local secret = ns.Compat.IsSecret
 
 local function mainWidth()
 	local w = hub and (hub:GetWidth() - (hub.lsRail or 0) - SH.sidebar - 2) or 0
@@ -193,17 +193,7 @@ local function itemIcon(id)
 	return nil
 end
 
-local function mapName(map)
-	if not map then return nil end
-	local C = ns.Compat
-	if C and C.GetMapName then
-		local ok, name = pcall(C.GetMapName, map)
-		if ok and type(name) == "string" and name ~= "" and not secret(name) then return name end
-	end
-	local X = ns.Codex
-	local z = X and X.IsLoaded and X.IsLoaded() and X.Zone and X.Zone(map)
-	return z and z.name or nil
-end
+local mapName = ns.Compat.MapName
 
 local function bandOf(level)
 	if type(level) ~= "number" then return nil end

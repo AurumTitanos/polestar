@@ -19,6 +19,8 @@
 local ADDON, ns = ...
 local Maps = ns.Maps
 local Client = Maps.Client
+local readable = ns.Compat.Readable
+local serverTime = ns.Compat.Now
 local L = ns.L
 
 local type, ipairs, tonumber, floor, max, format = type, ipairs, tonumber, math.floor, math.max, string.format
@@ -133,7 +135,7 @@ local refreshDisplay -- forward
 
 -- Arrived in a tracked instance (or reloaded inside one).
 local function enter(name, kind, id)
-	local now = Maps.Now()
+	local now = serverTime()
 	local r = runs()
 	local last = r[#r]
 	visitChecked = false
@@ -153,7 +155,7 @@ end
 
 local function leave()
 	if not active then return end
-	close(active, Maps.Now())
+	close(active, serverTime())
 	active = nil
 	refreshDisplay()
 end
@@ -175,7 +177,7 @@ end
 -- "Creature-0-<server>-<instanceMap>-<zoneUID>-<npcID>-<spawnUID>".
 local function observe(unit)
 	if not active or visitChecked then return end
-	local guid = Client.Readable(UnitGUID and UnitGUID(unit))
+	local guid = readable(UnitGUID and UnitGUID(unit))
 	if type(guid) ~= "string" then return end
 	local kind, zone = guid:match("^(%a+)%-0%-%d+%-%d+%-(%d+)%-")
 	if kind ~= "Creature" and kind ~= "Vehicle" then return end
@@ -185,7 +187,7 @@ local function observe(unit)
 	elseif active.zone ~= zone then
 		-- Another copy of this instance: the run we resumed ended when we
 		-- left it; this visit is a new instance and counts.
-		local now = Maps.Now()
+		local now = serverTime()
 		local visit = active.since or now
 		if active.resumed then
 			active.left, active.since, active.resumed = active.resumed, nil, nil
@@ -221,7 +223,7 @@ do
 end
 
 local function onSystem(_, msg)
-	msg = Client.Readable(msg)
+	msg = readable(msg)
 	if type(msg) ~= "string" then return end
 	local name = msg:match(RESET_PATTERN)
 	if not name then return end
@@ -236,7 +238,7 @@ end
 
 local function readLockouts()
 	lockouts = Client.GetSavedInstances()
-	lockoutsAt = Maps.Now()
+	lockoutsAt = serverTime()
 end
 
 ---------------------------------------------------------------------------
@@ -245,7 +247,7 @@ end
 
 -- { inHour, inDay, perHour, perDay, wait, clears, run } for displays and commands.
 function Maps.GetInstanceStatus()
-	local now = Maps.Now()
+	local now = serverTime()
 	local perHour, perDay = tonumber(ns.Get("maps.perHour")) or 5, tonumber(ns.Get("maps.perDay")) or 0
 	local h, d, wait, clears = Maps.InstanceWindow(entries(), now, perHour, perDay)
 	return {
@@ -258,14 +260,14 @@ end
 function Maps.RunSeconds(run, now)
 	if not run then return 0 end
 	local t = run.time or 0
-	if run.since and not run.left then t = t + max(0, (now or Maps.Now()) - run.since) end
+	if run.since and not run.left then t = t + max(0, (now or serverTime()) - run.since) end
 	return t
 end
 
 -- Saved instances with seconds until reset, as of now.
 function Maps.GetSavedLockouts()
 	local out = {}
-	local elapsed = Maps.Now() - lockoutsAt
+	local elapsed = serverTime() - lockoutsAt
 	for _, l in ipairs(lockouts) do
 		if l.locked or l.extended then
 			out[#out + 1] = {
@@ -338,7 +340,7 @@ end
 local function wanted()
 	if not (ns.Get("maps.instances") and ns.Get("maps.instanceDisplay")) then return false end
 	if active then return true end
-	local h = Maps.InstanceWindow(entries(), Maps.Now(), 1, 0)
+	local h = Maps.InstanceWindow(entries(), serverTime(), 1, 0)
 	return h > 0
 end
 
@@ -467,7 +469,7 @@ end)
 
 ns.OnLogin(function()
 	buildFrame()
-	prune(Maps.Now())
+	prune(serverTime())
 	Client.RequestRaidInfo()
 	trackXP()
 	situation()

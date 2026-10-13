@@ -19,6 +19,7 @@
 local ADDON, ns = ...
 local UI, Theme, W = ns.UI, ns.Theme, ns.Widgets
 local Rares = ns.Rares
+local serverTime, mapName = ns.Compat.Now, ns.Compat.MapName
 local L = ns.L
 local floor, max, min, type, ipairs, pairs, tostring, format, pcall, concat = math.floor, math.max, math.min, type, ipairs, pairs, tostring, string.format, pcall, table.concat
 
@@ -58,7 +59,7 @@ local listRows, heads, items, places, notes, sections = {}, {}, {}, {}, {}, {}
 local shown = {} -- what the last render put up, for tests and the preview
 
 local function LK() return UI.Lookup end
-local function secret(v) return issecretvalue and issecretvalue(v) end
+local secret = ns.Compat.IsSecret
 
 ---------------------------------------------------------------------------
 -- Helpers
@@ -348,10 +349,10 @@ local function entries()
 	if tab == "seen" then
 		local h = Rares.History()
 		local rows = {}
-		local now = Rares.Now()
+		local now = serverTime()
 		for key, e in pairs(h) do
 			if type(e) == "table" and e.t then
-				local zone = Rares.MapName(e.map)
+				local zone = mapName(e.map)
 				if matches(e.name, zone) then
 					rows[#rows + 1] = { key = key, title = e.name or key, sub = Rares.AgoText(e.t, now), kind = e.kind, t = e.t }
 				end
@@ -386,13 +387,13 @@ local function entries()
 		listZ[#listZ + 1] = rec
 	end
 	for _, rec in ipairs(all) do
-		local zone = Rares.MapName(rec.spawns[1].map) or NOWHERE
+		local zone = mapName(rec.spawns[1].map) or NOWHERE
 		if matches(rec.name, zone) then add(rec, zone) end
 	end
 	for _, rec in ipairs(unplaced) do
 		if matches(rec.name) then add(rec, nil) end
 	end
-	local hereName = here and Rares.MapName(here)
+	local hereName = here and mapName(here)
 	table.sort(zones, function(a, b)
 		if a == hereName then return b ~= hereName end
 		if b == hereName then return false end
@@ -684,7 +685,7 @@ local function renderWhere(rec, w)
 	end
 	for i = 1, min(#rows, MAX_PLACES) do
 		local r = rows[i]
-		w.place({ map = r.map, x = r.x, y = r.y, f = r.f, zone = r.zone or Rares.MapName(r.map), travel = travelText(r.travel), label = rec.name })
+		w.place({ map = r.map, x = r.x, y = r.y, f = r.f, zone = r.zone or mapName(r.map), travel = travelText(r.travel), label = rec.name })
 	end
 	if #rows > MAX_PLACES then w.note(format(L["And %d more on the map."], #rows - MAX_PLACES)) end
 	shown.places = #rows
@@ -697,7 +698,7 @@ local function renderSeen(entry, w, now)
 		return
 	end
 	local how = { vignette = L["on the minimap"], nameplate = L["by its nameplate"], target = L["as your target"], mouseover = L["under the cursor"] }
-	local zone = Rares.MapName(entry.map)
+	local zone = mapName(entry.map)
 	local line = format(L["Last seen %s"], Rares.AgoText(entry.t, now))
 	if zone then line = line .. " " .. format(L["in %s"], zone) end
 	if how[entry.src or ""] then line = line .. ", " .. how[entry.src] end
@@ -710,7 +711,7 @@ end
 
 local function renderEntity(key, w)
 	local kind, id = splitKey(key)
-	local now = Rares.Now()
+	local now = serverTime()
 	local entry = key and Rares.History()[key]
 	local rec = (kind == "rare" or kind == "treasure") and Rares.Info(kind, id) or nil
 	if not rec and not entry then
@@ -720,14 +721,14 @@ local function renderEntity(key, w)
 		return
 	end
 	local name = (rec and rec.name) or (entry and entry.name) or key
-	local me = Rares.PlayerPoint()
+	local me = ns.PlayerPoint()
 	local spawn = rec and Rares.Nearest(rec.spawns, me)
 	if not spawn and entry and entry.map then spawn = { map = entry.map, x = entry.x, y = entry.y } end
 	local facts = {}
 	local lv = Rares.LevelText(rec and rec.level or entry and entry.level, rec and rec.levelMax)
 	if lv then facts[#facts + 1] = format(L["Level %s"], lv) end
 	if kind == "rare" and rec and rec.elite then facts[#facts + 1] = L["Elite"] end
-	local zone = spawn and Rares.MapName(spawn.map)
+	local zone = spawn and mapName(spawn.map)
 	if zone then facts[#facts + 1] = zone end
 	if entry and entry.t then facts[#facts + 1] = format(L["seen %s"], Rares.AgoText(entry.t, now)) end
 	band(name, concat(facts, DOT), spawn and spawn.map, spawn and spawn.x, spawn and spawn.y)

@@ -33,10 +33,7 @@ local DEBOUNCE = 3
 local SCAN_EVERY = 2
 local CLASS_RARE = { rare = true, rareelite = true }
 
-local function readable(v)
-	if v ~= nil and issecretvalue and issecretvalue(v) then return nil end
-	return v
-end
+local readable = ns.Compat.Readable
 
 local function clock() return GetTime and GetTime() or 0 end
 

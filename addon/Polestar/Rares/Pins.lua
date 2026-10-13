@@ -16,6 +16,7 @@
 
 local ADDON, ns = ...
 local Rares = ns.Rares
+local serverTime = ns.Compat.Now
 local L = ns.L
 
 local type, ipairs, floor, abs, format = type, ipairs, math.floor, math.abs, string.format
@@ -191,7 +192,7 @@ local function apply(kind)
 	local list = due(kind) and lists[kind]
 	local pins = list and Rares.BuildPins({
 		kind = kind, list = list, level = ns.Compat.GetPlayerInfo().level, hideGrey = Rares.Get("hideGrey"),
-		history = Rares.History(), now = Rares.Now(), onClick = click,
+		history = Rares.History(), now = serverTime(), onClick = click,
 	})
 	if pins and #pins > 0 then
 		Pins.SetLayer(layer, pins, { world = world, minimap = minimap, edge = false })

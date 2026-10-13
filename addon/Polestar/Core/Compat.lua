@@ -36,13 +36,25 @@ end
 ---------------------------------------------------------------------------
 
 -- Forever has retail-style combat restrictions: unit APIs can return secret
--- values, and comparing, indexing or parsing one throws. Every unit read
--- passes through here; a secret value reads as unknown (nil).
+-- values, and comparing, indexing or parsing one throws. Every module checks
+-- with these two: IsSecret(v) is true for a secret value, and Readable(v)
+-- passes a value through, a secret one reading as unknown (nil).
+local function isSecret(v)
+	return v ~= nil and issecretvalue ~= nil and issecretvalue(v) and true or false
+end
+Compat.IsSecret = isSecret
+
 local function readable(v)
-	if v ~= nil and issecretvalue and issecretvalue(v) then return nil end
+	if isSecret(v) then return nil end
 	return v
 end
 Compat.Readable = readable
+
+-- Seconds since the epoch on the server clock (stable across sessions and alts).
+function Compat.Now()
+	if GetServerTime then return GetServerTime() end
+	return time and time() or 0
+end
 
 function Compat.GetPlayerInfo()
 	local _, race = UnitRace("player")
@@ -264,6 +276,18 @@ function Compat.GetMapName(uiMapID)
 	if not (uiMapID and C_Map and C_Map.GetMapInfo) then return nil end
 	local info = C_Map.GetMapInfo(uiMapID)
 	return info and info.name or nil
+end
+
+-- A map's name to show: the client's, else the Codex zone's; nil when
+-- neither knows the map. Asks ns.Compat, so a stand-in Compat answers too.
+function Compat.MapName(uiMapID)
+	if not uiMapID then return nil end
+	local C = ns.Compat
+	local ok, name = pcall(C.GetMapName, uiMapID)
+	if ok and type(name) == "string" and name ~= "" and not isSecret(name) then return name end
+	local X = ns.Codex
+	local z = X and X.IsLoaded and X.IsLoaded() and X.Zone and X.Zone(uiMapID)
+	return z and z.name or nil
 end
 
 -- The continent-type uiMap (Enum.UIMapType.Continent = 2) a map belongs to,

@@ -105,7 +105,7 @@ function Dungeons.PickupPlan(key)
 	local Lk, C = LK(), ns.Codex
 	if not (Lk and Lk.QuestChain and C) then return nil, "missing" end
 	local p = Lk.PlayerInfo()
-	local from = Lk.PlayerPoint()
+	local from = ns.PlayerPoint()
 	local reach = max(p.level or 1, d.minLevel or 1)
 	local quests = Dungeons.Quests(key)
 	local onPage = {}
@@ -352,7 +352,7 @@ end
 -- one (a rebuild after /reload) the order kept for the character.
 local function route(key, plan)
 	local Lk = LK()
-	local from = Lk.PlayerPoint()
+	local from = ns.PlayerPoint()
 	local stops = stopsOf(plan, from)
 	local order
 	if from then
@@ -470,7 +470,7 @@ function Dungeons.GiverTarget(key, questId)
 		if rec then
 			local first = Lk.QuestChain(questId, Lk.PlayerInfo())[1]
 			if first and first.id ~= questId then
-				local pt, turnIn = chainPoint(key, first.id, first, Lk.PlayerPoint())
+				local pt, turnIn = chainPoint(key, first.id, first, ns.PlayerPoint())
 				if pt then return pt, pt.name, first.title, turnIn end
 			end
 		else

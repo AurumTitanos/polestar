@@ -315,13 +315,7 @@ local function loadHint()
 		or L["Double-click a guide or press Enter to load it."]
 end
 
-local function mapName(map)
-	local C = ns.Compat
-	if not (map and C and C.GetMapName) then return nil end
-	local ok, name = pcall(C.GetMapName, map)
-	if ok and type(name) == "string" and name ~= "" then return name end
-	return nil
-end
+local mapName = ns.Compat.MapName
 
 -- What a guide's steps hold for this character: the quests it accepts
 -- (steps and goals filtered by `only`, as the route choice counts them) and
