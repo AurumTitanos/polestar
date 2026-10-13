@@ -1,11 +1,16 @@
 guide forever/horde/50-60/05-eastern-plaguelands
-title Eastern Plaguelands, Feralas & Winterspring
+title Eastern Plaguelands, Winterspring & Tanaris
 faction Horde
 levels 56-58
 zone Eastern Plaguelands
 next forever/horde/50-60/06-silithus
 # Built from the playthrough simulator's consensus route (Horde, visits
 # 86-93) and machine-checked with lint; not play-tested on Forever yet.
+#
+# Optional: the Deadwood Cauldron chain (5084-5086) and Winterfall Ritual
+# Totem (8471) start from rare Winterspring drops (forever/horde/50-60/03-
+# winterspring), and Kernda speaks only to characters at Neutral with the
+# Timbermaw.
 #
 # Flow: fly from the Undercity to Light's Hope Chapel (bind, Alen, Carlin)
 # -> Lake Mereldar elementals -> Sword of Marduk -> the Pestilent Scar ->
@@ -120,7 +125,6 @@ step Northdale
 
 step Corin's Crossing
   tip Living Rot spoils within ten minutes: kill the town's Scourge quickly and grind the seven pieces with the Mortar and Pestle at once.
-  goto 52.5,58.5 "Corin's Crossing"
   collect 15447 x7
   complete 6022
 
@@ -142,6 +146,7 @@ step Carlin Redpath
 
 step Fly to Thunder Bluff
   zone Thunder Bluff
+  tip Fly to the Undercity, take the zeppelin to Orgrimmar and fly on to Thunder Bluff.
   fly "Thunder Bluff"
   sethome "Thunder Bluff"
 
@@ -160,13 +165,13 @@ step Trull Failbane
   accept 4741
 
 step Deadwood Cauldron
-  tip Ride north up the road. The cauldron stands in Felpaw Village, just south-west of Timbermaw Hold; the Deadwood furbolgs there are hostile.
-  turnin 5084
-  accept 5085
+  tip Only if you found a Winterfall Firewater flask in Winterspring: ride north up the road. The cauldron stands in Felpaw Village, just south-west of Timbermaw Hold; the Deadwood furbolgs there are hostile.
+  turnin 5084 optional
+  accept 5085 optional
 
 step Kernda
-  tip Kernda waits at the Felwood entrance of Timbermaw Hold.
-  turnin 8471
+  tip Only if a Winterfall Ritual Totem dropped for you: Kernda waits at the Felwood entrance of Timbermaw Hold, and speaks to you only at Neutral with the Timbermaw.
+  turnin 8471 optional
 
 step Rabine Saturna
   zone Moonglade
@@ -181,11 +186,11 @@ step Rabine Saturna
 step Donova Snowden
   zone Winterspring
   tip Back through the tunnel and take the Winterspring exit, then ride south to Frostfire Hot Springs.
-  turnin 5085
-  accept 5086
+  turnin 5085 optional
+  accept 5086 optional
   turnin 3909
   accept 3912
-  note Toxic Horrors are in Felwood, on a later trip: keep it.
+  note Toxic Horrors are in Felwood, on a later trip: keep it if you have it.
 
 step Moontouched Owlbeasts
   tip Ride east to Everlook and north out of it; the Moontouched Owlbeasts roam the hills of Frostsaber Rock's southern slopes. Pull them one at a time.

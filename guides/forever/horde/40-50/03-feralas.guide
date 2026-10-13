@@ -117,22 +117,20 @@ step Zeppelin to Orgrimmar
 
 step Orgrimmar
   zone Orgrimmar
-  tip Valley of Honor, then the Cleft of Shadow, the Valley of Wisdom and the Valley of Spirits.
+  tip Valley of Honor, then the Cleft of Shadow and the Valley of Spirits.
   accept 2981                           -- Belgrom Rockmaul, Valley of Honor
   turnin 2976
   turnin 3121                           -- Neeru Fireblade, Cleft of Shadow
   accept 3122
-  turnin 1262                           -- Zor Lonetree, Valley of Wisdom
-  accept 7541
-  turnin 7541
   turnin 3002                           -- Uthel'nay, Valley of Spirits
   train class only Hunter,Mage,Priest,Rogue,Shaman,Warlock,Warrior
 
 step Thunder Bluff
   only Druid,Paladin
   zone Thunder Bluff
-  tip Your trainer is in Thunder Bluff: fly there, then on to Brackenwall Village.
+  tip Your trainer is in Thunder Bluff: fly there (no flight path there yet? fly to Camp Taurajo and ride west through Mulgore), then on to Brackenwall Village.
   fly "Thunder Bluff"
+  getfp "Thunder Bluff" npc 2995      -- Tal
   train class
 
 # ---------------------------------------------------------------- Dustwallow Marsh
@@ -228,7 +226,7 @@ step Zorbin Fandazzle
   turnin 7721
 
 step Northspring harpies
-  tip The Northspring harpies nest on the ridges in the far north-west.
+  tip The Northspring harpies nest on the ridges in the far north-west. They are 48-50, a few levels above you: the Windcallers heal, so kill them first and pull one at a time.
   kill 5362 quest 3063.1
   kill 5363 quest 3063.2
   kill 5366 quest 3063.3

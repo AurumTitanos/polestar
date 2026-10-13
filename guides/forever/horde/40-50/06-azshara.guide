@@ -50,9 +50,11 @@ next forever/horde/50-60/01-un-goro-crater
 # - Thunder Bluff's and Grom'gol's binds are dropped (replaced unused); the
 #   Camp Mojache and Gadgetzan binds are kept for their hearths.
 #
-# Optional: Rescue OOX-09/HL! (836) and Rescue OOX-17/TN! (648) if you
+# Optional: Rescue OOX-22/FE! (2767), Rescue OOX-09/HL! (836) and Rescue
+# OOX-17/TN! (648) if you
 # escorted those robots, and An OOX of Your Own (3721), which needs all three
-# robots home.
+# robots home. A Meeting with the Master (3381) gives no experience, only a
+# teleport to Azshara Tower.
 #
 # Left open for later guides: Jes'rimon's Payment to Jediga (3563),
 # Magatha's Payment to Jediga (3562), Betrayed (3504), Bone-Bladed Weapons
@@ -86,7 +88,7 @@ step Zeppelin to Orgrimmar
 
 step Ride into Azshara
   zone Azshara
-  tip Ride east along the road out of Splintertree; past the border, Loh'atu waits at the Shadowsong Shrine just off the road.
+  tip Ride east along the road out of Splintertree. Loh'atu waits at the Shadowsong Shrine just off the road, a few steps west of the Alliance's Talrendis Point: come in from the west and keep clear of the Azshara Sentinels and Jarrodenus (elite).
   accept 5535                         -- Loh'atu
   accept 5536
 
@@ -99,6 +101,7 @@ step Highborne and Haldarr satyrs
   kill 6127 quest 5536.3
 
 step Loh'atu
+  tip Back to Loh'atu at the shrine; stay west of the Talrendis Point guards.
   turnin 5535
   turnin 5536
 
@@ -108,14 +111,14 @@ step Valormok
   tip Follow the road north to Valormok, the Horde camp.
   getfp "Valormok"
   accept 3517                         -- Jediga
-  accept 3381                         -- Sanath Lim-yo, at the east edge of the camp
+  accept 3381 optional                -- Sanath Lim-yo, at the east edge of the camp: no experience, only a teleport to Azshara Tower
 
 step Undamaged Hippogryph Feathers
   tip The Thunderhead Hippogryphs fly over the hills just south of Valormok.
-  collect 10450 quest 3381
+  collect 10450 quest 3381 optional
 
 step Sanath Lim-yo
-  turnin 3381
+  turnin 3381 optional
 
 # ---------------------------------------------------------------- Kim'jael
 
@@ -186,7 +189,7 @@ step Ironjaw Basilisks
 
 step Booty Bay
   tip Continue south to Booty Bay. Oglethorpe Obnoticus has his workshop on the upper ring of the bay.
-  turnin 2767                         -- Oglethorpe Obnoticus
+  turnin 2767 optional                -- Oglethorpe Obnoticus
   turnin 836 optional
   turnin 648 optional
   accept 3721 optional                -- Only once all three robots are home
@@ -218,8 +221,9 @@ step Orgrimmar
 
 step Thunder Bluff
   zone Thunder Bluff
-  tip Fly to Thunder Bluff; it is on the way to Camp Mojache. Hamuul and Magatha are on the Elder Rise.
+  tip Fly to Thunder Bluff; it is on the way to Camp Mojache. No flight path there yet? Fly to Camp Taurajo and ride west through Mulgore. Hamuul and Magatha are on the Elder Rise.
   fly "Thunder Bluff"
+  getfp "Thunder Bluff" npc 2995      -- Tal
   turnin 3784                         -- Arch Druid Hamuul Runetotem
   accept 3761
   turnin 3518                         -- Magatha Grimtotem

@@ -220,7 +220,7 @@ step Emerald Sanctuary
   accept 4102                         -- Maybess Riverbreeze, just west of the camp
 
 step Southern Jaedenar
-  tip Follow the road north-west. The south of Jaedenar, around its corrupted moon well, is held by Shadow Council cultists, adepts, guardsmen and their hounds.
+  tip Follow the road north-west. The south of Jaedenar, around its corrupted moonwell, is held by Shadow Council cultists, adepts, guardsmen and their hounds.
   kill 7125 quest 5155.1
   kill 7115 quest 5155.2
   kill 7112 quest 5155.3
@@ -255,8 +255,8 @@ step Grazle
 
 # ---------------------------------------------------------------- North through Felwood
 
-step The Jaedenar moon well
-  tip Back north to Jaedenar. Fill Greta's canteen at the corrupted moon well in the middle of the southern camp.
+step The Jaedenar moonwell
+  tip Back north to Jaedenar. Fill Greta's canteen at the corrupted moonwell in the middle of the southern camp.
   collect 12907 quest 5157 @35.2,59.8
 
 step Rakaiah
@@ -313,7 +313,7 @@ step Felpaw Village
   kill 7156 quest 8461.1
   kill 7157 quest 8461.2
   kill 7158 quest 8461.3
-  accept 6031                         -- Meilosh: keep 30 Runecloth for him
+  accept 6031 optional                -- Meilosh: keep 30 Runecloth for him; he trades only at Neutral with the Timbermaw
   collect 20741 optional              -- Deadwood Ritual Totem, a rare drop
   accept 8470 optional
 

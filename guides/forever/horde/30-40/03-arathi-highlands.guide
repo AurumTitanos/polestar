@@ -10,10 +10,10 @@ next forever/horde/30-40/04-dustwallow-marsh
 # Badlands 38.4-39.2, The Barrens 39.2. Shared by every Horde start.
 # Era + known Forever quests only.
 #
-# Flow: fly Booty Bay -> Tarren Mill -> ride into Arathi: the Circle of West
-# Binding, the Boulderfist camp -> the Shards of Myzrael -> Hammerfall (flight
-# path, bind) -> raptor eyes outside the walls -> Hammerfall -> Drywhisker
-# Gorge and the Stone of East Binding -> the Witherbark village -> Fleshstalker
+# Flow: fly Booty Bay -> Grom'gol, zeppelin to the Undercity, fly to Tarren
+# Mill -> ride into Arathi: the Boulderfist camp -> the Shards of Myzrael ->
+# Hammerfall (flight path, bind) -> raptor eyes outside the walls -> Hammerfall -> Drywhisker
+# Gorge and the Stone of East Binding -> Witherbark Village -> Fleshstalker
 # raptors -> Faldir's Cove -> the Stone of Outer Binding, Northfold Manor, the
 # Stone of West Binding -> the Stone of Inner Binding -> hearth to Hammerfall
 # -> Boulderfist Hall -> Hammerfall -> Thandol Span, the Wetlands and Loch
@@ -28,8 +28,10 @@ next forever/horde/30-40/04-dustwallow-marsh
 # - Visit 26 (Tarren Mill) is dropped as a stop: Blackmoore's Legacy (506)
 #   is turned in to Krusk in forever/horde/30-40/01-desolace, right after
 #   Strahnbrad, and Baron Vardus (566) is never turned in. Tarren Mill is
-#   only the landing point: you fly there from Booty Bay (Hammerfall's flight
-#   path is not known yet) and ride east into Arathi. The export's Tarren
+#   only the landing point: Booty Bay's flight master reaches only Grom'gol
+#   from here, so you fly there, take the zeppelin to the Undercity and fly
+#   from the Undercity to Tarren Mill (Hammerfall's flight path is not known
+#   yet), then ride east into Arathi. The export's Tarren
 #   Mill bind is dropped: Kargath replaces it before use.
 # - The Hammerfall flight path and bind (taken at the end of the export's
 #   Stranglethorn visit) are taken here, on arrival.
@@ -53,7 +55,12 @@ next forever/horde/30-40/04-dustwallow-marsh
 # Package (7866, 270 XP), which the export takes at the Mor'shan Rampart: a
 # detour to the far north of the Barrens isn't worth it.
 # Optional: Stone Is Better than Cloth (716) needs Patterned Bronze Bracers
-# (Blacksmithing or the Auction House).
+# (Blacksmithing or the Auction House). Study of the Elements: Rock (712):
+# its Greater Rock Elementals are 42-44, four or five levels above you, and
+# the bracers drop one kill in five.
+# Dropped: This Must Be The Place (79976): the Messenger Bag only offers it
+# after Eagle's Fist (79975), the end of the Cozy Sleeping Bag chain that no
+# Horde guide runs.
 # Crystal in the Mountains (635) and Trollbane (638) are accepted in the
 # Stranglethorn guide; their turn-ins here are skipped if you never had them.
 # Restored: Martek the Exiled (1106, Fizzle's letter, accepted at the
@@ -67,21 +74,22 @@ next forever/horde/30-40/04-dustwallow-marsh
 
 # ---------------------------------------------------------------- Tarren Mill
 
+step Fly to Grom'gol
+  zone Stranglethorn Vale
+  tip From Booty Bay, fly to Grom'gol. The Undercity zeppelin leaves from the tower on the west side of the camp.
+  fly "Grom'gol"
+  goto 31.5,29.4 "Zeppelin to the Undercity"
+
 step Fly to Tarren Mill
   zone Hillsbrad Foothills
-  tip From Booty Bay, fly to Tarren Mill.
+  tip The zeppelin lands at the towers outside the Undercity: ride down into the city and fly to Tarren Mill.
   fly "Tarren Mill"
 
 # ---------------------------------------------------------------- Into Arathi
 
-step The Circle of West Binding
-  zone Arathi Highlands
-  tip Ride east out of Tarren Mill through Thoradin's Wall. Just past the wall, turn north off the road to the ring of standing stones: the messenger bag lies among them, the satchel beside it.
-  accept 79976
-  turnin 79976
-
 step Boulderfist camp
-  tip Follow the road east. The Boulderfist Ogres and Enforcers (32-34) camp south of the road, south-east of Northfold Manor.
+  zone Arathi Highlands
+  tip Ride east out of Tarren Mill through Thoradin's Wall and follow the road east. The Boulderfist Ogres and Enforcers (32-34) camp south of the road, south-east of Northfold Manor.
   kill 2562 quest 676.1
   kill 2564 quest 676.2
 
@@ -135,7 +143,7 @@ step The Stone of East Binding
 
 # ---------------------------------------------------------------- The south
 
-step Witherbark village
+step Witherbark Village
   tip The Witherbark trolls hold the village in the south-eastern hills. Axe Throwers guard the outer huts; the Witch Doctors and Headhunters hold the heart of the village.
   kill 2554 quest 677.1
   kill 2556 quest 677.2
@@ -276,8 +284,8 @@ step Coyotes and buzzards
   collect 3404 quest 703
 
 step Greater Rock Elementals
-  tip The Greater Rock Elementals wander the gulches in the south-west; the bracers drop about one kill in five. Keep killing coyotes and buzzards you still need on the way.
-  collect 4628 quest 712
+  tip The Greater Rock Elementals (42-44, well above you) wander the gulches in the south-west; the bracers drop about one kill in five. Pull one at a time and rest between fights, or leave them. Keep killing coyotes and buzzards you still need on the way.
+  collect 4628 quest 712 optional
   collect 7848 quest 2258.3
 
 step Kargath
@@ -287,7 +295,7 @@ step Kargath
   vendor nearest
 
 step The Dustbowl
-  turnin 712                          -- Lotwil Veriatus
+  turnin 712 optional                 -- Lotwil Veriatus
   accept 716 optional                 -- Lucien Tosselwrench: only if you carry Patterned Bronze Bracers (Blacksmithing or the Auction House)
   turnin 716 optional
 

@@ -51,6 +51,11 @@ next forever/horde/03-silverpine-forest
 # Thun'grim Firegaze and Forged Steel (1498, 1502, 1503); Call of Fire (1524-
 # 1527) with Telf Joolam on the Durotar bank of the river. Orcs and Trolls do
 # these in their own Barrens guide.
+# Path of Defense stays Tauren-only here: Undead and Skyborne Warriors learn
+# Defensive Stance from their own start guides' class quests.
+#
+# Far Watch Post is for Orcs, Trolls and Tauren only: Crossroads Conscription
+# (842) needs Conscript of the Horde (840), which only their start guides give.
 #
 # No grind stops: the export has none here.
 
@@ -107,7 +112,8 @@ step Kranal Fiss
   accept 1524
 
 step Far Watch Post
-  tip Follow the road east to the outpost above the Southfury River.
+  only Orc,Troll,Tauren
+  tip Follow the road east to the outpost above the Southfury River. Crossroads Conscription follows Conscript of the Horde from Razor Hill, so only Orcs, Trolls and Tauren are sent here.
   turnin 840                          -- Kargal Battlescar
   accept 842
   turnin 1505 only Tauren,Warrior     -- Uzzek
@@ -184,7 +190,7 @@ step Ratchet
 step The Crossroads
   tip Walk back west along the road to the Crossroads.
   turnin 903                          -- Sergra Darkthorn
-  turnin 842
+  turnin 842 only Orc,Troll,Tauren
   accept 881
   turnin 871                          -- Thork
   turnin 5041

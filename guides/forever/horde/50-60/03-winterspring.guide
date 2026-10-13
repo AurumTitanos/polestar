@@ -1,5 +1,5 @@
 guide forever/horde/50-60/03-winterspring
-title Winterspring, Feralas & Azshara
+title Winterspring & Feralas
 faction Horde
 levels 54-56
 zone Winterspring
@@ -13,8 +13,8 @@ next forever/horde/50-60/04-azshara
 # Darkwhisper Gorge -> Winterfall Village -> Donova -> Salfa (beads) ->
 # hearth to Everlook -> grind to 55 -> Mau'ari -> fly to Camp Mojache
 # (Videre Elixir, Talo) -> Thunder Bluff (Morrowgrain, Hamuul, Nara, cloth
-# donations) -> Orgrimmar (bind, cloth donations) -> Azshara (Captain
-# Beltis) -> hearth to Orgrimmar.
+# donations) -> Orgrimmar (bind, cloth donations), where the next guide
+# starts.
 #
 # Deviations from the export:
 # - Umi's and Meggi's quests (3783, 6603) are taken on arrival in Everlook
@@ -32,6 +32,15 @@ next forever/horde/50-60/04-azshara
 #   Tinkee (4810: Burning Steppes, never on the later route) and Duke
 #   Hydraxis' Poisoned Water and Stormers and Rumblers (6804, 6805: the
 #   later guides no longer hand them in, the Duke's chain runs on past 60).
+#   A Crew Under Fire (3382): six naga waves at 57 on Azshara's Southridge
+#   Beach, with elite giants close by, for 600 XP, and a flight, a long ride
+#   and a hearth.
+#   Winterfall Activity (6241): no longer in the game; 8464, which the
+#   route takes, replaced it.
+# - Optional: Winterfall Firewater (5083) and Falling to Corruption (5084):
+#   the Empty Firewater Flask drops one kill in ten. Winterfall Ritual Totem
+#   (8471): the totem drops at 2-4%, and Kernda in Timbermaw Hold speaks
+#   only to characters at Neutral, which the route does not reach.
 # - Not taken: Guarding Secrets (4882, 4883, to Nara Wildmane here). The
 #   Blue-feathered Necklace that starts it drops from Winterspring's
 #   Moontouched and Berserk Owlbeasts only after Wild Guardians (4741) is
@@ -101,30 +110,23 @@ step Donova Snowden
 step Salfa
   tip Salfa stands by the Winterspring exit of Timbermaw Hold's tunnel, north of the hot springs.
   turnin 8465
-  accept 6241
   accept 8464
 
 step Frostfire Winterfall camps
   tip Pathfinders, Den Watchers and Totemics share the furbolg camps around the hot springs; Ragged Owlbeasts roam the slopes between them. Kill Totemics first. Save every Runecloth you loot for Meilosh.
-  kill 7441 quest 6241.1
-  kill 7440 quest 6241.2
-  kill 7442 quest 6241.3
   kill 7442 quest 5082.1
   kill 7440 quest 5082.2
   kill 7441 quest 5082.3
   kill 7450 quest 4521.2
-  collect 12771                       -- Empty Firewater Flask, from the Winterfall furbolgs
-  accept 5083
-  collect 20742                       -- Winterfall Ritual Totem, from the Winterfall furbolgs
-  accept 8471
-
-step Salfa
-  turnin 6241
+  collect 12771 optional              -- Empty Firewater Flask, a rare drop from the Winterfall furbolgs
+  accept 5083 optional
+  collect 20742 optional              -- Winterfall Ritual Totem, a rare drop from the Winterfall furbolgs
+  accept 8471 optional
 
 step Donova Snowden
   turnin 5082
-  turnin 5083
-  accept 5084
+  turnin 5083 optional
+  accept 5084 optional
   note Falling to Corruption is turned in at the Deadwood Cauldron in Felwood, on a later trip.
 
 # ---------------------------------------------------------------- Darkwhisper Gorge and Winterfall Village
@@ -235,18 +237,3 @@ step Rashona Straglash
   accept 7827
   accept 7831
 
-# ---------------------------------------------------------------- Azshara
-
-step Fly to Valormok
-  zone Azshara
-  fly "Valormok"
-
-step A Crew Under Fire
-  tip Captain Vanessa Beltis is stranded on Southridge Beach, on Azshara's south coast. Accept, then hold the beach with her crew until the naga waves stop.
-  accept 3382
-  goto 52.9,87.8 "Southridge Beach"
-  complete 3382
-  turnin 3382
-
-step Back to Orgrimmar
-  hearth "Orgrimmar"

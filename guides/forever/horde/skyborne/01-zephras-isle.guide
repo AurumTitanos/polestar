@@ -43,6 +43,11 @@ next forever/horde/02-the-barrens
 # Added: The Earthen Ring (95349). The export accepts it but never turns it
 # in; its ender, Alaana Stormwalker, stands where the airship lands, so it is
 # turned in there at no cost.
+# Welcome to Azeroth (95350) is accepted from Alaana there and carried to
+# Thrall in forever/horde/03-silverpine-forest; its follow-up, Journey to the
+# Crossroads (98024), goes to Thork in forever/horde/04-the-barrens.
+# The Thunder Bluff flight path is learned on the way past the bluff: later
+# guides fly there.
 
 # ---------------------------------------------------------------- Thendal Village
 
@@ -508,7 +513,12 @@ step Northern Mulgore
   zone Mulgore
   tip You leave the isle for good. Alaana Stormwalker waits where the airship lands.
   turnin 95349                        -- Alaana Stormwalker
-  note Follow the road south and east past Bloodhoof Village, through the eastern pass into the Barrens.
+  accept 95350                        -- Alaana Stormwalker: keep it, Thrall in Orgrimmar comes two guides later
+
+step Thunder Bluff
+  zone Thunder Bluff
+  tip Thunder Bluff is beside the landing: ride up a lift and learn the flight path from Tal, the wind rider master. Then follow the road south past Bloodhoof Village and through the eastern pass into the Barrens.
+  getfp "Thunder Bluff" npc 2995      -- Tal
 
 step The Crossroads
   zone The Barrens

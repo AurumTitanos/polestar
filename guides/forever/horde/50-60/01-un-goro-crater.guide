@@ -104,12 +104,12 @@ step Western jungle
   kill 6512 quest 4145.4
 
 step Stegodons and ravasaurs
-  tip South of the hot springs, Stegodons graze and Dinosaur Bones drop from them or lie on the ground; Diemetradons nearby carry the scales Shizzle wants. Ravasaurs hunt in packs in the south-west: their claws are for Jes'rimon, and one of them carries a Mangled Journal. Avoid Gruff, a level 57 Stegodon.
+  tip South of the hot springs, Stegodons graze and Dinosaur Bones drop from them or lie on the ground; Diemetradons nearby carry the scales Shizzle wants. Ravasaurs hunt in packs in the south-west: their claws are for Jes'rimon, and now and then one carries a Mangled Journal (a rare drop: take its quest only if you get one). Avoid Gruff, a level 57 Stegodon.
   collect 11114 quest 3882
   collect 11830 quest 4503.1
   collect 11477 quest 4300
-  collect 11116
-  accept 3884                         -- Use the Mangled Journal to start it
+  collect 11116 optional              -- A Mangled Journal, a rare drop
+  accept 3884 optional                -- Use the Mangled Journal to start it
 
 step Research Equipment
   tip The expedition's lost equipment lies in the south-west jungle.
@@ -208,7 +208,7 @@ step Marshal's Refuge
   turnin 3845                         -- Linken
   accept 3908
   turnin 3881                         -- Williden Marshal
-  turnin 3884
+  turnin 3884 optional
   turnin 3883                         -- Hol'anyee Marshal
   turnin 3882                         -- Spark Nilminer
   turnin 4503                         -- Shizzle
@@ -365,7 +365,7 @@ step Augustus the Touched
 
 step Augustus' Receipt Book
   tip The book lies in the ruined inn of Terrordale.
-  collect 15884 quest 6164 @14.0,24.2
+  collect 15884 quest 6164 @17.4,31.1
 
 step Augustus the Touched
   turnin 6164
@@ -395,10 +395,10 @@ step Pamela Redpath
 
 step Pamela's Doll
   tip The doll's head and its two sides lie in the houses around Pamela; join them from your bags.
-  collect 12886 @32.6,79.6
-  collect 12887 @32.7,79.1
-  collect 12888 @33.1,79.7
-  collect 12885 quest 5149 @33.0,78.5
+  collect 12886
+  collect 12887
+  collect 12888
+  collect 12885 quest 5149 @38.5,91.4
 
 step Pamela Redpath
   turnin 5149

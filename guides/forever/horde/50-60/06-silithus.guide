@@ -115,7 +115,7 @@ step Cenarion Hold
 # ---------------------------------------------------------------- The south and the west
 
 step Hermit Ortell
-  tip Ride south-east to Ortell's hideout under the Un'Goro cliffs.
+  tip Ride south-east to Ortell's Hideout under the Un'Goro cliffs.
   turnin 8285
   accept 8279
 
@@ -167,7 +167,7 @@ step Noggle's Lost Satchel
   collect 20379 quest 8282.1
 
 step Hermit Ortell
-  tip Ride north-east to Ortell's hideout.
+  tip Ride north-east to Ortell's Hideout.
   turnin 8279
   accept 8287
   accept 8323
@@ -290,9 +290,8 @@ step Light's Hope Chapel
   turnin 6030                         -- Duke Nicholas Zverenhoff
 
 step Scourge Champions
-  tip Scourge Champions roam the fields north-west of the chapel. Pass Carlin's Mystic Crystal over each one you kill: the skulls that resonate are the ones he wants.
-  goto 56.7,40.8 "Scourge Champions"
-  collect 13155 quest 5206.1 @56.7,40.8
+  tip Scourge Champions roam the Noxious Glade, north of the chapel. Pass Carlin's Mystic Crystal over each one you kill: the skulls that resonate are the ones he wants.
+  collect 13155 quest 5206.1 @81.5,44.0
 
 step Light's Hope Chapel
   turnin 5206                         -- Carlin Redpath

@@ -14,8 +14,8 @@ next forever/horde/07-ashenvale
 # Syndicate camps, Durnholde Keep and the Mudsnout Blossoms -> hearth to
 # Tarren Mill -> Stanley and the southern fields (peasants, skulls) -> Tarren
 # Mill -> the smithy -> Tarren Mill -> the town hall -> hearth -> Azurelode
-# Mine -> Tarren Mill -> fly to the Undercity (Elixir of Agony, Unending
-# Torment, training) -> zeppelin to Orgrimmar, fly to Camp Taurajo (bind) ->
+# Mine -> Tarren Mill -> fly to the Undercity (Elixir of Agony, training) ->
+# zeppelin to Orgrimmar, fly to Camp Taurajo (bind) ->
 # Bael Modan (Tear of the Moons) -> Grish Longrunner at the Great Lift ->
 # hearth to Camp Taurajo -> fly to Ratchet: Mahren Skyseer, Isha Awak,
 # Sputtervalve -> forever/horde/07-ashenvale.
@@ -44,7 +44,12 @@ next forever/horde/07-ashenvale
 # and never hands it in. Melor Sends Word (1130): its turn-in in Thunder
 # Bluff at 30 is not on the route any more. Blood of Innocents (1066) needs
 # Journey to Tarren Mill (1065), from Zamah's chain in Thunder Bluff, which
-# this route never runs.
+# this route never runs. Unending Torment (97289-97292): the chain starts
+# from the Abominable Head, a drop from The Baron in the Ruins of Lordaeron
+# dungeon (97288).
+#
+# Added: Scout Support (98094, Forever): Darthalia's orders for Deathstalker
+# Masoj, who hides on the way from Durnholde to the Mudsnout Blossoms.
 #
 # Class training: in the Undercity at 26-27 (no Hunter, Shaman or Druid
 # trainer there; Hunters and Shamans train in Orgrimmar on the way through,
@@ -94,6 +99,7 @@ step Tarren Mill
   turnin 527                          -- High Executor Darthalia
   accept 528
   accept 546                          -- Deathguard Samsa
+  accept 98094 npc 2215               -- High Executor Darthalia: orders for Deathstalker Masoj, on the way to Durnholde
 
 # ---------------------------------------------------------------- East: Durnholde
 
@@ -106,6 +112,10 @@ step Durnholde Keep
   tip Drull and Tog'thar are chained inside Durnholde Keep's courtyard buildings; open both locks.
   interact 1721 quest 498.1           -- Drull's ball and chain
   interact 1722 quest 498.2           -- Tog'thar's ball and chain
+
+step Deathstalker Masoj
+  tip Masoj hides on the hillside above Dun Garok, south of Durnholde, on the way down to the blossoms.
+  turnin 98094 npc 270438 @64.2,54.0  -- Deathstalker Masoj
 
 step Mudsnout Blossoms
   tip South-west of Durnholde, the Mudsnout Blossoms grow on the hillsides above the river.
@@ -177,28 +187,6 @@ step Master Apothecary Faranell
   fly "Undercity"
   turnin 513                          -- Master Apothecary Faranell, in the Apothecarium
   accept 515                          -- Keep it: the Hillsbrad coast, later on the route
-  accept 97289
-  accept 97291
-  accept 97292
-
-step Othmar's body
-  zone Undercity
-  tip Othmar's body lies on the Unfinished Abomination's table next to the Apothecarium. Inject the Hissing Serum into the system above it, then lay the Baron's head on the body.
-  turnin 97289                        -- Unfinished Abomination
-  accept 97290
-
-step Faranell's reagents
-  zone Undercity
-  tip Tawny Grisette sells the Toxic Skullcap in the Trade Quarter; the Blisterweed grows beside Martha Alliestar, the herbalism trainer in the Magic Quarter; any poison vendor in the Rogues' Quarter sells the Essence of Agony.
-  buy 281246 npc 4554 x1
-  collect 281300 quest 97291.2 @54.0,49.3
-  buy 8923 nearest x1
-
-step Master Apothecary Faranell
-  zone Undercity
-  turnin 97292
-  turnin 97290
-  turnin 97291
   train class only !Hunter,!Shaman,!Druid
   vendor nearest
 

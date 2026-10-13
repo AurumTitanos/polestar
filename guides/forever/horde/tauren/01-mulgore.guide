@@ -159,7 +159,7 @@ step Mull Thunderhorn
 
 step Winterhoof Water Well
   tip The well lies south-east of the village.
-  use 5411 quest 754.1 @51.8,68.4     -- Winterhoof Cleansing Totem
+  use 5411 quest 754.1 @53.7,66.2     -- Winterhoof Cleansing Totem
 
 step Mull Thunderhorn
   turnin 754
@@ -204,7 +204,7 @@ step Ahab Wheathoof
 
 step Thunderhorn Water Well
   tip The well lies north of the village. Well Stones sit around the well, Ambercorn lies under the trees nearby. Kill wolves, cougars, plainstriders and swoops on the way for Mazzranache and Swoop Hunting.
-  use 5415 quest 758.1 @44.2,51.1     -- Thunderhorn Cleansing Totem
+  use 5415 quest 758.1 @44.6,45.4     -- Thunderhorn Cleansing Totem
   complete 771
   complete 99411
   collect 4804 quest 766.1 optional
@@ -268,7 +268,7 @@ step Morin Cloudstalker
 
 step The Venture Co. Mine
   tip The goblins work the mine in the hills north-east of the well. Supervisor Fizsprocket stands in the back of the mine; his Mulgore Expansion Plans start Fizsprocket's Notes, and the other pages lie inside the mine.
-  goto 61.2,49.3 "The Venture Co. Mine"
+  goto 64.9,43.3 "The Venture Co. Mine"
   complete 764
   complete 765
   collect 281031
@@ -279,7 +279,7 @@ step The Venture Co. Mine
 
 step Wildmane Water Well
   tip Cross north-west past Thunder Bluff to the Wildmane Water Well in the far north of Mulgore.
-  use 5416 quest 760.1 @42.7,25.0     -- Wildmane Cleansing Totem
+  use 5416 quest 760.1 @42.8,14.2     -- Wildmane Cleansing Totem
 
 step Dangers of the Windfury
   tip The Windfury harpies hold Windfury Ridge, north and west of the well.
