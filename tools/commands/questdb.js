@@ -9,14 +9,14 @@ const usage = `usage: node tools/polestar.js questdb build [options]
 
 Builds the load-on-demand quest database addon (addon/Polestar_QuestDB) from
 data/forever: quests (levels, race/class masks, faction, givers, enders,
-prerequisites, objectives), NPCs and objects (spawn clusters per map, Era
-frames) and items (drop sources, objects, vendors). Prints the Lua size and an
-estimate of the in-game memory it costs once loaded.
+prerequisites, objectives), NPCs and objects (spawn clusters per map, covering
+every known spawn; Era frames) and items (drop sources, objects, vendors).
+Prints the Lua size and an estimate of the in-game memory it costs once
+loaded.
 
   --data <dir>            data/forever (quests, npcs, objects, items, map-frames)
   --out <dir>             output addon folder (default: addon/Polestar_QuestDB)
   --radius <yd>           spawn cluster radius (default ${DEFAULTS.clusterRadius})
-  --clusters <n>          clusters kept per entity per map (default ${DEFAULTS.clusterCap})
   --droppers <n>          NPC drop sources kept per item (default ${DEFAULTS.maxDroppers})
   --json                  print the stats as JSON`;
 
@@ -29,7 +29,6 @@ async function build(rest) {
 			data: { type: 'string' },
 			out: { type: 'string' },
 			radius: { type: 'string' },
-			clusters: { type: 'string' },
 			droppers: { type: 'string' },
 			json: { type: 'boolean' },
 		},
@@ -41,7 +40,6 @@ async function build(rest) {
 		return n;
 	};
 	if (values.radius) options.clusterRadius = num(values.radius, '--radius');
-	if (values.clusters) options.clusterCap = num(values.clusters, '--clusters');
 	if (values.droppers) options.maxDroppers = num(values.droppers, '--droppers');
 	const result = buildQuestDB({ dataDir: values.data ? path.resolve(values.data) : undefined, options });
 	const outDir = path.resolve(values.out || path.join(ROOT, 'addon', 'Polestar_QuestDB'));

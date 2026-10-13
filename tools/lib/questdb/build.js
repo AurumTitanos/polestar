@@ -25,7 +25,9 @@
 //     skill     required profession skill line; holiday: event id (never "available")
 //   npcs[id]    = { name, map, frame, n, x1, y1, r1, ..., map, frame, n, ... }
 //   objects[id] = same as npcs
-//     n clusters per map; x, y map percent (frame 0 = Era, 1 = live), r yards
+//     n clusters per map, together covering every known spawn there (the
+//     reference data's `pts` and `more`); x, y map percent (frame 0 = Era,
+//     1 = live), r yards
 //   items[id]   = { name, nNpc, npc, chance, ..., nObj, object, chance, ..., vendor, ... }
 //     chance in percent, best first; vendors to the end of the record
 
@@ -43,7 +45,6 @@ const OBJECTIVE_KIND = { kill: 1, item: 2, object: 3, event: 4 };
 
 const DEFAULTS = {
 	clusterRadius: 70, // yards: points closer than this to a centroid join it
-	clusterCap: 8, // clusters kept per entity per map (largest first)
 	maxDroppers: 8, // NPC drop sources per item (best chance first)
 	maxObjectSources: 6, // object sources per item
 	maxVendors: 4, // vendors per item
@@ -200,8 +201,9 @@ function buildQuestDB({ dataDir, options = {} } = {}) {
 			const live = s.f === 'l';
 			const frame = frames[map];
 			if (!live && !frame) continue; // an Era point without an Era frame cannot be placed
-			const pts = s.pts || [];
-			const clusters = clusterPoints(pts, frame, { radius: opts.clusterRadius, cap: opts.clusterCap });
+			// Every known spawn, so every place the entity spawns gets a marker.
+			const pts = [...(s.pts || []), ...(s.more || [])];
+			const clusters = clusterPoints(pts, frame, { radius: opts.clusterRadius });
 			if (clusters.length === 0) continue;
 			spawnStats.points += pts.length;
 			spawnStats.clusters += clusters.length;

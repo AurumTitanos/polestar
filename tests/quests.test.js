@@ -275,6 +275,32 @@ emit(#Q.GetMarkers(1429, "objectives"))
 	assert.equal(mapIndex, 2);
 });
 
+test('after a rebuild a cluster two quests shared shows only the quest still needing it', () => {
+	const [shared, after, tip] = run(`
+w.accept(60, { { text = "Large Candle: 0/8", type = "item", required = 8 } })
+w.accept(7, { { text = "Kobold Vermin slain: 0/10", type = "monster", required = 10 } })
+stub.advance(0.3)
+local function vermin()
+	local out = {}
+	for _, p in ipairs(layer("quests.objectives")) do
+		if p.header == "Kobold Vermin" then out[#out + 1] = p.icon .. ":" .. #p.refs end
+	end
+	table.sort(out)
+	return out
+end
+emit(vermin())
+w.progress(7, 1, 10)                -- 7's kill objective is done: only 60's candles still need the kobolds
+stub.advance(0.3)
+emit(vermin())
+for _, p in ipairs(layer("quests.objectives")) do
+	if p.header == "Kobold Vermin" then emit(sq.pinTooltip(p)) break end
+end
+`, { setup: 'w.complete({ 783 }); w.setLevel(4)' });
+	assert.deepEqual(shared, ['icon-kill:2', 'icon-kill:2', 'icon-kill:2']);
+	assert.deepEqual(after, ['icon-collect:1', 'icon-collect:1', 'icon-collect:1'], 'the kill glyph and the done quest are gone');
+	assert.ok(tip.some((l) => /Kobold Candles/.test(l)) && !tip.some((l) => /Kobold Camp Cleanup/.test(l)), JSON.stringify(tip));
+});
+
 // The suite's quest line: Hooks.AddLine
 // with "<Quest>:" left in the quest colour and "<what> cur/max" right in
 // textDim, success once done. The stub tooltip joins the halves with " | ".
@@ -340,6 +366,29 @@ emit(snap())
 `, { setup: 'w.complete({ 783 })' });
 	assert.ok(first.calls > 0);
 	assert.deepEqual(after, first);
+});
+
+test('a progress count alone rebuilds no marker and calls no Pins; tooltips read it live; a finished objective rebuilds', () => {
+	const [base, tick, tip, done] = run(`
+w.accept(7, { { text = "Kobold Vermin slain: 0/10", type = "monster", required = 10 } })
+stub.advance(0.3)
+local updates = 0
+Polestar.On("QUESTDB_UPDATED", function() updates = updates + 1 end)
+local function snap() return { rebuilds = Q.stats.rebuilds, calls = #sq.pins.calls, pins = #layer("quests.objectives"), updates = updates } end
+emit(snap())
+w.progress(7, 1, 4)
+stub.advance(0.3)
+emit(snap())
+emit(sq.pinTooltip(layer("quests.objectives")[1]))
+w.progress(7, 1, 10)
+stub.advance(0.3)
+emit(snap())
+`, { setup: 'w.complete({ 783 })' });
+	assert.ok(base.pins > 0);
+	assert.deepEqual(tick, { ...base, updates: base.updates + 1 }, 'kill count 4/10: same markers, no Pins call, one update for tooltips and nameplates');
+	assert.ok(tip.some((l) => /4\/10/.test(l)), `the marker tooltip reads the live count: ${JSON.stringify(tip)}`);
+	assert.equal(done.rebuilds, base.rebuilds + 1, 'objective done: markers rebuilt');
+	assert.equal(done.pins, 0, 'its kill markers are gone');
 });
 
 test('quest log events are coalesced into one update per throttle window', () => {

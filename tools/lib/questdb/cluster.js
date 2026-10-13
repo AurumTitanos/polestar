@@ -15,10 +15,11 @@ const round1 = (n) => Math.round(n * 10) / 10;
 
 // points: [[x, y], ...] in map percent. Returns clusters sorted by size
 // (largest first, ties by position): [{ x, y, r, n }], r in whole yards.
-// opts: { radius (yd, default 70), cap (max clusters, default 8), minRadius (yd, default 0) }
+// Every point lies in one cluster unless `cap` keeps only the largest.
+// opts: { radius (yd, default 70), cap (max clusters, default none), minRadius (yd, default 0) }
 function clusterPoints(points, frame, opts = {}) {
 	const radius = opts.radius ?? 70;
-	const cap = opts.cap ?? 8;
+	const cap = opts.cap ?? Infinity;
 	const minRadius = opts.minRadius ?? 0;
 	const { sx, sy } = scaleOf(frame);
 	const pts = points

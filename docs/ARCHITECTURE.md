@@ -1272,13 +1272,15 @@ Polestar_Travel when it is built (`--crossings-lua none` leaves it out).
 ## Quests — quest database, markers, tooltips, quest levels
 
 `addon/Polestar/Quests/` loads the load-on-demand data addon
-`Polestar_QuestDB` through `Data.Pack` (≈ 0.9 MB of Lua, ≈ 4.6 MB resident)
+`Polestar_QuestDB` through `Data.Pack` (≈ 1.3 MB of Lua, ≈ 6.4 MB resident)
 at login, and only while `qol.questDB` is on and at least one feature that
 needs it is (`QuestDB.IsWanted()`: map/minimap objectives, available quests,
 turn-ins, tooltips, nameplates); turning the first one on later loads it then,
 and a load refused in combat is retried when combat ends. It fires
 `QUESTDB_LOADED`, then `QUESTDB_STARTED`; `QUESTDB_UPDATED` follows every
 change to the tracked quest log. Record layouts: `tools/lib/questdb/build.js`.
+An entity's spawn clusters (70 yd) cover every known spawn on each map (the
+reference data's `pts` and `more`), with no cap on how many.
 
 ```lua
 Polestar.QuestDB.IsLoaded() / IsEnabled() / IsRunning() / IsWanted()
@@ -1310,7 +1312,13 @@ profession skill.
 Pins layers: `quests.objectives`, `quests.turnin`, `quests.available`, one pin
 per entity spawn cluster and layer (a mob two objectives need carries both
 under the higher-ranked glyph: kill > interact > collect > vendor). Objective
-clusters at least `MIN_AREA` (12 yd) wide carry their radius as `area`. Look is
+clusters at least `MIN_AREA` (12 yd) wide carry their radius as `area`. Markers
+and the tooltip/nameplate indexes are rebuilt only when what they show
+changed (a quest came or went, got ready or changed title, an objective was
+done or undone); a progress count alone only fires `QUESTDB_UPDATED`, since
+tooltips and nameplates read counts live. A rebuild reuses the pin tables
+the last one kept for the same cluster, with their world position (`c`,
+`wx`, `wy`) worked out once, so `Pins.SetLayer` converts only new pins. Look is
 applied at publish: while a Polestar guide runs, pins of quests in its current
 step (`Engine.GetGuide().steps[Engine.GetStepIndex()].goals[*].quest`, re-read on
 `STEP_CHANGED`/`GUIDE_CHANGED`) are 1.3× with a glow and on top; with
@@ -1673,8 +1681,9 @@ Spawn points per entity per map: `pts` holds at most 24 (`data build --cap`),
 spread evenly over the entity's spawns (farthest-point sampling); `more` the
 distinct points the cap left out, sorted by x then y, only when there are any.
 Every consumer reads the evenly spread `pts` (the simulator, zone levels,
-QuestDB, Codex, the profession generators), except the guide compiler, whose
-spawn areas and near-spawn lint read `pts` and `more`: every known spawn.
+Codex, the profession generators), except the ones that mark where an entity
+spawns, which read `pts` and `more`, every known spawn: the guide compiler's
+spawn areas and near-spawn lint, and QuestDB's marker clusters.
 
 `dungeons.json` is built by `dungeons build` (`tools/lib/data/dungeonjournal.js`)
 from the installed DungeonJournal addon (no licence: local only, see

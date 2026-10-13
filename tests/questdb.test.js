@@ -103,11 +103,29 @@ test('the fixture database keeps quest-related entities only, in the documented 
 	assert.match(files['LICENSE-DATA.txt'], /Fixture notice\./);
 });
 
-test('caps limit drop sources and clusters', () => {
-	const { db } = buildQuestDB({ dataDir: FIX, options: { maxDroppers: 1, maxObjectSources: 0, maxVendors: 0, clusterCap: 1 } });
+test('caps limit drop sources', () => {
+	const { db } = buildQuestDB({ dataDir: FIX, options: { maxDroppers: 1, maxObjectSources: 0, maxVendors: 0 } });
 	assert.deepEqual(db.items.get(772), ['Large Candle', 1, 6, 40, 0]);
 	assert.ok(!db.npcs.has(40), 'a dropper past the cap is not pulled in');
-	assert.equal(db.npcs.get(6)[3], 1, 'one cluster kept');
+});
+
+test('every known spawn of an entity lies in one of its clusters: no cap, and the points the data cap left out count', () => {
+	const dir = tmp();
+	for (const f of fs.readdirSync(FIX)) fs.copyFileSync(path.join(FIX, f), path.join(dir, f));
+	const npcs = JSON.parse(fs.readFileSync(path.join(FIX, 'npcs.json'), 'utf8'));
+	// Kobold Vermin: its camps, plus ten lone spawns 240 yd apart that the data's cap left out.
+	const more = Array.from({ length: 10 }, (_, i) => [10 + i * 8, 90]);
+	npcs[6].spawns[1429].more = more;
+	fs.writeFileSync(path.join(dir, 'npcs.json'), JSON.stringify(npcs));
+	const rec = buildQuestDB({ dataDir: dir }).db.npcs.get(6);
+	assert.equal(rec[1], 1429);
+	const clusters = [];
+	for (let k = 0; k < rec[3]; k++) clusters.push({ x: rec[4 + k * 3], y: rec[5 + k * 3], r: rec[6 + k * 3] });
+	assert.ok(clusters.length > 8, `${clusters.length} clusters: past the old cap of 8`);
+	// The fixture's Elwynn frame: 30 yd per x percent, 20 yd per y percent.
+	const inside = ([x, y]) => clusters.some((c) => Math.hypot((x - c.x) * 30, (y - c.y) * 20) <= c.r);
+	assert.deepEqual([...npcs[6].spawns[1429].pts, ...more].filter((p) => !inside(p)), []);
+	for (const [x, y] of more) assert.ok(clusters.some((c) => c.x === x && c.y === y), `a marker at the lone spawn ${x},${y}`);
 });
 
 test('builds are byte-identical and the TOC is a load-on-demand Polestar addon', () => {

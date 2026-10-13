@@ -3,9 +3,13 @@
 -- quests this character can take now. Markers go through Polestar.Pins.
 --
 -- Work is event-driven and coalesced: quest log, level and setting events
--- only mark state dirty; one flush per THROTTLE seconds re-reads the log,
--- compares it with what it saw last time, and rebuilds markers and the
--- per-entity indexes (Tooltips.lua) only when something actually changed.
+-- only mark state dirty; one flush per THROTTLE seconds re-reads the log and
+-- compares it with what it saw last time. Markers and the per-entity indexes
+-- (Tooltips.lua) are rebuilt only when what they show changed: a quest came
+-- or went, got ready, changed title, or an objective was done or undone. A
+-- progress count alone ("3/10" to "4/10") only fires QUESTDB_UPDATED: tooltips
+-- and nameplates read it live, and a marker covers every spawn of its target,
+-- so rebuilding thousands of them on every kill would cost for nothing.
 -- Markers are kept in a per-map index (QuestDB.GetMarkers(map)).
 --
 -- Look is applied when a layer is published (stylePin): objective spawn
@@ -151,22 +155,24 @@ local function newEntry(q)
 end
 
 -- Match database objectives to the client's by name (the client text reads
--- "Kobold Vermin slain: 3/10"), else by position. Returns true on a change.
+-- "Kobold Vermin slain: 3/10"), else by position. Returns two booleans: what
+-- markers show changed (title, ready, an objective done or undone), and a
+-- progress count changed.
 local find = string.find
 local function readProgress(e)
-	local changed = false
+	local shape, progress = false, false
 	local title = ns.Compat.GetQuestTitle(e.q) or (e.rec and e.rec[F.TITLE]) or ("Quest " .. e.q)
 	if title ~= e.title then
 		e.title = title
-		changed = true
+		shape = true
 	end
 	local ready = ns.Compat.IsQuestReadyForTurnIn(e.q) and true or false
 	if ready ~= e.ready then
 		e.ready = ready
-		changed = true
+		shape = true
 	end
 	local objs = e.objs
-	if #objs == 0 then return changed end
+	if #objs == 0 then return shape, progress end
 	local client = ns.Compat.GetQuestObjectives(e.q)
 	local n = client and #client or 0
 	for i = 1, #objs do
@@ -194,12 +200,16 @@ local function readProgress(e)
 			cur, max, done = 0, o.max, ready
 		end
 		if ready then done = true end
-		if cur ~= o.cur or max ~= o.max or done ~= o.done then
-			o.cur, o.max, o.done = cur, max, done
-			changed = true
+		if done ~= o.done then
+			o.done = done
+			shape = true
+		end
+		if cur ~= o.cur or max ~= o.max then
+			o.cur, o.max = cur, max
+			progress = true
 		end
 	end
-	return changed
+	return shape, progress
 end
 
 -- Quests the log enumeration may not show (under a collapsed header): seeded
@@ -207,32 +217,38 @@ end
 -- character is on them.
 local hidden = {}
 
+-- Read one quest; returns (shape, progress) as readProgress, a new quest
+-- counting as a shape change.
 local function visit(q)
-	local changed = false
 	local e = entries[q]
+	local added = false
 	if not e then
 		e = newEntry(q)
 		entries[q] = e
-		changed = true
+		added = true
 		dirtyAvailable = true
 	end
 	e.seen = generation
-	if readProgress(e) then changed = true end
-	return changed
+	local shape, progress = readProgress(e)
+	return shape or added, progress
 end
 
+-- Re-read the log: (shape, progress) over every quest, a quest that left
+-- the log counting as a shape change.
 local function scanLog()
 	stats.scans = stats.scans + 1
 	generation = generation + 1
-	local changed = false
+	local shape, progress = false, false
 	client.LogQuestIDs(logIDs)
 	for i = 1, #logIDs do
-		if visit(logIDs[i]) then changed = true end
+		local s, p = visit(logIDs[i])
+		shape, progress = shape or s, progress or p
 	end
 	for q in pairs(hidden) do
 		local e = entries[q]
 		if not (e and e.seen == generation) and ns.Compat.IsOnQuest(q) then
-			if visit(q) then changed = true end
+			local s, p = visit(q)
+			shape, progress = shape or s, progress or p
 		end
 		hidden[q] = nil
 	end
@@ -240,15 +256,16 @@ local function scanLog()
 		if e.seen ~= generation then
 			if ns.Compat.IsOnQuest(q) then
 				e.seen = generation
-				if readProgress(e) then changed = true end
+				local s, p = readProgress(e)
+				shape, progress = shape or s, progress or p
 			else
 				entries[q] = nil
-				changed = true
+				shape = true
 				dirtyAvailable = true
 			end
 		end
 	end
-	return changed
+	return shape, progress
 end
 
 local function sweepLog()
@@ -342,6 +359,21 @@ local function addTooltipLines(tt, pin)
 	end
 end
 
+-- Pins kept from the last rebuild of each layer, by key, and reused by the
+-- next: no new tables or closures, and the world position (c, wx, wy) worked
+-- out once, so Pins.SetLayer skips converting it. A key names one spawn
+-- cluster (or event point), whose position the data never changes. Each
+-- rebuild keeps only the pins it used (poolGen).
+local pools = { [LAYER_OBJECTIVES] = {}, [LAYER_TURNIN] = {}, [LAYER_AVAILABLE] = {} }
+local poolGen = 0
+
+local function prune(layer)
+	local pool = pools[layer]
+	for key, pin in pairs(pool) do
+		if pin.gen ~= poolGen then pool[key] = nil end
+	end
+end
+
 -- One pin per entity spawn cluster and layer: a mob two objectives need
 -- (killed for one quest, looted for another) carries both refs under the
 -- glyph of the higher-ranked style (STYLE[*].rank).
@@ -354,12 +386,24 @@ local function newPin(layer, key, kind, style, map, f, x, y, header, byKey, radi
 		if area and area > (pin.radius or 0) then pin.radius = area end
 		return pin
 	end
-	pin = {
-		map = map, x = x, y = y, f = f,
-		icon = s.icon, size = s.size, color = color(s.color), priority = s.priority,
-		kind = kind, header = header, refs = {}, layer = layer, style = style, radius = area,
-	}
-	pin.tooltip = function(tt) addTooltipLines(tt, pin) end
+	local pool = pools[layer]
+	pin = pool[key]
+	if pin then
+		local refs = pin.refs
+		for i = #refs, 1, -1 do refs[i] = nil end
+		pin.kind, pin.header, pin.style, pin.icon, pin.radius = kind, header, style, s.icon, area
+	else
+		pin = {
+			map = map, x = x, y = y, f = f,
+			icon = s.icon, size = s.size, color = color(s.color), priority = s.priority,
+			kind = kind, header = header, refs = {}, layer = layer, style = style, radius = area,
+		}
+		local C = ns.Compat
+		if C and C.MapToWorld then pin.c, pin.wx, pin.wy = C.MapToWorld(map, x, y, f) end
+		pin.tooltip = function(tt) addTooltipLines(tt, pin) end
+		pool[key] = pin
+	end
+	pin.gen = poolGen
 	byKey[key] = pin
 	local byMap = markers[layer]
 	local list = byMap[map]
@@ -512,10 +556,13 @@ end
 
 local function rebuildObjectiveMarkers()
 	stats.rebuilds = stats.rebuilds + 1
+	poolGen = poolGen + 1
 	clearMarkers(LAYER_OBJECTIVES)
 	clearMarkers(LAYER_TURNIN)
 	local byKey = {}
 	for _, e in pairs(entries) do objectivePins(e, byKey) end
+	prune(LAYER_OBJECTIVES)
+	prune(LAYER_TURNIN)
 end
 
 ---------------------------------------------------------------------------
@@ -658,6 +705,7 @@ local function scanAvailable()
 end
 
 local function rebuildAvailableMarkers()
+	poolGen = poolGen + 1
 	clearMarkers(LAYER_AVAILABLE)
 	local byKey = {}
 	for i = 1, #candidates do
@@ -666,6 +714,7 @@ local function rebuildAvailableMarkers()
 			for _, ref in Each(Q.QuestRecord(q)[F.START]) do spawnPins(LAYER_AVAILABLE, "available", "available", ref, q, byKey) end
 		end
 	end
+	prune(LAYER_AVAILABLE)
 end
 
 -- Sorted IDs of the quests this character can take now (needs a flush).
@@ -767,10 +816,10 @@ end
 local function flush()
 	pending = false
 	if not running then return end
-	local logChanged, availChanged = false, false
+	local logChanged, progressChanged, availChanged = false, false, false
 	if dirtyLog then
 		dirtyLog = false
-		logChanged = scanLog()
+		logChanged, progressChanged = scanLog()
 	end
 	if logChanged then
 		stats.changes = stats.changes + 1
@@ -778,6 +827,10 @@ local function flush()
 		rebuildObjectiveMarkers()
 		publish(LAYER_OBJECTIVES)
 		publish(LAYER_TURNIN)
+		ns.Fire("QUESTDB_UPDATED")
+	elseif progressChanged then
+		-- Counts only: markers and indexes stay; tooltips and nameplates re-read.
+		stats.changes = stats.changes + 1
 		ns.Fire("QUESTDB_UPDATED")
 	end
 	if dirtyAvailable then
@@ -865,6 +918,8 @@ function Q.Stop()
 	rebuildIndex()
 	for layer in pairs(markers) do
 		clearMarkers(layer)
+		local pool = pools[layer]
+		for key in pairs(pool) do pool[key] = nil end
 		publish(layer)
 	end
 	ns.Fire("QUESTDB_UPDATED")
