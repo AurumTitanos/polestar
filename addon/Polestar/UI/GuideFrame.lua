@@ -580,6 +580,24 @@ local function tabMenu(self)
 	}, { point = "TOPLEFT", relPoint = "BOTTOMLEFT", x = 0, y = -2 })
 end
 
+-- A tab's label: the title, then its level range in a dimmer string. The
+-- range tells same-named guides apart, so it keeps its width and the title
+-- truncates; `pad` is the room kept at the right (more while the close button
+-- shows). Too narrow for even the range, the tab is its glyph alone.
+local TAB_TEXT_X = 27 -- the label's left edge: the glyph's inset, width and gap
+local TAB_RANGE_GAP = 4
+local function layoutTab(b, pad)
+	local room = b:GetWidth() - TAB_TEXT_X - pad
+	local rangeW = b.lsRange and (floor(b.Range:GetStringWidth() + 1) + TAB_RANGE_GAP) or 0
+	local fits = rangeW <= room
+	local titleW = fits and min(b.lsTitleW, room - rangeW) or 0
+	b.Label:SetShown(titleW >= 1)
+	if titleW >= 1 then b.Label:SetWidth(titleW) end
+	b.Range:SetShown(b.lsRange and fits or false)
+	b.Range:ClearAllPoints()
+	b.Range:SetPoint("LEFT", b.Icon, "RIGHT", 6 + (titleW >= 1 and titleW + TAB_RANGE_GAP or 0), 0)
+end
+
 local function tabButton(i)
 	local b = tabButtons[i]
 	if b then return b end
@@ -602,7 +620,7 @@ local function tabButton(i)
 	b.Icon:SetPoint("LEFT", b, "LEFT", 9, 0)
 	b.Label = T(b, "small", "textDim")
 	b.Label:SetPoint("LEFT", b.Icon, "RIGHT", 6, 0)
-	b.Label:SetPoint("RIGHT", b, "RIGHT", -8, 0)
+	b.Range = T(b, "small", "textMuted")
 	b.Close = W.IconButton(b, "close", 16, L["Close tab"], function(self)
 		local E = Engine()
 		if E and E.CloseTab then E.CloseTab(self:GetParent().lsIndex) end
@@ -620,7 +638,7 @@ local function tabButton(i)
 	end)
 	b:SetScript("OnEnter", function(self)
 		self.Close:SetAlpha(1)
-		self.Label:SetPoint("RIGHT", self, "RIGHT", -20, 0)
+		layoutTab(self, 20)
 		local lines = {}
 		if self.lsMeta and self.lsMeta ~= "" then lines[#lines + 1] = self.lsMeta end
 		if self.lsProgress then lines[#lines + 1] = self.lsProgress end
@@ -630,7 +648,7 @@ local function tabButton(i)
 	end)
 	b:SetScript("OnLeave", function(self)
 		self.Close:SetAlpha(0)
-		self.Label:SetPoint("RIGHT", self, "RIGHT", -8, 0)
+		layoutTab(self, 8)
 		W.HideTooltip(self)
 	end)
 	tabButtons[i] = b
@@ -670,13 +688,20 @@ function GF.RenderTabs()
 		local total = t.total or t.stepCount
 		b.lsProgress = (t.done and total and total > 0) and string.format(L["%d of %d steps done"], t.done, total) or nil
 		b.Label:SetText(b.lsTitle)
+		b.Label:SetWidth(0) -- unbound, to measure the whole title
+		b.lsTitleW = floor(b.Label:GetStringWidth() + 1)
+		local lv = guide and UI.LevelRange(guide.minLevel, guide.maxLevel)
+		b.lsRange = lv and ("(" .. lv .. ")") or nil
+		b.Range:SetText(b.lsRange or "")
 		b.Icon:SetTexture(Theme.Media(CATEGORY_ICON[t.category] or "icon-level"))
 		W.Color(b.Label, b.lsActive and "text" or "textMuted")
+		W.Color(b.Range, b.lsActive and "textDim" or "textMuted")
 		W.Color(b.Icon, b.lsActive and "accent" or "textMuted")
 		b.Selected:SetShown(b.lsActive)
 		b.Bar:SetShown(b.lsActive)
 		local w = b.lsActive and activeW or otherW
 		b:SetWidth(w)
+		layoutTab(b, b:IsMouseOver() and 20 or 8)
 		b:ClearAllPoints()
 		b:SetPoint("BOTTOMLEFT", strip, "BOTTOMLEFT", x, 0)
 		x = x + w

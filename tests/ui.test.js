@@ -434,8 +434,8 @@ test('tab strip: one tab per open guide; select, close, move, and + opens the pi
 	const [out] = run(`
 		uistub.openTabs(TABS, 1)
 		local tabs = shownTabs()
-		local titles, widths = {}, {}
-		for i, b in ipairs(tabs) do titles[i] = b.Label:GetText(); widths[i] = b:GetWidth() end
+		local titles, ranges, widths = {}, {}, {}
+		for i, b in ipairs(tabs) do titles[i] = b.Label:GetText(); ranges[i] = b.Range:GetText(); widths[i] = b:GetWidth() end
 		local activeBar = { tabs[1].Bar:IsShown(), tabs[2].Bar:IsShown() }
 		local titleInNav = GF.parts.nav.Title:IsShown()
 		tabs[2]:Click()
@@ -448,9 +448,10 @@ test('tab strip: one tab per open guide; select, close, move, and + opens the pi
 		local closed = { n = #shownTabs(), call = lastCall("CloseTab") }
 		GF.parts.strip.Add:Click()
 		local pickerNewTab = PolestarPicker:IsShown() and Polestar.UI.Picker.IsNewTabMode()
-		emit({ titles = titles, widths = widths, activeBar = activeBar, titleInNav = titleInNav, afterSelect = afterSelect, moved = moved,
+		emit({ titles = titles, ranges = ranges, widths = widths, activeBar = activeBar, titleInNav = titleInNav, afterSelect = afterSelect, moved = moved,
 			closed = closed, pickerNewTab = pickerNewTab })`);
 	assert.deepEqual(out.titles, ['Elwynn Forest', 'Tailoring 1-300', 'Stormwind Reputation']);
+	assert.deepEqual(out.ranges, ['(1–13)', '(5–60)', '(12–60)'], 'each tab names its levels after the title, as the guide menu rows do');
 	assert.ok(out.widths[0] > out.widths[1], 'the active tab gets the room to read its title');
 	assert.deepEqual(out.activeBar, [true, false]);
 	assert.equal(out.titleInNav, false, 'the tab names the guide; the navigator does not repeat it');
@@ -458,6 +459,31 @@ test('tab strip: one tab per open guide; select, close, move, and + opens the pi
 	assert.deepEqual(out.moved, ['MoveTab', 1, 2]);
 	assert.deepEqual(out.closed, { n: 2, call: ['CloseTab', 3] });
 	assert.equal(out.pickerNewTab, true);
+});
+
+test('a narrow tab truncates its title and keeps its level range whole, also with the close button shown', () => {
+	const [out] = run(`
+		Polestar.Set("ui.width", 300)
+		uistub.openTabs(TABS, 1)
+		local b = shownTabs()[1]
+		local function measure()
+			local _, _, _, x = b.Range:GetPoint(1)
+			return { range = b.Range:IsShown() and b.Range:GetText(), rangeWhole = b.Range:GetStringWidth() == b.Range:GetUnboundedStringWidth(),
+				titleCut = b.Label:IsShown() and b.Label:GetStringWidth() < b.Label:GetUnboundedStringWidth(),
+				right = 9 + 12 + x + b.Range:GetStringWidth(), width = b:GetWidth() }
+		end
+		local rest = measure()
+		stub.RunScript(b, "OnEnter")
+		local hover = measure()
+		stub.RunScript(b, "OnLeave")
+		emit({ rest = rest, hover = hover, after = measure() })`);
+	for (const [state, pad] of [['rest', 8], ['hover', 20], ['after', 8]]) {
+		const m = out[state];
+		assert.equal(m.range, '(1–13)', state);
+		assert.equal(m.rangeWhole, true, `${state}: the range is not cut`);
+		assert.equal(m.titleCut, true, `${state}: the title truncates instead`);
+		assert.ok(m.right <= m.width - pad, `${state}: the range ends ${m.right} inside ${m.width - pad}`);
+	}
 });
 
 test('without the Engine tabs API the strip stays hidden and the navigator names the guide', () => {
