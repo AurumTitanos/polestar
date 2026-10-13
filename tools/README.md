@@ -1,0 +1,174 @@
+# tools/
+
+Polestar's toolchain: Node 24 or newer, no npm dependencies. Every command
+runs through one entry point:
+
+```sh
+node tools/polestar.js help              # the list of commands
+node tools/polestar.js help <command>    # one command's options
+node tools/polestar.js <command> --help  # the same; -h too
+```
+
+Asking for help never runs a command: `--help` or `-h` anywhere after the
+command name prints its usage and exits, so nothing is built, rendered,
+downloaded or imported. `package.json` has one script, `npm test`; every
+other command runs as `node tools/polestar.js <command>` (or `polestar
+<command>` after `npm link`).
+
+Some commands also need a Lua 5.1 interpreter (`play`, `playtest`,
+`record import`, `travel route`); `node tools/polestar.js doctor` checks what
+is installed. The contract the tools write to is in
+[docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md), "Toolchain".
+
+## Commands
+
+### Playing and previewing
+
+| Command | What it does |
+|---|---|
+| `doctor` | Checks Node, Lua, the reference data, the AddOns folder and a pack's `pack.json` |
+| `install` | Copies (or with `--link`, symlinks) the addons into the game's AddOns folder; given a guide pack, builds and installs that pack |
+| `play` | The playground: the real addon in the browser against a simulated world |
+| `preview` | Renders the guide window, the hub and the options to `docs/preview/*.svg` |
+
+### Writing guides and packs
+
+| Command | What it does |
+|---|---|
+| `new` | Starts a guide pack in a new folder from `tools/templates/pack` |
+| `lint` | Checks a pack's `.guide` files without writing anything |
+| `compile` | Compiles a pack into its addon folder (ours into `addon/Polestar_Guides`) |
+| `dev` | Rebuilds a pack into the game, and optionally the playground, on every save |
+| `playtest` | Plays a pack's guides to the end for every class they branch on |
+| `find` | Looks up quests, NPCs, objects, items, inns, flight points and guides, printed as guide lines |
+| `draft` | Drafts a leveling route (`.guide`) from the reference data |
+| `record` | Recorder sessions: `import`, `watch`, `list`, `draft` a guide from one, `report` on recorded play |
+| `sim` | The route simulator: `world`, `calibrate`, `run`, `robust`, `compare`, `bench`, `export`, `consensus` ([docs/SIMULATION.md](../docs/SIMULATION.md)) |
+
+### Building data
+
+These need the game client's tables, installed addons or other local
+sources, so they run on a maintainer's machine, never in CI.
+
+| Command | What it does |
+|---|---|
+| `data build` | Builds the reference data, `data/forever/*.json` |
+| `dungeons build` | Imports dungeon data into `data/forever/dungeons.json` |
+| `profession build` | Builds `data/forever/professions.json`; `profession draft <Profession>` drafts a 1-300 crafting guide |
+| `trainers build` | Builds `data/forever/trainers.json` and `Core/ClassTrainers.lua` |
+| `travel build` | Builds the travel network: `data/forever/travel.json`, `Nav/TravelData.lua`, `Polestar_Travel`; `travel route` runs the in-game planner between two points |
+| `maps build` / `maps overlays` | Zone level ranges (`Maps/ZoneLevels.lua`) / zone art overlays (`UI/ZoneArtOverlays.lua`) |
+| `qol build` | Spirit healers and flight masters (`QoL/Data.lua`) |
+| `itemdb build` | The `Polestar_ItemDB` item stats (`Items.lua`) |
+| `gear build` / `gear fetch` | Forever item stats, reward choices and stat weight bands / refresh the cached sims |
+| `questdb build` | The `Polestar_QuestDB` data addon |
+| `codex build` | Lookup's Codex: `data/forever/codex/*.json` and the `Polestar_Codex` data addon |
+| `media` | Regenerates the addon's textures from `tools/media/*.js` |
+
+### Releasing
+
+| Command | What it does |
+|---|---|
+| `version` | Shows, or sets, the version in `package.json`, `guides/pack.json` and every addon TOC |
+| `pack` | Writes the release zips and `SHA256SUMS` to `dist/`; given a guide pack, that pack's zip |
+
+The release steps are in [docs/RELEASING.md](../docs/RELEASING.md).
+
+## What is in tools/
+
+| Path | What it is |
+|---|---|
+| `polestar.js` | The entry point: dispatches to `commands/<name>.js` |
+| `commands/` | One module per command: `{ name, summary, usage, run }` |
+| `lib/` | The library the commands share (below) |
+| `media/` | Texture generators run by `media`: `nav.js`, `qol.js`, `ui.js`; the wordmark fonts in `media/fonts` |
+| `preview/` | `preview`'s renderer: a geometry-recording client stub (`stub.lua`), font outlines, SVG drawing |
+| `play/` | The playground: server, Lua session, driver and the page in `play/public` |
+| `readme/` | Scripts for the README's art: `brand.js` (banners, emblem, logo, download button) and `charts.js` (route charts) |
+| `templates/pack/` | What `new` copies into a new guide pack |
+
+### tools/lib
+
+| Path | What it is |
+|---|---|
+| `addons.js` | Finds World of Warcraft: Forever installs and their AddOns and WTF folders; every command that reads or writes them goes through it (`$WOW_FOREVER_ADDONS` first, then the detected clients, live first) |
+| `codex/` | `codex build`: the Codex JSON, the Dungeons journal and the `Polestar_Codex` writer |
+| `consume/` | Readers for installed addons' data, all through one Lua reader, and for the sims' stat weights |
+| `data/` | `data build`: sources, merging, spawns, races, the dungeon import; also the shared CSV and wago.tools loaders |
+| `dsl/` | The guide compiler: lexer, parser, resolver, validation, emitter; project and pack layout; the shared argument parser `cli.js` |
+| `exploration/` | The exploration guide generator (`build.js`, run directly, see below) |
+| `find.js` | `find`'s search |
+| `gear/` | `gear build`: Forever item stats, reward choices, weight bands |
+| `itemdb/` | `itemdb build`: item stats from the client tables |
+| `lua.js` | Runs Lua 5.1 for the tools (reading SavedVariables and other addons' data) |
+| `maps/` | `maps build` (zone levels) and `maps overlays` |
+| `pack/` | The pack contract: which pack a command works on, `pack.json`, building a pack and the format constants |
+| `playtest.js` | The guide simulator behind `playtest` and `tests/guides.test.js` |
+| `professions/` | `profession build` and `draft`; `gathering/` is the gathering and secondary profession guide generator (run directly, see below) |
+| `questdb/` | `questdb build`, and the spawn clustering the compiler also uses |
+| `recording/` | `record`: import, watch, draft, report |
+| `route/` | `draft`: the first-draft route planner and its geometry, tour and XP helpers |
+| `sim/` | The route simulator: world model, evaluation, search, calibration, export, baselines |
+| `tga.js` | Draws textures in code and writes TGA files |
+| `travel/` | `travel build` and `travel route`: flights, transports, inns, paths, crossings |
+| `zip.js` | A deterministic ZIP writer and reader for `pack` |
+
+## Generated files
+
+Every file a tool writes, with what it is built from. "Local" means
+gitignored: it stays on the machine that built it. To tell whether a
+committed file is stale, run its command again and look at `git status`: a
+changed file was stale. The checks named in the last column do that for you
+where they exist.
+
+| Output | Command | Inputs | In git | Staleness check |
+|---|---|---|---|---|
+| `data/forever/*.json` (quests, npcs, objects, items, zones, map-frames, factions, races, meta) | `data build` | pfQuest, QuestieDB from the installed client, client tables from wago.tools, `data/recordings/*.json`; cached in `data/sources/` | local | `meta.json` records the sources and when |
+| `data/forever/dungeons.json` | `dungeons build` | the installed dungeon journal addon, `data/forever` | local | none |
+| `data/forever/professions.json` | `profession build` | client tables, `data/forever` items, npcs, objects | local | none |
+| `data/forever/trainers.json` | `trainers build` | `train` goals under `guides/`, `data/recordings`, the curated list, `npcs.json` | local | none |
+| `addon/Polestar/Core/ClassTrainers.lua` | `trainers build` | the same | yes | rerun |
+| `data/forever/travel.json` | `travel build` | client tables, `data/forever` map-frames, zones, npcs, objects, `data/recordings` | local | none |
+| `addon/Polestar/Nav/TravelData.lua` | `travel build` | the same | yes | rerun; `tests/travel-build.test.js` loads the committed file |
+| `addon/Polestar_Travel/` | `travel build` | the local crossings file `data/local/crossings.json` | local | `tests/travel-crossings.test.js` validates the crossings file |
+| `addon/Polestar/Maps/ZoneLevels.lua` | `maps build` | `data/forever` npcs, zones | yes | `tests/maps-zonelevels.test.js` ("up to date") |
+| `addon/Polestar/UI/ZoneArtOverlays.lua` | `maps overlays` | Forever client tables (wago.tools) | yes | rerun |
+| `addon/Polestar/QoL/Data.lua` | `qol build` | `data/forever` npcs, map-frames | yes | rerun |
+| `addon/Polestar_ItemDB/Items.lua`, its TOC | `itemdb build` | Classic Era client item tables | yes | rerun; `tests/itemdb.test.js` loads it within its size budget |
+| `addon/Polestar_ItemDB/Forever.lua` and `LICENSE-DATA.txt`, `addon/Polestar/Gear/SpecData.lua` and `LICENSE-DATA.txt`; `data/forever/gear/report.json` | `gear build`, after `itemdb build` | the installed ForeverLevelingBiS, the sims cached in `data/sources/wowsims` (`gear fetch`) | yes; the report is local | rerun |
+| `addon/Polestar_QuestDB/` | `questdb build` | `data/forever` quests, npcs, objects, items, map-frames | local; ships in the release zip when built | `tests/questdb.test.js` loads it within its budget |
+| `data/forever/codex/*.json`, `addon/Polestar_Codex/` | `codex build` | installed AtlasLoot, RareScanner and ForeverLevelingBiS; `data/forever` including dungeons, trainers and professions; Forever client tables | local; never packaged | none |
+| `guides/forever/exploration/*.guide` (7) | `node tools/lib/exploration/build.js --write` | client map tables, `data/forever` zones, map-frames, travel | yes | `node tools/lib/exploration/build.js --check`; `tests/exploration.test.js` |
+| `guides/forever/professions/` mining, herbalism, skinning, cooking, first-aid, fishing | `node tools/lib/professions/gathering/build.js --write` | `data/forever` professions, items, npcs, objects | yes | `node tools/lib/professions/gathering/build.js --check`; `tests/profession-gathering.test.js` |
+| `guides/forever/professions/` alchemy, blacksmithing, enchanting, engineering, leatherworking, tailoring | `profession draft <Profession> --out` | `data/forever` including professions | yes | rerun |
+| `addon/Polestar_Guides/` | `compile` | `guides/**/*.guide`, `guides/pack.json`, `data/forever` (including trainers, travel, professions, dungeons) | yes | rerun; `tests/guides-parse.test.js` fails when a guide is added, renamed or removed without `compile` |
+| `addon/Polestar/Media/Nav/*.tga`, `addon/Polestar/Media/UI/*.tga` | `media` | `tools/media/*.js`, `tools/lib/tga.js`, `tools/media/fonts` (no data) | yes | rerun: the output is byte-identical, and CI fails when it differs from the committed files; `tests/media-refs.test.js` checks the addon names every texture |
+| `docs/preview/*.svg` | `preview` | the addon's Core, Theme, Gear, Lookup, Dungeons, UI and QoL Lua; `addon/Polestar_Guides/Guides.lua`; `tests/lua/stub_ui.lua`, `tests/fixtures`; optional `POLESTAR_CLIENT_ART` and `POLESTAR_DUNGEONS_PACK` | yes | rerun (local client art changes the output) |
+| `docs/assets/{banner-dark,banner-light,emblem,logo,download}.svg` | `node tools/readme/brand.js` | the emblem geometry, the wordmark fonts | yes | rerun |
+| `docs/assets/charts/{levels,starts}.svg` | `node tools/readme/charts.js --draft <dir or git rev>` | `data/sim`, `guides/` | yes | rerun |
+| `data/sim/` | `sim world`, `sim run` and the other `sim` commands | `data/forever` | local | `lint` notes a cached world built from other data and skips its check |
+| `data/recordings/*.json` | `record import` / `record watch` | the Recorder's SavedVariables | local | none |
+| `dist/` | `pack` | `addon/`, `guides/` | local | none |
+
+## Rebuild order after a data change
+
+Each step reads only the data the steps above it wrote. After a new client
+build, new recordings or a change to an installed source addon:
+
+1. `node tools/polestar.js data build`
+2. `node tools/polestar.js dungeons build`
+3. `node tools/polestar.js profession build`
+4. `node tools/polestar.js trainers build`
+5. `node tools/polestar.js travel build`
+6. `node tools/polestar.js maps build` and `node tools/polestar.js maps overlays`
+7. `node tools/polestar.js qol build`
+8. `node tools/polestar.js itemdb build`, then `node tools/polestar.js gear build`
+9. `node tools/polestar.js questdb build`
+10. `node tools/polestar.js codex build` (reads `dungeons.json`, `professions.json` and `trainers.json`)
+11. The generated guides: `node tools/lib/exploration/build.js --write` (reads `travel.json`), `node tools/lib/professions/gathering/build.js --write` and `node tools/polestar.js profession draft <Profession> --out` for each crafting profession (read `professions.json`)
+12. `node tools/polestar.js lint`, then `node tools/polestar.js compile`
+13. `node tools/polestar.js preview` (reads the compiled `Guides.lua`)
+
+`maps overlays`, `itemdb build` and `media` read no reference data: they
+only need rerunning when the client's tables or `tools/media` change. The
+README charts need a simulator run (`data/sim`) on the new data first.
