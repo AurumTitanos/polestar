@@ -1056,6 +1056,29 @@ end
 -- Search box
 ---------------------------------------------------------------------------
 
+local PLACEHOLDER_X, PLACEHOLDER_PAD = 30, 10
+
+-- The placeholder takes the first of its wordings (longest first) that fits
+-- inside the box in the current font; the last one is cut with an ellipsis
+-- if even it does not. Refitted when the box's size or the font changes.
+local function fitPlaceholder(e)
+	local ph, list = e.Placeholder, e.lsPlaceholders
+	if not list then return end
+	local room = floor(e:GetWidth() - PLACEHOLDER_X - PLACEHOLDER_PAD)
+	for i, text in ipairs(list) do
+		ph:SetWidth(0) -- unbound, to measure the whole wording
+		ph:SetText(text)
+		if i == #list or room <= 0 or ph:GetStringWidth() <= room then break end
+	end
+	if room > 0 then ph:SetWidth(room) end
+end
+
+-- placeholder: a string, or a list of wordings, longest first.
+function W.SetSearchPlaceholder(e, placeholder)
+	e.lsPlaceholders = type(placeholder) == "table" and placeholder or { placeholder or L["Search"] }
+	fitPlaceholder(e)
+end
+
 function W.SearchBox(parent, placeholder, onChange)
 	local e = CreateFrame("EditBox", nil, parent)
 	e:SetHeight(30)
@@ -1072,8 +1095,10 @@ function W.SearchBox(parent, placeholder, onChange)
 	e.Icon:SetPoint("LEFT", e, "LEFT", 10, 0)
 	W.Color(e.Icon, "textMuted")
 	e.Placeholder = W.Text(deco, "label", "textMuted")
-	e.Placeholder:SetPoint("LEFT", e, "LEFT", 30, 0)
-	e.Placeholder:SetText(placeholder or L["Search"])
+	e.Placeholder:SetPoint("LEFT", e, "LEFT", PLACEHOLDER_X, 0)
+	W.SetSearchPlaceholder(e, placeholder)
+	e:HookScript("OnSizeChanged", fitPlaceholder)
+	W.Painter(e.Placeholder, function() fitPlaceholder(e) end)
 	e.Clear = W.IconButton(e, "close", 20, nil, function()
 		e:SetText("")
 		e:ClearFocus()

@@ -193,6 +193,24 @@ test('the sidebar is one compact block on one edge: the lockup (wordmark, taglin
 	assert.deepEqual(out.emblem, ['TOP', 0, -(47 - 18)], 'the emblem centred on the title line, like the lockup beside it');
 });
 
+test('the search placeholder is the first wording that fits the box, refitted on resize; the last is cut when none fits', () => {
+	const [out] = run(`
+		UI.ShowPicker()
+		local box = PolestarPicker.Search
+		local ph = box.Placeholder
+		local function at(w)
+			box:SetWidth(w)
+			stub.RunScript(box, "OnSizeChanged", w, 30)
+			return { ph:GetText(), ph:GetStringWidth() <= w - 40 }
+		end
+		emit({ wide = at(400), mid = at(185), narrow = at(60) })`);
+	// The stub measures 6px a character at the label's size (12); the
+	// placeholder has the box's width less 40px (its left inset and padding).
+	assert.deepEqual(out.wide, ['Search guides, items, NPCs', true]);
+	assert.deepEqual(out.mid, ['Search guides, items', true], 'the full wording (156px) would overflow 145px: the shorter one shows');
+	assert.deepEqual(out.narrow, ['Search', true], 'the last wording, cut to the box when even it is too long');
+});
+
 test('the hub fits: every section on the rail above Options, every category in the sidebar above the status line', () => {
 	const [out] = run(`
 		-- Fill the rail to eight sections: the docs/SUITE.md ones (Guides,

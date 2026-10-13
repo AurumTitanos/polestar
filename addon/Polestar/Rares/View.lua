@@ -943,6 +943,6 @@ if UI.RegisterSection then
 		build = RV.Build, render = RV.Render,
 		nav = RV.Nav, onNav = RV.SetTab,
 		search = RV.Search, enter = RV.Enter, step = RV.Step,
-		searchPlaceholder = L["Search rares and treasures"],
+		searchPlaceholder = { L["Search rares and treasures"], L["Search rares"], L["Search"] },
 	})
 end

@@ -1100,7 +1100,7 @@ end
 --     nav = fn() -> items, activeKey,  -- optional: its index ({ key, label, icon, count })
 --     onNav = fn(key),                 -- with nav: set the state, then UI.Picker.Render()
 --     search = fn(text), enter = fn(), step = fn(delta), -- optional: the hub search drives it
---     searchPlaceholder = "...",       -- optional
+--     searchPlaceholder = "...",       -- optional; or a list of wordings, longest first (the first that fits shows)
 --   })
 ---------------------------------------------------------------------------
 
@@ -1142,6 +1142,9 @@ function P.ShowSection(key)
 	if win and win:IsShown() then P.Render() end
 end
 
+-- The hub's search wordings, longest first: the box shows the first that fits.
+local HUB_SEARCH = { L["Search guides, items, NPCs"], L["Search guides, items"], L["Search"] }
+
 local function sectionLayout(s)
 	local on = s ~= nil
 	details:SetShown(not on)
@@ -1155,7 +1158,7 @@ local function sectionLayout(s)
 	win.Close:ClearAllPoints()
 	win.Close:SetPoint("TOPRIGHT", on and win.Header or details.Art, "TOPRIGHT", -12, -12)
 	if not on then win.Close:SetFrameLevel(details.Scrim:GetFrameLevel() + 2) end
-	win.Search.Placeholder:SetText((s and s.searchPlaceholder) or (s and s.search and L["Search"]) or L["Search guides, items, NPCs"])
+	W.SetSearchPlaceholder(win.Search, (s and s.searchPlaceholder) or (s and s.search and L["Search"]) or HUB_SEARCH)
 	win.Search:SetShown(not s or s.search ~= nil)
 end
 
@@ -1482,7 +1485,7 @@ end
 
 local function build()
 	win = W.Shell("PolestarPicker", {
-		width = WIN_W, rail = true, title = L["Guides"], scalePath = "ui.menuScale", searchPlaceholder = L["Search guides, items, NPCs"],
+		width = WIN_W, rail = true, title = L["Guides"], scalePath = "ui.menuScale", searchPlaceholder = HUB_SEARCH,
 		onSearch = onSearch,
 	})
 	P.frame = win

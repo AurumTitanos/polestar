@@ -1547,7 +1547,7 @@ if UI.RegisterSection then
 		build = LK.Build, render = sectionRender,
 		nav = LK.Nav, onNav = LK.SetKind,
 		search = onSearch, enter = onEnter, step = LK.Step,
-		searchPlaceholder = L["Search items, mounts, NPCs"],
+		searchPlaceholder = { L["Search items, mounts, NPCs"], L["Search items, mounts"], L["Search"] },
 	})
 end
 
