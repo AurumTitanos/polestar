@@ -43,8 +43,20 @@ next forever/alliance/02-westfall
 # the export accepts but never turns in (Rellian and Fandral are at the far
 # north end of Darnassus).
 #
-# Class quests: none on this route. The level 1 sigil letters, the Hunters'
-# Taming the Beast and the Druids' Heeding the Call at 10 are not part of it.
+# Class quests, as class-only steps from the last Dolanaar stop (about 10.5):
+# - Hunter: Dazalar's taming quests (6063, 6101, 6102) around Dolanaar;
+#   Training the Beast (6103) is handed to Jocaste in Darnassus.
+# - Druid: Heeding the Call (5925, Kal) to Moonglade (5921) at Darnassus;
+#   Teleport: Moonglade and the Great Bear Spirit (5929), then Back to
+#   Darnassus and Body and Heart (5931, 6001) at the Moonkin Stone by
+#   Auberdine, moving by the Auberdine, Moonglade and Rut'theran flight
+#   paths; Bear Form is handed in at Darnassus before the boat to Stormwind.
+# - Priest: Returning Home (5629, Laurna Morninglight) to Priestess Alathea
+#   in Darnassus: Starshards.
+# - Warrior: the Defensive Stance quests (1638, 1639, 1640, 1665) on arrival
+#   in Stormwind by the boat. The level 1 sigil letters are not taken.
+# - Druid, later: Aquatic Form and Cat Form in 03-darkshore and
+#   06-ashenvale.
 #
 # No grind stops and no dungeons.
 
@@ -307,7 +319,23 @@ step Dolanaar
   turnin 99047                                -- Byancie
   turnin 486                                  -- Athridas Bearmantle
   turnin 7383                                 -- Corithras Moonrage
+  accept 6063 only Hunter                     -- Dazalar
+  accept 5925 only Druid                      -- Kal: Mathrengyl Bearwalker in Darnassus takes it
+  accept 5629 only Priest                     -- Laurna Morninglight: Priestess Alathea in Darnassus takes it
   train class
+
+step Taming the Beast
+  only Hunter
+  tip Each of Dazalar's quests hands you a Taming Rod: use it on the beast he names, then bring the rod back to him in Dolanaar. Webwood Lurkers creep around the village, Nightsaber Stalkers and Strigid Screechers roam the woods south of it.
+  kill 1998 quest 6063.1                      -- Webwood Lurker: tame it with the Taming Rod
+  turnin 6063                                 -- Dazalar
+  accept 6101
+  kill 2043 quest 6101.1                      -- Nightsaber Stalker: tame it with the Taming Rod
+  turnin 6101
+  accept 6102
+  kill 1996 quest 6102.1                      -- Strigid Screecher: tame it with the Taming Rod
+  turnin 6102                                 -- Tame Beast
+  accept 6103                                 -- Jocaste in Darnassus takes it
 
 # ---------------------------------------------------------------- Darnassus and Rut'theran
 
@@ -316,6 +344,10 @@ step Darnassus
   tip Follow the road west into Darnassus. Mydrannul stands on the Craftsmen's Terrace just inside the city; Sister Aquinne is in the west of the city, on the way to the pink portal down to Rut'theran.
   accept 6344                                 -- Mydrannul
   turnin 98391                                -- Sister Aquinne
+  turnin 6103 only Hunter                     -- Jocaste, in the Cenarion Enclave: Beast Training
+  turnin 5629 only Priest                     -- Priestess Alathea, in the Temple of the Moon: Starshards
+  turnin 5925 only Druid                      -- Mathrengyl Bearwalker, in the Cenarion Enclave
+  accept 5921 only Druid
 
 step Rut'theran Village
   zone Teldrassil
@@ -329,9 +361,60 @@ step Rut'theran Village
 step Boat to Auberdine
   goto 54.8,97.2 "Boat to Auberdine"
 
+step Moonglade
+  only Druid
+  zone Darkshore
+  tip Learn the Auberdine flight path on the hill south of the inn, then cast Teleport: Moonglade. Dendrite Starblaze is in Nighthaven; the Great Bear Spirit sits in the woods to the north-west. Learn the Moonglade flight path in Nighthaven and fly to Rut'theran Village (by way of Auberdine).
+  getfp "Auberdine"
+  zone Moonglade
+  turnin 5921                                 -- Dendrite Starblaze
+  accept 5929
+  complete 5929 @39.1,27.5                    -- Speak with the Great Bear Spirit
+  turnin 5929
+  accept 5931
+  getfp "Moonglade"
+  fly "Rut'theran Village"
+
+step Back to Darnassus
+  only Druid
+  zone Darnassus
+  tip Take the portal up from Rut'theran Village to Mathrengyl in the Cenarion Enclave.
+  turnin 5931                                 -- Mathrengyl Bearwalker
+  accept 6001
+
+step The Moonkin Stone
+  only Druid
+  zone Darkshore
+  tip Go back down to Rut'theran Village and fly to Auberdine. The Moonkin Stone stands in the hills just east of the village: use the Cenarion Moondust there, defeat Lunaclaw and speak to the Lunaclaw Spirit.
+  fly "Auberdine"
+  use 15208 @43.5,46.0                        -- Cenarion Moondust
+  complete 6001
+
+step Body and Heart
+  only Druid
+  zone Darnassus
+  tip Fly to Rut'theran Village once more and take the portal up to Mathrengyl, then fly back to Auberdine for the boat.
+  fly "Rut'theran Village"
+  turnin 6001                                 -- Mathrengyl Bearwalker: Bear Form
+  fly "Auberdine"
+
 step Auberdine
   zone Darkshore
   tip Laird's fish stall is by the docks. Then take the boat to Stormwind.
   turnin 6342                                 -- Laird
   goto 30.5,40.9 "Boat to Stormwind"
   note From Stormwind Harbor, ride through the city gates into Elwynn Forest and follow the road west to Westfall.
+
+step Defensive Stance
+  only Warrior
+  zone Stormwind City
+  tip From the harbour walk into Old Town. Ilsa Corbin trains warriors there; Harry Burlguard and Bartleby stand together by the Pig and Whistle Tavern. Bartleby fights you for his mug.
+  accept 1638 npc 5480                        -- Ilsa Corbin
+  turnin 1638                                 -- Harry Burlguard
+  accept 1639
+  turnin 1639                                 -- Bartleby
+  accept 1640
+  kill 6090 quest 1640.1                      -- Beat Bartleby
+  turnin 1640
+  accept 1665
+  turnin 1665                                 -- Harry Burlguard: Defensive Stance

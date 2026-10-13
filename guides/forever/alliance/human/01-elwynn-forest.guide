@@ -41,7 +41,22 @@ next forever/alliance/02-westfall
 #   gnolls Riverpaw Gnoll Bounty sends you to. Manhunt (147) moves with it
 #   to the last east pass, where Morgan the Collector walks beside the murlocs.
 #
-# Class quests: none on this route; train at the Abbey and in Goldshire.
+# Class quests, as class-only steps (the level 10-12 ones from the last
+# Goldshire stop, about level 12):
+# - Warlock: The Stolen Tome (1598, Summon Imp) in Northshire. Gakin's
+#   Summons (1685, Remen Marcot) to Surena Caledon (1688) and The Binding
+#   (1689, Summon Voidwalker): a trip to Stormwind and the Brackwell Pumpkin
+#   Patch before Westfall.
+# - Hunter: Josephine Carson's three Taming the Beast quests (94792, 94863,
+#   94864) and Training the Beast (94793, Isaac Chan), all around Goldshire.
+# - Paladin: Tome of Divinity (2998, Brother Wilhelm) through Henze Faulk by
+#   Stone Cairn Lake to Redemption (1788): a trip to Stormwind and east
+#   Elwynn before Westfall.
+# - Priest: Desperate Prayer (5635) and Divine Grace (94774) from Priestess
+#   Josetta, handed in at the Cathedral of Light (02-westfall).
+# - Warrior: the Defensive Stance quests are taken in Stormwind (02-westfall).
+# - Mage and Rogue: their level 10 quests reward items, not spells: not taken.
+# Train at the Abbey and in Goldshire.
 # Left out: Shipment to Stormwind (61, the route never goes to Stormwind to
 # hand it in), An Enchanting Lesson (91753, it needs Enchanting to disenchant
 # the effigies) and An Apple Treat (91738, the Thunder Applejack it wants has
@@ -61,6 +76,7 @@ step Northshire Abbey
   accept 91758
   accept 7
   accept 5261                                 -- Deputy Willem
+  accept 1598 only Warlock                    -- Drusilla La Salle, outside the Abbey
 
 step Wolves
   tip Young Wolves and Timber Wolves roam the fields right around the Abbey.
@@ -109,11 +125,13 @@ step Northshire Abbey
 step The Defias camp
   tip Defias Thugs camp in the clearing east of the Abbey and along the valley's east side.
   collect 752 quest 18                        -- Red Burlap Bandanas
+  collect 6785 quest 1598.1 only Warlock      -- Powers of the Void: the Stolen Books in the Defias camp
 
 step Deputy Willem
   turnin 18
   accept 6
   accept 3903
+  turnin 1598 only Warlock                    -- Drusilla La Salle: Summon Imp
 
 step Milly Osworth
   tip She stands by her cart at the vineyard east of the Abbey.
@@ -403,7 +421,85 @@ step The Eastvale Logging Camp
 step Goldshire
   tip Follow the road west back to Goldshire.
   turnin 147                                  -- Marshal Dughan
+  accept 1685 only Warlock                    -- Remen Marcot: Gakin the Darkbinder in Stormwind takes it
+  accept 2998 only Paladin                    -- Brother Wilhelm: Duthorian Rall in Stormwind takes it
+  accept 5635 only Priest                     -- Priestess Josetta: High Priestess Laurena in Stormwind takes both
+  accept 94774 only Priest
   train class
+
+step Taming the Beast
+  only Hunter
+  tip Josephine Carson stands with the Goldshire trainers. Each of her quests hands you a Taming Rod: use it on the beast she names, then bring the rod back to her. Rockhide Boars and Young Forest Bears roam the hills south of the Maclure Vineyards, Gray Forest Wolves the woods east of Crystal Lake.
+  accept 94792                                -- Josephine Carson
+  goto 43.3,77.9 "Rockhide Boars"
+  turnin 94792
+  accept 94863
+  goto 58.4,62.1 "Gray Forest Wolves"
+  turnin 94863
+  accept 94864
+  goto 45.0,80.0 "Young Forest Bears"
+  turnin 94864                                -- Taming Lesson: Tame Beast
+  accept 94793
+  turnin 94793                                -- Isaac Chan, beside her: Training Lesson
+
+# ---------------------------------------------------------------- Warlocks and Paladins: Stormwind and east Elwynn
+
+step Gakin the Darkbinder
+  only Warlock
+  zone Stormwind City
+  tip Follow the road north from Goldshire into Stormwind. Gakin the Darkbinder waits in the cellar of the Slaughtered Lamb, in the Mage Quarter.
+  turnin 1685                                 -- Gakin the Darkbinder
+  accept 1688
+
+step Surena Caledon
+  only Warlock
+  zone Elwynn Forest
+  tip Ride back out through Goldshire and east along the road to the Brackwell Pumpkin Patch. Surena Caledon (level 9) stands by its farmhouse.
+  collect 6810 quest 1688.1                   -- Surena's Choker: Surena Caledon
+
+step The Binding
+  only Warlock
+  zone Stormwind City
+  tip Back to Gakin. Use the Bloodstone Choker at the summoning circle in the Slaughtered Lamb's cellar and defeat the voidwalker it calls.
+  turnin 1688                                 -- Gakin the Darkbinder
+  accept 1689
+  complete 1689                               -- Subdue the voidwalker
+  turnin 1689                                 -- Summon Voidwalker
+
+step The Tome of Divinity
+  only Paladin
+  zone Stormwind City
+  tip Follow the road north from Goldshire into Stormwind. Duthorian Rall and Gazin Tenorm are in the Cathedral of Light; Stephanie Turner stands in Old Town and asks for ten Linen Cloth (humanoids drop it; the Auction House sells it).
+  turnin 2998                                 -- Duthorian Rall
+  accept 1642                                 -- From the Tome of Divinity he gives you
+  turnin 1642
+  accept 1643
+  turnin 1643                                 -- Stephanie Turner, Old Town
+  accept 1644
+  collect 2589 quest 1644.1                   -- Linen Cloth
+  turnin 1644
+  accept 1780
+  turnin 1780                                 -- Duthorian Rall
+  accept 1781
+  turnin 1781                                 -- Gazin Tenorm
+  accept 1786
+
+step Henze Faulk
+  only Paladin
+  zone Elwynn Forest
+  tip Ride back out through Goldshire and east to Stone Cairn Lake. Henze Faulk lies south of the lake: use the Symbol of Life on him. The Defias Rogue Wizards around him carry the Defias Script.
+  complete 1786                               -- Use the Symbol of Life on Henze Faulk
+  turnin 1786                                 -- Henze Faulk
+  accept 1787
+  collect 6846 quest 1787.1                   -- Defias Script: Defias Rogue Wizards
+
+step Gazin Tenorm
+  only Paladin
+  zone Stormwind City
+  tip Back to the Cathedral of Light.
+  turnin 1787                                 -- Gazin Tenorm
+  accept 1788
+  turnin 1788                                 -- Duthorian Rall: Redemption
 
 # ---------------------------------------------------------------- To Westfall
 

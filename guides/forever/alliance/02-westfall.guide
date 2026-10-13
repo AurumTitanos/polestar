@@ -30,7 +30,10 @@ next forever/alliance/03-darkshore
 # Defias. The second Harvesting the Harvesters (92911) turn-in is optional:
 # reports say Ozwin also asks for engineering parts.
 #
-# Class quests: none on this leg; train in Stormwind before the boat.
+# Class quests: Human Warriors take the Defensive Stance quests (1638, 1639,
+# 1640, 1665) and Human Priests hand in Desperate Prayer and Divine Grace
+# (5635, 94774, from Goldshire) at the Stormwind stop; the other races do
+# theirs in their start guides. Train in Stormwind before the boat.
 #
 # Not taken: The Coast Isn't Clear and The Coastal Menace (152, 104, level 19-20
 # lighthouse murlocs), Captain Sander's treasure (136-140, a rare map drop),
@@ -175,6 +178,27 @@ step Back to Sentinel Hill
   vendor nearest
 
 # ---------------------------------------------------------------- Stormwind and the boat
+
+step Defensive Stance
+  only Human,Warrior
+  zone Stormwind City
+  tip Fly or ride to Stormwind. Ilsa Corbin trains warriors in Old Town; Harry Burlguard and Bartleby stand together by the Pig and Whistle Tavern there. Bartleby fights you for his mug.
+  accept 1638 npc 5480                        -- Ilsa Corbin
+  turnin 1638                                 -- Harry Burlguard
+  accept 1639
+  turnin 1639                                 -- Bartleby
+  accept 1640
+  kill 6090 quest 1640.1                      -- Beat Bartleby
+  turnin 1640
+  accept 1665
+  turnin 1665                                 -- Harry Burlguard: Defensive Stance
+
+step High Priestess Laurena
+  only Human,Priest
+  zone Stormwind City
+  tip Fly or ride to Stormwind. High Priestess Laurena is in the Cathedral of Light.
+  turnin 5635                                 -- Desperate Prayer
+  turnin 94774                                -- Divine Grace
 
 step Stormwind
   zone Stormwind City

@@ -31,7 +31,28 @@ next forever/alliance/02-westfall
 # senator or Loch Modan).
 # "The Adventurer" (96628) is kept as the export has it, taken from Thalos after
 # "The Great Outdoors": skip it if Thalos no longer offers it.
-# No class quests on this route.
+# Class quests, as class-only steps:
+# - Warlock (Gnome): Beginnings (1599, Summon Imp) in Coldridge Valley; The
+#   Slaughtered Lamb (1715) from Lago Blackwrench in Ironforge; on arrival in
+#   Stormwind, Gakin, Surena Caledon at the Brackwell Pumpkin Patch in Elwynn
+#   and The Binding (1688, 1689, Summon Voidwalker).
+# - Shaman (Dwarf): Call of Earth (94373-94375) in Coldridge Valley; Call of
+#   Fire (94449, 94465-94468) from Kharanos through Bruegs Kindleborn's cave
+#   by the South Gate and Braldir Ashmantle in Loch Modan, at about 11-12.
+# - Hunter (Dwarf): Grif Wildheart's taming quests (6064, 6084, 6085) at
+#   Kharanos after the hearth; Training the Beast (6086) in Ironforge.
+# - Paladin (Dwarf): the Tome of Divinity quests (2999 to 1785, Redemption)
+#   at the end: Ironforge, Narm Faulk by Helm's Bed Lake, Ironforge.
+# - Priest: Desperate Prayer (5637, Dwarf; handed in at the Cathedral of Light
+#   on arrival in Stormwind) and Confounding Flash (94824, Gnome; Ironforge) from
+#   Maxan Anvol in Kharanos.
+# - Warrior: the Defensive Stance quests (1638, 1639, 1640, 1665) on arrival
+#   in Stormwind by the tram, instead of the Vejrek detour from Ironforge.
+# - Mage and Rogue: their level 10 quests reward items, not spells: not taken.
+# - Shaman, not taken: Call of Water (94494 onwards) runs from Ironforge to
+#   Loch Modan, the Wetlands, Redridge, Ashenvale and Westfall, places the
+#   route reaches years apart in levels; Call of Air is not in the reference
+#   data.
 
 # ---------------------------------------------------------------- Coldridge Valley
 
@@ -58,6 +79,7 @@ step The troggs
 step Back to Anvilmar
   turnin 170                                  -- Balir Frosthammer
   accept 3361 lvl 3                           -- Felix Whindlebolt, by the door of Anvilmar
+  accept 1599 only Warlock                    -- Alamar Grimm, inside Anvilmar
 
 step Talin Keeneye
   tip Talin's camp is at the west end of the valley. Felix's Box lies in the snow south of it, his Chest by the troll cave and his Bucket of Bolts east of the cave: grab them as you pass.
@@ -84,6 +106,7 @@ step The troll cave
   kill 706 quest 182                          -- Frostmane Troll Whelp
   collect 16313 quest 3361 @22.8,80.0         -- Felix's Chest
   collect 16314 quest 3361 @26.3,79.3         -- Felix's Bucket of Bolts
+  collect 6753 quest 1599.1 only Warlock      -- Feather Charms, from the Frostmane Novices
 
 step Grelin Whitebeard
   turnin 182
@@ -101,9 +124,22 @@ step Anvilmar
   turnin 3361                                 -- Felix Whindlebolt
   turnin 3364                                 -- Durnan Furcutter, inside Anvilmar
   accept 3365
+  turnin 1599 only Warlock                    -- Alamar Grimm: Summon Imp
+  accept 94373 only Shaman                    -- Teo Hammerstorm, inside Anvilmar
 
 step Nori Pridedrift
   turnin 3365                                 -- Back at Grelin's camp
+  collect 264356 quest 94373.1 only Shaman    -- Iceclaw Bear Pendants, from the Frostmane Troll Whelps on the slopes above the camp
+
+step Call of Earth
+  only Shaman
+  tip Back to Teo Hammerstorm in Anvilmar. He gives you the Earth Sapta: take the rubble-marked path that climbs west from the south of the valley to the Spirit Stone on the ridge, drink the Sapta beside it and speak to the Minor Manifestation of Earth, then bring its Rough Quartz back to Teo.
+  turnin 94373                                -- Teo Hammerstorm
+  accept 94374
+  use 6635 @25.0,62.4                         -- Earth Sapta, beside the Spirit Stone
+  turnin 94374                                -- Minor Manifestation of Earth
+  accept 94375
+  turnin 94375                                -- Teo Hammerstorm: Stoneskin Totem and your Earth Totem
 
 step The tunnel
   tip Mountaineer Thalos guards the tunnel out of the valley, east of Anvilmar.
@@ -305,6 +341,23 @@ step North Gate Outpost
 step Hearth to Kharanos
   hearth "Thunderbrew Distillery"
   train class
+  accept 6064 only Hunter                     -- Grif Wildheart, at the smithy
+  accept 94449 only Shaman                    -- Ingrid Dunwald: Bruegs Kindleborn by the South Gate takes it
+  accept 5637 only Priest,Dwarf               -- Maxan Anvol: High Priestess Laurena in Stormwind takes it
+  accept 94824 only Priest,Gnome              -- Maxan Anvol: High Priestess Mims in Ironforge takes it
+
+step Taming the Beast
+  only Hunter
+  tip Each of Grif Wildheart's quests hands you a Taming Rod: use it on the beast he names, then bring the rod back to him at the Kharanos smithy. Large Crag Boars, Snow Leopards and Ice Claw Bears all roam the fields just south and east of Kharanos.
+  kill 1126 quest 6064.1                      -- Large Crag Boar: tame it with the Taming Rod
+  turnin 6064                                 -- Grif Wildheart
+  accept 6084
+  kill 1201 quest 6084.1                      -- Snow Leopard: tame it with the Taming Rod
+  turnin 6084
+  accept 6085
+  kill 1196 quest 6085.1                      -- Ice Claw Bear: tame it with the Taming Rod
+  turnin 6085                                 -- Tame Beast
+  accept 6086                                 -- Belia Thundergranite in Ironforge takes it
 
 # ---------------------------------------------------------------- Brewnall again
 
@@ -328,6 +381,41 @@ step Steelgrill's Depot
 step South Gate Outpost
   tip Follow the road all the way east to the South Gate Outpost at the Loch Modan tunnel.
   turnin 413                                  -- Mountaineer Barleybrew
+
+step Bruegs Kindleborn
+  only Shaman
+  tip Bruegs waits in a cave above the farm north-west of the South Gate Outpost; the path up starts behind the farm.
+  turnin 94449                                -- Bruegs Kindleborn
+  accept 94465
+
+step Braldir Ashmantle
+  only Shaman
+  zone Loch Modan
+  tip Go through the tunnel into Loch Modan. Just past it, a path marked by stones climbs the hills on the right of the road north to Braldir's camp.
+  turnin 94465                                -- Braldir Ashmantle
+  accept 94466
+
+step Fire Tar and the Reagent Pouch
+  only Shaman
+  tip Stonesplinter Seers (level 13) stand among the troggs in the south of Stonesplinter Valley, south of Braldir; Tunnel Rat Geomancers (level 12) work the Silver Stream Mine at the north end of the loch. The troggs come in packs and some throw from range: pull one at a time.
+  collect 6652 quest 94466.2                  -- Reagent Pouch: Stonesplinter Seers
+  collect 5026 quest 94466.1                  -- Fire Tar: Tunnel Rat Geomancers
+
+step The Fire Spirit Stone
+  only Shaman
+  tip Braldir gives you the Fire Sapta. Climb to the peak above his camp, drink the Sapta beside the Spirit Stone and defeat the Minor Manifestation of Fire, then place its Glowing Ember in the Brazier of the Dormant Flame beside the stone.
+  turnin 94466                                -- Braldir Ashmantle
+  accept 94467
+  use 6636 @31.9,64.5                         -- Fire Sapta, beside the Spirit Stone
+  collect 6655 quest 94467.1 @31.9,64.5       -- Glowing Ember: Minor Manifestation of Fire
+  turnin 94467 @31.9,64.5                     -- Brazier of the Dormant Flame
+  accept 94468 @31.9,64.5
+
+step Back to Bruegs Kindleborn
+  only Shaman
+  zone Dun Morogh
+  tip Back through the tunnel to Bruegs' cave above the farm.
+  turnin 94468                                -- Bruegs Kindleborn: Searing Totem and your Fire Totem
 
 step Earthseer Farsen
   tip Farsen camps on the ridge overlooking the Gol'Bolar Quarry from the west. Talk to him for his farsight.
@@ -361,7 +449,94 @@ step Tundra MacGrann
 
 # ---------------------------------------------------------------- Ironforge
 
+step The Tome of Divinity
+  only Paladin
+  zone Ironforge
+  tip Follow the road up to Ironforge and take the Mystic Ward: Brandur Ironhammer, Tiza Battleforge and Muiredon Battleforge are in the Hall of Mysteries. John Turner, a beggar, wanders the city. He asks for ten Linen Cloth: the troggs and trolls of Dun Morogh drop it, and the Auction House sells it.
+  accept 2999                                 -- Brandur Ironhammer
+  turnin 2999                                 -- Tiza Battleforge
+  accept 1646                                 -- From the Tome of Divinity she gives you
+  turnin 1646
+  accept 1647
+  turnin 1647                                 -- John Turner
+  accept 1648
+  collect 2589 quest 1648.1                   -- Linen Cloth
+  turnin 1648
+  accept 1778
+  turnin 1778                                 -- Tiza Battleforge
+  accept 1779
+  turnin 1779                                 -- Muiredon Battleforge
+  accept 1783
+
+step Narm Faulk
+  only Paladin
+  zone Dun Morogh
+  tip Ride back out of Ironforge and east along the road to Helm's Bed Lake. Narm Faulk lies dead by its shore: use the Symbol of Life on him. The Dark Iron Spies sneaking around the lake carry the script.
+  complete 1783                               -- Use the Symbol of Life on Narm Faulk
+  turnin 1783                                 -- Narm Faulk
+  accept 1784
+  collect 6847 quest 1784.1                   -- Dark Iron Script: Dark Iron Spies
+
+step Muiredon Battleforge
+  only Paladin
+  zone Ironforge
+  turnin 1784                                 -- Muiredon Battleforge
+  accept 1785
+  turnin 1785                                 -- Tiza Battleforge: Redemption
+
+step Ironforge class quests
+  only Hunter,Priest,Warlock
+  zone Ironforge
+  tip Belia Thundergranite is in the Hall of Arms, High Priestess Mims in the Hall of Mysteries, Lago Blackwrench in the Forlorn Cavern.
+  turnin 6086 only Hunter                     -- Belia Thundergranite: Beast Training
+  turnin 94824 only Priest                    -- High Priestess Mims: Confounding Flash
+  accept 1715 only Warlock                    -- Lago Blackwrench: Gakin the Darkbinder in Stormwind takes it
+
 step The Deeprun Tram
   zone Ironforge
   tip Follow the road up to Ironforge. The Deeprun Tram leaves from Tinker Town, in the east of the city. Ride it to Stormwind.
   goto 78.0,51.4 "Deeprun Tram"
+
+# ---------------------------------------------------------------- Class quests in Stormwind
+
+step Defensive Stance
+  only Warrior
+  zone Stormwind City
+  tip The tram arrives in the Dwarven District. Ilsa Corbin trains warriors in Old Town; Harry Burlguard and Bartleby stand together by the Pig and Whistle Tavern there. Bartleby fights you for his mug.
+  accept 1638 npc 5480                        -- Ilsa Corbin
+  turnin 1638                                 -- Harry Burlguard
+  accept 1639
+  turnin 1639                                 -- Bartleby
+  accept 1640
+  kill 6090 quest 1640.1                      -- Beat Bartleby
+  turnin 1640
+  accept 1665
+  turnin 1665                                 -- Harry Burlguard: Defensive Stance
+
+step Desperate Prayer
+  only Dwarf,Priest
+  zone Stormwind City
+  tip High Priestess Laurena is in the Cathedral of Light.
+  turnin 5637                                 -- High Priestess Laurena: Desperate Prayer
+
+step Gakin the Darkbinder
+  only Warlock
+  zone Stormwind City
+  tip Gakin the Darkbinder waits in the cellar of the Slaughtered Lamb, in the Mage Quarter.
+  turnin 1715                                 -- Gakin the Darkbinder
+  accept 1688
+
+step Surena Caledon
+  only Warlock
+  zone Elwynn Forest
+  tip Leave Stormwind by the main gate, go south to Goldshire and east along the road to the Brackwell Pumpkin Patch. Surena Caledon (level 9) stands by its farmhouse.
+  collect 6810 quest 1688.1                   -- Surena's Choker: Surena Caledon
+
+step The Binding
+  only Warlock
+  zone Stormwind City
+  tip Back to Gakin. Use the Bloodstone Choker at the summoning circle in the Slaughtered Lamb's cellar and defeat the voidwalker it calls. Westfall is next, west of Goldshire.
+  turnin 1688                                 -- Gakin the Darkbinder
+  accept 1689
+  complete 1689                               -- Subdue the voidwalker
+  turnin 1689                                 -- Summon Voidwalker

@@ -18,6 +18,19 @@ next forever/alliance/02-westfall
 # class trains in Thendal Grove (2, 4, 6), Shen'dar (about 9) and Valanaar
 # (about 11 and 14). There are no grind stops: the quests carry you.
 #
+# Class quests, as class-only steps around Valanaar:
+# - Hunter: Quel'ana Quickgale's Taming the Beast (94978, 94979, 94013:
+#   Windsong Crawler, Vuldren Alpha, Ornery Galestrider) and Training the
+#   Beast (94050) after the Valanaar turn-ins at about 11; Elayaa Easewind's
+#   breadcrumb (94007) is not needed.
+# - Warrior: The Skybreaker Bulwark (94003, Defensive Stance), Zaal
+#   Stormshield at the Shrine of Akir. The data puts Zaal by Hanaa's camp in
+#   Thendal Grove; the quest text and players' reports put him at the shrine.
+# - Druid: The Great Ursera Spirit and Strength and Mercy (94006, 94638, Bear
+#   Form) from Lotheluum Starbreeze, Urs'endris and Ur'endra. Cat Form is in
+#   03-darkshore.
+# - Mage and Rogue: no spell quests on the isle.
+#
 # Optional extra: WANTED: Vulgara the Insatiable (93318), not in the export;
 # Vulgara is elite, so it stays an optional extra.
 #
@@ -299,7 +312,23 @@ step Valanaar turn-ins
   accept 99260                                -- Fillion Flamebreeze
   turnin 99260                                -- Elaadrin Evengale
   accept 92840
+  accept 94003 only Warrior                   -- Seena Skybreaker: Zaal Stormshield waits at the Shrine of Akir
+  accept 94978 only Hunter                    -- Quel'ana Quickgale
   train class
+
+step Taming the Beast
+  only Hunter
+  tip Each of Quel'ana's quests hands you a Taming Rod: use it on the beast she names, then bring the rod back to her in Valanaar. Windsong Crawlers line the shore west of town; Vuldren Alphas and Ornery Galestriders roam the Gustberry Lowlands around the Windfield farm. Her sister Quel'dora stands beside her.
+  kill 254588 quest 94978.1                   -- Windsong Crawler: tame it with the Taming Rod
+  turnin 94978                                -- Quel'ana Quickgale
+  accept 94979
+  kill 250874 quest 94979.1                   -- Tame it with the Taming Rod
+  turnin 94979
+  accept 94013
+  kill 251707 quest 94013.1                   -- Tame it with the Taming Rod
+  turnin 94013                                -- Tame Beast
+  accept 94050
+  turnin 94050                                -- Quel'dora Quickgale: Beast Training
 
 step The Windstone Formations
   tip The Windstone Formations stand on the rise west of Fillion's camp.
@@ -335,6 +364,13 @@ step Valanaar, the turncoat
   accept 92881
   turnin 92881                                -- Talaanis Shadowsong
   accept 92643
+  accept 94006 only Druid                     -- Lotheluum Starbreeze
+
+step Urs'endris
+  only Druid
+  tip Urs'endris waits by the falls north-east of Valanaar. Ur'endra prowls the Shen'dar Highlands west of Valanaar, by the road you take next.
+  turnin 94006                                -- Urs'endris
+  accept 94638
 
 step The dead cultist
   tip North-west of Valanaar along the road: Fendaal Windstone watches the Al'Aketh Assassins; the dead cultist lies just north of him.
@@ -344,6 +380,7 @@ step The dead cultist
   turnin 92643
   accept 92644
   turnin 98512                                -- Fendaal Windstone
+  kill 258443 quest 94638.1 only Druid        -- Ur'endra, in the highlands south-west of the cultist
 
 step Desperate times
   turnin 92644                                -- Talaanis Shadowsong
@@ -358,6 +395,11 @@ step Desperate times
   turnin 93065
   accept 92947
 
+step Strength and Mercy
+  only Druid
+  tip Back to Urs'endris by the falls north-east of Valanaar, on the way north to the shrine.
+  turnin 94638                                -- Urs'endris: Bear Form
+
 # ---------------------------------------------------------------- The Shrine of Akir
 
 step The Shrine of Akir
@@ -370,6 +412,7 @@ step The Shrine of Akir
   accept 93958
   turnin 93958                                -- Valennia Stormfist, in the sanctum
   accept 93835
+  collect 263993 quest 94003.1 @56.6,50.3 only Warrior -- Skybreaker Bulwark: Zaal Stormshield, west of the shrine's approach
 
 # ---------------------------------------------------------------- Shadowgale Forest
 
@@ -448,6 +491,7 @@ step Valanaar, the fate of Zephras
   turnin 93089                                -- Elaadrin Evengale
   accept 94946                                -- Elaadrin Evengale: Denaaris Stargale waits by the Skyborne portal
   train class
+  turnin 94003 only Warrior                   -- Seena Skybreaker: Defensive Stance
 
 step The skycutter
   tip The skycutter docks at the tower south of Valanaar. It lands by the Kirin Tor camp on the lake shore west of Dalaran.
