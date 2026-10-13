@@ -12,7 +12,7 @@ const usage = `usage: node tools/polestar.js sim <command> [options]
   sim run     --faction F [--race R] [--class C] [--paths N] [--workers W] [--seed S] [--dungeons]
               [--jobs J] [--anneal A] [--max-paths M]
   sim robust  --faction F [--race R] [--draws K] [--top N]   robustness of the top routes
-  sim compare --faction F [--race R] [--guides DIR] [--pack DIR] [--to 10,20,30]  Polestar's routes vs the best found, same model
+  sim compare --faction F [--race R] [--guides DIR] [--pack DIR | DIR] [--to 10,20,30]  Polestar's routes vs the best found, same model
   sim bench   --faction F [--race R]                  bracket table: zones, levels, quests per 10 levels
   sim export  --result <file> --out <dir>             zone-by-zone skeleton guides + visits.json for authors
   sim consensus --faction F [--dungeons] [--evals N]  one 12-60 route shared by the faction's starts (+ exports)
@@ -27,8 +27,9 @@ options:
   --fdj <dir>        calibrate: ForeverDungeonJournal folder (default: the installed one)
   --band <levels>    level width of the world's quest packages (default 5; a new width rebuilds the world)
   --guides <dir>     compare: Polestar guides folder to score (default guides/), e.g. an old copy
-  --pack <dir>       compare: also score this guide pack's chain (default: the nearest
-                     pack.json); after our chain up to its first level when it starts above 1;
+  --pack <dir>       compare: also score this guide pack's chain (or name the pack folder
+                     as the one argument; default: the nearest pack.json); after our chain
+                     up to its first level when it starts above 1;
                      written to data/bench/compare-<faction>-<race>-<pack id>.json
   --to <levels>      compare: levels to show time to (default 10,20,30,40,50,60)
   --jobs <n>         run: search jobs per round (default 32)

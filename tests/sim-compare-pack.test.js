@@ -11,6 +11,7 @@ const path = require('node:path');
 const syn = require('./fixtures/sim/synthetic');
 const { tmpdir, quiet } = require('./fixtures/dsl/helpers');
 const { compareCommand } = require('../tools/lib/sim/compare');
+const { parseArgs } = require('../tools/commands/sim');
 const { loadPolestarRoutes } = require('../tools/lib/sim/baselines/polestar');
 const { readManifest } = require('../tools/lib/pack/manifest');
 
@@ -131,4 +132,32 @@ test('sim compare refuses a --guides folder that does not exist (it would score 
 	assert.equal(result, 2, out);
 	assert.match(out, /sim compare: --guides .*typo is not a folder/);
 	assert.equal(fs.existsSync(f.benchDir), false);
+});
+
+test('sim compare takes the pack folder as its one argument, like --pack', async () => {
+	const f = fixture();
+	const o = { dataDir: f.dataDir, simDir: f.simDir, sourcesDir: f.sourcesDir, benchDir: f.benchDir, offline: true, extraStarts: syn.START, log: () => {} };
+	const args = parseArgs(['compare', '--faction', 'Horde', '--race', 'Orc', '--guides', f.ours, f.pack]);
+	const { result, out } = await quiet(() => compareCommand(args, o));
+	assert.equal(result, 0, out);
+	const doc = JSON.parse(fs.readFileSync(path.join(f.benchDir, 'compare-horde-orc-joe.json'), 'utf8'));
+	assert.equal(doc.pack, 'joe');
+	assert.ok(doc.rows.some((x) => x.id === 'pack'), 'the pack row is there');
+});
+
+test('sim compare refuses two pack folders, a folder with --pack, and a folder without pack.json', async () => {
+	const f = fixture();
+	const o = { dataDir: f.dataDir, simDir: f.simDir, sourcesDir: f.sourcesDir, benchDir: f.benchDir, offline: true, extraStarts: syn.START, log: () => {} };
+	const base = ['compare', '--faction', 'Horde', '--race', 'Orc', '--guides', f.ours];
+	const cases = [
+		[[...base, f.pack, f.pack], /sim compare: one pack folder only, got 2/],
+		[[...base, '--pack', f.pack, f.pack], /sim compare: the pack folder is named twice/],
+		[[...base, f.ours], /sim compare: no pack\.json in .*guides/],
+	];
+	for (const [argv, message] of cases) {
+		const { result, out } = await quiet(() => compareCommand(parseArgs(argv), o));
+		assert.equal(result, 2, out);
+		assert.match(out, message);
+	}
+	assert.equal(fs.existsSync(f.benchDir), false, 'nothing is scored');
 });

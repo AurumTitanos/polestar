@@ -14,7 +14,7 @@ const { compileSequence, routeSequence } = require('./sequence');
 const { fmtH, table, mdTable } = require('./report');
 const { LEVEL_XP } = require('./xp');
 const { loadPolestarRoutes } = require('./baselines/polestar');
-const { resolvePack } = require('../pack/locate');
+const { resolvePack, packArgument } = require('../pack/locate');
 const { printDiagnostics } = require('../dsl/cli');
 const { isDir } = require('../addons');
 
@@ -151,10 +151,13 @@ function fmtRow(x) {
 const makeHead = () => ['route', 'levels', ...LEVELS.map((l) => `to ${l}`), '20->30', 'quests', 'dungeons', 'travel', 'grind', 'unknown'];
 let HEAD = makeHead();
 
-// The other pack compare scores: --pack, else the nearest pack.json; null for ours.
-// -> { pack } or { error }
+// The other pack compare scores: the folder named (one argument after
+// `compare`, or --pack), else the nearest pack.json; null for ours.
+// -> { pack }, { usage } for a usage error, or { error }
 function comparePack(args) {
-	const r = resolvePack({ pack: args.pack });
+	const arg = packArgument(args, (args._ || []).slice(1));
+	if (arg.error) return { usage: arg.error };
+	const r = resolvePack({ pack: arg.pack });
 	if (r.official) return { pack: null };
 	if (!r.manifest) {
 		printDiagnostics(r.diags);
@@ -169,7 +172,11 @@ async function compareCommand(args, o) {
 		console.error(`sim compare: --guides ${args.guides} is not a folder`);
 		return 2;
 	}
-	const { pack, error } = comparePack(args);
+	const { pack, usage, error } = comparePack(args);
+	if (usage) {
+		console.error(`sim compare: ${usage}`);
+		return 2;
+	}
 	if (error) {
 		console.error(`sim compare: ${error}`);
 		return 1;
