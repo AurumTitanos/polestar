@@ -2,8 +2,9 @@
 // Text as outlines for the README's SVG assets. GitHub serves SVGs as images,
 // which never load web fonts, so every word is drawn from the font's own
 // glyph outlines: each glyph once under <defs>, then placed with <use>.
-// Inter (addon/Polestar/Media/Fonts) for text, Cinzel (tools/media/fonts) only
-// for the POLESTAR wordmark, as in the addon.
+// Inter (addon/Polestar/Media/Fonts) for text, Cinzel (tools/media/fonts) for
+// the POLESTAR wordmark, as in the addon, and Marcellus (tools/media/fonts), a
+// free typeface close to the game's own, for the banner's lines under it.
 
 const path = require('node:path');
 const { Font } = require('../preview/font');
@@ -14,8 +15,9 @@ const FILES = {
 	medium: path.join(ROOT, 'addon', 'Polestar', 'Media', 'Fonts', 'Inter-Medium.ttf'),
 	semibold: path.join(ROOT, 'addon', 'Polestar', 'Media', 'Fonts', 'Inter-SemiBold.ttf'),
 	cinzel: path.join(ROOT, 'tools', 'media', 'fonts', 'Cinzel-Variable.ttf'),
+	marcellus: path.join(ROOT, 'tools', 'media', 'fonts', 'Marcellus-Regular.ttf'),
 };
-const KEYS = { regular: 'r', medium: 'm', semibold: 's', cinzel: 'c' };
+const KEYS = { regular: 'r', medium: 'm', semibold: 's', cinzel: 'c', marcellus: 'g' };
 const loaded = new Map();
 
 function font(name) {

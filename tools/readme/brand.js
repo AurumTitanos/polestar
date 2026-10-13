@@ -2,12 +2,13 @@
 // The README's identity art, drawn in code like the addon's own textures
 // (tools/media/ui.js) and from the same geometry: the Polestar emblem, the
 // night-sky band with its stars and constellation, the Cinzel wordmark and
-// Inter text as outlines. Writes docs/assets/:
+// the lines under it in Marcellus, as outlines. Writes docs/assets/:
 //   banner-dark.svg   the band dissolving into a dark page (GitHub dark)
 //   banner-light.svg  the band as a night tile with square edges (light pages;
 //                     the band has no daylight form, DESIGN.md)
 //   emblem.svg        the emblem in Polestar gold, transparent
 //   logo.svg          the addon icon: the gold emblem on a night tile
+//   download.svg      the README's download button
 //
 //   node tools/readme/brand.js
 
@@ -87,6 +88,28 @@ function logoSvg() {
 `;
 }
 
+// The README's download button: the gold of the addon's primary buttons, the
+// emblem's star, and "Download Polestar" in Marcellus, as outlines.
+function downloadSvg() {
+	const o = new Outliner('d');
+	const H = 56, pad = 26, star = 22, gap = 12, size = 23;
+	const label = 'Download Polestar';
+	const tw = o.width(label, { font: 'marcellus', size });
+	const W = Math.ceil(pad + star + gap + tw + pad);
+	const text = o.text(label, { font: 'marcellus', size, x: pad + star + gap, y: H / 2 + size * 0.34, fill: C.navy, stroke: 0.35 });
+	return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${label}">
+<title>${label}</title>
+<defs>
+<linearGradient id="face" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0cb7f"/><stop offset="1" stop-color="${C.accent}"/></linearGradient>
+${o.defs()}
+</defs>
+<rect x="0.5" y="0.5" width="${W - 1}" height="${H - 1}" rx="10" fill="url(#face)" stroke="#fff3d4" stroke-opacity="0.55"/>
+<path fill="${C.navy}" d="${emblemPath(star / 128, pad, (H - star) / 2)}"/>
+${text}
+</svg>
+`;
+}
+
 // The band's sky mask (tools/media/ui.js band()): opaque at the top, a
 // quarter left halfway, gone at the foot. As gradient stops.
 function skyStops(color) {
@@ -145,8 +168,8 @@ function banner(variant) {
 	body.push(`<circle cx="${f2(lx + E / 2)}" cy="${cy}" r="${E * 0.95}" fill="url(#glow)"/>`);
 	body.push(`<path fill="${C.accent}" d="${emblemPath(E / 128, lx, cy - E / 2)}"/>`);
 	body.push(o.text('POLESTAR', { font: 'cinzel', capHeight: capH, tracking, x: wx, y: cy + 6, fill: C.text, stroke: 0.9 }));
-	body.push(o.text('A community project', { font: 'medium', size: 19, x: wx + 2, y: cy + 40, fill: C.textDim }));
-	body.push(o.text('Leveling guides for World of Warcraft: Forever', { font: 'regular', size: 22, x: W / 2, y: 256, anchor: 'middle', fill: C.textDim }));
+	body.push(o.text('A community project', { font: 'marcellus', size: 21, x: wx + 2, y: cy + 40, fill: C.textDim, stroke: 0.25 }));
+	body.push(o.text('Leveling guides for World of Warcraft: Forever', { font: 'marcellus', size: 25, x: W / 2, y: 256, anchor: 'middle', fill: C.textDim, stroke: 0.25 }));
 
 	const defs = [
 		`<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">${skyStops(C.sky)}</linearGradient>`,
@@ -183,6 +206,7 @@ function main() {
 		'banner-light.svg': banner('light'),
 		'emblem.svg': emblemSvg(),
 		'logo.svg': logoSvg(),
+		'download.svg': downloadSvg(),
 	};
 	for (const [name, text] of Object.entries(files)) {
 		fs.writeFileSync(path.join(OUT, name), text);

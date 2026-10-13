@@ -11,6 +11,10 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/fitzforge/polestar/releases"><img src="docs/assets/download.svg" height="48" alt="Download Polestar"></a>
+</p>
+
+<p align="center">
   <a href="LICENSE"><img alt="Licence: GPL-3.0" src="https://img.shields.io/badge/licence-GPL--3.0-e6ba66?style=flat-square&labelColor=232a3f"></a>
   <img alt="World of Warcraft: Forever, client 1.60.1" src="https://img.shields.io/badge/WoW-Forever_1.60.1-94c9ff?style=flat-square&labelColor=232a3f">
   <img alt="Version 0.1.0, beta" src="https://img.shields.io/badge/version-0.1.0_beta-fabf4d?style=flat-square&labelColor=232a3f">
@@ -18,20 +22,53 @@
 </p>
 
 <p align="center">
+  <a href="#quick-start">Quick start</a> ·
   <a href="#what-it-is">What it is</a> ·
   <a href="#a-look-inside">A look inside</a> ·
   <a href="#features">Features</a> ·
   <a href="#how-the-routes-are-made">How the routes are made</a> ·
-  <a href="#install">Install</a> ·
+  <a href="#guide-packs">Guide packs</a> ·
   <a href="#building-from-source">Building from source</a> ·
   <a href="#contributing">Contributing</a> ·
   <a href="#data-and-licensing">Data and licensing</a>
 </p>
 
+## Quick start
+
+1. **Download** `Polestar-<version>.zip` from the newest release on the
+   [Releases page](https://github.com/fitzforge/polestar/releases), under
+   *Assets* (not "Source code").
+2. **Unzip it into the game's AddOns folder**, so the Polestar folders
+   (`Polestar`, `Polestar_Guides`, `Polestar_QuestDB`, `Polestar_ItemDB`) sit
+   directly inside it:
+   `World of Warcraft/_classic_beta_/Interface/AddOns/` on the beta client,
+   `_forever_` instead of `_classic_beta_` from launch.
+3. **Restart the game completely** (a `/reload` does not load new addons) and
+   log in. The guide window opens with a guide for your race, level and zone:
+   follow the arrow, and the goals tick themselves off as you play.
+
+Good to know:
+
+- `/polestar guides` opens the hub: every guide, Lookup, Dungeons and Rares.
+  `/polestar options` holds every setting; quest markers on the map are off
+  until you turn them on under **Map**.
+- `/polestar skip` moves on for good; `/polestar next` and `prev` only look
+  ahead or back.
+- **Updating:** delete the old Polestar folders, then unzip the new release
+  the same way.
+- **Optional:** `Polestar_Recorder-<version>.zip` from the same release
+  records your sessions to improve the routes. It does nothing until you turn
+  it on.
+- **Guide packs** by other players install the same way, next to the
+  `Polestar` folders: see [Guide packs](#guide-packs).
+- Something wrong? `/console scriptErrors 1` shows Lua errors; please
+  [open an issue](https://github.com/fitzforge/polestar/issues) with what you
+  saw. The release's `SHA256SUMS` holds the zips' checksums.
+
 ## What it is
 
-Polestar is one addon for the whole of WoW: Forever. It carries 164 guides:
-63 leveling guides that take both factions from 1 to 60 from every race's
+Polestar is one addon for the whole of WoW: Forever. It carries 158 guides:
+57 leveling guides that take both factions from 1 to 60 from every race's
 starting zone (Zephras Isle for the Skyborne included), the twelve
 professions from 1 to 300, 17 reputations, 7 exploration guides, the Legacy
 challenges and 64 collectible guides, one per mount and per pet. Around the
@@ -47,7 +84,7 @@ are written from that route and scored under the same model
 ([How the routes are made](#how-the-routes-are-made)).
 
 Guide packs written by other players install the same way, next to Polestar
-([Installing a guide pack](#installing-a-guide-pack)). On the first login a short welcome walks
+([Guide packs](#guide-packs)). On the first login a short welcome walks
 through the guide window, setup and guide packs (`/polestar welcome` shows it
 again).
 
@@ -59,76 +96,70 @@ again).
 
 ## A look inside
 
-Every picture below is the addon's real Lua UI, drawn without the game by
-`node tools/polestar.js preview` against a stub client with sample guides and
-data. None of them contains game art.
+Screenshots from the game: World of Warcraft: Forever (beta client) with
+Polestar 0.1.0 at its default settings. Click a picture for full size.
+
+<p align="center">
+  <img src="docs/assets/screenshots/hub-guides.png" width="880" alt="The Polestar hub on its Guides section: the section rail (Guides, Lookup, Dungeons, Rares, Options), guide categories with Leveling selected, the Horde leveling guides by level band with The Barrens (19-24) selected, and its details: a painting of the zone, levels, progress in tab 1, steps, quests, zones, the next guide and a Continue button">
+  <br><sub><b>The hub.</b> Guides, Lookup, Dungeons and Rares on one rail, Options at its foot. Here the Horde leveling guides by level band, and the selected guide's zone, progress, quests and the guide after it.</sub>
+</p>
 
 <table>
   <tr>
-    <td colspan="2" align="center">
-      <img src="docs/assets/gallery/hub-guides.svg" width="860" alt="The Polestar hub on its Guides section: a section rail (Guides, Lookup, Dungeons, Options), a sidebar of guide categories with Leveling selected, a list of leveling guides grouped by faction and level band with Westfall selected, and its details on the right">
-      <br><sub><b>The hub.</b> Guides, Lookup, Dungeons and Rares on one rail, Options at its foot. Here the leveling guides by faction and level band, with the selected guide's details.</sub>
+    <td width="36%" align="center">
+      <img src="docs/assets/screenshots/guide-window.png" width="260" alt="The guide window on step 5 of 60 of The Barrens: Northwatch Hold, collect the Theramore Medal, kill Captain Fairmount and two cannoneers with a 4/10 counter, then Gilthares Firebough, 3620 XP per hour and 6 h 52 m to level">
+      <br><sub><b>The guide window.</b> The step's goals with their counters, who comes next, XP per hour and the time to level.</sub>
     </td>
-  </tr>
-  <tr>
-    <td width="50%" align="center">
-      <img src="docs/assets/gallery/guide-hub.svg" width="400" alt="The guide window in a quest hub: one person to talk to, their quests, and the next person under Then">
-      <br><sub><b>The guide window.</b> In a hub it shows one person at a time, their quests and who comes next.</sub>
+    <td width="36%" align="center">
+      <img src="docs/assets/screenshots/guide-transparent.png" width="260" alt="The same guide window in transparent mode: no background, outlined text over the grass of the Barrens">
+      <br><sub><b>Transparent mode.</b> Outlined text straight on the world; the controls appear under the cursor.</sub>
     </td>
-    <td width="50%" align="center">
-      <img src="docs/assets/gallery/guide-transparent.svg" width="400" alt="The guide window in transparent mode over a bright landscape, its text outlined">
-      <br><sub><b>Transparent mode.</b> No ground at all: outlined text straight on the world, the chrome only under the cursor.</sub>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" align="center">
-      <img src="docs/assets/gallery/hub-lookup.svg" width="420" alt="Lookup showing the Reins of the Winterspring Frostsaber with its sources ranked for the character and a Guide button">
-      <br><sub><b>Lookup.</b> Where an item, mount or pet comes from, its sources ranked for your character.</sub>
-    </td>
-    <td width="50%" align="center">
-      <img src="docs/assets/gallery/hub-dungeons.svg" width="420" alt="The Dungeons journal page for Wailing Caverns: its quests with givers, objectives and rewards, and buttons to pick up the quests or go to the entrance">
-      <br><sub><b>Dungeons.</b> A journal page per dungeon: every quest, its chain and rewards, the bosses and the entrance.</sub>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" align="center">
-      <img src="docs/preview/travel.svg" width="420" alt="The waypoint arrow pointing west with 1412 yd, Go to Westfall and 8:00 total under it, beside a world map of Elwynn Forest where gold trail dots run from the player to the zone crossing on the western edge">
-      <br><sub><b>Arrow and route.</b> Each leg captioned on the arrow, trail dots on the map to the next waypoint.</sub>
-    </td>
-    <td width="50%" align="center">
-      <img src="docs/assets/gallery/quests-map.svg" width="420" alt="Quest markers on a world map: quest givers, kill and collect objectives, an object and a turn-in">
-      <br><sub><b>Quest markers.</b> Givers, objectives and turn-ins on the world map, off by default.</sub>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" align="center">
-      <img src="docs/assets/gallery/hub-rares.svg" width="420" alt="The Rares section listing Elwynn Forest's rares, with Thuros Lightfingers selected, its signature drop and spawn points">
-      <br><sub><b>Rares.</b> Rares and treasures by zone with their spawns and signature drop.</sub>
-    </td>
-    <td width="50%" align="center">
-      <img src="docs/assets/gallery/options-appearance.svg" width="420" alt="Options on the Appearance page: accent colour, class colour, colour scheme, background colour, brightness, opacity, font and reduced motion">
-      <br><sub><b>Options.</b> Every setting as one row, applied live; here Appearance.</sub>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" align="center">
-      <img src="docs/assets/gallery/rare-alert.svg" width="400" alt="A rare alert: the rare's name, level and distance, with Set waypoint and Show rare buttons">
-      <br><sub><b>Rare alert.</b> A rare on the minimap, at its distance, one click from the arrow.</sub>
-    </td>
-    <td width="50%" align="center">
-      <img src="docs/assets/gallery/quest-rewards.svg" width="360" alt="The game's quest reward panel with a green upgrade arrow on two rewards and a gold frame around the one to take">
-      <br><sub><b>Quest rewards.</b> Upgrades marked on the game's own reward panel, the one to take framed.</sub>
-    </td>
-  </tr>
-  <tr>
-    <td colspan="2" align="center">
-      <img src="docs/preview/schemes.svg" width="860" alt="The guide window in the Dusk, Night and Graphite schemes, with EllesmereUI's colours, and with an accent of your own">
-      <br><sub><b>Colour schemes.</b> Dusk (the default), Night, Graphite, EllesmereUI's own when it is installed, and a look of your own.</sub>
+    <td width="28%" align="center">
+      <img src="docs/assets/screenshots/arrow.png" width="190" alt="The 3D waypoint arrow over the sea: 34 yd, Collect Theramore Medal">
+      <br><sub><b>The arrow.</b> Distance and the goal it leads to.</sub>
     </td>
   </tr>
 </table>
 
-More renders, one per state and section, are in [docs/preview](docs/preview).
+<table>
+  <tr>
+    <td width="50%" align="center">
+      <img src="docs/assets/screenshots/lookup.png" width="390" alt="Lookup searching for Swift: 119 results across guides, mounts, items, recipes, quests, NPCs and rares, with the Swift Ram guide selected">
+      <br><sub><b>Lookup.</b> One search over guides, mounts, items, recipes, quests, NPCs and rares, each with where it comes from.</sub>
+    </td>
+    <td width="50%" align="center">
+      <img src="docs/assets/screenshots/dungeons.png" width="390" alt="The Dungeons section: 34 dungeons by level band on painted cards, with their levels, zone, quest count and a Your level mark">
+      <br><sub><b>Dungeons.</b> Every dungeon by level, its quests counted for your faction, the ones for your level marked.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <img src="docs/assets/screenshots/dungeon-quests.png" width="390" alt="The Wailing Caverns page: Show on map, Guide me to the entrance and Pick up the quests buttons, and its quests with who starts and ends them and their chains">
+      <br><sub><b>A dungeon's page.</b> Who starts and ends each quest and its chain; one button guides you round to pick them all up.</sub>
+    </td>
+    <td width="50%" align="center">
+      <img src="docs/assets/screenshots/dungeon-rewards.png" width="390" alt="Wailing Caverns quests with their objectives and rewards: item choices with icons, experience and money">
+      <br><sub><b>Objectives and rewards.</b> The items to choose from with their icons, the experience and the money.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center">
+      <img src="docs/assets/screenshots/rares.png" width="390" alt="The Rares section: a list of rares with their levels, and Aean Swiftriver selected with its drop, where it spawns and how far away, when it was last seen, and Mute alerts, Look up and Set waypoint buttons">
+      <br><sub><b>Rares.</b> Every rare and treasure, its drops, where it spawns and how far, and when you last met it.</sub>
+    </td>
+    <td width="50%" align="center">
+      <img src="docs/assets/screenshots/options-appearance.png" width="390" alt="Options on the Appearance page: accent colour, class colour, colour scheme, background colour, brightness, background opacity, font set to Game font, and reduce motion">
+      <br><sub><b>Options.</b> Every setting as one row, applied as you change it; here Appearance.</sub>
+    </td>
+  </tr>
+</table>
+
+Lookup beyond the guides, Dungeons and Rares read a data pack that is built
+locally and not in the release yet ([Lookup, Dungeons and
+Rares](#lookup-dungeons-and-rares)). Not pictured yet: the rare alert, the
+upgrade marks on the quest reward panel and the quest markers on the world
+map. Renders of every window and state, drawn without the game, are in
+[docs/preview](docs/preview).
 
 ## Features
 
@@ -447,72 +478,47 @@ on one line):
 ```
 
 Every verb, modifier and condition is in
-[docs/GUIDE_FORMAT.md](docs/GUIDE_FORMAT.md).
+[docs/GUIDE_FORMAT.md](docs/GUIDE_FORMAT.md); guides of your own ship as a
+[guide pack](#guide-packs).
 
-### Writing a guide pack
+## Guide packs
 
 Anyone can write guides for Polestar and publish them as a **guide pack**: an
-addon that depends on Polestar. The tools work on a pack the way they work on
-ours: run them inside the pack's folder, or give them the pack's folder
-(`polestar lint ../joes-routes`, or `--pack <dir>`).
-[docs/PACKS.md](docs/PACKS.md) is the handbook for writing one (setup, a first
-pack in 15 minutes, testing, publishing);
-[docs/PACK_FORMAT.md](docs/PACK_FORMAT.md) is the format.
+ordinary addon that depends on Polestar, made and supported by its author.
+Polestar shows the packs you have installed; it does not host, bundle or
+recommend any.
+
+A pack installs like any addon: extract its zip into the AddOns folder next to
+the `Polestar` folders and restart the game. Its guides appear in the hub
+under "Guide packs", each credited to its author. Options > Guide packs
+(`/polestar packs`) lists every installed pack with its status and any
+problems, switches a pack off and on without a reload, and picks where the
+guide for your level is suggested from (Polestar's own guides unless you
+choose a pack). A pack never replaces Polestar's guides or another pack's.
+
+<details>
+<summary><b>Writing a guide pack</b></summary>
+
+`polestar new my-pack` starts a pack from the template, with an example guide
+that already passes lint. The tools work on a pack as they do on Polestar's
+own guides: run them in the pack's folder, or name it
+(`polestar lint ../my-pack`). `npm link` in a clone puts `polestar` on the
+PATH.
 
 | Command | What it does |
 |---|---|
-| `new [dir]` | Start a pack from the template |
-| `doctor` | Check Node, Lua, the reference data, the AddOns folder and `pack.json` |
-| `dev` | Lint and build into the game on every save (`--play`: with the playground) |
-| `find <text>` | Look up quests, NPCs, objects, items and guides as guide lines |
-| `lint`, `compile` | Check (`--format` rewrites the files in the canonical layout), and build into `dist/<folder>/` |
-| `playtest [--filter text]` | Play every guide to the end for every class |
-| `play` | The playground with the pack loaded |
-| `install` | Build the pack and install it into the game |
-| `pack` | Build `dist/<folder>-<version>.zip`: exactly the pack's files, its LICENSE as `LICENSE.txt`, byte for byte reproducible |
-| `record draft`, `sim compare` | A draft from recorded play into `drafts/`; the pack's chain scored beside ours |
+| `find <text>` | Quests, NPCs, objects, items, inns, flight points and Polestar's guides as guide lines; in game, `/polestar where` gives your position as guide lines to copy |
+| `lint`, `playtest` | Check every guide, and play each to the end for every class |
+| `dev`, `play` | Rebuild into the game on every save; run the pack in the browser playground |
+| `pack` | Build the zip to publish, byte for byte reproducible |
 
-`npm link` in a clone puts `polestar` on the PATH for these.
+A pack can hand over to any of Polestar's guides with `next`, so it can cover
+one zone or one level range. [docs/PACKS.md](docs/PACKS.md) is the handbook
+(setup, a first pack in 15 minutes, testing, publishing) and
+[docs/PACK_FORMAT.md](docs/PACK_FORMAT.md) the format. A pack may use a
+licence of its author's choice ([Data and licensing](#data-and-licensing)).
 
-## Install
-
-1. Download `Polestar-0.1.0.zip` from the
-   [releases](https://github.com/fitzforge/polestar/releases) (its checksum
-   is in `SHA256SUMS` beside it). It holds `Polestar`, `Polestar_Guides` and
-   the data addons `Polestar_QuestDB` (quest markers) and `Polestar_ItemDB`
-   (item stats for gear advice), both loaded only when needed. `Polestar`
-   carries the licence and a `README.txt` with these steps.
-2. Extract it into the game's AddOns folder, so the `Polestar` folders sit
-   directly inside it:
-   - `World of Warcraft/_forever_/Interface/AddOns/`
-   - `World of Warcraft/_classic_beta_/Interface/AddOns/` during the beta
-3. Restart the game completely. A `/reload` does not pick up new addon
-   folders.
-
-### Installing a guide pack
-
-Packs written by other players install like any addon: extract the pack's zip
-into the same AddOns folder, next to the `Polestar` folders, and restart the
-game. Its guides appear in the hub under "Guide packs", credited to their
-author. Options > Guide packs (`/polestar packs`) lists every installed pack
-with its status and problems, switches a pack's guides off and on, and picks
-where the guide for your level is suggested from. Each pack is made and
-supported by its author.
-
-Optional: `Polestar_Recorder-0.1.0.zip`, extracted the same way, records
-your sessions to improve the routes. It does nothing until you turn it on.
-
-### First steps in game
-
-- Log in: the guide window opens with a guide suggested for your race, class,
-  level and location, and a short note about the beta shows once.
-- Follow the arrow. Goals tick themselves off; `/polestar next` and `prev`
-  only look ahead or back, `/polestar skip` moves on for good.
-- `/polestar guides` opens the hub to pick another guide, open one in a new
-  tab, or search.
-- `/polestar options` holds every setting. Map icons are off until you turn
-  them on under **Map**.
-- If something looks wrong, `/console scriptErrors 1` shows Lua errors.
+</details>
 
 ## Building from source
 
@@ -671,12 +677,14 @@ terms do not allow redistribution are read from your installed copies at
 build time and their outputs stay local: `data/forever/`, the Codex pack and
 the zone crossings pack are gitignored and never packaged. No game art ships
 with Polestar: zone paintings are read from the player's own client, and
-every texture is drawn in code.
+every texture is drawn in code. The screenshots in this README show the game
+(© Blizzard Entertainment) and are not part of the release.
 
 The Inter typeface (SIL Open Font License 1.1) ships with the addon; the
 POLESTAR wordmark is cut from Cinzel (SIL Open Font License 1.1) and ships
-only as images. The README's banner, logo and charts are drawn by
-[`tools/readme`](tools/readme) from the same sources.
+only as images. The README's banner, download button, logo and charts are
+drawn by [`tools/readme`](tools/readme) from the same sources, with
+Marcellus (SIL Open Font License 1.1) for the banner's lines.
 
 [LICENSE-EXCEPTION.md](LICENSE-EXCEPTION.md) adds a permission under section
 7: guide packs produced by Polestar's compiler, including the reference data
