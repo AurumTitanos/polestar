@@ -1,16 +1,23 @@
-node_modules/
-.ref/
-dist/
+# Data addons built on the developer's machine from local reference data.
+addon/Polestar_Codex/
+addon/Polestar_QuestDB/
+addon/Polestar_Travel/
+
+# Local data: game client tables, downloaded sources and their builds.
 data/sources/
 data/forever/
-data/recordings/*
-!data/recordings/.gitkeep
-addon/Polestar_Codex/
-*.log
 data/sim/
 data/bench/
-guides/drafts/
-addon/Polestar_QuestDB/
 data/play/
 data/local/
-addon/Polestar_Travel/
+data/recordings/*
+!data/recordings/.gitkeep
+
+# Build output and drafts.
+dist/
+guides/drafts/
+*.log
+
+# Tooling.
+node_modules/
+.ref/

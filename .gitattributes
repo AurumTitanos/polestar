@@ -1,0 +1,23 @@
+# Text files are stored with LF line endings.
+* text=auto eol=lf
+
+# Binary assets.
+*.tga binary
+*.ttf binary
+*.png binary
+
+# Downloaded source tables keep their bytes exactly as fetched.
+tests/fixtures/data/sources/** -text
+
+# Generated files: collapsed in diffs and left out of the language statistics.
+# Each one is rebuilt by a `node tools/polestar.js` command; edit the generator, not the file.
+addon/Polestar_Guides/** linguist-generated
+addon/Polestar_ItemDB/*.lua linguist-generated
+addon/Polestar/Core/ClassTrainers.lua linguist-generated
+addon/Polestar/Gear/SpecData.lua linguist-generated
+addon/Polestar/Maps/ZoneLevels.lua linguist-generated
+addon/Polestar/Nav/TravelData.lua linguist-generated
+addon/Polestar/QoL/Data.lua linguist-generated
+addon/Polestar/UI/ZoneArtOverlays.lua linguist-generated
+docs/preview/*.svg linguist-generated
+docs/assets/**/*.svg linguist-generated
