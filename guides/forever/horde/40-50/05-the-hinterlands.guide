@@ -15,7 +15,7 @@ next forever/horde/40-50/06-azshara
 # village (Grim Message) -> the Violet Tragan -> the Atal'ai Exile ->
 # Revantusk Village (flight path, bind) -> the north coast -> the Vilebranch
 # temples -> the central hills -> Skulk Rock -> the Silvermane Howlers ->
-# Highvale -> Gilveradin -> Jintha'alor -> Revantusk -> Aerie Peak -> hearth
+# Highvale -> Gilveradin -> Jintha'Alor -> Revantusk -> Aerie Peak -> hearth
 # Revantusk Village, where the next guide starts.
 #
 # Deviations from the export:
@@ -29,7 +29,7 @@ next forever/horde/40-50/06-azshara
 #   bind, no hearth back to it, no zeppelin.
 # - Hinterlands: Gilveradin, the Highvale records, Rin'ji, the Grim Message,
 #   the Violet Tragan and the Atal'ai Exile are done on the way in from
-#   Tarren Mill; Elder Torntusk is visited with the rest of Jintha'alor. The
+#   Tarren Mill; Elder Torntusk is visited with the rest of Jintha'Alor. The
 #   Long Elegant Feathers for Another Message to the Wildhammer (7842) drop
 #   from the Razorbeak Skylords in the central hills before the quest is in
 #   your log, so it is handed in the moment you take it.
@@ -225,19 +225,19 @@ step Gilveradin's camp
   turnin 77                             -- Gilveradin Sunchaser
   accept 81                             -- for Dran Droffers in Orgrimmar, around level 50
 
-# ---------------------------------------------------------------- Jintha'alor
+# ---------------------------------------------------------------- Jintha'Alor
 
 step Vilebranch soothsayers
-  tip On the way back east, the Vilebranch soothsayers hold the troll ruins south of the central hills.
+  tip On the way back east, the Vilebranch soothsayers hold the Altar of Zul, the troll temple south of the central hills. Qiaga and Morta'gya the Keeper (elite, 50) stand at its top: take the soothsayers on the lower steps.
   kill 4467 quest 7844.2
   kill 4466 quest 7844.1
 
-step Jintha'alor
-  tip Huntsman Malkhor's skull lies on a pile below the Vilebranch ruins, his bones on a pile at the foot of Jintha'alor. The Vessels of Tainted Blood sit on the lower terraces, and Elder Torntusk is held at the top. Keep to the paths: the trolls inside are elite.
+step Jintha'Alor
+  tip Huntsman Malkhor's skull lies on a pile below the Vilebranch ruins, his bones on a pile at the foot of Jintha'Alor. The Vessels of Tainted Blood sit on the lower terraces, and Elder Torntusk is held at the top. Keep to the paths: the trolls inside are elite.
   collect 19069 quest 7849.1 @58.6,64.8
   collect 19070 quest 7849.2 @62.1,75.3
   collect 19071 quest 7850.1
-  turnin 7845                           -- Elder Torntusk, at the top of Jintha'alor
+  turnin 7845                           -- Elder Torntusk, at the top of Jintha'Alor
   note His next request, going on to the Altar of Zul, is for a group.
 
 step Revantusk Village

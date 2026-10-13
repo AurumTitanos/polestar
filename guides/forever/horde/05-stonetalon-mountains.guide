@@ -16,8 +16,8 @@ next forever/horde/06-hillsbrad-foothills
 # Splintertree, back to Kadrak -> south to the Crossroads and west into
 # Stonetalon: Malaka'jin -> Ziz Fizziks and Windshear Crag -> Sun Rock
 # Retreat (flight path, bind) -> Mirkfallon Lake -> Stonetalon Peak (Jin'Zil's
-# reagents, Cenarion grove) -> hearth to Sun Rock -> the burned-out note's
-# trail -> the Charred Vale -> Sun Rock -> down the Webwinder Path to
+# reagents, Cenarion grove) -> hearth to Sun Rock -> the Charred Vale -> Sun
+# Rock -> down the Webwinder Path to
 # Malaka'jin -> fly from the Crossroads to Orgrimmar, zeppelin to the
 # Undercity, fly to Tarren Mill (bind) for forever/horde/06-hillsbrad-foothills.
 #
@@ -47,6 +47,12 @@ next forever/horde/06-hillsbrad-foothills
 # Left out: Bloodfury Bloodline (6283, an elite harpy matriarch), Ordanus
 # (1088, Alliance side of Ashenvale), Arachnophobia (6284, Besseleth is
 # elite and the export leaves it out). No class quests in this range.
+#
+# Added: Bloodfury Trinkets (86576, Forever): the sunstones drop from the
+# Charred Vale harpies the route kills for Harpies Threaten (6282).
+#
+# Dropped: Stepping Stones (79192) and Scramble (79980): they follow ... and
+# that note you found (79007), which no Horde guide takes.
 
 # ---------------------------------------------------------------- Mor'shan Rampart
 
@@ -128,6 +134,7 @@ step Sun Rock Retreat
   sethome "Sun Rock Retreat"
   accept 5881                         -- Maggran Earthbinder: Grish is at the Great Lift, in the next guide
   accept 6282
+  accept 86576                        -- Maggran Earthbinder: Glittering Sunstones from the Bloodfury harpies
   accept 1087                         -- Braelyn Firehand, outside the gate
   accept 6393                         -- Tsunaman
   accept 6562                         -- Je'neu Sancrea at Zoram'gar, at 27
@@ -155,12 +162,6 @@ step Sun Rock Retreat
   turnin 1087                         -- Braelyn Firehand
   note Braelyn's next quest, Ordanus, is on the Alliance side of Ashenvale. Skip it.
 
-step The note's trail
-  tip West of Sun Rock the trail of the burned-out note goes on: Pocket Litter by the road, then a Mound of Dirt a little to the north.
-  turnin 79192 @40.8,52.6             -- Pocket Litter
-  accept 79980
-  turnin 79980 @39.6,49.9             -- Mound of Dirt
-
 step The Charred Vale
   tip South-west of Sun Rock lies the burned Charred Vale. Plant the Gaea Seeds in the dirt mounds on the valley floor; the fire elementals drop Incendrites. Bloodfury Harpies and Ambushers nest on the north side, Slayers and Roguefeathers to the south.
   interact 177929 quest 6381          -- Gaea Dirt Mounds
@@ -169,11 +170,13 @@ step The Charred Vale
   kill 4025 quest 6282.2
   kill 4024 quest 6282.3
   kill 4023 quest 6282.4
+  collect 277936 quest 86576.1        -- Glittering Sunstone, from any Bloodfury harpy
 
 step Sun Rock Retreat
   turnin 6381                         -- Tammra Windfield
   turnin 6393                         -- Tsunaman
   turnin 6282                         -- Maggran Earthbinder
+  turnin 86576 npc 11861              -- Mor'rogal, beside Maggran
 
 step Malaka'jin
   tip Ride back down the Webwinder Path to Malaka'jin.

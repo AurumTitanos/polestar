@@ -49,7 +49,11 @@ next forever/horde/40-50/02-feralas
 # O'Breen in forever/horde/30-40/03-arathi-highlands) at Fleet Master Seahorn
 # on the first Booty Bay stop; the export hands it in at level 44, on a
 # separate Booty Bay trip that the route drops. Report to Helgrum (1420, from
-# the Badlands).
+# the Badlands). The Troll Witchdoctor (1240, from forever/horde/30-40/04-
+# dustwallow-marsh) at Kin'weelay in Grom'gol.
+#
+# Optional: The Bloodsail Buccaneers (608): the three captains are 45-48 on
+# decks crewed by 42-45 pirates, at about 41.
 #
 # Accepted here, finished later on the route: Stoley's Debt (2872) and
 # Tran'rek (2864) in Tanaris; Cortello's Riddle (624) in the Swamp of
@@ -120,15 +124,15 @@ step Booty Bay
   turnin 576                            -- Dizzy One-Eye
 
 step The Bloodsail ships
-  tip The three ships lie off the Wild Shore. Swim out and pull the crew to the rail one at a time; Firallon is level 48, so rest before you take him. A scroll, Cortello's Riddle, lies on the ships' decks: take it.
-  kill 2550 quest 608.1
-  kill 2548 quest 608.2
-  kill 2546 quest 608.3
+  tip The three ships lie off the Wild Shore. The crews are 42-45, Stillwater 45, Keelhaul 46 and Fleet Master Firallon 48: at 41 this is a fight for a group, or for the end of the guide. If you go, swim out and pull the crew to the rail one at a time. A scroll, Cortello's Riddle, lies on the ships' decks: take it.
+  kill 2550 quest 608.1 optional
+  kill 2548 quest 608.2 optional
+  kill 2546 quest 608.3 optional
   collect 4056 "Cortello's Riddle"
   accept 624                            -- for a later stop in the Swamp of Sorrows
 
 step Booty Bay
-  turnin 608                            -- Fleet Master Seahorn
+  turnin 608 optional                   -- Fleet Master Seahorn
 
 # ---------------------------------------------------------------- North through the jungle
 
@@ -163,6 +167,7 @@ step Grom'gol Base Camp
   accept 584                            -- Nimboya
   accept 2932                           -- for later: the Hinterlands, around level 48
   accept 598                            -- Kin'weelay
+  turnin 1240                           -- Kin'weelay
 
 step Nesingwary's Expedition
   tip Ride north up the road; the hunters camp on the hill above the river.

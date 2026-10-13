@@ -9,10 +9,11 @@ next forever/horde/40-50/01-stranglethorn-vale
 # 29-30: Dustwallow Marsh 39.2-39.8 and Desolace 39.8-40.2. Shared by every
 # Horde start. Era + known Forever quests only.
 #
-# Flow: Ratchet -> fly to Camp Taurajo (Shamans: Brine) -> the Shady Rest Inn
-# -> Brackenwall Village -> the Quagmire (Ogron) -> Muckshell crabs -> Witch
-# Hill (Stinky, Mirefin murlocs, Swamp Eye Jarl) -> Darkfang spiders and the
-# Darkmist cavern -> Brackenwall -> Jarl -> hearth to Ratchet -> fly to
+# Flow: Ratchet -> fly to Camp Taurajo -> the Shady Rest Inn -> Brackenwall
+# Village (flight path) -> the Quagmire (Ogron) -> Witch
+# Hill (Stinky, Mirefin murlocs, Swamp Eye Jarl) -> Darkfang spiders,
+# Theramore Infiltrators and the Darkmist Cavern -> Brackenwall -> Jarl ->
+# Brackenwall -> hearth to Ratchet -> fly to
 # Shadowprey Village (bind) -> the Valley of Spears escort -> the Kodo
 # Graveyard -> the Gizelton caravan -> Kormek's Hut -> the Kodo Graveyard ->
 # Kormek's Hut -> Thunder Axe Fortress -> Ethel Rethor and the Slitherblade
@@ -32,15 +33,24 @@ next forever/horde/40-50/01-stranglethorn-vale
 # - Desolace: Kormek's Hut is visited twice (Bone Collector needs the quest
 #   before the bones can be picked up); the Thunder Axe box and Ethel Rethor
 #   follow on the second visit.
+# - Theramore Spies (1201), Soothing Spices (1218) and the Loose Dirt pair
+#   (1238, 1239) come from forever/horde/07-ashenvale, where they were level 35
+#   quests at 30. The Lost Report (1238) is read at Brackenwall before the
+#   dirt gives up The Severed Head (1239), so the second Jarl visit ends with
+#   a ride back to Brackenwall. The Troll Witchdoctor (1240) goes to Grom'gol
+#   in forever/horde/40-50/01-stranglethorn-vale.
 #
-# Class quests: Shamans hand in Brine's red waterskin (1536) south of Camp
-# Taurajo.
+# Class quests: none; Shamans handed Brine their waterskin (1536) in
+# forever/horde/06-hillsbrad-foothills.
 #
 # Left out: Claim Rackmore's Treasure! (6161): its two keys come from the
 # north coast naga and the crabs by Shadowprey, and the chest sits on
 # Ranazjar Isle in the far north, a crossing of the whole zone for one quest.
-# The Black Shield for Thunder Bluff (1276) and Report to Zor (1262) are
-# accepted and carried: later guides turn them in.
+# Marg Speaks (1261) and Report to Zor (1262): Marg's note in Grom'gol is
+# offered only after The Troll Witchdoctor (1240), which now comes after this
+# guide, and the Jeweled Pendant drops one crab in twenty.
+# The Black Shield (1276) is not taken: its Thunder Bluff turn-in is not on
+# the route.
 # The export's closing Booty Bay bind belongs to the next guide, which
 # starts there.
 
@@ -49,11 +59,6 @@ next forever/horde/40-50/01-stranglethorn-vale
 step Fly to Camp Taurajo
   zone The Barrens
   fly "Camp Taurajo"
-
-step Brine
-  only Shaman
-  tip Brine's hut stands on the ridge above the quilboar watering hole, south of Camp Taurajo.
-  turnin 1536                         -- Brine: the red waterskin from Tarren Mill
 
 step Shady Rest Inn
   zone Dustwallow Marsh
@@ -66,6 +71,7 @@ step Shady Rest Inn
 
 step Brackenwall Village
   tip Take the road north at the fork to the ogre village of Brackenwall.
+  getfp "Brackenwall Village"
   turnin 1269                         -- Krog
   turnin 1251
   turnin 1268
@@ -73,15 +79,12 @@ step Brackenwall Village
   turnin 1321                         -- Do'gol
   accept 1322
   accept 1177                         -- Mudcrush Durtfeet, at the south edge of the village
+  accept 1201                         -- Nazeer Bloodpike
 
 step Questioning Reethe
   tip Ogron waits in the Quagmire east of the village. Follow him to Reethe and keep him alive through the fight that breaks out.
   accept 1273
   complete 1273
-
-step Muckshell crabs
-  tip The Muckshell crabs line the pools east of the Quagmire; now and then one carries the Jeweled Pendant for Marg Speaks.
-  collect 5942 quest 1261
 
 # ---------------------------------------------------------------- Witch Hill
 
@@ -96,25 +99,27 @@ step Mirefin murlocs
 
 step Swamp Eye Jarl
   tip Jarl lives in the Swamplight Manor south-east of Witch Hill.
+  accept 1218                         -- "Swamp Eye" Jarl
   turnin 1218
+  accept 1238                         -- Loose Dirt, beside the manor
   accept 1206
 
 # ---------------------------------------------------------------- Back west
 
 step Darkfang spiders
-  tip Ride west back across the marsh. The Darkfang Venomspitters on the ridges north of Brackenwall drop the venom sacs.
+  tip Ride west back across the marsh. The Darkfang Venomspitters on the ridges north of Brackenwall drop the venom sacs. Theramore Infiltrators (35-36) sneak through the same woods: they are stealthed, so look closely.
   collect 5959 quest 1322
+  kill 4834 quest 1201
 
-step Darkmist cavern
+step Darkmist Cavern
   tip The Darkmist spiders swarm the cavern mouth north-west of Brackenwall; every kind drops eyes.
   collect 5884 quest 1206
 
 step Brackenwall Village
   turnin 1273                         -- Krog
-  accept 1276                         -- for Mosarn in Thunder Bluff, around level 44
+  turnin 1201                         -- Nazeer Bloodpike
+  turnin 1238
   turnin 1177                         -- Mudcrush Durtfeet
-  turnin 1261                         -- Nazeer Bloodpike
-  accept 1262                         -- for Zor Lonetree in Orgrimmar, around level 45
   turnin 1322                         -- Do'gol
   accept 1323
   turnin 1323                         -- Krog
@@ -124,6 +129,12 @@ step Swamp Eye Jarl
   turnin 1206
   accept 1203 optional                -- only if you carry a Moonsteel Broadsword (Blacksmithing or the Auction House)
   turnin 1203 optional
+  accept 1239                         -- Loose Dirt, now that Nazeer has read the report
+
+step Brackenwall Village
+  tip Ride back west to Brackenwall with the head.
+  turnin 1239                         -- Nazeer Bloodpike
+  accept 1240                         -- For Kin'weelay at Grom'gol, in the next guide
 
 step Hearth to Ratchet
   hearth "Ratchet"

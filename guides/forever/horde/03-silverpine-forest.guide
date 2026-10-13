@@ -35,7 +35,12 @@ next forever/horde/04-the-barrens
 #
 # Optional: Resting in Pieces and The Hidden Niche (460, 461): A Talking Head
 # is a rare drop from the Rot Hide gnolls, and the Dusty Shelf stands inside
-# Fenris Keep among level 18-22 gnolls.
+# Fenris Keep among level 18-22 gnolls. Arugal's Folly (98298, Forever): it
+# is listed after Dalar Dawnweaver's Arugal's Folly series (421-424, 99),
+# which the route does not run, so Dalar may not offer it.
+#
+# Skyborne: Welcome to Azeroth (95350) is turned in to Thrall in Grommash
+# Hold, and Journey to the Crossroads (98024) taken on to Thork.
 #
 # Dropped: A Recipe For Death (447), Zinge's Delivery (1359), The Engraved
 # Ring (440), Rot Hide Origins (444) and Hidden Enemies (5726): the route never
@@ -165,7 +170,7 @@ step The Sepulcher
   tip Swim back and follow the road west to the Sepulcher.
   turnin 443                          -- Apothecary Renferrel
   accept 95981                        -- Shadow Priest Allister
-  accept 98298                        -- Dalar Dawnweaver
+  accept 98298 optional               -- Dalar Dawnweaver: take it if he offers it; it may follow his Arugal's Folly series, which the route does not run
   accept 98299
 
 # ---------------------------------------------------------------- South loop
@@ -177,8 +182,8 @@ step Ambermill
   kill 1888 quest 95981.2
 
 step Moonrage Bloodhowlers
-  tip The Bloodhowlers prowl the woods south-west of Ambermill, east of Pyrewood; they drop the Worgen Bits.
-  collect 280375 quest 98298.1
+  tip Only if Dalar gave you Arugal's Folly: the Bloodhowlers prowl the woods south-west of Ambermill, east of Pyrewood; they drop the Worgen Bits.
+  collect 280375 quest 98298.1 optional
 
 step The refugees
   tip The Sickly and Haggard Refugees shamble along the road south of Pyrewood toward the Greymane Wall.
@@ -189,7 +194,7 @@ step Hearth to the Sepulcher
   hearth "The Sepulcher"
   turnin 479                          -- Shadow Priest Allister
   turnin 95981
-  turnin 98298                        -- Dalar Dawnweaver
+  turnin 98298 optional               -- Dalar Dawnweaver
   turnin 98299
 
 step Lordamere Lake shore
@@ -238,4 +243,6 @@ step Valley of Wisdom
   collect 277952 quest 97326.1
   turnin 97326
   turnin 97249                        -- Migi
+  turnin 95350 only Skyborne          -- Thrall, inside Grommash Hold
+  accept 98024 only Skyborne          -- Keep it: Thork at the Crossroads
   train class

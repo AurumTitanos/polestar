@@ -40,6 +40,10 @@ next forever/horde/05-stonetalon-mountains
 #   offers it from level 23 and the route reaches him at about 22.5.
 #   forever/horde/07-ashenvale accepts it at the top of the Great Lift on its
 #   way to Freewind Post.
+# - Field to Clear (98093, Forever) is taken from Sulhasa, up in a tree just
+#   east of Gann Stonespire: its lizards and stalkers live on the walk to
+#   Blackthorn Ridge.
+# - A level-20 stop before the Orgrimmar trip: the class quests there need 20.
 #
 # Optional: WANTED: Bruuz (92706): Bruuz is elite, grouping up is advised.
 # Owatanka (884), Lakota'mani (883), The Harvester (897) and Washte Pawne
@@ -51,12 +55,12 @@ next forever/horde/05-stonetalon-mountains
 #   forever/horde/02-the-barrens, and it would need a final trip to Ratchet.
 # - Deepmoss Spider Eggs (1069), Goblin Invaders (1062), Avenge My Village
 #   (6548), Letter to Jin'Zil (1060) and ... and that note you found (79007):
-#   the route never turns them in.
+#   the route never turns them in. Stepping Stones (79192) follows 79007, so
+#   it is not offered either.
 #
 # Carried on into later guides: Report to Kadrak (6541) and The Ashenvale Hunt
-# (6382), Ashenvale; Stepping Stones (79192) and Ziz Fizziks (1483),
-# Stonetalon; Journey to Hillsbrad Foothills (493, from Silverpine) and Rilli
-# Greasygob (3923).
+# (6382), Ashenvale; Ziz Fizziks (1483), Stonetalon; Journey to Hillsbrad
+# Foothills (493, from Silverpine) and Rilli Greasygob (3923).
 #
 # Class quests (training trip at 20): Warrior Speak with Ruga / Trial at the
 # Field of Giants / Speak with Thun'grim (1823-1825); Shaman Call of Water
@@ -112,8 +116,7 @@ step Ratchet
 # ---------------------------------------------------------------- The Crossroads
 
 step Raptor Horns
-  tip Sunscale Scytheclaws hunt the plains south of the road between Ratchet and the Crossroads; they drop the horns. Hand them in on your next pass through Ratchet.
-  goto 52.0,36.0 "Sunscale Scytheclaws"
+  tip Sunscale Scytheclaws hunt the plains south of the Crossroads, around the Raptor Grounds; they drop the horns. Hand them in on your next pass through Ratchet.
   collect 5055 quest 865.1
 
 step The Crossroads
@@ -126,12 +129,17 @@ step The Crossroads
   accept 876                          -- Darsok Swiftdagger
   accept 6541                         -- Thork. Keep it: Kadrak at the Mor'shan Rampart, next guide
   accept 868                          -- Korran: the eggs are in the Field of Giants, later
+  turnin 98024 only Skyborne          -- Thork, at the top of the tower
+
+step Level 20
+  tip The level-20 class quests in Orgrimmar (Sorek, Searn Firewarder, the Warlock and Rogue trainers) are only offered from level 20, so finish the level here before you fly. The Thunderhawk Hatchlings (18) on the plains south-west of the Crossroads and the Kolkar (14-15) at the Stagnant Oasis are the nearest mobs worth killing; you need well under a level.
+  level 20                            -- grind on Thunderhawk Hatchlings south-west of the Crossroads
 
 # ---------------------------------------------------------------- Orgrimmar at 20
 
 step Orgrimmar
   zone Orgrimmar
-  tip Fly to Orgrimmar to train your level 20 ranks (Druids: `train class` sends you to Thunder Bluff). Sorek is in the Valley of Honor, Searn Firewarder in the Valley of Wisdom.
+  tip Fly to Orgrimmar to train your level 20 ranks (Druids train in Thunder Bluff instead). Sorek is in the Valley of Honor, Searn Firewarder in the Valley of Wisdom.
   fly "Orgrimmar"
   train class
   accept 1823 only Warrior            -- Sorek
@@ -351,9 +359,8 @@ step Jorn Skyseer
 # ---------------------------------------------------------------- The south
 
 step Field of Giants
-  tip South of Camp Taurajo the Silithid Mounds dot the Field of Giants; the eggs lie in them, and Silithid Swarmers come out to defend them. The Burned-Out Remains of a campfire lie by the road at the south end. Silithid Harvesters are rare: if you see one, kill it for its head.
+  tip South of Camp Taurajo the Silithid Mounds dot the Field of Giants; the eggs lie in them, and Silithid Swarmers come out to defend them. Silithid Harvesters are rare: if you see one, kill it for its head.
   collect 5058 quest 868.1
-  accept 79192                        -- Burned-Out Remains. Keep it: Sun Rock Retreat, next guide
   collect 7119 quest 1824.1 only Warrior -- Twitching Antennae from the silithid
   collect 5138 optional               -- Harvester's Head
   accept 897 optional
@@ -361,6 +368,7 @@ step Field of Giants
 step Gann Stonespire
   tip Gann waits in a small camp further south, on the road toward Bael Modan.
   accept 843
+  accept 98093 @47.8,77.6             -- Sulhasa, up in the tree just east of Gann
   turnin 1530 only Shaman             -- Brine, just west of Gann
   accept 1535 only Shaman
   collect 7769 quest 1535.1 only Shaman @44.3,76.8 -- Fill the Empty Brown Waterskin at the quilboar watering hole
@@ -368,7 +376,7 @@ step Gann Stonespire
   accept 1536 only Shaman             -- Keep it: the Spring Well is beside Tarren Mill
 
 step Blackthorn Ridge
-  tip West of Gann, the Razormane hold Blackthorn Ridge. Kuz is on the east side, Nak to the south, Lok Orcbane at the west end. Pathfinders and Stalkers drop the Backstabber, Seers the Wand, Warfrenzies the War Shield. Washte Pawne, a rare red wind serpent, flies over the ridge: its feather starts a quest.
+  tip West of Gann, the Razormane hold Blackthorn Ridge. Kuz is on the east side, Nak to the south, Lok Orcbane at the west end. Lok (25) and the Warfrenzies (24-25) are a few levels above you; Hagg Taurenbane, a rare elite, sometimes walks the ridge: leave him. Pathfinders and Stalkers drop the Backstabber, Seers the Wand, Warfrenzies the War Shield. Stormhide lizards and Hecklefang Stalkers roam the plain between Gann and the ridge. Washte Pawne, a rare red wind serpent, flies over the ridge: its feather starts a quest.
   goto 42.5,81.0 "Blackthorn Ridge"
   collect 5074 quest 879.3
   collect 5073 quest 879.2
@@ -376,17 +384,20 @@ step Blackthorn Ridge
   collect 5093 quest 893.1
   collect 5092 quest 893.2
   collect 5094 quest 893.3
+  kill 3238 quest 98093.1             -- Stormhide, on the plain between Gann and the ridge
+  kill 4128 quest 98093.2             -- Hecklefang Stalker
   collect 5103 optional               -- Washte Pawne's Feather
   accept 885 optional
 
 step Bael Modan
-  tip South of Gann, the Bael'dun dwarves dig at Bael Modan. Excavators and Foremen work the pit; Prospector Khazgorm carries the journal.
+  tip South of Gann, the Bael'dun dwarves dig at Bael Modan. Excavators and Foremen work the pit; Prospector Khazgorm (26) carries the journal: pull him alone.
   kill 3374 quest 843.1
   kill 3375 quest 843.2
   collect 5006 quest 843.3
 
 step Gann Stonespire
   turnin 843
+  turnin 98093 @47.8,77.6             -- Sulhasa
   accept 846
 
 step Bael'dun fortress
@@ -437,7 +448,7 @@ step Thun'grim Firegaze
 
 step Orgrimmar
   zone Orgrimmar
-  tip Fly to Orgrimmar to train (Druids: `train class` sends you to Thunder Bluff).
+  tip Fly to Orgrimmar to train (Druids train in Thunder Bluff instead).
   fly "Orgrimmar"
   train class
 

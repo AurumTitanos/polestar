@@ -58,8 +58,14 @@ next forever/horde/30-40/03-arathi-highlands
 #
 # Class quests: none on this stretch.
 #
-# Carried on: Trollbane (638) for Arathi; Marg Speaks (1261) for Dustwallow
-# Marsh.
+# Class training: none in Stranglethorn: the guide stays between Grom'gol and
+# Booty Bay. You train next in Orgrimmar at about 38, in the next guide.
+#
+# Carried on: Trollbane (638) for Arathi.
+#
+# Not taken: Marg Speaks (1261): Marg's note is offered only after The Troll
+# Witchdoctor (1240), which is now turned in at Grom'gol in forever/horde/40-
+# 50/01-stranglethorn-vale, after the Dustwallow stay.
 
 # ---------------------------------------------------------------- Grom'gol
 
@@ -73,7 +79,6 @@ step Grom'gol Base Camp
   tip The zeppelin lands at the tower on the west side of the camp.
   getfp "Grom'gol" npc 1387           -- Thysta
   sethome "Grom'gol Base Camp" npc 5814 -- Innkeeper Thulbek
-  turnin 1240                         -- Kin'weelay
   accept 581                          -- Nimboya
 
 # ---------------------------------------------------------------- Nesingwary's camp
@@ -230,10 +235,9 @@ step Bloodscalp ruins
   collect 3915 quest 596
 
 step Grom'gol
-  tip Ride back south to Grom'gol. The bubbling cauldron beside Kin'weelay holds Marg's note.
+  tip Ride back south to Grom'gol.
   turnin 596                          -- Kin'weelay
   turnin 629
-  accept 1261                         -- Bubbling Cauldron: for Dustwallow Marsh, later on the route
 
 # ---------------------------------------------------------------- Nesingwary's camp
 

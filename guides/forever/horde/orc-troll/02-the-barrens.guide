@@ -56,7 +56,6 @@ step The Crossroads
   accept 844
   accept 871                          -- Thork
   accept 5041
-  accept 867                          -- Darsok Swiftdagger
   accept 848                          -- Apothecary Helbrim
   accept 1492
   accept 869                          -- Gazrog
@@ -80,6 +79,7 @@ step The Crossroads
   turnin 869                          -- Gazrog
   turnin 845                          -- Sergra Darkthorn
   accept 903
+  accept 867                          -- Darsok Swiftdagger, on the tower platform: needs level 12
 
 # ---------------------------------------------------------------- Razormane camp and Ratchet
 
@@ -173,7 +173,7 @@ step Gazlowe
   turnin 888
 
 step Back to the Crossroads
-  tip Walk back up the road to the Crossroads. Savannah Prowlers hunt along it and on the plains west of town; finish the claws on the next loop if you are short.
+  tip Walk back up the road to the Crossroads. Savannah Prowlers hunt along it and on the plains west of town: finish the claws before you hand them in.
   collect 5096 quest 903.1 optional
   turnin 903                          -- Sergra Darkthorn
   accept 881
@@ -190,7 +190,6 @@ step Regthar Deathgate
 step Kolkar camps and the Forgotten Pools
   tip The Kolkar camps spread north-west of Regthar; every Kolkar can drop Centaur Bracers. The Forgotten Pools lie in their middle, with Laden Mushrooms around the water. Savannah Prowlers roam the same plains.
   collect 5030 quest 855.1
-  collect 5096 quest 903.1
   goto 45.1,22.5 "The Forgotten Pools"  -- Wade into the pools to explore them
   complete 870
   collect 5012 quest 848.1

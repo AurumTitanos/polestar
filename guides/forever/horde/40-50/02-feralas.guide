@@ -47,10 +47,13 @@ next forever/horde/40-50/03-feralas
 # Ratchet on the way in, as in the earlier Feralas guide.
 #
 # Accepted here, finished later on the route: Screecher Spirits (3520,
-# Steamwheedle Port, around 46.7), Deliver to MacKinley (2874) and Rescue
-# OOX-22/FE! (2767) in Booty Bay around level 50, A Strange Request (3121),
-# A Grim Discovery (2976) and The Gordunni Orb (3002) in Orgrimmar at 45,
-# Ripple Recovery (650) in the Hinterlands.
+# Steamwheedle Port, around 46.7), Deliver to MacKinley (2874) in Booty Bay
+# around level 50, A Strange Request (3121), A Grim Discovery (2976) and The
+# Gordunni Orb (3002) in Orgrimmar at 45, Ripple Recovery (650) in the
+# Hinterlands.
+#
+# Optional: Find OOX-22/FE! (2766) and Rescue OOX-22/FE! (2767): the distress
+# beacon drops about one kill in forty; the reward waits in Booty Bay.
 #
 # Left out: Pearl Diving (705: the export gathers the pearls but never hands
 # them in). Speaking with Nezzliok (585, export visit 38 at Grom'gol) is done
@@ -72,6 +75,15 @@ step Orgrimmar
   zone Orgrimmar
   train class
   accept 3631 only Warlock              -- Zevrost, Cleft of Shadow
+
+step Riding at 40
+  tip Riding needs level 40 and costs 100 gold; learning it gives you a mount. Kildar teaches it in the Valley of Honor, by Ogunaro Wolfrunner's kennel. Your race's other mounts are 20 gold each: Collectibles, Mounts · Level 40 has a guide for each.
+  train 4752 optional                   -- Kildar, riding trainer
+  note "Wolves: Ogunaro Wolfrunner, beside Kildar." only Orc
+  note "Raptors: Zjolnir, in Sen'jin Village on the Durotar coast." only Troll
+  note "Kodos: Harb Clawhoof, in Bloodhoof Village, Mulgore." only Tauren
+  note "Skeletal horses: Zachariah Post, in Brill, Tirisfal Glades." only Undead
+  note "Galestriders: Genn Fairweather, in Valanaar on Zephras Isle." only Skyborne
 
 step Ratchet for the Felsteed
   only Warlock
@@ -247,15 +259,15 @@ step Rogue Vale screechers
   kill 8612 quest 3520.1
 
 step The Forgotten Coast
-  tip Keep riding west to the coast. The Coast Crawl Deepseers and Snapclaws on the beaches drop OOX-22/FE's distress beacon about one kill in forty; use it to start the quest.
-  collect 8705 "OOX-22/FE Distress Beacon"
-  accept 2766
+  tip Keep riding west to the coast. The Coast Crawl Deepseers and Snapclaws on the beaches drop OOX-22/FE's distress beacon about one kill in forty: if one drops, use it to start the quest.
+  collect 8705 "OOX-22/FE Distress Beacon" optional
+  accept 2766 optional
 
 step Homing Robot OOX-22/FE
-  tip The robot sits in a small cave on the north side of Feral Scar Vale. Escort it to the dock on the Forgotten Coast; yetis and gorillas ambush you on the way. Its reward waits in Booty Bay for a later visit.
-  turnin 2766
-  accept 2767
-  complete 2767
+  tip Only with the distress beacon: the robot sits in a small cave on the north side of Feral Scar Vale. Escort it to the dock on the Forgotten Coast; yetis and gorillas ambush you on the way. Its reward waits in Booty Bay for a later visit.
+  turnin 2766 optional
+  accept 2767 optional
+  complete 2767 optional
 
 step Hearth to Camp Mojache
   hearth "Camp Mojache"

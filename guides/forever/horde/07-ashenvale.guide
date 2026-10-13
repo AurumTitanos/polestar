@@ -1,5 +1,5 @@
 guide forever/horde/07-ashenvale
-title Ashenvale, Thousand Needles & Dustwallow Marsh
+title Ashenvale & Thousand Needles
 faction Horde
 levels 27-31
 zone Ashenvale
@@ -19,9 +19,8 @@ next forever/horde/30-40/01-desolace
 # (flight path, bind) -> Alien Egg -> Galak camps -> Dorn Plainstalker ->
 # Freewind -> Grimtotem camps -> Darkcloud Pinnacle (Lakota) -> Whitereach
 # Post and Highperch -> Roguefeather Den (Grenka) ->
-# Freewind -> Dorn -> the Shimmering Flats -> hearth to Freewind -> fly to
-# Camp Taurajo and ride into Dustwallow Marsh: Brackenwall Village (flight
-# path) -> Witch Hill -> the Theramore docks -> Brackenwall.
+# Freewind -> Dorn -> the Shimmering Flats -> hearth to Freewind Post, where
+# the next guide flies on to Orgrimmar.
 #
 # Deviations from the export:
 # - Ashenvale: the export flies back and forth between Splintertree and
@@ -31,9 +30,14 @@ next forever/horde/30-40/01-desolace
 #   and one flight to Zoram'gar at the end cover King of the Foulweald and
 #   Je'neu of the Earthen Ring. The export binds at Splintertree and hearths
 #   there twice; here one hearth does.
-# - Dustwallow: The Severed Head (1239) only shows on the Loose Dirt once The
-#   Lost Report (1238) is handed in, so Witch Hill is visited twice; the
-#   export takes both on one visit.
+# - Dustwallow: the export ends this stay with Brackenwall Village and Witch
+#   Hill at about 30, where the quests are level 35, the Theramore
+#   Infiltrators 35-36 and the Theramore docks crowded with Young Murk
+#   Threshers (40-41). Theramore Spies (1201), Soothing Spices (1218) and the
+#   Loose Dirt pair (1238, 1239, with The Troll Witchdoctor 1240) move to
+#   forever/horde/30-40/04-dustwallow-marsh at 39, which already stays in
+#   Brackenwall. The Theramore Docks (1202) is dropped: the footlocker lies
+#   among the threshers and below the Theramore guards.
 # - The Lost Pages (6504) is optional: the export hands it in on the spot,
 #   but its twelve manual pages drop at about 1% from Ashenvale mobs.
 # - Thousand Needles: the export runs to the Shimmering Flats first and comes
@@ -51,10 +55,9 @@ next forever/horde/30-40/01-desolace
 # Optional: Test of Strength (1151): Rok'Alim the Pounder is elite: grouping
 # up is advised.
 #
-# Carried on: Hemet Nesingwary (5762), Test of Lore (1152), Soothing Spices
-# (1218), The Troll Witchdoctor (1240) and Martek the Exiled (1106, the
-# Badlands in forever/horde/30-40/03-arathi-highlands) are turned in later
-# on the route.
+# Carried on: Hemet Nesingwary (5762), Test of Lore (1152) and Martek the
+# Exiled (1106, the Badlands in forever/horde/30-40/03-arathi-highlands) are
+# turned in later on the route.
 #
 # Restored: Wanted - Arnak Grimtotem (5147): the poster is at Freewind, Arnak
 # (29, not elite) stands beside Lakota on Darkcloud Pinnacle, and the
@@ -312,7 +315,7 @@ step Mirage Raceway
   accept 1176                         -- Pozzik
 
 step The salt flats
-  tip Rocket Car Rubble lies all over the flats north of the raceway. Scorpid Reavers and Sparkleshell Tortoises roam the north half, Salt Flats Scavengers circle overhead, and Saltstone Basilisks graze west of the track. The Crystalhides roam the middle of the flats and the Gazers (34) the far south.
+  tip Rocket Car Rubble lies all over the flats north of the raceway. Scorpid Reavers and Sparkleshell Tortoises roam the north half, Salt Flats Scavengers circle overhead, and Saltstone Basilisks graze west of the track. The Crystalhides roam the middle of the flats and the Gazers (34-35, five levels above you: one at a time) the far south.
   collect 5798 quest 1110
   collect 5794 quest 1104
   collect 5795 quest 1105
@@ -329,42 +332,6 @@ step Mirage Raceway
   turnin 1176                         -- Pozzik
   turnin 1175                         -- Trackmaster Zherin
 
-# ---------------------------------------------------------------- Dustwallow Marsh
-
-step Brackenwall Village
-  zone Dustwallow Marsh
-  tip Hearth to Freewind Post, fly to Camp Taurajo and ride east along the road into the marsh. Take the road north at the fork to the ogre village of Brackenwall.
+step Freewind Post
   hearth "Freewind Post"
-  fly "Camp Taurajo"
-  getfp "Brackenwall Village"
-  accept 1201                         -- Nazeer Bloodpike
-
-step Theramore Spies
-  tip Theramore Infiltrators sneak through the woods around Brackenwall; they are stealthed, so look closely.
-  kill 4834 quest 1201
-
-step Brackenwall Village
-  turnin 1201                         -- Nazeer Bloodpike
-  accept 1202
-
-step Witch Hill
-  tip East of Brackenwall, "Swamp Eye" Jarl lives in the hut on Witch Hill. The Loose Dirt patch beside his hut holds a report.
-  accept 1218                         -- "Swamp Eye" Jarl: the spices come later on the route
-  accept 1238                         -- Loose Dirt
-
-step Brackenwall Village
-  tip Nazeer must read the report before the dirt gives up its second find.
-  turnin 1238                         -- Nazeer Bloodpike
-
-step Witch Hill
-  tip Back to the Loose Dirt beside Jarl's hut.
-  accept 1239                         -- Loose Dirt
-
-step The Theramore docks
-  tip South-east to Theramore Isle (Alliance town: stay out of the guards' sight). The Captain's Footlocker stands at the end of the docks.
-  collect 5882 quest 1202 @71.5,51.2
-
-step Brackenwall Village
-  turnin 1202                         -- Nazeer Bloodpike
-  turnin 1239
-  accept 1240                         -- For Grom'gol in Stranglethorn, later on the route
+  note The next guide flies on from here to Orgrimmar.
