@@ -369,6 +369,7 @@ step Rut'theran Village
 
 step Feathermoon Stronghold
   zone Feralas
+  tip From Rut'theran Village, fly to Feathermoon Stronghold.
   fly "Feathermoon"
   accept 3445                         -- Angelas Moonbreeze: keep it for Tanaris
 

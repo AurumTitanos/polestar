@@ -73,7 +73,7 @@ step The Emerald Sanctuary
   accept 5249                         -- Ivy Leafrunner: ends in Winterspring, keep it
 
 step Shadow Hold braziers
-  tip Shadow Hold is the cave at the back of Jaedenar, west of the road. Use the Purified Moon Well Water on the four braziers inside. Kill the Angerclaw bears and Felpaw wolves you pass for the Silvery Claws.
+  tip Shadow Hold is the cave at the back of Jaedenar, west of the road. Use the Purified Moonwell Water on the four braziers inside. Kill the Angerclaw bears and Felpaw wolves you pass for the Silvery Claws.
   interact 176158 quest 5165.1        -- Brazier of Pain
   interact 176161 quest 5165.4        -- Brazier of Hatred
   interact 176160 quest 5165.3        -- Brazier of Suffering
@@ -102,9 +102,9 @@ step Arei
 
 step Felpaw Village
   tip Ride north to the Deadwood furbolgs' village by the Timbermaw Hold cave mouth.
-  turnin 5084                         -- Deadwood Cauldron
-  accept 5085                         -- Mystery Goo: Donova Snowden in Winterspring, keep it
-  turnin 8471                         -- Kernda, just inside the cave
+  turnin 5084 optional                -- Deadwood Cauldron, if you found the Firewater flask in Winterspring
+  accept 5085 optional                -- Mystery Goo: Donova Snowden in Winterspring, keep it
+  turnin 8471 optional                -- Kernda, just inside the cave: only from Neutral with the Timbermaw
   turnin 6031 optional                -- Meilosh, if you have thirty Runecloth
 
 step The Emerald Sanctuary
@@ -272,7 +272,7 @@ step Starfall Village
 
 step Donova Snowden
   tip Keep west on the road to Donova's camp beside the hot springs.
-  turnin 5085
+  turnin 5085 optional
 
 # ---------------------------------------------------------------- Moonglade
 

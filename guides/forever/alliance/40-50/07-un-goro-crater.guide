@@ -50,8 +50,9 @@ next forever/alliance/50-60/01-burning-steppes
 
 step Gadgetzan
   zone Tanaris
-  tip From Thelsamar fly to Menethil Harbor, take the boat to Theramore and fly on to Gadgetzan.
+  tip From Thelsamar fly to Menethil Harbor, take the boat to Theramore and fly on to Gadgetzan. Torwa's first quest in the crater needs level 48: finish the level here if you are short.
   fly "Gadgetzan"
+  level 48                            -- grind on the Wastewanderers or Dunemaul ogres around Gadgetzan
 
 step Torwa Pathfinder
   zone Un'Goro Crater

@@ -20,8 +20,10 @@
 #   in Stranglethorn. The Princess Trapped starts at the shards without it.
 # - The Thandol Span (631) is accepted here from Rhag Garmason at Dun Modr,
 #   just over the bridge, instead of on an earlier Wetlands visit.
-# - Ongeku (1373) is carried from Desolace; characters without it skip the
-#   shard. Local order: the route's Stormwind stop gains class training.
+# - Local order: the route's Stormwind stop gains class training.
+# - Dropped: This Must Be The Place (79976): the Messenger Bag on Thoradin's
+#   Wall offers it only after Eagle's Fist (79975) and the rest of the Cozy
+#   Sleeping Bag chain, which no Alliance guide takes.
 # - Restored, all on the way: Dark Council (537; Further Mysteries is now
 #   handed in on the first Southshore stop so Maleb offers it before Alterac;
 #   the Shadow Mages stand at the Ruins of Alterac, Nagaz by the parchment
@@ -75,11 +77,10 @@ step The Harborage
   accept 1389                         -- Magtoor
 
 step Fallow Sanctuary
-  tip East along the road to the Fallow Sanctuary. The Lost One mobs drop the crystals; Noboru walks the ruins and drops his cudgel; Ongeku carries the shard Uthek wants.
+  tip East along the road to the Fallow Sanctuary. The Lost One mobs drop the crystals; Noboru walks the ruins and drops his cudgel.
   collect 6071 quest 1389             -- Draenethyst Crystal
   collect 6196 "Noboru's Cudgel"
   accept 1392
-  collect 6190 quest 1373             -- Draenethyst Shard: Ongeku
 
 step Galen Goodward
   tip Galen is caged at the north end of the sanctuary. Free him and keep him alive on the walk out; his strongbox waits by the road afterwards.
@@ -142,11 +143,6 @@ step Northfold Manor
   tip The Syndicate hold the farm north-west of Refuge Pointe.
   kill 2586 quest 681.1               -- Syndicate Highwayman
   kill 2589 quest 681.2               -- Syndicate Mercenary
-
-step Circle of West Binding
-  tip A messenger's bag lies by the standing stones on the hill west of the farm.
-  accept 79976                        -- Messenger Bag
-  turnin 79976                        -- Hastily Rolled-Up Satchel
 
 step Refuge Pointe
   turnin 681                          -- Captain Nials
@@ -283,8 +279,8 @@ step Ruins of Alterac
   kill 2318 quest 537.1               -- Argus Shadow Mage
 
 step Dalaran
-  tip South-west to the Kirin Tor camp at Dalaran's dome.
-  turnin 92432 "An Alarming Request" @19.7,75.4
+  tip South-west to the Kirin Tor camp on the lake shore west of Dalaran: the Image of Archmage Modera stands there. Archmage Ansirem stands south-east of it, by the dome.
+  turnin 92432 "An Alarming Request" @7.4,59.2 -- Image of Archmage Modera
   turnin 602                          -- Archmage Ansirem Runeweaver
   accept 603                          -- For Catelyn the Blade in Booty Bay: keep it
 

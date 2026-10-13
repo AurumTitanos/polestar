@@ -7,7 +7,7 @@
 # Song -> the south-east (disease, chests, Fallen Sky Lake) and the insane
 # druids -> Night Run and the hidden shrine -> Astranaar -> Krolg and Ran
 # Bloodtooth -> Astranaar -> the western posts -> hearth, boat to Menethil ->
-# Menethil turn-ins and the dig site. Next guide: Stranglethorn Vale.
+# Menethil turn-ins. Next guide: Stranglethorn Vale.
 #
 # Deviations from the simulator route (consensus, Alliance Human):
 # - Ashenvale runs as one west-to-east loop and back: the western quests are
@@ -24,6 +24,8 @@
 # - The Tower of Althalaxx (1167), Velinde Starsong (1037), Satyr Slaying!
 #   (1032) and Blessed Arm (322): the route accepts them and never turns them
 #   in.
+# - Lost in the Thicket Things (95647) and Lost Relic Carry (95810): both
+#   happen in the Excavation Site: Wetlands dungeon.
 # Carried on: James Hyal (1302) and The Missing Diplomat (1264), turned in
 # later on the route.
 # Also left out: The Thandol Span (631), a ride to Dun Modr for one accept;
@@ -209,14 +211,3 @@ step Deepwater Tavern
   accept 1250                         -- Tapoke "Slim" Jahn
   turnin 1250                         -- Mikhail
   accept 1264
-
-step Caitlin Grassman
-  accept 95647 "Lost in the Thicket Things" npc 1480
-
-step The dig site
-  tip Follow the road east to the dig site below Whelgar's Excavation; the lost things lie inside it.
-  turnin 95647 "Lost in the Thicket Things" @47.7,56.2
-  accept 95810 "Lost Relic Carry" @47.7,56.2
-
-step Prospector Whelgar
-  turnin 95810 "Lost Relic Carry" npc 1077

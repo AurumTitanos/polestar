@@ -30,11 +30,14 @@
 # three OOX rescues and An OOX of Your Own (2767, 648, 836, 3721: their beacons
 # are 0.5-2.5% drops). With it go Find and Rescue OOX-09/HL! (485, 836) here.
 # Look To The Stars (181): a level 30 quest whose ogre sits across Duskwood
-# from Darkshire. Favored of Elune? (3661) and Badlands Reagent Run (2500):
-# the earlier guides no longer give 3661, and hand 2500 in themselves. The
-# binds at Craftsmen's Terrace, Darkshire and Booty Bay: no hearth uses them.
-# The net loss is about 4000 experience (0.05 of a level), too little for a
-# grind stop.
+# from Darkshire. Badlands Reagent Run (2500): the earlier guides hand it in
+# themselves. The binds at Craftsmen's Terrace, Darkshire and Booty Bay: no
+# hearth uses them. The net loss is about 4000 experience (0.05 of a level),
+# too little for a grind stop.
+#
+# Carried on: Favored of Elune? (3661), taken from Erelas at Rut'theran; its
+# feathers are picked up and it is handed in at the end of
+# 50-60/01-burning-steppes, which opens Moontouched Wildkin (978).
 #
 # Left out: Sprinkle's Secret Ingredient (2641: the Violet Tragan grows here,
 # but the route never takes it back to Gadgetzan), Whiskey Slim's Lost Grog
@@ -53,7 +56,7 @@ step Aerie Peak
   accept 2989                         -- Gryphon Master Talonaxe
 
 step The Altar of Zul
-  tip Ride south-east to the Altar of Zul, the stepped Vilebranch temple in the south of the Hinterlands, and climb to the top. Its Headhunters and Shadowcasters are elite: keep to the stairs.
+  tip Ride south-east to the Altar of Zul, the stepped Vilebranch temple in the south of the Hinterlands, and climb to the top. Qiaga and Morta'gya the Keeper (elite, 50) stand up there: touch the top and come straight back down.
   complete 2989 @49.0,68.7
 
 step Skulk Rock
@@ -63,7 +66,7 @@ step Skulk Rock
 
 step Aerie Peak
   tip Hearth to Aerie Peak.
-  hearth "Aerie Peak"
+  hearth "Aerie Peak"                 -- Hearthstone on cooldown? Ride back north-west.
   turnin 2877                         -- Fraggar Thundermantle
   turnin 2989                         -- Gryphon Master Talonaxe
   accept 2990                         -- for Thadius Grimshade at Nethergarde Keep, later
@@ -130,7 +133,7 @@ step Thelsamar
   zone Loch Modan
   tip Fly from Nethergarde Keep to Thelsamar.
   fly "Thelsamar"
-  sethome "Thelsamar" npc 6734        -- Innkeeper Hearthstove, Stoutlager Inn
+  sethome "Stoutlager Inn" npc 6734   -- Innkeeper Hearthstove
   accept 17                           -- Ghak Healtouch
 
 step Ironband's Excavation Site
@@ -161,6 +164,7 @@ step Rut'theran Village
   turnin 2940
   note Daryn's next errand goes to Tanaris: skip it.
   turnin 3022                         -- Erelas Ambersky
+  accept 3661                         -- Erelas Ambersky: keep it, the feathers come at the end of the Burning Steppes guide
 
 step Temple of the Moon
   zone Darnassus
@@ -178,4 +182,4 @@ step Cenarion Enclave
 step Back to Thelsamar
   zone Loch Modan
   tip Hearth to Thelsamar. The Searing Gorge guide starts at Thorium Point: from here, ride south into the Badlands, west past the Horde town of Kargath and up the trail into the gorge.
-  hearth "Thelsamar"
+  hearth "Stoutlager Inn"

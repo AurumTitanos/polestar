@@ -3,8 +3,8 @@
 # Agmond's End, Lotwil's elementals in the Dustbowl, the Ancient Chest) >
 # hearth to Thelsamar > fly to Menethil, boat to Theramore (flight path,
 # two turn-ins) > fly to Nijel's Point > Desolace (Ethel Rethor first, then
-# one loop south through the Kodo Graveyard, Gelkis Village, the Mannoroc
-# Coven and the Magram, back up the road to Nijel's Point) > fly to Theramore,
+# one loop south through the Kodo Graveyard, the caravan road, the Mannoroc
+# Coven and the Valley of Bones, back up the road to Nijel's Point) > fly to Theramore,
 # where the next guide starts.
 #
 # Deviations from the export:
@@ -30,6 +30,9 @@
 # Left out: A Sign of Hope (721, to Hammertoe Grez inside Uldaman) and Pearl
 # Diving (705, its clams lie on Stranglethorn's far north-west coast, which the
 # route no longer visits): never finished on the route.
+# Dropped: Khan Jehn (1374) and the Gelkis turn-ins: they follow the centaur
+# war, which 30-40/02-desolace no longer takes (one character cannot be
+# Friendly with both clans).
 # Class training: none here; the next guide trains in Stormwind.
 guide forever/alliance/30-40/06-badlands
 title Badlands & Desolace
@@ -210,11 +213,6 @@ step Melizza Brimbuzzle
 step Hornizz Brimbuzzle
   turnin 6132
 
-step Gelkis Village
-  tip Uthek the Wise sits in the Gelkis centaur village in the south-west.
-  turnin 1373                         -- Uthek the Wise
-  accept 1374
-
 step Gizelton Caravan
   tip Rigger Gizelton's caravan stops on the road east of Gelkis Village. Take the quest and walk with the kodos past the Mannoroc Coven, killing the demons that jump them; talk to Smeed at his camp east of the Kodo Graveyard afterwards.
   accept 5943                         -- Rigger Gizelton
@@ -227,15 +225,10 @@ step Mannoroc Coven
   collect 6251 quest 1466             -- Nether Wing
   collect 6252 quest 1466             -- Doomwarder Blood
 
-step The Magram and the Valley of Bones
-  tip Khan Jehn leads the Magram in their village east of the Coven. Undead Ravagers roam the bone fields south of it; at the far south-east, use the Crate of Ghost Magnets to draw the Magrami Spectres.
-  collect 6072 quest 1374             -- Khan Jehn's Head
+step The Valley of Bones
+  tip Undead Ravagers roam the bone fields south of the Magram village, east of the Coven; at the far south-east, use the Crate of Ghost Magnets to draw the Magrami Spectres.
   kill 11561 quest 261                -- Undead Ravager
   collect 15849 quest 6134            -- Ghost-o-plasm
-
-step Gelkis Village
-  tip Ride west along the south of Desolace.
-  turnin 1374                         -- Uthek the Wise
 
 step Kodo Graveyard
   turnin 6134                         -- Hornizz Brimbuzzle

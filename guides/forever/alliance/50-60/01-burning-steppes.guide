@@ -3,7 +3,8 @@
 # Kim'jael at the Legashi Encampment -> the Ruins of Eldarath -> Kim'jael -> Pilot Xiggs on the southern island ->
 # hearth Ironforge -> Lakeshire -> Morgan's Vigil (flight path) -> Dreadmaul Rock -> the Vigil -> Flame Crest and the
 # Ruins of Thaurissan -> Blackrock Stronghold -> Flame Crest -> the Vigil -> Dreadmaul Rock -> the Vigil ->
-# Nethergarde Keep -> the Rise of the Defiler -> hearth Ironforge -> Rut'theran Village.
+# Nethergarde Keep -> the Rise of the Defiler -> fly to Aerie Peak (Wildkin Feathers) -> hearth Ironforge (training) ->
+# Menethil Harbor -> Auberdine -> Rut'theran Village.
 # Forever's 30-60 content (Riverglades, Shen'dralas, Mount Hyjal, the rest of the Wetlands expansion) is not in
 # the data yet: this guide follows Era + known Forever quests.
 # Optional extras: A Meeting with the Master (3381: Sanath Lim-yo's hippogryph feathers, no experience in the data)
@@ -17,9 +18,14 @@
 # - FIFTY! YEP!'s medallions drop all through the Blackrock camps, so they are collected with Gor'tesh.
 # - Restored: Tablet of the Seven (4296), taken and handed in at Flame Crest, which the route already visits twice; the
 #   tablet stands in the Ruins of Thaurissan, walked through for the relics anyway.
-# Carried on: Felnok Steelspring (4808) for Everlook, Petty Squabbles (2783) for the Swamp of Sorrows, Moontouched
-# Wildkin (978) for Winterspring, The Smoldering Ruins of Thaurissan (3701) for Ironforge at 57.
+# - Added: the Wildkin Feathers for Favored of Elune? (3661, taken at Rut'theran in 40-50/05) are picked up in the
+#   Hinterlands after Nethergarde Keep, and 3661 is handed in at Rut'theran, which opens Moontouched Wildkin (978)
+#   and the Ranshalla chain after it (979, 4901, 4902). Measured with sim compare against dropping the chain: about
+#   0.6 h faster to 60 for every start, despite the flight to Aerie Peak and the boat to Rut'theran.
+# Carried on: Felnok Steelspring (4808) for Everlook, Moontouched Wildkin (978) for Winterspring, The Smoldering
+# Ruins of Thaurissan (3701) for Ironforge at 57.
 # Left out: Ragnar Thunderbrew (4128: the export never turns it in).
+# Dropped: Petty Squabbles (2783): its Swamp of Sorrows turn-in is not on the route.
 guide forever/alliance/50-60/01-burning-steppes
 title Burning Steppes, Azshara & Blasted Lands
 faction Alliance
@@ -182,7 +188,6 @@ step Nethergarde Keep
   zone Blasted Lands
   tip Fly to Nethergarde Keep.
   fly "Nethergarde Keep"
-  accept 2783                         -- Ambassador Ardalan: ends in the Swamp of Sorrows, keep it
 
 step Kum'isha the Collector
   tip Kum'isha waits at the Rise of the Defiler, the hill south-west of the keep. The Blasted Lands mobs on the way drop the Imperfect Draenethyst Fragments; bring her what you have.
@@ -190,11 +195,18 @@ step Kum'isha the Collector
   collect 10593 quest 3501.1
   turnin 3501
 
-# ---------------------------------------------------------------- Rut'theran Village
+# ---------------------------------------------------------------- The Hinterlands, Ironforge and Rut'theran
+
+step Wildkin feathers
+  zone The Hinterlands
+  tip Ride back to Nethergarde Keep and fly to Aerie Peak. The Wildkin Feathers lie on the ground across the Hinterlands, south and east of Aerie Peak, where the owlbeasts roam; the mobs here are well below you now.
+  fly "Aerie Peak"
+  collect 10819 quest 3661                    -- Wildkin Feather
 
 step Ironforge
   zone Ironforge
   hearth "Ironforge"
+  train class
 
 step Menethil Harbor
   zone Wetlands
@@ -203,4 +215,5 @@ step Menethil Harbor
 
 step Rut'theran Village
   zone Teldrassil
-  accept 978                          -- Erelas Ambersky: the wildkin are in Winterspring, keep it
+  turnin 3661                         -- Erelas Ambersky
+  accept 978                          -- The wildkin are in Winterspring: keep it

@@ -20,7 +20,7 @@
 # - A Little Slime Goes a Long Way (4513) is accepted in Ironforge after the Un'Goro sweep: its jars are filled on
 #   the next guide's Un'Goro visit. A Donation of Wool (7791) is optional (cloth).
 # - Hameya's Plea (6024, scroll from 05): key and turn-in here. Marauders of Darrowshire
-#   (5206) are done in one sweep south of Corin's Crossing.
+#   (5206): the Scourge Champions in the Noxious Glade, north of the chapel.
 # - Train class in Ironforge (level 56 spells).
 # Carried on: Umber, Archivist (6844), Super Sticky (4504), Bungle in the Jungle (4496), The Stone Circle (3444,
 # turned in later), Fire Plume Forged (5801), Linken's Memory (3942), Good Luck Charm
@@ -179,7 +179,6 @@ step Ironforge
   turnin 3701                         -- Royal Historian Archesonus
   turnin 4512                         -- Laris Geardawdle
   accept 4513                         -- Its jars are filled on the next Un'Goro visit
-  turnin 3461                         -- Tymor, Mystic Ward
   accept 7807                         -- Bubulo Acerbus
   accept 7808
   accept 7809
@@ -203,11 +202,10 @@ step Light's Hope Chapel
   turnin 5168                         -- Carlin Redpath
   accept 5206
 
-step South of Corin's Crossing
-  goto 51.5,67.5 "South of Corin's Crossing"
-  tip Use the Mystic Crystal on the Scourge you kill here to draw out Resonating Skulls.
-  kill 8519 optional                  -- Blighted Surge
-  note Five Resonating Skulls for Carlin
+step Scourge Champions
+  tip Scourge Champions (59) roam the Noxious Glade, north of Light's Hope Chapel. Pass Carlin's Mystic Crystal over each one you kill: the skulls that resonate are the ones he wants. Pull them one at a time.
+  kill 8529 optional                  -- Scourge Champion
+  collect 13155 quest 5206.1 @81.5,44.0 -- Resonating Skull, from the Scourge Champions
 
 step Light's Hope Chapel
   turnin 5206                         -- Carlin Redpath

@@ -1,6 +1,6 @@
 # Felwood, Alliance ~52 to ~54 (consensus visit 63).
 # Flow: Rut'theran Village -> Auberdine -> Astranaar -> the Emerald Sanctuary -> Deadwood Village -> Jadefire Glen
-# -> Jaedenar and Shadow Hold (Arko'narin) -> the Sanctuary -> Jaedenar's moon well and Rakaiah -> the oozes ->
+# -> Jaedenar and Shadow Hold (Arko'narin) -> the Sanctuary -> Jaedenar's moonwell and Rakaiah -> the oozes ->
 # Shatter Scar Vale -> Jadefire Run (Xavaric) -> Irontree Woods -> Talonbranch Glade -> Nafien, Felpaw Village and
 # Timbermaw Hold -> back south to the Sanctuary -> north again through Timbermaw Hold to Everlook (flight path, bind).
 # Forever's 30-60 content (Riverglades, Shen'dralas, Mount Hyjal, the rest of the Wetlands expansion) is not in
@@ -13,8 +13,11 @@
 #   Retribution of the Light (5204) are done on the same pass north: the export walks back to Jaedenar and Jadefire
 #   Run after the northern loop. Xavaric then drops his flute (939) on the one visit to Jadefire Run.
 # - Talonbranch Glade's flight path is added on the way north: it shortens the final ride from the Sanctuary.
-# Carried on: Speak to Salfa (8465) for Winterspring, Runecloth (6031) for Meilosh at 57, Felbound Ancients (4441)
+# Carried on: Speak to Salfa (8465) for Winterspring, Felbound Ancients (4441)
 # for Darnassus, Seeking Spiritual Aid (5158) for the Barrens, A Little Slime Goes a Long Way (4512) for Ironforge.
+# Optional, by rare drop or reputation: the Blood Red Key chain (5202, 5203, 5204, 5385: the key drops about one
+# Jaedenar kill in thirty), Deadwood Ritual Totem (8470: a 3% drop, and the Timbermaw speak to you only from
+# Neutral, which the route does not reach) and Runecloth (6031, Meilosh in Timbermaw Hold, same rule).
 # Left out: the old Timbermaw Ally and Deadwood of the North (6131, 6221): they pay no experience in the data and
 # were replaced by 8460 and 8461, which are done here.
 guide forever/alliance/50-60/02-felwood
@@ -64,33 +67,33 @@ step Jadefire Glen
   kill 9454 quest 4421.4              -- Xavathras
 
 step Jaedenar
-  tip Jaedenar is the ruined temple north of the glen. The Jaedenar Darkweavers drop a Blood Red Key: it opens Arko'narin's cell in Shadow Hold, the cave at the back. Clear the way out before you free her.
+  tip Jaedenar is the ruined temple north of the glen. Some of its cultists drop a Blood Red Key, about one kill in thirty: it opens Arko'narin's cell in Shadow Hold, the cave at the back. If it drops, clear the way out before you free her; if not, skip her quests.
   kill 7125 quest 5155.1              -- Jaedenar Hound
   kill 7115 quest 5155.2              -- Jaedenar Adept
   kill 7112 quest 5155.3              -- Jaedenar Cultist
   kill 7113 quest 5155.4              -- Jaedenar Guardian
-  collect 13140                       -- Blood Red Key
-  accept 5202
-  turnin 5202                         -- Captured Arko'narin, in Shadow Hold
-  accept 5203
-  complete 5203                       -- Keep her alive until she is out of the cave
+  collect 13140 optional              -- Blood Red Key, a rare drop
+  accept 5202 optional
+  turnin 5202 optional                -- Captured Arko'narin, in Shadow Hold
+  accept 5203 optional
+  complete 5203 optional              -- Keep her alive until she is out of the cave
 
 step The Emerald Sanctuary
   turnin 4421                         -- Eridan Bluewind
   accept 4906
   turnin 5155                         -- Greta Mosshoof
   accept 5157
-  turnin 5203                         -- Jessir Moonbow
-  accept 5204
+  turnin 5203 optional                -- Jessir Moonbow
+  accept 5204 optional
 
 # ---------------------------------------------------------------- The north
 
 step Jaedenar again
-  tip Use the Empty Canteen at the corrupted moon well in the middle of Jaedenar, then go back into Shadow Hold for the succubus Rakaiah; Trey Lightforge's remains lie beside her.
+  tip Use the Empty Canteen at the corrupted moonwell in the middle of Jaedenar. If you freed Arko'narin, go back into Shadow Hold for the succubus Rakaiah; Trey Lightforge's remains lie beside her.
   collect 12907 quest 5157.1
-  kill 9518 quest 5204.1              -- Rakaiah
-  turnin 5204                         -- Remains of Trey Lightforge
-  accept 5385
+  kill 9518 quest 5204.1 optional     -- Rakaiah
+  turnin 5204 optional                -- Remains of Trey Lightforge
+  accept 5385 optional
 
 step Oozes
   tip The Cursed and Tainted Oozes slide about the streams and fel pools around Jaedenar and Bloodvenom Falls: kill them and use Laris's Empty Ooze Jars on their remains.
@@ -136,8 +139,8 @@ step Felpaw Village
   kill 7156 quest 8461.1              -- Deadwood Den Watcher
   kill 7157 quest 8461.2              -- Deadwood Avenger
   kill 7158 quest 8461.3              -- Deadwood Shaman
-  collect 20741                       -- Deadwood Ritual Totem
-  accept 8470
+  collect 20741 optional              -- Deadwood Ritual Totem, a rare drop
+  accept 8470 optional
 
 step Nafien
   turnin 8461
@@ -147,8 +150,8 @@ step Nafien
 
 step Timbermaw Hold
   tip Step into the cave: Kernda and Meilosh stand just inside.
-  turnin 8470                         -- Kernda
-  accept 6031                         -- Meilosh: thirty Runecloth, handed in when you pass through again at 57
+  turnin 8470 optional                -- Kernda: the Timbermaw speak to you only from Neutral
+  accept 6031 optional                -- Meilosh: thirty Runecloth, handed in when you pass through again at 57
 
 # ---------------------------------------------------------------- Back south
 
@@ -158,7 +161,7 @@ step The Emerald Sanctuary
   turnin 939
   accept 4441                         -- The vial is filled in Darnassus: keep it
   turnin 5156                         -- Taronn Redfeather
-  turnin 5385                         -- Jessir Moonbow
+  turnin 5385 optional                -- Jessir Moonbow
   turnin 5157                         -- Greta Mosshoof
   accept 5158                         -- Ends in the Barrens: keep it
   turnin 4101                         -- Arathandris Silversky

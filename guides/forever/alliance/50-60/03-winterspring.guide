@@ -24,9 +24,13 @@
 # Left out: Toxic Horrors and Winterfall Runners (5086, 5087): Donova only offers them after Mystery Goo (5085),
 #   which starts at the Deadwood cauldron in Felwood once Falling to Corruption (5084) is done. That is after
 #   this guide, so the prerequisite is missing here.
-# Carried on: Winterfall Ritual Totem (8471), Falling to Corruption (5084), Runecloth
-# (6031), the last Are We There, Yeti? (5163), The Videre Elixir (3909), Moontouched Wildkin (978), Troubled
-# Spirits of Kel'Theril (5245), Auntie Marlene (5152).
+# Carried on: Falling to Corruption (5084, if the flask dropped), the last Are We There, Yeti? (5163), The Videre
+# Elixir (3909), Moontouched Wildkin (978), Troubled Spirits of Kel'Theril (5245), Auntie Marlene (5152).
+# Optional, by rare drop: Winterfall Firewater (5083: the flask drops about one kill in ten) and Winterfall Ritual
+# Totem (8471: a 3% drop, and Kernda speaks to you only from Neutral with the Timbermaw, which the route does not
+# reach). Runecloth for Meilosh (6031) stays optional.
+# Dropped: Winterfall Activity 6241 (Totemics, Den Watchers, Pathfinders): the quest is gone from the game; Salfa
+# gives 8464 instead, which this guide takes.
 # No class quests in this stretch.
 guide forever/alliance/50-60/03-winterspring
 title Winterspring & Eastern Plaguelands
@@ -74,36 +78,29 @@ step Donova Snowden
 step Salfa
   tip Salfa guards the mouth of Timbermaw Hold, north-west of Donova.
   turnin 8465
-  accept 6241
   accept 8464
 
 step The Winterfall camp
-  tip The western Winterfall camp sits in the hills between Salfa and Donova. Pathfinders can drop an Empty Firewater Flask and a Winterfall Ritual Totem: right-click both. Keep the Runecloth the furbolgs drop for Meilosh.
+  tip The western Winterfall camp sits in the hills between Salfa and Donova. Any furbolg here can drop an Empty Firewater Flask (about one in ten) and, rarely, a Winterfall Ritual Totem: right-click whichever drops. Keep the Runecloth the furbolgs drop for Meilosh.
   kill 7442 quest 5082.1              -- Winterfall Pathfinder
   kill 7440 quest 5082.2              -- Winterfall Den Watcher
   kill 7441 quest 5082.3              -- Winterfall Totemic
-  kill 7441 quest 6241.1              -- Winterfall Totemic
-  kill 7440 quest 6241.2              -- Winterfall Den Watcher
-  kill 7442 quest 6241.3              -- Winterfall Pathfinder
-  collect 12771                       -- Empty Firewater Flask
-  accept 5083
-  collect 20742                       -- Winterfall Ritual Totem
-  accept 8471                         -- For Kernda in Timbermaw Hold: keep it
+  collect 12771 optional              -- Empty Firewater Flask, a rare drop
+  accept 5083 optional
+  collect 20742 optional              -- Winterfall Ritual Totem, a rare drop
+  accept 8471 optional                -- For Kernda in Timbermaw Hold: keep it
   collect 14047 quest 6031.1 optional -- Runecloth, for Meilosh later
-
-step Salfa
-  turnin 6241
 
 step Donova Snowden
   turnin 5082
-  turnin 5083
-  accept 5084                         -- The Deadwood cauldron in Felwood: keep it
+  turnin 5083 optional
+  accept 5084 optional                -- The Deadwood cauldron in Felwood: keep it
 
 # ---------------------------------------------------------------- The east
 
 step Winterfall Village
   hearth "Everlook"
-  tip The Winterfall furbolg village lies east of Everlook: Shaman, Den Watchers and Ursa.
+  tip The Winterfall furbolg village lies east of Everlook: Shaman (56-57), Den Watchers (55-56) and Ursa (57-58), all above you. Kill the Shaman first, they heal, and pull from the edge. High Chief Winterfall in the cave at the back is elite: stay out.
   kill 7439 quest 8464.1              -- Winterfall Shaman
   kill 7440 quest 8464.2              -- Winterfall Den Watcher
   kill 7438 quest 8464.3              -- Winterfall Ursa

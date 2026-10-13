@@ -1,27 +1,27 @@
 # Desolace, Alliance ~31.5 to ~33.5: Nijel's Point and the Reclaimers, the
 # Malem family, Azore's sceptre, the Gizelton caravan and the Kodo Graveyard,
-# then both sides of the centaur war (Warug's Magram, Uthek's Gelkis).
+# then the Kolkar for Melkins.
 #
 # Flow: Ironforge -> Menethil -> boat to Auberdine -> Astranaar -> Talondeep
 # Path -> Nijel's Point -> Sargeron and the Malem chest -> Azore and Thunder
 # Axe Fortress -> Kormek's Hut and the caravan -> Smeed and the Kodo
-# Graveyard -> Gelkis, Magram and the Kolkar -> hearth to Nijel's Point.
+# Graveyard -> the Kolkar -> hearth to Nijel's Point.
 # Next guide: Ashenvale.
 #
 # Deviations from the simulator route (consensus, Alliance Human):
 # - Azore's Sceptre of Light is taken on the way to Thunder Axe Fortress and
 #   done together with Tyranis, instead of a separate trip from Nijel's Point
 #   later.
-# - Uthek's Raid on the Kolkar is picked up before the Kolkar run, so the
-#   Kolkar are killed once for Warug, Melkins and Uthek (the route kills
-#   them twice).
 # - The route's mid-zone hearth to Nijel's Point (for Vahlarriel, Melkins and
 #   Kreldig) is dropped: those three are turned in after the closing hearth,
 #   which saves a walk across the zone and back.
-# - Gizmo for Warug (1371) and Khan Shaka (1375) are left out: Warug wants an
-#   Advanced Target Dummy, an Engineering item no vendor sells, and Khan Shaka
-#   follows from it.
-# Carried on: Ongeku (1373), turned in later on the route.
+# - Bodyguard for Hire (5821) is optional: the Kolkar ambushers are 34-35 and
+#   come in waves at about 32.
+# Dropped: Strange Alliance (1382) and Brutal Politics (1385) with the rest of
+# the centaur war (1384, 1386, 1369, 1370, 1373 Ongeku): Friendly with the
+# Gelkis comes only from killing Magram and the reverse, so one character
+# cannot serve both, and the route builds neither standing. Gizmo for Warug
+# (1371) and Khan Shaka (1375) go with them.
 # Class quests: none in this stretch.
 guide forever/alliance/30-40/02-desolace
 title Desolace
@@ -55,8 +55,6 @@ step Nijel's Point
   accept 1458
   accept 1437                         -- Vahlarriel Demonslayer
   accept 1387                         -- Corporal Melkins
-  accept 1382                         -- Captain Pentigast
-  accept 1385
 
 # ---------------------------------------------------------------- North-east
 
@@ -90,7 +88,7 @@ step Dalinda Malem
   accept 1439
 
 step Tyranis and the Seer
-  tip Her brother walks the fortress with the Burning Blade cultists; the Burning Blade Seer keeps the sceptre in the fortress's main building.
+  tip Her brother Tyranis (36) walks the fortress with the Burning Blade cultists (30-33): pull him alone. The Burning Blade Seer keeps the sceptre in the fortress's main building.
   collect 6767 quest 1439             -- Tyranis' Pendant
   collect 15750 quest 5741            -- Sceptre of Light
 
@@ -112,14 +110,15 @@ step Scorpashi venom
 
 step Cork Gizelton
   tip The Gizelton Caravan waits at Kormek's Hut.
-  accept 5821
+  accept 5821 optional
 
 step Escort the caravan
-  tip Walk with the caravan south past Kolkar Village; Kolkar ambushers jump it on the way. Stay close until it stops at Scrabblescrew's Camp.
-  complete 5821
+  tip Walk with the caravan south past Kolkar Village; Kolkar ambushers jump it on the way. Stay close until it stops at Scrabblescrew's Camp. The ambushers are 34-35 and come in waves: skip it if you are below 33.
+  complete 5821 optional
 
 step Smeed Scrabblescrew
-  turnin 5821
+  tip Smeed's camp is on the road south of Kolkar Village, by the Kodo Graveyard.
+  turnin 5821 optional
   accept 5561
 
 step Kodo Graveyard
@@ -130,46 +129,11 @@ step Kodo Graveyard
 step Smeed Scrabblescrew
   turnin 5561
 
-# ---------------------------------------------------------------- Gelkis and Magram
-
-step Uthek the Wise
-  tip The Gelkis centaur village lies in the south-west of Desolace; the clan is neutral to you.
-  turnin 1382
-  accept 1384
-
-step Warug
-  tip The Magram village lies in the south-east; walk in calmly, the clan is neutral to you.
-  turnin 1385
-  accept 1386
+# ---------------------------------------------------------------- The Kolkar
 
 step Kolkar Village
-  tip The Kolkar roam the plains north of the Magram, around Kolkar Village; every kill counts for all three quests.
-  kill 4632 quest 1386.1              -- Kolkar Centaur
-  kill 4633 quest 1386.2              -- Kolkar Scout
-  kill 4634 quest 1386.3              -- Kolkar Mauler
+  tip The Kolkar roam the plains around Kolkar Village; their ears are for Corporal Melkins.
   collect 6067 quest 1387             -- Centaur Ear
-  collect 6079 quest 1384             -- Crude Charm
-
-step Warug
-  turnin 1386
-  accept 1369
-
-step Broken Tears
-  tip The Tears of Theradras lie at the foot of the mountains in the far south, below the Gelkis village.
-  collect 6083 quest 1369             -- Broken Tears
-
-step Uthek the Wise
-  turnin 1384
-  accept 1370
-
-step Magram supplies
-  tip The Sacks of Meat lie around the Magram village's huts.
-  collect 6069 quest 1370             -- Crudely Dried Meat
-  turnin 1369                         -- Warug
-
-step Uthek the Wise
-  turnin 1370
-  accept 1373                         -- Turned in later on the route
 
 # ---------------------------------------------------------------- Nijel's Point
 
