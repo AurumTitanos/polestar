@@ -3,6 +3,7 @@
 // Polestar's command line. Each command is a module in tools/commands/
 // exporting { name, summary, usage, run(argv) -> exit code }; this file only
 // finds and dispatches them, so adding a command never edits a shared file.
+// `<command> ... --help` (or -h) prints the command's usage and never runs it.
 //
 //   node tools/polestar.js help
 //   node tools/polestar.js help <command>
@@ -56,6 +57,13 @@ async function main(argv) {
 	if (!cmd) {
 		console.error(`unknown command "${name}"\n\n${overview(cmds)}`);
 		return 2;
+	}
+	// Asking for help never does work: `<command> [anything] --help` prints the
+	// usage before the command sees its arguments, so no command can take the
+	// flag for an input and build, write or download.
+	if (rest.includes('--help') || rest.includes('-h')) {
+		console.log(cmd.usage || cmd.summary || cmd.name);
+		return 0;
 	}
 	const code = await cmd.run(rest);
 	return typeof code === 'number' ? code : 0;
