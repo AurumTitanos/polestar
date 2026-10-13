@@ -110,6 +110,9 @@ test('goal notes: the other faction\'s town, hazards, far-above-band levels, sev
 	assert.deepEqual(P.goalNotes(o(['The Dark Portal'], 63), null, 60), ["level 63 area, well above this guide's range"]);
 	assert.deepEqual(P.goalNotes(o(['Frostwhisper Gorge'], 60), null, 60), []);
 	assert.deepEqual(P.goalNotes(o(['Kharanos', "Steelgrill's Depot"], 5), 'Alliance', 30), ['any one of these names counts']);
+	// A zone area and its instance area can share a name: one name, no choice.
+	assert.deepEqual(P.goalNotes(o(['Darkwhisper Gorge', 'Darkwhisper Gorge'], 55), null, 60), []);
+	assert.equal(P.areaLabel(o(['Darkwhisper Gorge', 'Darkwhisper Gorge'])), 'Darkwhisper Gorge');
 	assert.equal(P.overlayLevel({ areas: [{ level: 0 }, { level: 26 }, { level: 30 }] }), 26);
 });
 

@@ -14074,7 +14074,7 @@ do
 						{ t = "explore", text = "Mazthoril", map = 1452, x = 58.4, y = 58, f = "e" },
 						{ t = "explore", text = "Owl Wing Thicket", map = 1452, x = 65.4, y = 61.8, f = "e" },
 						{ t = "explore", text = "Frostwhisper Gorge", map = 1452, x = 61.9, y = 68.5, f = "e" },
-						{ t = "explore", text = "Darkwhisper Gorge / Darkwhisper Gorge", map = 1452, x = 57.9, y = 83.1, f = "e", note = "any one of these names counts" },
+						{ t = "explore", text = "Darkwhisper Gorge", map = 1452, x = 57.9, y = 83.1, f = "e" },
 					},
 				},
 				{

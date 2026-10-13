@@ -164,7 +164,7 @@ step Winterspring (2/2)
   explore 58.4,58 "Mazthoril"
   explore 65.4,61.8 "Owl Wing Thicket"
   explore 61.9,68.5 "Frostwhisper Gorge"
-  explore 57.9,83.1 "Darkwhisper Gorge / Darkwhisper Gorge" -- any one of these names counts
+  explore 57.9,83.1 "Darkwhisper Gorge"
 
 step Mount Hyjal (1/2)
   zone Mount Hyjal

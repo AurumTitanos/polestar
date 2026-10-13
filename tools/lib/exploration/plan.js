@@ -65,8 +65,14 @@ function mapOf(ctx, name) {
 	return id;
 }
 
+// An overlay's area names, each once (AreaTable can give a zone area and its
+// instance area the same name).
+function areaNames(o) {
+	return [...new Set(o.areas.map((a) => a.name))];
+}
+
 function areaLabel(o) {
-	return o.areas.map((a) => a.name).join(' / ');
+	return areaNames(o).join(' / ');
 }
 
 // The lowest known level among an overlay's areas (any one of them reveals it).
@@ -150,7 +156,7 @@ function travelLines(travel) {
 // Per-goal warnings: the other faction's town, a known hazard, an area above
 // the guide's level band. `side` = the faction the step is for, or null.
 function goalNotes(o, side, maxLevel) {
-	const names = o.areas.map((a) => a.name);
+	const names = areaNames(o);
 	const notes = [];
 	for (const owner of FACTIONS) {
 		if (side === owner) continue;
