@@ -15,6 +15,7 @@ const { Diagnostics } = require('../lib/dsl/diag');
 const { loadData } = require('../lib/dsl/data');
 const { isDir } = require('../lib/addons');
 const { PACK_OPTIONS, PACK_USAGE, otherPack, buildPack, folderIn } = require('../lib/pack/build');
+const { commandPack } = require('../lib/pack/locate');
 const { chooseDest } = require('./install');
 const { playPackRoot, untilStopped, defaultArt, playDataDir } = require('./play');
 
@@ -96,9 +97,14 @@ async function run(argv, env = process.env) {
 	let playDir = null; // the last good build for the playground
 	let play = null;
 
-	// One rebuild: the pack is resolved again (pack.json may have changed).
+	// One rebuild: the pack is read again (pack.json may have changed, or be
+	// gone: its error is printed like any other and the last good build stays).
 	async function rebuild() {
-		const pack = otherPack({ ...opts, pack: packDir });
+		const pack = commandPack({ pack: packDir, context: opts.context, contextData: opts.contextData });
+		if (pack.error) {
+			console.error(`dev: ${pack.error}; not built (the last good build stays)`);
+			return;
+		}
 		const built = buildPack(pack, { dataDir, cache });
 		printDiagnostics(built.diag);
 		if (!built.ok) {

@@ -169,6 +169,28 @@ test('dev prints the missing reference data warning, as lint does', { timeout: 3
 	}
 });
 
+test('dev reports a deleted pack.json, keeps the last good build and watching, and builds again once it is back', { timeout: 30000 }, async () => {
+	const pack = miniCopy();
+	const dest = tmpdir();
+	const d = dev(pack, dest);
+	try {
+		await d.waitFor(/watching/);
+		const guides = path.join(dest, FOLDER, 'Guides.lua');
+		const before = fs.readFileSync(guides, 'utf8');
+		const manifest = path.join(pack, 'pack.json');
+		const text = fs.readFileSync(manifest, 'utf8');
+		fs.renameSync(manifest, path.join(pack, 'pack.json.bak'));
+		await d.waitFor(/pack\.json:1: error: no pack\.json in [\s\S]*dev: 1 error, 0 warnings; not built \(the last good build stays\)/);
+		assert.doesNotMatch(d.out(), /TypeError|\n\s+at /);
+		assert.equal(fs.readFileSync(guides, 'utf8'), before);
+		fs.writeFileSync(manifest, text);
+		await d.waitFor(/not built \(the last good build stays\)[\s\S]*built 2 guides/);
+		assert.equal(d.child.exitCode, null, 'still watching');
+	} finally {
+		await d.stop();
+	}
+});
+
 const noPlay = !fs.existsSync(path.join(__dirname, '..', 'data', 'forever', 'races.json')) ? 'reference data not built' : false;
 
 test('dev --play on a taken port exits 1 promptly and leaves no Lua session behind', { skip: noPlay, timeout: 60000 }, async () => {
