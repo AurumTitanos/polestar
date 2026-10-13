@@ -314,9 +314,9 @@ emit({ Polestar.Data.Pack("Broken") })
 // ---------------------------------------------------------------------------
 
 const fs = require('node:fs');
-const os = require('node:os');
 const path = require('node:path');
 const { mergeCodex, clientFacts, buildCodex, cluster } = require('../tools/lib/codex/build');
+const { tmpdir } = require('./helpers/tmp');
 
 function syntheticInputs() {
 	const era = { left: 0, right: -1000, top: 1000, bottom: 0, c: 1 };
@@ -574,29 +574,25 @@ test('cluster merges nearby points, biggest first', () => {
 });
 
 test('buildCodex writes deterministic JSON and a pack whose memory it measures', async () => {
-	const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'polestar-codex-build-'));
-	try {
-		const run = (n) =>
-			buildCodex({ inputs: syntheticInputs(), outDir: path.join(tmp, `out${n}`), packDir: path.join(tmp, `pack${n}`, 'Polestar_Codex'), version: '1.0.0', measure: n === 1 });
-		const a = await run(1);
-		const b = await run(2);
-		const files = fs.readdirSync(path.join(tmp, 'out1')).sort();
-		assert.deepEqual(files, ['factions.json', 'frames.json', 'instances.json', 'items.json', 'journal.json', 'meta.json', 'npcs.json', 'objects.json', 'quests.json', 'spells.json', 'zones.json']);
-		for (const f of files.filter((f) => f !== 'meta.json')) {
-			assert.equal(fs.readFileSync(path.join(tmp, 'out1', f), 'utf8'), fs.readFileSync(path.join(tmp, 'out2', f), 'utf8'), f);
-		}
-		for (const f of fs.readdirSync(a.packDir)) assert.equal(fs.readFileSync(path.join(a.packDir, f), 'utf8'), fs.readFileSync(path.join(b.packDir, f), 'utf8'), f);
-		const meta = JSON.parse(fs.readFileSync(path.join(tmp, 'out1', 'meta.json'), 'utf8'));
-		assert.equal(meta.counts.mount, 3);
-		assert.equal(meta.counts.rare, 1);
-		assert.equal(meta.counts.instance, 1);
-		assert.ok(meta.coverage.share > 0 && meta.coverage.share < 1);
-		assert.ok(meta.pack.bytes > 0);
-		assert.ok(meta.pack.memoryKB > 0 && meta.pack.memoryKBDecoded > meta.pack.memoryKB, JSON.stringify(meta.pack));
-		assert.ok(meta.sources.some((s) => s.name === 'AtlasLootClassic' && s.licence === 'GPL-2.0'));
-		const toc = fs.readFileSync(path.join(a.packDir, 'Polestar_Codex.toc'), 'utf8');
-		assert.match(toc, /^Meta\.lua$/m);
-	} finally {
-		fs.rmSync(tmp, { recursive: true, force: true });
+	const tmp = tmpdir('polestar-codex-build-');
+	const run = (n) =>
+		buildCodex({ inputs: syntheticInputs(), outDir: path.join(tmp, `out${n}`), packDir: path.join(tmp, `pack${n}`, 'Polestar_Codex'), version: '1.0.0', measure: n === 1 });
+	const a = await run(1);
+	const b = await run(2);
+	const files = fs.readdirSync(path.join(tmp, 'out1')).sort();
+	assert.deepEqual(files, ['factions.json', 'frames.json', 'instances.json', 'items.json', 'journal.json', 'meta.json', 'npcs.json', 'objects.json', 'quests.json', 'spells.json', 'zones.json']);
+	for (const f of files.filter((f) => f !== 'meta.json')) {
+		assert.equal(fs.readFileSync(path.join(tmp, 'out1', f), 'utf8'), fs.readFileSync(path.join(tmp, 'out2', f), 'utf8'), f);
 	}
+	for (const f of fs.readdirSync(a.packDir)) assert.equal(fs.readFileSync(path.join(a.packDir, f), 'utf8'), fs.readFileSync(path.join(b.packDir, f), 'utf8'), f);
+	const meta = JSON.parse(fs.readFileSync(path.join(tmp, 'out1', 'meta.json'), 'utf8'));
+	assert.equal(meta.counts.mount, 3);
+	assert.equal(meta.counts.rare, 1);
+	assert.equal(meta.counts.instance, 1);
+	assert.ok(meta.coverage.share > 0 && meta.coverage.share < 1);
+	assert.ok(meta.pack.bytes > 0);
+	assert.ok(meta.pack.memoryKB > 0 && meta.pack.memoryKBDecoded > meta.pack.memoryKB, JSON.stringify(meta.pack));
+	assert.ok(meta.sources.some((s) => s.name === 'AtlasLootClassic' && s.licence === 'GPL-2.0'));
+	const toc = fs.readFileSync(path.join(a.packDir, 'Polestar_Codex.toc'), 'utf8');
+	assert.match(toc, /^Meta\.lua$/m);
 });

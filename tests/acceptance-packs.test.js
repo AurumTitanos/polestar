@@ -23,8 +23,9 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const { runAddon, ROOT, ADDONS } = require('./helpers/lua');
 const { tmpdir } = require('./helpers/tmp');
+const { needs } = require('./helpers/data');
+const cli = require('./helpers/cli');
 
-const CLI = path.join(ROOT, 'tools', 'polestar.js');
 const FIXTURES = path.join(__dirname, 'fixtures', 'packs');
 
 function hasLua() {
@@ -34,11 +35,7 @@ function hasLua() {
 	});
 }
 
-const skip = !fs.existsSync(path.join(ROOT, 'data', 'forever', 'races.json'))
-	? 'reference data not built'
-	: !process.env.LUA && !hasLua()
-		? 'no Lua 5.1'
-		: false;
+const skip = needs('races.json') || (!process.env.LUA && !hasLua() && 'no Lua 5.1');
 
 const GOOD = 'PolestarPack_AcceptanceGood';
 const IMPOSTER = 'PolestarPack_AcceptanceImposter';
@@ -47,7 +44,7 @@ const FUTURE = 'PolestarPack_AcceptanceFuture';
 const WESTFALL = 'forever/alliance/02-westfall';
 
 function polestar(args, cwd, env = {}) {
-	const r = spawnSync(process.execPath, [CLI, ...args], { cwd, env: { ...process.env, ...env }, encoding: 'utf8' });
+	const r = cli.polestar(args, { cwd, env });
 	assert.equal(r.status, 0, `polestar ${args.join(' ')}:\n${r.stdout}${r.stderr}`);
 	return r;
 }

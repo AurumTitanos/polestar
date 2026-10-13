@@ -5,7 +5,7 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { compile, guideText, plain, fixtureData } = require('./fixtures/dsl/helpers');
+const { compile, guideText, plain, fixtureData } = require('./helpers/dsl');
 
 function goalsOf(lines) {
 	const r = compile(guideText(lines));

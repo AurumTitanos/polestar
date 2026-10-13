@@ -5,7 +5,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const path = require('node:path');
-const { quiet } = require('./fixtures/dsl/helpers');
+const { quiet } = require('./helpers/cli');
 const { loadData } = require('../tools/lib/dsl/data');
 const { parseGuide } = require('../tools/lib/dsl/parse');
 const { Diagnostics, format } = require('../tools/lib/dsl/diag');
@@ -156,7 +156,7 @@ test('find prints objectives and a guide\'s next under its line; --race and --cl
 });
 
 test('missing reference data is an error naming the files and data build, not "nothing matches"', async () => {
-	const empty = require('./fixtures/dsl/helpers').tmpdir();
+	const empty = require('./helpers/tmp').tmpdir();
 	for (const extra of [[], ['--json']]) {
 		const { result, out } = await quiet(() => cmd.run(['Westfall Stew', '--data', empty, '--guides', GUIDES, ...extra]));
 		assert.equal(result, 1);

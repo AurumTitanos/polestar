@@ -9,7 +9,8 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { runAddon, ADDONS } = require('./helpers/lua');
-const { tmpdir, quiet, fakeAddons } = require('./fixtures/dsl/helpers');
+const { quiet, fakeAddons } = require('./helpers/cli');
+const { tmpdir } = require('./helpers/tmp');
 const version = require('../tools/commands/version');
 const { releaseAddons, packageVersion, ROOT } = require('../tools/lib/dsl/project');
 

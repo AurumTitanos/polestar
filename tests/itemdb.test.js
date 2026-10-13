@@ -12,6 +12,7 @@ const { extractItems, encode, decode, dps } = require('../tools/lib/itemdb/stats
 const { buildItemDb, emitLua } = require('../tools/lib/itemdb/build');
 const { SIZE_BUDGET } = require('../tools/commands/itemdb');
 const { runAddon, ROOT } = require('./helpers/lua');
+const { tmpdir } = require('./helpers/tmp');
 
 // One ItemSparse row with every column the extractor reads.
 function sparse(over) {
@@ -177,30 +178,26 @@ function toCsv(rows) {
 }
 
 test('itemdb build: offline from cached CSVs to a TOC and Items.lua, byte-identical on rerun', async () => {
-	const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'polestar-itemdb-'));
-	try {
-		const cache = path.join(dir, 'sources', 'wago', '1.15.9.1');
-		fs.mkdirSync(cache, { recursive: true });
-		for (const [name, rows] of Object.entries(TABLES)) {
-			const withId = rows.map((r, i) => ({ ID: r.ID ?? String(i + 1), ...r }));
-			fs.writeFileSync(path.join(cache, `${name}.csv`), toCsv(withId));
-		}
-		const out = path.join(dir, 'Polestar_ItemDB');
-		const res = await buildItemDb({ sourcesDir: path.join(dir, 'sources'), offline: true, outDir: out });
-		assert.equal(res.build, '1.15.9.1');
-		assert.equal(res.count, 6);
-		const first = fs.readFileSync(path.join(out, 'Items.lua'), 'utf8');
-		await buildItemDb({ sourcesDir: path.join(dir, 'sources'), offline: true, outDir: out });
-		assert.equal(fs.readFileSync(path.join(out, 'Items.lua'), 'utf8'), first);
-		assert.match(first, /\[1482\]="21 24 19 3 2 7 dmin33 dmax63 speed2700",/);
-		const toc = fs.readFileSync(path.join(out, 'Polestar_ItemDB.toc'), 'utf8');
-		assert.match(toc, /^## Interface: 16001$/m);
-		assert.match(toc, /^## LoadOnDemand: 1$/m);
-		assert.match(toc, /^## Dependencies: Polestar$/m);
-		assert.match(toc, /^Items\.lua$/m);
-	} finally {
-		fs.rmSync(dir, { recursive: true, force: true });
+	const dir = tmpdir('polestar-itemdb-');
+	const cache = path.join(dir, 'sources', 'wago', '1.15.9.1');
+	fs.mkdirSync(cache, { recursive: true });
+	for (const [name, rows] of Object.entries(TABLES)) {
+		const withId = rows.map((r, i) => ({ ID: r.ID ?? String(i + 1), ...r }));
+		fs.writeFileSync(path.join(cache, `${name}.csv`), toCsv(withId));
 	}
+	const out = path.join(dir, 'Polestar_ItemDB');
+	const res = await buildItemDb({ sourcesDir: path.join(dir, 'sources'), offline: true, outDir: out });
+	assert.equal(res.build, '1.15.9.1');
+	assert.equal(res.count, 6);
+	const first = fs.readFileSync(path.join(out, 'Items.lua'), 'utf8');
+	await buildItemDb({ sourcesDir: path.join(dir, 'sources'), offline: true, outDir: out });
+	assert.equal(fs.readFileSync(path.join(out, 'Items.lua'), 'utf8'), first);
+	assert.match(first, /\[1482\]="21 24 19 3 2 7 dmin33 dmax63 speed2700",/);
+	const toc = fs.readFileSync(path.join(out, 'Polestar_ItemDB.toc'), 'utf8');
+	assert.match(toc, /^## Interface: 16001$/m);
+	assert.match(toc, /^## LoadOnDemand: 1$/m);
+	assert.match(toc, /^## Dependencies: Polestar$/m);
+	assert.match(toc, /^Items\.lua$/m);
 });
 
 const GENERATED = path.join(ROOT, 'addon', 'Polestar_ItemDB', 'Items.lua');

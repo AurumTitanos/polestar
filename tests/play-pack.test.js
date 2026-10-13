@@ -8,11 +8,13 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const { ROOT } = require('./helpers/lua');
-const { DATA_DIR, quiet, tmpdir } = require('./fixtures/dsl/helpers');
+const { needs } = require('./helpers/data');
+const { DATA_DIR } = require('./helpers/dsl');
+const { quiet } = require('./helpers/cli');
+const { tmpdir } = require('./helpers/tmp');
 const { resolvePack } = require('../tools/lib/pack/locate');
 
-const skip = !fs.existsSync(path.join(ROOT, 'data', 'forever', 'races.json')) ? 'reference data not built' : false;
+const skip = needs('races.json');
 const PACKS = path.join(__dirname, 'fixtures', 'packs');
 
 // This process's playground program files in the temp folder (Session names them polestar-play-<pid>-<n>.lua).

@@ -7,16 +7,13 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { spawnSync } = require('node:child_process');
-const { runAddon, ROOT } = require('./helpers/lua');
-const { compile, guideText, tmpdir, plain, GUIDES_DIR, DATA_DIR, ourManifest, writeTestPack } = require('./fixtures/dsl/helpers');
+const { runAddon } = require('./helpers/lua');
+const { compile, guideText, plain, GUIDES_DIR, DATA_DIR, ourManifest, writeTestPack } = require('./helpers/dsl');
+const { tmpdir } = require('./helpers/tmp');
+const { polestar } = require('./helpers/cli');
 const { compileProject } = require('../tools/lib/dsl/project');
 
-const CLI = path.join(ROOT, 'tools', 'polestar.js');
-
-function cli(...args) {
-	return spawnSync(process.execPath, [CLI, ...args], { encoding: 'utf8', cwd: ROOT });
-}
+const cli = (...args) => polestar(args);
 
 function luaString(s) {
 	return JSON.stringify(s);

@@ -8,7 +8,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { parseGuide } = require('../tools/lib/dsl/parse');
 const { Diagnostics } = require('../tools/lib/dsl/diag');
-const { guideText, lineOf } = require('./fixtures/dsl/helpers');
+const { guideText, lineOf } = require('./helpers/dsl');
+const { needs } = require('./helpers/data');
 
 function parse(text) {
 	const diag = new Diagnostics();
@@ -244,7 +245,7 @@ test('Skyborne plays on both sides: the faction picks its quest-mask bit, Era-on
 	assert.equal(maskExcludes(applicable([{ races: ['Human'] }]), q(2 ** 32 + 1)), null);
 });
 
-test('the race table agrees with the Forever client (data/forever/races.json)', { skip: !fs.existsSync(path.join(__dirname, '..', 'data', 'forever', 'races.json')) && 'data/forever not built' }, () => {
+test('the race table agrees with the Forever client (data/forever/races.json)', { skip: needs('races.json') }, () => {
 	const { RACE_BY_FILE } = require('../tools/lib/dsl/conditions');
 	const races = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'forever', 'races.json'), 'utf8'));
 	const fromData = Object.fromEntries(Object.entries(races).map(([file, sides]) => [file, Object.fromEntries(Object.entries(sides).map(([s, v]) => [s, v.bit]))]));

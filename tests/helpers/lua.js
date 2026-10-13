@@ -3,8 +3,8 @@
 //
 //   const { runAddon } = require('./helpers/lua');
 //   const [result] = runAddon({
-//     stubs: ['stub_engine.lua'],            // extra files from tests/lua/, after wow_stub.lua
-//     before: 'stub.world.level = 3',        // Lua run after the stubs, before any addon file
+//     stubs: ['stub_world.lua'],             // extra files from tests/lua/, after wow_stub.lua
+//     before: 'stub.world.setLevel(3)',      // Lua run after the stubs, before any addon file
 //     addons: ['Polestar', 'Polestar_Guides'],
 //     saved: { Polestar: 'PolestarDB = { schema = 1, settings = {} }' },  // restored before ADDON_LOADED
 //     login: true,                           // fire PLAYER_LOGIN / PLAYER_ENTERING_WORLD after loading

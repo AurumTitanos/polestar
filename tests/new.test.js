@@ -9,8 +9,9 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const { ROOT } = require('./helpers/lua');
 const { tmpdir } = require('./helpers/tmp');
+const cli = require('./helpers/cli');
+const { needs } = require('./helpers/data');
 
-const CLI = path.join(ROOT, 'tools', 'polestar.js');
 const ARGS = ['--yes', '--id', 'ann-routes', '--title', "Ann's Routes", '--author', 'Ann'];
 const REPO = 'https://example.test/polestar.git';
 
@@ -21,11 +22,10 @@ function hasLua() {
 	});
 }
 
-function polestar(args, { cwd = ROOT, origin, env: extra = {}, input = '' } = {}) {
-	const env = { ...process.env, ...extra };
-	if (origin === undefined) delete env.POLESTAR_ORIGIN_URL;
-	else env.POLESTAR_ORIGIN_URL = origin;
-	return spawnSync(process.execPath, [CLI, ...args], { cwd, env, input, encoding: 'utf8' });
+// The origin URL `new` reads stands in for this clone's git remote; without
+// one, the test's own environment must not leak a value.
+function polestar(args, { cwd, origin, env = {}, input = '' } = {}) {
+	return cli.polestar(args, { cwd, input, env: { ...env, POLESTAR_ORIGIN_URL: origin } });
 }
 
 const tmp = () => tmpdir('polestar-new-');
@@ -123,7 +123,7 @@ test('with an origin URL the workflow and dev container install Polestar from it
 	assert.match(b.stdout, /skipped .*pack\.yml.*\.devcontainer.*no origin remote/);
 });
 
-const skip = !fs.existsSync(path.join(ROOT, 'data', 'forever', 'quests.json')) ? 'reference data not built' : !hasLua() ? 'no Lua 5.1' : false;
+const skip = needs('quests.json') || (!hasLua() && 'no Lua 5.1');
 
 test('end to end: the new pack lints clean, playtests and packs from its own folder', { skip }, () => {
 	const dir = path.join(tmp(), 'ann');

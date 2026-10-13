@@ -7,7 +7,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { main, load } = require('../tools/polestar');
-const { quiet } = require('./fixtures/dsl/helpers');
+const { quiet } = require('./helpers/cli');
 
 const ROOT = path.join(__dirname, '..');
 

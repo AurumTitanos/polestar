@@ -16,7 +16,7 @@ const { Frames } = require('../tools/lib/travel/geo');
 const { planRoute } = require('../tools/lib/travel/route');
 const { ROOT } = require('./helpers/lua');
 const { tmpdir } = require('./helpers/tmp');
-const { quiet, fakeAddons } = require('./fixtures/dsl/helpers');
+const { quiet, fakeAddons } = require('./helpers/cli');
 const install = require('../tools/commands/install');
 
 const FIX = path.join(__dirname, 'fixtures', 'travel');

@@ -9,11 +9,13 @@ const fs = require('node:fs');
 const net = require('node:net');
 const os = require('node:os');
 const path = require('node:path');
-const { spawn, spawnSync } = require('node:child_process');
-const { tmpdir, DATA_DIR } = require('./fixtures/dsl/helpers');
+const { spawn } = require('node:child_process');
+const { DATA_DIR } = require('./helpers/dsl');
+const { tmpdir } = require('./helpers/tmp');
+const { CLI, polestar } = require('./helpers/cli');
+const { needs } = require('./helpers/data');
 const { TOC_MARKER } = require('../tools/lib/pack/format');
 
-const CLI = path.join(__dirname, '..', 'tools', 'polestar.js');
 const PACKS = path.join(__dirname, 'fixtures', 'packs');
 const FOLDER = 'PolestarPack_MiniPack';
 const RESTART = /New addon: restart the game once so it sees PolestarPack_MiniPack; after that \/reload shows every change\./g;
@@ -152,10 +154,10 @@ test('dev takes the pack folder as its one argument; two folders, or one without
 	} finally {
 		await d.stop();
 	}
-	const two = spawnSync(process.execPath, [CLI, 'dev', pack, miniCopy(), '--no-game'], { cwd: tmpdir(), encoding: 'utf8' });
+	const two = polestar(['dev', pack, miniCopy(), '--no-game'], { cwd: tmpdir() });
 	assert.equal(two.status, 2, two.stderr);
 	assert.match(two.stderr, /one pack folder only/);
-	const none = spawnSync(process.execPath, [CLI, 'dev', '../my-pack', '--no-game'], { cwd: miniCopy(), encoding: 'utf8' });
+	const none = polestar(['dev', '../my-pack', '--no-game'], { cwd: miniCopy() });
 	assert.equal(none.status, 2, none.stderr);
 	assert.match(none.stderr, /no pack\.json in \.\.\/my-pack/);
 });
@@ -191,7 +193,7 @@ test('dev reports a deleted pack.json, keeps the last good build and watching, a
 	}
 });
 
-const noPlay = !fs.existsSync(path.join(__dirname, '..', 'data', 'forever', 'races.json')) ? 'reference data not built' : false;
+const noPlay = needs('races.json');
 
 test('dev --play on a taken port exits 1 promptly and leaves no Lua session behind', { skip: noPlay, timeout: 60000 }, async () => {
 	const holder = net.createServer();

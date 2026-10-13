@@ -11,13 +11,12 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { spawnSync } = require('node:child_process');
 const { runAddon } = require('./helpers/lua');
-const { DATA_DIR } = require('./fixtures/dsl/helpers');
+const { DATA_DIR } = require('./helpers/dsl');
+const { polestar } = require('./helpers/cli');
 
 const PARITY = path.join(__dirname, 'fixtures', 'packs', 'parity');
 const CONTEXT = path.join(__dirname, 'fixtures', 'packs', 'context');
-const CLI = path.join(__dirname, '..', 'tools', 'polestar.js');
 
 // The registry's refusal of a guide outside its pack's prefix.
 const OUTSIDE = 'Guide forever/parity-outside was refused: its id must start with parity/.';
@@ -149,7 +148,7 @@ test('the runtime refuses each compiled twin for its reason', () => {
 test('lint rejects each parity fixture for the matching reason', () => {
 	const files = fs.readdirSync(path.join(PARITY, 'guides')).sort();
 	assert.deepEqual(files, CASES.map((c) => `${c.file}.guide`).sort(), 'one fixture per case, no strays');
-	const r = spawnSync(process.execPath, [CLI, 'lint', '--pack', PARITY, '--data', DATA_DIR, '--context', CONTEXT, '--context-data', DATA_DIR, '--format', 'json'], { encoding: 'utf8' });
+	const r = polestar(['lint', '--pack', PARITY, '--data', DATA_DIR, '--context', CONTEXT, '--context-data', DATA_DIR, '--format', 'json']);
 	assert.equal(r.status, 1, r.stderr);
 	const doc = JSON.parse(r.stdout);
 	for (const c of CASES) {

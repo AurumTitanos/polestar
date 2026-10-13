@@ -8,7 +8,8 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { runAddon } = require('./helpers/lua');
-const { tmpdir, DATA_DIR } = require('./fixtures/dsl/helpers');
+const { DATA_DIR } = require('./helpers/dsl');
+const { tmpdir } = require('./helpers/tmp');
 const { readManifest } = require('../tools/lib/pack/manifest');
 const { compileProject, buildPackFiles, writePackDir, packDirRefusal, coreInterface } = require('../tools/lib/dsl/project');
 

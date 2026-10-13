@@ -13,7 +13,7 @@ const { runAddon, ROOT } = require('./helpers/lua');
 const { compileSources } = require('../tools/lib/dsl/project');
 const { loadData } = require('../tools/lib/dsl/data');
 const { format } = require('../tools/lib/dsl/diag');
-const { writeTestPack } = require('./fixtures/dsl/helpers');
+const { writeTestPack } = require('./helpers/dsl');
 
 const DATA = path.join(ROOT, 'tests', 'fixtures', 'dsl', 'data');
 

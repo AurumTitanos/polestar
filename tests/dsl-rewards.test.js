@@ -8,7 +8,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { runAddon } = require('./helpers/lua');
-const { compile, guideText, lineOf, plain, writeTestPack } = require('./fixtures/dsl/helpers');
+const { compile, guideText, lineOf, plain, writeTestPack } = require('./helpers/dsl');
 const { TEST_PACK, TEST_SOURCE } = require('./helpers/packs');
 
 const LINES = ['step S', '  accept 783', '  turnin 783 choose 159 750 "Wolf Steak" uncommon reward 990010 "Miner\'s Lantern" rare xp 1050 money 1g7s'];

@@ -5,7 +5,7 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { compile, guideText, lineOf } = require('./fixtures/dsl/helpers');
+const { compile, guideText, lineOf } = require('./helpers/dsl');
 
 const gotoWarnings = (src) => compile(src).diag.warnings.filter((d) => /already leads/.test(d.message));
 

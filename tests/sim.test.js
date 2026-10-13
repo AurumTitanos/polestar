@@ -6,7 +6,6 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const os = require('node:os');
 const path = require('node:path');
 
 const xp = require('../tools/lib/sim/xp');
@@ -21,6 +20,7 @@ const { parseForeverXp, ratioFit } = require('../tools/lib/sim/calibrate');
 const { analyze, spearman } = require('../tools/lib/sim/robust');
 const sim = require('../tools/lib/sim');
 const syn = require('./fixtures/sim/synthetic');
+const { tmpdir } = require('./helpers/tmp');
 
 function world(opts = {}) {
 	const w = buildWorld(syn.makeData(), { faction: 'Horde', bandWidth: opts.band || 5, extraStarts: syn.START });
@@ -527,20 +527,16 @@ test('convergence rule: no improvement over the last share of evaluations', () =
 });
 
 test('workers give the same result as one thread for a seed', async () => {
-	const root = fs.mkdtempSync(path.join(os.tmpdir(), 'polestar-sim-'));
-	try {
-		const dirs = syn.writeDataDir(root);
-		const base = { ...dirs, offline: true, extraStarts: syn.START, faction: 'Horde', race: 'Orc', paths: 3000, seed: 9, jobsPerRound: 6, constructions: 2, anneal: 150, benchMs: 0, write: false, bandWidth: 2 };
-		const one = await sim.runCharacter({ ...base, workers: 1 });
-		const many = await sim.runCharacter({ ...base, workers: 3 });
-		assert.equal(many.evaluatedRoutes, one.evaluatedRoutes);
-		assert.deepEqual(many.best.route, one.best.route);
-		assert.equal(many.best.seconds, one.best.seconds);
-		assert.deepEqual(many.curve, one.curve);
-		assert.deepEqual(many.elite, one.elite);
-	} finally {
-		fs.rmSync(root, { recursive: true, force: true });
-	}
+	const root = tmpdir('polestar-sim-');
+	const dirs = syn.writeDataDir(root);
+	const base = { ...dirs, offline: true, extraStarts: syn.START, faction: 'Horde', race: 'Orc', paths: 3000, seed: 9, jobsPerRound: 6, constructions: 2, anneal: 150, benchMs: 0, write: false, bandWidth: 2 };
+	const one = await sim.runCharacter({ ...base, workers: 1 });
+	const many = await sim.runCharacter({ ...base, workers: 3 });
+	assert.equal(many.evaluatedRoutes, one.evaluatedRoutes);
+	assert.deepEqual(many.best.route, one.best.route);
+	assert.equal(many.best.seconds, one.best.seconds);
+	assert.deepEqual(many.curve, one.curve);
+	assert.deepEqual(many.elite, one.elite);
 });
 
 // ---------------------------------------------------------------- params, calibration, robustness

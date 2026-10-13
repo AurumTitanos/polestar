@@ -20,12 +20,11 @@ const { test, after } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { runAddon, ROOT } = require('./helpers/lua');
+const { runAddon } = require('./helpers/lua');
+const { needs } = require('./helpers/data');
 const { buildSimPack, luaValue } = require('../tools/lib/playtest');
 
-const skip = fs.existsSync(path.join(ROOT, 'data', 'forever', 'quests.json'))
-	? false
-	: 'reference data not built (node tools/polestar.js data build)';
+const skip = needs('quests.json');
 
 const packs = {};
 after(() => Object.values(packs).forEach((p) => p.dispose()));

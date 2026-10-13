@@ -6,18 +6,16 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
 const path = require('node:path');
-const { spawnSync } = require('node:child_process');
-const { quiet, tmpdir } = require('./fixtures/dsl/helpers');
-const { ROOT } = require('./helpers/lua');
+const { quiet, polestar } = require('./helpers/cli');
+const { tmpdir } = require('./helpers/tmp');
+const { needs } = require('./helpers/data');
 const { findLua } = require('../tools/lib/lua');
 const cmd = require('../tools/commands/playtest');
 const { playtest } = require('../tools/lib/playtest');
 const { commandPack } = require('../tools/lib/pack/locate');
 
 const PACKS = path.join(__dirname, 'fixtures', 'packs');
-const CLI = path.join(__dirname, '..', 'tools', 'polestar.js');
 const hasLua = (() => {
 	try {
 		return !!findLua();
@@ -25,7 +23,7 @@ const hasLua = (() => {
 		return false;
 	}
 })();
-const skip = !fs.existsSync(path.join(ROOT, 'data', 'forever', 'quests.json')) ? 'reference data not built' : !hasLua ? 'no Lua 5.1' : false;
+const skip = needs('quests.json') || (!hasLua && 'no Lua 5.1');
 
 const lines = (out) => out.split('\n').filter(Boolean);
 
@@ -112,7 +110,7 @@ test('missing reference data is an error naming data build, not a stuck or empty
 
 test('without Lua 5.1 playtest says so and points to doctor, without a stack trace; exit 1', () => {
 	const bin = tmpdir();
-	const r = spawnSync(process.execPath, [CLI, 'playtest', path.join(PACKS, 'plays')], { encoding: 'utf8', env: { ...process.env, PATH: bin, LUA: path.join(bin, 'no-lua') } });
+	const r = polestar(['playtest', path.join(PACKS, 'plays')], { env: { PATH: bin, LUA: path.join(bin, 'no-lua') } });
 	assert.equal(r.status, 1, r.stderr);
 	assert.match(r.stderr, /playtest failed: No Lua 5\.1 interpreter found .* Run `polestar doctor` for the install steps\./);
 	assert.doesNotMatch(r.stderr, /\n\s+at /, 'no stack trace');

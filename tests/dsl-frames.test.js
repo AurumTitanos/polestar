@@ -6,7 +6,7 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { compile, guideText, lineOf, plain } = require('./fixtures/dsl/helpers');
+const { compile, guideText, lineOf, plain } = require('./helpers/dsl');
 
 function dunMorogh(body, extra = []) {
 	return guideText(['guide t/dm', 'title Coldridge', 'faction Alliance', 'levels 1-6', 'zone Dun Morogh', ...extra, '', ...body]);

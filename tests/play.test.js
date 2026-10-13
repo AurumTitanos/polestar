@@ -6,12 +6,12 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const os = require('node:os');
 const path = require('node:path');
-const { ROOT } = require('./helpers/lua');
+const { needs } = require('./helpers/data');
 const { hitTest, toScreen } = require('../tools/play/public/hit');
+const { tmpdir } = require('./helpers/tmp');
 
-const skip = !fs.existsSync(path.join(ROOT, 'data', 'forever', 'races.json')) ? 'reference data not built' : false;
+const skip = needs('races.json');
 
 test('hit-testing picks the front-most mouse frame inside its clip', () => {
 	const hits = [
@@ -39,7 +39,7 @@ async function act(base, action, known = 0) {
 
 test('a scripted session: hub, a guide, a goal, a scheme change, then a clean stop', { skip, timeout: 120000 }, async () => {
 	const { startServer } = require('../tools/play/server');
-	const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'polestar-play-test-'));
+	const dataDir = tmpdir('polestar-play-test-');
 	const play = await startServer({ port: 0, dataDir, artDir: null });
 	try {
 		let f = await act(play.url, { type: 'render' });
@@ -90,5 +90,4 @@ test('a scripted session: hub, a guide, a goal, a scheme change, then a clean st
 	// SavedVariables written on stop.
 	const sv = fs.readFileSync(path.join(dataDir, 'SavedVariables', 'Polestar.lua'), 'utf8');
 	assert.match(sv, /scheme = "graphite"/);
-	fs.rmSync(dataDir, { recursive: true, force: true });
 });

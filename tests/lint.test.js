@@ -5,18 +5,17 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const os = require('node:os');
 const path = require('node:path');
 
 const lint = require('../tools/commands/lint');
 const { soloExclusions } = lint;
 const { dataHash } = require('../tools/lib/sim/world');
 const { ROOT } = require('../tools/lib/dsl/project');
-const { quiet } = require('./fixtures/dsl/helpers');
+const { quiet } = require('./helpers/cli');
+const { tmpdir } = require('./helpers/tmp');
 
 test('a cached world from other data or an older builder is ignored (reported stale), a current one is used', (t) => {
-	const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'polestar-lint-'));
-	t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+	const dir = tmpdir('polestar-lint-');
 	const dataDir = path.join(dir, 'data');
 	const simDir = path.join(dir, 'sim');
 	fs.mkdirSync(dataDir);
@@ -33,8 +32,7 @@ test('a cached world from other data or an older builder is ignored (reported st
 });
 
 test('the note about a stale cached world is for our guides only, not another pack', async (t) => {
-	const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'polestar-lint-'));
-	t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+	const dir = tmpdir('polestar-lint-');
 	fs.writeFileSync(path.join(dir, 'world-alliance.json'), JSON.stringify({ dataHash: 'builder 15', excluded: [] }));
 	const guides = path.join(dir, 'guides');
 	fs.mkdirSync(guides);

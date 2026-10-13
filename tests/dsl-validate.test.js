@@ -5,7 +5,7 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { compile, guideText, lineOf } = require('./fixtures/dsl/helpers');
+const { compile, guideText, lineOf } = require('./helpers/dsl');
 
 function header(id, extra = []) {
 	return [`guide ${id}`, `title ${id}`, 'faction Alliance', 'levels 1-10', 'zone Elwynn Forest', ...extra, ''];
@@ -122,7 +122,7 @@ test('accepting a quest no applicable character can take is an error', () => {
 // (its `excl`, like 324), while 9371 has no `excl`.
 function prereqData() {
 	const { Data } = require('../tools/lib/dsl/data');
-	const { fixtureData } = require('./fixtures/dsl/helpers');
+	const { fixtureData } = require('./helpers/dsl');
 	const base = fixtureData();
 	const q = (id, extra) => ({ id, title: `Quest ${id}`, level: 2, minLevel: 1, races: null, classes: null, start: { npc: [823], object: [], item: [] }, end: { npc: [823], object: [] }, pre: [], excl: [], objectives: [], ...extra });
 	const quests = {
@@ -237,7 +237,7 @@ test('objective-capable goals without coordinates warn', () => {
 test('the fixture guide set is valid: no errors, and no warnings but its goto before the kobolds', () => {
 	const fs = require('node:fs');
 	const path = require('node:path');
-	const { GUIDES_DIR } = require('./fixtures/dsl/helpers');
+	const { GUIDES_DIR } = require('./helpers/dsl');
 	const { findGuideFiles } = require('../tools/lib/dsl/project');
 	const files = findGuideFiles(GUIDES_DIR);
 	assert.deepEqual(files, ['forever/alliance/human/01-northshire.guide', 'forever/alliance/human/02-elwynn.guide']);
@@ -343,7 +343,7 @@ test('`complete` on a quest without objectives warns: the turn-in is the action'
 // normal kobold; quest 9380 collects 95100 as an objective.
 function eliteData() {
 	const { Data } = require('../tools/lib/dsl/data');
-	const { fixtureData } = require('./fixtures/dsl/helpers');
+	const { fixtureData } = require('./helpers/dsl');
 	const base = fixtureData();
 	const npcs = { ...base.npcs, 95030: { id: 95030, name: 'Friendly Sage', level: 55, rank: 1, faction: 'AH', spawns: { 1429: { f: 'e', pts: [[40, 40]] } } } };
 	const items = {
@@ -407,14 +407,15 @@ test('solo policy: goals on quests the simulator excludes are errors when elite,
 test('lint applies the solo policy from the cached world in --sim (built from the same data by the current builder)', () => {
 	const fs = require('node:fs');
 	const path = require('node:path');
-	const { spawnSync } = require('node:child_process');
-	const { tmpdir, GUIDES_DIR, DATA_DIR } = require('./fixtures/dsl/helpers');
+	const { polestar } = require('./helpers/cli');
+	const { GUIDES_DIR, DATA_DIR } = require('./helpers/dsl');
+	const { tmpdir } = require('./helpers/tmp');
 	const { dataHash } = require('../tools/lib/sim/world');
 	const { ROOT } = require('../tools/lib/dsl/project');
 	const sim = tmpdir();
 	const hash = dataHash(DATA_DIR, path.join(ROOT, 'data', 'sources'));
 	fs.writeFileSync(path.join(sim, 'world-alliance.json'), JSON.stringify({ dataHash: hash, excluded: [{ id: 5261, title: 'Eagan Peltskinner', reason: 'dungeon quest', category: 'dungeon' }] }));
-	const lint = (...args) => spawnSync(process.execPath, [path.join(__dirname, '..', 'tools', 'polestar.js'), 'lint', '--guides', GUIDES_DIR, '--data', DATA_DIR, ...args], { encoding: 'utf8' });
+	const lint = (...args) => polestar(['lint', '--guides', GUIDES_DIR, '--data', DATA_DIR, ...args]);
 	const r = lint('--sim', sim);
 	assert.equal(r.status, 0, r.stderr);
 	assert.match(r.stderr, /01-northshire\.guide:14: warning: quest 5261 \(Eagan Peltskinner\) is excluded from solo leveling \(dungeon: dungeon quest\)/);

@@ -6,7 +6,8 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { tmpdir, quiet, fakeAddons } = require('./fixtures/dsl/helpers');
+const { quiet, fakeAddons } = require('./helpers/cli');
+const { tmpdir } = require('./helpers/tmp');
 const { TOC_MARKER } = require('../tools/lib/pack/format');
 const install = require('../tools/commands/install');
 const { detectAddonsDirs } = require('../tools/lib/addons');
@@ -189,7 +190,7 @@ test('install refuses to replace its own source, install into the source, or rep
 // Pack mode: a temp copy of the mini fixture pack, built with the fixture data
 // and the context fixture standing in for our guides.
 const PACKS = path.join(__dirname, 'fixtures', 'packs');
-const { DATA_DIR } = require('./fixtures/dsl/helpers');
+const { DATA_DIR } = require('./helpers/dsl');
 
 function miniCopy(manifest = null) {
 	const dir = tmpdir();

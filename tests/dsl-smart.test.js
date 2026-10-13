@@ -10,7 +10,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { runAddon } = require('./helpers/lua');
 const { TEST_PACK } = require('./helpers/packs');
-const { compile, guideText, lineOf, plain, fixtureData, tmpdir, quiet, writeTestPack, DATA_DIR } = require('./fixtures/dsl/helpers');
+const { compile, guideText, lineOf, plain, fixtureData, writeTestPack, DATA_DIR } = require('./helpers/dsl');
+const { quiet } = require('./helpers/cli');
+const { tmpdir } = require('./helpers/tmp');
 const { loadData } = require('../tools/lib/dsl/data');
 const trainersCmd = require('../tools/commands/trainers');
 
@@ -284,9 +286,9 @@ test('every Era-frame coordinate in an emitted pack, candidates included, has it
 	// A Durotar guide whose trainer candidates stand in Elwynn, Stormwind and
 	// Dun Morogh: those maps' frames must ship too, or the engine cannot place them.
 	const durotar = `${['guide t/d', 'title D', 'levels 1-60', 'zone Durotar', '', 'step S', '  train First Aid Apprentice', '  train Mining', '  train class', '  vendor nearest', '  sethome nearest'].join('\n')}\n`;
-	const fixtureGuides = require('../tools/lib/dsl/project').findGuideFiles(require('./fixtures/dsl/helpers').GUIDES_DIR);
+	const fixtureGuides = require('../tools/lib/dsl/project').findGuideFiles(require('./helpers/dsl').GUIDES_DIR);
 	const sources = { 'd.guide': durotar };
-	for (const f of fixtureGuides) sources[f] = fs.readFileSync(path.join(require('./fixtures/dsl/helpers').GUIDES_DIR, f), 'utf8');
+	for (const f of fixtureGuides) sources[f] = fs.readFileSync(path.join(require('./helpers/dsl').GUIDES_DIR, f), 'utf8');
 	const r = compile(sources);
 	assert.deepEqual(r.errors, []);
 	const { files, scripts: order } = writeTestPack(r.guides);

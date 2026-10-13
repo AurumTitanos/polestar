@@ -25,17 +25,14 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { ROOT } = require('./helpers/lua');
+const { needs } = require('./helpers/data');
 const { buildSimPack, playGuide, luaValue, SIMULATE } = require('../tools/lib/playtest');
 const { localPacks } = require('./helpers/profile');
 
-const DATA = path.join(ROOT, 'data', 'forever');
 const LEVELING = 'forever/horde/02-the-barrens.guide';
 const GATHERING = 'forever/professions/mining.guide';
-const skip = !fs.existsSync(path.join(DATA, 'quests.json'))
-	? 'reference data not built (node tools/polestar.js data build)'
-	: !fs.existsSync(path.join(ROOT, 'guides', LEVELING)) || !fs.existsSync(path.join(ROOT, 'guides', GATHERING))
-		? 'budget guides missing'
-		: false;
+const skip = needs('quests.json')
+	|| ((!fs.existsSync(path.join(ROOT, 'guides', LEVELING)) || !fs.existsSync(path.join(ROOT, 'guides', GATHERING))) && 'budget guides missing');
 
 const BUDGET = { burst: 4, tick: 1, setGuide: 8, stepChange: 8, gatherSeconds: 15 };
 

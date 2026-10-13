@@ -7,7 +7,6 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
-const os = require('node:os');
 const path = require('node:path');
 
 const { draft, loadData } = require('../tools/lib/route');
@@ -18,6 +17,7 @@ const { compileSources } = require('../tools/lib/dsl/project');
 const dslData = require('../tools/lib/dsl/data');
 const { parseGuide } = require('../tools/lib/dsl/parse');
 const { Diagnostics } = require('../tools/lib/dsl/diag');
+const { tmpdir } = require('./helpers/tmp');
 
 const ROOT = path.resolve(__dirname, '..');
 const FIXTURE = path.join(__dirname, 'fixtures', 'route');
@@ -395,22 +395,18 @@ test('CLI: draft writes the same guide to stdout and --out, and rejects bad argu
 		title: 'Testvale 1-8', faction: 'Alliance', races: ['Human'],
 		levels: { min: 1, max: 8 }, zone: { name: 'Testvale', line: 6 }, next: ['forever/alliance/human/02-next'],
 	});
-	const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'polestar-route-'));
-	try {
-		const file = path.join(dir, 'sub', 'draft.guide');
-		const r = spawnSync(process.execPath, [CLI, ...args.filter((a) => a !== '--quiet'), '--out', file], { encoding: 'utf8' });
-		assert.equal(r.status, 0, r.stderr);
-		assert.equal(r.stdout, '');
-		assert.equal(fs.readFileSync(file, 'utf8'), out.stdout);
-		assert.match(r.stderr, /quests routed/);
-		assert.match(r.stderr, /skipped 112 "Fishing Lessons": profession/);
-		// --done from a previous guide's turn-ins.
-		const d = spawnSync(process.execPath, [CLI, ...args, '--done', file], { encoding: 'utf8' });
-		assert.equal(d.status, 1, 'every quest done: nothing left to route');
-		assert.match(d.stderr, /no quest is available/);
-	} finally {
-		fs.rmSync(dir, { recursive: true, force: true });
-	}
+	const dir = tmpdir('polestar-route-');
+	const file = path.join(dir, 'sub', 'draft.guide');
+	const r = spawnSync(process.execPath, [CLI, ...args.filter((a) => a !== '--quiet'), '--out', file], { encoding: 'utf8' });
+	assert.equal(r.status, 0, r.stderr);
+	assert.equal(r.stdout, '');
+	assert.equal(fs.readFileSync(file, 'utf8'), out.stdout);
+	assert.match(r.stderr, /quests routed/);
+	assert.match(r.stderr, /skipped 112 "Fishing Lessons": profession/);
+	// --done from a previous guide's turn-ins.
+	const d = spawnSync(process.execPath, [CLI, ...args, '--done', file], { encoding: 'utf8' });
+	assert.equal(d.status, 1, 'every quest done: nothing left to route');
+	assert.match(d.stderr, /no quest is available/);
 	for (const bad of [
 		['--levels', '8-1'],
 		['--levels', 'x'],

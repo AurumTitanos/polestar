@@ -10,6 +10,7 @@ const path = require('node:path');
 const { buildQolData, toLua } = require('../tools/commands/qol');
 const media = require('../tools/media/qol');
 const { runAddon } = require('./helpers/lua');
+const { tmpdir } = require('./helpers/tmp');
 
 const FRAMES = { era: { 1429: { c: 0, left: 1000, right: -1000, top: 1000, bottom: -1000 } } };
 
@@ -60,22 +61,18 @@ test('qol build: generated Lua loads into the addon namespace', () => {
 });
 
 test('qol media: power-of-two TGA glyphs under Media/UI with the qol- prefix', () => {
-	const root = fs.mkdtempSync(path.join(os.tmpdir(), 'qol-media-'));
-	try {
-		const written = media.generate(root);
-		assert.equal(media.name, 'qol');
-		assert.deepEqual(written.map((f) => path.basename(f, '.tga')).sort(), [...media.textures].sort());
-		for (const f of written) {
-			assert.equal(path.dirname(f), path.join(root, 'Media', 'UI'));
-			const b = fs.readFileSync(f);
-			assert.equal(b[2], 2, 'uncompressed true-colour');
-			assert.deepEqual([b.readUInt16LE(12), b.readUInt16LE(14)], [32, 32]);
-			let ink = 0;
-			for (let i = 18 + 3; i < b.length; i += 4) if (b[i] > 128) ink++;
-			assert.ok(ink > 40, `${path.basename(f)} draws something`);
-		}
-	} finally {
-		fs.rmSync(root, { recursive: true, force: true });
+	const root = tmpdir('qol-media-');
+	const written = media.generate(root);
+	assert.equal(media.name, 'qol');
+	assert.deepEqual(written.map((f) => path.basename(f, '.tga')).sort(), [...media.textures].sort());
+	for (const f of written) {
+		assert.equal(path.dirname(f), path.join(root, 'Media', 'UI'));
+		const b = fs.readFileSync(f);
+		assert.equal(b[2], 2, 'uncompressed true-colour');
+		assert.deepEqual([b.readUInt16LE(12), b.readUInt16LE(14)], [32, 32]);
+		let ink = 0;
+		for (let i = 18 + 3; i < b.length; i += 4) if (b[i] > 128) ink++;
+		assert.ok(ink > 40, `${path.basename(f)} draws something`);
 	}
 });
 

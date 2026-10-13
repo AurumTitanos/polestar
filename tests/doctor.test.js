@@ -6,7 +6,8 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { tmpdir, quiet } = require('./fixtures/dsl/helpers');
+const { quiet } = require('./helpers/cli');
+const { tmpdir } = require('./helpers/tmp');
 const doctor = require('../tools/commands/doctor');
 
 const JOE = path.join(__dirname, 'fixtures', 'packs', 'joe');

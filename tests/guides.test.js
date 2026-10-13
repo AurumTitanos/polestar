@@ -13,18 +13,13 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { ROOT } = require('./helpers/lua');
+const { needs } = require('./helpers/data');
 const { playtest, resultLines } = require('../tools/lib/playtest');
 const { OFFICIAL_DIR, findGuideFiles } = require('../tools/lib/dsl/project');
 const { readManifest } = require('../tools/lib/pack/manifest');
 const { format } = require('../tools/lib/dsl/diag');
 
-const DATA = path.join(ROOT, 'data', 'forever');
-const skip = !fs.existsSync(path.join(DATA, 'quests.json'))
-	? 'reference data not built (node tools/polestar.js data build)'
-	: findGuideFiles(OFFICIAL_DIR).length === 0
-		? 'no guides under guides/'
-		: false;
+const skip = needs('quests.json') || (findGuideFiles(OFFICIAL_DIR).length === 0 && 'no guides under guides/');
 
 test('every authored guide can be played to the end by every class it branches on', { skip }, () => {
 	const { manifest } = readManifest(OFFICIAL_DIR, { official: true });

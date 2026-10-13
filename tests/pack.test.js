@@ -7,7 +7,9 @@ const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
-const { GUIDES_DIR, DATA_DIR, tmpdir, quiet, fakeAddons } = require('./fixtures/dsl/helpers');
+const { GUIDES_DIR, DATA_DIR } = require('./helpers/dsl');
+const { quiet, fakeAddons, polestar } = require('./helpers/cli');
+const { tmpdir } = require('./helpers/tmp');
 const pack = require('../tools/commands/pack');
 const { buildZip, writeZip, readZip, directoryEntries, crc32 } = require('../tools/lib/zip');
 const { packageVersion, ROOT } = require('../tools/lib/dsl/project');
@@ -150,11 +152,7 @@ test('inside a pack, pack writes dist/<folder>-<version>.zip with exactly its fi
 	const PACKS = path.join(__dirname, 'fixtures', 'packs');
 	const dir = tmpdir();
 	fs.cpSync(path.join(PACKS, 'mini'), dir, { recursive: true });
-	const cli = () =>
-		spawnSync(process.execPath, [path.join(__dirname, '..', 'tools', 'polestar.js'), 'pack', '--data', DATA_DIR, '--context', path.join(PACKS, 'context'), '--context-data', DATA_DIR], {
-			cwd: path.join(dir, 'guides'),
-			encoding: 'utf8',
-		});
+	const cli = () => polestar(['pack', '--data', DATA_DIR, '--context', path.join(PACKS, 'context'), '--context-data', DATA_DIR], { cwd: path.join(dir, 'guides') });
 	const first = cli();
 	assert.equal(first.status, 0, first.stderr);
 	assert.deepEqual(fs.readdirSync(path.join(dir, 'dist')), ['PolestarPack_MiniPack-0.3.0.zip']);

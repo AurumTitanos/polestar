@@ -8,6 +8,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { zoneLevels, emitLua, buildZoneLevels, foreverOnly, ROOT } = require('../tools/lib/maps/zonelevels');
 const { runAddon } = require('./helpers/lua');
+const { DATA, needs } = require('./helpers/data');
 
 function pts(n, x, y) {
 	return Array.from({ length: n }, (_, i) => [x + (i % 5), y + Math.floor(i / 5)]);
@@ -99,10 +100,7 @@ test('the generated Lua registers the ranges and the addon colours them for the 
 	}
 });
 
-const DATA = path.join(ROOT, 'data', 'forever');
-const haveData = fs.existsSync(path.join(DATA, 'npcs.json')) && fs.existsSync(path.join(DATA, 'zones.json'));
-
-test('ZoneLevels.lua is up to date with data/forever', { skip: !haveData && 'data/forever not built' }, () => {
+test('ZoneLevels.lua is up to date with data/forever', { skip: needs('npcs.json', 'zones.json') }, () => {
 	const { lua, levels } = buildZoneLevels({ dataDir: DATA });
 	const committed = fs.readFileSync(path.join(ROOT, 'addon', 'Polestar', 'Maps', 'ZoneLevels.lua'), 'utf8');
 	assert.equal(committed, lua, 'run: node tools/polestar.js maps build');

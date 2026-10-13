@@ -5,17 +5,16 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const path = require('node:path');
-const { spawnSync } = require('node:child_process');
-const { DATA_DIR } = require('./fixtures/dsl/helpers');
+const { DATA_DIR } = require('./helpers/dsl');
+const { polestar } = require('./helpers/cli');
 const { formatDiagnostics } = require('../tools/lib/dsl/diag');
 
 const PACKS = path.join(__dirname, 'fixtures', 'packs');
 const FORMAT = path.join(PACKS, 'format');
 const CONTEXT = path.join(PACKS, 'context');
-const CLI = path.join(__dirname, '..', 'tools', 'polestar.js');
 
 function cmd(name, ...args) {
-	return spawnSync(process.execPath, [CLI, name, '--pack', FORMAT, '--data', DATA_DIR, '--context', CONTEXT, '--context-data', DATA_DIR, ...args], { encoding: 'utf8' });
+	return polestar([name, '--pack', FORMAT, '--data', DATA_DIR, '--context', CONTEXT, '--context-data', DATA_DIR, ...args]);
 }
 
 const HINT = 'find the id with `polestar find <name>`, or give its name in quotes';
@@ -74,7 +73,7 @@ test('an unknown --format exits 2', () => {
 });
 
 test('the required fix hints', () => {
-	const { compile, guideText } = require('./fixtures/dsl/helpers');
+	const { compile, guideText } = require('./helpers/dsl');
 	const { validateManifest } = require('../tools/lib/pack/manifest');
 	const hintOf = (diags, re) => diags.find((d) => re.test(d.message)).hint;
 	const r = compile(guideText(['guide forever/h', 'title H', 'faction Alliance', 'levels 1-6', 'zone Elwynn Forest', 'next forever/nope', '', 'step S', '  talk 999999', '  goto 50,50 "a | b"']));
@@ -88,7 +87,7 @@ test('the required fix hints', () => {
 
 test('a guide id outside the pack hints at the prefix', () => {
 	const { compileSources } = require('../tools/lib/dsl/project');
-	const { fixtureData } = require('./fixtures/dsl/helpers');
+	const { fixtureData } = require('./helpers/dsl');
 	const { diag } = compileSources([{ file: 'x.guide', text: 'guide forever/x\ntitle X\nlevels 1-2\nzone Elwynn Forest\n\nstep S\n  level 2\n' }], fixtureData(), undefined, { pack: 'joe' });
 	assert.equal(diag.errors[0].hint, 'start the id with `joe/`');
 });
@@ -103,11 +102,11 @@ test('--format json --quiet leaves the warnings out of the list but still counts
 
 test('compile --format json: a failed write is an error in the document, so ok matches the exit code', () => {
 	const fs = require('node:fs');
-	const { tmpdir } = require('./fixtures/dsl/helpers');
+	const { tmpdir } = require('./helpers/tmp');
 	const out = tmpdir();
 	fs.writeFileSync(path.join(out, 'mine.txt'), 'not a pack\n');
 	const args = ['compile', '--pack', path.join(PACKS, 'joe'), '--data', DATA_DIR, '--context', CONTEXT, '--context-data', DATA_DIR, '--out', out, '--format', 'json'];
-	const r = spawnSync(process.execPath, [CLI, ...args], { encoding: 'utf8' });
+	const r = polestar(args);
 	assert.equal(r.status, 1, r.stderr);
 	const doc = JSON.parse(r.stdout);
 	assert.equal(doc.ok, false);

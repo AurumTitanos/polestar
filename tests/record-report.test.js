@@ -5,13 +5,12 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
 const { buildReport, formatReport } = require('../tools/lib/recording/report');
 const { tmpdir } = require('./helpers/tmp');
+const { polestar } = require('./helpers/cli');
 
-const CLI = path.join(__dirname, '..', 'tools', 'polestar.js');
 const G = 'forever/alliance/human/01-elwynn';
 const G2 = 'professions/mining';
 // Elwynn Forest: 5200 yd wide, so 1% of x = 52 yd.
@@ -167,7 +166,7 @@ test('--guide narrows the report; the text report names steps, revisits and open
 test('record report CLI: text, --json, --guide, and no recordings', () => {
 	const dir = tmpdir('polestar-report-');
 	for (const s of SESSIONS()) fs.writeFileSync(path.join(dir, `${s.session}.json`), JSON.stringify(s));
-	const run = (...args) => spawnSync(process.execPath, [CLI, 'record', 'report', '--recordings', dir, ...args], { encoding: 'utf8' });
+	const run = (...args) => polestar(['record', 'report', '--recordings', dir, ...args]);
 
 	const text = run();
 	assert.equal(text.status, 0, text.stderr);
@@ -183,7 +182,7 @@ test('record report CLI: text, --json, --guide, and no recordings', () => {
 	assert.equal(none.status, 1);
 	assert.match(none.stderr, /no recorded guide matches "nowhere"/);
 
-	const empty = spawnSync(process.execPath, [CLI, 'record', 'report', '--recordings', path.join(dir, 'missing')], { encoding: 'utf8' });
+	const empty = polestar(['record', 'report', '--recordings', path.join(dir, 'missing')]);
 	assert.equal(empty.status, 1);
 	assert.match(empty.stderr, /no sessions/);
 });

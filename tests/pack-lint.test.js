@@ -7,19 +7,17 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { spawnSync } = require('node:child_process');
-const { tmpdir, DATA_DIR } = require('./fixtures/dsl/helpers');
+const { DATA_DIR } = require('./helpers/dsl');
+const { tmpdir } = require('./helpers/tmp');
+const { polestar } = require('./helpers/cli');
 const { findPackDir, resolvePack } = require('../tools/lib/pack/locate');
 const { OFFICIAL_DIR } = require('../tools/lib/dsl/project');
 
 const PACKS = path.join(__dirname, 'fixtures', 'packs');
 const JOE = path.join(PACKS, 'joe');
 const CONTEXT = path.join(PACKS, 'context');
-const CLI = path.join(__dirname, '..', 'tools', 'polestar.js');
 
-function run(args, cwd = path.join(__dirname, '..')) {
-	return spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: 'utf8' });
-}
+const run = (args, cwd) => polestar(args, { cwd });
 
 // lint/compile on a pack with the fixture data and the context fixture.
 function packCmd(cmd, dir, ...extra) {

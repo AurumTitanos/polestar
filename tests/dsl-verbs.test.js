@@ -10,7 +10,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { runAddon } = require('./helpers/lua');
 const { TEST_PACK } = require('./helpers/packs');
-const { compile, guideText, lineOf, plain, fixtureData, tmpdir, writeTestPack, DATA_DIR } = require('./fixtures/dsl/helpers');
+const { compile, guideText, lineOf, plain, fixtureData, writeTestPack, DATA_DIR } = require('./helpers/dsl');
+const { tmpdir } = require('./helpers/tmp');
 const { loadData } = require('../tools/lib/dsl/data');
 const { emitGuides } = require('../tools/lib/dsl/emit');
 

@@ -5,15 +5,14 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const os = require('node:os');
 const path = require('node:path');
 
 const { loadCamps, grindSpotter } = require('../tools/lib/sim/export');
 const syn = require('./fixtures/sim/synthetic');
+const { tmpdir } = require('./helpers/tmp');
 
 test('camps are clusters of quest mobs only: a guard standing in a group is never a grind spot', (t) => {
-	const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'polestar-export-'));
-	t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+	const dir = tmpdir('polestar-export-');
 	const data = syn.makeData();
 	// Town guards: a group of normal NPCs without a faction, no quest needs them.
 	data.npcs[20] = { id: 20, name: 'Town Bruiser', level: 7, faction: null, spawns: { [syn.FIELD]: { f: 'e', pts: [[60, 60], [60.5, 60], [61, 60], [60, 60.5], [60.5, 60.5], [61, 60.5], [60, 61]] } } };

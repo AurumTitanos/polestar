@@ -8,7 +8,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const dj = require('../tools/lib/data/dungeonjournal');
 const { loadData } = require('../tools/lib/dsl/data');
-const { tmpdir, DATA_DIR } = require('./fixtures/dsl/helpers');
+const { DATA_DIR } = require('./helpers/dsl');
+const { tmpdir } = require('./helpers/tmp');
 
 const DJ_DIR = path.join(__dirname, 'fixtures', 'dungeonjournal', 'ForeverDungeonJournal');
 
