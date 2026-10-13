@@ -1,10 +1,11 @@
 'use strict';
-// The first-run welcome (addon/Polestar/UI/Welcome.lua) against the real
-// Core + Theme + UI manifests and the fake Engine of tests/lua/stub_ui.lua:
-// once per account (PolestarDB.welcomeSeen = 1), never in combat, never over
-// the route choice; four pages (three once the routes are no longer alpha)
-// whose setup choices write their settings; reopened from About and by
-// /polestar welcome.
+// The welcome (addon/Polestar/UI/Welcome.lua) against the real Core + Theme +
+// UI manifests and the fake Engine of tests/lua/stub_ui.lua: once per new
+// character (PolestarCharDB.welcomeSeen = 1), with Set up only while the
+// account has not had one (PolestarDB.welcomeSeen = 1); never in combat,
+// never over the route choice; a first page that greets the character; four
+// pages (three once the routes are no longer alpha) whose setup choices write
+// their settings; opened from About and by /polestar welcome.
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
@@ -12,71 +13,152 @@ const { runAddon } = require('./helpers/lua');
 
 const FILES = ['Core/Core.xml', 'Theme/Theme.xml', 'UI/UI.xml'];
 
+// Saved variables: an account that has had its welcome, a character Polestar
+// knew before the welcome had a flag, one that has seen it, one still due.
+const ACCOUNT_SEEN = 'PolestarDB = { schema = 1, settings = {}, welcomeSeen = 1 }';
+const ACCOUNT_NEW = 'PolestarDB = { schema = 1, settings = {} }';
+const CHAR_KNOWN = 'PolestarCharDB = { schema = 1 }';
+const CHAR_SEEN = 'PolestarCharDB = { schema = 1, welcomeSeen = 1 }';
+const CHAR_DUE = 'PolestarCharDB = { schema = 1, welcomeSeen = 0 }';
+
 // uistub.install marks the welcome seen for every other UI test; here the
-// account keeps whatever its saved variables say (nothing on a fresh one).
+// account and the character keep what their saved variables (and the addon
+// loading) made of them.
 function run(script, opts = {}) {
 	return runAddon({
 		stubs: ['stub_ui.lua'],
 		addons: [{ name: 'Polestar', files: FILES }],
-		saved: opts.saved,
+		saved: opts.saved && { Polestar: opts.saved },
 		script: `local savedSeen = PolestarDB and PolestarDB.welcomeSeen
+local savedChar = PolestarCharDB and PolestarCharDB.welcomeSeen
 uistub.install()
 Polestar.DB().welcomeSeen = savedSeen
+Polestar.CharState().welcomeSeen = savedChar
 ${opts.before || ''}
 stub.login()
 local Wel = Polestar.UI.Welcome
 function shown() return PolestarWelcome ~= nil and PolestarWelcome:IsShown() end
 function title() return PolestarWelcome.Title:GetText() end
+function titles()
+	local out = {}
+	repeat
+		out[#out + 1] = title()
+		PolestarWelcome.Next:Click()
+	until not shown() or #out > 6
+	return out
+end
+function plain(s) return (s:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", "")) end
 function menuPick(text) for _, r in ipairs(PolestarMenu.rows) do if r:IsShown() and r.Text:GetText() == text then r:Click() return true end end return false end
 ${script}`,
 	}).emitted;
 }
 
-test('a fresh account sees the welcome once, shortly after login; closing it marks the account', () => {
+test('a new character sees the welcome once, shortly after login; opening it marks the character, closing it the account', () => {
 	const [out] = run(`
 		local atLogin = shown()
 		stub.advance(3)
 		local after = shown()
 		local first = title()
+		local step = PolestarWelcome.Subtitle:GetText()
+		local open = { char = PolestarCharDB.welcomeSeen, account = PolestarDB.welcomeSeen or false }
 		PolestarWelcome.Skip:Click()
-		emit({ atLogin = atLogin, after = after, first = first, closed = not shown(), seen = PolestarDB.welcomeSeen })`);
-	assert.deepEqual(out, { atLogin: false, after: true, first: 'Welcome to Polestar', closed: true, seen: 1 });
-
-	const [again] = run('stub.advance(10)\nemit({ shown = shown() })', {
-		saved: { Polestar: 'PolestarDB = { schema = 1, settings = {}, welcomeSeen = 1 }' },
-	});
-	assert.equal(again.shown, false, 'a later login on the same account never shows it again');
+		emit({ atLogin = atLogin, after = after, first = first, step = step, open = open, closed = not shown(),
+			char = PolestarCharDB.welcomeSeen, account = PolestarDB.welcomeSeen })`);
+	assert.deepEqual(out, { atLogin: false, after: true, first: 'Hello, Testchar', step: '1 of 4',
+		open: { char: 1, account: false }, closed: true, char: 1, account: 1 },
+	'a reload or logout with it still up does not show it again');
 });
 
-test('an account that saw the old beta notice still gets the welcome once, and the old flag goes', () => {
+test('a character with saved data and no flag never gets it unasked, even on an account that never saw it', () => {
+	const [out] = run('stub.advance(10)\nemit({ shown = shown(), char = PolestarCharDB.welcomeSeen, account = PolestarDB.welcomeSeen or false })', {
+		saved: `${ACCOUNT_NEW}\n${CHAR_KNOWN}`,
+	});
+	assert.deepEqual(out, { shown: false, char: 1, account: false });
+});
+
+test('a later login of a character that has seen it does not show it', () => {
+	const [out] = run('stub.advance(10)\nemit({ shown = shown() })', { saved: `${ACCOUNT_SEEN}\n${CHAR_SEEN}` });
+	assert.equal(out.shown, false);
+});
+
+test('a new character on an account that has had its welcome gets it without Set up; /polestar welcome shows every page', () => {
+	const [out] = run(`
+		stub.advance(3)
+		local login = titles()
+		SlashCmdList.POLESTAR("welcome")
+		local asked = titles()
+		emit({ login = login, asked = asked, char = PolestarCharDB.welcomeSeen })`, { saved: ACCOUNT_SEEN });
+	assert.deepEqual(out.login, ['Hello, Testchar', 'Our routes are still alpha', 'Guide packs']);
+	assert.deepEqual(out.asked, ['Hello, Testchar', 'Our routes are still alpha', 'Set up', 'Guide packs']);
+	assert.equal(out.char, 1);
+});
+
+test('a due welcome that never opened shows at the next login', () => {
+	const [out] = run('stub.advance(3)\nemit({ shown = shown() })', { saved: `${ACCOUNT_SEEN}\n${CHAR_DUE}` });
+	assert.equal(out.shown, true);
+});
+
+test('an account that saw the old beta notice still gets the welcome on a new character, and the old flag goes', () => {
 	const [out] = run('stub.advance(3)\nemit({ shown = shown(), old = PolestarDB.betaNoticeSeen or false })', {
-		saved: { Polestar: 'PolestarDB = { schema = 1, settings = {}, betaNoticeSeen = true }' },
+		saved: 'PolestarDB = { schema = 1, settings = {}, betaNoticeSeen = true }',
 	});
 	assert.deepEqual(out, { shown: true, old: false });
+});
+
+test('the first page greets the character by name and names the guide Polestar suggests', () => {
+	const [out] = run(`
+		local g = uistub.guides[uistub.suggest]
+		local function page() return plain(PolestarWelcome.pages.welcome.Text:GetText()) end
+		local function again() PolestarWelcome:Hide(); Wel.Show(); return page() end
+		Wel.Show()
+		local named = title()
+		local text = page()
+		local zoneTitle = g.title
+		g.title = "First Steps"
+		local other = again()
+		uistub.player = { name = "Testchar", level = 7 }
+		local levelOnly = again()
+		uistub.player = {}
+		Polestar.Compat.GetZoneText = function() return nil end
+		local nothing = again()
+		uistub.suggest = nil
+		local none = again()
+		emit({ named = named, title = title(), text = text, zoneTitle = zoneTitle, other = other,
+			levelOnly = levelOnly, nothing = nothing, none = none })`);
+	assert.equal(out.named, 'Hello, Testchar');
+	assert.equal(out.title, 'Welcome to Polestar', 'without a name');
+	assert.equal(out.zoneTitle, 'Elwynn Forest');
+	assert.ok(out.text.startsWith('Polestar suggests Elwynn Forest for your level 4 Human Warrior.'), 'a guide named for the zone: ' + out.text);
+	assert.ok(out.other.startsWith('Polestar suggests First Steps for your level 4 Human Warrior in Elwynn Forest.'), out.other);
+	assert.ok(out.levelOnly.startsWith('Polestar suggests First Steps for your level 7 character in Elwynn Forest.'), out.levelOnly);
+	assert.ok(out.nothing.startsWith('Polestar suggests First Steps for you.'), out.nothing);
+	for (const part of ['The guide window', 'The arrow', '/polestar guides']) assert.ok(out.text.includes(part), part);
+	assert.ok(out.none.startsWith('Polestar has no guide to suggest for where you are.\n\n'), out.none);
+	assert.ok(out.none.includes('/polestar guides'), 'the third paragraph still names /polestar guides');
 });
 
 test('the ✕ and Escape close it and mark it seen too', () => {
 	const [out] = run(`
 		stub.advance(3)
 		PolestarWelcome.Close:Click()
-		local x = { closed = not shown(), seen = PolestarDB.welcomeSeen }
-		PolestarDB.welcomeSeen = nil
+		local x = { closed = not shown(), seen = PolestarCharDB.welcomeSeen }
+		PolestarCharDB.welcomeSeen = 0
 		Wel.Show()
 		local special = false
 		for _, n in ipairs(UISpecialFrames) do if n == "PolestarWelcome" then special = true end end
 		PolestarWelcome:Hide()
-		emit({ x = x, special = special, seen = PolestarDB.welcomeSeen })`);
+		emit({ x = x, special = special, seen = PolestarCharDB.welcomeSeen })`);
 	assert.deepEqual(out, { x: { closed: true, seen: 1 }, special: true, seen: 1 });
 });
 
 test('in combat it waits for the fight to end', () => {
 	const [out] = run(`
 		stub.advance(3)
-		local during = shown()
+		local during = { shown = shown(), char = PolestarCharDB.welcomeSeen }
 		stub.inCombat = false
 		stub.fire("PLAYER_REGEN_ENABLED")
 		emit({ during = during, after = shown(), seen = PolestarDB.welcomeSeen or false })`, { before: 'stub.inCombat = true' });
-	assert.deepEqual(out, { during: false, after: true, seen: false });
+	assert.deepEqual(out, { during: { shown: false, char: 0 }, after: true, seen: false });
 });
 
 test('it never opens over the route choice: it waits for that window to close, and steps aside if one opens', () => {
@@ -94,14 +176,16 @@ test('it never opens over the route choice: it waits for that window to close, a
 		local afterChoice = shown()
 		PolestarWelcome.Next:Click()
 		Polestar.Fire("ROUTE_CHOICE", "x")
-		local overWelcome = { welcome = shown(), choice = RC.IsShown(), seen = PolestarDB.welcomeSeen or false }
+		local overWelcome = { welcome = shown(), choice = RC.IsShown(), char = PolestarCharDB.welcomeSeen }
 		RC.Hide()
-		emit({ underChoice = underChoice, afterChoice = afterChoice, overWelcome = overWelcome, back = shown(), page = title() })`);
+		emit({ underChoice = underChoice, afterChoice = afterChoice, overWelcome = overWelcome, back = shown(), page = title(),
+			step = PolestarWelcome.Subtitle:GetText() })`, { saved: ACCOUNT_SEEN });
 	assert.equal(out.underChoice, false);
 	assert.equal(out.afterChoice, true);
-	assert.deepEqual(out.overWelcome, { welcome: false, choice: true, seen: false }, 'stepping aside is not closing');
+	assert.deepEqual(out.overWelcome, { welcome: false, choice: true, char: 1 }, 'stepped aside, already marked shown');
 	assert.equal(out.back, true);
 	assert.equal(out.page, 'Our routes are still alpha', 'it comes back on the page it left');
+	assert.equal(out.step, '2 of 3', 'with the pages it started with');
 });
 
 test('four pages with Next and Back; Next on the last page closes it', () => {
@@ -126,13 +210,13 @@ test('four pages with Next and Back; Next on the last page closes it', () => {
 		PolestarWelcome.Next:Click()
 		emit({ titles = titles, steps = steps, lastNext = lastNext, back = back, alpha = alpha, alphaText = alphaText,
 			firstBack = firstBack, closed = not shown(), seen = PolestarDB.welcomeSeen })`);
-	assert.deepEqual(out.titles, ['Welcome to Polestar', 'Our routes are still alpha', 'Set up', 'Guide packs']);
+	assert.deepEqual(out.titles, ['Hello, Testchar', 'Our routes are still alpha', 'Set up', 'Guide packs']);
 	assert.deepEqual(out.steps, ['1 of 4', '2 of 4', '3 of 4', '4 of 4']);
 	assert.equal(out.lastNext, 'Done');
 	assert.equal(out.back, 'Set up');
 	assert.equal(out.alpha, false, 'the alpha text is only on its own page');
 	assert.equal(out.alphaText, true);
-	assert.deepEqual(out.firstBack, { title: 'Welcome to Polestar', backShown: false });
+	assert.deepEqual(out.firstBack, { title: 'Hello, Testchar', backShown: false });
 	assert.equal(out.closed, true);
 	assert.equal(out.seen, 1);
 });
@@ -144,7 +228,7 @@ test('the alpha page follows ns.routesAlpha: three pages once the routes are pro
 		local titles = {}
 		for i = 1, 3 do titles[i] = title(); PolestarWelcome.Next:Click() end
 		emit({ titles = titles, closed = not shown() })`);
-	assert.deepEqual(out.titles, ['Welcome to Polestar', 'Set up', 'Guide packs']);
+	assert.deepEqual(out.titles, ['Hello, Testchar', 'Set up', 'Guide packs']);
 	assert.equal(out.closed, true);
 });
 
@@ -242,5 +326,5 @@ test('About and /polestar welcome reopen it on its first page', () => {
 		PolestarWelcome:Hide()
 		SlashCmdList.POLESTAR("welcome")
 		emit({ about = about, command = shown(), title = title() })`);
-	assert.deepEqual(out, { about: { shown: true, title: 'Welcome to Polestar' }, command: true, title: 'Welcome to Polestar' });
+	assert.deepEqual(out, { about: { shown: true, title: 'Hello, Testchar' }, command: true, title: 'Hello, Testchar' });
 });

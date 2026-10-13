@@ -1,6 +1,7 @@
--- The first-run welcome: a small Polestar window, once per account, that
--- walks a new player through four pages with Back, Next and Skip:
---   1. Welcome to Polestar: the guide window, the arrow, quest automation,
+-- The welcome: a small Polestar window, centred, that greets a character
+-- Polestar has not seen before, with Back, Next and Skip:
+--   1. Hello, <name>: the guide Polestar suggests for this character (its
+--      level, race, class and zone), then the guide window, the arrow and
 --      /polestar guides;
 --   2. Our routes are still alpha: shown while ns.routesAlpha is true;
 --   3. Set up: quest automation (behavior.autoAccept and autoTurnin as one
@@ -9,16 +10,29 @@
 --   4. Guide packs: what they are, how to install one, where they appear,
 --      who supports them and the pack docs (ns.DocsURL); Start the suggested
 --      guide (Choose a guide without one) or Browse guides.
--- Any close (Skip, Done, Start, Browse guides, the header ✕, Escape) marks it
--- seen: PolestarDB.welcomeSeen = SEEN, the welcome's version. The beta
--- notice's old flag (betaNoticeSeen) is dropped, so every account sees the
--- welcome once.
+--
+-- Per character: PolestarCharDB.welcomeSeen, the welcome's version (SEEN).
+-- A new character (ns.IsNewCharacter: no saved PolestarCharDB when Polestar
+-- loaded) gets 0, so the welcome is due; a character with saved data and no
+-- flag gets SEEN without seeing it, so nobody who already plays gets it
+-- unasked. At login it opens while the character's flag is below SEEN, and
+-- opening it sets the flag, so a /reload or a logout with it still up does
+-- not bring it back; a due welcome that never opened (a logout in combat or
+-- under the route choice) stays due for the next login.
+--
+-- Per account: PolestarDB.welcomeSeen, the account has had its welcome. Its
+-- settings are account-wide, so Set up is in a welcome shown at login only
+-- while the account's flag is below SEEN; a later character skips it. The
+-- page set is fixed when a showing starts. Any close (Skip, Done, Start,
+-- Browse guides, the header ✕, Escape) sets both flags. The beta notice's old
+-- flag (betaNoticeSeen) is dropped.
 --
 -- It opens a moment after login, never in combat (it waits for the fight to
 -- end), and never over the route choice: while that window is up the welcome
 -- waits for it to close, and if a route choice opens over the welcome it
 -- steps aside until it is done, then comes back on the page it left. About's
--- "Show the welcome again" and /polestar welcome (SHOW_WELCOME) reopen it.
+-- "Show the welcome again" and /polestar welcome (SHOW_WELCOME) open it with
+-- every page.
 --
 -- Built on first use; colours are Theme tokens only.
 
@@ -40,15 +54,22 @@ local DELAY = 2 -- seconds after login, so the world and the other windows settl
 
 local F -- the window
 local current = "welcome" -- the page shown (its key)
-local pending -- nil | "login" (due once) | "asked" (opened on request), waiting for combat or the route choice
+local pending -- nil | "login" (due at login) | "asked" (opened on request, or coming back), waiting for combat or the route choice
 local stepping -- hidden to make way for the route choice, not closed
+local full = true -- this showing has every page (false: Set up left out); fixed when it starts
 local hookedRC
 
 local function inCombat()
 	return InCombatLockdown and InCombatLockdown() or false
 end
 
+-- This character has had its welcome.
 local function seen()
+	return (tonumber(ns.CharState().welcomeSeen) or 0) >= SEEN
+end
+
+-- This account has had its welcome.
+local function accountSeen()
 	return (tonumber(ns.DB().welcomeSeen) or 0) >= SEEN
 end
 
@@ -87,16 +108,59 @@ end
 
 local PAGES = {}
 
+-- The player as Polestar reads them; a field is nil when the client cannot say.
+local function playerInfo()
+	local C = ns.Compat
+	local ok, info = pcall(C.GetPlayerInfo)
+	return ok and type(info) == "table" and info or {}
+end
+
+local function known(s)
+	return type(s) == "string" and s ~= "" and s or nil
+end
+
+-- "Polestar suggests <guide> for your level 1 Human Warrior in Elwynn
+-- Forest.", leaving out what is unknown.
+local function hello()
+	local G = ns.Guides
+	local id = G and G.Suggest and G.Suggest()
+	local g = id and G.Get and G.Get(id)
+	if not (g and known(g.title)) then
+		return L["Polestar has no guide to suggest for where you are."]
+	end
+	local info = playerInfo()
+	local race, class = known(UI.RaceName(info.race)), known(UI.ClassName(info.class))
+	local level = tonumber(info.level)
+	local who
+	if race or class then
+		who = race and class and (race .. " " .. class) or race or class
+		if level then who = (L["level %d %s"]):format(level, who) end
+	elseif level then
+		who = (L["level %d character"]):format(level)
+	end
+	local zone = known((ns.Compat.GetZoneText()))
+	-- A guide named for the zone already says where.
+	if zone and g.title:lower():find(zone:lower(), 1, true) then zone = nil end
+	local guide = cmd(g.title)
+	if who and zone then return (L["Polestar suggests %s for your %s in %s."]):format(guide, who, zone) end
+	if who then return (L["Polestar suggests %s for your %s."]):format(guide, who) end
+	if zone then return (L["Polestar suggests %s for you in %s."]):format(guide, zone) end
+	return (L["Polestar suggests %s for you."]):format(guide)
+end
+
 PAGES[#PAGES + 1] = {
 	key = "welcome",
-	title = function() return L["Welcome to Polestar"] end,
+	title = function()
+		local name = known(playerInfo().name)
+		return name and (L["Hello, %s"]):format(name) or L["Welcome to Polestar"]
+	end,
 	build = function(p) p.Text = bodyText(p) end,
 	layout = function(p)
 		p.Text:SetText(table.concat({
-			L["Polestar takes you through World of Warcraft: Forever one step at a time."],
-			L["The guide window shows the step you are on: who to talk to, what to kill or collect, and where to go. The arrow points the way, and the map marks each place."],
-			L["Polestar can also accept and turn in your guide's quests for you. You choose that in a moment."],
-			(L["Choose a guide any time with %s."]):format(cmd("/polestar guides")),
+			hello(),
+			(L["%s shows the step you are on: who to talk to, what to kill or collect, and where to go. Goals tick themselves off as you do them."]):format(cmd(L["The guide window"])),
+			(L["%s points the way, and the map marks each place."]):format(cmd(L["The arrow"])),
+			(L["%s lets you pick another guide, open one in a new tab, or search them all."]):format(cmd("/polestar guides")),
 		}, "\n\n"))
 		place(p.Text, 0)
 		return p.Text:GetStringHeight()
@@ -127,6 +191,7 @@ end
 
 PAGES[#PAGES + 1] = {
 	key = "setup",
+	shown = function() return full end,
 	title = function() return L["Set up"] end,
 	build = function(p)
 		p.Text = bodyText(p)
@@ -259,7 +324,7 @@ local function build()
 	F:EnableMouse(true)
 	F:SetMovable(true)
 	F:SetWidth(WIDTH)
-	F:SetPoint("CENTER", UIParent, "CENTER", 0, 60)
+	F:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
 	F:Hide()
 	Theme.Skin(F, "window")
 
@@ -320,9 +385,11 @@ local function build()
 	F.Back:SetPoint("RIGHT", F.Next, "LEFT", -8, 0)
 
 	F:SetScript("OnShow", function(self) Anim.To(self, "alpha", 0, 1, Anim.BASE, "out") end)
-	-- Any close marks it seen; stepping aside for the route choice does not.
+	-- Any close marks it seen, for the character and the account; stepping
+	-- aside for the route choice does not.
 	F:SetScript("OnHide", function()
 		if stepping then return end
+		ns.CharState().welcomeSeen = SEEN
 		ns.DB().welcomeSeen = SEEN
 		pending = nil
 	end)
@@ -368,7 +435,9 @@ local function afterRouteChoice()
 	end
 end
 
--- Open now on the current page, or as soon as combat and the route choice allow.
+-- Open now on the current page, or as soon as combat and the route choice
+-- allow. A showing at login starts on the first page, with Set up while the
+-- account has not had its welcome.
 local function open(why)
 	if inCombat() then
 		pending = pending == "asked" and "asked" or why
@@ -380,6 +449,11 @@ local function open(why)
 		return
 	end
 	pending = nil
+	if why == "login" then
+		ns.CharState().welcomeSeen = SEEN -- shown: a reload or logout from here does not repeat it
+		full = not accountSeen()
+		current = PAGES[1].key
+	end
 	if not F then build() end
 	render()
 	F:Show()
@@ -387,9 +461,11 @@ local function open(why)
 end
 
 -- Open the welcome at `page` (a page key: "welcome", "alpha", "setup",
--- "packs"; or its number among the pages shown), the first by default.
--- Opens even when already seen (About, /polestar welcome, the preview).
+-- "packs"; or its number among the pages shown), the first by default, with
+-- every page. Opens even when already seen (About, /polestar welcome, the
+-- preview).
 function WEL.Show(page)
+	full = true
 	local list = pageList()
 	current = list[1].key
 	if type(page) == "number" and list[page] then
@@ -413,7 +489,8 @@ function try()
 	if pending == "asked" or (pending and not seen()) then open(pending) end
 end
 
--- A route choice opened over the welcome: step aside, come back after it.
+-- A route choice opened over the welcome: step aside, come back after it
+-- with the same pages.
 local function yieldToRouteChoice()
 	if not (F and F:IsShown() and routeChoiceUp()) then return end
 	stepping = true
@@ -422,6 +499,13 @@ local function yieldToRouteChoice()
 	pending = "asked"
 	afterRouteChoice()
 end
+
+-- The character's flag, set as the addon loads: due (0) for a new character,
+-- seen for one Polestar already knew, so only new characters get it unasked.
+ns.OnInit(function()
+	local s = ns.CharState()
+	if s.welcomeSeen == nil then s.welcomeSeen = ns.IsNewCharacter() and 0 or SEEN end
+end)
 
 ns.OnLogin(function()
 	local db = ns.DB()

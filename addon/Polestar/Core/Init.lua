@@ -16,9 +16,9 @@ ns.version = (C_AddOns and C_AddOns.GetAddOnMetadata and C_AddOns.GetAddOnMetada
 -- version (the shell sidebar, About). nil once Polestar is released.
 ns.stage = "Beta"
 -- The leveling routes are planned and played in the simulator but not yet
--- followed through the live game: the first-run welcome (UI/Welcome.lua)
--- says so on its own page while this is true. The owner turns it off once
--- they have been.
+-- followed through the live game: the welcome (UI/Welcome.lua) says so on
+-- its own page while this is true. The owner turns it off once they have
+-- been.
 ns.routesAlpha = true
 
 -- The pack docs online: the TOC's X-Website (the public repository, added at
@@ -271,6 +271,14 @@ function ns.CharState()
 	return s
 end
 
+-- A character Polestar had never seen: no saved PolestarCharDB when the addon
+-- loaded. A /reload loads the saved table again, so it reads false after one.
+local newCharacter = false
+
+function ns.IsNewCharacter()
+	return newCharacter
+end
+
 ---------------------------------------------------------------------------
 -- Lifecycle
 ---------------------------------------------------------------------------
@@ -292,6 +300,7 @@ local function onAddonLoaded(_, name)
 	if name ~= ADDON then return end
 	ns.UnregisterEvent("ADDON_LOADED", onAddonLoaded)
 	DB()
+	newCharacter = type(PolestarCharDB) ~= "table"
 	ns.CharState()
 	initialized = true
 	local queue = initQueue

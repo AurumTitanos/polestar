@@ -116,13 +116,16 @@ Polestar.RegisterDefaults(section, tbl)  -- at file load; section = "ui" | "nav"
 Polestar.Get("ui.scale")                 -- dotted path; falls back to defaults
 Polestar.Set("ui.scale", 1.1)            -- writes PolestarDB.settings, fires SETTING_CHANGED
 Polestar.CharState()                      -- PolestarCharDB, always a table
+Polestar.IsNewCharacter()                 -- true when there was no saved PolestarCharDB as the addon loaded
 ```
 
 `PolestarDB = { schema = 1, settings = { [section] = { ... } }, packs = { [packId] = { off = true } }, welcomeSeen = 1 }`
-`PolestarCharDB = { schema = 1, guide = id|nil, tabs = { guideId, ... }, activeTab = n, absentAt = { [guideId] = place }, manual = { [guideId] = { ["s:g"] = true|"tick" } }, skipped = { [guideId] = { [stepIndex] = true, ["s:g"] = true } }, pins = { [guideId] = { step, done } }, offers = { [questID] = level }, shapes = { [guideId] = shape }, stepKeys = { [guideId] = { hash, ... } }, flags = { fp = { [name] = true }, ... } }`
+`PolestarCharDB = { schema = 1, guide = id|nil, tabs = { guideId, ... }, activeTab = n, absentAt = { [guideId] = place }, manual = { [guideId] = { ["s:g"] = true|"tick" } }, skipped = { [guideId] = { [stepIndex] = true, ["s:g"] = true } }, pins = { [guideId] = { step, done } }, offers = { [questID] = level }, shapes = { [guideId] = shape }, stepKeys = { [guideId] = { hash, ... } }, flags = { fp = { [name] = true }, ... }, welcomeSeen = 0|1 }`
 
 `packs[<id>].off` hides a pack's guides account-wide (the Guide packs page's
-switch); `welcomeSeen` is the version of the welcome last seen (UI/Welcome.lua).
+switch). `welcomeSeen` (UI/Welcome.lua) is the version of the welcome last
+seen: in `PolestarDB`, the account has had its welcome (later characters skip
+its Set up page); in `PolestarCharDB`, this character has (0 while due).
 `behavior.suggestFrom` (default `"guides"`) is the pack suggestions come from.
 
 `manual` holds the player's ticks (`"tick"`, any goal but a note) **and**
@@ -1049,14 +1052,22 @@ Reading flow: `docs/UI_BRIEF.md` (READING FLOW).
   `X-Website` + `/blob/HEAD/docs/PACKS.md`, else "docs/PACKS.md in Polestar's
   source"). While `Guides.ProblemCount() > 0` the page's sidebar row carries
   the warning dot (a page spec's `dot`). Nothing goes to chat.
-- **Welcome** (`UI/Welcome.lua`, `SHOW_WELCOME`): four pages with Back, Next
-  and Skip: Welcome to Polestar; Our routes are still alpha (while
-  `ns.routesAlpha`); Set up (quest automation, the guide at login, the colour
-  scheme); Guide packs (with the docs link, then Start <suggested guide> or
-  Choose a guide, and Browse guides). Once per account
-  (`PolestarDB.welcomeSeen`), 2 s after login, never in combat or over the
-  route choice; any close marks it seen. About's "Show the welcome again" and
-  `/polestar welcome` reopen it.
+- **Welcome** (`UI/Welcome.lua`, `SHOW_WELCOME`): centred, four pages with
+  Back, Next and Skip: Hello, <name> (the guide `Guides.Suggest()` picks, for
+  the character's level, race, class and zone, else that there is none;
+  then the guide window, the arrow and `/polestar guides`); Our
+  routes are still alpha (while `ns.routesAlpha`); Set up (quest automation,
+  the guide at login, the colour scheme); Guide packs (with the docs link,
+  then Start <suggested guide> or Choose a guide, and Browse guides). Once
+  per new character (`PolestarCharDB.welcomeSeen`: 0 for a character with no
+  saved `PolestarCharDB` as Polestar loaded, `ns.IsNewCharacter()`; set seen
+  silently for one with saved data and no flag), 2 s after login, never in
+  combat or over the route choice; a due welcome that never opened stays due
+  for the next login, and one that opened is marked on the character as it
+  opens (a /reload or logout with it up does not repeat it). Set up is in it only while the account has not had its
+  welcome (`PolestarDB.welcomeSeen`); the page set is fixed when a showing
+  starts. Any close marks the account (and the character). About's "Show the
+  welcome again" and `/polestar welcome` open it with every page.
 - **Copy window** (`UI/Copy.lua`, frame `PolestarCopy`, `UI.ShowCopy(title,
   text)` or `SHOW_COPY`): a small window with the band, a title, a read-only
   `W.CopyBox` holding the text, selected and focused, and how to copy it; ✕

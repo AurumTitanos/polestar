@@ -639,7 +639,7 @@ const SCENES = [
 	},
 	{
 		file: 'welcome.svg',
-		title: 'The first-run welcome, once per account after login: Welcome, Our routes are still alpha, Set up, Guide packs',
+		title: 'The welcome, once per new character after login: Hello, Our routes are still alpha, Set up (on the account\'s first), Guide packs',
 		panels: [
 			{ roots: ['PolestarWelcome'], script: 'Polestar.UI.Welcome.Show("welcome")' },
 			{ roots: ['PolestarWelcome'], script: 'Polestar.UI.Welcome.Show("alpha")' },
