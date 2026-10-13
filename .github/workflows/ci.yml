@@ -2,6 +2,7 @@ name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
 
 permissions:
@@ -29,4 +30,9 @@ jobs:
       # No npm dependencies. A fresh clone has no built data (it needs the game
       # client and local sources), so the tests that read it skip with a reason.
       - name: Test
-        run: node --test "tests/**/*.test.js"
+        run: npm test
+
+      # The textures are generated from code alone, so CI can rebuild them and
+      # fail when the committed ones are stale.
+      - name: Textures are up to date
+        run: node tools/polestar.js media && git diff --exit-code -- addon/Polestar/Media

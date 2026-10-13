@@ -27,12 +27,6 @@
     "node": ">=24"
   },
   "scripts": {
-    "test": "node --test \"tests/**/*.test.js\"",
-    "data": "node tools/polestar.js data build",
-    "compile": "node tools/polestar.js compile",
-    "lint": "node tools/polestar.js lint",
-    "preview": "node tools/polestar.js preview",
-    "install-addon": "node tools/polestar.js install",
-    "pack": "node tools/polestar.js pack"
+    "test": "node --test \"tests/**/*.test.js\""
   }
 }
