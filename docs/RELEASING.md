@@ -100,8 +100,12 @@ Replace `0.2.0` with the new version throughout.
    checks that the guides registered, a guide opened, the data addons loaded
    and every TOC carries the release version.
 
-6. Then install the zip into the game itself, restart it fully and play the
-   first steps of a guide.
+6. Then install the zip into the game itself (remove the old `Polestar*`
+   folders first), restart it fully and test what the release changes: play
+   the first steps of a guide, and search, Dungeons and Rares when the Codex
+   changed. This is a gate: nothing is tagged, pushed or uploaded (steps 7 to
+   10) until the maintainer has played the release on their own client and
+   said it is good. If the servers are down, the release waits.
 
 7. Commit the version bump and the regenerated files that are tracked
    (`git status` lists them; `Polestar_QuestDB` and the other local packs are
