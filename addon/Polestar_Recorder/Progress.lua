@@ -1,6 +1,6 @@
 -- Character progress: skill ranks, reputation, exploration, crafting, newly
 -- learned spells and recipes, achievements. Also the faction and skill
--- scanners behind `/lsrec factions` and `/lsrec skills`.
+-- scanners behind `/psrec factions` and `/psrec skills`.
 --
 -- Collapsed headers hide rows from C_Reputation / C_SkillInfo index scans.
 -- A full scan expands every collapsed header (and shows legacy reputations),

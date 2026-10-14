@@ -523,11 +523,11 @@ end
 local bands = setmetatable({}, { __mode = "k" }) -- sky texture -> true
 
 local function paintBand(sky)
-	local on = sky.lsArt or Theme.ShowsBand()
+	local on = sky.psArt or Theme.ShowsBand()
 	local r, g, b = Theme.Color("sky")
 	sky:SetVertexColor(r, g, b, on and 1 or 0)
 	local sr, sg, sb, sa = Theme.Color("star")
-	sky.lsStars:SetVertexColor(sr, sg, sb, on and (sa or 1) or 0)
+	sky.psStars:SetVertexColor(sr, sg, sb, on and (sa or 1) or 0)
 end
 
 function Theme.Band(parent, layer, sub, art)
@@ -537,8 +537,8 @@ function Theme.Band(parent, layer, sub, art)
 	local stars = parent:CreateTexture(nil, layer or "BACKGROUND", nil, sub + 1)
 	stars:SetTexture(Theme.Media("band-stars"))
 	stars:SetAllPoints(sky)
-	sky.lsStars = stars
-	sky.lsArt = art and true or nil
+	sky.psStars = stars
+	sky.psArt = art and true or nil
 	for _, method in ipairs({ "SetTexCoord", "Show", "Hide", "SetShown", "SetAlpha" }) do
 		local own, theirs = sky[method], stars[method]
 		sky[method] = function(self, ...)
@@ -664,11 +664,11 @@ function Theme.Pixel(region)
 	return 1
 end
 
--- A border as four edge textures, kept on frame.lsBorder: one physical
+-- A border as four edge textures, kept on frame.psBorder: one physical
 -- pixel by default; `size` pixels grow outward from that pixel (a window's
 -- chosen thickness), so the frame's own children never cover it.
 function Theme.Border(frame, r, g, b, a, layer, size)
-	local e = frame.lsBorder
+	local e = frame.psBorder
 	if not e then
 		e = {}
 		for i = 1, 4 do
@@ -676,7 +676,7 @@ function Theme.Border(frame, r, g, b, a, layer, size)
 			t:SetTexture(Theme.Media("white"))
 			e[i] = t
 		end
-		frame.lsBorder = e
+		frame.psBorder = e
 	end
 	local px = Theme.Pixel(frame)
 	local n = (type(size) == "number" and size > 1) and floor(size + 0.5) or 1
@@ -690,12 +690,12 @@ function Theme.Border(frame, r, g, b, a, layer, size)
 		e[i]:SetVertexColor(r, g, b, a)
 		e[i]:Show()
 	end
-	frame.lsBorderSize = n
+	frame.psBorderSize = n
 	return e
 end
 
 local function hideBorder(frame)
-	local e = frame.lsBorder
+	local e = frame.psBorder
 	if e then for i = 1, 4 do e[i]:Hide() end end
 end
 
@@ -705,7 +705,7 @@ local SHADOW_OUT = 16
 local SHADOW_DROP = 4
 local SLICE = 20 / 64
 local function shadowFor(frame)
-	local s = frame.lsShadow
+	local s = frame.psShadow
 	if s then return s end
 	s = CreateFrame("Frame", nil, frame)
 	s:SetFrameLevel(math.max(0, frame:GetFrameLevel() - 1))
@@ -741,7 +741,7 @@ local function shadowFor(frame)
 	edge({ "TOPLEFT", parts[1], "BOTTOMLEFT" }, { "BOTTOMRIGHT", parts[3], "TOPRIGHT" }, 0, SLICE, SLICE, 1 - SLICE)
 	edge({ "TOPLEFT", parts[2], "BOTTOMLEFT" }, { "BOTTOMRIGHT", parts[4], "TOPRIGHT" }, 1 - SLICE, 1, SLICE, 1 - SLICE)
 	s.parts = parts
-	frame.lsShadow = s
+	frame.psShadow = s
 	return s
 end
 
@@ -752,7 +752,7 @@ end
 local skinned = setmetatable({}, { __mode = "k" }) -- frame -> kind
 
 local function fill(frame, layer, sub)
-	local d = frame.lsSkin
+	local d = frame.psSkin
 	if not d.bg then
 		d.bg = frame:CreateTexture(nil, layer or "BACKGROUND", nil, sub or -7)
 		d.bg:SetTexture(Theme.Media("white"))
@@ -763,7 +763,7 @@ local function fill(frame, layer, sub)
 end
 
 local function hoverWash(frame)
-	local d = frame.lsSkin
+	local d = frame.psSkin
 	if not d.hover then
 		d.hover = frame:CreateTexture(nil, "HIGHLIGHT")
 		d.hover:SetTexture(Theme.Media("white"))
@@ -774,7 +774,7 @@ local function hoverWash(frame)
 end
 
 local function glyph(frame, name, size, layer)
-	local d = frame.lsSkin
+	local d = frame.psSkin
 	if not d.glyph then
 		d.glyph = frame:CreateTexture(nil, layer or "ARTWORK")
 		d.glyph:SetPoint("CENTER", frame, "CENTER", 0, 0)
@@ -786,12 +786,12 @@ local function glyph(frame, name, size, layer)
 end
 
 -- A skin can be turned off on a frame (the transparent guide window):
--- frame.lsBare = true hides every fill, border and shadow it painted.
+-- frame.psBare = true hides every fill, border and shadow it painted.
 local function bare(f)
-	local d = f.lsSkin
+	local d = f.psSkin
 	if d.bg then d.bg:Hide() end
 	hideBorder(f)
-	if f.lsShadow then f.lsShadow:Hide() end
+	if f.psShadow then f.psShadow:Hide() end
 end
 
 local HOUSE_PAINT = {
@@ -799,9 +799,9 @@ local HOUSE_PAINT = {
 	-- (Theme.WindowBorder: on or off, its colour and thickness) and the
 	-- drop shadow unless the player turned it off.
 	window = function(f)
-		if f.lsBare then return bare(f) end
+		if f.psBare then return bare(f) end
 		local r, g, b = Theme.Color("bg")
-		local alpha = f.lsBgAlpha or Theme.GroundAlpha()
+		local alpha = f.psBgAlpha or Theme.GroundAlpha()
 		fill(f):SetVertexColor(r, g, b, alpha)
 		local shown, size = Theme.WindowBorder()
 		if shown then
@@ -811,7 +811,7 @@ local HOUSE_PAINT = {
 			hideBorder(f)
 		end
 		if get("ui.shadow") == false then
-			if f.lsShadow then f.lsShadow:Hide() end
+			if f.psShadow then f.psShadow:Hide() end
 			return
 		end
 		local s = shadowFor(f)
@@ -820,7 +820,7 @@ local HOUSE_PAINT = {
 		s:Show()
 	end,
 	panel = function(f)
-		if f.lsBare then return bare(f) end
+		if f.psBare then return bare(f) end
 		fill(f):SetVertexColor(Theme.Color("panel"))
 		Theme.Border(f, Theme.Color("border"))
 	end,
@@ -845,7 +845,7 @@ local HOUSE_PAINT = {
 	editbox = function(f)
 		local r, g, b = Theme.Color("shade")
 		fill(f):SetVertexColor(r, g, b, 0.35)
-		if f.lsFocused then
+		if f.psFocused then
 			local r, g, b = Theme.Accent()
 			Theme.Border(f, r, g, b, 0.8)
 		else
@@ -853,12 +853,12 @@ local HOUSE_PAINT = {
 		end
 	end,
 	checkbox = function(f)
-		local d = f.lsSkin
+		local d = f.psSkin
 		if not d.box then
 			d.box = CreateFrame("Frame", nil, f)
 			d.box:SetPoint("CENTER", f, "CENTER", 0, 0)
 			d.box:SetSize(14, 14)
-			d.box.lsSkin = {}
+			d.box.psSkin = {}
 			if f.SetCheckedTexture then
 				local check = f:CreateTexture(nil, "OVERLAY")
 				check:SetTexture(Theme.Media("check"))
@@ -876,7 +876,7 @@ local HOUSE_PAINT = {
 		hoverWash(f)
 	end,
 	tab = function(f)
-		local d = f.lsSkin
+		local d = f.psSkin
 		if not d.bar then
 			d.bar = f:CreateTexture(nil, "OVERLAY")
 			d.bar:SetTexture(Theme.Media("white"))
@@ -885,7 +885,7 @@ local HOUSE_PAINT = {
 		end
 		d.bar:SetHeight(2)
 		d.bar:SetVertexColor(Theme.Accent())
-		d.bar:SetShown(f.lsSelected and true or false)
+		d.bar:SetShown(f.psSelected and true or false)
 		hoverWash(f)
 	end,
 	close = function(f)
@@ -893,13 +893,13 @@ local HOUSE_PAINT = {
 		hoverWash(f):SetVertexColor(Theme.Wash("hover"))
 	end,
 	scrollbar = function(f)
-		local thumb = f.thumb or f.lsThumb
+		local thumb = f.thumb or f.psThumb
 		if thumb and thumb.SetVertexColor then thumb:SetVertexColor(Theme.Wash("thumb")) end
 	end,
 }
 
 local function paint(frame, kind)
-	frame.lsSkin = frame.lsSkin or {}
+	frame.psSkin = frame.psSkin or {}
 	local fn = HOUSE_PAINT[kind] or HOUSE_PAINT.panel
 	fn(frame)
 end
@@ -912,7 +912,7 @@ function Theme.Skin(frame, kind)
 	return frame
 end
 
--- Repaint one skinned frame (after changing lsBare / lsBgAlpha).
+-- Repaint one skinned frame (after changing psBare / psBgAlpha).
 function Theme.Repaint(frame)
 	local kind = skinned[frame]
 	if kind then paint(frame, kind) end
@@ -920,13 +920,13 @@ end
 
 -- Tabs we switch ourselves.
 function Theme.SetTabSelected(tab, selected)
-	tab.lsSelected = selected and true or false
+	tab.psSelected = selected and true or false
 	if skinned[tab] then paint(tab, "tab") end
 end
 
 -- Edit boxes light their border in the accent while focused.
 function Theme.SetFocused(box, focused)
-	box.lsFocused = focused and true or false
+	box.psFocused = focused and true or false
 	if skinned[box] == "editbox" then paint(box, "editbox") end
 end
 

@@ -360,8 +360,8 @@ test('the sidebar page list never reaches the version line: it scrolls, the sele
 		local function measure(F)
 			local side = F:GetHeight() - 2
 			local sf = F.NavScroll
-			local view, content, scroll = sf.lsView, sf.lsContent, sf:GetVerticalScroll()
-			local floor = F.lsNavTop + view
+			local view, content, scroll = sf.psView, sf.psContent, sf:GetVerticalScroll()
+			local floor = F.psNavTop + view
 			local statusTop = side - SH.foot - F.Status:GetStringHeight()
 			local chipTop = side - SH.foot - F.Status:GetStringHeight() / 2 - W.CHIP_H / 2
 			local activeTop, clipped = nil, true
@@ -419,10 +419,10 @@ test('window border, band and shadow repaint every window live; right-click rest
 		local function look()
 			local o = {}
 			for name, f in pairs(wins) do
-				local e = f.lsBorder[1]
+				local e = f.psBorder[1]
 				local r, g, b, a = e:GetVertexColor()
 				local _, _, _, ba = bands[name]:GetVertexColor()
-				o[name] = { border = e:IsShown(), colour = { r, g, b, a }, px = e:GetHeight(), band = ba, shadow = f.lsShadow ~= nil and f.lsShadow:IsShown() }
+				o[name] = { border = e:IsShown(), colour = { r, g, b, a }, px = e:GetHeight(), band = ba, shadow = f.psShadow ~= nil and f.psShadow:IsShown() }
 			end
 			return o
 		end
@@ -505,11 +505,11 @@ test('the settings carry the hub rail: a section goes back to the hub, in the sa
 	const [out] = run(`
 		local function rail(f)
 			local out = {}
-			for _, b in ipairs(f.railButtons) do if b:IsShown() then out[#out + 1] = b.lsKey .. (b.Bar:IsShown() and "*" or "") end end
+			for _, b in ipairs(f.railButtons) do if b:IsShown() then out[#out + 1] = b.psKey .. (b.Bar:IsShown() and "*" or "") end end
 			return out
 		end
 		local function place(f) local p, rel, rp, x, y = f:GetPoint(1) return { p, rel == UIParent, rp, x, y } end
-		local function railButton(f, key) for _, b in ipairs(f.railButtons) do if b:IsShown() and b.lsKey == key then return b end end end
+		local function railButton(f, key) for _, b in ipairs(f.railButtons) do if b:IsShown() and b.psKey == key then return b end end end
 		UI.ShowPicker()
 		local hub, settings = PolestarPicker, nil
 		hub.x, hub.y = 200, 100

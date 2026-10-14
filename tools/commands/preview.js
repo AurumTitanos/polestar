@@ -763,7 +763,7 @@ uistub.update()`,
 		panels: [
 			{ roots: OPTIONS, before: PACKS_ADDONS, script: `${PACKS_SCENE}; Polestar.UI.ShowOptions("guidepacks")` },
 			{ roots: OPTIONS, before: PACKS_ADDONS, script: `${PACKS_SCENE}; Polestar.UI.ShowOptions("guidepacks")
-				for _, r in ipairs(Polestar.UI.Packs.view.rows) do if r:IsShown() and r.lsRecord.id == "ann" then r.ShowList:Click(); r.CopyReport:Click() end end` },
+				for _, r in ipairs(Polestar.UI.Packs.view.rows) do if r:IsShown() and r.psRecord.id == "ann" then r.ShowList:Click(); r.CopyReport:Click() end end` },
 		],
 	},
 	{

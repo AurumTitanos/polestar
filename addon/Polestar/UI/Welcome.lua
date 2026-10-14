@@ -270,14 +270,14 @@ PAGES[#PAGES + 1] = {
 		local G = ns.Guides
 		local id = G and G.Suggest and G.Suggest()
 		local g = id and G.Get and G.Get(id)
-		if F.Start.lsFixedWidth then
-			F.Start.lsFixedWidth = nil
+		if F.Start.psFixedWidth then
+			F.Start.psFixedWidth = nil
 			F.Start.Label:SetWidth(0) -- unbounded again
 		end
 		W.SetButtonText(F.Start, g and (L["Start %s"]):format(g.title) or L["Choose a guide"])
 		local room = CW - F.Browse:GetWidth() - 8
 		if F.Start:GetWidth() > room then
-			F.Start.lsFixedWidth = room
+			F.Start.psFixedWidth = room
 			F.Start:SetWidth(room)
 			F.Start.Label:SetWidth(room - 32)
 			F.Start.Label:SetWordWrap(false)
@@ -416,8 +416,8 @@ function render()
 	-- One primary per view: on the last page the guide buttons hold it.
 	local last = at == #list
 	W.SetButtonText(F.Next, last and L["Done"] or L["Next"])
-	if F.Next.lsPrimary ~= not last then
-		F.Next.lsPrimary = not last
+	if F.Next.psPrimary ~= not last then
+		F.Next.psPrimary = not last
 		Theme.Repaint(F.Next)
 		W.RepaintButton(F.Next)
 	end

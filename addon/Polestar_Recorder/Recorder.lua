@@ -2,12 +2,12 @@
 -- PolestarRecorderDB.sessions, in the schema of docs/ARCHITECTURE.md
 -- ("Toolchain → Recordings"). `node tools/polestar.js record import` turns it
 -- into data/recordings/<session>.json; `record draft` turns that into a guide.
--- Off until the player turns it on (/lsrec on, or Options > Recorder): while
+-- Off until the player turns it on (/psrec on, or Options > Recorder): while
 -- off nothing is written, not even a session.
 --
 -- This file: SavedVariables access, sessions, the event log and caps,
 -- positions and map info. Quests.lua, World.lua and Commands.lua add the
--- recorders and the /lsrec command on the shared namespace.
+-- recorders and the /psrec command on the shared namespace.
 --
 -- Forever beta can restore SavedVariables as nil after a cold client restart.
 -- Nothing here trusts a cached PolestarRecorderDB: DB() recreates it, and
@@ -128,7 +128,7 @@ end
 ---------------------------------------------------------------------------
 
 -- Recording is opt-in: nothing is written, not even a session, until the
--- player turns it on (/lsrec on, or Options > Recorder). The choice lives in
+-- player turns it on (/psrec on, or Options > Recorder). The choice lives in
 -- the DB and here, so a DB table lost mid-session keeps recording on.
 local enabled = false
 

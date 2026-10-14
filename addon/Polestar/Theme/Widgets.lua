@@ -36,7 +36,7 @@ local painters = setmetatable({}, { __mode = "k" }) -- object -> fn(object)
 -- through theme changes. alpha multiplies the palette alpha.
 function W.Color(region, name, alpha)
 	colored[region] = name
-	region.lsAlpha = alpha
+	region.psAlpha = alpha
 	local r, g, b, a = Theme.Color(name)
 	a = (a or 1) * (alpha or 1)
 	if region:GetObjectType() == "Texture" then
@@ -60,7 +60,7 @@ function W.Painter(obj, fn)
 end
 
 Theme.OnChanged(function()
-	for region, name in pairs(colored) do W.Color(region, name, region.lsAlpha) end
+	for region, name in pairs(colored) do W.Color(region, name, region.psAlpha) end
 	for obj, fn in pairs(painters) do fn(obj) end
 end)
 
@@ -140,7 +140,7 @@ function W.HideTooltip(owner)
 end
 
 local function simpleTip(self)
-	if self.lsTip then W.Tooltip(self, self.lsTipAnchor or "ANCHOR_TOP", self.lsTip, self.lsTipLines) end
+	if self.psTip then W.Tooltip(self, self.psTipAnchor or "ANCHOR_TOP", self.psTip, self.psTipLines) end
 end
 local function hideTip(self) W.HideTooltip(self) end
 W.SimpleTip, W.HideTip = simpleTip, hideTip
@@ -175,16 +175,16 @@ function W.IconButton(parent, icon, size, tip, onClick, glyphSize)
 	g:SetPoint("CENTER", b, "CENTER", 0, 0)
 	b.Icon = g
 	W.Color(g, "textDim")
-	b.lsTip = tip
+	b.psTip = tip
 	b:SetScript("OnEnter", function(self)
-		if self:IsEnabled() then W.Color(self.Icon, self.lsActive and "accent" or "text") end
+		if self:IsEnabled() then W.Color(self.Icon, self.psActive and "accent" or "text") end
 		simpleTip(self)
-		if self.lsOnEnter then self.lsOnEnter(self) end
+		if self.psOnEnter then self.psOnEnter(self) end
 	end)
 	b:SetScript("OnLeave", function(self)
-		W.Color(self.Icon, self.lsActive and "accent" or "textDim", self:IsEnabled() and 1 or 0.35)
+		W.Color(self.Icon, self.psActive and "accent" or "textDim", self:IsEnabled() and 1 or 0.35)
 		hideTip(self)
-		if self.lsOnLeave then self.lsOnLeave(self) end
+		if self.psOnLeave then self.psOnLeave(self) end
 	end)
 	b:SetScript("OnMouseDown", function(self) if self:IsEnabled() then self.Icon:SetPoint("CENTER", self, "CENTER", 0, -1) end end)
 	b:SetScript("OnMouseUp", function(self) self.Icon:SetPoint("CENTER", self, "CENTER", 0, 0) end)
@@ -198,9 +198,9 @@ end
 
 -- Mark an icon button as "on" (accent glyph) or dim it when disabled.
 function W.SetIconState(b, active, enabled)
-	b.lsActive = active and true or false
+	b.psActive = active and true or false
 	if enabled == false then b:Disable() else b:Enable() end
-	W.Color(b.Icon, b.lsActive and "accent" or "textDim", b:IsEnabled() and 1 or 0.35)
+	W.Color(b.Icon, b.psActive and "accent" or "textDim", b:IsEnabled() and 1 or 0.35)
 end
 
 -- A text button. opts: { primary = true, ghost = true, danger = true,
@@ -218,8 +218,8 @@ function W.Button(parent, text, onClick, opts)
 		g:SetSize(13, 13)
 		b.Icon = g
 	end
-	b.lsPrimary, b.lsGhost, b.lsDanger = opts.primary, opts.ghost, opts.danger
-	b.lsFixedWidth = opts.width
+	b.psPrimary, b.psGhost, b.psDanger = opts.primary, opts.ghost, opts.danger
+	b.psFixedWidth = opts.width
 	if opts.ghost then
 		hoverTexture(b)
 	else
@@ -227,21 +227,21 @@ function W.Button(parent, text, onClick, opts)
 	end
 	W.Painter(b, function(self)
 		local icon = rawget(self, "Icon")
-		if self.lsPrimary then
-			local d = self.lsSkin
+		if self.psPrimary then
+			local d = self.psSkin
 			local r, g, bb = Theme.Accent()
 			if d and d.bg then d.bg:SetVertexColor(r, g, bb, 1) end
-			if self.lsBorder then for i = 1, 4 do self.lsBorder[i]:SetVertexColor(r, g, bb, 1) end end
+			if self.psBorder then for i = 1, 4 do self.psBorder[i]:SetVertexColor(r, g, bb, 1) end end
 			W.Uncolor(self.Label)
 			self.Label:SetTextColor(Theme.Color("onAccent"))
 			if icon then icon:SetVertexColor(Theme.Color("onAccent")) end
 		elseif icon then
-			icon:SetVertexColor(Theme.Color(self.lsDanger and "danger" or "textDim"))
+			icon:SetVertexColor(Theme.Color(self.psDanger and "danger" or "textDim"))
 		end
-		Theme.SetShadow(self.Label, not self.lsPrimary)
+		Theme.SetShadow(self.Label, not self.psPrimary)
 	end)
-	b:SetScript("OnMouseDown", function(self) if self:IsEnabled() then self.Label:SetPoint("CENTER", self, "CENTER", self.lsLabelX or 0, -1) end end)
-	b:SetScript("OnMouseUp", function(self) self.Label:SetPoint("CENTER", self, "CENTER", self.lsLabelX or 0, 0) end)
+	b:SetScript("OnMouseDown", function(self) if self:IsEnabled() then self.Label:SetPoint("CENTER", self, "CENTER", self.psLabelX or 0, -1) end end)
+	b:SetScript("OnMouseUp", function(self) self.Label:SetPoint("CENTER", self, "CENTER", self.psLabelX or 0, 0) end)
 	b:SetScript("OnEnter", simpleTip)
 	b:SetScript("OnLeave", hideTip)
 	if onClick then b:SetScript("OnClick", onClick) end
@@ -255,31 +255,31 @@ function W.SetButtonText(b, text)
 	local icon = rawget(b, "Icon")
 	local iconW = icon and 19 or 0
 	if icon then
-		b.lsLabelX = iconW / 2
+		b.psLabelX = iconW / 2
 		b.Icon:ClearAllPoints()
 		b.Icon:SetPoint("RIGHT", b.Label, "LEFT", -6, 0)
 	end
-	b.Label:SetPoint("CENTER", b, "CENTER", b.lsLabelX or 0, 0)
-	b:SetWidth(b.lsFixedWidth or max(72, floor(w + iconW + 32 + 0.5)))
+	b.Label:SetPoint("CENTER", b, "CENTER", b.psLabelX or 0, 0)
+	b:SetWidth(b.psFixedWidth or max(72, floor(w + iconW + 32 + 0.5)))
 end
 
 -- Buttons that act only on a second click within three seconds.
 function W.Confirm(b, text, fn)
-	b.lsConfirmText, b.lsConfirmFn = text, fn
+	b.psConfirmText, b.psConfirmFn = text, fn
 	b:SetScript("OnClick", function(self)
 		local now = GetTime()
-		if self.lsArmed and now - self.lsArmed < 3 then
-			self.lsArmed = nil
-			if self.lsSetText then self.lsSetText(self, self.lsConfirmText) end
-			self.lsConfirmFn()
+		if self.psArmed and now - self.psArmed < 3 then
+			self.psArmed = nil
+			if self.psSetText then self.psSetText(self, self.psConfirmText) end
+			self.psConfirmFn()
 			return
 		end
-		self.lsArmed = now
-		if self.lsSetText then self.lsSetText(self, L["Click again to confirm"]) end
+		self.psArmed = now
+		if self.psSetText then self.psSetText(self, L["Click again to confirm"]) end
 		C_Timer.After(3, function()
-			if self.lsArmed and GetTime() - self.lsArmed >= 2.9 then
-				self.lsArmed = nil
-				if self.lsSetText then self.lsSetText(self, self.lsConfirmText) end
+			if self.psArmed and GetTime() - self.psArmed >= 2.9 then
+				self.psArmed = nil
+				if self.psSetText then self.psSetText(self, self.psConfirmText) end
 			end
 		end)
 	end)
@@ -377,7 +377,7 @@ function W.ProgressLine(parent, height)
 	f.Fill:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 0, 0)
 	f.Fill:SetWidth(0.01)
 	W.Color(f.Fill, "accent")
-	f.lsFrac = 0
+	f.psFrac = 0
 	return f
 end
 
@@ -385,13 +385,13 @@ end
 function W.SetProgress(f, frac, width, animate)
 	if frac < 0 then frac = 0 elseif frac > 1 then frac = 1 end
 	local w = max(0.01, (width or f:GetWidth()) * frac)
-	if animate and f.lsFrac ~= frac and f.Fill:GetWidth() > 0 then
+	if animate and f.psFrac ~= frac and f.Fill:GetWidth() > 0 then
 		Anim.To(f.Fill, "width", f.Fill:GetWidth(), w, Anim.SLOW, "out")
 	elseif not Anim.IsRunning(f.Fill, "width") then
 		f.Fill:SetWidth(w)
 	end
 	f.Fill:SetShown(frac > 0)
-	f.lsFrac = frac
+	f.psFrac = frac
 end
 
 ---------------------------------------------------------------------------
@@ -412,8 +412,8 @@ end
 
 -- control.Refresh(control) paints it from the current value.
 function W.Bind(control, path, depends)
-	control.lsPath = path
-	control.lsDepends = depends
+	control.psPath = path
+	control.psDepends = depends
 	track(bound, path, control)
 	if depends then track(dependents, depends, control) end
 	control:Refresh()
@@ -424,19 +424,19 @@ end
 local conditional = setmetatable({}, { __mode = "k" })
 
 function W.SetDisabledWhen(control, fn)
-	control.lsDisabledFn = fn
+	control.psDisabledFn = fn
 	conditional[control] = fn and true or nil
 	if control.Refresh then control:Refresh() end
 end
 
 function W.Enabled(control)
-	local fn = control.lsDisabledFn
+	local fn = control.psDisabledFn
 	if fn then
 		local ok, off = pcall(fn)
 		if ok and off then return false end
 	end
-	if not control.lsDepends then return true end
-	return ns.Get(control.lsDepends) and true or false
+	if not control.psDepends then return true end
+	return ns.Get(control.psDepends) and true or false
 end
 
 local function refreshList(list)
@@ -479,10 +479,10 @@ local function settingRow(parent, label, desc)
 	row.Label = W.Text(row, "body", "text")
 	row.Label:SetText(label)
 	row.Label:SetPoint("LEFT", row, "LEFT", 12, 0)
-	row.lsLabel, row.lsDesc = label, desc
-	row.lsTip = label
-	row.lsTipLines = desc and { desc } or nil
-	row.lsTipAnchor = "ANCHOR_TOPLEFT"
+	row.psLabel, row.psDesc = label, desc
+	row.psTip = label
+	row.psTipLines = desc and { desc } or nil
+	row.psTipAnchor = "ANCHOR_TOPLEFT"
 	return row
 end
 
@@ -508,8 +508,8 @@ end
 local TOGGLE_W, TOGGLE_H, KNOB = 30, 16, 12
 
 local function toggleValue(self)
-	if self.lsGet then return self.lsGet() and true or false end
-	return ns.Get(self.lsPath) and true or false
+	if self.psGet then return self.psGet() and true or false end
+	return ns.Get(self.psPath) and true or false
 end
 
 local function toggleRefresh(self)
@@ -525,14 +525,14 @@ local function toggleRefresh(self)
 		self.Knob:SetVertexColor(Theme.Color("textDim"))
 	end
 	local x = on and (TOGGLE_W - KNOB - 2) or 2
-	if self.lsOn ~= nil and self.lsOn ~= on then
-		self.Knob.lsAnchor[4] = x
-		Anim.To(self.Knob, "offsetX", (self.lsKnobX or x) - x, 0, Anim.FAST, "out")
+	if self.psOn ~= nil and self.psOn ~= on then
+		self.Knob.psAnchor[4] = x
+		Anim.To(self.Knob, "offsetX", (self.psKnobX or x) - x, 0, Anim.FAST, "out")
 	else
 		Anim.Anchor(self.Knob, "LEFT", self.Track, "LEFT", x, 0)
 	end
-	self.lsKnobX = x
-	self.lsOn = on
+	self.psKnobX = x
+	self.psOn = on
 	self.checked = on
 end
 
@@ -541,7 +541,7 @@ end
 function W.Toggle(parent, label, path, desc, depends, opts)
 	local row = settingRow(parent, label, desc)
 	row.Track = pill(row, TOGGLE_W, TOGGLE_H)
-	row.lsGet, row.lsSet = opts and opts.get, opts and opts.set
+	row.psGet, row.psSet = opts and opts.get, opts and opts.set
 	row.Track:SetPoint("RIGHT", row, "RIGHT", -12, 0)
 	row.Knob = row.Track:CreateTexture(nil, "OVERLAY")
 	row.Knob:SetTexture(Theme.Media("circle"))
@@ -551,12 +551,12 @@ function W.Toggle(parent, label, path, desc, depends, opts)
 	row:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 	row:SetScript("OnClick", function(self, button)
 		if not W.Enabled(self) then return end
-		if self.lsSet then
-			if button == "RightButton" then self.lsSet(nil) else self.lsSet(not toggleValue(self)) end
+		if self.psSet then
+			if button == "RightButton" then self.psSet(nil) else self.psSet(not toggleValue(self)) end
 		elseif button == "RightButton" then
-			ns.Set(self.lsPath, nil)
+			ns.Set(self.psPath, nil)
 		else
-			ns.Set(self.lsPath, not ns.Get(self.lsPath))
+			ns.Set(self.psPath, not ns.Get(self.psPath))
 		end
 	end)
 	row:SetScript("OnEnter", rowEnter)
@@ -576,7 +576,7 @@ function W.Switch(parent, get, set, tip)
 	b.Knob = b.Track:CreateTexture(nil, "OVERLAY")
 	b.Knob:SetTexture(Theme.Media("circle"))
 	b.Knob:SetSize(KNOB, KNOB)
-	b.lsGet, b.lsTip = get, tip
+	b.psGet, b.psTip = get, tip
 	b:SetScript("OnClick", function(self)
 		set(not toggleValue(self))
 		self:Refresh()
@@ -599,7 +599,7 @@ local function roundTo(v, stepSize)
 end
 
 local function sliderText(self, v)
-	local fmt = self.lsFormat
+	local fmt = self.psFormat
 	if type(fmt) == "function" then return fmt(v) end
 	return string.format(fmt or "%.2f", v)
 end
@@ -615,11 +615,11 @@ local function sliderPaint(self, value)
 end
 
 local function sliderRefresh(self)
-	local v = ns.Get(self.lsPath)
-	if type(v) ~= "number" then v = self.lsMin end
-	self.lsRefreshing = true
+	local v = ns.Get(self.psPath)
+	if type(v) ~= "number" then v = self.psMin end
+	self.psRefreshing = true
 	self.Slider:SetValue(v)
-	self.lsRefreshing = false
+	self.psRefreshing = false
 	dimRow(self, W.Enabled(self))
 	self.Fill:SetVertexColor(Theme.Accent())
 	self.Thumb:SetVertexColor(Theme.Color("text"))
@@ -658,7 +658,7 @@ end
 -- setting that rescales the window the slider sits in).
 function W.Slider(parent, label, path, lo, hi, stepSize, fmt, desc, depends, opts)
 	local row = settingRow(parent, label, desc)
-	row.lsMin, row.lsMax, row.lsStep, row.lsFormat = lo, hi, stepSize, fmt
+	row.psMin, row.psMax, row.psStep, row.psFormat = lo, hi, stepSize, fmt
 	row.Value = W.Text(row, "number", "textDim")
 	row.Value:SetJustifyH("RIGHT")
 	row.Value:SetWidth(VALUE_W)
@@ -671,26 +671,26 @@ function W.Slider(parent, label, path, lo, hi, stepSize, fmt, desc, depends, opt
 	s:SetScript("OnValueChanged", function(_, value, userInput)
 		value = roundTo(value, stepSize)
 		sliderPaint(row, value)
-		if userInput and not row.lsRefreshing and W.Enabled(row) and ns.Get(row.lsPath) ~= value then
-			if opts and opts.release then row.lsPending = value else ns.Set(row.lsPath, value) end
+		if userInput and not row.psRefreshing and W.Enabled(row) and ns.Get(row.psPath) ~= value then
+			if opts and opts.release then row.psPending = value else ns.Set(row.psPath, value) end
 		end
 	end)
 	s:SetScript("OnMouseUp", function()
-		if row.lsPending ~= nil then
-			local v = row.lsPending
-			row.lsPending = nil
-			ns.Set(row.lsPath, v)
+		if row.psPending ~= nil then
+			local v = row.psPending
+			row.psPending = nil
+			ns.Set(row.psPath, v)
 		end
 	end)
 	s:SetScript("OnMouseWheel", function(_, delta)
 		if not W.Enabled(row) then return end
-		local v = roundTo((ns.Get(row.lsPath) or lo) + delta * stepSize, stepSize)
-		ns.Set(row.lsPath, min(hi, max(lo, v)))
+		local v = roundTo((ns.Get(row.psPath) or lo) + delta * stepSize, stepSize)
+		ns.Set(row.psPath, min(hi, max(lo, v)))
 	end)
 	-- Right-click puts the setting back to its default.
 	row:RegisterForClicks("RightButtonUp")
 	row:SetScript("OnClick", function(self, button)
-		if button == "RightButton" and W.Enabled(self) then ns.Set(self.lsPath, nil) end
+		if button == "RightButton" and W.Enabled(self) then ns.Set(self.psPath, nil) end
 	end)
 	row:SetScript("OnEnter", rowEnter)
 	row:SetScript("OnLeave", hideTip)
@@ -709,10 +709,10 @@ local MENU_ROW, MENU_SEP, MENU_PAD = 26, 9, 5
 -- Items with confirm = true need a second click: the first relabels the row
 -- and keeps the menu open.
 local function menuRowClick(self)
-	local item = self.lsItem
+	local item = self.psItem
 	if not item or item.disabled then return end
-	if item.confirm and not self.lsArmed then
-		self.lsArmed = true
+	if item.confirm and not self.psArmed then
+		self.psArmed = true
 		self.Text:SetText(L["Click again to confirm"])
 		W.Color(self.Text, "danger")
 		return
@@ -722,7 +722,7 @@ local function menuRowClick(self)
 end
 
 local function menuRowEnter(self)
-	if self.lsItem and self.lsItem.tip then W.Tooltip(self, "ANCHOR_RIGHT", self.lsItem.text, { self.lsItem.tip }) end
+	if self.psItem and self.psItem.tip then W.Tooltip(self, "ANCHOR_RIGHT", self.psItem.text, { self.psItem.tip }) end
 end
 
 local function buildMenu()
@@ -796,8 +796,8 @@ function W.ShowMenu(anchor, items, opts)
 		else
 			nrow = nrow + 1
 			local row = menuRow(nrow)
-			row.lsItem = item
-			row.lsArmed = nil
+			row.psItem = item
+			row.psArmed = nil
 			row.Text:SetText(item.text)
 			row.Text:SetPoint("LEFT", row, "LEFT", anyIcon and 32 or 12, 0)
 			W.Color(row.Text, item.color or "text", item.disabled and 0.45 or 1)
@@ -820,7 +820,7 @@ function W.ShowMenu(anchor, items, opts)
 	end
 	menu:SetSize(floor(width + 0.5), -y + MENU_PAD)
 	menu:ClearAllPoints()
-	menu.lsOwner = anchor
+	menu.psOwner = anchor
 	local point, relPoint = opts.point or "TOPRIGHT", opts.relPoint or "BOTTOMRIGHT"
 	Anim.Anchor(menu, point, anchor, relPoint, opts.x or 0, opts.y or -4)
 	catcher:Show()
@@ -836,7 +836,7 @@ function W.HideMenu()
 end
 
 function W.MenuShown(owner)
-	return menu and menu:IsShown() and (not owner or menu.lsOwner == owner) or false
+	return menu and menu:IsShown() and (not owner or menu.psOwner == owner) or false
 end
 
 ---------------------------------------------------------------------------
@@ -850,14 +850,14 @@ end
 local DROPDOWN_W = 150
 
 local function choicesOf(row)
-	local c = row.lsChoices
+	local c = row.psChoices
 	if type(c) == "function" then return c() or {} end
 	return c
 end
 
 local function valueOf(row)
-	if row.lsGet then return row.lsGet() end
-	return ns.Get(row.lsPath)
+	if row.psGet then return row.psGet() end
+	return ns.Get(row.psPath)
 end
 
 local function choiceText(choices, v)
@@ -873,7 +873,7 @@ local function dropdownRefresh(self)
 end
 
 local function openChoices(self)
-	local row = self.lsRow
+	local row = self.psRow
 	if W.MenuShown(self) then return W.HideMenu() end
 	local items = {}
 	local cur = valueOf(row)
@@ -881,7 +881,7 @@ local function openChoices(self)
 	for i = 1, #list do
 		local c = list[i]
 		items[i] = { text = c.text, checked = c.value == cur, onClick = function()
-			if row.lsSet then row.lsSet(c.value) else ns.Set(row.lsPath, c.value) end
+			if row.psSet then row.psSet(c.value) else ns.Set(row.psPath, c.value) end
 		end }
 	end
 	W.ShowMenu(self, items, { minWidth = self:GetWidth() })
@@ -889,8 +889,8 @@ end
 
 function W.Dropdown(parent, label, path, choices, desc, depends, opts)
 	local row = settingRow(parent, label, desc)
-	row.lsChoices = choices
-	row.lsGet, row.lsSet = opts and opts.get, opts and opts.set
+	row.psChoices = choices
+	row.psGet, row.psSet = opts and opts.get, opts and opts.set
 	local b = CreateFrame("Button", nil, row)
 	b:SetSize(DROPDOWN_W, 28)
 	b:SetPoint("RIGHT", row, "RIGHT", -12, 0)
@@ -903,7 +903,7 @@ function W.Dropdown(parent, label, path, choices, desc, depends, opts)
 	b.Arrow:SetPoint("RIGHT", b, "RIGHT", -9, 0)
 	W.Color(b.Arrow, "textDim")
 	Theme.Skin(b, "dropdown")
-	b.lsRow = row
+	b.psRow = row
 	b:SetScript("OnClick", openChoices)
 	row.Button = b
 	fitLabel(row, b)
@@ -934,13 +934,13 @@ end
 ---------------------------------------------------------------------------
 
 local function swatchColor(self)
-	local c = ns.Get(self.lsPath)
+	local c = ns.Get(self.psPath)
 	if type(c) == "table" and type(c[1]) == "number" then return c[1], c[2], c[3], true end
-	if self.lsShown then
-		local r, g, b = self.lsShown()
+	if self.psShown then
+		local r, g, b = self.psShown()
 		return r, g, b, false
 	end
-	c = ns.GetDefault(self.lsPath)
+	c = ns.GetDefault(self.psPath)
 	if type(c) == "table" then return c[1], c[2], c[3], false end
 	return 1, 1, 1, false
 end
@@ -948,17 +948,17 @@ end
 local function swatchRefresh(self)
 	local r, g, b, own = swatchColor(self)
 	self.Chip:SetVertexColor(r, g, b, 1)
-	self.Note:SetText((not own and self.lsSource and self.lsSource()) or "")
+	self.Note:SetText((not own and self.psSource and self.psSource()) or "")
 	dimRow(self, W.Enabled(self))
 end
 
 local function openPicker(self)
 	if not ColorPickerFrame or not ColorPickerFrame.SetupColorPickerAndShow then return end
-	local path = self.lsPath
+	local path = self.psPath
 	local r, g, b = swatchColor(self)
 	local previous = ns.Get(path)
 	local linked = {}
-	for i, p in ipairs(self.lsLinked or {}) do linked[i] = ns.Get(p) end
+	for i, p in ipairs(self.psLinked or {}) do linked[i] = ns.Get(p) end
 	ColorPickerFrame:SetupColorPickerAndShow({
 		r = r, g = g, b = b,
 		hasOpacity = false,
@@ -968,7 +968,7 @@ local function openPicker(self)
 		end,
 		cancelFunc = function()
 			ns.Set(path, previous)
-			for i, p in ipairs(self.lsLinked or {}) do ns.Set(p, linked[i]) end
+			for i, p in ipairs(self.psLinked or {}) do ns.Set(p, linked[i]) end
 		end,
 	})
 end
@@ -976,7 +976,7 @@ end
 function W.Swatch(parent, label, path, desc, opts)
 	opts = opts or {}
 	local row = settingRow(parent, label, desc)
-	row.lsShown, row.lsSource, row.lsLinked = opts.shown, opts.source, opts.linked
+	row.psShown, row.psSource, row.psLinked = opts.shown, opts.source, opts.linked
 	local chip = CreateFrame("Frame", nil, row)
 	chip:SetSize(34, 18)
 	chip:SetPoint("RIGHT", row, "RIGHT", -12, 0)
@@ -992,7 +992,7 @@ function W.Swatch(parent, label, path, desc, opts)
 	row:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 	row:SetScript("OnClick", function(self, button)
 		if not W.Enabled(self) then return end
-		if button == "RightButton" then ns.Set(self.lsPath, nil) else openPicker(self) end
+		if button == "RightButton" then ns.Set(self.psPath, nil) else openPicker(self) end
 	end)
 	row:SetScript("OnEnter", rowEnter)
 	row:SetScript("OnLeave", hideTip)
@@ -1038,10 +1038,10 @@ function W.ActionTile(parent, icon, title, desc, onClick, opts)
 	b.Desc:SetPoint("TOPLEFT", b.Title, "BOTTOMLEFT", 0, -5)
 	b.Desc:SetPoint("TOPRIGHT", b.Title, "BOTTOMRIGHT", 0, -5)
 	b.Desc:SetText(desc or "")
-	b.lsTitle = title
-	b.lsSetText = function(self, text)
+	b.psTitle = title
+	b.psSetText = function(self, text)
 		self.Title:SetText(text)
-		W.Color(self.Title, text == self.lsTitle and "text" or "danger")
+		W.Color(self.Title, text == self.psTitle and "text" or "danger")
 	end
 	if opts.confirm then
 		W.Confirm(b, title, onClick)
@@ -1061,7 +1061,7 @@ local PLACEHOLDER_X, PLACEHOLDER_PAD = 30, 10
 -- inside the box in the current font; the last one is cut with an ellipsis
 -- if even it does not. Refitted when the box's size or the font changes.
 local function fitPlaceholder(e)
-	local ph, list = e.Placeholder, e.lsPlaceholders
+	local ph, list = e.Placeholder, e.psPlaceholders
 	if not list then return end
 	local room = floor(e:GetWidth() - PLACEHOLDER_X - PLACEHOLDER_PAD)
 	for i, text in ipairs(list) do
@@ -1074,7 +1074,7 @@ end
 
 -- placeholder: a string, or a list of wordings, longest first.
 function W.SetSearchPlaceholder(e, placeholder)
-	e.lsPlaceholders = type(placeholder) == "table" and placeholder or { placeholder or L["Search"] }
+	e.psPlaceholders = type(placeholder) == "table" and placeholder or { placeholder or L["Search"] }
 	fitPlaceholder(e)
 end
 
@@ -1151,8 +1151,8 @@ function W.CopyBox(parent, opts)
 	e:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
 	e:SetScript("OnEnterPressed", function(self) self:ClearFocus() end)
 	e:SetScript("OnTextChanged", function(self, userInput)
-		if userInput and self:GetText() ~= self.lsText then
-			self:SetText(self.lsText or "")
+		if userInput and self:GetText() ~= self.psText then
+			self:SetText(self.psText or "")
 			self:HighlightText()
 		end
 	end)
@@ -1160,8 +1160,8 @@ function W.CopyBox(parent, opts)
 end
 
 function W.SetCopyText(e, text)
-	e.lsText = text or ""
-	e:SetText(e.lsText)
+	e.psText = text or ""
+	e:SetText(e.psText)
 	e:SetCursorPosition(0)
 end
 
@@ -1171,8 +1171,8 @@ end
 ---------------------------------------------------------------------------
 
 local function scrollUpdate(sf)
-	local view = sf.lsView or sf:GetHeight()
-	local content = sf.lsContent or 0
+	local view = sf.psView or sf:GetHeight()
+	local content = sf.psContent or 0
 	local range = max(0, content - view)
 	local cur = min(range, max(0, sf:GetVerticalScroll()))
 	if cur ~= sf:GetVerticalScroll() then sf:SetVerticalScroll(cur) end
@@ -1189,15 +1189,15 @@ local function scrollUpdate(sf)
 end
 
 local function scrollDrag(bar)
-	local sf = bar.lsScroll
+	local sf = bar.psScroll
 	local _, y = GetCursorPosition()
 	local scale = bar:GetEffectiveScale()
-	local view = sf.lsView or sf:GetHeight()
-	local range = max(0, (sf.lsContent or 0) - view)
+	local view = sf.psView or sf:GetHeight()
+	local range = max(0, (sf.psContent or 0) - view)
 	local h = bar.Thumb:GetHeight()
 	if view - h <= 0 then return end
-	local dy = (bar.lsStartY - y / scale)
-	sf:SetVerticalScroll(min(range, max(0, bar.lsStartScroll + dy * range / (view - h))))
+	local dy = (bar.psStartY - y / scale)
+	sf:SetVerticalScroll(min(range, max(0, bar.psStartScroll + dy * range / (view - h))))
 	scrollUpdate(sf)
 end
 
@@ -1220,12 +1220,12 @@ function W.Scroll(parent)
 	bar.Thumb = bar:CreateTexture(nil, "OVERLAY")
 	bar.Thumb:SetTexture(WHITE)
 	bar.Thumb:SetWidth(2)
-	bar.lsScroll = sf
-	bar.lsThumb = bar.Thumb
+	bar.psScroll = sf
+	bar.psThumb = bar.Thumb
 	bar:SetScript("OnMouseDown", function(self)
 		local _, y = GetCursorPosition()
-		self.lsStartY = y / self:GetEffectiveScale()
-		self.lsStartScroll = sf:GetVerticalScroll()
+		self.psStartY = y / self:GetEffectiveScale()
+		self.psStartScroll = sf:GetVerticalScroll()
 		self:SetScript("OnUpdate", scrollDrag)
 	end)
 	bar:SetScript("OnMouseUp", function(self) self:SetScript("OnUpdate", nil) end)
@@ -1241,8 +1241,8 @@ end
 
 -- Tell the scroll area its content and view heights (view nil = measured).
 function W.SetScrollContent(sf, contentHeight, viewHeight)
-	sf.lsContent = contentHeight
-	sf.lsView = viewHeight
+	sf.psContent = contentHeight
+	sf.psView = viewHeight
 	sf.Child:SetHeight(max(1, contentHeight))
 	scrollUpdate(sf)
 end
@@ -1324,7 +1324,7 @@ local function navButton(f, i)
 	b.Dot:SetPoint("RIGHT", b, "RIGHT", -SHELL.side, 0)
 	W.Color(b.Dot, "warning")
 	b.Dot:Hide()
-	b:SetScript("OnClick", function(self) if f.lsOnNav and not self.lsHeading then f.lsOnNav(self.lsKey) end end)
+	b:SetScript("OnClick", function(self) if f.psOnNav and not self.psHeading then f.psOnNav(self.psKey) end end)
 	f.navButtons[i] = b
 	return b
 end
@@ -1343,12 +1343,12 @@ end
 local NAV_ROW = 40
 local NAV_COUNT_W = 32 -- room kept right of a row's label for its count or dot
 function W.ShellNav(f, items, active, onSelect)
-	f.lsOnNav = onSelect
+	f.psOnNav = onSelect
 	local sf = f.NavScroll
 	local y, activeY = 0, nil
 	for i, item in ipairs(items) do
 		local b = navButton(f, i)
-		b.lsKey = item.key
+		b.psKey = item.key
 		local on = item.key == active
 		local empty = item.count == 0
 		b.Icon:SetTexture(Theme.Media(item.icon or "compact"))
@@ -1362,8 +1362,8 @@ function W.ShellNav(f, items, active, onSelect)
 		W.Color(b.Label, on and "text" or (empty and "textMuted" or "textDim"))
 		W.Color(b.Icon, on and "accent" or (empty and "textMuted" or "textDim"))
 		b:SetAlpha((empty and not on) and 0.55 or 1)
-		b.lsEmpty = empty
-		b.lsHeading = item.heading and true or false
+		b.psEmpty = empty
+		b.psHeading = item.heading and true or false
 		b.Icon:SetShown(not item.heading)
 		-- The label ends short of the count (or dot) so a long one is cut
 		-- with an ellipsis rather than running under it or off the sidebar.
@@ -1403,7 +1403,7 @@ end
 -- The height the navigation rows may fill: from their top line to the
 -- footer bar's line.
 function W.ShellNavHeight(f)
-	return f:GetHeight() - 2 - f.lsNavTop - SHELL.footer
+	return f:GetHeight() - 2 - f.psNavTop - SHELL.footer
 end
 
 local function shellTab(f, i)
@@ -1414,7 +1414,7 @@ local function shellTab(f, i)
 	t.Label = W.Text(t, "label", "textDim")
 	t.Label:SetPoint("CENTER", t, "CENTER", 0, 0)
 	Theme.Skin(t, "tab")
-	t:SetScript("OnClick", function(self) if f.lsOnTab then f.lsOnTab(self.lsKey) end end)
+	t:SetScript("OnClick", function(self) if f.psOnTab then f.psOnTab(self.psKey) end end)
 	f.tabButtons[i] = t
 	return t
 end
@@ -1427,19 +1427,19 @@ local function layoutBody(f)
 	f.Content:ClearAllPoints()
 	f.Content:SetPoint("TOPLEFT", tabs and f.TabRow or f.Header, "BOTTOMLEFT", 0, 0)
 	f.Content:SetPoint("BOTTOMRIGHT", f.Footer, foot and "TOPRIGHT" or "BOTTOMRIGHT", 0, 0)
-	f.lsViewH = f:GetHeight() - SHELL.header - (tabs and SHELL.tabs or 0) - (foot and SHELL.footer or 0)
+	f.psViewH = f:GetHeight() - SHELL.header - (tabs and SHELL.tabs or 0) - (foot and SHELL.footer or 0)
 end
 
 -- tabs: { { key, label }, ... } or nil (no tab row; the body moves up). A
 -- single tab is no choice: its row is left out too.
 function W.ShellTabs(f, tabs, active, onSelect)
-	f.lsOnTab = onSelect
+	f.psOnTab = onSelect
 	local n = tabs and #tabs or 0
-	if n == 1 and not f.lsKeepOneTab then n = 0 end
+	if n == 1 and not f.psKeepOneTab then n = 0 end
 	local x = SHELL.pad - 12
 	for i = 1, n do
 		local t = shellTab(f, i)
-		t.lsKey = tabs[i].key
+		t.psKey = tabs[i].key
 		t.Label:SetText(tabs[i].label)
 		t:SetWidth(floor(t.Label:GetStringWidth() + 24 + 0.5))
 		local on = tabs[i].key == active
@@ -1451,7 +1451,7 @@ function W.ShellTabs(f, tabs, active, onSelect)
 		x = x + t:GetWidth() + 4
 	end
 	for i = n + 1, #f.tabButtons do f.tabButtons[i]:Hide() end
-	f.TabRow:SetShown(n > 0 or f.lsKeepTabRow and true or false)
+	f.TabRow:SetShown(n > 0 or f.psKeepTabRow and true or false)
 	layoutBody(f)
 end
 
@@ -1462,7 +1462,7 @@ local function footerButton(f, side, i)
 	local b = list[i]
 	if b then return b end
 	b = W.Button(f.Footer, "", nil, {})
-	b.lsSetText = W.SetButtonText
+	b.psSetText = W.SetButtonText
 	list[i] = b
 	return b
 end
@@ -1478,8 +1478,8 @@ function W.ShellFooter(f, left, right)
 		local prev
 		for i, spec in ipairs(specs) do
 			local b = footerButton(f, side, i)
-			b.lsPrimary = spec.opts and spec.opts.primary
-			b.lsArmed = nil
+			b.psPrimary = spec.opts and spec.opts.primary
+			b.psArmed = nil
 			if spec.opts and spec.opts.icon then
 				if not rawget(b, "Icon") then
 					b.Icon = b:CreateTexture(nil, "ARTWORK")
@@ -1512,11 +1512,11 @@ function W.ShellFooter(f, left, right)
 	end
 end
 
--- Re-run a button's paint (after toggling lsPrimary).
+-- Re-run a button's paint (after toggling psPrimary).
 function W.RepaintButton(b)
 	local fn = painters[b]
 	if fn then
-		if not b.lsPrimary then W.Color(b.Label, b.lsDanger and "danger" or "text") end
+		if not b.psPrimary then W.Color(b.Label, b.psDanger and "danger" or "text") end
 		fn(b)
 	end
 end
@@ -1568,7 +1568,7 @@ function W.Shell(name, opts)
 	f:Hide()
 	Theme.Skin(f, "window")
 	f.navButtons, f.tabButtons, f.footerButtons, f.railButtons = {}, {}, { left = {}, right = {} }, {}
-	f.lsRail = RAIL
+	f.psRail = RAIL
 
 	local function draggable(frame)
 		frame:EnableMouse(true)
@@ -1638,11 +1638,11 @@ function W.Shell(name, opts)
 	f.Search = W.SearchBox(side, opts.searchPlaceholder or L["Search"], opts.onSearch)
 	f.Search:SetPoint("TOPLEFT", side, "TOPLEFT", SHELL.side, -searchTop)
 	f.Search:SetPoint("TOPRIGHT", side, "TOPRIGHT", -SHELL.side, -searchTop)
-	f.lsNavTop = searchTop + 30 + 12
+	f.psNavTop = searchTop + 30 + 12
 	-- The navigation: its own scroll area, ending on the footer bar's line
 	-- (W.ShellNav), so the version band below it is never crowded.
 	f.NavScroll = W.Scroll(side)
-	f.NavScroll:SetPoint("TOPLEFT", side, "TOPLEFT", 0, -f.lsNavTop)
+	f.NavScroll:SetPoint("TOPLEFT", side, "TOPLEFT", 0, -f.psNavTop)
 	f.NavScroll:SetPoint("BOTTOMRIGHT", side, "BOTTOMRIGHT", -1, SHELL.footer)
 	f.NavScroll.Child:SetWidth(SB - 1)
 
@@ -1721,7 +1721,7 @@ function W.Shell(name, opts)
 	f.BodyWidth = Wd - RAIL - SB - 2 - SHELL.pad * 2
 	W.ShellTitle(f, opts.title, opts.subtitle)
 	-- Refit the subtitle in a new font.
-	W.Painter(f.Subtitle, function(fs) fitLines(fs, f.lsSubtitle or "", SUBTITLE_LINES) end)
+	W.Painter(f.Subtitle, function(fs) fitLines(fs, f.psSubtitle or "", SUBTITLE_LINES) end)
 	W.ShellTabs(f, nil)
 
 	if opts.scalePath then
@@ -1755,7 +1755,7 @@ local function railButton(f, i)
 	local b = f.railButtons[i]
 	if b then return b end
 	b = CreateFrame("Button", nil, f.Rail)
-	b:SetSize(f.lsRail, RAIL_ROW)
+	b:SetSize(f.psRail, RAIL_ROW)
 	hoverTexture(b)
 	b.Selected = b:CreateTexture(nil, "BACKGROUND")
 	b.Selected:SetTexture(WHITE)
@@ -1772,14 +1772,14 @@ local function railButton(f, i)
 	b.Icon:SetPoint("TOP", b, "TOP", 0, -10)
 	b.Label = W.Text(b, "caption", "textDim")
 	b.Label:SetJustifyH("CENTER")
-	b.Label:SetWidth(f.lsRail - 4)
+	b.Label:SetWidth(f.psRail - 4)
 	b.Label:SetPoint("TOP", b.Icon, "BOTTOM", 0, -6)
 	b:SetScript("OnClick", function(self)
-		if self.lsOnClick then self.lsOnClick(self.lsKey) end
+		if self.psOnClick then self.psOnClick(self.psKey) end
 	end)
 	b:SetScript("OnEnter", simpleTip)
 	b:SetScript("OnLeave", hideTip)
-	b.lsTipAnchor = "ANCHOR_RIGHT"
+	b.psTipAnchor = "ANCHOR_RIGHT"
 	f.railButtons[i] = b
 	return b
 end
@@ -1792,8 +1792,8 @@ function W.ShellRail(f, items, bottom, active, onSelect)
 	local n = 0
 	local function place(item, i, y, fromBottom)
 		local b = railButton(f, i)
-		b.lsKey, b.lsOnClick = item.key, item.onClick or onSelect
-		b.lsTip = item.tip or item.label
+		b.psKey, b.psOnClick = item.key, item.onClick or onSelect
+		b.psTip = item.tip or item.label
 		local on = item.key == active
 		b.Icon:SetTexture(Theme.Media(item.icon or "compact"))
 		b.Label:SetText(item.label)
@@ -1817,7 +1817,7 @@ function W.ShellRail(f, items, bottom, active, onSelect)
 		y = y + RAIL_ROW
 	end
 	local limit = f:GetHeight() - 2 - y -- the top of the bottom group
-	y = f.lsNavTop -- the first section level with the sidebar's first row
+	y = f.psNavTop -- the first section level with the sidebar's first row
 	for k = 1, #items do
 		if y + RAIL_ROW > limit then break end
 		i = i + 1
@@ -1826,7 +1826,7 @@ function W.ShellRail(f, items, bottom, active, onSelect)
 		y = y + RAIL_ROW
 	end
 	for k = i + 1, #f.railButtons do f.railButtons[k]:Hide() end
-	f.lsRailFloor = limit
+	f.psRailFloor = limit
 	return n
 end
 
@@ -1834,17 +1834,17 @@ end
 -- subtitle, so it never jumps between pages.
 function W.ShellTitle(f, title, subtitle)
 	f.Title:SetText(title or "")
-	f.lsSubtitle = subtitle or ""
+	f.psSubtitle = subtitle or ""
 	-- The main column's width between its pads (a hub's narrower column too).
 	f.Subtitle:SetWidth(f.BodyWidth)
-	fitLines(f.Subtitle, f.lsSubtitle, SUBTITLE_LINES)
+	fitLines(f.Subtitle, f.psSubtitle, SUBTITLE_LINES)
 	f.Subtitle:SetShown(subtitle ~= nil and subtitle ~= "")
 end
 
 -- Lay the body out for `height` px of content (the scroll range).
 function W.ShellBody(f, height)
 	f.Body:SetWidth(f.BodyWidth + SHELL.pad * 2)
-	W.SetScrollContent(f.Scroll, height, f.lsViewH)
+	W.SetScrollContent(f.Scroll, height, f.psViewH)
 end
 
 -- A section header in a shell body: the heading itself, a hairline after it.

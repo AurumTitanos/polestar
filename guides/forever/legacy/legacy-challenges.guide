@@ -26,7 +26,7 @@ zone Burning Steppes
 #
 # Under the hood Legacy Challenges are achievements, but no achievement ids
 # exist in our data yet (the newest wow_classic_era client tables on wago.tools
-# carry none). Once a player runs `/lsrec legacy` in Polestar_Recorder on a live
+# carry none). Once a player runs `/psrec legacy` in Polestar_Recorder on a live
 # Forever client and that recording is imported, every manual goal here becomes
 # an `achieve <id> "Name"` goal (with `criteria <n>` for per-boss and
 # per-dungeon parts) and is tracked automatically, account-wide.

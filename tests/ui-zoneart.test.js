@@ -64,7 +64,7 @@ const near = (a, b, eps = 0.01) => Math.abs(a - b) < eps;
 test('the place lands mid-band horizontally and in the clear stretch between the top shade and the fade', () => {
 	const [out] = run(`
 		local painted, reveal = ZA.Paint(art, 7001, 43.3, 68.5)
-		emit({ painted = painted, reveal = reveal, c = canvas(), fy = art.lsFocusY, band = art.Band:IsShown() })`);
+		emit({ painted = painted, reveal = reveal, c = canvas(), fy = art.psFocusY, band = art.Band:IsShown() })`);
 	assert.equal(out.painted, true);
 	assert.equal(out.reveal, 'full');
 	assert.equal(out.band, false);
@@ -123,7 +123,7 @@ test('only the base tiles the band shows are drawn, each with its row-major file
 
 test('every overlay the band meets is laid over the base the way the world map lays it: tiles, partial tiles, texcoords', () => {
 	const [out] = run(`
-		art.lsZoom = 0.5 -- the whole painting in view
+		art.psZoom = 0.5 -- the whole painting in view
 		ZA.Paint(art, 7001, 50, 50)
 		emit({ c = canvas(), shapes = shown(art.Shapes), pool = #art.Shapes })`);
 	const s = out.c.w / 1002;
@@ -159,7 +159,7 @@ test('overlays outside the band get no texture, and textures are pooled across p
 
 test('a map whose art the table was not built for shows only what the client lists as explored', () => {
 	const [out] = run(`
-		art.lsZoom = 0.5
+		art.psZoom = 0.5
 		EXPLORED = {
 			{ textureWidth = 128, textureHeight = 128, offsetX = 10, offsetY = 20, fileDataIDs = { 601 }, isShownByMouseOver = false, isDrawOnTopLayer = false },
 			{ textureWidth = 128, textureHeight = 128, offsetX = 300, offsetY = 300, fileDataIDs = { 602 }, isShownByMouseOver = true, isDrawOnTopLayer = false },

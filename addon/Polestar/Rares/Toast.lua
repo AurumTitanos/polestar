@@ -124,10 +124,10 @@ local function build()
 	end)
 	f:SetScript("OnUpdate", function(self, elapsed)
 		if self:IsMouseOver() then return end
-		self.lsLeft = (self.lsLeft or 0) - elapsed
-		local total = self.lsTotal or 1
-		W.SetProgress(self.Timer, max(0, self.lsLeft) / total, WIDTH - 2)
-		if self.lsLeft <= 0 then T.Hide() end
+		self.psLeft = (self.psLeft or 0) - elapsed
+		local total = self.psTotal or 1
+		W.SetProgress(self.Timer, max(0, self.psLeft) / total, WIDTH - 2)
+		if self.psLeft <= 0 then T.Hide() end
 	end)
 	f:Hide()
 	T.frame = f
@@ -153,14 +153,14 @@ function T.Show(a)
 	end
 	f.Open:SetShown(a.id ~= nil)
 	local secs = tonumber(Rares.Get("toastSeconds")) or 20
-	f.lsTotal, f.lsLeft = secs, secs
+	f.psTotal, f.psLeft = secs, secs
 	W.SetProgress(f.Timer, 1, WIDTH - 2)
 	local wasShown = f:IsShown()
 	place()
 	f:Show()
 	if not wasShown then
 		-- One authored moment: it settles in from above while it fades up.
-		local p = f.lsAnchor
+		local p = f.psAnchor
 		Anim.To(f, "alpha", 0, 1, Anim.SLOW, "out")
 		Anim.To(f, "offset", p[5] + 18, p[5], Anim.SLOW * 1.5, "out")
 	end

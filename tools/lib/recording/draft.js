@@ -9,7 +9,7 @@
 // (accept/turnin/getfp/sethome/train/vendor) group when they are close
 // together; objective work (kill/collect at the centroid of where the
 // objective advanced) groups by area. A flight ends its step. Map changes
-// emit `zone` directives; `/lsrec mark` notes become `note` lines; levels,
+// emit `zone` directives; `/psrec mark` notes become `note` lines; levels,
 // deaths and abandons become author comments.
 
 // Clustering thresholds.

@@ -37,12 +37,12 @@ local function rowFor(parent, title)
 	for _, r in ipairs(shownRows(parent)) do if r.Title:GetText() == title then return r end end
 end
 local function nav(key)
-	for _, b in ipairs(PolestarPicker.navButtons) do if b.lsKey == key and b:IsShown() then return b end end
+	for _, b in ipairs(PolestarPicker.navButtons) do if b.psKey == key and b:IsShown() then return b end end
 end
 local function lookupShown() return PolestarPicker:IsShown() and Polestar.UI.Picker.Section() == "Lookup" end
 local function navKeys()
 	local out = {}
-	for _, b in ipairs(PolestarPicker.navButtons) do if b:IsShown() then out[#out + 1] = b.lsKey end end
+	for _, b in ipairs(PolestarPicker.navButtons) do if b:IsShown() then out[#out + 1] = b.psKey end end
 	return out
 end
 local function type_(text)
@@ -59,7 +59,7 @@ test('SHOW_LOOKUP opens the hub at Lookup on the query, results grouped by kind,
 		emit({ shown = lookupShown(), query = LK.Query(), box = Polestar.UI.Picker.search:GetText(), groups = LK.shown.groups, rows = rowTexts(body),
 			sel = LK.Selected() and LK.Selected().id, title = PolestarPicker.Title:GetText(), sub = PolestarPicker.Subtitle:GetText(),
 			navs = navKeys(), mounts = nav("mount").Count:GetText(), codex = LK.root.CodexLine:GetText(), tabRow = PolestarPicker.TabRow:IsShown(),
-			tip = rowFor(body, "Reins of the Striped Frostsaber").lsTip,
+			tip = rowFor(body, "Reins of the Striped Frostsaber").psTip,
 			special = (function() for _, n in ipairs(UISpecialFrames) do if n == "PolestarPicker" then return true end end end)() })`);
 	assert.equal(out.shown, true);
 	assert.equal(out.query, 'saber');
@@ -144,7 +144,7 @@ test('what cannot be got: a muted chip carries it in the list and the hub search
 		Polestar.UI.Picker.SetQuery("reins of the frostsaber")
 		local hub = {}
 		for _, r in ipairs(shownRows(PolestarPicker.Scroll.Child)) do
-			if r.lsResult and r.lsResult.id == 12302 then hub = { chip = r.Status:IsShown() and r.Status.Text:GetText(), alpha = r.Title:GetAlpha() } end
+			if r.psResult and r.psResult.id == 12302 then hub = { chip = r.Status:IsShown() and r.Status.Text:GetText(), alpha = r.Title:GetAlpha() } end
 		end
 		emit({ list = list, d = d, chip = chip, buttons = buttons, sourceGuide = sourceGuide, calls = calls, hub = hub })`);
 	assert.deepEqual(out.list.live, { status: false, alpha: 1 });

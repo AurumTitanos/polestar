@@ -394,7 +394,7 @@ end
 -- name in its colour (a chip saying why when it cannot be got: the name keeps
 -- its full colour), the subtitle right. note: the right-hand text.
 local function paintResult(r, res, note, width, on)
-	r.lsResult = res
+	r.psResult = res
 	r.Selected:SetShown(on and true or false)
 	r.Bar:SetShown(on and true or false)
 	local icon = KIND[res.kind] and KIND[res.kind].item and itemIcon(res.id)
@@ -421,7 +421,7 @@ end
 
 -- A row that acts rather than shows: "Show all 14", "Search everything".
 local function paintAction(r, text, glyph, width)
-	r.lsResult = nil
+	r.psResult = nil
 	r.Selected:Hide()
 	r.Bar:Hide()
 	setGlyph(r.Icon, glyph, "accent")
@@ -544,8 +544,8 @@ function LK.Activate()
 		LK.OpenGuide(sel.id)
 	elseif sourceSel then
 		LK.Guide(sourceSel)
-	elseif details and details.lsPrimaryAction then
-		details.lsPrimaryAction()
+	elseif details and details.psPrimaryAction then
+		details.psPrimaryAction()
 	else
 		LK.Guide(nil)
 	end
@@ -572,11 +572,11 @@ local function factRow(i)
 end
 
 local function sourceRowClick(self, button)
-	if self.lsIndex then LK.SelectSource(self.lsIndex) end
+	if self.psIndex then LK.SelectSource(self.psIndex) end
 end
 
 local function sourceRowDouble(self)
-	if self.lsIndex then LK.Guide(self.lsIndex) end
+	if self.psIndex then LK.Guide(self.psIndex) end
 end
 
 local function sourceRow(i)
@@ -609,9 +609,9 @@ local function sourceRow(i)
 	r.Facts:SetPoint("TOPLEFT", r, "TOPLEFT", 30, -43)
 	-- Why this character cannot use it yet, under the facts.
 	r.Why = W.Text(r, "small", "warning")
-	r.Guide = W.Button(r, L["Guide"], function(b) LK.Guide(b:GetParent().lsIndex) end, { height = 24, icon = "icon-goto" })
+	r.Guide = W.Button(r, L["Guide"], function(b) LK.Guide(b:GetParent().psIndex) end, { height = 24, icon = "icon-goto" })
 	r.Guide:SetPoint("BOTTOMRIGHT", r, "BOTTOMRIGHT", -8, 8)
-	r.Guide.lsTip = L["Build a guide to this source and open it in a new tab."]
+	r.Guide.psTip = L["Build a guide to this source and open it in a new tab."]
 	r:SetScript("OnClick", sourceRowClick)
 	r:SetScript("OnDoubleClick", sourceRowDouble)
 	r:SetScript("OnEnter", W.SimpleTip)
@@ -634,7 +634,7 @@ local function buildDetails()
 	rule:SetPoint("BOTTOMLEFT", d, "BOTTOMLEFT", 0, 0)
 
 	d.Art = ZoneArt.Create(d, DETAIL_W, ART_H, "panel")
-	d.Art.lsZoom = 1.5
+	d.Art.psZoom = 1.5
 	d.Art:SetPoint("TOPLEFT", d, "TOPLEFT", 0, 0)
 	d.Art:EnableMouse(true)
 	d.Art:RegisterForDrag("LeftButton")
@@ -695,7 +695,7 @@ local function buildDetails()
 	d.Note:SetPoint("BOTTOMLEFT", d, "BOTTOMLEFT", DPAD, DPAD + 32 + 12)
 	d.Primary = W.Button(d, L["Guide me"], function() LK.Activate() end, { primary = true, height = 32 })
 	d.Primary:SetPoint("BOTTOMLEFT", d, "BOTTOMLEFT", DPAD, DPAD)
-	d.Secondary = W.Button(d, L["Show in Guides"], function(b) if b.lsAction then b.lsAction() end end, { height = 32 })
+	d.Secondary = W.Button(d, L["Show in Guides"], function(b) if b.psAction then b.psAction() end end, { height = 32 })
 	d.Secondary:SetPoint("BOTTOMRIGHT", d, "BOTTOMRIGHT", -DPAD, DPAD)
 
 	-- Nothing selected (or nothing to look in).
@@ -716,7 +716,7 @@ local function skyIndex(s)
 end
 
 local function setButtonWidth(b, w)
-	b.lsFixedWidth = w
+	b.psFixedWidth = w
 	W.SetButtonText(b, b.Label:GetText())
 end
 
@@ -807,7 +807,7 @@ end
 
 local function emptyDetails(title, note)
 	local d = details
-	d.lsArt = ZoneArt.Paint(d.Art, nil, nil, nil, 1)
+	d.psArt = ZoneArt.Paint(d.Art, nil, nil, nil, 1)
 	for _, p in ipairs({ d.Well, d.Title, d.Sub, d.Status, d.Head, d.Scroll, d.Note, d.Primary, d.Secondary }) do p:Hide() end
 	for _, f in ipairs(d.Facts) do
 		f.Label:Hide()
@@ -862,7 +862,7 @@ local function renderDetails(loaded, reason)
 
 	-- The band.
 	local map, fx, fy = bandMap(s, entity, list)
-	d.lsArt = ZoneArt.Paint(d.Art, map, fx, fy, skyIndex(keyOf(s.kind, s.id)))
+	d.psArt = ZoneArt.Paint(d.Art, map, fx, fy, skyIndex(keyOf(s.kind, s.id)))
 	local icon = KIND[s.kind] and KIND[s.kind].item and itemIcon(s.id)
 	d.Icon:ClearAllPoints()
 	if icon then
@@ -943,14 +943,14 @@ local function renderDetails(loaded, reason)
 		if row.available ~= false and row.guideable then best = best or i end
 	end
 	local dungeon = s.kind == "instance" and hasDungeons()
-	d.lsPrimaryAction, d.Secondary.lsAction = nil, nil
+	d.psPrimaryAction, d.Secondary.psAction = nil, nil
 	if s.kind == "guide" then
 		if ns.Engine and ns.Engine.OpenTab then
 			primary, secondary = L["Open in new tab"], L["Show in Guides"]
 		else
 			primary = L["Show in Guides"]
 		end
-		d.Secondary.lsAction = function() LK.OpenGuide(s.id, true) end
+		d.Secondary.psAction = function() LK.OpenGuide(s.id, true) end
 		note = g and g.pitch or nil
 	elseif s.kind == "zone" then
 		note = L["Zones have no sources. Search for what is in them."]
@@ -977,10 +977,10 @@ local function renderDetails(loaded, reason)
 		local open = function() LK.OpenDungeon(s.id) end
 		if primary then
 			secondary = L["Open dungeon"]
-			d.Secondary.lsAction = open
+			d.Secondary.psAction = open
 		else
 			primary, enabled = L["Open dungeon"], nil
-			d.lsPrimaryAction = open
+			d.psPrimaryAction = open
 			if not LK.message then note = L["Its quests and bosses are under Dungeons."] end
 		end
 	end
@@ -993,14 +993,14 @@ local function renderDetails(loaded, reason)
 		d.Primary:Show()
 		if secondary then
 			d.Secondary:Show()
-			d.Secondary.lsFixedWidth = nil
+			d.Secondary.psFixedWidth = nil
 			W.SetButtonText(d.Secondary, secondary)
 			setButtonWidth(d.Primary, INNER - d.Secondary:GetWidth() - 8)
 		else
 			d.Secondary:Hide()
 			setButtonWidth(d.Primary, INNER)
 		end
-		d.Primary.lsTip = s.kind == "guide" and nil or L["Enter does this too."]
+		d.Primary.psTip = s.kind == "guide" and nil or L["Enter does this too."]
 	else
 		d.Primary:Hide()
 		d.Secondary:Hide()
@@ -1029,7 +1029,7 @@ local function renderDetails(loaded, reason)
 			local r = sourceRow(i)
 			local on = sourceSel == i
 			local open = row.available ~= false
-			r.lsIndex = i
+			r.psIndex = i
 			r.Selected:SetShown(on)
 			r.Bar:SetShown(on)
 			setGlyph(r.Icon, SOURCE_ICON[row.type] or "icon-goto", on and "accent" or (open and "textDim" or "textMuted"))
@@ -1044,7 +1044,7 @@ local function renderDetails(loaded, reason)
 				W.Color(r.Label, "npc")
 			end
 			r.Travel:SetText(LK.Travel(row.travel) or "")
-			r.Travel.lsTip = nil
+			r.Travel.psTip = nil
 			r.Detail:SetText(row.detail or "")
 			W.Color(r.Detail, open and "textDim" or "textMuted")
 			local facts = sourceFacts(row)
@@ -1076,8 +1076,8 @@ local function renderDetails(loaded, reason)
 			if row.zone or row.map then tip[#tip + 1] = (row.zone or UI.MapName(row.map) or "") .. ((row.x and row.y) and format("  %.1f, %.1f", row.x, row.y) or "") end
 			if row.travel then tip[#tip + 1] = format(L["About %s from here"], LK.Travel(row.travel)) end
 			tip[#tip + 1] = (row.guideable and not blocked) and L["Select it, then Guide; or double-click."] or L["No guide can lead here."]
-			r.lsTipTitle = row.label
-			r.lsTip = table.concat(tip, "\n")
+			r.psTipTitle = row.label
+			r.psTip = table.concat(tip, "\n")
 			r:Show()
 			cy = cy + h + 2
 			rowsShown[i] = { label = row.label, detail = row.detail, travel = r.Travel:GetText(), facts = facts, why = why, available = open, guide = guideBtn }
@@ -1097,7 +1097,7 @@ local function renderDetails(loaded, reason)
 	end
 	LK.detail = {
 		kind = s.kind, id = s.id, title = title, facts = shown, sources = rowsShown, curated = curated, status = status,
-		primary = primary and d.Primary.Label:GetText() or nil, note = d.Note:GetText(), art = d.lsArt,
+		primary = primary and d.Primary.Label:GetText() or nil, note = d.Note:GetText(), art = d.psArt,
 	}
 	if primary then LK.detail.enabled = d.Primary:IsEnabled() end
 end
@@ -1108,16 +1108,16 @@ end
 ---------------------------------------------------------------------------
 
 local function resultClick(self)
-	if self.lsResult then
-		LK.Select(self.lsResult.kind, self.lsResult.id, self.lsResult)
-	elseif self.lsAct then
-		self.lsAct()
+	if self.psResult then
+		LK.Select(self.psResult.kind, self.psResult.id, self.psResult)
+	elseif self.psAct then
+		self.psAct()
 	end
 end
 
 local function resultDouble(self)
-	if not self.lsResult then return end
-	LK.Select(self.lsResult.kind, self.lsResult.id, self.lsResult)
+	if not self.psResult then return end
+	LK.Select(self.psResult.kind, self.psResult.id, self.psResult)
 	LK.Activate()
 end
 
@@ -1204,8 +1204,8 @@ end
 
 -- A drawn row's subtitle, asked for once.
 local function subtitleOf(res)
-	if res.subtitle == nil and not res.lsSubtitled then
-		res.lsSubtitled = true
+	if res.subtitle == nil and not res.psSubtitled then
+		res.psSubtitled = true
 		local S = ns.Search
 		if S and S.Subtitle then
 			local ok, text = pcall(S.Subtitle, res)
@@ -1243,12 +1243,12 @@ local function paintVisible()
 				f = resultRow(nr)
 				if e.t == "row" then
 					paintResult(f, e.res, subtitleOf(e.res), width, sel and sel.kind == e.res.kind and sel.id == e.res.id)
-					f.lsAct = nil
+					f.psAct = nil
 				else
 					paintAction(f, e.text, e.glyph, width)
-					f.lsAct = e.act
+					f.psAct = e.act
 				end
-				f.lsTip = e.tip
+				f.psTip = e.tip
 			end
 			f:ClearAllPoints()
 			f:SetPoint("TOPLEFT", body, "TOPLEFT", ROW_X, -e.y)
@@ -1287,9 +1287,9 @@ function LK.Render()
 	-- comes back only to say why the Codex is not there to search (not while
 	-- it simply waits for the first search).
 	local status = not loaded and reason ~= nil and reason ~= "notloaded" and reasonShort(reason) or nil
-	shell.lsKeepTabRow = status ~= nil
+	shell.psKeepTabRow = status ~= nil
 	W.ShellTabs(shell, nil)
-	shell.lsKeepTabRow = nil
+	shell.psKeepTabRow = nil
 	root.CodexLine:SetText(status or "")
 	if status then
 		W.Color(root.CodexLine, (reason == "combat" or reason == "loading") and "textMuted" or "warning")
@@ -1629,9 +1629,9 @@ local pickerPools = setmetatable({}, { __mode = "k" }) -- parent -> { folder, ro
 local pickerCount, pickerTotal = 0, 0
 
 local function pickerClick(self)
-	local q = self.lsQuery
-	if self.lsResult then
-		UI.ShowLookup({ query = q, kind = self.lsResult.kind, id = self.lsResult.id })
+	local q = self.psQuery
+	if self.psResult then
+		UI.ShowLookup({ query = q, kind = self.psResult.kind, id = self.psResult.id })
 	else
 		UI.ShowLookup({ query = q })
 	end
@@ -1688,7 +1688,7 @@ function UI.LookupRows(parent, y, q, width, x)
 			r:SetScript("OnClick", pickerClick)
 			pool.rows[n] = r
 		end
-		r.lsQuery = q
+		r.psQuery = q
 		r:ClearAllPoints()
 		r:SetPoint("TOPLEFT", parent, "TOPLEFT", x, -y)
 		y = y + ROW_H
@@ -1699,11 +1699,11 @@ function UI.LookupRows(parent, y, q, width, x)
 		local kindName = KIND[res.kind] and L[KIND[res.kind].name] or res.kind
 		local sub = subtitleOf(res)
 		paintResult(r, res, sub and (kindName .. DOT .. sub) or kindName, width, false)
-		r.lsTip = L["Click to see where to get it."]
+		r.psTip = L["Click to see where to get it."]
 	end
 	local r = nextRow()
 	paintAction(r, format(L["Look up everything for %s"], LQ .. q .. RQ), "search", width)
-	r.lsTip = L["Opens Lookup with this search."]
+	r.psTip = L["Opens Lookup with this search."]
 	for i = n + 1, #pool.rows do pool.rows[i]:Hide() end
 	pickerCount = #picked
 	return y

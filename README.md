@@ -285,7 +285,7 @@ flight helper once, or to answer a request yourself.
 ### Recorder
 
 `Polestar_Recorder` is an optional companion addon that records your
-sessions to improve the routes. It is off until you turn it on (`/lsrec on`,
+sessions to improve the routes. It is off until you turn it on (`/psrec on`,
 or Options > Recorder > Start recording) and writes nothing while off.
 Recordings replace the Classic Era estimates with Forever facts (quest XP,
 NPC and object positions, trainers, flight paths and times), and
@@ -332,8 +332,8 @@ finds any setting.
 | `where` | Print your map and position as guide lines (`zone map <id>`, `goto x,y live`), in a box to copy |
 | `debug` | Toggle debug output |
 
-The Recorder has its own: `/lsrec on | off | mark <text> | clear` and a
-few more listed by `/lsrec`.
+The Recorder has its own: `/psrec on | off | mark <text> | clear` and a
+few more listed by `/psrec`.
 
 </details>
 

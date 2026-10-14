@@ -142,12 +142,12 @@ local function newRow(view)
 	row.Credits = oneLine(W.Text(row, "small", "textDim"))
 	row.Count = W.Text(row, "number", "textMuted")
 	row.Count:SetJustifyH("RIGHT")
-	row.Switch = W.Switch(row, function() return row.lsRecord and row.lsRecord.status == "on" end, function(on)
+	row.Switch = W.Switch(row, function() return row.psRecord and row.psRecord.status == "on" end, function(on)
 		local G = registry()
-		if row.lsRecord and G and G.SetPackShown then G.SetPackShown(row.lsRecord.id, on) end
+		if row.psRecord and G and G.SetPackShown then G.SetPackShown(row.psRecord.id, on) end
 	end, L["Show this pack's guides"])
 	row.Enable = W.Button(row, L["Enable and reload"], function()
-		local r = row.lsRecord
+		local r = row.psRecord
 		if not (r and r.addon and C_AddOns and C_AddOns.EnableAddOn) then return end
 		C_AddOns.EnableAddOn(r.addon)
 		if ReloadUI then ReloadUI() end
@@ -162,7 +162,7 @@ local function newRow(view)
 	row.Problems = W.Chip(row)
 	-- Show opens the problem list; Hide closes the list and the report.
 	row.ShowList = W.Button(row, L["Show"], function()
-		local k = keyOf(row.lsRecord)
+		local k = keyOf(row.psRecord)
 		if listed[k] or reported[k] then
 			listed[k], reported[k] = nil, nil
 		else
@@ -172,7 +172,7 @@ local function newRow(view)
 	end, { ghost = true, height = 24 })
 	-- Copy report opens the report (it stays open) and selects its text.
 	row.CopyReport = W.Button(row, L["Copy report"], function()
-		reported[keyOf(row.lsRecord)] = true
+		reported[keyOf(row.psRecord)] = true
 		relayout(view)
 		row.Report:SetFocus()
 		row.Report:HighlightText()
@@ -185,8 +185,8 @@ local function newRow(view)
 	row.Report = W.CopyBox(row, { lines = 6 })
 	-- Escape closes it.
 	row.Report:HookScript("OnEscapePressed", function()
-		if not row.lsRecord then return end
-		reported[keyOf(row.lsRecord)] = nil
+		if not row.psRecord then return end
+		reported[keyOf(row.psRecord)] = nil
 		relayout(view)
 	end)
 	return row
@@ -194,7 +194,7 @@ end
 
 -- Lay a row out for record r at `width`. -> its height
 local function layoutRow(row, r, width)
-	row.lsRecord = r
+	row.psRecord = r
 	row:SetWidth(width)
 	local titleW = min(220, floor(width * 0.32))
 	local col = PAD + titleW + 16

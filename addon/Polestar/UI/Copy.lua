@@ -59,13 +59,13 @@ end
 -- The box is made for the number of lines it holds.
 local function box(lines)
 	local cur = rawget(F, "Box")
-	if cur and cur.lsLines == lines then return cur end
+	if cur and cur.psLines == lines then return cur end
 	if cur then cur:Hide() end
 	F.boxes = F.boxes or {}
 	local b = F.boxes[lines]
 	if not b then
 		b = W.CopyBox(F, { lines = lines })
-		b.lsLines = lines
+		b.psLines = lines
 		b:SetWidth(WIDTH - PAD * 2)
 		-- Escape in the box closes the window (the text is copied by then).
 		b:SetScript("OnEscapePressed", function() F:Hide() end)

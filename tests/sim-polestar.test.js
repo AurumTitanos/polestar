@@ -9,15 +9,15 @@ const path = require('node:path');
 const { loadPolestarRoutes } = require('../tools/lib/sim/baselines/polestar');
 
 const FIX = path.join(__dirname, 'fixtures', 'sim');
-const LS_GUIDES = path.join(FIX, 'polestar', 'guides');
-const LS_DATA = path.join(FIX, 'polestar', 'data');
+const GUIDES = path.join(FIX, 'polestar', 'guides');
+const DATA = path.join(FIX, 'polestar', 'data');
 
 const ids = (seq, t) => seq.events.filter((e) => e.t === t).map((e) => e.q);
 
-const lsRoutes = (opts) => loadPolestarRoutes({ guidesDir: LS_GUIDES, dataDir: LS_DATA, race: 'Orc', ...opts });
+const routes = (opts) => loadPolestarRoutes({ guidesDir: GUIDES, dataDir: DATA, race: 'Orc', ...opts });
 
 test('polestar: default route, conditions and missing quests', () => {
-	const r = lsRoutes();
+	const r = routes();
 	const def = r.default;
 	assert.equal(def.source, 'polestar');
 	assert.deepEqual(
@@ -47,13 +47,13 @@ test('polestar: default route, conditions and missing quests', () => {
 	);
 	assert.deepEqual(def.missing, [90030]); // fixture quests.json lacks it
 
-	assert.deepEqual(ids(lsRoutes({ cls: 'Warlock' }).default, 'accept'), [90001, 90002, 90003, 90010, 90030]);
-	assert.deepEqual(ids(lsRoutes({ cls: 'Druid' }).default, 'accept'), [90001, 90010, 90030]);
-	assert.equal(lsRoutes({ race: 'Skyborne', faction: 'Horde' }), null);
+	assert.deepEqual(ids(routes({ cls: 'Warlock' }).default, 'accept'), [90001, 90002, 90003, 90010, 90030]);
+	assert.deepEqual(ids(routes({ cls: 'Druid' }).default, 'accept'), [90001, 90010, 90030]);
+	assert.equal(routes({ race: 'Skyborne', faction: 'Horde' }), null);
 });
 
 test('polestar: every path through the route choices, and the graph', () => {
-	const r = lsRoutes();
+	const r = routes();
 	assert.equal(r.mode, 'all');
 	assert.deepEqual(
 		r.variants.map((v) => [v.label, v.sequence.guides.map((g) => g.id)]),
@@ -89,7 +89,7 @@ test('polestar: every path through the route choices, and the graph', () => {
 	]);
 
 	// Above the path cap: the default route plus one changed choice each.
-	const capped = lsRoutes({ maxPaths: 2 });
+	const capped = routes({ maxPaths: 2 });
 	assert.equal(capped.mode, 'single-change');
 	assert.deepEqual(
 		capped.variants.map((v) => [v.label, v.sequence.guides.map((g) => g.id)]),

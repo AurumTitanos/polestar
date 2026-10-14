@@ -1,6 +1,6 @@
 ## Interface: 16001
 ## Title: Polestar Recorder
-## Notes: Records quests, routes and world data while you play, for authoring Polestar guides. /lsrec
+## Notes: Records quests, routes and world data while you play, for authoring Polestar guides. /psrec
 ## Author: Polestar
 ## X-License: GPL-3.0-only
 ## Version: 0.1.0

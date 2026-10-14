@@ -16,7 +16,7 @@ page says which part is which.
 | `Polestar_QuestDB` | The quest database behind the quest markers, available-quest markers, tooltips and nameplate icons. Loaded on demand. | `questdb build`, from `data/forever` | no (gitignored, built locally) | yes, in `Polestar-<version>.zip` when built |
 | `Polestar_Codex` | Lookup's Codex: items, mounts, pets, recipes, NPCs, rares, quests, zones, dungeons and treasures with where each comes from; also the Dungeons and Rares data. Loaded on demand. | `codex build` | no (gitignored, built locally) | no: `install` copies it when built, `pack` never packages it |
 | `Polestar_Travel` | Zone crossings for the travel planner, from the optional local crossings file `data/local/crossings.json`. Loads with Polestar. | `travel build` | no (gitignored, built locally) | no: `install` copies it when built, `pack` never packages it |
-| `Polestar_Recorder` | An optional, standalone recorder (no dependency on Polestar): quests, routes, world data and, while Polestar runs, guide progress, into `PolestarRecorderDB`. Off until turned on (`/lsrec on`). `record import` reads what it wrote. | Hand-written | yes | yes, as its own `Polestar_Recorder-<version>.zip`; `install --recorder` |
+| `Polestar_Recorder` | An optional, standalone recorder (no dependency on Polestar): quests, routes, world data and, while Polestar runs, guide progress, into `PolestarRecorderDB`. Off until turned on (`/psrec on`). `record import` reads what it wrote. | Hand-written | yes | yes, as its own `Polestar_Recorder-<version>.zip`; `install --recorder` |
 
 The data addons Polestar can do without: with `Polestar_QuestDB`,
 `Polestar_Codex` or `Polestar_ItemDB` missing, the features that read them say
@@ -31,6 +31,11 @@ namespace is one table, `ns` inside the addon and the global `Polestar`
 outside it (`Core/Init.lua`: `Polestar = ns`), so `ns.Engine` and
 `Polestar.Engine` are the same table. "Public table" is the table a file
 defines or adds to.
+
+Fields Polestar adds to a game frame (`row.psRecord`, `button.psTip`,
+`frame.psSkin`) start with `ps`, so they never clash with the frame's own keys
+or with fields other addons set on shared frames. They live only on the frame,
+never in saved variables.
 
 | # | Module | Manifest | Public tables | What it is |
 |---|---|---|---|---|

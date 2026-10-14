@@ -388,7 +388,7 @@ local function buildRecorder(view)
 	local actions = W.SectionHeader(view)
 	W.SetSection(actions, L["Actions"])
 	local toggle = W.ActionTile(view, "record", L["Start recording"], L["Write quests, routes and world data for guide authors. Off until you start it."], function(self)
-		recorderCommand(self.lsOn and "off" or "on")
+		recorderCommand(self.psOn and "off" or "on")
 		view.Refresh()
 	end)
 	local status = W.ActionTile(view, "info", L["Print status"], L["Counts and the current session in chat."], function() recorderCommand("status") end)
@@ -434,9 +434,9 @@ local function buildRecorder(view)
 		actions:SetWidth(win.BodyWidth)
 		actions:Show()
 		y = y + 44 + 4
-		toggle.lsOn = st.enabled
+		toggle.psOn = st.enabled
 		toggle.Title:SetText(st.enabled and L["Stop recording"] or L["Start recording"])
-		toggle.lsTitle = toggle.Title:GetText()
+		toggle.psTitle = toggle.Title:GetText()
 		toggle.Desc:SetText(st.enabled and L["Nothing more is written until you start it again."] or L["Write quests, routes and world data for guide authors. Off until you start it."])
 		for i, t in ipairs({ toggle, status }) do
 			t:ClearAllPoints()
@@ -631,7 +631,7 @@ local function makeControl(parent, c)
 		w = W.Swatch(parent, c.label, c.key, c.help, { shown = c.shown, source = c.source, linked = c.linked })
 	elseif c.kind == "button" then
 		w = W.ActionTile(parent, c.icon or "bolt", c.label, c.help, c.onClick, { confirm = c.confirm, danger = c.danger })
-		w.lsTile = true
+		w.psTile = true
 		if c.disabled then
 			w.Refresh = function(self)
 				local ok, off = pcall(c.disabled)
@@ -644,7 +644,7 @@ local function makeControl(parent, c)
 		return w
 	end
 	if c.disabled then W.SetDisabledWhen(w, c.disabled) end
-	w.lsControl = c
+	w.psControl = c
 	return w
 end
 

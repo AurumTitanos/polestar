@@ -111,7 +111,7 @@ local function tooltipAnchor()
 end
 
 local function goalTooltip(row)
-	local goal = row.lsGoal
+	local goal = row.psGoal
 	if not goal then return end
 	local lines = {}
 	local id = "  |c" .. Theme.Hex("textMuted") .. "#"
@@ -186,18 +186,18 @@ end
 
 -- Tick the row's goal done, or untick it (any goal but a note).
 local function toggleGoal(row)
-	local E, goal = Engine(), row.lsGoal
+	local E, goal = Engine(), row.psGoal
 	if E and E.ToggleGoal and goal and goal.tickable and view then E.ToggleGoal(view.index, goal.index) end
 end
 
 -- Skip an optional goal, or bring it back.
 local function skipGoal(row)
-	local E, goal = Engine(), row.lsGoal
+	local E, goal = Engine(), row.psGoal
 	if E and E.SkipGoal and goal and goal.optional and view then E.SkipGoal(view.index, goal.index) end
 end
 
 local function rowClick(row, button)
-	local goal = row.lsGoal
+	local goal = row.psGoal
 	if not goal then return end
 	if button == "RightButton" then
 		toggleGoal(row)
@@ -216,7 +216,7 @@ local function rowClick(row, button)
 end
 
 local function rowEnter(row)
-	local goal = row.lsGoal
+	local goal = row.psGoal
 	if goal and ((goal.x and goal.map) or goal.tickable) then row.Hover:Show() end
 	goalTooltip(row)
 	GF.HoverIn()
@@ -259,11 +259,11 @@ local function goalRow(i)
 	r.Check = W.Checkbox(r, function(c)
 		-- The click already flipped the box; the Engine's view is the truth,
 		-- so put it back and let STEP_UPDATED repaint it.
-		c:SetChecked(c.lsChecked)
+		c:SetChecked(c.psChecked)
 		toggleGoal(r)
 	end)
 	r.Check:SetScript("OnEnter", function(c)
-		local goal = r.lsGoal
+		local goal = r.psGoal
 		local tip = not goal and "" or (goal.ticked and L["Untick"]) or (goal.status == "done" and L["Done"]) or L["Tick it done"]
 		W.Tooltip(c, "ANCHOR_TOP", tip, goal and goal.status == "done" and not goal.ticked and { L["The game counts this one itself."] } or nil)
 		GF.HoverIn()
@@ -278,7 +278,7 @@ local function goalRow(i)
 	r.Skip:SetScript("OnClick", function() skipGoal(r) end)
 	r.Skip:SetScript("OnEnter", function(b)
 		W.Color(b.Label, "text")
-		local goal = r.lsGoal
+		local goal = r.psGoal
 		W.Tooltip(b, "ANCHOR_TOP", goal and goal.dismissed and L["Bring it back"] or L["Skip this optional goal"],
 			{ goal and goal.dismissed and L["It leads the arrow again."] or L["The arrow moves on; Undo brings it back."] })
 		GF.HoverIn()
@@ -293,7 +293,7 @@ local function goalRow(i)
 	-- with spawn areas, the next spot. The arrow follows the goal there: the
 	-- Engine aims at it, and a point picked by hand gives way.
 	r.Alt = W.IconButton(r, "reload", 20, nil, function()
-		local E, goal = Engine(), r.lsGoal
+		local E, goal = Engine(), r.psGoal
 		if not (E and goal and view) then return end
 		if type(goal.alternatives) == "number" and goal.alternatives > 0 then
 			if E.CycleCandidate then E.CycleCandidate(view.index, goal.index) end
@@ -306,8 +306,8 @@ local function goalRow(i)
 			GF.UpdateTargets()
 		end
 	end, 11)
-	r.Alt.lsOnEnter = function(b)
-		local goal = r.lsGoal
+	r.Alt.psOnEnter = function(b)
+		local goal = r.psGoal
 		if goal and not (type(goal.alternatives) == "number" and goal.alternatives > 0) and type(goal.spots) == "number" then
 			W.Tooltip(b, "ANCHOR_TOP", L["Next spot"], { string.format(L["%d spots in this area"], goal.spots) })
 		else
@@ -329,7 +329,7 @@ end
 local BAR_ROW, BAR_THICK = 13, 3
 
 local function rowBar(r)
-	local b = r.lsBar
+	local b = r.psBar
 	if b then return b end
 	b = CreateFrame("Frame", nil, r)
 	b:SetHeight(BAR_ROW)
@@ -345,7 +345,7 @@ local function rowBar(r)
 	b.Fill:SetHeight(BAR_THICK)
 	b.Fill:SetPoint("LEFT", b.Track, "LEFT", 0, 0)
 	b.Fill:SetWidth(0.01)
-	r.lsBar = b
+	r.psBar = b
 	return b
 end
 
@@ -354,8 +354,8 @@ end
 -- current = the first open goal of the focus: its glyph alone takes the
 -- accent; the others sit in textDim.
 local function paintRow(r, goal, pop, sameStep, current)
-	local sameGoal = sameStep and r.lsGoal and r.lsGoal.index == goal.index and r.lsGoal.t == goal.t
-	r.lsGoal = goal
+	local sameGoal = sameStep and r.psGoal and r.psGoal.index == goal.index and r.psGoal.t == goal.t
+	r.psGoal = goal
 	local status = goal.status
 	local done = status == "done"
 	local skipped = status == "skipped"
@@ -368,7 +368,7 @@ local function paintRow(r, goal, pop, sameStep, current)
 	r.Text:SetText(UI.GoalLine(goal))
 	-- White while it is to be done; done and skipped goals step back.
 	W.Color(r.Text, (done or skipped) and "textMuted" or "text")
-	local sub = UI.GoalSubline(goal, person.Where:IsShown() and person.lsPlace and person.lsPlace.map or nil)
+	local sub = UI.GoalSubline(goal, person.Where:IsShown() and person.psPlace and person.psPlace.map or nil)
 	r.Sub:SetText(sub or "")
 	r.Sub:SetShown(sub ~= nil)
 	-- An unavailable quest's reason is the point of the line: keep it readable.
@@ -385,16 +385,16 @@ local function paintRow(r, goal, pop, sameStep, current)
 		W.Color(b.Fill, done and "success" or "accent", status == "pending" and 0.6 or 1)
 		-- Fill from where it was when the same goal moved on (a rank, a
 		-- reputation tick); jump when the row now shows a different goal.
-		b.lsFrom = (sameGoal and b:IsShown() and b.lsFrac ~= frac) and b.lsFrac or nil
-		b.lsFrac = frac
+		b.psFrom = (sameGoal and b:IsShown() and b.psFrac ~= frac) and b.psFrac or nil
+		b.psFrac = frac
 		b:Show()
-	elseif r.lsBar then
-		r.lsBar:Hide()
+	elseif r.psBar then
+		r.psBar:Hide()
 	end
 	-- Every goal ticks (a note never); a goal the game itself counts done
 	-- shows its check but has nothing to undo.
 	r.Check:SetShown(goal.tickable and not skipped and true or false)
-	r.Check.lsChecked = done
+	r.Check.psChecked = done
 	r.Check:SetChecked(done)
 	local locked = done and not goal.ticked
 	if locked then r.Check:Disable() else r.Check:Enable() end
@@ -412,7 +412,7 @@ local function paintRow(r, goal, pop, sameStep, current)
 	elseif not Anim.IsRunning(r.Icon, "size") then
 		r.Icon:SetSize(ICON, ICON)
 	end
-	r.lsStatus = status
+	r.psStatus = status
 end
 
 local function layoutBar(b, tw)
@@ -421,10 +421,10 @@ local function layoutBar(b, tw)
 	local trackW = max(24, tw - lw)
 	b:SetWidth(tw)
 	b.Track:SetWidth(trackW)
-	local w = max(0.01, trackW * b.lsFrac)
-	if b.lsFrom then
-		Anim.To(b.Fill, "width", max(0.01, trackW * b.lsFrom), w, Anim.SLOW, "out")
-		b.lsFrom = nil
+	local w = max(0.01, trackW * b.psFrac)
+	if b.psFrom then
+		Anim.To(b.Fill, "width", max(0.01, trackW * b.psFrom), w, Anim.SLOW, "out")
+		b.psFrom = nil
 	elseif not Anim.IsRunning(b.Fill, "width") then
 		b.Fill:SetWidth(w)
 	end
@@ -449,7 +449,7 @@ local function measureRow(r, width)
 	r.Text:SetWidth(tw)
 	local h = 4 + r.Text:GetStringHeight()
 	local above = r.Text
-	local b = r.lsBar
+	local b = r.psBar
 	if b and b:IsShown() then
 		b:ClearAllPoints()
 		b:SetPoint("TOPLEFT", r.Text, "BOTTOMLEFT", 0, -5)
@@ -485,10 +485,10 @@ end
 local GROUP_VERB = { npc = "talk", object = "interact", here = "goto" }
 
 -- The arrow on the header: on its person, or on the "Go to" it stands for
--- (a field step's own place, `person.lsHeaderGoal`, shown as the header).
+-- (a field step's own place, `person.psHeaderGoal`, shown as the header).
 local function personMarked(t)
-	if person.lsPerson and isTarget(person.lsPlace, t) then return true end
-	local hg = person.lsHeaderGoal
+	if person.psPerson and isTarget(person.psPlace, t) then return true end
+	local hg = person.psHeaderGoal
 	return hg ~= nil and hg.status ~= "done" and hg.status ~= "skipped" and isTarget(hg, t)
 end
 
@@ -503,23 +503,23 @@ local function paintPerson(group)
 	local where = place and UI.MapName(place.map) or nil
 	person.Where:SetText(where or "")
 	person.Where:SetShown(where ~= nil)
-	person.lsPlace = place
-	person.lsLabel = UI.GroupName(view, group)
+	person.psPlace = place
+	person.psLabel = UI.GroupName(view, group)
 	-- The arrow on this person marks the header; a field group's goals carry
 	-- their own marks, except the "Go to" the header stands for.
-	person.lsPerson = kind ~= "here"
+	person.psPerson = kind ~= "here"
 	person.Mark:SetShown(personMarked(targetOf()))
 end
 
 local function personEnter(self)
 	local lines = {}
-	if self.lsPlace then
-		lines[#lines + 1] = { left = L["Location"], right = string.format("%s  %.1f, %.1f", UI.MapName(self.lsPlace.map) or "", self.lsPlace.x, self.lsPlace.y) }
+	if self.psPlace then
+		lines[#lines + 1] = { left = L["Location"], right = string.format("%s  %.1f, %.1f", UI.MapName(self.psPlace.map) or "", self.psPlace.x, self.psPlace.y) }
 		local r, g, b = Theme.Accent()
 		lines[#lines + 1] = { L["Click to point the arrow here"], r, g, b }
 	end
-	if view and view.title and view.title ~= self.lsLabel then lines[#lines + 1] = view.title end
-	W.Tooltip(self, tooltipAnchor(), self.lsLabel or "", lines)
+	if view and view.title and view.title ~= self.psLabel then lines[#lines + 1] = view.title end
+	W.Tooltip(self, tooltipAnchor(), self.psLabel or "", lines)
 	GF.HoverIn()
 end
 
@@ -545,10 +545,10 @@ local function upRow(i)
 	r.Text:SetPoint("LEFT", r.Icon, "RIGHT", 9, 0)
 	r:SetScript("OnClick", function(self)
 		local E = Engine()
-		if E and E.Goto and self.lsIndex then E.Goto(self.lsIndex) end
+		if E and E.Goto and self.psIndex then E.Goto(self.psIndex) end
 	end)
 	r:SetScript("OnEnter", function(self)
-		W.Tooltip(self, tooltipAnchor(), self.lsSummary or "", { { L["Click to jump to this step"], Theme.Accent() } })
+		W.Tooltip(self, tooltipAnchor(), self.psSummary or "", { { L["Click to jump to this step"], Theme.Accent() } })
 		GF.HoverIn()
 	end)
 	r:SetScript("OnLeave", function(self) W.HideTooltip(self) end)
@@ -571,7 +571,7 @@ end
 
 local function tabMenu(self)
 	local E = Engine()
-	local i = self.lsIndex
+	local i = self.psIndex
 	local tabs = tabsOf(E) or {}
 	W.ShowMenu(self, {
 		{ text = L["Close tab"], icon = "close", onClick = function() E.CloseTab(i) end },
@@ -588,12 +588,12 @@ local TAB_TEXT_X = 27 -- the label's left edge: the glyph's inset, width and gap
 local TAB_RANGE_GAP = 4
 local function layoutTab(b, pad)
 	local room = b:GetWidth() - TAB_TEXT_X - pad
-	local rangeW = b.lsRange and (floor(b.Range:GetStringWidth() + 1) + TAB_RANGE_GAP) or 0
+	local rangeW = b.psRange and (floor(b.Range:GetStringWidth() + 1) + TAB_RANGE_GAP) or 0
 	local fits = rangeW <= room
-	local titleW = fits and min(b.lsTitleW, room - rangeW) or 0
+	local titleW = fits and min(b.psTitleW, room - rangeW) or 0
 	b.Label:SetShown(titleW >= 1)
 	if titleW >= 1 then b.Label:SetWidth(titleW) end
-	b.Range:SetShown(b.lsRange and fits or false)
+	b.Range:SetShown(b.psRange and fits or false)
 	b.Range:ClearAllPoints()
 	b.Range:SetPoint("LEFT", b.Icon, "RIGHT", 6 + (titleW >= 1 and titleW + TAB_RANGE_GAP or 0), 0)
 end
@@ -623,27 +623,27 @@ local function tabButton(i)
 	b.Range = T(b, "small", "textMuted")
 	b.Close = W.IconButton(b, "close", 16, L["Close tab"], function(self)
 		local E = Engine()
-		if E and E.CloseTab then E.CloseTab(self:GetParent().lsIndex) end
+		if E and E.CloseTab then E.CloseTab(self:GetParent().psIndex) end
 	end, 9)
 	b.Close:SetPoint("RIGHT", b, "RIGHT", -3, 0)
 	b.Close:SetAlpha(0)
-	b.Close.lsOnEnter = function(c) c:SetAlpha(1) end
-	b.Close.lsOnLeave = function(c) if not c:GetParent():IsMouseOver() then c:SetAlpha(0) end end
+	b.Close.psOnEnter = function(c) c:SetAlpha(1) end
+	b.Close.psOnLeave = function(c) if not c:GetParent():IsMouseOver() then c:SetAlpha(0) end end
 	b:SetScript("OnClick", function(self, button)
 		local E = Engine()
 		if not E then return end
 		if button == "RightButton" then return tabMenu(self) end
-		if button == "MiddleButton" and E.CloseTab then return E.CloseTab(self.lsIndex) end
-		if E.SelectTab and not self.lsActive then E.SelectTab(self.lsIndex) end
+		if button == "MiddleButton" and E.CloseTab then return E.CloseTab(self.psIndex) end
+		if E.SelectTab and not self.psActive then E.SelectTab(self.psIndex) end
 	end)
 	b:SetScript("OnEnter", function(self)
 		self.Close:SetAlpha(1)
 		layoutTab(self, 20)
 		local lines = {}
-		if self.lsMeta and self.lsMeta ~= "" then lines[#lines + 1] = self.lsMeta end
-		if self.lsProgress then lines[#lines + 1] = self.lsProgress end
+		if self.psMeta and self.psMeta ~= "" then lines[#lines + 1] = self.psMeta end
+		if self.psProgress then lines[#lines + 1] = self.psProgress end
 		lines[#lines + 1] = { L["Right-click for tab options"], Theme.Accent() }
-		W.Tooltip(self, "ANCHOR_TOP", self.lsTitle or "", lines)
+		W.Tooltip(self, "ANCHOR_TOP", self.psTitle or "", lines)
 		GF.HoverIn()
 	end)
 	b:SetScript("OnLeave", function(self)
@@ -665,7 +665,7 @@ function GF.RenderTabs()
 	if not F then return end
 	local tabs, active = tabsOf(Engine())
 	local n = tabs and #tabs or 0
-	strip.lsCount = n
+	strip.psCount = n
 	local avail = F:GetWidth() - 2 - 30
 	-- The active tab gets the room to read its title; the rest share the remainder.
 	local share = n > 0 and floor(avail / n) or 0
@@ -680,26 +680,26 @@ function GF.RenderTabs()
 	for i = 1, n do
 		local t = tabs[i]
 		local b = tabButton(i)
-		b.lsIndex = i
-		b.lsActive = i == active
-		b.lsTitle = t.title or t.guideId
+		b.psIndex = i
+		b.psActive = i == active
+		b.psTitle = t.title or t.guideId
 		local guide = G and G.Get and G.Get(t.guideId)
-		b.lsMeta = guide and UI.GuideMeta(guide) or nil
+		b.psMeta = guide and UI.GuideMeta(guide) or nil
 		local total = t.total or t.stepCount
-		b.lsProgress = (t.done and total and total > 0) and string.format(L["%d of %d steps done"], t.done, total) or nil
-		b.Label:SetText(b.lsTitle)
+		b.psProgress = (t.done and total and total > 0) and string.format(L["%d of %d steps done"], t.done, total) or nil
+		b.Label:SetText(b.psTitle)
 		b.Label:SetWidth(0) -- unbound, to measure the whole title
-		b.lsTitleW = floor(b.Label:GetStringWidth() + 1)
+		b.psTitleW = floor(b.Label:GetStringWidth() + 1)
 		local lv = guide and UI.LevelRange(guide.minLevel, guide.maxLevel)
-		b.lsRange = lv and ("(" .. lv .. ")") or nil
-		b.Range:SetText(b.lsRange or "")
+		b.psRange = lv and ("(" .. lv .. ")") or nil
+		b.Range:SetText(b.psRange or "")
 		b.Icon:SetTexture(Theme.Media(CATEGORY_ICON[t.category] or "icon-level"))
-		W.Color(b.Label, b.lsActive and "text" or "textMuted")
-		W.Color(b.Range, b.lsActive and "textDim" or "textMuted")
-		W.Color(b.Icon, b.lsActive and "accent" or "textMuted")
-		b.Selected:SetShown(b.lsActive)
-		b.Bar:SetShown(b.lsActive)
-		local w = b.lsActive and activeW or otherW
+		W.Color(b.Label, b.psActive and "text" or "textMuted")
+		W.Color(b.Range, b.psActive and "textDim" or "textMuted")
+		W.Color(b.Icon, b.psActive and "accent" or "textMuted")
+		b.Selected:SetShown(b.psActive)
+		b.Bar:SetShown(b.psActive)
+		local w = b.psActive and activeW or otherW
 		b:SetWidth(w)
 		layoutTab(b, b:IsMouseOver() and 20 or 8)
 		b:ClearAllPoints()
@@ -712,7 +712,7 @@ function GF.RenderTabs()
 	strip.Add:SetPoint("LEFT", strip, "BOTTOMLEFT", x + 2, TAB_H / 2)
 	local full = n >= 6
 	W.SetIconState(strip.Add, false, not full)
-	strip.Add.lsTip = full and L["Six tabs is the limit"] or L["Open a guide in a new tab"]
+	strip.Add.psTip = full and L["Six tabs is the limit"] or L["Open a guide in a new tab"]
 end
 
 ---------------------------------------------------------------------------
@@ -798,7 +798,7 @@ end
 
 function GF.LayoutBanner(width)
 	local kind, n = bannerNotice()
-	banner.lsKind = kind
+	banner.psKind = kind
 	banner.Text:SetWidth(width - PAD * 2 - 21 - 24)
 	banner.Later:Hide()
 	if kind == "skipped" then
@@ -906,7 +906,7 @@ end
 ---------------------------------------------------------------------------
 
 local function stripShown()
-	return strip.lsHasTabs and not compact()
+	return strip.psHasTabs and not compact()
 end
 
 local function layoutCard(width)
@@ -940,7 +940,7 @@ local function layoutCard(width)
 	if tip:IsShown() then
 		tip.Text:SetWidth(cw - 18)
 		tip.Text:SetWordWrap(tipOpen)
-		tip.lsOpen = tipOpen
+		tip.psOpen = tipOpen
 		local th = tipOpen and tip.Text:GetStringHeight() or min(tip.Text:GetStringHeight(), tip.Text:GetLineHeight())
 		local h = floor(6 + th + 6 + 0.5)
 		tip:SetHeight(h)
@@ -1044,7 +1044,7 @@ function GF.Layout()
 		local h = layoutCard(width)
 		-- The card animates its own offset; keep its anchor's base in step.
 		if Anim.IsRunning(card, "offset") then
-			card.lsAnchor[5] = -y
+			card.psAnchor[5] = -y
 		else
 			Anim.Anchor(card, "TOPLEFT", body, "TOPLEFT", 0, -y)
 		end
@@ -1054,7 +1054,7 @@ function GF.Layout()
 	else
 		y = stack(empty, y, layoutEmpty(width))
 	end
-	if GF.xp.lsHas and not isCompact and state == "steps" then
+	if GF.xp.psHas and not isCompact and state == "steps" then
 		GF.xp:Show()
 		y = stack(GF.xp, y, GF.xp:GetHeight())
 	else
@@ -1089,7 +1089,7 @@ function GF.PaintProgress(animate)
 	local w = F:GetWidth() - PAD * 2 - 44
 	foot.Line:SetWidth(max(1, w))
 	W.SetProgress(foot.Line, frac, w, animate)
-	foot.lsDone, foot.lsTotal = done, total
+	foot.psDone, foot.psTotal = done, total
 end
 
 ---------------------------------------------------------------------------
@@ -1107,7 +1107,7 @@ local function setEmpty(kind)
 		empty.Title:SetText(L["No guides shown"])
 		empty.Text:SetText(L["The guide packs are switched off. Turn one on under Options, Guide packs (/polestar packs)."])
 		W.SetButtonText(empty.Primary, L["Guide packs"])
-		empty.Primary.lsAction = function() UI.ShowOptions(L["Guide packs"]) end
+		empty.Primary.psAction = function() UI.ShowOptions(L["Guide packs"]) end
 		empty.Primary:Show()
 	elseif kind == "noguides" then
 		empty.Title:SetText(L["No guides installed"])
@@ -1119,17 +1119,17 @@ local function setEmpty(kind)
 		if suggested then
 			empty.Text:SetText(L["Suggested for you"] .. ": |c" .. Theme.Hex("text") .. suggested.title .. "|r")
 			W.SetButtonText(empty.Primary, L["Start guide"])
-			empty.Primary.lsAction = function()
+			empty.Primary.psAction = function()
 				if E and E.OpenTab then E.OpenTab(id) elseif E and E.SetGuide then E.SetGuide(id) end
 			end
 			empty.Primary:Show()
 			W.SetButtonText(empty.Secondary, L["Browse guides"])
-			empty.Secondary.lsAction = function() UI.ShowPicker() end
+			empty.Secondary.psAction = function() UI.ShowPicker() end
 			empty.Secondary:Show()
 		else
 			empty.Text:SetText(L["Pick a guide to start."])
 			W.SetButtonText(empty.Primary, L["Choose a guide"])
-			empty.Primary.lsAction = function() UI.ShowPicker() end
+			empty.Primary.psAction = function() UI.ShowPicker() end
 			empty.Primary:Show()
 		end
 	elseif kind == "complete" then
@@ -1142,23 +1142,23 @@ local function setEmpty(kind)
 			-- Several zones to continue in: the player picks (UI.RouteChoice).
 			empty.Text:SetText(L["Choose where to level next."])
 			W.SetButtonText(empty.Primary, L["Choose your path"])
-			empty.Primary.lsAction = function() UI.ShowRouteChoice(choiceFrom) end
+			empty.Primary.psAction = function() UI.ShowRouteChoice(choiceFrom) end
 			empty.Primary:Show()
 			W.SetButtonText(empty.Secondary, L["Browse guides"])
-			empty.Secondary.lsAction = function() UI.ShowPicker() end
+			empty.Secondary.psAction = function() UI.ShowPicker() end
 			empty.Secondary:Show()
 		elseif nextGuide then
 			empty.Text:SetText(L["Up next"] .. ": |c" .. Theme.Hex("text") .. nextGuide.title .. "|r")
 			W.SetButtonText(empty.Primary, L["Continue"])
-			empty.Primary.lsAction = function() E.SetGuide(nextGuide.id) end
+			empty.Primary.psAction = function() E.SetGuide(nextGuide.id) end
 			empty.Primary:Show()
 			W.SetButtonText(empty.Secondary, L["Browse guides"])
-			empty.Secondary.lsAction = function() UI.ShowPicker() end
+			empty.Secondary.psAction = function() UI.ShowPicker() end
 			empty.Secondary:Show()
 		else
 			empty.Text:SetText(L["Nice work. Pick your next guide to keep going."])
 			W.SetButtonText(empty.Primary, L["Choose a guide"])
-			empty.Primary.lsAction = function() UI.ShowPicker() end
+			empty.Primary.psAction = function() UI.ShowPicker() end
 			empty.Primary:Show()
 		end
 	end
@@ -1186,11 +1186,11 @@ local function navigatorFor(guide, index)
 	if guide then
 		nav.Steps.Count:SetText(string.format("%d / %d", index or count, count))
 		nav.Title:SetText(guide.title or guide.id)
-		nav.lsMeta = UI.GuideMeta(guide)
+		nav.psMeta = UI.GuideMeta(guide)
 	else
 		nav.Steps.Count:SetText("")
 		nav.Title:SetText(L["Polestar"])
-		nav.lsMeta = nil
+		nav.psMeta = nil
 	end
 	W.SetIconState(nav.Prev, false, guide ~= nil)
 	W.SetIconState(nav.Next, false, guide ~= nil and index ~= nil)
@@ -1218,16 +1218,16 @@ local function fillUpcoming(E, index)
 		if v and v.status ~= "na" then
 			n = n + 1
 			local r = upRow(n)
-			r.lsIndex = i
-			r.lsSummary = UI.StepSummary(v)
+			r.psIndex = i
+			r.psSummary = UI.StepSummary(v)
 			r.Num:SetText(i)
 			r.Icon:SetTexture(Theme.VerbIcon(UI.FirstVerb(v)))
-			r.Text:SetText(r.lsSummary)
+			r.Text:SetText(r.psSummary)
 			r:SetShown(upcomingOpen())
 		end
 		i = i + 1
 	end
-	upnext.lsCount = n
+	upnext.psCount = n
 	local open = upcomingOpen()
 	upnext.Toggle.Label:SetText(n == 1 and L["Up next \194\183 1 step"] or string.format(L["Up next \194\183 %d steps"], n))
 	upnext.Toggle.Icon:SetTexture(Theme.Media(open and "chevron-up" or "chevron-down"))
@@ -1322,7 +1322,7 @@ local function fillCard(sameFocus)
 	local g = shownGroup(view, groups, focus)
 	focusGroup = g
 	local list, header = shownGoals(view, g)
-	person.lsHeaderGoal = header
+	person.psHeaderGoal = header
 	paintPerson(g)
 	person:Show()
 	local t = targetOf()
@@ -1333,7 +1333,7 @@ local function fillCard(sameFocus)
 	for _, goal in ipairs(list) do
 		n = n + 1
 		local r = goalRow(n)
-		local pop = sameFocus and goal.status == "done" and r.lsStatus and r.lsStatus ~= "done" and r.lsGoal and r.lsGoal.index == goal.index
+		local pop = sameFocus and goal.status == "done" and r.psStatus and r.psStatus ~= "done" and r.psGoal and r.psGoal.index == goal.index
 		local isCurrent = view.current ~= nil and goal.index == view.current and goal.status == "active"
 		paintRow(r, goal, pop, sameFocus, isCurrent)
 		r.Mark:SetShown(goal.status ~= "done" and goal.status ~= "skipped" and isTarget(goal, t) and not person.Mark:IsShown())
@@ -1341,8 +1341,8 @@ local function fillCard(sameFocus)
 	end
 	for i = n + 1, #rows do
 		rows[i]:Hide()
-		rows[i].lsGoal = nil
-		rows[i].lsStatus = nil
+		rows[i].psGoal = nil
+		rows[i].psStatus = nil
 	end
 	local note = (ns.Get("ui.showNotes") and not compact()) and view.note or nil
 	card.Tip.Text:SetText(note or "")
@@ -1361,7 +1361,7 @@ end
 function GF.Render()
 	if not F or not ns.IsLoggedIn() then return end
 	local E, G = Engine(), ns.Guides
-	strip.lsHasTabs = GF.TabsOf(E) ~= nil
+	strip.psHasTabs = GF.TabsOf(E) ~= nil
 	local guide = E and E.GetGuide and E.GetGuide()
 	local list = G and G.List and G.List()
 	if not guide then
@@ -1440,8 +1440,8 @@ function GF.UpdateTargets()
 	person.Mark:SetShown(personMarked(t))
 	for i = 1, #rows do
 		local r = rows[i]
-		if r:IsShown() and r.lsGoal then
-			r.Mark:SetShown(r.lsGoal.status ~= "done" and r.lsGoal.status ~= "skipped" and isTarget(r.lsGoal, t) and not person.Mark:IsShown())
+		if r:IsShown() and r.psGoal then
+			r.Mark:SetShown(r.psGoal.status ~= "done" and r.psGoal.status ~= "skipped" and isTarget(r.psGoal, t) and not person.Mark:IsShown())
 		end
 	end
 end
@@ -1503,7 +1503,7 @@ end
 function GF.ApplyStyle()
 	if not F then return end
 	local clear = transparent()
-	F.lsBare = clear
+	F.psBare = clear
 	Theme.Repaint(F)
 	band:SetShown(not clear)
 	strip.Rule:SetShown(not clear)
@@ -1641,7 +1641,7 @@ end
 
 local function resizeUpdate(self)
 	local x = GetCursorPosition() / F:GetEffectiveScale()
-	local w = min(UI.MAX_WIDTH, max(UI.MIN_WIDTH, floor(self.lsStartW + (x - self.lsStartX) + 0.5)))
+	local w = min(UI.MAX_WIDTH, max(UI.MIN_WIDTH, floor(self.psStartW + (x - self.psStartX) + 0.5)))
 	if w ~= floor(F:GetWidth() + 0.5) then
 		F:SetWidth(w)
 		GF.Layout()
@@ -1656,8 +1656,8 @@ local function resizeStart(self)
 		F:ClearAllPoints()
 		F:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", l, t)
 	end
-	self.lsStartX = GetCursorPosition() / F:GetEffectiveScale()
-	self.lsStartW = F:GetWidth()
+	self.psStartX = GetCursorPosition() / F:GetEffectiveScale()
+	self.psStartW = F:GetWidth()
 	self:SetScript("OnUpdate", resizeUpdate)
 end
 
@@ -1760,7 +1760,7 @@ local function build()
 		local E = Engine()
 		if E and E.Prev then E.Prev() end
 	end)
-	nav.Prev.lsTipLines = { L["A look back: nothing changes."] }
+	nav.Prev.psTipLines = { L["A look back: nothing changes."] }
 	nav.Prev:SetPoint("LEFT", nav.Steps, "LEFT", 0, 0)
 	nav.Steps.Count = T(nav.Steps, "number", "text")
 	nav.Steps.Count:SetJustifyH("CENTER")
@@ -1769,7 +1769,7 @@ local function build()
 		local E = Engine()
 		if E and E.Next then E.Next() end
 	end)
-	nav.Next.lsTipLines = { L["A look ahead: nothing is skipped. Skip moves on for good."] }
+	nav.Next.psTipLines = { L["A look ahead: nothing is skipped. Skip moves on for good."] }
 	nav.Next:SetPoint("LEFT", nav.Steps.Count, "RIGHT", 0, 0)
 	nav.Menu = W.IconButton(nav, "menu", 24, L["Menu"], openMenu)
 	nav.Menu:SetPoint("RIGHT", nav, "RIGHT", -8, 0)
@@ -1810,7 +1810,7 @@ local function build()
 	countHit:SetScript("OnEnter", function(self)
 		local lines = {}
 		if view and view.title and view.title ~= "" then lines[#lines + 1] = view.title end
-		if nav.lsMeta and nav.lsMeta ~= "" then lines[#lines + 1] = nav.lsMeta end
+		if nav.psMeta and nav.psMeta ~= "" then lines[#lines + 1] = nav.psMeta end
 		W.Tooltip(self, tooltipAnchor(), nav.Title:GetText() or "", lines)
 		GF.HoverIn()
 	end)
@@ -1849,7 +1849,7 @@ local function build()
 	person.Name:SetPoint("TOPLEFT", person, "TOPLEFT", TEXT_X, -10)
 	person.Where = T(person, "small", "textDim")
 	person.Where:SetPoint("TOPLEFT", person.Name, "BOTTOMLEFT", 0, -3)
-	person:SetScript("OnClick", function(self) pointAt(self.lsPlace, self.lsLabel) end)
+	person:SetScript("OnClick", function(self) pointAt(self.psPlace, self.psLabel) end)
 	person:SetScript("OnEnter", personEnter)
 	person:SetScript("OnLeave", function(self) W.HideTooltip(self) end)
 
@@ -1915,7 +1915,7 @@ local function build()
 	xp.Text = T(xp, "small", "textDim")
 	xp.Text:SetPoint("LEFT", xp.Icon, "RIGHT", 7, 0)
 	xp:SetScript("OnEnter", function(self)
-		if self.lsSummary then W.Tooltip(self, tooltipAnchor(), L["Experience"], { self.lsSummary }) end
+		if self.psSummary then W.Tooltip(self, tooltipAnchor(), L["Experience"], { self.psSummary }) end
 		GF.HoverIn()
 	end)
 	xp:SetScript("OnLeave", function(self) W.HideTooltip(self) end)
@@ -1973,7 +1973,7 @@ local function build()
 	empty.Text:SetJustifyH("CENTER")
 	empty.Text:SetWordWrap(true)
 	empty.Text:SetSpacing(3)
-	local function act(b) if b.lsAction then b.lsAction() end end
+	local function act(b) if b.psAction then b.psAction() end end
 	empty.Primary = W.Button(empty, "", act, { primary = true, width = 168 })
 	empty.Secondary = W.Button(empty, "", act, { width = 168 })
 
@@ -1990,8 +1990,8 @@ local function build()
 	foot.Pct:SetWidth(40)
 	foot.Pct:SetPoint("RIGHT", foot, "RIGHT", -PAD, 0)
 	foot:SetScript("OnEnter", function(self)
-		if self.lsTotal and self.lsTotal > 0 then
-			W.Tooltip(self, tooltipAnchor(), L["Guide progress"], { string.format(L["%d of %d steps done"], self.lsDone or 0, self.lsTotal) })
+		if self.psTotal and self.psTotal > 0 then
+			W.Tooltip(self, tooltipAnchor(), L["Guide progress"], { string.format(L["%d of %d steps done"], self.psDone or 0, self.psTotal) })
 		end
 		GF.HoverIn()
 	end)
@@ -2087,21 +2087,21 @@ function GF.UpdateXP(stats)
 			parts[#parts + 1] = string.format(L["%s to level"], Q.Duration(stats.timeToLevel))
 		end
 	end
-	local had = GF.xp.lsHas
-	GF.xp.lsHas = #parts > 0
-	if GF.xp.lsHas then
+	local had = GF.xp.psHas
+	GF.xp.psHas = #parts > 0
+	if GF.xp.psHas then
 		GF.xp.Text:SetText(table.concat(parts, "  \194\183  "))
 		local ok, summary = pcall(function() return Q.XP and Q.XP.Summary and Q.XP.Summary(stats) end)
-		GF.xp.lsSummary = ok and summary or nil
+		GF.xp.psSummary = ok and summary or nil
 	end
-	if had ~= GF.xp.lsHas then GF.Layout() end
+	if had ~= GF.xp.psHas then GF.Layout() end
 end
 
 ns.On("QOL_XP_UPDATED", whenReady(function(stats) GF.UpdateXP(stats) end))
 ns.OnLogin(function() GF.UpdateXP() end)
 
 ns.On("TABS_CHANGED", whenReady(function()
-	strip.lsHasTabs = tabsOf(Engine()) ~= nil
+	strip.psHasTabs = tabsOf(Engine()) ~= nil
 	GF.Layout()
 end))
 

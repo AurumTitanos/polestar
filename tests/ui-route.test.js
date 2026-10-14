@@ -26,7 +26,7 @@ E.ChooseRoute = function(from, to) CHOSEN = from .. ">" .. to; return true end
 E.PendingRouteChoice = function() return "tirisfal" end
 RC = Polestar.UI.RouteChoice
 function cardFor(id)
-	for _, f in ipairs(stub.frames) do if f.lsId == id and f:IsShown() then return f end end
+	for _, f in ipairs(stub.frames) do if f.psId == id and f:IsShown() then return f end end
 end
 `;
 
@@ -55,8 +55,8 @@ test('ROUTE_CHOICE opens one card per zone: a stat row on one line across cards,
 			tag = s.Tag:IsShown() and s.Tag.Text:GetText(), otherTag = b.Tag:IsShown(),
 			pros = { s.Pros[1].Text:GetText(), s.Pros[2].Text:GetText() }, cons = b.Cons[2].Text:GetText(),
 			bShown = { pros = shown(b.Pros), cons = shown(b.Cons) },
-			tip = tip, closeTip = F.Close.lsTip,
-			primary = s.Go.lsPrimary or false, otherPrimary = b.Go.lsPrimary or false,
+			tip = tip, closeTip = F.Close.psTip,
+			primary = s.Go.psPrimary or false, otherPrimary = b.Go.psPrimary or false,
 			button = s.Go.Label:GetText(), sameHeight = s:GetHeight() == b:GetHeight(),
 		})`);
 	assert.equal(out.shown, true);
@@ -144,10 +144,10 @@ test('each card shows its zone painting from the client, framed on the route sta
 		local _, _, _, cx, cy = a.Canvas:GetPoint(1)
 		local bShown = 0
 		for _, t in ipairs(b.Art.Tiles) do if t:IsShown() then bShown = bShown + 1 end end
-		emit({ tiles = tiles, focusY = a.lsFocusY,
+		emit({ tiles = tiles, focusY = a.psFocusY,
 			tileW = a.Tiles[1]:GetWidth(), canvas = { a.Canvas:GetWidth(), a.Canvas:GetHeight() }, offset = { cx, cy },
-			artW = a:GetWidth(), band = a.Band:IsShown(), painted = s.lsArt,
-			other = { painted = b.lsArt, band = b.Art.Band:IsShown(), tiles = bShown },
+			artW = a:GetWidth(), band = a.Band:IsShown(), painted = s.psArt,
+			other = { painted = b.psArt, band = b.Art.Band:IsShown(), tiles = bShown },
 			name = s.Name:GetText(), nameOnArt = s.Name:GetParent() == a.Over })`);
 	assert.equal(out.painted, true);
 	assert.equal(out.band, false);

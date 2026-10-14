@@ -124,7 +124,7 @@ ${world}`,
 G, E, UI = Polestar.Guides, Polestar.Engine, Polestar.UI
 function flush() stub.advance(0.25) end
 function rowOf(addon)
-	for _, r in ipairs(UI.Packs.view.rows) do if r:IsShown() and r.lsRecord.addon == addon then return r end end
+	for _, r in ipairs(UI.Packs.view.rows) do if r:IsShown() and r.psRecord.addon == addon then return r end end
 end
 function shownText(fs) return fs:IsShown() and fs:GetText() or false end
 function titles(entries)
@@ -135,7 +135,7 @@ end
 function nav()
 	local out = {}
 	for _, b in ipairs(PolestarPicker.navButtons) do
-		if b:IsShown() then out[#out + 1] = (b.lsHeading and "# " or "") .. b.Label:GetText() end
+		if b:IsShown() then out[#out + 1] = (b.psHeading and "# " or "") .. b.Label:GetText() end
 	end
 	return out
 end

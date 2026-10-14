@@ -1058,7 +1058,7 @@ Reading flow: `docs/UI_BRIEF.md` (READING FLOW).
   `MapExplorationDataProvider` places them, at the same desaturation, above
   the base. The place (`focusX/Y`, live-frame percent) lands mid-band
   horizontally and vertically mid-way between the top shade and the bottom
-  fade (`art.lsFocusY`), where nothing covers it; near an edge the painting
+  fade (`art.psFocusY`), where nothing covers it; near an edge the painting
   zooms in up to `ZA.REFRAME` times so the place can stay there, and it never
   shows past the painting's edges. Only the base and overlay tiles the band
   shows get a texture, from per-band pools. Used by the route choice cards
@@ -1955,7 +1955,7 @@ Character progress: `skill {skill, skillLine, rank, max, map, x, y}`,
 `rep {faction, factionName, standing, value, delta, map, x, y}`,
 `explore {map, x, y, area, areaID, xp}`, `craft {spell, item, count, skill}`,
 `learn {spell, name}`, `achieve {id, name, already}`. Session dumps from
-`/lsrec factions|skills|legacy`: `factions: { "<id>": { name, order, parent,
+`/psrec factions|skills|legacy`: `factions: { "<id>": { name, order, parent,
 header, headerRep, standing, value, min, max, atWar, canToggleAtWar } }`,
 `skills: { "<skillLine>": { name, order, rank, max, category, categoryID } }`,
 `legacy: { categories, achievements, majorFactions, trees }`, each time-stamped
@@ -1971,7 +1971,7 @@ Also, with or without Polestar: `combat {on}` (`PLAYER_REGEN_DISABLED/ENABLED`),
 
 #### Measuring routes
 
-Recording is opt-in (`PolestarRecorderDB.enabled == true`, set by `/lsrec on` or
+Recording is opt-in (`PolestarRecorderDB.enabled == true`, set by `/psrec on` or
 Options > Recorder); while it is off the Recorder writes nothing, not even a
 session. Testers turn it on, play with Polestar, run `record import`
 (or keep `record watch` running), then `record report [--guide <text>]

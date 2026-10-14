@@ -84,14 +84,14 @@ end
 local function paintStats(fs)
 	local c = fs:GetParent()
 	local parts = {}
-	if c.lsLevels then parts[1] = "|c" .. Theme.Hex("text") .. c.lsLevels .. "|r" end
-	for _, f in ipairs(c.lsFacts or {}) do parts[#parts + 1] = f end
+	if c.psLevels then parts[1] = "|c" .. Theme.Hex("text") .. c.psLevels .. "|r" end
+	for _, f in ipairs(c.psFacts or {}) do parts[#parts + 1] = f end
 	fs:SetText(table.concat(parts, SEP))
 end
 
 -- The whole card, for its tooltip: stats, pitch, every pro and con.
 local function cardTip(c)
-	local o = c.lsOption
+	local o = c.psOption
 	if not o then return end
 	local lines = {}
 	local stats = c.Stats:GetText()
@@ -154,9 +154,9 @@ local function card(i)
 	c.Pitch:SetJustifyV("TOP")
 	c.Rule = W.Divider(c)
 	c.Pros, c.Cons = {}, {}
-	c.Go = W.Button(c, "", function(self) RC.Choose(self:GetParent().lsId) end, { width = CARD_W - CARD_PAD * 2, height = 32 })
+	c.Go = W.Button(c, "", function(self) RC.Choose(self:GetParent().psId) end, { width = CARD_W - CARD_PAD * 2, height = 32 })
 	c.Go:SetPoint("BOTTOMLEFT", c, "BOTTOMLEFT", CARD_PAD, CARD_PAD)
-	c:SetScript("OnClick", function(self) RC.Choose(self.lsId) end)
+	c:SetScript("OnClick", function(self) RC.Choose(self.psId) end)
 	c:SetScript("OnEnter", cardTip)
 	c:SetScript("OnLeave", function(self) W.HideTooltip(self) end)
 	cards[i] = c
@@ -169,9 +169,9 @@ end
 -- chips, rules and the first con line up across cards. Returns the content
 -- height (the button is placed at the bottom once every card's is known).
 local function fillCard(c, o, grid)
-	c.lsId, c.lsOption = o.id, o
+	c.psId, c.psOption = o.id, o
 	local inner = CARD_W - CARD_PAD * 2
-	c.lsArt = ZoneArt.Paint(c.Art, o.zone, o.focusX, o.focusY, c.lsIndex)
+	c.psArt = ZoneArt.Paint(c.Art, o.zone, o.focusX, o.focusY, c.psIndex)
 	c.Name:SetText(o.zoneName or o.title or o.id)
 	c.Name:SetWidth(inner)
 	-- "10–14 · ~2 min away · 28 quests"
@@ -179,7 +179,7 @@ local function fillCard(c, o, grid)
 	local away = awayText(o.seconds)
 	if away then facts[#facts + 1] = away end
 	if o.quests and o.quests > 0 then facts[#facts + 1] = string.format(L["%d quests"], o.quests) end
-	c.lsLevels, c.lsFacts = levelsText(o), facts
+	c.psLevels, c.psFacts = levelsText(o), facts
 	paintStats(c.Stats)
 	local y = ART_H + 12 + c.Stats:GetLineHeight() + 12
 	local tag, kind
@@ -243,7 +243,7 @@ local function fillCard(c, o, grid)
 	lines(c.Cons, o.cons, MAX_CONS, 0, "cross", "textMuted", "textDim", 9)
 	-- The recommended card leads: accent ring and the primary button.
 	for k = 1, 4 do c.Ring[k]:SetShown(o.recommended and not o.open) end
-	c.Go.lsPrimary = o.recommended and not o.open
+	c.Go.psPrimary = o.recommended and not o.open
 	Theme.Repaint(c.Go)
 	W.RepaintButton(c.Go)
 	W.SetButtonText(c.Go, o.open and L["Keep this route"] or string.format(L["Level in %s"], o.zoneName or o.title or o.id))
@@ -316,7 +316,7 @@ local function build()
 	F.Hint:SetText(L["Change your mind any time with /polestar path"])
 	F.Later = W.Button(foot, L["Decide later"], function() RC.Hide() end, { ghost = true })
 	F.Later:SetPoint("RIGHT", foot, "RIGHT", -PAD + 8, 0)
-	F.Later.lsTip = L["The guide window keeps offering the choice; /polestar path opens it again."]
+	F.Later.psTip = L["The guide window keeps offering the choice; /polestar path opens it again."]
 
 	F:SetScript("OnShow", function(self) Anim.To(self, "alpha", 0, 1, Anim.BASE, "out") end)
 	if UISpecialFrames then tinsert(UISpecialFrames, "PolestarRouteChoice") end
@@ -346,7 +346,7 @@ local function layout(choice)
 	local inner = CARD_W - CARD_PAD * 2
 	for i, o in ipairs(opts) do
 		local c = card(i)
-		c.lsIndex = i
+		c.psIndex = i
 		if o.open or o.recommended or o.outleveled then grid.tag = true end
 		c.Pitch:SetWidth(inner)
 		c.Pitch:SetText(o.pitch or "")

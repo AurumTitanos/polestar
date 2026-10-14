@@ -130,7 +130,7 @@ Record your own play and turn it into a draft:
 
 ```sh
 polestar install --recorder        # in the Polestar clone (not the pack): installs Polestar_Recorder with Polestar
-# in game: /lsrec on, play the route, then log out
+# in game: /psrec on, play the route, then log out
 polestar record import             # copies the sessions out of SavedVariables
 polestar record list
 polestar record draft <session>    # writes drafts/<faction>-<race>-<date>-<time>.guide

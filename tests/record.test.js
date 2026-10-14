@@ -135,7 +135,7 @@ test('import normalizes each session to the recordings schema', () => {
 	assert.deepEqual(human.events[1], { t: 5, e: 'gossip', active: [], available: [783], map: 1429, npc: 823, npcName: 'Deputy Willem', x: 48.17, y: 42.95 });
 	assert.deepEqual(Object.keys(human.events[2]).slice(0, 2), ['t', 'e']);
 	assert.equal(human.events[18].text, 'Kobolds respawn fast -- pull at the "tunnel" mouth');
-	// session maps plus their parents from the /lsrec maps dump; recorder bookkeeping dropped
+	// session maps plus their parents from the /psrec maps dump; recorder bookkeeping dropped
 	assert.deepEqual(Object.keys(human.maps), ['947', '1415', '1429', '1453']);
 	assert.deepEqual(human.maps['1429'], { name: 'Elwynn Forest', type: 3, parent: 1415, c: 0, left: 1100, right: -4100, top: 1800, bottom: -1666.67 });
 	assert.equal(human.counts, undefined);

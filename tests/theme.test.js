@@ -150,11 +150,11 @@ test('house style: the game\'s font by default and Inter on request, Polestar go
 		Polestar.Set("ui.font", "inter")
 		local inter = { fs:GetFont() }
 		Polestar.Set("ui.bgOpacity", 0.5)
-		local bgAlpha = select(4, PolestarGuideFrame.lsSkin.bg:GetVertexColor())
+		local bgAlpha = select(4, PolestarGuideFrame.psSkin.bg:GetVertexColor())
 		T.SetOutline(fs, true)
 		local outlined = select(3, fs:GetFont())
 		emit({ before = before, inter = inter, default = d, tex = { tr, tg, tb }, fired = fired, eui = T.IsEllesmere(),
-			border = PolestarGuideFrame.lsBorder ~= nil, shadow = PolestarGuideFrame.lsShadow:IsShown(), bgAlpha = bgAlpha,
+			border = PolestarGuideFrame.psBorder ~= nil, shadow = PolestarGuideFrame.psShadow:IsShown(), bgAlpha = bgAlpha,
 			outlined = outlined, media = T.Media("check"), verb = T.VerbIcon("kill"),
 			band = { T.BandCoords(720, 112) }, schemes = T.SchemeChoices() })`);
 	assert.deepEqual(out.before, ['Fonts\\FRIZQT__.TTF', 15, ''], 'the game\'s own font by default');
@@ -224,7 +224,7 @@ test('EllesmereUI: an optional scheme and follow toggles, never a lock', () => {
 		local inter = { match = Polestar.Get("ui.matchFont"), font = { fs:GetFont() }, label = font.Button.Label:GetText() }
 		look["ui.matchFont"]:Click()
 		emit({ registered = stub.skinRegistered, eui = T.IsEllesmere(), skinned = #stub.skinned,
-			shellArt = PolestarGuideFrame.euiSkin or false, houseBg = PolestarGuideFrame.lsSkin.bg:IsShown(),
+			shellArt = PolestarGuideFrame.euiSkin or false, houseBg = PolestarGuideFrame.psSkin.bg:IsShown(),
 			band = GF.parts.band:IsShown(), followFont = followFont, before = before, after = after, fired = fired,
 			schemes = schemes, euiGround = euiGround, euiPal = euiPal, note = note, opened = opened, enabled = swatch:IsEnabled(),
 			picked = picked, cancelled = cancelled, own = own, rematched = rematched, fontLabel = fontLabel, items = items, inter = inter,
@@ -297,9 +297,9 @@ test('Anim: OnUpdate exists only while a tween runs; retargeting reuses the reco
 		local running = A.Active()
 		stub.advance(0.1)
 		local mid = f:GetAlpha()
-		local rec = f.lsTweens.alpha
+		local rec = f.psTweens.alpha
 		A.To(f, "alpha", f:GetAlpha(), 0.5, 0.2)
-		local reused = f.lsTweens.alpha == rec and A.Active() == 1
+		local reused = f.psTweens.alpha == rec and A.Active() == 1
 		local done = false
 		A.To(f, "width", 10, 100, 0.2, "out", function() done = true end)
 		stub.advance(0.5)
@@ -385,7 +385,7 @@ test('a primary button label has no drop shadow, a secondary one keeps it, acros
 		local out = { primary = alpha(primary), secondary = alpha(secondary) }
 		Polestar.Set("ui.scheme", "night")
 		out.primaryAfterScheme, out.secondaryAfterScheme = alpha(primary), alpha(secondary)
-		primary.lsPrimary, secondary.lsPrimary = false, true
+		primary.psPrimary, secondary.psPrimary = false, true
 		W.RepaintButton(primary); W.RepaintButton(secondary)
 		out.demoted, out.promoted = alpha(primary), alpha(secondary)
 		emit(out)`);

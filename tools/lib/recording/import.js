@@ -164,7 +164,7 @@ function sortedMaps(maps) {
 }
 
 // One session of PolestarRecorderDB -> the schema of docs/ARCHITECTURE.md
-// "Recordings". `dbMaps` (from /lsrec maps) fill in maps the session touched
+// "Recordings". `dbMaps` (from /psrec maps) fill in maps the session touched
 // and their parents.
 function normalizeSession(key, raw, dbMaps = {}) {
 	const events = toList(raw.events)
@@ -210,7 +210,7 @@ function normalizeSession(key, raw, dbMaps = {}) {
 	return out;
 }
 
-// Session-scoped dumps (/lsrec factions|skills|legacy): Lua tables keyed by
+// Session-scoped dumps (/psrec factions|skills|legacy): Lua tables keyed by
 // id become objects, lists become arrays (an empty Lua table is ambiguous).
 function idMap(v, fn = (x) => x) {
 	const out = {};

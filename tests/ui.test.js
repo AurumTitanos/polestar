@@ -28,7 +28,7 @@ local function visibleRows()
 end
 local function rowFor(subject)
 	for _, r in ipairs(visibleRows()) do
-		if r.lsGoal and r.lsGoal.subject == subject then return r end
+		if r.psGoal and r.psGoal.subject == subject then return r end
 	end
 end
 local function lastCall(name)
@@ -56,7 +56,7 @@ test('a field step reads as one focus: the step title, its few objectives with c
 			local tr, tg, tb = r.Icon:GetVertexColor()
 			local cr, cg, cb = r.Text:GetTextColor()
 			rows[#rows + 1] = {
-				subject = r.lsGoal.subject,
+				subject = r.psGoal.subject,
 				icon = r.Icon:GetTexture():match("([%w-]+)$"),
 				iconColor = { tr, tg, tb }, textColor = { cr, cg, cb },
 				check = r.Check:IsShown(),
@@ -105,7 +105,7 @@ test('a hub reads one person at a time: name in NPC colour, only their goals, th
 		local function snap()
 			local P = GF.parts
 			local names = {}
-			for _, r in ipairs(visibleRows()) do names[#names + 1] = r.lsGoal.subject end
+			for _, r in ipairs(visibleRows()) do names[#names + 1] = r.psGoal.subject end
 			local nr, ng, nb = P.person.Name:GetTextColor()
 			return { person = P.person.Name:GetText(), color = { nr, ng, nb }, npc = { Polestar.Theme.Color("npc") },
 				icon = P.person.Icon:GetTexture():match("([%w-]+)$"), goals = names,
@@ -152,7 +152,7 @@ test('a done step (viewed with Prev) lists all its goals under the step title, c
 		uistub.update()
 		local names, marks = {}, 0
 		for _, r in ipairs(visibleRows()) do
-			names[#names + 1] = r.lsGoal.subject .. ":" .. r.lsGoal.status
+			names[#names + 1] = r.psGoal.subject .. ":" .. r.psGoal.status
 			if r.Mark:IsShown() then marks = marks + 1 end
 		end
 		emit({ person = GF.parts.person.Name:GetText(), goals = names, marks = marks, personMark = GF.parts.person.Mark:IsShown() })`);
@@ -169,12 +169,12 @@ test('the tip is one line until clicked', () => {
 		Polestar.Set("ui.width", 300)
 		uistub.setGuide(uistub.elwynn, 3)
 		local tip = GF.parts.tip
-		local closed = { open = tip.lsOpen, h = tip:GetHeight() }
+		local closed = { open = tip.psOpen, h = tip:GetHeight() }
 		tip:Click()
-		local open = { open = tip.lsOpen, h = tip:GetHeight() }
+		local open = { open = tip.psOpen, h = tip:GetHeight() }
 		uistub.setStep(4)
 		uistub.setStep(3)
-		emit({ closed = closed, open = open, reset = { open = tip.lsOpen, h = tip:GetHeight() } })`);
+		emit({ closed = closed, open = open, reset = { open = tip.psOpen, h = tip:GetHeight() } })`);
 	assert.equal(out.closed.open, false);
 	assert.equal(out.open.open, true);
 	assert.ok(out.open.h > out.closed.h, 'opened, the tip shows in full');
@@ -285,7 +285,7 @@ test('the step navigator and the Up next list drive the engine; a step change an
 		GF.parts.upnext.Toggle:Click()
 		local open = Polestar.Get("ui.upcomingOpen")
 		local shown = {}
-		for _, r in ipairs(GF.upRows) do if r:IsShown() then shown[#shown + 1] = r.lsIndex end end
+		for _, r in ipairs(GF.upRows) do if r:IsShown() then shown[#shown + 1] = r.psIndex end end
 		GF.upRows[1]:Click()
 		emit({ count = count, animating = animating, settled = settled, collapsed = collapsed, open = open, shown = shown,
 			calls = uistub.calls })`);
@@ -327,7 +327,7 @@ test('settings apply live: scale, opacity, lock, compact, upcoming, shown', () =
 		Polestar.Set("ui.upcoming", 4)
 		Polestar.Set("ui.upcomingOpen", true)
 		local upIdx = {}
-		for _, r in ipairs(GF.upRows) do if r:IsShown() then upIdx[#upIdx + 1] = r.lsIndex end end
+		for _, r in ipairs(GF.upRows) do if r:IsShown() then upIdx[#upIdx + 1] = r.psIndex end end
 		Polestar.Fire("TOGGLE_FRAME")
 		local afterToggle = F:IsShown()
 		Polestar.Fire("SHOW_FRAME")
@@ -502,8 +502,8 @@ test('transparent mode: no fills or borders, outlined text, chrome only while th
 			return a
 		end
 		Polestar.Set("ui.style", "transparent")
-		local skin = F.lsSkin
-		local bare = { bg = skin.bg:IsShown(), border = F.lsBorder[1]:IsShown(), shadow = F.lsShadow:IsShown(), band = GF.parts.band:IsShown() }
+		local skin = F.psSkin
+		local bare = { bg = skin.bg:IsShown(), border = F.psBorder[1]:IsShown(), shadow = F.psShadow:IsShown(), band = GF.parts.band:IsShown() }
 		local _, _, flags = GF.parts.person.Name:GetFont()
 		local _, _, goalFlags = visibleRows()[1].Text:GetFont()
 		local rest = chromeAlpha()
@@ -552,9 +552,9 @@ test('a goal with alternative trainers shows where it is and cycles to the next'
 		local tip = GameTooltip.lines
 		r.Alt:Click()
 		local after = visibleRows()[1]
-		emit({ before = before, tip = tip, call = lastCall("CycleCandidate"), subject = after.lsGoal.subject, sub = after.Sub:IsShown(),
+		emit({ before = before, tip = tip, call = lastCall("CycleCandidate"), subject = after.psGoal.subject, sub = after.Sub:IsShown(),
 			person = GF.parts.person.Name:GetText(), where = GF.parts.person.Where:GetText(),
-			alone = Polestar.UI.GoalSubline(after.lsGoal) })`);
+			alone = Polestar.UI.GoalSubline(after.psGoal) })`);
 	assert.deepEqual(out.before, { sub: false, alt: true, person: 'Georgio Bolero', where: 'Stormwind City' },
 		'the person names the zone; the goal does not repeat it');
 	assert.ok(out.tip.includes('2 others nearby; the arrow button switches to the next.'));
@@ -599,7 +599,7 @@ test('non-leveling guides name their category, and a place only when the guide h
 		local metas = {}
 		for i = 1, 3 do
 			shownTabs()[i]:Click()
-			metas[i] = GF.parts.nav.lsMeta
+			metas[i] = GF.parts.nav.psMeta
 		end
 		emit(metas)`);
 	assert.deepEqual(out, [
@@ -643,13 +643,13 @@ test('profession, reputation and achievement goals: own colours, icons, progress
 		local function snapshot()
 			local out = {}
 			for _, r in ipairs(visibleRows()) do
-				local b = r.lsBar
+				local b = r.psBar
 				local bar = b and b:IsShown() and {
 					label = b.Label:IsShown() and b.Label:GetText() or false,
 					frac = b.Fill:GetWidth() / b.Track:GetWidth(),
 				} or false
 				local text = r.Text:GetText()
-				out[#out + 1] = { t = r.lsGoal.t, icon = r.Icon:GetTexture():match("([%w-]+)$"), text = text,
+				out[#out + 1] = { t = r.psGoal.t, icon = r.Icon:GetTexture():match("([%w-]+)$"), text = text,
 					progress = text:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", ""):match("(%d+/%d+)$") or false, bar = bar, h = r:GetHeight() }
 			end
 			return out
@@ -801,7 +801,7 @@ test('a farm-spot collect goal names its mobs, their levels and zone, and cycles
 		uistub.update()
 		local r = rowFor("Tough Wolf Meat")
 		local before = { detail = r.Sub:GetText(), alt = r.Alt:IsShown(), progress = r.Text:GetText():gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", ""):match("(%d+/%d+)$") }
-		local elsewhere = Polestar.UI.GoalSubline(r.lsGoal, 1453)
+		local elsewhere = Polestar.UI.GoalSubline(r.psGoal, 1453)
 		r.Alt:Click()
 		emit({ before = before, call = lastCall("CycleCandidate"), elsewhere = elsewhere })`);
 	assert.deepEqual(out.before, { detail: 'from Young Wolf (lvl 2\u20134)', alt: true, progress: '3/8' },
@@ -852,7 +852,7 @@ test('a quest started by a dropped item reads as one line, the quest; the Go to 
 		uistub.update()
 		local rows = {}
 		for _, r in ipairs(visibleRows()) do
-			rows[#rows + 1] = { text = r.Text:GetText():gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", ""), sub = r.Sub:GetText(), icon = r.Icon:GetTexture():match("([%w-]+)$"), index = r.lsGoal.index }
+			rows[#rows + 1] = { text = r.Text:GetText():gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", ""), sub = r.Sub:GetText(), icon = r.Icon:GetTexture():match("([%w-]+)$"), index = r.psGoal.index }
 		end
 		local P = GF.parts
 		local headerMark = P.person.Mark:IsShown()
@@ -916,7 +916,7 @@ test('an optional goal is tagged in the warning colour and skips in one click, t
 			icon = r.Icon:GetTexture():match("([%w-]+)$") }
 		r.Skip:Click()
 		emit({ warning = Polestar.Theme.Hex("warning"), muted = Polestar.Theme.Hex("textMuted"), before = before, call = call, after = after,
-			back = rowFor("Tough Wolf Meat").lsGoal.status })`);
+			back = rowFor("Tough Wolf Meat").psGoal.status })`);
 	assert.ok(out.before.text.endsWith(`|c${out.warning}optional|r`), out.before.text);
 	assert.equal(out.before.skip, 'Skip');
 	assert.equal(out.before.check, true, 'it ticks like any goal');

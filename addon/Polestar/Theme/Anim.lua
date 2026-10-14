@@ -39,12 +39,12 @@ local APPLY = {
 	size = function(o, v) o:SetSize(v, v) end,
 	-- Vertical offset from the anchor recorded by Anim.Anchor.
 	offset = function(o, v)
-		local p = o.lsAnchor
+		local p = o.psAnchor
 		o:ClearAllPoints()
 		o:SetPoint(p[1], p[2], p[3], p[4], p[5] + v)
 	end,
 	offsetX = function(o, v)
-		local p = o.lsAnchor
+		local p = o.psAnchor
 		o:ClearAllPoints()
 		o:SetPoint(p[1], p[2], p[3], p[4] + v, p[5])
 	end,
@@ -89,10 +89,10 @@ end
 
 -- Remember where an object belongs, for "offset" tweens.
 function Anim.Anchor(obj, point, rel, relPoint, x, y)
-	local p = obj.lsAnchor
+	local p = obj.psAnchor
 	if not p then
 		p = {}
-		obj.lsAnchor = p
+		obj.psAnchor = p
 	end
 	p[1], p[2], p[3], p[4], p[5] = point, rel, relPoint, x or 0, y or 0
 	obj:ClearAllPoints()
@@ -103,10 +103,10 @@ end
 -- the same property is retargeted, not stacked. done(obj) runs at the end
 -- (also when snapped).
 function Anim.To(obj, kind, from, to, dur, ease, done)
-	local recs = obj.lsTweens
+	local recs = obj.psTweens
 	if not recs then
 		recs = {}
-		obj.lsTweens = recs
+		obj.psTweens = recs
 	end
 	local rec = recs[kind]
 	if not rec then
@@ -145,7 +145,7 @@ end
 
 -- Jump a running tween to its end.
 function Anim.Stop(obj, kind)
-	local rec = obj.lsTweens and obj.lsTweens[kind]
+	local rec = obj.psTweens and obj.psTweens[kind]
 	if rec and rec.running then
 		rec.dur = 1e-9
 		rec.t0 = GetTime() - 1
@@ -154,7 +154,7 @@ function Anim.Stop(obj, kind)
 end
 
 function Anim.IsRunning(obj, kind)
-	local rec = obj and obj.lsTweens and obj.lsTweens[kind]
+	local rec = obj and obj.psTweens and obj.psTweens[kind]
 	return rec and rec.running or false
 end
 

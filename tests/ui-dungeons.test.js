@@ -32,7 +32,7 @@ local DS, P = Polestar.UI.DungeonsSection, Polestar.UI.Picker
 local function navs()
 	local out = {}
 	for _, b in ipairs(PolestarPicker.navButtons) do
-		if b:IsShown() then out[#out + 1] = { b.lsKey, b.Label:GetText(), b.Count:IsShown() and b.Count:GetText() or "" } end
+		if b:IsShown() then out[#out + 1] = { b.psKey, b.Label:GetText(), b.Count:IsShown() and b.Count:GetText() or "" } end
 	end
 	return out
 end
@@ -49,11 +49,11 @@ end
 local function segs()
 	local _, _, _, s = DS.Frames()
 	local out = {}
-	for _, b in ipairs(s) do out[#out + 1] = { b.lsKey, b:IsShown(), b.Selected:IsShown() } end
+	for _, b in ipairs(s) do out[#out + 1] = { b.psKey, b:IsShown(), b.Selected:IsShown() } end
 	return out
 end
 local function block(id)
-	for _, b in ipairs(DS.blocks) do if b:IsShown() and b.lsQuest == id then return b end end
+	for _, b in ipairs(DS.blocks) do if b:IsShown() and b.psQuest == id then return b end end
 end
 local function shownTexts(pool, field)
 	local out = {}
@@ -169,11 +169,11 @@ test('A page with quests to pick up: "Pick up the quests" is the primary action,
 		local function corner() for _, b in ipairs({ pg.Pickup, pg.Go, pg.PickupNone, pg.GoQuiet, pg.MapBtn }) do
 			if b:IsShown() then local p = { b:GetPoint(1) } if p[1] == "BOTTOMRIGHT" then return b.Label:GetText() end end end end
 		emit({ pickup = shown(pg.Pickup), go = shown(pg.Go), quiet = shown(pg.GoQuiet), none = shown(pg.PickupNone), corner = corner(),
-			tip = { pg.Pickup.lsTip, pg.Pickup.lsTipLines } })
+			tip = { pg.Pickup.psTip, pg.Pickup.psTipLines } })
 		done[1486], done[959] = true, true
 		DS.Render()
 		pg.PickupNone:Click()
-		emit({ pickup = shown(pg.Pickup), go = shown(pg.Go), none = shown(pg.PickupNone), corner = corner(), tip = pg.PickupNone.lsTipLines, printed = printed,
+		emit({ pickup = shown(pg.Pickup), go = shown(pg.Go), none = shown(pg.PickupNone), corner = corner(), tip = pg.PickupNone.psTipLines, printed = printed,
 			tabs = #Polestar.Engine.GetTabs() })`);
 	assert.deepEqual([open.pickup, open.go, open.quiet, open.none, open.corner],
 		['Pick up the quests', false, 'Guide me to the entrance', false, 'Pick up the quests']);
@@ -198,8 +198,8 @@ test('Quests: the giver line is a link; with a prerequisite still to do it point
 		local fang, hides = block(914), block(1486)
 		fang.StartLink:Click()
 		hides.StartLink:Click()
-		emit({ pins = pins, fang = { fang.StartLink.lsTip, fang.StartLink.lsTipLines[1], fang.StartPin.lsTip },
-			hides = { hides.StartLink.lsTip, hides.StartLink.lsTipLines[1] } })`);
+		emit({ pins = pins, fang = { fang.StartLink.psTip, fang.StartLink.psTipLines[1], fang.StartPin.psTip },
+			hides = { hides.StartLink.psTip, hides.StartLink.psTipLines[1] } })`);
 	assert.deepEqual(out.pins, [[1413, 52.2, 31.9, 'Tonga Runetotem'], [1413, 46, 35.7, 'Nalpak']]);
 	assert.deepEqual(out.fang, ['Set the arrow to Tonga Runetotem', 'First pick up Nara Wildmane, which comes before this quest.', 'Set the arrow to Tonga Runetotem']);
 	assert.deepEqual(out.hides, ['Set the arrow to Nalpak', 'Where this quest starts.']);
@@ -216,9 +216,9 @@ test('Quests: one block per quest with state, level, flags, objective, start and
 		fang.StartPin:Click()
 		for _, r in ipairs(kids("Chains")) do r.Pin:Click() end
 		local tile
-		for _, t in ipairs(kids("Tiles")) do if t.lsID == 6505 then tile = t end end
+		for _, t in ipairs(kids("Tiles")) do if t.psID == 6505 then tile = t end end
 		stub.RunScript(tile, "OnEnter")
-		emit({ shown = DS.Shown(), order = (function() local t = {} for _, b in ipairs(DS.blocks) do if b:IsShown() then t[#t + 1] = b.lsQuest end end return t end)(),
+		emit({ shown = DS.Shown(), order = (function() local t = {} for _, b in ipairs(DS.blocks) do if b:IsShown() then t[#t + 1] = b.psQuest end end return t end)(),
 			fang = { fang.Title:GetText(), fang.Meta:GetText(), fang.State:IsShown() and fang.State.Text:GetText(), fang.Faction.Text:GetText(),
 				plain(fang.Start:GetText()), plain(fang.End:GetText()), fang.ChainLabel:IsShown(), fang.ChooseLabel:IsShown(), fang.GetLabel:IsShown() },
 			hides = { hides.Obj:GetText(), hides.State:IsShown(), hides.Faction:IsShown() },
@@ -278,7 +278,7 @@ test('Bosses: kill order, level and the quests each serves; a quest line opens t
 		for _, t in ipairs(DS.ties) do if t:IsShown() then ties[#ties + 1] = plain(t.Text:GetText()) end end
 		local first
 		for _, t in ipairs(DS.ties) do if t:IsShown() then first = t break end end
-		local q = first.lsQuest
+		local q = first.psQuest
 		first:Click()
 		emit({ names = names, levels = levels, ties = ties, tab = DS.Tab(), quest = q, blocks = DS.Shown().blocks, bosses = (function() return #DS.bossRows end)() })`);
 	assert.deepEqual(out.names, ['Lady Anacondra', 'Kresh', 'Lord Cobrahn', 'Mutanus the Devourer']);

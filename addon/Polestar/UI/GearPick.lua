@@ -62,7 +62,7 @@ local function itemQuality(id)
 end
 
 local function onEnter(self)
-	local e = self.lsEntry
+	local e = self.psEntry
 	if not (e and GameTooltip) then return end
 	GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
 	GameTooltip:SetHyperlink("item:" .. e.id)
@@ -75,7 +75,7 @@ local function onLeave(self)
 end
 
 local function onClick(self)
-	local e = self.lsEntry
+	local e = self.psEntry
 	if not e then return end
 	local link
 	if C_Item and C_Item.GetItemInfo then
@@ -86,7 +86,7 @@ local function onClick(self)
 end
 
 local function frameOf(row)
-	local f = row.lsGearPick
+	local f = row.psGearPick
 	if f then return f end
 	f = CreateFrame("Button", nil, row)
 	f:SetHeight(LINE_H)
@@ -101,22 +101,22 @@ local function frameOf(row)
 	f:SetScript("OnLeave", onLeave)
 	f:SetScript("OnClick", onClick)
 	f:Hide()
-	row.lsGearPick = f
+	row.psGearPick = f
 	return f
 end
 
 function GP.Paint(row, goal)
 	local pick = pickFor(goal)
 	if not pick then
-		if row.lsGearPick then
-			row.lsGearPick.lsEntry = nil
-			row.lsGearPick:Hide()
+		if row.psGearPick then
+			row.psGearPick.psEntry = nil
+			row.psGearPick:Hide()
 		end
 		return
 	end
 	local f = frameOf(row)
 	local e = pick.entry
-	f.lsEntry = e
+	f.psEntry = e
 	local name = "|c" .. qualityHex(itemQuality(e.id)) .. itemName(e.id) .. "|r"
 	f.Text:ClearAllPoints()
 	if pick.upgrade then
@@ -135,8 +135,8 @@ function GP.Paint(row, goal)
 end
 
 function GP.Measure(row, width, h, above)
-	local f = row.lsGearPick
-	if not (f and f:IsShown() and f.lsEntry) then return h, above end
+	local f = row.psGearPick
+	if not (f and f:IsShown() and f.psEntry) then return h, above end
 	f:ClearAllPoints()
 	f:SetPoint("TOPLEFT", above, "BOTTOMLEFT", 0, -GAP)
 	f:SetWidth(width)

@@ -1,10 +1,10 @@
--- /lsrec: status, on|off, mark <text>, maps, talents, clear.
+-- /psrec: status, on|off, mark <text>, maps, talents, clear.
 
 local ADDON, ns = ...
 
 local type, pairs, ipairs, tostring, GetTime = type, pairs, ipairs, tostring, GetTime
 
-local CLEAR_WINDOW = 30 -- seconds to confirm /lsrec clear
+local CLEAR_WINDOW = 30 -- seconds to confirm /psrec clear
 
 ---------------------------------------------------------------------------
 -- Map dump: every map under Azeroth with name/type/parent/world bounds
@@ -268,7 +268,7 @@ local function status()
 			s.factions and "factions" or "-", s.skills and "skills" or "-", s.legacy and "legacy" or "-",
 		}, " ")))
 	end
-	ns.Print("commands: /lsrec on | off | mark <text> | maps | talents | legacy | factions | skills | clear")
+	ns.Print("commands: /psrec on | off | mark <text> | maps | talents | legacy | factions | skills | clear")
 end
 
 ---------------------------------------------------------------------------
@@ -293,11 +293,11 @@ end
 
 commands.mark = function(rest)
 	if rest == "" then
-		ns.Print("usage: /lsrec mark <text>")
+		ns.Print("usage: /psrec mark <text>")
 		return
 	end
 	if not ns.IsEnabled() then
-		ns.Print("recording is off; /lsrec on first")
+		ns.Print("recording is off; /psrec on first")
 		return
 	end
 	if ns.Record("mark", ns.Here({ text = rest })) then
@@ -377,10 +377,10 @@ commands.clear = function(rest)
 		return
 	end
 	clearArmedAt = now
-	ns.Print(("this deletes every recorded session. Type |cffffd100/lsrec clear confirm|r within %d seconds to proceed."):format(CLEAR_WINDOW))
+	ns.Print(("this deletes every recorded session. Type |cffffd100/psrec clear confirm|r within %d seconds to proceed."):format(CLEAR_WINDOW))
 end
 
-SLASH_POLESTARREC1 = "/lsrec"
+SLASH_POLESTARREC1 = "/psrec"
 SLASH_POLESTARREC2 = "/polestarrec"
 SlashCmdList.POLESTARREC = function(msg)
 	local name, rest = (msg or ""):match("^%s*(%S*)%s*(.-)%s*$")

@@ -473,12 +473,12 @@ local function folderRow(i)
 end
 
 local function rowClick(self)
-	if self.lsGuide then P.Select(self.lsGuide.id) end
+	if self.psGuide then P.Select(self.psGuide.id) end
 end
 
 local function rowDoubleClick(self)
-	if not self.lsGuide then return end
-	uiState().pickerSelected = self.lsGuide.id
+	if not self.psGuide then return end
+	uiState().pickerSelected = self.psGuide.id
 	P.LoadSelected()
 end
 
@@ -520,8 +520,8 @@ end
 
 -- note: the right-hand text ("Tab 2", "Tab 2 · 25%"), or nil.
 local function paintRow(r, g, note, width)
-	r.lsGuide = g
-	r.lsTip = loadHint()
+	r.psGuide = g
+	r.psTip = loadHint()
 	local sel = P.Selected() == g.id
 	r.Selected:SetShown(sel)
 	r.Bar:SetShown(sel)
@@ -590,9 +590,9 @@ local function layoutCards(tabs, active, byId, y)
 	local cw = floor((MID_W - x0 * 2 - CARD_GAP * (per - 1)) / per)
 	for i, t in ipairs(tabs) do
 		local c = card(i)
-		c.lsIndex = i
-		c.lsGuide = byId[t.guideId] or { id = t.guideId, title = t.title }
-		c.lsTip = loadHint()
+		c.psIndex = i
+		c.psGuide = byId[t.guideId] or { id = t.guideId, title = t.title }
+		c.psTip = loadHint()
 		local sel = P.Selected() == t.guideId
 		c.Ring:SetShown(sel)
 		c.Icon:SetTexture(Theme.Media(CATEGORY_ICON[t.category] or "icon-level"))
@@ -693,7 +693,7 @@ local function buildDetails()
 	local inner = DETAIL_W - DPAD * 2
 
 	d.Art = ZoneArt.Create(d, DETAIL_W, ART_H, "panel")
-	d.Art.lsZoom = 1.5 -- the wider band shows more of the zone
+	d.Art.psZoom = 1.5 -- the wider band shows more of the zone
 	d.Art:SetPoint("TOPLEFT", d, "TOPLEFT", 0, 0)
 	d.Art:EnableMouse(true)
 	d.Art:RegisterForDrag("LeftButton")
@@ -782,12 +782,12 @@ local function skyIndex(id)
 end
 
 local function setButtonWidth(b, w)
-	b.lsFixedWidth = w
+	b.psFixedWidth = w
 	W.SetButtonText(b, b.Label:GetText())
 end
 
 local function setPrimary(b, on)
-	b.lsPrimary = on
+	b.psPrimary = on
 	Theme.Repaint(b)
 	W.RepaintButton(b)
 end
@@ -819,7 +819,7 @@ local function renderDetails(byId, tabs, active)
 	local E = ns.Engine
 	local parts = { d.Star, d.Title, d.ProgLabel, d.ProgPct, d.Prog, d.FactRule, d.Scroll, d.Load, d.NewTab, d.Credits, d.Source }
 	if not g then
-		d.lsArt = ZoneArt.Paint(d.Art, nil, nil, nil, 1)
+		d.psArt = ZoneArt.Paint(d.Art, nil, nil, nil, 1)
 		for _, p in ipairs(parts) do p:Hide() end
 		for _, c in ipairs(d.Chips) do c:Hide() end
 		for _, f in ipairs(d.Facts) do
@@ -836,10 +836,10 @@ local function renderDetails(byId, tabs, active)
 	for _, p in ipairs(parts) do p:Show() end
 	local fx, fy
 	if E and E.GuideFocus then fx, fy = E.GuideFocus(g.id) end
-	d.lsArt = ZoneArt.Paint(d.Art, g.zone, fx, fy, skyIndex(g.id))
+	d.psArt = ZoneArt.Paint(d.Art, g.zone, fx, fy, skyIndex(g.id))
 	local fav = P.IsFavorite(g.id)
 	W.SetIconState(d.Star, fav)
-	d.Star.lsTip = fav and L["Remove from favourites"] or L["Add to favourites"]
+	d.Star.psTip = fav and L["Remove from favourites"] or L["Add to favourites"]
 	d.Title:SetText(g.title or g.id)
 
 	-- Chips: levels, faction, races, classes; on two lines at most.
@@ -1002,7 +1002,7 @@ local function renderDetails(byId, tabs, active)
 	-- alone at full width.
 	local hasTabs = E and E.OpenTab and true or false
 	W.SetButtonText(d.Load, tab and L["Continue"] or L["Load guide"])
-	d.Load.lsTip = tab and string.format(L["Switch to tab %d."], tabIndex) or L["Load into the current tab."]
+	d.Load.psTip = tab and string.format(L["Switch to tab %d."], tabIndex) or L["Load into the current tab."]
 	if hasTabs and not tab then
 		d.NewTab:Show()
 		setButtonWidth(d.NewTab, nil)
@@ -1014,7 +1014,7 @@ local function renderDetails(byId, tabs, active)
 		setButtonWidth(d.Load, inner)
 		setPrimary(d.Load, true)
 	end
-	P.detail = { id = g.id, art = d.lsArt, state = state, tab = tabIndex, label = label, frac = frac, facts = shownFacts,
+	P.detail = { id = g.id, art = d.psArt, state = state, tab = tabIndex, label = label, frac = frac, facts = shownFacts,
 		credits = credits, source = source }
 end
 
@@ -1061,12 +1061,12 @@ end
 local function navTips(filter)
 	for _, b in ipairs(win.navButtons) do
 		local tip
-		if b:IsShown() and b.lsEmpty and query == "" and filter ~= "All" and b.lsKey ~= "Favorites" then
+		if b:IsShown() and b.psEmpty and query == "" and filter ~= "All" and b.psKey ~= "Favorites" then
 			tip = string.format(L["None for %s; switch the filter to All."], L[filter])
 		end
-		b.lsTip = tip
-		if tip and not b.lsPickerTip then
-			b.lsPickerTip = true
+		b.psTip = tip
+		if tip and not b.psPickerTip then
+			b.psPickerTip = true
 			b:HookScript("OnEnter", W.SimpleTip)
 			b:HookScript("OnLeave", W.HideTip)
 		end
@@ -1075,7 +1075,7 @@ end
 
 local function paintSegments(filter)
 	for _, b in ipairs(segButtons) do
-		local on = b.lsKey == filter
+		local on = b.psKey == filter
 		b.Selected:SetShown(on)
 		W.Color(b.Label, on and "text" or "textMuted")
 	end
@@ -1159,19 +1159,19 @@ local function sectionLayout(s)
 end
 
 local function renderSection(s)
-	if not s.lsFrame then
+	if not s.psFrame then
 		local f = CreateFrame("Frame", nil, win.Main)
-		s.lsFrame = f
+		s.psFrame = f
 		s.build(f, win)
 	end
 	for _, o in ipairs(sections) do
-		if o.lsFrame then o.lsFrame:SetShown(o == s) end
+		if o.psFrame then o.psFrame:SetShown(o == s) end
 	end
 	-- No tabs until the section sets its own (its render may).
 	W.ShellTabs(win, nil)
 	s.render()
 	-- Under the tab row when the section set one, else under the header.
-	local f = s.lsFrame
+	local f = s.psFrame
 	f:ClearAllPoints()
 	f:SetPoint("TOPLEFT", win.TabRow:IsShown() and win.TabRow or win.Header, "BOTTOMLEFT", 0, 0)
 	f:SetPoint("BOTTOMRIGHT", win.Main, "BOTTOMRIGHT", 0, 0)
@@ -1227,7 +1227,7 @@ function P.Render()
 		renderSection(active)
 		return
 	end
-	for _, s in ipairs(sections) do if s.lsFrame then s.lsFrame:Hide() end end
+	for _, s in ipairs(sections) do if s.psFrame then s.psFrame:Hide() end end
 	local filter = factionFilter()
 	-- A pack entry whose pack was hidden or holds no guides, or a category no
 	-- shown guide is in (its pack was switched off): back to All.
@@ -1524,7 +1524,7 @@ local function build()
 		local f = FACTIONS[i]
 		local b = CreateFrame("Button", nil, win.TabRow)
 		b:SetHeight(24)
-		b.lsKey = f
+		b.psKey = f
 		W.Hover(b)
 		b.Selected = W.Fill(b, "panelAlt", "BACKGROUND", 0)
 		b.Label = W.Text(b, "small", "textMuted")
@@ -1532,8 +1532,8 @@ local function build()
 		b.Label:SetText(f == "All" and L["All"] or L[f])
 		b:SetWidth(floor(b.Label:GetStringWidth() + 20 + 0.5))
 		b:SetPoint("RIGHT", win.TabRow, "RIGHT", x, 0)
-		b:SetScript("OnClick", function(self) ns.Set("ui.pickerFaction", self.lsKey) end)
-		b.lsTip = L["Faction filter"]
+		b:SetScript("OnClick", function(self) ns.Set("ui.pickerFaction", self.psKey) end)
+		b.psTip = L["Faction filter"]
 		x = x - b:GetWidth() - 2
 		segButtons[i] = b
 	end

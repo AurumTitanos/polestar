@@ -411,7 +411,7 @@ test('quest XP rewards of quests already in the log are recorded once per sessio
 	assert.equal(reloaded, 2);
 });
 
-test('/lsrec: off pauses recording, maps dumps world bounds, talents dumps the trait tree, clear needs confirmation', () => {
+test('/psrec: off pauses recording, maps dumps world bounds, talents dumps the trait tree, clear needs confirmation', () => {
 	const [out] = run(`
 		local cmd = SlashCmdList.POLESTARREC
 		cmd("off")

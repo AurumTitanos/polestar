@@ -75,12 +75,12 @@ stub.login()
 UI, O, P = Polestar.UI, Polestar.UI.Options, Polestar.UI.Packs
 function openPage() UI.ShowOptions("guidepacks"); return P.view end
 function rowOf(addon)
-	for _, r in ipairs(P.view.rows) do if r:IsShown() and r.lsRecord.addon == addon then return r end end
+	for _, r in ipairs(P.view.rows) do if r:IsShown() and r.psRecord.addon == addon then return r end end
 end
 function shownText(fs) return fs:IsShown() and fs:GetText() or false end
 function navDot()
 	for _, b in ipairs(PolestarOptions.navButtons) do
-		if b:IsShown() and b.lsKey == "guidepacks" then return b.Dot:IsShown() end
+		if b:IsShown() and b.psKey == "guidepacks" then return b.Dot:IsShown() end
 	end
 end
 `;
@@ -100,7 +100,7 @@ test('one row per pack, ours first: credits, count, website, source and each sta
 		local rows = {}
 		for _, r in ipairs(P.view.rows) do
 			if r:IsShown() then
-				rows[#rows + 1] = { addon = r.lsRecord.addon, title = r.Title:GetText(), credits = r.Credits:GetText(),
+				rows[#rows + 1] = { addon = r.psRecord.addon, title = r.Title:GetText(), credits = r.Credits:GetText(),
 					count = shownText(r.Count), switch = r.Switch:IsShown(), enable = r.Enable:IsShown(),
 					status = shownText(r.Status), problems = r.Problems:IsShown() and r.Problems.Text:GetText() or false,
 					website = r.Website:IsShown() and r.Website:GetText() or false, source = shownText(r.Source) }
@@ -292,7 +292,7 @@ test('the navigation dot shows while a pack has problems and goes with them', ()
 			stub.login()
 			Polestar.UI.ShowOptions("guide")
 			local dot
-			for _, b in ipairs(PolestarOptions.navButtons) do if b:IsShown() and b.lsKey == "guidepacks" then dot = b.Dot:IsShown() end end
+			for _, b in ipairs(PolestarOptions.navButtons) do if b:IsShown() and b.psKey == "guidepacks" then dot = b.Dot:IsShown() end end
 			emit({ dot = dot, problems = Polestar.Guides.ProblemCount() })`,
 	}).emitted;
 	assert.deepEqual(clean, { dot: false, problems: 0 });

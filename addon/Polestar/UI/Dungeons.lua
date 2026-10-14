@@ -88,7 +88,7 @@ local function D() return ns.Dungeons end
 local secret = ns.Compat.IsSecret
 
 local function mainWidth()
-	local w = hub and (hub:GetWidth() - (hub.lsRail or 0) - SH.sidebar - 2) or 0
+	local w = hub and (hub:GetWidth() - (hub.psRail or 0) - SH.sidebar - 2) or 0
 	if w <= 0 then w = 878 end
 	return w
 end
@@ -308,21 +308,21 @@ local function canGuide(p)
 end
 
 local function guideTo(self)
-	local p = self.lsPoint
+	local p = self.psPoint
 	local Dg = D()
-	if p and Dg and Dg.GuideToPoint then Dg.GuideToPoint(p, self.lsLabel) end
+	if p and Dg and Dg.GuideToPoint then Dg.GuideToPoint(p, self.psLabel) end
 end
 
 -- The Starts line as one link over its pin and text: the arrow to the giver,
 -- or to the first prerequisite still to do.
 local function linkEnter(self)
-	local p = self.lsPin
+	local p = self.psPin
 	if p:IsEnabled() then W.Color(p.Icon, "text") end
 	W.SimpleTip(self)
 end
 
 local function linkLeave(self)
-	local p = self.lsPin
+	local p = self.psPin
 	W.Color(p.Icon, "textDim", p:IsEnabled() and 1 or 0.35)
 	W.HideTip(self)
 end
@@ -365,7 +365,7 @@ local function card(i)
 	W.Hover(c)
 	c.Art = ZoneArt.Create(c, cw - 2, CARD_ART, "panel")
 	c.Art:SetPoint("TOPLEFT", c, "TOPLEFT", 1, -1)
-	c.Art.lsZoom = 1.6
+	c.Art.psZoom = 1.6
 	c.Name = textShadow(W.Text(c.Art.Over, "title", "text"))
 	c.Name:SetPoint("BOTTOMLEFT", c.Art, "BOTTOMLEFT", PAD - CARD_X - 1, 10)
 	c.Name:SetWidth(cw - (PAD - CARD_X) * 2)
@@ -373,7 +373,7 @@ local function card(i)
 	c.Stats:SetPoint("LEFT", c, "TOPLEFT", PAD - CARD_X, -(CARD_ART + 20))
 	c.Forever = W.Chip(c)
 	c.Yours = W.Chip(c)
-	c:SetScript("OnClick", function(self) DS.Open(self.lsKey) end)
+	c:SetScript("OnClick", function(self) DS.Open(self.psKey) end)
 	cards[i] = c
 	return c
 end
@@ -406,9 +406,9 @@ local function chainRow(b, i)
 end
 
 local function tileEnter(self)
-	if not (self.lsID and GameTooltip) then return end
+	if not (self.psID and GameTooltip) then return end
 	GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-	GameTooltip:SetHyperlink("item:" .. self.lsID)
+	GameTooltip:SetHyperlink("item:" .. self.psID)
 	GameTooltip:Show()
 end
 
@@ -419,8 +419,8 @@ end
 -- Shift-click links it in chat, Ctrl-click tries it on (the client's own
 -- modified-click handling).
 local function tileClick(self)
-	if not (self.lsID and IsModifiedClick and IsModifiedClick() and HandleModifiedItemClick and C_Item and C_Item.GetItemInfo) then return end
-	local ok, _, link = pcall(C_Item.GetItemInfo, self.lsID)
+	if not (self.psID and IsModifiedClick and IsModifiedClick() and HandleModifiedItemClick and C_Item and C_Item.GetItemInfo) then return end
+	local ok, _, link = pcall(C_Item.GetItemInfo, self.psID)
 	if ok and link and not secret(link) then HandleModifiedItemClick(link) end
 end
 
@@ -479,7 +479,7 @@ local function block(i)
 	b.StartLink:SetHeight(22)
 	b.StartLink:SetFrameLevel(b.StartPin:GetFrameLevel() + 1)
 	W.Hover(b.StartLink)
-	b.StartLink.lsPin = b.StartPin
+	b.StartLink.psPin = b.StartPin
 	b.StartLink:SetScript("OnClick", guideTo)
 	b.StartLink:SetScript("OnEnter", linkEnter)
 	b.StartLink:SetScript("OnLeave", linkLeave)
@@ -527,10 +527,10 @@ local function tie(i)
 	t.Glyph:SetPoint("LEFT", t, "LEFT", 4, 0)
 	t.Text = W.Text(t, "label", "textDim")
 	t.Text:SetPoint("LEFT", t, "LEFT", 24, 0)
-	t:SetScript("OnClick", function(self) DS.ShowQuest(self.lsQuest) end)
+	t:SetScript("OnClick", function(self) DS.ShowQuest(self.psQuest) end)
 	t:SetScript("OnEnter", W.SimpleTip)
 	t:SetScript("OnLeave", W.HideTip)
-	t.lsTip = L["Show the quest"]
+	t.psTip = L["Show the quest"]
 	ties[i] = t
 	return t
 end
@@ -567,7 +567,7 @@ local function placeOn(m, art, x, y)
 end
 
 local function giverEnter(self)
-	W.Tooltip(self, "ANCHOR_TOP", self.lsName, self.lsLines)
+	W.Tooltip(self, "ANCHOR_TOP", self.psName, self.psLines)
 end
 
 local function giver(i)
@@ -611,7 +611,7 @@ end
 
 local function segPaint(f)
 	for _, b in ipairs(segs) do
-		local on = b.lsKey == f
+		local on = b.psKey == f
 		b.Selected:SetShown(on)
 		W.Color(b.Label, on and "text" or "textMuted")
 	end
@@ -665,7 +665,7 @@ function DS.Build(parent, shell)
 
 	-- The header painting, in the shell's header band under its close.
 	local art = ZoneArt.Create(pg, MW, SH.header, "bg")
-	art.lsZoom = 1.5
+	art.psZoom = 1.5
 	art:SetPoint("TOPLEFT", hub.Header, "TOPLEFT", 0, 0)
 	pg.Art = art
 	art.Rule:Hide() -- the tab row draws the line under the band
@@ -693,13 +693,13 @@ function DS.Build(parent, shell)
 	pg.Pickup = W.Button(over, L["Pick up the quests"], function() DS.PickUp() end, { primary = true, height = 28, icon = "icon-accept" })
 	pg.PickupNone = W.Button(over, L["Nothing to pick up"], function() DS.PickUp() end, { height = 28 })
 	pg.Go = W.Button(over, L["Guide me to the entrance"], function() DS.GuideThere() end, { primary = true, height = 28, icon = "icon-goto" })
-	pg.Go.lsTip = L["Set the arrow to the entrance."]
+	pg.Go.psTip = L["Set the arrow to the entrance."]
 	pg.GoQuiet = W.Button(over, L["Guide me to the entrance"], function() DS.GuideThere() end, { height = 28, icon = "icon-goto" })
-	pg.GoQuiet.lsTip = pg.Go.lsTip
+	pg.GoQuiet.psTip = pg.Go.psTip
 	pg.MapBtn = W.Button(over, L["Show on map"], function() DS.ShowOnMap() end, { height = 28 })
 
 	pg.MapArt = ZoneArt.Create(pg.Body, MW - PAD * 2, MAP_H, "bg")
-	pg.MapArt.lsZoom = 1
+	pg.MapArt.psZoom = 1
 	pg.MapArt:SetPoint("TOPLEFT", pg.Body, "TOPLEFT", PAD, -24)
 	pg.MapArt.Entrance = entranceMarker(pg.MapArt)
 	pg.MapArt.Entrance:SetFrameLevel(pg.MapArt.Over:GetFrameLevel() + 3)
@@ -725,7 +725,7 @@ function DS.Build(parent, shell)
 		local f = order[i]
 		local b = CreateFrame("Button", nil, hub.TabRow)
 		b:SetHeight(24)
-		b.lsKey = f
+		b.psKey = f
 		W.Hover(b)
 		b.Selected = W.Fill(b, "panelAlt", "BACKGROUND", 0)
 		b.Label = W.Text(b, "small", "textMuted")
@@ -733,8 +733,8 @@ function DS.Build(parent, shell)
 		b.Label:SetText(L[f])
 		b:SetWidth(floor(b.Label:GetStringWidth() + 20 + 0.5))
 		b:SetPoint("RIGHT", hub.TabRow, "RIGHT", x, 0)
-		b:SetScript("OnClick", function(self) DS.SetFaction(self.lsKey) end)
-		b.lsTip = L["Faction filter"]
+		b:SetScript("OnClick", function(self) DS.SetFaction(self.psKey) end)
+		b.psTip = L["Faction filter"]
 		b:SetScript("OnEnter", W.SimpleTip)
 		b:SetScript("OnLeave", W.HideTip)
 		b:Hide()
@@ -762,14 +762,14 @@ function DS.PaintVisible()
 	if not (home and home:IsShown()) then return end
 	local top = home.Scroll:GetVerticalScroll() or 0
 	local view = viewHeight()
-	for i = 1, (home.lsCount or 0) do
+	for i = 1, (home.psCount or 0) do
 		local c = cards[i]
-		local key = c.lsKey
-		if c.lsPainted ~= key and c.lsY < top + view + CARD_H and c.lsY + CARD_H > top - CARD_H then
-			local d = c.lsEntry
+		local key = c.psKey
+		if c.psPainted ~= key and c.psY < top + view + CARD_H and c.psY + CARD_H > top - CARD_H then
+			local d = c.psEntry
 			local e = d.entrance
-			c.lsArt = ZoneArt.Paint(c.Art, e and e.map or d.zone, e and e.x, e and e.y, i)
-			c.lsPainted = key
+			c.psArt = ZoneArt.Paint(c.Art, e and e.map or d.zone, e and e.x, e and e.y, i)
+			c.psPainted = key
 			shown.painted = (shown.painted or 0) + 1
 		end
 	end
@@ -804,7 +804,7 @@ local function defaultBand(plevel)
 end
 
 local function paintCard(c, d, f, plevel, key)
-	c.lsKey, c.lsEntry = d.key, d
+	c.psKey, c.psEntry = d.key, d
 	c.Name:SetText(d.name)
 	local facts = {}
 	local lv = UI.LevelRange(d.minLevel, d.maxLevel)
@@ -853,9 +853,9 @@ local function renderHome(plevel)
 	home:Show()
 	pg:Hide()
 	restoreHeader()
-	hub.lsKeepTabRow = true
+	hub.psKeepTabRow = true
 	W.ShellTabs(hub, nil)
-	hub.lsKeepTabRow = nil
+	hub.psKeepTabRow = nil
 	local f = factionKey()
 	local key = defaultBand(plevel)
 	local rows = entries(key, plevel, f)
@@ -904,7 +904,7 @@ local function renderHome(plevel)
 		end
 		local c = card(i)
 		paintCard(c, d, f, plevel, filter ~= "" and "search" or key)
-		c.lsY = y
+		c.psY = y
 		c:ClearAllPoints()
 		c:SetPoint("TOPLEFT", home.Body, "TOPLEFT", CARD_X + col * (cw + CARD_GAP), -y)
 		c:Show()
@@ -916,7 +916,7 @@ local function renderHome(plevel)
 		end
 	end
 	if col == 1 then y = y + CARD_H + CARD_GAP end
-	home.lsCount = #rows
+	home.psCount = #rows
 	hidePool(cards, #rows + 1)
 	hidePool(heads, nh + 1)
 	local empty = #rows == 0
@@ -976,15 +976,15 @@ local function pageHeader(d)
 	local side = SIDE[UI.PlayerFaction() or ""]
 	local none = plan ~= nil and take == 0 and #Dg.Quests(d.key, side) > 0
 	if take > 0 then
-		pg.Pickup.lsTip = L["Pick up the quests"]
+		pg.Pickup.psTip = L["Pick up the quests"]
 		local lines = { format(take == 1 and L["A guide to the 1 quest here you can take, with what comes before it, ending at the entrance."]
 			or L["A guide to the %d quests here you can take, with what comes before them, ending at the entrance."], take) }
 		local carried = #plan.carried
 		if carried > 0 then lines[#lines + 1] = carried == 1 and L["1 more is in your log already."] or format(L["%d more are in your log already."], carried) end
 		lines[#lines + 1] = L["It opens in a new tab."]
-		pg.Pickup.lsTipLines = lines
+		pg.Pickup.psTipLines = lines
 	elseif none then
-		pg.PickupNone.lsTip, pg.PickupNone.lsTipLines = L["Nothing to pick up"], { DS.NothingText(plan) }
+		pg.PickupNone.psTip, pg.PickupNone.psTipLines = L["Nothing to pick up"], { DS.NothingText(plan) }
 	end
 	pg.Pickup:SetShown(take > 0)
 	pg.PickupNone:SetShown(none)
@@ -1104,7 +1104,7 @@ local function placeTiles(b, n0, items, choice, y)
 			local col, line = n % per, floor(n / per)
 			t:ClearAllPoints()
 			t:SetPoint("TOPLEFT", b, "TOPLEFT", VALUE_X + col * (TILE_W + TILE_GAP), -(y + line * (TILE_H + 6)))
-			t.lsID = it.id
+			t.psID = it.id
 			local icon = itemIcon(it.id)
 			if icon then
 				t.Icon:SetTexture(icon)
@@ -1151,7 +1151,7 @@ local function paintQuest(b, q, p, top, plevel, key)
 	b:SetPoint("TOPLEFT", pg.Body, "TOPLEFT", 0, -top)
 	b:SetWidth(MW)
 	b:SetHeight(p.h)
-	b.lsQuest = q.id
+	b.psQuest = q.id
 	local state = questState(q, plevel)
 	local g = STATE_GLYPH[state]
 	b.Glyph:SetTexture(Theme.Media(g[1]))
@@ -1213,21 +1213,21 @@ local function paintQuest(b, q, p, top, plevel, key)
 	if key and Dg.GiverTarget then target, tlabel, first, turnIn = Dg.GiverTarget(key, q.id) end
 	if not first then target, tlabel = s, s and s.name end
 	local go = canGuide(target)
-	b.StartPin.lsPoint, b.StartPin.lsLabel = target, tlabel
+	b.StartPin.psPoint, b.StartPin.psLabel = target, tlabel
 	W.SetIconState(b.StartPin, false, go)
 	local link = b.StartLink
-	link.lsPoint, link.lsLabel = target, tlabel
+	link.psPoint, link.psLabel = target, tlabel
 	link:SetEnabled(go)
 	if not go then
-		link.lsTip, link.lsTipLines = L["Not known"], { L["Where this quest starts is not known yet."] }
+		link.psTip, link.psTipLines = L["Not known"], { L["Where this quest starts is not known yet."] }
 	elseif first then
-		link.lsTip = format(L["Set the arrow to %s"], tlabel or L["the quest giver"])
-		link.lsTipLines = { format(turnIn and L["First turn in %s, which comes before this quest."] or L["First pick up %s, which comes before this quest."], first) }
+		link.psTip = format(L["Set the arrow to %s"], tlabel or L["the quest giver"])
+		link.psTipLines = { format(turnIn and L["First turn in %s, which comes before this quest."] or L["First pick up %s, which comes before this quest."], first) }
 	else
-		link.lsTip = format(L["Set the arrow to %s"], tlabel or L["the quest giver"])
-		link.lsTipLines = { L["Where this quest starts."] }
+		link.psTip = format(L["Set the arrow to %s"], tlabel or L["the quest giver"])
+		link.psTipLines = { L["Where this quest starts."] }
 	end
-	b.StartPin.lsTip, b.StartPin.lsTipLines = link.lsTip, link.lsTipLines
+	b.StartPin.psTip, b.StartPin.psTipLines = link.psTip, link.psTipLines
 	b.Start:ClearAllPoints()
 	b.Start:SetPoint("LEFT", b.StartPin, "RIGHT", 4, 0)
 	b.Start:SetWidth(half - 24)
@@ -1252,7 +1252,7 @@ local function paintQuest(b, q, p, top, plevel, key)
 	b.EndLabel:SetPoint("TOPLEFT", b, "TOPLEFT", VALUE_X + half + 16, -(y + 4))
 	b.EndPin:ClearAllPoints()
 	b.EndPin:SetPoint("TOPLEFT", b, "TOPLEFT", VALUE_X + half + 16 + 40, -y)
-	b.EndPin.lsPoint, b.EndPin.lsLabel = fin, fin and fin.name
+	b.EndPin.psPoint, b.EndPin.psLabel = fin, fin and fin.name
 	W.SetIconState(b.EndPin, false, canGuide(fin))
 	b.End:ClearAllPoints()
 	b.End:SetPoint("LEFT", b.EndPin, "RIGHT", 4, 0)
@@ -1294,7 +1294,7 @@ local function paintQuest(b, q, p, top, plevel, key)
 			local tw = min(floor(r.Title:GetStringWidth() + 1), floor(room * 0.55))
 			r.Title:SetWidth(tw)
 			r.Sub:SetWidth(max(40, min(floor(r.Sub:GetStringWidth() + 1), room - tw - 10)))
-			r.Pin.lsPoint, r.Pin.lsLabel = st, st and st.name
+			r.Pin.psPoint, r.Pin.psLabel = st, st and st.name
 			W.SetIconState(r.Pin, false, canGuide(st))
 			r:Show()
 			y = y + CHAIN_H
@@ -1408,7 +1408,7 @@ local function renderBosses(key, f, plevel)
 				else
 					row.Text:SetText(format(L[spec[2]], qh))
 				end
-				row.lsQuest = q.id
+				row.psQuest = q.id
 				row:ClearAllPoints()
 				row:SetPoint("TOPLEFT", pg.Body, "TOPLEFT", PAD - 4, -(y + h - 6))
 				row:SetWidth(MW - PAD * 2 + 4)
@@ -1461,7 +1461,7 @@ local function renderMap(key, d, f)
 			n = n + 1
 			local g = giver(n)
 			placeOn(g, art, gq.point.x, gq.point.y)
-			g.lsName, g.lsLines = gq.point.name, gq.lines
+			g.psName, g.psLines = gq.point.name, gq.lines
 			g:Show()
 		end
 	else
@@ -1546,7 +1546,7 @@ local function renderEmpty(reason)
 	W.ShellTabs(hub, nil)
 	hidePool(cards)
 	hidePool(heads)
-	home.lsCount = 0
+	home.psCount = 0
 	W.ShellTitle(hub, L["Dungeons"], L["Every dungeon quest, where it starts and what it gives"])
 	home.Watermark:Show()
 	local text
@@ -1695,7 +1695,7 @@ end
 function DS.Enter()
 	if page or not home then return end
 	local c = cards[1]
-	if c and c:IsShown() and c.lsKey then DS.Open(c.lsKey) end
+	if c and c:IsShown() and c.psKey then DS.Open(c.psKey) end
 end
 
 -- SHOW_DUNGEON(key): the hub at the page (nil: Home).

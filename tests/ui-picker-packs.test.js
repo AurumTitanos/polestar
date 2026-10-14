@@ -39,13 +39,13 @@ end
 function nav()
 	local out = {}
 	for _, b in ipairs(PolestarPicker.navButtons) do
-		if b:IsShown() then out[#out + 1] = (b.lsHeading and "# " or "") .. b.Label:GetText() end
+		if b:IsShown() then out[#out + 1] = (b.psHeading and "# " or "") .. b.Label:GetText() end
 	end
 	return out
 end
 function rowFor(title)
 	for _, f in ipairs(stub.frames) do
-		if f.lsGuide and rawget(f, "Range") and f:IsShown() and f.lsGuide.title == title then return f end
+		if f.psGuide and rawget(f, "Range") and f:IsShown() and f.psGuide.title == title then return f end
 	end
 end
 `;
@@ -209,7 +209,7 @@ test('a 64-character pack title is cut: in the sidebar, the header and a row\'s 
 		local note = { text = row.Note:GetText(), w = row.Note:GetWidth(), row = row:GetWidth(), title = row.Title:GetWidth() }
 		P.SetCategory("pack:joe")
 		local entry
-		for _, b in ipairs(PolestarPicker.navButtons) do if b:IsShown() and b.lsKey == "pack:joe" then entry = b end end
+		for _, b in ipairs(PolestarPicker.navButtons) do if b:IsShown() and b.psKey == "pack:joe" then entry = b end end
 		local p2, rel, rp, x = entry.Label:GetPoint(2)
 		local t2, trel, trp, tx = PolestarPicker.Title:GetPoint(2)
 		emit({ note = note, label = { n = entry.Label:GetNumPoints(), point = p2, own = rel == entry, rp = rp, x = x },
@@ -259,12 +259,12 @@ test('every pack switched off: the empty states point to the Guide packs page, n
 		local GF = PolestarGuideFrame
 		local button
 		for _, f in ipairs(stub.frames) do
-			if rawget(f, "lsAction") and rawget(f, "Label") and f:IsVisible() and f.Label:GetText() == "Guide packs" then button = f end
+			if rawget(f, "psAction") and rawget(f, "Label") and f:IsVisible() and f.Label:GetText() == "Guide packs" then button = f end
 		end
 		local r = { picker = PolestarPicker.Empty:GetText(), title = uistub.findText(GF, "No guides shown") ~= nil,
 			text = uistub.findText(GF, "The guide packs are switched off. Turn one on under Options, Guide packs (/polestar packs).") ~= nil,
 			installed = uistub.findText(GF, "No guides installed") ~= nil, button = button ~= nil }
-		if button then button.lsAction() end
+		if button then button.psAction() end
 		r.options = PolestarOptions ~= nil and PolestarOptions:IsShown() and PolestarOptions.Title:GetText() or false
 		emit(r)`);
 	assert.equal(out.picker, 'No guides shown: the guide packs are switched off. Turn one on under Options, Guide packs (/polestar packs).');

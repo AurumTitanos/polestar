@@ -1,6 +1,6 @@
 'use strict';
 // The recorder's progress capture (addon/Polestar_Recorder/Progress.lua and
-// the /lsrec legacy|factions|skills dumps) plus quest givers that are game
+// the /psrec legacy|factions|skills dumps) plus quest givers that are game
 // objects or items, against tests/lua/stub_recorder.lua.
 
 const { test } = require('node:test');
@@ -57,7 +57,7 @@ const SKILLS = `
 	stub.skill({ id = 43, name = "Swords", rank = 20, max = 25, category = 6 })
 `;
 
-test('/lsrec factions: every faction with hierarchy, standing and bounds; collapsed headers and legacy visibility restored', () => {
+test('/psrec factions: every faction with hierarchy, standing and bounds; collapsed headers and legacy visibility restored', () => {
 	const [out] = run(`
 		cmd("factions")
 		emit({ f = S().factions, collapsed = stub.collapsedFactions(), legacyShown = stub.world.showLegacyRep, dumped = type(S().dumped.factions) })`,
@@ -75,7 +75,7 @@ test('/lsrec factions: every faction with hierarchy, standing and bounds; collap
 	assert.equal(Object.keys(out.f).length, 8);
 });
 
-test('/lsrec skills: every skill line with rank, max and category; collapsed headers restored', () => {
+test('/psrec skills: every skill line with rank, max and category; collapsed headers restored', () => {
 	const [out] = run(`
 		cmd("skills")
 		local collapsed = {}
@@ -90,7 +90,7 @@ test('/lsrec skills: every skill line with rank, max and category; collapsed hea
 	});
 });
 
-test('/lsrec legacy: achievement categories, achievements with criteria and Legacy points, the renown track and the Legacy trees', () => {
+test('/psrec legacy: achievement categories, achievements with criteria and Legacy points, the renown track and the Legacy trees', () => {
 	const [out] = run(`
 		stub.world.achievements = {
 			categories = {

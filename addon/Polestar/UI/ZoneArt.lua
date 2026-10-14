@@ -9,7 +9,7 @@
 --   ZoneArt.Create(parent, width, height[, ground]) -> art
 --     A width x height band (the caller anchors it). ground: the palette
 --     colour the bottom fade runs into (default "panelAlt"). art.Over sits
---     above the painting for text and chips; art.lsZoom overrides ZA.ZOOM.
+--     above the painting for text and chips; art.psZoom overrides ZA.ZOOM.
 --   ZoneArt.Paint(art, uiMapID, focusX, focusY, index) -> painted, reveal
 --     focusX/Y: the place to show, live-frame percent (default the middle);
 --     it lands in the clear stretch between the top shade and the bottom
@@ -37,7 +37,7 @@ local floor, max, min, ceil, huge, pcall, type, pairs, ipairs = math.floor, math
 local ZA = {}
 UI.ZoneArt = ZA
 
-ZA.ZOOM = 2.1 -- how far past "the whole map fits" the painting is zoomed in (art.lsZoom overrides)
+ZA.ZOOM = 2.1 -- how far past "the whole map fits" the painting is zoomed in (art.psZoom overrides)
 ZA.REFRAME = 1.5 -- at most this much further in, so a place near an edge still sits in the clear stretch
 ZA.DESAT = 0.2 -- a little colour out, so every zone sits in the night palette
 local TOP_SHADE = 40 -- the darker top edge, for chips and buttons
@@ -55,7 +55,7 @@ end
 function ZA.Create(parent, width, height, ground)
 	local a = CreateFrame("Frame", nil, parent)
 	a:SetSize(width, height)
-	a.lsW, a.lsH = width, height
+	a.psW, a.psH = width, height
 	if a.SetClipsChildren then a:SetClipsChildren(true) end
 	a.Band = Theme.Band(a, "BACKGROUND", -7, true) -- stands in for missing art: kept with the header band off
 	a.Band:SetAllPoints(a)
@@ -78,7 +78,7 @@ function ZA.Create(parent, width, height, ground)
 	a.Top:SetPoint("TOPRIGHT", a, "TOPRIGHT", 0, 0)
 	a.Top:SetHeight(TOP_SHADE)
 	-- Where the place goes: the middle of the stretch neither shades.
-	a.lsFocusY = (TOP_SHADE + height - fade) / 2
+	a.psFocusY = (TOP_SHADE + height - fade) / 2
 	ground = ground or "panelAlt"
 	W.Painter(a, function(self)
 		local r, g, b = Theme.Color(ground)
@@ -185,12 +185,12 @@ function ZA.EachOverlayTile(tileW, tileH, width, height, offX, offY, files, firs
 	end
 end
 
--- A tile of the zone art's overlays; ctx is the art (lsN the pool count, lsS
--- the scale, lsSub the sublevel).
+-- A tile of the zone art's overlays; ctx is the art (psN the pool count, psS
+-- the scale, psSub the sublevel).
 local function placeTile(a, file, x, y, w, h, right, bottom)
-	local n = a.lsN + 1
-	a.lsN = n
-	local s, sub = a.lsS, a.lsSub
+	local n = a.psN + 1
+	a.psN = n
+	local s, sub = a.psS, a.psSub
 	local t = acquire(a, a.Shapes, n, sub)
 	t:SetDrawLayer("BACKGROUND", sub)
 	t:SetTexture(file, nil, nil, "TRILINEAR")
@@ -205,9 +205,9 @@ end
 -- Lays one overlay over the canvas; only the tiles inside the window get a
 -- texture. -> the pool count after it
 local function drawOverlay(a, n, s, x0, y0, x1, y1, tileW, tileH, width, height, offX, offY, files, first, sub)
-	a.lsN, a.lsS, a.lsSub = n, s, sub
+	a.psN, a.psS, a.psSub = n, s, sub
 	ZA.EachOverlayTile(tileW, tileH, width, height, offX, offY, files, first, placeTile, a, x0, y0, x1, y1)
-	return a.lsN
+	return a.psN
 end
 
 -- The scale and canvas offset that put (fx, fy) (0..1 of the layer) at
@@ -227,7 +227,7 @@ local function frame(w, h, ay, lw, lh, fx, fy, base)
 end
 
 function ZA.Paint(a, uiMapID, focusX, focusY, index)
-	local w, h = a.lsW, a.lsH
+	local w, h = a.psW, a.psH
 	local info, textures = artLayer(uiMapID)
 	local tiles, shapes = a.Tiles, a.Shapes
 	if not info then
@@ -243,7 +243,7 @@ function ZA.Paint(a, uiMapID, focusX, focusY, index)
 	local lw, lh, tileW, tileH = info.layerWidth, info.layerHeight, info.tileWidth, info.tileHeight
 	local fx = min(1, max(0, (focusX or 50) / 100))
 	local fy = min(1, max(0, (focusY or 50) / 100))
-	local s, x, y = frame(w, h, a.lsFocusY or h / 2, lw, lh, fx, fy, max(w / lw, h / lh) * (a.lsZoom or ZA.ZOOM))
+	local s, x, y = frame(w, h, a.psFocusY or h / 2, lw, lh, fx, fy, max(w / lw, h / lh) * (a.psZoom or ZA.ZOOM))
 	a.Canvas:SetSize(lw * s, lh * s)
 	a.Canvas:ClearAllPoints()
 	a.Canvas:SetPoint("TOPLEFT", a, "TOPLEFT", x, -y)

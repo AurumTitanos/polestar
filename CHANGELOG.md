@@ -55,6 +55,8 @@
 - Beta wording everywhere, and British spelling in the interface.
 - The README starts with a quick start for players, a download button and
   screenshots from the game.
+- The Recorder's command is `/psrec`, replacing `/lsrec`; `/polestarrec`
+  still works.
 
 ### For guide authors
 
@@ -100,6 +102,8 @@
   The guide menu scenes load frozen copies of six compiled guides, so they
   change only with the UI, never with a guide recompile. CI renders them
   again and fails when they differ from the committed ones.
+- Fields the addon sets on game frames share one prefix, `ps`, explained in
+  addon/README.md.
 
 ## 0.1.0 (2026-10-13)
 

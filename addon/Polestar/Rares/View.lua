@@ -134,7 +134,7 @@ local function listRow(i)
 	r.Sub = W.Text(r, "small", "textMuted")
 	r.Sub:SetJustifyH("RIGHT")
 	r.Sub:SetPoint("RIGHT", r, "RIGHT", -10, 0)
-	r:SetScript("OnClick", function(self) RV.Select(self.lsKey) end)
+	r:SetScript("OnClick", function(self) RV.Select(self.psKey) end)
 	listRows[i] = r
 	return r
 end
@@ -173,9 +173,9 @@ local function note(i, parent)
 end
 
 local function itemEnter(self)
-	if not (self.lsID and GameTooltip) then return end
+	if not (self.psID and GameTooltip) then return end
 	GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-	GameTooltip:SetHyperlink("item:" .. self.lsID)
+	GameTooltip:SetHyperlink("item:" .. self.psID)
 	local r, g, b = Theme.Color("textDim")
 	GameTooltip:AddLine(L["Click: every way to get it in Lookup"], r, g, b, true)
 	GameTooltip:AddLine(L["Alt-click: a guide to get it"], r, g, b, true)
@@ -218,7 +218,7 @@ local function itemRow(i, parent)
 	r.Note:SetPoint("LEFT", r.Name, "RIGHT", 10, 0)
 	r:SetScript("OnEnter", itemEnter)
 	r:SetScript("OnLeave", itemLeave)
-	r:SetScript("OnClick", function(self) RV.ItemClick(self.lsID) end)
+	r:SetScript("OnClick", function(self) RV.ItemClick(self.psID) end)
 	items[i] = r
 	return r
 end
@@ -241,9 +241,9 @@ local function placeRow(i, parent)
 	r.Travel:SetPoint("RIGHT", r, "RIGHT", 0, 0)
 	r:SetScript("OnClick", function(self)
 		local N = ns.Nav
-		if N and N.SetTarget and self.lsMap then N.SetTarget(self.lsMap, self.lsX, self.lsY, self.lsLabel, self.lsF) end
+		if N and N.SetTarget and self.psMap then N.SetTarget(self.psMap, self.psX, self.psY, self.psLabel, self.psF) end
 	end)
-	r:SetScript("OnEnter", function(self) W.Tooltip(self, "ANCHOR_RIGHT", self.lsLabel, { L["Click: set the waypoint here"] }) end)
+	r:SetScript("OnEnter", function(self) W.Tooltip(self, "ANCHOR_RIGHT", self.psLabel, { L["Click: set the waypoint here"] }) end)
 	r:SetScript("OnLeave", function(self) W.HideTooltip(self) end)
 	places[i] = r
 	return r
@@ -287,7 +287,7 @@ end
 -- The selection pane's width, from the hub (anchored frames have no width
 -- before the first layout): the main column, less the rail and sidebar.
 local function detailWidth()
-	local full = shellRef and (shellRef:GetWidth() - (shellRef.lsRail or 0) - SH.sidebar - 2) or 0
+	local full = shellRef and (shellRef:GetWidth() - (shellRef.psRail or 0) - SH.sidebar - 2) or 0
 	if full <= 0 then full = 878 end
 	return full - LIST_W
 end
@@ -296,9 +296,9 @@ local function buildDetail()
 	local d = detail
 	if rawget(d, "Art") then return end
 	local w = detailWidth()
-	d.lsW = w
+	d.psW = w
 	d.Art = ZoneArt.Create(d, w, BAND_H, "panel")
-	d.Art.lsZoom = 1.6
+	d.Art.psZoom = 1.6
 	d.Art:SetPoint("TOPLEFT", d, "TOPLEFT", 1, 0)
 	d.Title = W.Text(d.Art.Over, "display", "text")
 	d.Sub = W.Text(d.Art.Over, "small", "textDim")
@@ -321,7 +321,7 @@ local function buildDetail()
 	d.FootRule:SetPoint("TOPRIGHT", d.Foot, "TOPRIGHT", 0, 0)
 	d.Go = W.Button(d.Foot, L["Set waypoint"], function() RV.Waypoint() end, { primary = true, height = 28, icon = "icon-goto" })
 	d.Look = W.Button(d.Foot, L["Look up"], function() RV.LookUp() end, { height = 28, icon = "search" })
-	d.Look.lsTip = L["Open it in Lookup: where it is, ranked for this character."]
+	d.Look.psTip = L["Open it in Lookup: where it is, ranked for this character."]
 	d.Mute = W.Button(d.Foot, L["Mute alerts"], function() RV.ToggleMute() end, { height = 28 })
 
 	d.Scroll = W.Scroll(d)
@@ -446,7 +446,7 @@ local function renderList(rows)
 			r:ClearAllPoints()
 			r:SetPoint("TOPLEFT", list.Scroll.Child, "TOPLEFT", ROW_X, -y)
 			r:SetWidth(LIST_W - ROW_X * 2)
-			r.lsKey = e.key
+			r.psKey = e.key
 			local on = e.key == key
 			r.Selected:SetShown(on)
 			r.Bar:SetShown(on)
@@ -488,11 +488,11 @@ end
 
 local function band(title, sub, map, x, y)
 	local d = detail
-	d.lsArt = ZoneArt.Paint(d.Art, map, x, y, #(title or "") + 1)
+	d.psArt = ZoneArt.Paint(d.Art, map, x, y, #(title or "") + 1)
 	d.Title:SetText(title or "")
 	d.Sub:SetText(sub or "")
-	d.Title:SetWidth(d.lsW - DPAD * 2)
-	d.Sub:SetWidth(d.lsW - DPAD * 2)
+	d.Title:SetWidth(d.psW - DPAD * 2)
+	d.Sub:SetWidth(d.psW - DPAD * 2)
 	d.Title:ClearAllPoints()
 	d.Title:SetPoint("BOTTOMLEFT", d.Art, "BOTTOMLEFT", DPAD, 16 + 11 + 8)
 end
@@ -503,7 +503,7 @@ local function actions(go, look, mute)
 	d.Look:SetShown(look)
 	d.Mute:SetShown(mute ~= nil)
 	if mute ~= nil then W.SetButtonText(d.Mute, mute and L["Unmute alerts"] or L["Mute alerts"]) end
-	d.Mute.lsTip = mute and L["Alerts for it are off. Click to turn them back on."] or L["No more alerts for this one; it stays on the map."]
+	d.Mute.psTip = mute and L["Alerts for it are off. Click to turn them back on."] or L["No more alerts for this one; it stays on the map."]
 	local prev
 	for _, b in ipairs({ d.Go, d.Look, d.Mute }) do
 		if b:IsShown() then
@@ -526,12 +526,12 @@ local function empty(title, text, y)
 	local d = detail
 	d.EmptyTitle:ClearAllPoints()
 	d.EmptyTitle:SetPoint("TOPLEFT", d.Body, "TOPLEFT", DPAD, y - 8)
-	d.EmptyTitle:SetWidth(d.lsW - DPAD * 2)
+	d.EmptyTitle:SetWidth(d.psW - DPAD * 2)
 	d.EmptyTitle:SetText(title)
 	d.EmptyTitle:Show()
 	d.EmptyNote:ClearAllPoints()
 	d.EmptyNote:SetPoint("TOPLEFT", d.EmptyTitle, "BOTTOMLEFT", 0, -10)
-	d.EmptyNote:SetWidth(min(520, d.lsW - DPAD * 2))
+	d.EmptyNote:SetWidth(min(520, d.psW - DPAD * 2))
 	d.EmptyNote:SetText(text)
 	d.EmptyNote:Show()
 	return 8 + 24 + 10 + d.EmptyNote:GetStringHeight() + 16
@@ -539,7 +539,7 @@ end
 
 local function writer()
 	local d = detail
-	local w = { y = -8, h = 0, i = 0, p = 0, n = 0, width = d.lsW - DPAD * 2 - 8 }
+	local w = { y = -8, h = 0, i = 0, p = 0, n = 0, width = d.psW - DPAD * 2 - 8 }
 	function w.head(text, count)
 		w.h = w.h + 1
 		local h = head(w.h, d.Body)
@@ -566,7 +566,7 @@ local function writer()
 		r:ClearAllPoints()
 		r:SetPoint("TOPLEFT", d.Body, "TOPLEFT", DPAD, w.y)
 		r:SetWidth(w.width)
-		r.lsID = e.id
+		r.psID = e.id
 		local icon = itemIcon(e.id)
 		if icon then
 			r.Icon:SetTexture(icon)
@@ -593,7 +593,7 @@ local function writer()
 		r:ClearAllPoints()
 		r:SetPoint("TOPLEFT", d.Body, "TOPLEFT", DPAD, w.y)
 		r:SetWidth(w.width)
-		r.lsMap, r.lsX, r.lsY, r.lsF, r.lsLabel = p.map, p.x, p.y, p.f, p.label
+		r.psMap, r.psX, r.psY, r.psF, r.psLabel = p.map, p.x, p.y, p.f, p.label
 		r.Zone:SetText(p.zone or "?")
 		r.Coords:SetText(p.x and format("%.1f, %.1f", p.x, p.y) or "")
 		r.Travel:SetText(p.travel or "")
@@ -732,7 +732,7 @@ local function renderEntity(key, w)
 	if zone then facts[#facts + 1] = zone end
 	if entry and entry.t then facts[#facts + 1] = format(L["seen %s"], Rares.AgoText(entry.t, now)) end
 	band(name, concat(facts, DOT), spawn and spawn.map, spawn and spawn.x, spawn and spawn.y)
-	detail.lsSpawn, detail.lsName, detail.lsKey = spawn, name, key
+	detail.psSpawn, detail.psName, detail.psKey = spawn, name, key
 	actions(spawn ~= nil and ns.Nav ~= nil, rec ~= nil and ns.Lookup ~= nil, Rares.IsIgnored(key))
 	shown.name, shown.facts = name, concat(facts, DOT)
 	if rec then
@@ -876,7 +876,7 @@ end
 -- Up/Down walk the list; Enter sets the waypoint to the selection.
 function RV.Step(delta)
 	local keys = {}
-	for _, r in ipairs(listRows) do if r:IsShown() and r.lsKey then keys[#keys + 1] = r.lsKey end end
+	for _, r in ipairs(listRows) do if r:IsShown() and r.psKey then keys[#keys + 1] = r.psKey end end
 	if #keys == 0 then return end
 	local at = 0
 	for i, k in ipairs(keys) do if k == selected[tab] then at = i end end
@@ -893,19 +893,19 @@ function RV.Select(key)
 end
 
 function RV.Waypoint()
-	local s = detail and detail.lsSpawn
+	local s = detail and detail.psSpawn
 	local N = ns.Nav
-	if s and N and N.SetTarget then N.SetTarget(s.map, s.x, s.y, detail.lsName, s.f) end
+	if s and N and N.SetTarget then N.SetTarget(s.map, s.x, s.y, detail.psName, s.f) end
 end
 
 function RV.LookUp()
-	local kind, id = splitKey(detail and detail.lsKey)
+	local kind, id = splitKey(detail and detail.psKey)
 	local Lookup = ns.Lookup
 	if id and Lookup and Lookup.Show then Lookup.Show(nil, kind, id) end
 end
 
 function RV.ToggleMute()
-	local key = detail and detail.lsKey
+	local key = detail and detail.psKey
 	if not key then return end
 	Rares.Ignore(key, not Rares.IsIgnored(key))
 	RV.Render()

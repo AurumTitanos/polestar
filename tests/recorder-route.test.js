@@ -10,32 +10,32 @@ const { runAddon } = require('./helpers/lua');
 const REC = 'Polestar_Recorder';
 
 // A stand-in for Polestar's bus and Engine (docs/ARCHITECTURE.md "Message bus",
-// "Tabs"): __fire(msg, ...) delivers a message; __lode.guide/step is the
+// "Tabs"): __fire(msg, ...) delivers a message; __polestar.guide/step is the
 // active tab.
 const FAKE_POLESTAR = `
-__lode = {
+__polestar = {
 	handlers = {},
 	guides = {
 		g1 = { id = "forever/alliance/human/01-elwynn", title = "Elwynn Forest", steps = { { title = "Deputy Willem" }, { title = "Kobold Camp" }, { title = "Wolves" } } },
 		g2 = { id = "professions/mining", title = "Mining 1-75", steps = { { title = "Learn Mining" } } },
 	},
 }
-__lode.guide, __lode.step = __lode.guides.g1, 2
+__polestar.guide, __polestar.step = __polestar.guides.g1, 2
 function __installPolestar()
 	Polestar = {
 		On = function(msg, fn)
-			__lode.handlers[msg] = __lode.handlers[msg] or {}
-			table.insert(__lode.handlers[msg], fn)
+			__polestar.handlers[msg] = __polestar.handlers[msg] or {}
+			table.insert(__polestar.handlers[msg], fn)
 			return {}
 		end,
 		Engine = {
-			GetGuide = function() return __lode.guide end,
-			GetStepIndex = function() return __lode.step end,
+			GetGuide = function() return __polestar.guide end,
+			GetStepIndex = function() return __polestar.step end,
 		},
 	}
 end
 function __fire(msg, ...)
-	for _, fn in ipairs(__lode.handlers[msg] or {}) do fn(...) end
+	for _, fn in ipairs(__polestar.handlers[msg] or {}) do fn(...) end
 end
 `;
 
@@ -70,20 +70,20 @@ test('step snapshots: at login, on every step change, on a tab switch (once), an
 		`
 		stub.world.xp, stub.world.money, stub.world.rested = 120, 4200, 800
 		stub.advance(5)
-		__lode.step = 3
+		__polestar.step = 3
 		__fire("STEP_CHANGED", 3)
 		stub.advance(5)
 		-- switching tabs fires GUIDE_CHANGED then STEP_CHANGED for the same state
-		__lode.guide, __lode.step = __lode.guides.g2, 1
+		__polestar.guide, __polestar.step = __polestar.guides.g2, 1
 		__fire("GUIDE_CHANGED", "professions/mining")
 		__fire("STEP_CHANGED", 1)
 		stub.advance(5)
 		stub.world.combat = true
-		__lode.guide, __lode.step = __lode.guides.g1, 3
+		__polestar.guide, __polestar.step = __polestar.guides.g1, 3
 		__fire("GUIDE_CHANGED", "forever/alliance/human/01-elwynn")
 		stub.world.combat = false
 		stub.advance(5)
-		__lode.step = nil
+		__polestar.step = nil
 		__fire("STEP_CHANGED", nil)
 		__fire("GUIDE_COMPLETED", "forever/alliance/human/01-elwynn")
 		emit(events("step"))`,
@@ -165,7 +165,7 @@ test('without Polestar nothing is snapshotted and nothing errors; a late or brok
 	const [late] = run(`
 		__installPolestar()
 		stub.addonLoaded("Polestar")
-		__lode.step = 3
+		__polestar.step = 3
 		__fire("STEP_CHANGED", 3)
 		local s = {}
 		for _, e in ipairs(events("step")) do s[#s + 1] = e.reason .. ":" .. e.step end
