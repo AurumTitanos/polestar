@@ -239,7 +239,7 @@ step The tunnel
 # ---------------------------------------------------------------- Kharanos
 
 step Kharanos
-  tip Follow the road through the tunnel and north-east to Kharanos. Senir Whitebeard, Eric Brighthammer and his campfire are outside the Thunderbrew Distillery; Tannok, Maxan and Ragnar are inside; Tharek Blackstone works the forge.
+  tip Follow the road through the tunnel and north-east to Kharanos. Kill the Crag Boars on the way: their ribs drop before you have Ragnar's quest and count toward it. Senir, Eric and his campfire are outside the Thunderbrew Distillery. Tannok, Maxan and Ragnar are inside. Tharek Blackstone works the forge.
   turnin 420                                  -- Senir Whitebeard
   turnin 2160                                 -- Tannok Frosthammer, in the distillery
   sethome "Thunderbrew Distillery"

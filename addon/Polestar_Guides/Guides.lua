@@ -8365,7 +8365,7 @@ do
 				},
 				{
 					title = "Kharanos",
-					note = "Follow the road through the tunnel and north-east to Kharanos. Senir Whitebeard, Eric Brighthammer and his campfire are outside the Thunderbrew Distillery; Tannok, Maxan and Ragnar are inside; Tharek Blackstone works the forge.",
+					note = "Follow the road through the tunnel and north-east to Kharanos. Kill the Crag Boars on the way: their ribs drop before you have Ragnar's quest and count toward it. Senir, Eric and his campfire are outside the Thunderbrew Distillery. Tannok, Maxan and Ragnar are inside. Tharek Blackstone works the forge.",
 					goals = {
 						{ t = "turnin", quest = 420, title = "Senir's Observations", npc = 1252, npcName = "Senir Whitebeard", map = 1426, x = 46.73, y = 53.83, f = "e", note = "Senir Whitebeard" },
 						{ t = "turnin", quest = 2160, title = "Supplies to Tannok", npc = 6806, npcName = "Tannok Frosthammer", map = 1426, x = 47.22, y = 52.19, f = "e", note = "Tannok Frosthammer, in the distillery" },
