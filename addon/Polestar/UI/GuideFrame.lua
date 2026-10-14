@@ -656,7 +656,7 @@ local function tabButton(i)
 end
 
 local CATEGORY_ICON = {
-	Leveling = "icon-level", Professions = "icon-craft", Reputation = "icon-rep", Legacy = "icon-achieve",
+	Leveling = "icon-level", Class = "icon-train", Professions = "icon-craft", Reputation = "icon-rep", Legacy = "icon-achieve",
 	Exploration = "icon-explore", Collectibles = "star", Dungeons = "icon-kill",
 }
 GF.CATEGORY_ICON = CATEGORY_ICON

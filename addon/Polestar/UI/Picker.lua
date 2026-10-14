@@ -74,12 +74,12 @@ local VIEWS = { "home", "browse", "current", "recent" }
 local VIEW_LABEL = { home = "Home", browse = "Browse", current = "Current", recent = "Recent" }
 
 -- The guide format's categories, in the order players look for them.
-local CATEGORIES = { "Leveling", "Professions", "Reputation", "Exploration", "Legacy", "Collectibles" }
+local CATEGORIES = { "Leveling", "Class", "Professions", "Reputation", "Exploration", "Legacy", "Collectibles" }
 P.CATEGORIES = CATEGORIES
 local CATEGORY_RANK = {}
 for i, c in ipairs(CATEGORIES) do CATEGORY_RANK[c] = i end
 local CATEGORY_ICON = {
-	Leveling = "icon-level", Professions = "icon-craft", Reputation = "icon-rep", Exploration = "icon-explore",
+	Leveling = "icon-level", Class = "icon-train", Professions = "icon-craft", Reputation = "icon-rep", Exploration = "icon-explore",
 	Legacy = "icon-achieve", Collectibles = "icon-collect", Favorites = "star",
 }
 P.CATEGORY_ICON = CATEGORY_ICON
