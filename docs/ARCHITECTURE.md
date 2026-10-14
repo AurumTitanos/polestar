@@ -2050,7 +2050,7 @@ built.
   | items: container | 2095 | 2095 | 100.0% |
   | tabards | 40 | 40 | 100.0% |
   | mounts | 135 | 134 | 99.3% |
-  | items: rep | 689 | 484 | 70.2% |
+  | items: rep | 689 | 682 | 99.0% |
   | pets | 89 | 87 | 97.8% |
   | items: pvp | 763 | 451 | 59.1% |
   | journal quests | 929 | 880 | 94.7% |
@@ -2069,19 +2069,37 @@ built.
   reputation standings that vendors gate in gossip, and battleground rewards
   AtlasLoot files as PvP, are in no client table (`ItemSparse` carries no
   `MinFactionID` or `RequiredPVPRank` for them, and Wowhead Forever's Sells
-  standing is that same `MinReputation`): a vendor's gate comes only from a
+  standing is that same `MinReputation`). A vendor's, giver's or quest's gate
+  comes from the cited table `tools/lib/codex/repgates.json`
+  (`loadRepGateTable`, provenance `curated`: rows `{ item, name, faction,
+  standing, npcs: [vendors or givers] | quest (+ choice), source, note? }`,
+  one per item and faction, each citing warcraft.wiki.gg, else Wowhead
+  Classic's reputation guides or QuestieDB; the Alterac Valley and Warsong
+  Gulch supply officers, Argent Dawn quartermasters, Timbermaw Hold, Duke
+  Hydraxis, Rin'wosho the Trader's barter quests, which the row also makes
+  the item's quest source since QuestieDB lists no rewards for them), from a
   curated guide that collects the item and reaches the standing before its
   `buy` (`curatedRepGates`, provenance `guides`: the Winterspring
-  Frostsaber, the Stormpike Battle Charger, the Frostwolf Howler), a quest's
-  from QuestieDB (`minRep` or a reputation objective, the higher: a `rep`
-  source naming no vendor, and the quest's `repFaction`/`repStanding`, which
-  blocks its reward row in Lookup), and the rest stay missing in parity
-  (a tooltip without a standing disproves no gate). An NPC that casts a
-  spell creating an item (client `SpellEffect` 24; who casts it, Wowhead
-  Forever's spell page, `codex wowhead` fetching those of items ours has no
-  source for) hands it out: a `gift { npc, spell }` source (Duke Hydraxis's
-  Aqual and Eternal Quintessence; the standing he asks is in no release
-  input). 26 Forever rares no
+  Frostsaber, the Stormpike Battle Charger, the Frostwolf Howler), and a
+  quest's from QuestieDB (`minRep` or a reputation objective, the higher: a
+  `rep` source naming no vendor, and the quest's `repFaction`/`repStanding`,
+  which blocks its reward row in Lookup; a table row's standing replaces it,
+  with a warning when they differ). Precedence: client, then the table, then
+  a guide. A rep source at an item's vendor or giver sets its
+  `repFaction`/`repStanding`; Lookup gates each vendor or giver row by the
+  rep source standing at that npc, else (a purchase) by the item's own,
+  unless that is the other side's faction and a gate of the npc's side exists
+  (`Lookup.PurchaseRep`: Alterac Valley wares both sides' supply officers
+  sell). A table row whose item, vendor or quest the Codex lacks is a build
+  warning. What stays missing: the Insignia of the Dawn and of the Crusade
+  (quest rewards and turn-ins, no standing), the Bloodsail Shirt, Sash and
+  Pants (in the Buccaneer's Uniform, whose quest, Dressing the Part, carries
+  the Neutral gate) and the world-drop Warbear patterns 15742 and 15754
+  (Timbermaw Hold sells 20253 and 20254, gated in `ItemSparse`). An NPC that
+  casts a spell creating an item (client `SpellEffect` 24; who casts it,
+  Wowhead Forever's spell page, `codex wowhead` fetching those of items ours
+  has no source for) hands it out: a `gift { npc, spell }` source (Duke
+  Hydraxis's Aqual and Eternal Quintessence). 26 Forever rares no
   database ranks yet. The 455 confirmed drop chances the release lacks are
   all cut by an item's 10-dropper cap (the internal build keeps AtlasLoot's
   instance trash past it; every dropper of every item would be 1.6 million

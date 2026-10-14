@@ -119,7 +119,7 @@ local SPAN = { item = ITEM_GROUPS, npc = NPC_GROUPS, object = OBJECT_GROUPS }
 -- Same letters as FROM in tools/lib/codex/pack.js.
 local FROM = {
 	a = "atlasloot", c = "client", d = "dungeons", f = "flbis", g = "guides", j = "journal", l = "recordings",
-	p = "pfquest", q = "questie", r = "rarescanner", w = "wowhead", e = "forever",
+	p = "pfquest", q = "questie", r = "rarescanner", u = "curated", w = "wowhead", e = "forever",
 }
 
 -- letter -> { type, fields }; same layout as SOURCE in pack.js.

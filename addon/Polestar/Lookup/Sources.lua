@@ -534,13 +534,45 @@ end
 -- Entities
 ---------------------------------------------------------------------------
 
--- What a vendor asks before selling the item: a standing with a faction
--- (item.repFaction / repStanding) and a skill rank (item.reqSkill /
--- reqSkillRank). Unmet: the purchase row is unavailable and costs the grind.
+-- What a vendor asks before selling the item, or an NPC before handing it
+-- out: a standing with a faction (purchaseRep) and, to buy it, a skill rank
+-- (item.reqSkill / reqSkillRank). Unmet: the row is unavailable and costs
+-- the grind.
 local PURCHASE = { vendor = true, pvp = true }
 
+local function factionSide(id)
+	local f = Codex().Faction(id)
+	return f and (f.side == "Alliance" and "A" or f.side == "Horde" and "H") or nil
+end
+
+-- The standing a row at npcId asks -> faction, standing | nil: a reputation
+-- source standing at that npc (the Codex's cited gate table, a guide's
+-- gate), else, to buy it, the item's own (item.repFaction / repStanding)
+-- unless that is the other side's faction and a gate of the npc's side
+-- exists (Alterac Valley wares both sides' supply officers sell).
+local function purchaseRep(item, npcId, purchase)
+	if type(item) ~= "table" then return nil end
+	local npc = npcId and Codex().Npc(npcId)
+	local side = npc and npc.faction
+	local ofSide
+	for _, s in ipairs(item.sources or {}) do
+		if s.type == "rep" and s.faction and s.standing and s.npc then
+			if s.npc == npcId then return s.faction, s.standing end
+			if side and not ofSide and factionSide(s.faction) == side then ofSide = s end
+		end
+	end
+	if not (purchase and item.repFaction and item.repStanding) then return nil end
+	local own = factionSide(item.repFaction)
+	if ofSide and own and own ~= side then return ofSide.faction, ofSide.standing end
+	return item.repFaction, item.repStanding
+end
+Lookup.PurchaseRep = purchaseRep
+
 local function purchaseGates(item, r)
-	if item.repFaction and item.repStanding then repGate(r, item.repFaction, item.repStanding) end
+	local purchase = PURCHASE[r.type] or false
+	local faction, standing = purchaseRep(item, r.src and r.src.npc, purchase)
+	if faction then repGate(r, faction, standing) end
+	if not purchase then return end
 	if item.reqSkill and item.reqSkillRank then
 		local rank = ns.Compat.GetSkillRank(item.reqSkill)
 		if not rank or rank < item.reqSkillRank then
@@ -572,7 +604,7 @@ local function itemSources(id, p, from)
 		elseif item.reqLevel and item.reqLevel > p.level then
 			block(r, "level", levelText(item.reqLevel))
 		end
-		if PURCHASE[r.type] then purchaseGates(item, r) end
+		if PURCHASE[r.type] or r.type == "gift" then purchaseGates(item, r) end
 		-- Retired stock (item.status, from codex build): listed by the Era
 		-- databases, no longer handed out. Shown for the record, never guided.
 		if item.status == "retired" then

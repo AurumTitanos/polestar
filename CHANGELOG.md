@@ -80,6 +80,17 @@
   Winterspring Frostsaber, Stormpike Battle Charger and Frostwolf Howler
   ask for Exalted at their vendor; Aqual and Eternal Quintessence come from
   Duke Hydraxis.
+- Lookup knows the standing about 180 reputation rewards ask at their
+  vendor, which the game's data does not say: the Alterac Valley and Warsong
+  Gulch supply officers' wares (each side's at its own faction: an Alliance
+  player buying Alterac Manna Biscuits needs Honored with the Stormpike
+  Guard, a Horde one with the Frostwolf Clan), the Argent Dawn's resistance
+  mantles, Timbermaw Hold's Furbolg Medicine Pouch and Totem, Duke
+  Hydraxis's Aqual and Eternal Quintessence, and the Zandalar Tribe's
+  Essence Mangoes, Zanza potions and signets, now listed as rewards of
+  Rin'wosho the Trader's quests. Such a source shows as unavailable, with
+  the grind, until you have the standing, and a guide built from it reaches
+  the standing first.
 
 ### For guide authors
 
@@ -109,6 +120,12 @@
   and grow under 15x from 2,500 names, each the median of several batches,
   so a per-keystroke index rebuild or a quadratic search still fails it
   (thanks CDVolvik).
+- `tools/lib/codex/repgates.json`: a curated, cited table of the reputation
+  a vendor, giver or quest asks for an item (one row per item and faction,
+  each with its warcraft.wiki.gg or Wowhead Classic page), which `codex
+  build` applies after the client's own gates and before a guide's; a row
+  whose item, vendor or quest the Codex lacks is a build warning. Parity
+  "items: rep" goes from 505 to 682 of 689.
 
 ## 0.2.3 (2026-10-14)
 

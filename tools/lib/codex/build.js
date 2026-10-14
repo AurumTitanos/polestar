@@ -15,7 +15,8 @@
 //   atlasloot|null, rarescanner|null                      (--local-extras only)
 //   client: clientFacts(tables) + { instanceMaps, instances: instanceFacts() }|null,
 //   curated: [item ids guides collect], curatedGates: curatedRepGates(), entrances: curatedEntrances(),
-//   entranceTable: loadEntranceTable() (tools/lib/codex/entrances.json), localExtras,
+//   entranceTable: loadEntranceTable() (tools/lib/codex/entrances.json),
+//   repTable: loadRepGateTable() (tools/lib/codex/repgates.json), localExtras,
 // }
 // Without AtlasLoot and dungeons.json the instances come from the client
 // tables (tools/lib/codex/instances.js).
@@ -51,8 +52,11 @@ const TABLES = [
 const ERA_BUILD = '1.15.9.70003';
 const ERA_TABLES = ['Item', 'ItemSparse', 'ItemEffect', 'Map'];
 
-// guides: Polestar's own curated guides (a collectible's `rep` before its `buy`).
-const RANK = { recordings: 0, client: 1, guides: 1, questie: 2, flbis: 2, rarescanner: 2, dungeons: 2, journal: 2, forever: 2, pfquest: 3, atlasloot: 3, wowhead: 4 };
+// curated: the cited reputation gate table (tools/lib/codex/repgates.json);
+// guides: Polestar's own curated guides (a collectible's `rep` before its
+// `buy`). A gate from the client beats the table, the table a guide's.
+const RANK = { recordings: 0, client: 1, curated: 2, guides: 3, questie: 4, flbis: 4, rarescanner: 4, dungeons: 4, journal: 4, forever: 4, pfquest: 5, atlasloot: 5, wowhead: 6 };
+const RANK_UNKNOWN = 7;
 // gift: an NPC hands the item out (casts a spell that creates it).
 const KEY_FIELD = { vendor: 'npc', drop: 'npc', object: 'object', quest: 'quest', gift: 'npc', craft: 'spell', rep: 'faction', pvp: null, container: 'item', world: null };
 const TYPE_ORDER = ['vendor', 'quest', 'gift', 'craft', 'rep', 'pvp', 'drop', 'object', 'container', 'world'];
@@ -336,11 +340,11 @@ function questRep(q) {
 }
 
 function rankOf(from) {
-	return Math.min(...from.map((f) => (RANK[f] === undefined ? 5 : RANK[f])));
+	return Math.min(...from.map((f) => (RANK[f] === undefined ? RANK_UNKNOWN : RANK[f])));
 }
 
 function sortFrom(from) {
-	return [...new Set(from)].sort((a, b) => (RANK[a] ?? 5) - (RANK[b] ?? 5) || (a < b ? -1 : 1));
+	return [...new Set(from)].sort((a, b) => (RANK[a] ?? RANK_UNKNOWN) - (RANK[b] ?? RANK_UNKNOWN) || (a < b ? -1 : 1));
 }
 
 function sideOf(side) {
@@ -737,6 +741,20 @@ function mergeCodex(inputs) {
 			add(it, { type: 'quest', quest: Number(qid), choice: true, from });
 		}
 	}
+	// The cited gate table's quest rows: the quest hands the item out
+	// (QuestieDB lists no rewards for Rin'wosho the Trader's barters).
+	const repTable = inputs.repTable || {};
+	for (const rows of Object.values(repTable)) {
+		for (const g of rows) {
+			if (!g.quest) continue;
+			if (!(fv.quests || {})[g.quest]) {
+				warnings.push(`repgates.json: ${g.item} ${g.name || ''}: quest ${g.quest} is not in the Codex`);
+				continue;
+			}
+			reward(g.quest, g.item, !!g.choice);
+			add(g.item, { type: 'quest', quest: g.quest, choice: g.choice ? true : null, from: ['curated'] });
+		}
+	}
 	const flbQuests = (flb && flb.quests) || {};
 	for (const [qid, q] of Object.entries(flbQuests)) {
 		for (const it of (q.rewards && q.rewards.items) || []) {
@@ -899,6 +917,17 @@ function mergeCodex(inputs) {
 				if (npcs[npc]) list.push({ type: 'gift', npc, spell, from: ['wowhead'] });
 			}
 		}
+		// The cited gate table (repgates.json): the standing its vendor or
+		// giver asks (the Alterac Valley and Warsong Gulch supply officers,
+		// the Argent Dawn quartermasters). A row naming an npc that neither
+		// sells nor hands out the item is stale: a warning, never a gate.
+		for (const g of repTable[id] || []) {
+			if (g.name && g.name !== name) warnings.push(`repgates.json: ${id} is "${name}" in the Codex, not "${g.name}"`);
+			for (const npc of g.npcs || []) {
+				if (list.some((s) => (s.type === 'vendor' || s.type === 'gift') && s.npc === npc)) list.push({ type: 'rep', faction: g.faction, standing: g.standing, npc, from: ['curated'] });
+				else warnings.push(`repgates.json: ${id} ${name}: npc ${npc} neither sells nor gives it in the Codex`);
+			}
+		}
 		if (c && c.pvpRank) {
 			const vendor = list.find((s) => s.type === 'vendor');
 			list.push({ type: 'pvp', rank: c.pvpRank, npc: vendor ? vendor.npc : null, from: ['client'] });
@@ -915,6 +944,9 @@ function mergeCodex(inputs) {
 		for (const s of list.filter((x) => x.type === 'quest')) {
 			const g = questRep((fv.quests || {})[s.quest]);
 			if (g) list.push({ type: 'rep', faction: g.faction, standing: g.standing, npc: null, from: ['questie'] });
+		}
+		for (const g of repTable[id] || []) {
+			if (g.quest && list.some((s) => s.type === 'quest' && s.quest === g.quest)) list.push({ type: 'rep', faction: g.faction, standing: g.standing, npc: null, from: ['curated'] });
 		}
 		const sources = finalizeSources(
 			list,
@@ -934,12 +966,12 @@ function mergeCodex(inputs) {
 		// Purchase requirements: reputation (standing 1..8, Hated..Exalted, as
 		// Compat.GetFactionStanding) and profession skill, from the client tables.
 		// Some reputation vendors gate items in their gossip, not in ItemSparse
-		// (13086 Winterspring Frostsaber): an item sold by the npc a reputation
-		// source stands at takes that source's faction and standing. A quest's
-		// gate (its giver's) stays on the quest.
+		// (13086 Winterspring Frostsaber): an item sold or handed out by the npc
+		// a reputation source stands at takes that source's faction and
+		// standing. A quest's gate (its giver's) stays on the quest.
 		let repFaction = (c && c.minFaction) || null;
 		let repStanding = repFaction ? c.minStanding : null;
-		const vendors = new Set(sources.filter((s) => s.type === 'vendor').map((s) => s.npc));
+		const vendors = new Set(sources.filter((s) => s.type === 'vendor' || s.type === 'gift').map((s) => s.npc));
 		const rep = !repFaction ? sources.find((s) => s.type === 'rep' && s.faction && s.standing && vendors.has(s.npc)) : null;
 		if (rep) {
 			repFaction = rep.faction;
@@ -959,6 +991,9 @@ function mergeCodex(inputs) {
 			status: statusOf(id, kind, sources, spell),
 			sources,
 		};
+	}
+	for (const [id, rows] of Object.entries(repTable)) {
+		if (!items[id]) warnings.push(`repgates.json: item ${id} ${rows[0].name || ''} is not in the Codex`);
 	}
 
 	// ----- spells (mount / pet summons, class mounts)
@@ -1068,6 +1103,16 @@ function mergeCodex(inputs) {
 			rewards,
 			choices,
 		};
+	}
+	// The table's quest rows gate their quest too: the table's standing over
+	// QuestieDB's (a difference is worth a look: a warning).
+	for (const rows of Object.values(repTable)) {
+		for (const g of rows) {
+			const q = g.quest && quests[g.quest];
+			if (!q) continue;
+			if (q.repFaction && (q.repFaction !== g.faction || q.repStanding !== g.standing)) warnings.push(`repgates.json: quest ${g.quest} asks ${g.faction}/${g.standing} here, ${q.repFaction}/${q.repStanding} in QuestieDB`);
+			Object.assign(q, { repFaction: g.faction, repStanding: g.standing });
+		}
 	}
 
 	// ----- loot of rares and treasures: RareScanner loot plus every drop/object
@@ -1310,7 +1355,7 @@ async function loadInputs({ addons, offline = false, dataDir, sourcesDir, build 
 		warnings.push(`Era client tables ${ERA_BUILD}: ${err.message}`);
 	}
 	client.instances = instanceFacts(loaded.tables, eraMaps);
-	return { forever, atlasloot, rarescanner, flbis, client, wowhead, curated: curatedCollects(guidesDir), curatedGates: curatedRepGates(guidesDir), entrances: curatedEntrances(guidesDir), entranceTable: loadEntranceTable(), localExtras: !!localExtras, warnings };
+	return { forever, atlasloot, rarescanner, flbis, client, wowhead, curated: curatedCollects(guidesDir), curatedGates: curatedRepGates(guidesDir), entrances: curatedEntrances(guidesDir), entranceTable: loadEntranceTable(), repTable: loadRepGateTable(), localExtras: !!localExtras, warnings };
 }
 
 // Every .guide file under dir -> [{ file, text }], by path.
@@ -1364,6 +1409,22 @@ function curatedRepGates(dir = path.join(ROOT, 'guides')) {
 	return out;
 }
 
+// The cited reputation gate table (tools/lib/codex/repgates.json): rows
+// { item, name, faction, standing (1..8), npcs: [vendor or giver] | quest
+// (+ choice), source (URL), note? } -> { item: [row] }. A malformed row throws.
+function loadRepGateTable(file = path.join(__dirname, 'repgates.json')) {
+	if (!fs.existsSync(file)) return {};
+	const out = {};
+	for (const g of JSON.parse(fs.readFileSync(file, 'utf8')).gates || []) {
+		const where = Array.isArray(g.npcs) && g.npcs.length && g.npcs.every(Number.isInteger) ? !g.quest : Number.isInteger(g.quest) && !g.npcs;
+		if (!Number.isInteger(g.item) || !Number.isInteger(g.faction) || !(g.standing >= 1 && g.standing <= 8) || !where || !/^https:\/\//.test(g.source || '')) {
+			throw new Error(`${path.basename(file)}: bad row ${JSON.stringify(g)}`);
+		}
+		(out[g.item] = out[g.item] || []).push(g);
+	}
+	return out;
+}
+
 function sourcesMeta(inputs) {
 	const out = [];
 	const fm = inputs.forever.meta || {};
@@ -1383,6 +1444,8 @@ function sourcesMeta(inputs) {
 	}
 	const ne = Object.keys(inputs.entranceTable || {}).length;
 	if (ne && !inputs.atlasloot) out.push({ name: 'Curated instance entrances (tools/lib/codex/entrances.json): QuestieDB Forever dungeon table, warcraft.wiki.gg, Wowhead Forever', version: `${ne} entrances`, licence: 'Facts only (coordinates), each entry with its source' });
+	const nr = Object.keys(inputs.repTable || {}).length;
+	if (nr) out.push({ name: 'Curated reputation gates (tools/lib/codex/repgates.json): warcraft.wiki.gg, Wowhead Classic reputation guides, QuestieDB', version: `${nr} items`, licence: 'Facts only (standings), each row with its source' });
 	if (inputs.client) out.push({ name: 'World of Warcraft: Forever client tables via wago.tools', version: inputs.client.build, licence: 'Blizzard Entertainment game data, facts only' });
 	if (inputs.client && inputs.client.eraBuild) out.push({ name: 'World of Warcraft Classic Era client item tables via wago.tools (items missing from the Forever tables)', version: inputs.client.eraBuild, licence: 'Blizzard Entertainment game data, facts only' });
 	return out;
@@ -1469,4 +1532,4 @@ function writeParity(ours, theirs, dir, verify = null) {
 	return { report, files };
 }
 
-module.exports = { buildCodex, loadInputs, mergeCodex, clientFacts, curatedRepGates, cluster, slug, writeParity, BUILD, TABLES };
+module.exports = { buildCodex, loadInputs, mergeCodex, clientFacts, curatedRepGates, loadRepGateTable, cluster, slug, writeParity, BUILD, TABLES };

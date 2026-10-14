@@ -69,6 +69,7 @@ const FROM = {
 	flbis: 'f',
 	journal: 'j',
 	guides: 'g',
+	curated: 'u',
 	recordings: 'l',
 	pfquest: 'p',
 	questie: 'q',
