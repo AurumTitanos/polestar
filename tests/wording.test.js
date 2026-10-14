@@ -1,9 +1,10 @@
 'use strict';
-// The wording rule: player-facing text, every doc, the guides and the pack
-// template name no other guide product and never invite players to bring or
-// convert other guides. Every path listed must exist, so a moved folder fails
-// here instead of being scanned as nothing. Names are matched as whole
-// tokens, so the game's own "rested XP" (two tokens) is not a product name.
+// The wording rule: player-facing text, every doc, the guides, the pack
+// template and the pack authors' skill (skills/) name no other guide product
+// and never invite players to bring or convert other guides. Every path
+// listed must exist, so a moved folder fails here instead of being scanned as
+// nothing. Names are matched as whole tokens, so the game's own "rested XP"
+// (two tokens) is not a product name.
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
@@ -13,7 +14,7 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
 const ROOT = path.join(__dirname, '..');
-const PATHS = ['addon', 'guides', 'docs', 'tools/templates', 'README.md', 'CONTRIBUTING.md', 'CHANGELOG.md', 'THIRD_PARTY.md', 'LICENSE-EXCEPTION.md'];
+const PATHS = ['addon', 'guides', 'docs', 'skills', 'tools/templates', 'README.md', 'CONTRIBUTING.md', 'CHANGELOG.md', 'THIRD_PARTY.md', 'LICENSE-EXCEPTION.md'];
 // Names of other guide products, kept as hashes so the repository never
 // spells them: SHA-256 of each name's lower-case form.
 const NAME_HASHES = new Set([
