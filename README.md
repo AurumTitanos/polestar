@@ -15,10 +15,15 @@
 </p>
 
 <p align="center">
+  Questions, feedback and bug reports: join the <a href="https://discord.gg/vMbee6F2e9"><b>Polestar Discord</b></a>.
+</p>
+
+<p align="center">
   <a href="LICENSE"><img alt="Licence: GPL-3.0" src="https://img.shields.io/badge/licence-GPL--3.0-e6ba66?style=flat-square&labelColor=232a3f"></a>
   <img alt="World of Warcraft: Forever, client 1.60.1" src="https://img.shields.io/badge/WoW-Forever_1.60.1-94c9ff?style=flat-square&labelColor=232a3f">
   <img alt="Version 0.2.1, beta" src="https://img.shields.io/badge/version-0.2.1_beta-fabf4d?style=flat-square&labelColor=232a3f">
   <a href="https://github.com/fitzforge/polestar/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/fitzforge/polestar/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://discord.gg/vMbee6F2e9"><img alt="Discord: join the Polestar community" src="https://img.shields.io/badge/Discord-join_us-5865f2?style=flat-square&logo=discord&logoColor=white&labelColor=232a3f"></a>
 </p>
 
 <p align="center">
@@ -30,7 +35,8 @@
   <a href="#guide-packs">Guide packs</a> ·
   <a href="#building-from-source">Building from source</a> ·
   <a href="#contributing">Contributing</a> ·
-  <a href="#data-and-licensing">Data and licensing</a>
+  <a href="#data-and-licensing">Data and licensing</a> ·
+  <a href="https://discord.gg/vMbee6F2e9">Discord</a>
 </p>
 
 <table align="center">
@@ -681,7 +687,8 @@ scope (best-in-slot lists, loot browsing, talent builds), and
 
 Issues and pull requests are welcome, guide fixes most of all: a step in the
 wrong order, a quest that is not where the guide says, a tip that would have
-saved you a minute.
+saved you a minute. Questions and ideas are welcome on the
+[Polestar Discord](https://discord.gg/vMbee6F2e9).
 
 - **Found a wrong step?** A guide's title names its file under
   `guides/forever/`; fix the step, run `node tools/polestar.js lint` and

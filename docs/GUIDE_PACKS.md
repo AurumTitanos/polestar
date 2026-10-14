@@ -206,7 +206,10 @@ pack apart and to reach you:
 
 ### More
 
-[PACKS.md](PACKS.md) is the full handbook: setup on each system, the ways to
-write guides (by playing, from the simulator, by hand), testing, publishing,
-updating after a game patch, and every message the tools or the game can
-show, with its fix.
+[PACKS.md](PACKS.md) is the full handbook: setup on each system, the four
+ways to write guides (by playing, from the simulator, by hand, with an AI
+assistant), testing, publishing, updating after a game patch, and every
+message the tools or the game can show, with its fix.
+
+Questions, or a pack to show? Players and authors meet on the
+[Polestar Discord](https://discord.gg/vMbee6F2e9).
