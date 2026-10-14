@@ -2112,7 +2112,8 @@ exclusive group: pfQuest `close` united with QuestieDB `exclusiveTo`.
    all rights reserved, Questie issue #4447). The data stays in `data/`, and
    only the importer is in this repository.
 3. **Wowhead Forever's change notes** (`tools/lib/data/wowhead.js`,
-   `--no-wowhead` skips them): the quest list of every zone and city page on
+   `--no-wowhead` skips them): the quest list of every zone and city page and
+   of the nine class pages (class quests are filed there, not under a zone) on
    wowhead.com/forever (cached a day in `data/sources/wowhead/zones.json`;
    `--offline` reads the cache). A quest Wowhead marks updated with "Experience
    X instead of Y", "Level X instead of Y" or "Requires level X instead of Y"

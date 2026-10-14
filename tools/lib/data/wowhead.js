@@ -3,11 +3,12 @@
 // facts Forever changed. Facts only (ids, XP, levels); results stay in data/,
 // which is gitignored.
 //
-// Zone quest lists: /forever/quests/<continent>/<zone> carries a Listview of
-// the zone's quests: id, name, level, reqlevel, xp, category (the zone's
-// AreaTable id) and envChange { status: new | updated | unchanged, lines }.
-// Wowhead answers an unknown zone path with a generic list, so only rows whose
-// category is the zone's area count.
+// Quest lists: /forever/quests/<continent>/<zone> carries a Listview of the
+// zone's quests: id, name, level, reqlevel, xp, category (the zone's AreaTable
+// id) and envChange { status: new | updated | unchanged, lines }. Class quests
+// are filed under the class instead (/forever/quests/classes/<class>, a
+// negative category per class). Wowhead answers an unknown path with a generic
+// list, so only rows whose category is the page's own count.
 //
 // Cache: <sources>/wowhead/zones.json ({ fetchedAt, zones: { "<area>": rows } }),
 // refetched once it is a day old (Wowhead adds quests as players find them);
@@ -31,6 +32,11 @@ const BASE = 'https://www.wowhead.com/forever';
 const CONCURRENCY = 4;
 const ZONE_TTL_MS = 24 * 60 * 60 * 1000;
 const CONTINENTS = { 1414: 'kalimdor', 1415: 'eastern-kingdoms' };
+// Wowhead's quest categories for the class pages.
+const CLASS_PAGES = [
+	['Warlock', -61], ['Warrior', -81], ['Shaman', -82], ['Paladin', -141], ['Mage', -161],
+	['Rogue', -162], ['Hunter', -261], ['Priest', -262], ['Druid', -263],
+];
 
 // "Un'Goro Crater" -> "ungoro-crater"
 function slug(name) {
@@ -100,11 +106,11 @@ function parseChangeNotes(lines) {
 	return out;
 }
 
-// Zones with a quest list worth asking for: zone and city maps (UiMap type 3)
-// with an area. Continent from the parent; a zone without one is tried under
-// both continents and bare.
+// Quest lists worth asking for: the class pages, then zone and city maps
+// (UiMap type 3) with an area. A zone's continent comes from its parent; a
+// zone without one is tried under both continents and bare.
 function zonePages(zones) {
-	const out = [];
+	const out = CLASS_PAGES.map(([name, area]) => ({ area, name, paths: [`classes/${name.toLowerCase()}`] }));
 	const seen = new Set();
 	for (const z of Object.values(zones)) {
 		if (z.type !== 3 || !z.areaId || !z.name || seen.has(z.areaId)) continue;

@@ -42,14 +42,16 @@ describe('Wowhead zone quest lists', () => {
 		]);
 	});
 
-	test('asks for zone and city maps; a zone without a continent is tried under both and bare', () => {
+	test('asks for every class page, and zone and city maps; a zone without a continent is tried under both and bare', () => {
 		const pages = zonePages({
 			1437: { name: 'Wetlands', areaId: 11, parent: 1415, type: 3 },
 			1447: { name: "Un'Goro Crater", areaId: 490, parent: 1414, type: 3 },
 			2521: { name: 'Zephras Isle', areaId: 16593, parent: 947, type: 3 },
 			1415: { name: 'Eastern Kingdoms', areaId: null, parent: 947, type: 2 },
 		});
-		assert.deepEqual(pages, [
+		assert.equal(pages.filter((p) => p.area < 0).length, 9, 'one page per class');
+		assert.deepEqual(pages.find((p) => p.name === 'Warrior'), { area: -81, name: 'Warrior', paths: ['classes/warrior'] });
+		assert.deepEqual(pages.filter((p) => p.area > 0), [
 			{ area: 11, name: 'Wetlands', paths: ['eastern-kingdoms/wetlands'] },
 			{ area: 490, name: "Un'Goro Crater", paths: ['kalimdor/ungoro-crater'] },
 			{ area: 16593, name: 'Zephras Isle', paths: ['kalimdor/zephras-isle', 'eastern-kingdoms/zephras-isle', 'zephras-isle'] },
@@ -104,14 +106,16 @@ describe('Wowhead zone list cache', () => {
 		const sourcesDir = tmpdir('polestar-wowhead-');
 		const calls = [];
 		const first = await loadZoneQuests({ sourcesDir, zones, fetchImpl: fakeFetch(calls), now: T0 });
-		assert.deepEqual(calls, ['https://www.wowhead.com/forever/quests/eastern-kingdoms/wetlands']);
+		assert.equal(calls.length, 10, 'the nine class pages and the zone, once each');
+		assert.ok(calls.includes('https://www.wowhead.com/forever/quests/eastern-kingdoms/wetlands'));
+		assert.ok(calls.includes('https://www.wowhead.com/forever/quests/classes/warrior'));
 		assert.equal(first.rows.get(5).xp, 100);
 
 		await loadZoneQuests({ sourcesDir, zones, fetchImpl: fakeFetch(calls), now: T0 + 3600e3 });
-		assert.equal(calls.length, 1, 'within a day: cache only');
+		assert.equal(calls.length, 10, 'within a day: cache only');
 
 		const later = await loadZoneQuests({ sourcesDir, zones, fetchImpl: fakeFetch(calls, { xp: 200 }), now: T0 + 25 * 3600e3 });
-		assert.equal(calls.length, 2);
+		assert.equal(calls.length, 20);
 		assert.equal(later.rows.get(5).xp, 200);
 	});
 
