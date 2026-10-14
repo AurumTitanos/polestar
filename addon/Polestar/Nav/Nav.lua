@@ -282,6 +282,8 @@ end
 --   state: "none" | "instance" | "taxi" | "unknown" | "far" | "travel" | "arrived"
 --          | "instruction" (a route leg to act on here: fly, ride, hearth)
 --          | "search" (reached a spot of an area objective: look around here)
+--          | "nopos" (the client gives no player position here: the Deeprun
+--            Tram, a map of its own without a world map)
 --   distance/relAngle/dNorth/dWest are toward what the arrow points at: the
 --   current route leg's end while a travel route is active, else the target.
 --   An area target (`area`, yards: a spawn area) is reached anywhere inside
@@ -317,7 +319,14 @@ function Nav.Sample()
 	end
 	local pc, px, py
 	if C.GetPlayerWorldPosition then pc, px, py = C.GetPlayerWorldPosition() end
-	if not pc then return "unknown" end
+	if not pc then
+		-- No position, nothing to measure. A ride, flight or hearth on the
+		-- route is still what to do (the tram ride itself); else say so.
+		local T = Nav.travel
+		local leg = T and T.Active and T.Active() and T.CurrentLeg()
+		if leg and leg.kind ~= "walk" then return "instruction" end
+		return "nopos"
+	end
 
 	local T = Nav.travel
 	if T and T.Active and T.Active() then

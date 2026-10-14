@@ -970,8 +970,12 @@ Polestar.UI.Picker.SetCategory("Leveling"); Polestar.UI.Picker.Select("forever/h
 	},
 	{
 		file: 'travel.svg',
-		title: 'Travel: the arrow (Arrow scale 160%) on a route into the next zone, its leg captioned ("Go to Westfall"), and the trail dots on the world map from the player to the zone crossing',
-		panels: [questScene(['PolestarNavArrow'], `Polestar.Set("nav.arrowScale", 1.6)\n${TRAVEL}`), questScene(['WorldMapFrame'], TRAVEL)],
+		title: 'Travel: the arrow (Arrow scale 160%) on a route into the next zone, its leg captioned ("Go to Westfall"), and the trail dots on the world map from the player to the zone crossing; then the arrow where the game gives no position (the Deeprun Tram)',
+		panels: [
+			questScene(['PolestarNavArrow'], `Polestar.Set("nav.arrowScale", 1.6)\n${TRAVEL}`),
+			questScene(['WorldMapFrame'], TRAVEL),
+			questScene(['PolestarNavArrow'], `Polestar.Set("nav.arrowScale", 1.6)\n${TRAVEL}\nstub.world.map = nil\nstub.advance(0.2)`),
+		],
 	},
 	{
 		file: 'dungeons.svg',

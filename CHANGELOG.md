@@ -105,6 +105,11 @@
 - An object a quest item drops from names the quest once on its tooltip,
   not once per object of that name: the Sapphire of Aku'Mai in Blackfathom
   Deeps listed its quest three times (thanks Mightie).
+- The arrow no longer vanishes on the Deeprun Tram, where the game gives no
+  position: on the ride it keeps showing "Take the tram to Stormwind" (or
+  Ironforge), anywhere else without a position it says "No position here"
+  over the step, and it points again as soon as you step off (thanks
+  Igotthis).
 - Teldrassil, Dun Morogh and Mulgore: the starting glens no longer send you
   off for one delivery quest and back. Dolanaar Delivery and Supplies to
   Tannok are taken on the way out of Shadowglen and Coldridge Valley, by the

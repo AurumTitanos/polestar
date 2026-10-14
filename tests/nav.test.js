@@ -505,6 +505,38 @@ test('hidden on a taxi, in an instance and without a target; zone name on anothe
 	]);
 });
 
+// The Deeprun Tram is a map of its own with no world map: the client gives
+// no player position there (nor in some loading moments). The arrow says so
+// over the target's label instead of vanishing, and points again once a
+// position returns.
+test('without a player position the arrow says so, keeps the label, and points again when one returns', () => {
+	const [out] = run(`
+		local seen = {}
+		local function snap(tag)
+			seen[#seen + 1] = { tag, A.frame:IsShown(), A.GetMode() or "hidden", A.distText:GetText(), A.labelText:GetText(),
+				A.dial:IsShown(), A.etaText:IsShown() }
+		end
+		target(100, 0, "Nightbane Shadow Weavers")
+		stub.advance(0.1); snap("start")
+		nav.player = nil
+		stub.advance(0.1); snap("no position")
+		seen[#seen + 1] = { "state", (N.Sample()), N.GetDistance() or false }
+		nav.place(0, 0, 0)
+		stub.advance(0.1); snap("back")
+		N.ClearTarget()
+		nav.player = nil
+		stub.advance(1.1)
+		seen[#seen + 1] = { "no target", A.frame:IsShown(), A.GetMode() or "hidden" }
+		emit(seen)`);
+	assert.deepEqual(out, [
+		['start', true, 'travel', '100 yd', 'Nightbane Shadow Weavers', true, false],
+		['no position', true, 'nopos', 'No position here', 'Nightbane Shadow Weavers', false, false],
+		['state', 'nopos', false],
+		['back', true, 'travel', '100 yd', 'Nightbane Shadow Weavers', true, false],
+		['no target', false, 'hidden'],
+	]);
+});
+
 test('ReleaseTarget drops only the override and guides to the engine waypoint again', () => {
 	const [out] = run(`
 		local seen = {}

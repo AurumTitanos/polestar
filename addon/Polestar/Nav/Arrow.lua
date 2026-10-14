@@ -1,7 +1,9 @@
 -- The waypoint arrow: turns smoothly toward the target, with distance, label
 -- and ETA underneath. It shifts from its far colour to its near colour as
 -- you close in and becomes a pulsing ring on arrival. On another continent
--- it shows the target's zone instead.
+-- it shows the target's zone instead; where the client gives no player
+-- position (the Deeprun Tram) it says so over the label, or keeps showing the
+-- route's ride, until a position returns.
 --
 -- Colour comes from Theme through Nav.RGB / Nav.Wash (repainted in OnTheme):
 -- the arrow in "arrow" far away and "arrowNear" up close and on arrival (the
@@ -145,7 +147,7 @@ Nav.arrow = Arrow
 -- State (all scalars: nothing is allocated per frame)
 ---------------------------------------------------------------------------
 
-local mode            -- "travel" | "arrived" | "search" | "far" | "instruction" | nil
+local mode            -- "travel" | "arrived" | "search" | "far" | "instruction" | "nopos" | nil
 local accum = 0       -- time since the last world sample
 local curAngle = 0    -- displayed rotation
 local goalAngle = 0   -- rotation the damping moves toward
@@ -225,6 +227,10 @@ local function setMode(m)
 		etaColor()
 		etaText:SetText(L["On another continent"])
 		etaText:Show()
+	elseif m == "nopos" then
+		-- Nothing to point at or measure; the label (target or route leg) stays.
+		distText:SetTextColor(Nav.RGB("textDim"))
+		distText:SetText(L["No position here"])
 	elseif act then
 		-- Act here: "Fly to Lakeshire", "Take the zeppelin to Undercity", "Hearth to Goldshire".
 		local T = Nav.travel
@@ -316,7 +322,7 @@ local function sample(elapsed)
 	local T = Nav.travel
 	local routed = T ~= nil and T.Active() or false
 	syncLabel(T, routed)
-	if state == "far" or state == "arrived" or state == "search" then
+	if state == "far" or state == "arrived" or state == "search" or state == "nopos" then
 		setMode(state)
 		return true
 	end

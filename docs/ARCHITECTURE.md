@@ -954,7 +954,13 @@ Polestar.Nav.GetDistance() -> yards | nil      -- to an area target's edge, 0 in
 Settings live under `nav.*`; `nav.distanceUnit` (`"yards"`, the default, or
 `"metres"`) sets how distances read, and the arrow redraws its distance as
 soon as it changes. Nav hides itself in instances, on taxis, and when
-the target is on another continent (shows the zone name instead).
+the target is on another continent (shows the zone name instead). Where the
+client gives no player position (the Deeprun Tram is a map of its own, Map
+369, with no UiMap), `Nav.Sample` returns "instruction" while the route's
+current leg is a ride, flight or hearth, so the arrow keeps that leg's glyph
+and caption ("Take the tram to Stormwind"), and "nopos" otherwise: the arrow
+says "No position here" over its label. It points again as soon as a
+position returns.
 
 An area target (a waypoint with `area`, yards: a spawn area) is reached
 anywhere within `area + r` of its centre; outside, the distance shown is to
