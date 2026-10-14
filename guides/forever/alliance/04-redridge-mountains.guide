@@ -36,7 +36,7 @@ next forever/alliance/05-duskwood
 # Gnome) for Ironforge in 06-ashenvale, Elune's Grace (5673, Night Elf) for
 # Darnassus on arrival in Auberdine (06-ashenvale). Night Elf Druids fetch
 # the Westfall half pendant for Trial of the Sea Lion (272). Train in
-# Stormwind on the way.
+# Stormwind on the way; Shamans take the Deeprun Tram to Ironforge for theirs.
 #
 # Not taken: Tharil'zun, Shadow Magic, Wanted: Gath'Ilzogg and Morganth (19,
 # 115, 169, 249: elite targets), Blackrock Blockade (98387) and the
@@ -52,8 +52,14 @@ next forever/alliance/05-duskwood
 step Stormwind
   zone Stormwind City
   tip The Auberdine boat docks at Stormwind Harbor. Walk up into the city for training, then leave by the main gate and follow the road east through Elwynn Forest.
-  train class                                 -- Level 18 and 20 spells
+  train class only Warrior,Paladin,Hunter,Rogue,Priest,Mage,Warlock,Druid -- Level 18 and 20 spells
   vendor nearest
+
+step Shaman training
+  only Shaman
+  zone Ironforge
+  tip Stormwind has no shaman trainer: take the Deeprun Tram from the Dwarven District to Ironforge, train with Eldrun Stormbreaker, then ride the tram back.
+  train class
 
 step Stormwind class quests
   only Priest,Rogue,Warlock

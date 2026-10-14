@@ -4,8 +4,8 @@
 # training, the Stern and Southshore errands) > Southshore (bind) > Refuge
 # Pointe > Northfold Manor > Faldir's Cove > Go'Shek Farm and the Myzrael
 # story > Witherbark Village > hearth to Southshore > Alterac Mountains
-# (Strahnbrad, the Crushridge ogres, Dalaran) > Southshore > Loch Modan,
-# ready for the Badlands.
+# (Strahnbrad, the Crushridge ogres, Dalaran) > Southshore > Ironforge
+# (training) > Loch Modan, ready for the Badlands.
 #
 # Deviations from the export:
 # - The Lost Supplies (1423, a crate in the Swamp) and The Thandol Span part 2
@@ -38,7 +38,9 @@
 #   needs the Ratchet chain (1180, 1181), which no Alliance guide takes.
 # Class quests: Warlocks hand the Heartswood to Gakin and summon their
 # Succubus (1738, 1739) at the Stormwind stop.
-# Class training: Stormwind, around level 38.
+# Class training: Stormwind, around level 38 (Shamans by the Deeprun Tram in
+# Ironforge), and Ironforge again at 39 on the way to Loch Modan (Druids:
+# Ironforge has no druid trainer).
 guide forever/alliance/30-40/05-arathi-highlands
 title Arathi Highlands, Alterac Mountains & Swamp of Sorrows
 faction Alliance
@@ -107,7 +109,7 @@ step Stormwind
   accept 1260
   accept 6141                         -- Brother Crowley, Cathedral of Light
   accept 538                          -- Milton Sheaf, the Royal Library in the keep
-  train class
+  train class only Warrior,Paladin,Hunter,Rogue,Priest,Mage,Warlock,Druid
 
 step The Binding
   only Warlock
@@ -117,10 +119,17 @@ step The Binding
   complete 1739                       -- Subdue the succubus
   turnin 1739                         -- Summon Succubus
 
+step Shaman training
+  only Shaman
+  zone Ironforge
+  tip Stormwind has no shaman trainer: take the Deeprun Tram from the Dwarven District to Ironforge and train with Eldrun Stormbreaker. Gryth Thurden in the Great Forge flies to Southshore too.
+  train class
+
 # ---------------------------------------------------------------- Southshore
 
 step Fly to Southshore
-  fly "Southshore"                    -- Dungar Longdrink, Trade District
+  zone Stormwind City
+  fly "Southshore"                    -- Dungar Longdrink, Trade District; Gryth Thurden, Ironforge
 
 step Southshore
   zone Hillsbrad Foothills
@@ -317,6 +326,7 @@ step Ironforge
   zone Ironforge
   fly "Ironforge"                     -- Darla Harris, Southshore
   turnin 554                          -- Prospector Stormpike, Hall of Explorers
+  train class only Warrior,Paladin,Hunter,Rogue,Priest,Shaman,Mage,Warlock
 
 step Thelsamar
   zone Loch Modan

@@ -18,8 +18,9 @@ next forever/alliance/06-ashenvale
 # back east: Watcher Dodds, the Yorgen Farmstead -> hearth to Darkshire, Blind
 # Mary -> west: Abercrombie, Sven -> Darkshire -> the
 # Skeletal Horrors south-east of town (Rot Blossoms) -> Darkshire -> west: Abercrombie, the
-# ghouls, Jitters, Sven (the end: ride north through Elwynn to Stormwind
-# Harbor for the Auberdine boat, where the next guide starts).
+# ghouls, Jitters, Sven (the end: ride north through Elwynn to Stormwind for
+# training, Shamans in Ironforge by the Deeprun Tram, and the Auberdine boat
+# from Stormwind Harbor, where the next guide starts).
 #
 # Deviations from the export:
 # - Look To The Stars (174): the export finds the Bronze Tube on Venture Co.
@@ -199,7 +200,7 @@ step Jitters
 
 step Sven's Camp
   turnin 268                              -- Sven Yorgen
-  note Next: Ashenvale. Ride north into Elwynn and on to Stormwind, then take the boat from Stormwind Harbor to Auberdine.
+  note Next: Stormwind for training, then the boat from Stormwind Harbor to Auberdine for Ashenvale.
 
 # ---------------------------------------------------------------- Rogues: Klaven's Tower
 
@@ -215,5 +216,18 @@ step Agent Kearnen
 step Master Mathias Shaw
   only Rogue
   zone Stormwind City
-  tip Ride north through Elwynn to Stormwind; Mathias Shaw is at SI:7 in Old Town. Then take the boat to Auberdine.
+  tip Ride north through Elwynn to Stormwind; Mathias Shaw is at SI:7 in Old Town.
   turnin 2359                                 -- Master Mathias Shaw: Poisons
+
+# ---------------------------------------------------------------- Stormwind and the boat
+
+step Stormwind
+  zone Stormwind City
+  tip Train in Stormwind, north through Elwynn Forest. Then take the boat from Stormwind Harbor to Auberdine.
+  train class only Warrior,Paladin,Hunter,Rogue,Priest,Mage,Warlock,Druid -- Level 22 and 24 spells
+
+step Shaman training
+  only Shaman
+  zone Ironforge
+  tip Stormwind has no shaman trainer: take the Deeprun Tram from the Dwarven District to Ironforge, train with Eldrun Stormbreaker, then ride the tram back for the Auberdine boat.
+  train class

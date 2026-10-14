@@ -21,7 +21,7 @@
 #   the next guide's Un'Goro visit. A Donation of Wool (7791) is optional (cloth).
 # - Hameya's Plea (6024, scroll from 05): key and turn-in here. Marauders of Darrowshire
 #   (5206): the Scourge Champions in the Noxious Glade, north of the chapel.
-# - Train class in Ironforge (level 56 spells).
+# - Train class in Ironforge (level 56 spells); Druids trained in Darnassus in the previous guide.
 # Carried on: Umber, Archivist (6844), Super Sticky (4504), Bungle in the Jungle (4496), The Stone Circle (3444,
 # turned in later), Fire Plume Forged (5801), Linken's Memory (3942), Good Luck Charm
 # (5050), the cloth donations, Flint Shadowmore (6184), Taking Back Silithus (8275), Return to Chromie (5941),
@@ -174,7 +174,7 @@ step Stormwind Keep
 step Ironforge
   zone Ironforge
   tip Take the Deeprun Tram to Ironforge.
-  train class
+  train class only Warrior,Paladin,Hunter,Rogue,Priest,Shaman,Mage,Warlock
   accept 8275                         -- Cenarion Emissary Jademoon
   turnin 3701                         -- Royal Historian Archesonus
   turnin 4512                         -- Laris Geardawdle

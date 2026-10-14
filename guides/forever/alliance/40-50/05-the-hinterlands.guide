@@ -7,7 +7,7 @@
 # supplies), the bloodmages' beast loop and Nethergarde Keep, Loch Modan
 # (Ironband's last quests and Ghak's reagents) with the bind in Thelsamar,
 # then Rut'theran Village and Darnassus (Tyrande, Gracina, Fandral's Un'Goro
-# Soil) last, at level 47, and the hearth back to Thelsamar. Searing Gorge
+# Soil; Druids train) last, at level 47, and the hearth back to Thelsamar. Searing Gorge
 # follows.
 #
 # Deviations from the export: the Rut'theran turn-ins of In Search of
@@ -178,6 +178,7 @@ step Craftsmen's Terrace
 step Cenarion Enclave
   turnin 3763                         -- Arch Druid Fandral Staghelm, at the top of the tree
   accept 3764 lvl 47                  -- the soil comes from Un'Goro Crater, later
+  train class only Druid              -- The druid trainers stand in the Enclave; Ironforge has none
 
 step Back to Thelsamar
   zone Loch Modan

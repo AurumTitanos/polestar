@@ -6,7 +6,7 @@
 # hive, the dinosaur bones and the expedition's equipment -> Marshal's Refuge -> the gorilla pelts on Ironstone
 # Plateau -> Ringo on Fire Plume Ridge -> his escort back to the refuge -> the Centipaar grind in western
 # Tanaris -> Torwa -> Lar'korwi -> Torwa -> U'cha on the gorilla plateau -> down the west side to Krakle -> the
-# Fire Plume vents -> Krakle -> Torwa -> hearth Thelsamar -> Ironforge (bind, training, errands).
+# Fire Plume vents -> Krakle -> Torwa -> hearth Thelsamar -> Ironforge (bind, training but for Druids, errands).
 # Forever's 30-60 content (Riverglades, Shen'dralas, Mount Hyjal, the rest of the Wetlands expansion) is not in
 # the data yet: this guide follows Era + known Forever quests.
 # Optional extras: Zul'Farrak instead of the long grind to 50 (a group run; it sits just north of Gadgetzan);
@@ -297,7 +297,7 @@ step Royal Historian Archesonus
 
 step Bind and train
   sethome "Ironforge"
-  train class
+  train class only Warrior,Paladin,Hunter,Rogue,Priest,Shaman,Mage,Warlock
 
 step Xiggs Fuselighter
   tip Xiggs waits in the Military Ward.

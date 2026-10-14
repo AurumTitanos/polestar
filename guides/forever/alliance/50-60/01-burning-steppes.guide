@@ -4,7 +4,7 @@
 # hearth Ironforge -> Lakeshire -> Morgan's Vigil (flight path) -> Dreadmaul Rock -> the Vigil -> Flame Crest and the
 # Ruins of Thaurissan -> Blackrock Stronghold -> Flame Crest -> the Vigil -> Dreadmaul Rock -> the Vigil ->
 # Nethergarde Keep -> the Rise of the Defiler -> fly to Aerie Peak (Wildkin Feathers) -> hearth Ironforge (training) ->
-# Menethil Harbor -> Auberdine -> Rut'theran Village.
+# Menethil Harbor -> Auberdine -> Rut'theran Village (Druids train in Darnassus: Ironforge has no druid trainer).
 # Forever's 30-60 content (Riverglades, Shen'dralas, Mount Hyjal, the rest of the Wetlands expansion) is not in
 # the data yet: this guide follows Era + known Forever quests.
 # Optional extras: A Meeting with the Master (3381: Sanath Lim-yo's hippogryph feathers, no experience in the data)
@@ -206,7 +206,7 @@ step Wildkin feathers
 step Ironforge
   zone Ironforge
   hearth "Ironforge"
-  train class
+  train class only Warrior,Paladin,Hunter,Rogue,Priest,Shaman,Mage,Warlock
 
 step Menethil Harbor
   zone Wetlands
@@ -217,3 +217,9 @@ step Rut'theran Village
   zone Teldrassil
   turnin 3661                         -- Erelas Ambersky
   accept 978                          -- The wildkin are in Winterspring: keep it
+
+step Druid training
+  only Druid
+  zone Darnassus
+  tip Ironforge has no druid trainer: take the portal up to Darnassus and train in the Cenarion Enclave, then come back down to Rut'theran Village.
+  train class

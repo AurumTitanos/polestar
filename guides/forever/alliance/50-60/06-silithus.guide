@@ -5,7 +5,7 @@
 # Point and Forest Song -> Everlook, Ranshalla, the Shardtooth grind, Starfall Village, Donova Snowden -> Timbermaw
 # Hold to Moonglade -> Auberdine and Rut'theran Village -> Darnassus -> the boat to Stormwind (bind, cloth, training)
 # -> Ironforge (cloth, A Little Slime) -> Chillwind Camp -> Andorhal, Felstone Field, Northridge -> Terrordale grind
-# to 60 -> Chillwind Camp -> hearth Stormwind and train.
+# to 60 -> Chillwind Camp -> hearth Stormwind and train (Shamans in Ironforge, by the Deeprun Tram).
 # Forever's 30-60 content (Riverglades, Shen'dralas, Mount Hyjal, the rest of the Wetlands expansion) is not in
 # the data yet: this guide follows Era + known Forever quests.
 # Optional extras: Araj's Scarab and The Key to Scholomance (5803, 5505: Araj the Summoner is a level 61 elite);
@@ -318,7 +318,7 @@ step Stormwind
   zone Stormwind City
   tip Go back down to Rut'theran Village, take the boat to Auberdine and the boat on to Stormwind Harbor. Bring sixty Silk, sixty Mageweave and sixty Runecloth for Clavicus: buy what you lack at the Auction House.
   sethome "Stormwind City"
-  train class
+  train class only Warrior,Paladin,Hunter,Rogue,Priest,Mage,Warlock,Druid
   collect 4306 x60 quest 7793.1       -- Silk Cloth
   collect 4338 x60 quest 7794.1       -- Mageweave Cloth
   turnin 7793                         -- Clavicus Knavingham, in the Trade District
@@ -331,6 +331,7 @@ step Ironforge
   zone Ironforge
   tip Take the Deeprun Tram to Ironforge. Bubulo Acerbus and Mistina Steelshield each want sixty Wool, sixty Silk and sixty Mageweave, then sixty Runecloth: 120 of each in all, from your bags or the Auction House.
   turnin 4513                         -- Laris Geardawdle
+  train class only Shaman             -- Stormwind has no shaman trainer
   collect 2592 x60 quest 7807.1       -- Wool Cloth
   collect 4306 x60 quest 7808.1       -- Silk Cloth
   collect 4338 x60 quest 7809.1       -- Mageweave Cloth
@@ -404,4 +405,10 @@ step Level 60
   zone Stormwind City
   tip Hearth to Stormwind and train your level 60 spells. This is the end of the leveling route: look at the reputation and dungeon guides next.
   hearth "Stormwind City"
+  train class only Warrior,Paladin,Hunter,Rogue,Priest,Mage,Warlock,Druid
+
+step Shaman training
+  only Shaman
+  zone Ironforge
+  tip Stormwind has no shaman trainer: take the Deeprun Tram from the Dwarven District to Ironforge and train your level 60 spells with Eldrun Stormbreaker.
   train class

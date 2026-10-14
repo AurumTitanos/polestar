@@ -3,8 +3,9 @@
 #
 # Flow: Southshore (Farren's murlocs and naga, the turtles, the Syndicate camp
 # on the Alterac border, the yeti cave) -> fly to Stormwind for a round of
-# turn-ins and the Missing Diplomat chain -> Deeprun Tram to Ironforge for
-# Stormpike and the Reclaimers -> next guide: Desolace.
+# turn-ins and the Missing Diplomat chain (Druids train there) -> Deeprun
+# Tram to Ironforge for Stormpike, the Reclaimers and class training -> next
+# guide: Desolace.
 #
 # Deviations from the simulator route (consensus, Alliance Human):
 # - Every Southshore quest is picked up on arrival instead of after Farren's
@@ -154,6 +155,11 @@ step Elling Trias
   turnin 1247
   accept 1248
 
+step Druid training
+  only Druid
+  tip Ironforge has no druid trainer: train with Sheldras Moontree in Stormwind before the tram.
+  train class
+
 # ---------------------------------------------------------------- Ironforge
 
 step Deeprun Tram
@@ -162,4 +168,4 @@ step Deeprun Tram
   turnin 514                          -- Prospector Stormpike, Hall of Explorers
   accept 525
   accept 1453                         -- Roetten Stonehammer
-  train class                         -- Level 30 and 32 spells
+  train class only Warrior,Paladin,Hunter,Rogue,Priest,Shaman,Mage,Warlock -- Level 30 and 32 spells

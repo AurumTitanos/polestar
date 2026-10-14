@@ -53,8 +53,8 @@ next forever/alliance/07-thousand-needles
 # Sea Lion and Aquatic Form (272, 5061: Moonglade, then Darnassus) and Night
 # Elf Priests hand in Elune's Grace (5673) in Darnassus, both by the free
 # Rut'theran flight; in Ironforge, Dwarf and Gnome Priests hand in Chastise
-# (5645) and Contingency Plan (94819). Class training in Ironforge and
-# Stormwind.
+# (5645) and Contingency Plan (94819). Class training in Ironforge, Druids
+# in Stormwind (Ironforge has no druid trainer).
 #
 # Left out (the export accepts them but never turns them in): Journey to
 # Stonetalon Peak (1056), Pridewings of Stonetalon (1134), Mage Summoner
@@ -411,7 +411,7 @@ step Ironforge
   getfp "Ironforge" npc 1573              -- Gryth Thurden, in the Great Forge
   turnin 1072                             -- Lomac Gearstrip, Tinker Town
   accept 1179                             -- Pilot Longbeard
-  train class
+  train class only Warrior,Paladin,Hunter,Rogue,Priest,Shaman,Mage,Warlock
   vendor nearest
 
 step Ironforge priests
@@ -453,5 +453,5 @@ step Jorgen and Elling Trias
 
 step Trade District
   getfp "Stormwind" npc 352               -- Dungar Longdrink
-  train class
+  train class only Druid
   note Next: fly to Darkshire.

@@ -1,5 +1,7 @@
 # Stranglethorn Vale, Alliance ~34 to ~38: the consensus Stranglethorn visit
-# (34.2-37.8). Flow: Nesingwary's Expedition (the first hunting tiers) >
+# (34.2-37.8). Flow: Menethil Harbor > fly to Ironforge for class training
+# (Druids take the tram to Stormwind) > fly to Darkshire and ride south >
+# Nesingwary's Expedition (the first hunting tiers) >
 # Rebel Camp and Kurzen's Compound (Bookie Herod) > Nesingwary again > Booty
 # Bay (flight path, bind) > the west coast (Bloodscalp trolls, crocolisks,
 # the Crystalvein Mine) > back north to pick up the Green Hills of
@@ -23,9 +25,29 @@ levels 34-38
 zone Stranglethorn Vale
 next forever/alliance/30-40/05-arathi-highlands
 
+# ---------------------------------------------------------------- Getting there
+
+step Ironforge
+  zone Ironforge
+  tip Fly from Menethil Harbor to Ironforge and train.
+  fly "Ironforge"                     -- Shellei Brondir, Menethil Harbor
+  train class only Warrior,Paladin,Hunter,Rogue,Priest,Shaman,Mage,Warlock
+
+step Druid training
+  only Druid
+  zone Stormwind City
+  tip Ironforge has no druid trainer: take the Deeprun Tram from Tinker Town to Stormwind and train with Sheldras Moontree.
+  train class
+
+step Darkshire
+  zone Duskwood
+  tip Fly to Darkshire: Gryth Thurden in Ironforge's Great Forge, or Dungar Longdrink in Stormwind's Trade District.
+  fly "Darkshire"
+
 # ---------------------------------------------------------------- Nesingwary's Expedition
 
 step Nesingwary's Expedition
+  zone Stranglethorn Vale
   tip From Duskwood take the road south into Stranglethorn; the hunters' tents stand just west of the road past the Rebel Camp turn-off.
   accept 583                          -- Barnil Stonepot
   turnin 583                          -- Hemet Nesingwary

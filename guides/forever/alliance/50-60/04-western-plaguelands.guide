@@ -37,7 +37,8 @@
 # (4493), Volcanic Activity (4502), The Sunken Temple (3445), Cleansed Water Returns to Felwood (5159),
 # A Reliquary of Purity (5527), Wasteland (1124), Meet at the Grave (3912), A Plague Upon
 # Thee (5903), Of Forgotten Memories (5781).
-# No class quests in this stretch.
+# No class quests in this stretch. Druids train in Darnassus (Ironforge, where the next guide trains, has no druid
+# trainer).
 guide forever/alliance/50-60/04-western-plaguelands
 title Western Plaguelands, Eastern Plaguelands & Feralas
 faction Alliance
@@ -347,6 +348,7 @@ step Darnassus
   accept 3803 optional
   turnin 3803 optional
   turnin 4986
+  train class only Druid              -- Ironforge, where the next guide trains, has no druid trainer
 
 step Temple of the Moon
   tip Herald Moonstalker and Gracina Spiritmight stand by the Temple of the Moon; fill Eridan's Vial at the moonwell inside.
@@ -409,7 +411,7 @@ step Ranshalla
   zone Winterspring
   tip From Ratchet, fly to Everlook and ride south to Owl Wing Thicket.
   fly "Everlook"
-  turnin 979                          -- Her escort is not part of this route
+  turnin 979                          -- Ranshalla: her escort comes later on the route
 
 step Donova Snowden
   tip Ride west along the road to the hot springs.

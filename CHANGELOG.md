@@ -28,6 +28,12 @@
   stands there, with stops of their own for Druids (Thunder Bluff) and Undead
   Paladins (Brill, the Undercity, Thunder Bluff), no gap of more than about
   five levels, and riding at 40 from each race's own riding trainer.
+- Alliance leveling guides: each training stop is for the classes whose
+  trainer stands there, with stops of their own for Shamans (Ironforge) and
+  Druids (Stormwind, Darnassus); new training in Ironforge on the way out of
+  Dun Morogh, in Stormwind after Duskwood and on the way to Stranglethorn, no
+  training in Auberdine, which has no class trainer; the Sentinel Hill flight
+  path for every race; riding at 40 from each race's own riding trainer.
 - Collectible, Legacy and reputation guides: clearer notes (warlock mount
   hand-offs, Merchant's Favor camps, Timbermaw and Cenarion Circle
   standings), and optional extras marked as such.

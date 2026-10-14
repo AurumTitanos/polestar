@@ -146,7 +146,6 @@ step Hearth to Auberdine
   turnin 963                                  -- Cerellean Whiteclaw
   collect 14339 quest 4812                    -- Fill the tube at the moonwell in the village
   vendor nearest
-  train class
 
 step A Lesson to Learn
   only NightElf,Druid
