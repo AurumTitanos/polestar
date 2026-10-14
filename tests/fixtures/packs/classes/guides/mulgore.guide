@@ -1,0 +1,14 @@
+# Fixture: a Horde guide with a Druid step and no race header
+# (tests/playtest.test.js): no Orc can be a Druid, so it is played as a Tauren.
+guide classes/mulgore
+title Druid Step
+faction Horde
+levels 1-6
+zone Mulgore
+
+step Camp Narache
+  goto 44.2,76.1 "Camp Narache"
+
+step Druids only
+  only Druid
+  goto 45.0,75.9 "Narache"

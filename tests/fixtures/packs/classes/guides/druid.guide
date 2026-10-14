@@ -1,0 +1,10 @@
+# Fixture: a Horde guide for Druids only (tests/playtest.test.js).
+guide classes/druid
+title Druids
+faction Horde
+class Druid
+levels 1-6
+zone Mulgore
+
+step Camp Narache
+  goto 44.2,76.1 "Camp Narache"

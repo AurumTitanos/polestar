@@ -174,10 +174,11 @@ function playableClasses(data, race, faction) {
 	return side ? side.classes : [];
 }
 
-// Classes named by any `only` in the guide that the race can be, plus one
-// playable class the guide never names. A guide limited by its `class` header
-// is played only as those classes. `only` (class files) replaces that choice
-// with the given classes the race can be.
+// Classes named by the `class` header or any `only` in the guide that the
+// race can be, plus one playable class the guide never names. A guide
+// limited by its `class` header is played only as those classes, each of
+// them. `only` (class files) replaces that choice with the given classes the
+// race can be.
 function classesFor(data, guide, race, faction, only = null) {
 	let can = playableClasses(data, race, faction);
 	if (guide.classes && guide.classes.length) {
@@ -185,7 +186,7 @@ function classesFor(data, guide, race, faction, only = null) {
 		can = can.filter((c) => allowed.includes(c));
 	}
 	if (only) return can.filter((c) => only.includes(c));
-	const named = new Set();
+	const named = new Set((guide.classes || []).map((c) => String(c).toUpperCase()));
 	const visit = (cond) => {
 		for (const c of (cond && cond.classes) || []) named.add(String(c).toUpperCase());
 	};
@@ -231,6 +232,38 @@ function personasFor(guide, arriving = []) {
 		for (const r of ['Scourge', 'NightElf']) if (!races.includes(r)) races.push(r);
 	}
 	return races.map((race) => ({ race, faction: sideOf(race) || guide.faction || 'Alliance' }));
+}
+
+// A persona for each class the guide names (its `class` header or any `only`)
+// that none of `personas` can be: the first race in races.json on the guide's
+// side (its race list, if it has one) that can be it, so an `only Druid` step
+// in a Horde guide is played as a Tauren rather than skipped.
+function classPersonas(data, guide, personas) {
+	if (!data.races || !Object.keys(data.races).length) return [];
+	const named = new Set((guide.classes || []).map((c) => String(c).toUpperCase()));
+	const visit = (cond) => {
+		for (const c of (cond && cond.classes) || []) named.add(String(c).toUpperCase());
+	};
+	for (const s of guide.steps) {
+		visit(s.only);
+		for (const g of s.goals) visit(g.only);
+	}
+	const allowed = guide.races && guide.races.length ? guide.races.map((x) => (x === 'Undead' ? 'Scourge' : x)) : null;
+	const sides = guide.faction ? [guide.faction] : ['Alliance', 'Horde'];
+	const added = [];
+	for (const cls of named) {
+		const all = [...personas, ...added];
+		if (all.some(({ race, faction }) => playableClasses(data, race, faction).includes(cls))) continue;
+		for (const [race, bySide] of Object.entries(data.races)) {
+			if (allowed && !allowed.includes(race)) continue;
+			const faction = sides.find((s) => bySide[s] && bySide[s].classes.includes(cls));
+			if (faction) {
+				added.push({ race, faction });
+				break;
+			}
+		}
+	}
+	return added;
 }
 
 // The guide id of a .guide text (its `guide` line) and its `next` ids.
@@ -375,7 +408,8 @@ function playtest({ dir, manifest, official = false, filter = null, classes = nu
 			// Every `next` option: the engine takes the recommended one, ours or the pack's.
 			const options = g.nextChoices && g.nextChoices.length ? g.nextChoices : g.next ? [g.next] : [];
 			const handOver = options.some((id) => ourIds.has(id) && !packIds.has(id)) ? options : null;
-			const personas = personasFor(g, arriving.get(g.id));
+			let personas = personasFor(g, arriving.get(g.id));
+			personas = [...personas, ...classPersonas(data, g, personas)];
 			for (const { race, faction } of personas) {
 				for (const cls of classesFor(data, g, race, faction, classes)) {
 					const [out, hand] = playGuide(sim, g, { race, faction, cls, handOver });

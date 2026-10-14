@@ -127,3 +127,13 @@ test('the pack folder is the one argument; two folders, or a folder and --pack, 
 	assert.equal(none.result, 2, none.out);
 	assert.match(none.out, /no pack\.json in /);
 });
+
+test('a class no persona\'s race can be is played as the first race of the guide\'s side that can be it: an `only Druid` step in a Horde guide and a `class Druid` guide play as Tauren; `class Shaman, Druid` plays each', { skip }, async () => {
+	const { result, out } = await quiet(() => cmd.run([path.join(PACKS, 'classes')]));
+	assert.equal(result, 0, out);
+	const ok = lines(out).filter((l) => l.startsWith('ok '));
+	assert.ok(ok.includes('ok  classes/mulgore (Tauren Druid)'), out);
+	assert.ok(ok.includes('ok  classes/mulgore (Orc Warrior)'), out);
+	assert.ok(ok.includes('ok  classes/druid (Tauren Druid)'), out);
+	assert.deepEqual(ok.filter((l) => l.includes('classes/totems')), ['ok  classes/totems (Orc Shaman)', 'ok  classes/totems (Tauren Shaman)', 'ok  classes/totems (Tauren Druid)']);
+});

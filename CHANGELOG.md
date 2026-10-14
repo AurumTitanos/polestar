@@ -2,6 +2,12 @@
 
 ## 0.2.1 (unreleased)
 
+### For guide authors
+
+- `playtest` plays a step for a class none of the guide's races can be, and a
+  guide with a `class` header, as the first race on the guide's side that can
+  be that class: an `only Druid` step in a Horde guide is played as a Tauren.
+
 ### For contributors
 
 - Two more independent route searches (the fourth on the data 0.2.0 ships
