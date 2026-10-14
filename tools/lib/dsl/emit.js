@@ -3,7 +3,7 @@
 // (docs/ARCHITECTURE.md, "Guide data"). Output is deterministic: fixed key
 // order, stable number formatting, sorted guides.
 
-const { FORMAT, NEEDS, TOC_MARKER } = require('../pack/format');
+const { FORMAT, NEEDS, TOC_MARKER, TOC_TITLE_PREFIX } = require('../pack/format');
 const { header } = require('../generated');
 
 const GUIDE_KEYS = ['id', 'pack', 'title', 'faction', 'races', 'classes', 'minLevel', 'maxLevel', 'category', 'folder', 'keywords', 'collects', 'zone', 'zoneName', 'next', 'nextChoices', 'pitch', 'pros', 'cons', 'author', 'version', 'steps'];
@@ -146,20 +146,28 @@ function emitPack(manifest) {
 
 // <folder>.toc: the pack's metadata for the client and for Polestar's pack
 // list (optional lines only when the value exists), then the fixed file set.
+// A pack other than ours reads "Polestar Pack: <title>" in the AddOns list and
+// sits in Polestar's group there, under Polestar's own entry, like
+// Polestar_Guides; Polestar's menus show the plain title (Pack.lua).
 function emitToc(manifest, iface) {
+	const ours = manifest.id === 'guides';
+	const title = ours || manifest.title.startsWith(TOC_TITLE_PREFIX) ? manifest.title : `${TOC_TITLE_PREFIX}${manifest.title}`;
 	const lines = [
 		`## Interface: ${iface}`,
-		`## Title: ${manifest.title}`,
-		`## Notes: ${manifest.notes || 'Guide pack for Polestar'}`,
+		`## Title: ${title}`,
+		`## Notes: ${manifest.notes || `Guide pack for Polestar by ${manifest.author}`}`,
 		`## Author: ${manifest.author}`,
 		`## Version: ${manifest.version}`,
 		'## Category: Quests',
+	];
+	if (!ours) lines.push('## Group: Polestar');
+	lines.push(
 		'## Dependencies: Polestar',
 		`## X-Polestar-Pack: ${manifest.id}`,
 		`## X-Polestar-Format: ${FORMAT}`,
 		`## X-Polestar-Needs: ${NEEDS[FORMAT]}`,
 		`## X-License: ${manifest.license}`,
-	];
+	);
 	if (manifest.website) lines.push(`## X-Website: ${manifest.website}`);
 	lines.push(TOC_MARKER, '', ...PACK_SCRIPTS);
 	return `${lines.join('\n')}\n`;

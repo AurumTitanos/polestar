@@ -705,10 +705,13 @@ local function noGuides(r)
 	end
 end
 
--- A pack that never registered, from its TOC and the client's state.
+-- A pack that never registered, from its TOC and the client's state. The
+-- compiler writes its Title as "Polestar Pack: <title>" for the AddOns list;
+-- here it reads as the pack's own title, as a registered pack's does.
 -- Priority: too-new > disabled > not-loaded > broken.
 local function fromToc(r, name, reason, enabled)
-	r.title = escape(meta(name, "Title") or name)
+	local title = meta(name, "Title")
+	r.title = escape(title and title:gsub("^Polestar Pack: ", "") or name)
 	for key, field in pairs({ author = "Author", version = "Version", license = "X-License", website = "X-Website" }) do
 		local v = meta(name, field)
 		r[key] = v and escape(v) or nil

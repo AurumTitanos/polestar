@@ -151,7 +151,7 @@ test('installed packs: on, broken, turned off, not loaded, too new, never regist
 			stub.addonMeta.Polestar_Guides = toc("guides", "Polestar Guides")
 			stub.addonMeta.JoeAddon = toc("joe", "Joe's Routes")
 			stub.addonMeta.EmptyAddon = toc("empty", "Empty")
-			stub.addonMeta.Off = toc("off", "Switched Off")
+			stub.addonMeta.Off = toc("off", "Switched Off", { Title = "Polestar Pack: Switched Off" })
 			stub.addonMeta.Old = toc("old", "Old Pack")
 			stub.addonMeta.Future = toc("future", "Future Pack", { ["X-Polestar-Format"] = "2", ["X-Polestar-Needs"] = "0.4.0" })
 			stub.addonMeta.Crash = toc("crash", "Crashing Pack")`,
@@ -173,7 +173,7 @@ test('installed packs: on, broken, turned off, not loaded, too new, never regist
 	assert.deepEqual(
 		{ id: by.Off.id, title: by.Off.title, author: by.Off.author, version: by.Off.version, license: by.Off.license, website: by.Off.website },
 		{ id: 'off', title: 'Switched Off', author: 'Switched Off Author', version: '2.0', license: 'CC0-1.0', website: 'https://example.org/off' },
-		'an unregistered pack reads its TOC',
+		'an unregistered pack reads its TOC, without the "Polestar Pack: " the compiler puts before its title',
 	);
 	assert.equal(by.JoeAddon.title, "Joe's Routes", 'a registered pack keeps what it registered');
 	assert.equal(out.problems, 2);

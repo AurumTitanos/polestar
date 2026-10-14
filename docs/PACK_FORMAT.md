@@ -39,7 +39,7 @@ its folder as the one argument (`polestar lint ../joe-routes`) or
 | `license` | yes | the licence of the pack's guides, as an SPDX id where one exists (`CC-BY-4.0`, `CC0-1.0`, `MIT`, `GPL-3.0-only`); at most 64 characters |
 | `website` | no | `https://` or `http://` address; at most 200 characters |
 | `source` | no | where the guides come from, in the author's words; at most 200 characters |
-| `notes` | no | one line for the AddOns list; at most 200 characters (default "Guide pack for Polestar") |
+| `notes` | no | one line for the AddOns list, shown when the player points at the pack there; at most 200 characters (default "Guide pack for Polestar by <author>") |
 | `folder` | no | the addon's folder name: 1 to 64 letters, digits, `_` and `-`, not `Polestar` and not starting with `Polestar_` (in any case); default `PolestarPack_` and the title in CamelCase (`Joe's Routes` → `PolestarPack_JoesRoutes`) |
 
 Every value is a string on one line. A missing or invalid required field is a
@@ -76,11 +76,12 @@ Each guide's table is built inside its own function in `Guides.lua`, so Lua
 
 ```
 ## Interface: 16001
-## Title: Joe's Routes
-## Notes: Guide pack for Polestar
+## Title: Polestar Pack: Joe's Routes
+## Notes: Guide pack for Polestar by Joe
 ## Author: Joe
 ## Version: 1.2.0
 ## Category: Quests
+## Group: Polestar
 ## Dependencies: Polestar
 ## X-Polestar-Pack: joe-routes
 ## X-Polestar-Format: 1
@@ -97,9 +98,11 @@ Guides.lua
 | Field | Value |
 |---|---|
 | `Interface` | copied from `addon/Polestar/Polestar.toc` at build time |
-| `Title`, `Author`, `Version` | from `pack.json` |
-| `Notes` | `pack.json` `notes`, else "Guide pack for Polestar" |
-| `Category` | `Quests` |
+| `Title` | "Polestar Pack: " and `pack.json` `title` (the title alone when it already starts so), so the AddOns list reads the addon as a pack. Polestar's own menus show the title without it |
+| `Author`, `Version` | from `pack.json` |
+| `Notes` | `pack.json` `notes`, else "Guide pack for Polestar by <author>" |
+| `Category` | `Quests`, Polestar's category in the AddOns list |
+| `Group` | `Polestar`: the AddOns list shows the pack under Polestar's own entry, beside Polestar's own addons |
 | `Dependencies` | `Polestar`: the client loads Polestar first |
 | `X-Polestar-Pack` | the pack id. Polestar lists every addon carrying it on the Guide packs page, loaded or not |
 | `X-Polestar-Format` | the pack format (below) |
