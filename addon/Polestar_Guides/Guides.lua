@@ -8295,6 +8295,7 @@ do
 					goals = {
 						{ t = "turnin", quest = 182, title = "The Troll Cave", npc = 786, npcName = "Grelin Whitebeard", map = 1426, x = 25.08, y = 75.71, f = "e" },
 						{ t = "accept", quest = 218, title = "The Stolen Journal", npc = 786, npcName = "Grelin Whitebeard", minLevel = 1, qlvl = 5, pre = { 182 }, preTitles = { [182] = "The Troll Cave" }, map = 1426, x = 25.08, y = 75.71, f = "e" },
+						{ t = "goto", text = "The troll cave", map = 1426, x = 26, y = 79, f = "e" },
 					},
 				},
 				{
@@ -9365,6 +9366,12 @@ do
 					},
 				},
 				{
+					title = "The Jasperlode Mine's entrance",
+					goals = {
+						{ t = "goto", text = "The Jasperlode Mine", map = 1429, x = 61.6, y = 54.1, f = "e" },
+					},
+				},
+				{
 					title = "The Jasperlode Mine",
 					note = "The mine is south-west of the gnoll camps. Mining Tools lie near the entrance; Kobold Geomancers hold the tunnels.",
 					goals = {
@@ -9726,8 +9733,14 @@ do
 					},
 				},
 				{
+					title = "Shadowthread Cave",
+					goals = {
+						{ t = "goto", text = "Shadowthread Cave", map = 1438, x = 57, y = 32, f = "e" },
+					},
+				},
+				{
 					title = "Webwood Egg and the antidote",
-					note = "The Webwood Eggs lie at the back of Shadowthread Cave. Hyacinth Mushrooms drop from Grells, Moonpetal Lilies grow by the ponds north of Aldrassil.",
+					note = "The Webwood Eggs lie at the back of Shadowthread Cave: take the central path, then left where it splits, up to the high ledge. Hyacinth Mushrooms drop from Grells, Moonpetal Lilies grow by the ponds north of Aldrassil.",
 					goals = {
 						{ t = "collect", quest = 917, title = "Webwood Egg", item = 5167, itemName = "Webwood Egg", count = 1, oi = 1, map = 1438, x = 57.01, y = 26.49, f = "e", spots = { { x = 56.8, y = 26.5, r = 15, n = 2 } } },
 						{ t = "collect", quest = 3521, title = "Iverron's Antidote", item = 10640, itemName = "Webwood Ichor", count = 1, oi = 3, map = 1438, x = 56.88, y = 26.28, f = "e", spots = { { x = 56.4, y = 25.4, r = 39, n = 7 }, { x = 56.2, y = 27.3, r = 48, n = 9 }, { x = 57.7, y = 27.1, r = 45, n = 9 }, { x = 56.7, y = 29.9, r = 51, n = 7 }, { x = 57.1, y = 33, r = 53, n = 10 }, { x = 58.8, y = 33.4, r = 15, n = 1, alt = true } }, note = "Webwood Spiders" },
@@ -9865,10 +9878,16 @@ do
 					},
 				},
 				{
-					title = "Fel Rock",
-					note = "The cave in the hill just west of Dolanaar. Lord Melenas waits at the back.",
+					title = "Fel Rock's mouth",
 					goals = {
-						{ t = "collect", quest = 932, title = "Twisted Hatred", item = 5221, itemName = "Melenas' Head", oi = 1, map = 1438, x = 51.23, y = 50.8, f = "e", spots = { { x = 51.3, y = 50.5, r = 15, n = 2 }, { x = 52.8, y = 50.2, r = 15, n = 1 } }, note = "Lord Melenas" },
+						{ t = "goto", text = "Fel Rock", map = 1438, x = 54, y = 52, f = "e" },
+					},
+				},
+				{
+					title = "Fel Rock",
+					note = "Lord Melenas waits inside the cave, at the bottom or up on the ledge; keep to the right.",
+					goals = {
+						{ t = "collect", quest = 932, title = "Twisted Hatred", item = 5221, itemName = "Melenas' Head", oi = 1, map = 1438, x = 52.82, y = 50.21, f = "e", spots = { { x = 52.8, y = 50.2, r = 15, n = 1 }, { x = 51.3, y = 50.5, r = 15, n = 2 } }, note = "Lord Melenas" },
 					},
 				},
 				{
@@ -29784,42 +29803,14 @@ do
 					goals = {
 						{ t = "collect", quest = 97279, title = "Wayward Weapons", item = 277653, itemName = "Abandoned Training Weapon", count = 6, oi = 1, map = 1411, x = 44, y = 67.2, f = "e", spots = { { x = 44.4, y = 66.6, r = 45, n = 4 }, { x = 45, y = 64.9, r = 38, n = 3 }, { x = 44.3, y = 70.8, r = 21, n = 2 }, { x = 42.3, y = 63.8, r = 26, n = 2 }, { x = 45.3, y = 63.1, r = 20, n = 2 }, { x = 43.8, y = 62.6, r = 43, n = 3 }, { x = 45.3, y = 71.2, r = 15, n = 1, alt = true }, { x = 43.6, y = 72.4, r = 54, n = 4, alt = true }, { x = 41.4, y = 71.6, r = 39, n = 3, alt = true }, { x = 40.9, y = 63.2, r = 33, n = 3, alt = true }, { x = 45.6, y = 60.6, r = 48, n = 3, alt = true }, { x = 47.1, y = 61.7, r = 15, n = 1, alt = true } } },
 						{ t = "kill", quest = 788, title = "Cutting Teeth", target = "Mottled Boar", npc = 3098, count = 10, oi = 1, map = 1411, x = 44.49, y = 65.1, f = "e", spots = { { x = 45, y = 65.7, r = 56, n = 8 }, { x = 44.2, y = 63.6, r = 50, n = 7 }, { x = 46.2, y = 66.6, r = 27, n = 3 }, { x = 45.7, y = 62.6, r = 55, n = 6 }, { x = 42.4, y = 64.3, r = 67, n = 8 }, { x = 46.8, y = 64.6, r = 25, n = 2 }, { x = 44.5, y = 60.7, r = 51, n = 7, alt = true }, { x = 46.1, y = 69, r = 53, n = 4, alt = true }, { x = 42.7, y = 61.2, r = 51, n = 7, alt = true }, { x = 44.3, y = 71.2, r = 54, n = 6, alt = true }, { x = 42.4, y = 72.1, r = 56, n = 6, alt = true } } },
-					},
-				},
-				{
-					title = "Kzan Thornslash",
-					note = "Kzan stands behind the Den, on its west side.",
-					goals = {
-						{ t = "turnin", quest = 97279, title = "Wayward Weapons", npc = 3159, npcName = "Kzan Thornslash", map = 1411, x = 40.47, y = 68, f = "e" },
-					},
-				},
-				{
-					title = "Hana'zua",
-					note = "Hana'zua lies wounded at the foot of the hills north-west of the Den.",
-					goals = {
-						{ t = "accept", quest = 790, title = "Sarkoth", npc = 3287, npcName = "Hana'zua", minLevel = 1, qlvl = 5, map = 1411, x = 40.6, y = 62.58, f = "e" },
-					},
-				},
-				{
-					title = "Sarkoth",
-					note = "Sarkoth, a large scorpid, prowls the slope south of Hana'zua.",
-					goals = {
-						{ t = "collect", quest = 790, title = "Sarkoth", item = 4905, itemName = "Sarkoth's Mangled Claw", oi = 1, map = 1411, x = 40.5, y = 66.83, f = "e" },
-						{ t = "kill", quest = 788, title = "Cutting Teeth", target = "Mottled Boar", npc = 3098, count = 10, oi = 1, map = 1411, x = 41.27, y = 65.1, f = "e", spots = { { x = 42.4, y = 64.3, r = 67, n = 8 }, { x = 42.7, y = 61.2, r = 51, n = 7 }, { x = 44.2, y = 63.6, r = 50, n = 7 }, { x = 45, y = 65.7, r = 56, n = 8 }, { x = 44.5, y = 60.7, r = 51, n = 7 }, { x = 45.7, y = 62.6, r = 55, n = 6 }, { x = 42.4, y = 72.1, r = 56, n = 6, alt = true }, { x = 46.2, y = 66.6, r = 27, n = 3, alt = true }, { x = 44.3, y = 71.2, r = 54, n = 6, alt = true }, { x = 46.1, y = 69, r = 53, n = 4, alt = true }, { x = 46.8, y = 64.6, r = 25, n = 2, alt = true } } },
-					},
-				},
-				{
-					title = "Hana'zua",
-					goals = {
-						{ t = "turnin", quest = 790, title = "Sarkoth", npc = 3287, npcName = "Hana'zua", map = 1411, x = 40.6, y = 62.58, f = "e" },
-						{ t = "accept", quest = 804, title = "Sarkoth", npc = 3287, npcName = "Hana'zua", minLevel = 1, qlvl = 5, pre = { 790 }, preTitles = { [790] = "Sarkoth" }, map = 1411, x = 40.6, y = 62.58, f = "e" },
+						{ t = "goto", text = "The Den's cave mouth", map = 1411, x = 42.4, y = 68.6, f = "e" },
 					},
 				},
 				{
 					title = "The Den",
+					note = "Gornek stands just inside the cave mouth; Kzan Thornslash at the back of the cave behind him.",
 					goals = {
-						{ t = "turnin", quest = 804, title = "Sarkoth", npc = 3143, npcName = "Gornek", map = 1411, x = 42.06, y = 68.33, f = "e", note = "Gornek" },
-						{ t = "turnin", quest = 788, title = "Cutting Teeth", npc = 3143, npcName = "Gornek", map = 1411, x = 42.06, y = 68.33, f = "e" },
+						{ t = "turnin", quest = 788, title = "Cutting Teeth", npc = 3143, npcName = "Gornek", map = 1411, x = 42.06, y = 68.33, f = "e", note = "Gornek" },
 						{ t = "accept", quest = 2383, title = "Simple Parchment", npc = 3143, npcName = "Gornek", minLevel = 1, qlvl = 1, pre = { 788 }, preTitles = { [788] = "Cutting Teeth" }, map = 1411, x = 42.06, y = 68.33, f = "e", only = { classes = { "WARRIOR" }, races = { "Orc" } }, note = "Gornek: Simple Parchment" },
 						{ t = "accept", quest = 3065, title = "Simple Tablet", npc = 3143, npcName = "Gornek", minLevel = 1, qlvl = 1, pre = { 788 }, preTitles = { [788] = "Cutting Teeth" }, map = 1411, x = 42.06, y = 68.33, f = "e", only = { classes = { "WARRIOR" }, races = { "Troll" } }, note = "Gornek: Simple Tablet" },
 						{ t = "accept", quest = 3087, title = "Etched Parchment", npc = 3143, npcName = "Gornek", minLevel = 1, qlvl = 1, pre = { 788 }, preTitles = { [788] = "Cutting Teeth" }, map = 1411, x = 42.06, y = 68.33, f = "e", only = { classes = { "HUNTER" }, races = { "Orc" } }, note = "Gornek: Etched Parchment" },
@@ -29833,24 +29824,57 @@ do
 						{ t = "accept", quest = 3086, title = "Glyphic Tablet", npc = 3143, npcName = "Gornek", minLevel = 1, qlvl = 1, pre = { 788 }, preTitles = { [788] = "Cutting Teeth" }, map = 1411, x = 42.06, y = 68.33, f = "e", only = { classes = { "MAGE" }, races = { "Troll" } }, note = "Gornek: Glyphic Tablet" },
 						{ t = "accept", quest = 3090, title = "Tainted Parchment", npc = 3143, npcName = "Gornek", minLevel = 1, qlvl = 1, pre = { 788 }, preTitles = { [788] = "Cutting Teeth" }, map = 1411, x = 42.06, y = 68.33, f = "e", only = { classes = { "WARLOCK" }, races = { "Orc" } }, note = "Gornek: Tainted Parchment" },
 						{ t = "accept", quest = 98575, title = "Tainted Tablet", npc = 3143, npcName = "Gornek", minLevel = 1, qlvl = 1, pre = { 788 }, preTitles = { [788] = "Cutting Teeth" }, map = 1411, x = 42.06, y = 68.33, f = "e", only = { classes = { "WARLOCK" }, races = { "Troll" } }, note = "Gornek: Tainted Tablet" },
+						{ t = "accept", quest = 789, title = "Sting of the Scorpid", npc = 3143, npcName = "Gornek", minLevel = 1, qlvl = 3, pre = { 788 }, preTitles = { [788] = "Cutting Teeth" }, map = 1411, x = 42.06, y = 68.33, f = "e", note = "Gornek" },
+						{ t = "turnin", quest = 97279, title = "Wayward Weapons", npc = 3159, npcName = "Kzan Thornslash", map = 1411, x = 40.47, y = 68, f = "e", note = "Kzan Thornslash, at the back of the cave" },
+						{ t = "turnin", quest = 3090, title = "Tainted Parchment", npc = 3156, npcName = "Nartok", map = 1411, x = 40.65, y = 68.52, f = "e", only = { classes = { "WARLOCK" }, races = { "Orc" } }, note = "Nartok, the warlock trainer at the back of the cave" },
+						{ t = "turnin", quest = 98575, title = "Tainted Tablet", npc = 3156, npcName = "Nartok", map = 1411, x = 40.65, y = 68.52, f = "e", only = { classes = { "WARLOCK" }, races = { "Troll" } }, note = "Nartok" },
+						{ t = "turnin", quest = 3088, title = "Encrypted Parchment", npc = 3155, npcName = "Rwag", map = 1411, x = 41.28, y = 68, f = "e", only = { classes = { "ROGUE" }, races = { "Orc" } }, note = "Rwag, the rogue trainer in the Den" },
+						{ t = "turnin", quest = 3083, title = "Encrypted Tablet", npc = 3155, npcName = "Rwag", map = 1411, x = 41.28, y = 68, f = "e", only = { classes = { "ROGUE" }, races = { "Troll" } }, note = "Rwag" },
 						{ t = "turnin", quest = 2383, title = "Simple Parchment", npc = 3153, npcName = "Frang", map = 1411, x = 42.89, y = 69.44, f = "e", only = { classes = { "WARRIOR" }, races = { "Orc" } }, note = "Frang, the warrior trainer beside the Den" },
 						{ t = "turnin", quest = 3065, title = "Simple Tablet", npc = 3153, npcName = "Frang", map = 1411, x = 42.89, y = 69.44, f = "e", only = { classes = { "WARRIOR" }, races = { "Troll" } }, note = "Frang" },
 						{ t = "turnin", quest = 3087, title = "Etched Parchment", npc = 3154, npcName = "Jen'shan", map = 1411, x = 42.84, y = 69.33, f = "e", only = { classes = { "HUNTER" }, races = { "Orc" } }, note = "Jen'shan, the hunter trainer beside the Den" },
 						{ t = "turnin", quest = 3082, title = "Etched Tablet", npc = 3154, npcName = "Jen'shan", map = 1411, x = 42.84, y = 69.33, f = "e", only = { classes = { "HUNTER" }, races = { "Troll" } }, note = "Jen'shan" },
-						{ t = "turnin", quest = 3088, title = "Encrypted Parchment", npc = 3155, npcName = "Rwag", map = 1411, x = 41.28, y = 68, f = "e", only = { classes = { "ROGUE" }, races = { "Orc" } }, note = "Rwag, the rogue trainer beside the Den" },
-						{ t = "turnin", quest = 3083, title = "Encrypted Tablet", npc = 3155, npcName = "Rwag", map = 1411, x = 41.28, y = 68, f = "e", only = { classes = { "ROGUE" }, races = { "Troll" } }, note = "Rwag" },
 						{ t = "turnin", quest = 3085, title = "Hallowed Tablet", npc = 3707, npcName = "Ken'jai", map = 1411, x = 42.36, y = 68.81, f = "e", only = { classes = { "PRIEST" }, races = { "Troll" } }, note = "Ken'jai, the priest trainer at the Den" },
 						{ t = "turnin", quest = 3089, title = "Rune-Inscribed Parchment", npc = 3157, npcName = "Shikrik", map = 1411, x = 42.39, y = 69, f = "e", only = { classes = { "SHAMAN" }, races = { "Orc" } }, note = "Shikrik, the shaman trainer beside the Den" },
 						{ t = "turnin", quest = 3084, title = "Rune-Inscribed Tablet", npc = 3157, npcName = "Shikrik", map = 1411, x = 42.39, y = 69, f = "e", only = { classes = { "SHAMAN" }, races = { "Troll" } }, note = "Shikrik" },
 						{ t = "turnin", quest = 98576, title = "Glyphic Parchment", npc = 5884, npcName = "Mai'ah", map = 1411, x = 42.51, y = 69.04, f = "e", only = { classes = { "MAGE" }, races = { "Orc" } }, note = "Mai'ah, the mage trainer, at the entrance to the Den" },
 						{ t = "turnin", quest = 3086, title = "Glyphic Tablet", npc = 5884, npcName = "Mai'ah", map = 1411, x = 42.51, y = 69.04, f = "e", only = { classes = { "MAGE" }, races = { "Troll" } }, note = "Mai'ah" },
-						{ t = "turnin", quest = 3090, title = "Tainted Parchment", npc = 3156, npcName = "Nartok", map = 1411, x = 40.65, y = 68.52, f = "e", only = { classes = { "WARLOCK" }, races = { "Orc" } }, note = "Nartok, the warlock trainer in the Den" },
-						{ t = "turnin", quest = 98575, title = "Tainted Tablet", npc = 3156, npcName = "Nartok", map = 1411, x = 40.65, y = 68.52, f = "e", only = { classes = { "WARLOCK" }, races = { "Troll" } }, note = "Nartok" },
-						{ t = "accept", quest = 789, title = "Sting of the Scorpid", npc = 3143, npcName = "Gornek", minLevel = 1, qlvl = 3, pre = { 788 }, preTitles = { [788] = "Cutting Teeth" }, map = 1411, x = 42.06, y = 68.33, f = "e" },
 						{ t = "accept", quest = 4402, title = "Galgar's Cactus Apple Surprise", npc = 9796, npcName = "Galgar", minLevel = 1, qlvl = 3, pre = { 788 }, preTitles = { [788] = "Cutting Teeth" }, map = 1411, x = 42.73, y = 67.23, f = "e", note = "Galgar, by the cooking fire" },
 						{ t = "accept", quest = 792, title = "Vile Familiars", npc = 3145, npcName = "Zureetha Fargaze", minLevel = 2, qlvl = 4, map = 1411, x = 42.85, y = 69.15, f = "e", only = { classes = { "WARRIOR", "PALADIN", "HUNTER", "ROGUE", "PRIEST", "SHAMAN", "MAGE", "DRUID" } }, note = "Zureetha Fargaze" },
 						{ t = "accept", quest = 1485, title = "Vile Familiars", npc = 5765, npcName = "Ruzan", minLevel = 1, qlvl = 4, closedBy = { 1470 }, preTitles = { [1470] = "Piercing the Veil" }, map = 1411, x = 42.59, y = 69, f = "e", only = { classes = { "WARLOCK" } }, note = "Ruzan" },
 						{ t = "train", class = true, candidates = { { npc = 5884, npcName = "Mai'ah", map = 1411, x = 42.51, y = 69.04, f = "e", faction = "H", classes = { "MAGE" } }, { npc = 3157, npcName = "Shikrik", map = 1411, x = 42.39, y = 69, f = "e", faction = "H", classes = { "SHAMAN" } }, { npc = 3707, npcName = "Ken'jai", map = 1411, x = 42.36, y = 68.81, f = "e", faction = "H", classes = { "PRIEST" } }, { npc = 3154, npcName = "Jen'shan", map = 1411, x = 42.84, y = 69.33, f = "e", faction = "H", classes = { "HUNTER" } }, { npc = 3153, npcName = "Frang", map = 1411, x = 42.89, y = 69.44, f = "e", faction = "H", classes = { "WARRIOR" } }, { npc = 3155, npcName = "Rwag", map = 1411, x = 41.28, y = 68, f = "e", faction = "H", classes = { "ROGUE" } }, { npc = 3156, npcName = "Nartok", map = 1411, x = 40.65, y = 68.52, f = "e", faction = "H", classes = { "WARLOCK" } }, { npc = 5880, npcName = "Un'Thuwa", map = 1411, x = 56.31, y = 75.11, f = "e", faction = "H", classes = { "MAGE" } }, { npc = 3170, npcName = "Kaplak", map = 1411, x = 51.98, y = 43.69, f = "e", faction = "H", classes = { "ROGUE" } }, { npc = 3171, npcName = "Thotar", map = 1411, x = 51.85, y = 43.49, f = "e", faction = "H", classes = { "HUNTER" } }, { npc = 3706, npcName = "Tai'jin", map = 1411, x = 54.26, y = 42.93, f = "e", faction = "H", classes = { "PRIEST" } }, { npc = 3169, npcName = "Tarshaw Jaggedscar", map = 1411, x = 54.19, y = 42.47, f = "e", faction = "H", classes = { "WARRIOR" } }, { npc = 3173, npcName = "Swart", map = 1411, x = 54.42, y = 42.59, f = "e", faction = "H", classes = { "SHAMAN" } }, { npc = 3172, npcName = "Dhugru Gorelust", map = 1411, x = 54.38, y = 41.2, f = "e", faction = "H", classes = { "WARLOCK" } }, { npc = 6018, npcName = "Ur'kyo", map = 1454, x = 35.59, y = 87.82, f = "e", faction = "H", classes = { "PRIEST" } }, { npc = 7311, npcName = "Uthel'nay", map = 1454, x = 39.16, y = 86.27, f = "e", faction = "H", classes = { "MAGE" } }, { npc = 3328, npcName = "Ormok", map = 1454, x = 43.9, y = 54.63, f = "e", faction = "H", classes = { "ROGUE" } }, { npc = 3325, npcName = "Mirket", map = 1454, x = 48.62, y = 46.95, f = "e", faction = "H", classes = { "WARLOCK" } }, { npc = 3344, npcName = "Kardris Dreamseeker", map = 1454, x = 38.8, y = 36.37, f = "e", faction = "H", classes = { "SHAMAN" } }, { npc = 3354, npcName = "Sorek", map = 1454, x = 80.39, y = 32.38, f = "e", faction = "H", classes = { "WARRIOR" } }, { npc = 3406, npcName = "Xor'juul", map = 1454, x = 67.24, y = 20.2, f = "e", faction = "H", classes = { "HUNTER" } }, { npc = 3034, npcName = "Sheal Runetotem", map = 1456, x = 77.14, y = 27.02, f = "e", faction = "H", classes = { "DRUID" } }, { npc = 3040, npcName = "Urek Thunderhorn", map = 1456, x = 59.13, y = 86.87, f = "e", faction = "H", classes = { "HUNTER" } }, { npc = 3063, npcName = "Krang Stonehoof", map = 1412, x = 48.35, y = 63.74, faction = "H", classes = { "WARRIOR" } }, { npc = 3065, npcName = "Yaw Sharpmane", map = 1412, x = 46.93, y = 59.65, faction = "H", classes = { "HUNTER" } }, { npc = 3043, npcName = "Ker Ragetotem", map = 1456, x = 57.58, y = 85.5, f = "e", faction = "H", classes = { "WARRIOR" } }, { npc = 3066, npcName = "Narm Skychaser", map = 1412, x = 47.4, y = 62.54, faction = "H", classes = { "SHAMAN" } }, { npc = 3064, npcName = "Gennia Runetotem", map = 1412, x = 47.48, y = 62.95, faction = "H", classes = { "DRUID" } }, { npc = 3048, npcName = "Ursyn Ghull", map = 1456, x = 25.7, y = 14.19, f = "e", faction = "H", classes = { "MAGE" } }, { npc = 3046, npcName = "Father Cobb", map = 1456, x = 25.64, y = 20.7, f = "e", faction = "H", classes = { "PRIEST" } }, { npc = 246344, npcName = "Alodan the Hopeful", map = 1456, x = 25.29, y = 15.11, f = "e", faction = "H", classes = { "PALADIN" } }, { npc = 3031, npcName = "Tigor Skychaser", map = 1456, x = 23.64, y = 18.79, f = "e", faction = "H", classes = { "SHAMAN" } }, { npc = 3060, npcName = "Gart Mistrunner", map = 1412, x = 44.65, y = 76.55, faction = "H", classes = { "DRUID" } }, { npc = 3062, npcName = "Meela Dawnstrider", map = 1412, x = 44.58, y = 76.56, faction = "H", classes = { "SHAMAN" } }, { npc = 3061, npcName = "Lanka Farshot", map = 1412, x = 43.96, y = 76.35, faction = "H", classes = { "HUNTER" } }, { npc = 3059, npcName = "Harutt Thunderhorn", map = 1412, x = 43.75, y = 76.72, faction = "H", classes = { "WARRIOR" } }, { npc = 2119, npcName = "Dannal Stern", map = 1420, x = 32.69, y = 65.56, f = "e", faction = "H", classes = { "WARRIOR" } }, { npc = 2122, npcName = "David Trias", map = 1420, x = 32.53, y = 65.65, f = "e", faction = "H", classes = { "ROGUE" } }, { npc = 2123, npcName = "Dark Cleric Duesten", map = 1420, x = 31.11, y = 66.03, f = "e", faction = "H", classes = { "PRIEST" } }, { npc = 2124, npcName = "Isabella", map = 1420, x = 30.93, y = 66.06, f = "e", faction = "H", classes = { "MAGE" } }, { npc = 2126, npcName = "Maximillion", map = 1420, x = 30.91, y = 66.34, f = "e", faction = "H", classes = { "WARLOCK" } }, { npc = 2127, npcName = "Rupert Boch", map = 1420, x = 61.59, y = 52.4, f = "e", faction = "H", classes = { "WARLOCK" } }, { npc = 2128, npcName = "Cain Firesong", map = 1420, x = 61.97, y = 52.47, f = "e", faction = "H", classes = { "MAGE" } }, { npc = 2129, npcName = "Dark Cleric Beryl", map = 1420, x = 61.57, y = 52.19, f = "e", faction = "H", classes = { "PRIEST" } }, { npc = 2130, npcName = "Marion Call", map = 1420, x = 61.75, y = 52, f = "e", faction = "H", classes = { "ROGUE" } }, { npc = 2131, npcName = "Austil de Mon", map = 1420, x = 61.85, y = 52.54, f = "e", faction = "H", classes = { "WARRIOR" } }, { npc = 244808, npcName = "Aramis Hammerhand", map = 1420, x = 31.04, y = 66.45, f = "e", faction = "H", classes = { "PALADIN" } }, { npc = 246152, npcName = "Shari Stilwell", map = 1420, x = 60.25, y = 52.62, f = "e", faction = "H", classes = { "PALADIN" } }, { npc = 246389, npcName = "Hilda the Breaker", map = 1420, x = 21.95, y = 46.94, f = "e", faction = "H", classes = { "PALADIN" } }, { npc = 4563, npcName = "Kaal Soulreaper", map = 1458, x = 86.21, y = 15.93, f = "e", faction = "H", classes = { "WARLOCK" } }, { npc = 4566, npcName = "Kaelystia Hatebringer", map = 1458, x = 85.02, y = 14.02, f = "e", faction = "H", classes = { "MAGE" } }, { npc = 4582, npcName = "Carolyn Ward", map = 1458, x = 83.86, y = 72.07, f = "e", faction = "H", classes = { "ROGUE" } }, { npc = 4593, npcName = "Christoph Walker", map = 1458, x = 46.93, y = 15.23, f = "e", faction = "H", classes = { "WARRIOR" } }, { npc = 4606, npcName = "Aelthalyste", map = 1458, x = 49.26, y = 17.12, f = "e", faction = "H", classes = { "PRIEST" } }, { npc = 260093, npcName = "Garen Largo", map = 1458, x = 47.7, y = 15.13, f = "e", faction = "H", classes = { "PALADIN" } }, { npc = 251373, npcName = "Xyton Silverwind", map = 2521, x = 41.71, y = 23.36, faction = "AH", classes = { "DRUID" } }, { npc = 251374, npcName = "Windshaper Boro", map = 2521, x = 42.77, y = 23.58, faction = "H", classes = { "SHAMAN" } }, { npc = 251376, npcName = "Tai'ree Farsight", map = 2521, x = 42.46, y = 23.67, faction = "AH", classes = { "HUNTER" } }, { npc = 251389, npcName = "Akeri Duskblade", map = 2521, x = 43.73, y = 24.3, faction = "AH", classes = { "ROGUE" } }, { npc = 251964, npcName = "Blademaster Ren", map = 2521, x = 43.65, y = 24.17, faction = "AH", classes = { "WARRIOR" } }, { npc = 254086, npcName = "Shenaan Spellwind", map = 2521, x = 44.89, y = 45.26, faction = "AH", classes = { "MAGE" } } } },
+					},
+				},
+				{
+					title = "Hana'zua",
+					note = "Hana'zua lies wounded at the foot of the hills north-west of the Den.",
+					goals = {
+						{ t = "accept", quest = 790, title = "Sarkoth", npc = 3287, npcName = "Hana'zua", minLevel = 1, qlvl = 5, map = 1411, x = 40.6, y = 62.58, f = "e" },
+					},
+				},
+				{
+					title = "Sarkoth",
+					note = "Sarkoth, a large scorpid, prowls the slope south of Hana'zua among the Scorpid Workers; pick the Cactus Apples by the cactuses on the way.",
+					goals = {
+						{ t = "collect", quest = 790, title = "Sarkoth", item = 4905, itemName = "Sarkoth's Mangled Claw", oi = 1, map = 1411, x = 40.5, y = 66.83, f = "e" },
+						{ t = "collect", quest = 789, title = "Sting of the Scorpid", item = 4862, itemName = "Scorpid Worker Tail", count = 10, oi = 1, map = 1411, x = 40.5, y = 66.83, f = "e", spots = { { x = 40.5, y = 67.5, r = 59, n = 9 }, { x = 41, y = 70.6, r = 40, n = 2 }, { x = 43.6, y = 73.7, r = 40, n = 2 }, { x = 45.2, y = 72.1, r = 40, n = 2 }, { x = 47.4, y = 63.7, r = 40, n = 3 }, { x = 46.9, y = 61.6, r = 40, n = 3 }, { x = 46, y = 59.6, r = 45, n = 7 }, { x = 42.8, y = 58.7, r = 73, n = 7 }, { x = 43.1, y = 56.4, r = 40, n = 1 }, { x = 41.2, y = 61.4, r = 40, n = 5 }, { x = 39.8, y = 62.2, r = 45, n = 6 }, { x = 40.9, y = 63.7, r = 44, n = 5 }, { x = 41.4, y = 66.1, r = 40, n = 4, alt = true } }, spread = true },
+						{ t = "collect", quest = 4402, title = "Galgar's Cactus Apple Surprise", item = 11583, itemName = "Cactus Apple", count = 10, oi = 1, map = 1411, x = 39.94, y = 68.1, f = "e", spots = { { x = 39.9, y = 68.1, r = 55, n = 1 }, { x = 40.9, y = 64.3, r = 87, n = 5 }, { x = 44, y = 65.8, r = 55, n = 3 }, { x = 45.1, y = 63.3, r = 86, n = 6 }, { x = 47.3, y = 64, r = 55, n = 2 }, { x = 45.5, y = 59.5, r = 76, n = 5 }, { x = 41.5, y = 59.2, r = 65, n = 3 }, { x = 42, y = 56.5, r = 55, n = 1 }, { x = 44.4, y = 71.3, r = 55, n = 3 } }, spread = true },
+					},
+				},
+				{
+					title = "Hana'zua",
+					goals = {
+						{ t = "turnin", quest = 790, title = "Sarkoth", npc = 3287, npcName = "Hana'zua", map = 1411, x = 40.6, y = 62.58, f = "e" },
+						{ t = "accept", quest = 804, title = "Sarkoth", npc = 3287, npcName = "Hana'zua", minLevel = 1, qlvl = 5, pre = { 790 }, preTitles = { [790] = "Sarkoth" }, map = 1411, x = 40.6, y = 62.58, f = "e" },
+						{ t = "goto", text = "The Den's cave mouth", map = 1411, x = 42.4, y = 68.6, f = "e" },
+					},
+				},
+				{
+					title = "Back to the Den",
+					goals = {
+						{ t = "turnin", quest = 804, title = "Sarkoth", npc = 3143, npcName = "Gornek", map = 1411, x = 42.06, y = 68.33, f = "e", note = "Gornek" },
+						{ t = "turnin", quest = 789, title = "Sting of the Scorpid", npc = 3143, npcName = "Gornek", map = 1411, x = 42.06, y = 68.33, f = "e", note = "Gornek" },
+						{ t = "turnin", quest = 4402, title = "Galgar's Cactus Apple Surprise", npc = 9796, npcName = "Galgar", map = 1411, x = 42.73, y = 67.23, f = "e", note = "Galgar" },
 					},
 				},
 				{
@@ -29876,12 +29900,17 @@ do
 				},
 				{
 					title = "North end of the valley",
-					note = "Collect Cactus Apples and kill Scorpid Workers on the way north. The Vile Familiars swarm the slope by the cave on the valley's north side; Thazz'ril's Pick lies just inside the cave mouth.",
+					note = "The Vile Familiars swarm the slope below the Burning Blade Coven, the cave on the valley's north side.",
 					goals = {
-						{ t = "collect", quest = 4402, title = "Galgar's Cactus Apple Surprise", item = 11583, itemName = "Cactus Apple", count = 10, oi = 1, map = 1411, x = 43.99, y = 67.09, f = "e", spots = { { x = 44, y = 65.8, r = 55, n = 3 }, { x = 45.1, y = 63.3, r = 86, n = 6 }, { x = 47.3, y = 64, r = 55, n = 2 }, { x = 45.5, y = 59.5, r = 76, n = 5 }, { x = 41.5, y = 59.2, r = 65, n = 3 }, { x = 42, y = 56.5, r = 55, n = 1 }, { x = 40.9, y = 64.3, r = 87, n = 5 }, { x = 39.9, y = 68.1, r = 55, n = 1 }, { x = 44.4, y = 71.3, r = 55, n = 3 } }, spread = true },
-						{ t = "collect", quest = 789, title = "Sting of the Scorpid", item = 4862, itemName = "Scorpid Worker Tail", count = 10, oi = 1, map = 1411, x = 41.83, y = 65.81, f = "e", spots = { { x = 41.4, y = 66.1, r = 40, n = 4 }, { x = 40.9, y = 63.7, r = 44, n = 5 }, { x = 39.8, y = 62.2, r = 45, n = 6 }, { x = 41.2, y = 61.4, r = 40, n = 5 }, { x = 42.8, y = 58.7, r = 73, n = 7 }, { x = 43.1, y = 56.4, r = 40, n = 1 }, { x = 46, y = 59.6, r = 45, n = 7 }, { x = 46.9, y = 61.6, r = 40, n = 3 }, { x = 47.4, y = 63.7, r = 40, n = 3 }, { x = 45.2, y = 72.1, r = 40, n = 2 }, { x = 43.6, y = 73.7, r = 40, n = 2 }, { x = 41, y = 70.6, r = 40, n = 2 }, { x = 40.5, y = 67.5, r = 59, n = 9, alt = true } }, spread = true },
-						{ t = "kill", quest = 792, title = "Vile Familiars", target = "Vile Familiar", npc = 3101, count = 12, oi = 1, map = 1411, x = 43.82, y = 58.29, f = "e", spots = { { x = 44.2, y = 58.4, r = 21, n = 2 }, { x = 44.7, y = 57.1, r = 44, n = 6 }, { x = 45.5, y = 55.8, r = 37, n = 4 }, { x = 46.1, y = 57.3, r = 49, n = 6 }, { x = 43.7, y = 54.1, r = 71, n = 15 } }, only = { classes = { "WARRIOR", "PALADIN", "HUNTER", "ROGUE", "PRIEST", "SHAMAN", "MAGE", "DRUID" } } },
-						{ t = "collect", quest = 1485, title = "Vile Familiars", item = 6487, itemName = "Vile Familiar Head", count = 6, oi = 1, map = 1411, x = 43.82, y = 58.29, f = "e", spots = { { x = 44.2, y = 58.4, r = 21, n = 2 }, { x = 44.7, y = 57.1, r = 44, n = 6 }, { x = 45.5, y = 55.8, r = 37, n = 4 }, { x = 46.1, y = 57.3, r = 49, n = 6 }, { x = 43.7, y = 54.1, r = 71, n = 15 } }, only = { classes = { "WARLOCK" } } },
+						{ t = "kill", quest = 792, title = "Vile Familiars", target = "Vile Familiar", npc = 3101, count = 12, oi = 1, map = 1411, x = 44.51, y = 58.49, f = "e", spots = { { x = 44.2, y = 58.4, r = 21, n = 2 }, { x = 44.7, y = 57.1, r = 44, n = 6 }, { x = 46.1, y = 57.3, r = 49, n = 6 }, { x = 45.5, y = 55.8, r = 37, n = 4 }, { x = 43.7, y = 54.1, r = 71, n = 15 } }, only = { classes = { "WARRIOR", "PALADIN", "HUNTER", "ROGUE", "PRIEST", "SHAMAN", "MAGE", "DRUID" } } },
+						{ t = "collect", quest = 1485, title = "Vile Familiars", item = 6487, itemName = "Vile Familiar Head", count = 6, oi = 1, map = 1411, x = 44.51, y = 58.49, f = "e", spots = { { x = 44.2, y = 58.4, r = 21, n = 2 }, { x = 44.7, y = 57.1, r = 44, n = 6 }, { x = 46.1, y = 57.3, r = 49, n = 6 }, { x = 45.5, y = 55.8, r = 37, n = 4 }, { x = 43.7, y = 54.1, r = 71, n = 15 } }, only = { classes = { "WARLOCK" } } },
+						{ t = "goto", text = "Burning Blade Coven", map = 1411, x = 45, y = 56, f = "e" },
+					},
+				},
+				{
+					title = "Thazz'ril's Pick",
+					note = "Inside the cave, go straight on at the first split, then right and follow the stream on your left to the waterfall: the pick glows by the water, behind a column of rock.",
+					goals = {
 						{ t = "collect", quest = 6394, title = "Thazz'ril's Pick", item = 16332, itemName = "Thazz'ril's Pick", oi = 1, map = 1411, x = 43.7, y = 53.8, f = "e" },
 					},
 				},
@@ -29889,8 +29918,6 @@ do
 					title = "Back at the Den",
 					goals = {
 						{ t = "turnin", quest = 6394, title = "Thazz'ril's Pick", npc = 11378, npcName = "Foreman Thazz'ril", map = 1411, x = 44.63, y = 68.65, f = "e", note = "Foreman Thazz'ril" },
-						{ t = "turnin", quest = 4402, title = "Galgar's Cactus Apple Surprise", npc = 9796, npcName = "Galgar", map = 1411, x = 42.73, y = 67.23, f = "e", note = "Galgar" },
-						{ t = "turnin", quest = 789, title = "Sting of the Scorpid", npc = 3143, npcName = "Gornek", map = 1411, x = 42.06, y = 68.33, f = "e", note = "Gornek" },
 						{ t = "turnin", quest = 792, title = "Vile Familiars", npc = 3145, npcName = "Zureetha Fargaze", map = 1411, x = 42.85, y = 69.15, f = "e", only = { classes = { "WARRIOR", "PALADIN", "HUNTER", "ROGUE", "PRIEST", "SHAMAN", "MAGE", "DRUID" } }, note = "Zureetha Fargaze" },
 						{ t = "turnin", quest = 1485, title = "Vile Familiars", npc = 5765, npcName = "Ruzan", map = 1411, x = 42.59, y = 69, f = "e", only = { classes = { "WARLOCK" } }, note = "Ruzan" },
 						{ t = "accept", quest = 1499, title = "Vile Familiars", npc = 5765, npcName = "Ruzan", minLevel = 1, qlvl = 4, pre = { 1470, 1485 }, preTitles = { [1470] = "Piercing the Veil", [1485] = "Vile Familiars" }, map = 1411, x = 42.59, y = 69, f = "e", only = { classes = { "WARLOCK" } } },
@@ -29908,7 +29935,13 @@ do
 				},
 				{
 					title = "Burning Blade Coven",
-					note = "Yarrog Baneshadow waits at the back of the cave on the valley's north side.",
+					goals = {
+						{ t = "goto", text = "Burning Blade Coven", map = 1411, x = 45, y = 56, f = "e" },
+					},
+				},
+				{
+					title = "Yarrog Baneshadow",
+					note = "Inside the cave, keep to the right wall all the way round, over the stream: Yarrog waits at the end.",
 					goals = {
 						{ t = "collect", quest = 794, title = "Burning Blade Medallion", item = 4859, itemName = "Burning Blade Medallion", count = 1, oi = 1, map = 1411, x = 42.71, y = 52.95, f = "e" },
 					},
@@ -30249,10 +30282,16 @@ do
 					},
 				},
 				{
-					title = "Skull Rock",
-					note = "Burning Blade cultists hold the caves of Skull Rock to the north; any of them drops a Searing Collar. Gazz'uz, a level 14 warlock, stands deep inside and drops the Eye of Burning Shadow.",
+					title = "Skull Rock's mouth",
 					goals = {
-						{ t = "collect", quest = 827, title = "Skull Rock", item = 4871, itemName = "Searing Collar", oi = 1, map = 1411, x = 52.93, y = 28.38, f = "e", spots = { { x = 52.9, y = 28.3, r = 56, n = 8 }, { x = 52.3, y = 25.8, r = 46, n = 11 }, { x = 42.3, y = 26.7, r = 40, n = 6 }, { x = 52, y = 9.3, r = 56, n = 12 }, { x = 53.3, y = 8.6, r = 42, n = 10 }, { x = 53.1, y = 10.6, r = 45, n = 6 }, { x = 54.7, y = 9.2, r = 40, n = 4 } }, spread = true },
+						{ t = "goto", text = "Skull Rock", map = 1411, x = 55, y = 10, f = "e" },
+					},
+				},
+				{
+					title = "Skull Rock",
+					note = "Burning Blade cultists hold the caves of Skull Rock; any of them drops a Searing Collar. Gazz'uz, a level 14 warlock, stands deep inside and drops the Eye of Burning Shadow.",
+					goals = {
+						{ t = "collect", quest = 827, title = "Skull Rock", item = 4871, itemName = "Searing Collar", oi = 1, map = 1411, x = 55.01, y = 9.79, f = "e", spots = { { x = 54.7, y = 9.2, r = 40, n = 4 }, { x = 53.3, y = 8.6, r = 42, n = 10 }, { x = 53.1, y = 10.6, r = 45, n = 6 }, { x = 52, y = 9.3, r = 56, n = 12 }, { x = 52.3, y = 25.8, r = 46, n = 11 }, { x = 52.9, y = 28.3, r = 56, n = 8 }, { x = 42.3, y = 26.7, r = 40, n = 6 } }, spread = true },
 						{ t = "collect", item = 4903, itemName = "Eye of Burning Shadow", map = 1411, x = 52.61, y = 8.82, f = "e", from = "Gazz'uz", fromKind = "npc" },
 						{ t = "accept", quest = 832, title = "Burning Shadows", item = 4903, itemName = "Eye of Burning Shadow", minLevel = 4, qlvl = 12 },
 					},
@@ -32287,6 +32326,7 @@ do
 					goals = {
 						{ t = "kill", quest = 380, title = "Night Web's Hollow", target = "Young Night Web Spider", npc = 1504, count = 10, oi = 1, map = 1420, x = 29.4, y = 59.42, f = "e", spots = { { x = 28.2, y = 59.3, r = 55, n = 10 }, { x = 29.6, y = 57.5, r = 54, n = 7 }, { x = 29.4, y = 55.9, r = 18, n = 3 }, { x = 27.8, y = 56.5, r = 48, n = 10 } } },
 						{ t = "kill", quest = 380, title = "Night Web's Hollow", target = "Night Web Spider", npc = 1505, count = 8, oi = 2, map = 1420, x = 26.6, y = 59.5, f = "e", spots = { { x = 25.8, y = 59.8, r = 38, n = 8 }, { x = 24, y = 59.7, r = 47, n = 12 } } },
+						{ t = "goto", text = "Night Web's Hollow", map = 1420, x = 26, y = 60, f = "e" },
 						{ t = "goto", text = "Webbed Victims", map = 1420, x = 24.8, y = 59.6, f = "e", note = "Free six Webbed Victims inside the cave for Aramis" },
 					},
 				},

@@ -170,10 +170,13 @@ step Scavenging Deathknell
   tip The Equipment Boxes lie beside the ruined houses in the north of Deathknell.
   collect 11127 quest 3902.1
 
+# Night Web's Hollow: "26,60 nightwebs and entrace to cave"
+# (https://www.wowhead.com/classic/quest=380, comments).
 step Night Web's Hollow
   tip Head west to the cave. The Young Night Web Spiders sit outside; the Night Web Spiders and the Webbed Victims are inside.
   kill 1504 quest 380.1
   kill 1505 quest 380.2
+  goto 26.0,60.0 "Night Web's Hollow"
   goto 24.8,59.6 "Webbed Victims"    -- Free six Webbed Victims inside the cave for Aramis
 
 step Back to Deathknell

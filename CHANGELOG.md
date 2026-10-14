@@ -57,6 +57,23 @@
   or the guides missing, or a Polestar folder left from another version
   (copied over an old install, or unzipped one folder too deep), with how to
   reinstall cleanly.
+- Durotar: Cutting Teeth goes back to Gornek as soon as the boars are
+  done, with the class letter, so Sting of the Scorpid and Galgar's Cactus
+  Apple Surprise come along to Sarkoth, whose slope is full of the Scorpid
+  Workers and cactuses they need (thanks Tom).
+- The arrow leads to a cave's mouth before anyone inside it: the Den (Kzan
+  Thornslash, at the back of the cave behind Gornek), the Burning Blade
+  Coven and Skull Rock in Durotar, the Coldridge troll cave in Dun Morogh,
+  the Jasperlode Mine in Elwynn Forest, Shadowthread Cave and Fel Rock in
+  Teldrassil and Night Web's Hollow in Tirisfal Glades, instead of straight
+  through the mountain (thanks Tom).
+- Dungeons: after the run, "Hand in the quests" on a dungeon's page builds a
+  guide to where its quests in your log are turned in, on the shortest path
+  from where you stand, and takes the follow-ups those turn-ins open from the
+  same NPC or one close by; quests not finished yet are listed instead of
+  routed. The button leads once a quest is finished, the pick-up guide's
+  last step points to it and its end offers it, and the hand-in guide takes
+  the finished pick-up guide's tab (thanks Feverish).
 
 ### For guide authors
 

@@ -155,8 +155,13 @@ step Aldrassil
   accept 3521
   train class
 
+# Shadowthread Cave: "The eggs are at 57,26 / The cave is at 57,32"
+# (https://www.wowhead.com/classic/quest=917, comments).
+step Shadowthread Cave
+  goto 57.0,32.0 "Shadowthread Cave"
+
 step Webwood Egg and the antidote
-  tip The Webwood Eggs lie at the back of Shadowthread Cave. Hyacinth Mushrooms drop from Grells, Moonpetal Lilies grow by the ponds north of Aldrassil.
+  tip The Webwood Eggs lie at the back of Shadowthread Cave: take the central path, then left where it splits, up to the high ledge. Hyacinth Mushrooms drop from Grells, Moonpetal Lilies grow by the ponds north of Aldrassil.
   collect 5167 quest 917.1
   collect 10640 quest 3521.3                  -- Webwood Spiders
   collect 10639 quest 3521.1
@@ -261,8 +266,14 @@ step Dolanaar
 
 # ---------------------------------------------------------------- West: Fel Rock to Gnarlpine Hold
 
+# Fel Rock's mouth: "Cave entrance at 54,52", "The cave entrance is at:
+# 54,52; and he is inside the cave at: 51,50"
+# (https://www.wowhead.com/classic/quest=932, comments).
+step Fel Rock's mouth
+  goto 54.0,52.0 "Fel Rock"
+
 step Fel Rock
-  tip The cave in the hill just west of Dolanaar. Lord Melenas waits at the back.
+  tip Lord Melenas waits inside the cave, at the bottom or up on the ledge; keep to the right.
   collect 5221 quest 932.1                    -- Lord Melenas
 
 step The road to Darnassus

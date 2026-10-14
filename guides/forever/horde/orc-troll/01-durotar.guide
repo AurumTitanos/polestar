@@ -22,6 +22,12 @@ next forever/horde/orc-troll/02-the-barrens
 # Crossroads (flight path, bind). The Barrens guide starts at the Crossroads.
 #
 # Local order fixed by hand (same quest set as the export unless listed below):
+# - Cutting Teeth (788) is turned in as soon as the boars are done, with the
+#   class letters and Wayward Weapons, so Sting of the Scorpid (789) and
+#   Galgar's Cactus Apple Surprise (4402), which need 788, are carried to
+#   Sarkoth: his slope is full of Scorpid Workers and cactuses. All three go
+#   back to the Den with Sarkoth (804); 0.01 h faster to 10 and 20 under the
+#   simulator than taking 789 and 4402 after Sarkoth.
 # - Legging It (96821) is taken at Sen'jin on the first visit: its spiders sit
 #   on the road north to Razor Hill, where Gar'Thok takes it.
 # - Rezlak's second pair (A Simmering Storm 97281, Stormy Potential 97282) and
@@ -93,31 +99,24 @@ step Gornek
   accept 788
   accept 97279
 
+# The Den is a cave: Gornek stands just inside its mouth, Kzan Thornslash
+# "behind me in the Den" (Gornek in Wayward Weapons, 97279,
+# https://www.wowhead.com/forever/quest=97279/wayward-weapons), "all the way
+# back in the back of the cave" (https://www.wowhead.com/classic/npc=3159,
+# comments), and Mai'ah, the mage trainer, at 42.51,69.04 "near the entrance
+# to the Den" (Glyphic Parchment, 98576). The mouth, 42.4,68.6, lies between
+# her and Gornek (42.06,68.33) and opens east onto the training grounds; from
+# the boars or from Hana'zua a straight line to anyone inside crosses the
+# hill, so the steps before each Den visit end at the mouth.
 step Training weapons and boars
   tip The weapons lie around the Den and the training grounds; the Mottled Boars roam the whole valley floor.
   collect 277653 quest 97279.1
   kill 3098 quest 788.1
-
-step Kzan Thornslash
-  tip Kzan stands behind the Den, on its west side.
-  turnin 97279
-
-step Hana'zua
-  tip Hana'zua lies wounded at the foot of the hills north-west of the Den.
-  accept 790
-
-step Sarkoth
-  tip Sarkoth, a large scorpid, prowls the slope south of Hana'zua.
-  collect 4905 quest 790.1
-  kill 3098 quest 788.1
-
-step Hana'zua
-  turnin 790
-  accept 804
+  goto 42.4,68.6 "The Den's cave mouth"
 
 step The Den
-  turnin 804                          -- Gornek
-  turnin 788
+  tip Gornek stands just inside the cave mouth; Kzan Thornslash at the back of the cave behind him.
+  turnin 788                          -- Gornek
   accept 2383 only Orc,Warrior        -- Gornek: Simple Parchment
   accept 3065 only Troll,Warrior      -- Gornek: Simple Tablet
   accept 3087 only Orc,Hunter         -- Gornek: Etched Parchment
@@ -131,24 +130,45 @@ step The Den
   accept 3086 only Troll,Mage         -- Gornek: Glyphic Tablet
   accept 3090 only Orc,Warlock        -- Gornek: Tainted Parchment
   accept 98575 only Troll,Warlock     -- Gornek: Tainted Tablet
+  accept 789                          -- Gornek
+  turnin 97279                        -- Kzan Thornslash, at the back of the cave
+  turnin 3090 only Orc,Warlock        -- Nartok, the warlock trainer at the back of the cave
+  turnin 98575 only Troll,Warlock     -- Nartok
+  turnin 3088 only Orc,Rogue          -- Rwag, the rogue trainer in the Den
+  turnin 3083 only Troll,Rogue        -- Rwag
   turnin 2383 only Orc,Warrior        -- Frang, the warrior trainer beside the Den
   turnin 3065 only Troll,Warrior      -- Frang
   turnin 3087 only Orc,Hunter         -- Jen'shan, the hunter trainer beside the Den
   turnin 3082 only Troll,Hunter       -- Jen'shan
-  turnin 3088 only Orc,Rogue          -- Rwag, the rogue trainer beside the Den
-  turnin 3083 only Troll,Rogue        -- Rwag
   turnin 3085 only Troll,Priest       -- Ken'jai, the priest trainer at the Den
   turnin 3089 only Orc,Shaman         -- Shikrik, the shaman trainer beside the Den
   turnin 3084 only Troll,Shaman       -- Shikrik
   turnin 98576 only Orc,Mage          -- Mai'ah, the mage trainer, at the entrance to the Den
   turnin 3086 only Troll,Mage         -- Mai'ah
-  turnin 3090 only Orc,Warlock        -- Nartok, the warlock trainer in the Den
-  turnin 98575 only Troll,Warlock     -- Nartok
-  accept 789
   accept 4402                         -- Galgar, by the cooking fire
   accept 792 only !Warlock            -- Zureetha Fargaze
   accept 1485 only Warlock            -- Ruzan
   train class
+
+step Hana'zua
+  tip Hana'zua lies wounded at the foot of the hills north-west of the Den.
+  accept 790
+
+step Sarkoth
+  tip Sarkoth, a large scorpid, prowls the slope south of Hana'zua among the Scorpid Workers; pick the Cactus Apples by the cactuses on the way.
+  collect 4905 quest 790.1
+  collect 4862 quest 789.1
+  collect 11583 quest 4402.1
+
+step Hana'zua
+  turnin 790
+  accept 804
+  goto 42.4,68.6 "The Den's cave mouth"
+
+step Back to the Den
+  turnin 804                          -- Gornek
+  turnin 789                          -- Gornek
+  turnin 4402                         -- Galgar
 
 step Foreman Thazz'ril
   tip The foreman stands at the lumber pile east of the Den.
@@ -162,18 +182,22 @@ step Foreman Thazz'ril
   turnin 5441
   accept 6394
 
+# The Burning Blade Coven's mouth: "Go in the cave (45 56) and stay right"
+# (https://www.wowhead.com/classic/quest=794, comments); the pick lies past the
+# first split, straight on, then right along the stream to the waterfall
+# (https://www.wowhead.com/classic/quest=6394, comments).
 step North end of the valley
-  tip Collect Cactus Apples and kill Scorpid Workers on the way north. The Vile Familiars swarm the slope by the cave on the valley's north side; Thazz'ril's Pick lies just inside the cave mouth.
-  collect 11583 quest 4402.1
-  collect 4862 quest 789.1
+  tip The Vile Familiars swarm the slope below the Burning Blade Coven, the cave on the valley's north side.
   kill 3101 quest 792.1 only !Warlock
   collect 6487 quest 1485.1 only Warlock
+  goto 45.0,56.0 "Burning Blade Coven"
+
+step Thazz'ril's Pick
+  tip Inside the cave, go straight on at the first split, then right and follow the stream on your left to the waterfall: the pick glows by the water, behind a column of rock.
   collect 16332 quest 6394.1 @43.7,53.8
 
 step Back at the Den
   turnin 6394                         -- Foreman Thazz'ril
-  turnin 4402                         -- Galgar
-  turnin 789                          -- Gornek
   turnin 792 only !Warlock            -- Zureetha Fargaze
   turnin 1485 only Warlock            -- Ruzan
   accept 1499 only Warlock
@@ -186,7 +210,10 @@ step Canaga Earthcaller
   accept 1516                         -- Canaga Earthcaller
 
 step Burning Blade Coven
-  tip Yarrog Baneshadow waits at the back of the cave on the valley's north side.
+  goto 45.0,56.0 "Burning Blade Coven"
+
+step Yarrog Baneshadow
+  tip Inside the cave, keep to the right wall all the way round, over the stream: Yarrog waits at the end.
   collect 4859 quest 794.1
 
 step Felstalker hooves
@@ -428,9 +455,15 @@ step Gan'rul Bloodeye
   turnin 1506                         -- Gan'rul Bloodeye
   accept 1501
 
-step Skull Rock
+# Skull Rock's mouth: "Entrance to the cave is at 55,10" and "Cave entrance is
+# at 55, 10" (https://www.wowhead.com/classic/quest=827, comments); Gazz'uz
+# stands at its back (52.6,8.8).
+step Skull Rock's mouth
   zone Durotar
-  tip Burning Blade cultists hold the caves of Skull Rock to the north; any of them drops a Searing Collar. Gazz'uz, a level 14 warlock, stands deep inside and drops the Eye of Burning Shadow.
+  goto 55.0,10.0 "Skull Rock"
+
+step Skull Rock
+  tip Burning Blade cultists hold the caves of Skull Rock; any of them drops a Searing Collar. Gazz'uz, a level 14 warlock, stands deep inside and drops the Eye of Burning Shadow.
   collect 4871 quest 827.1
   collect 4903 "Eye of Burning Shadow"
   accept 832

@@ -392,6 +392,10 @@ step The gnoll camps
   tip Riverpaw gnolls camp in the hills west of Stone Cairn Lake; the Stolen Enchanting Supplies lie in their camps.
   collect 247805 quest 91725                  -- Stolen Enchanting Supplies
 
+# "The mine entrance is at 61.6,54.1" (https://www.wowhead.com/classic/quest=76, comments).
+step The Jasperlode Mine's entrance
+  goto 61.6,54.1 "The Jasperlode Mine"
+
 step The Jasperlode Mine
   tip The mine is south-west of the gnoll camps. Mining Tools lie near the entrance; Kobold Geomancers hold the tunnels.
   complete 76 @60.2,49.2                      -- Walk into the mine
