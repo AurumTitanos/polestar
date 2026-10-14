@@ -11,6 +11,12 @@
 --   Data.Info(name) -> { loaded, reason, memoryKB }
 --     memoryKB from UpdateAddOnMemoryUsage/GetAddOnMemoryUsage (nil when the
 --     client hides it).
+--   Data.CheckInstall() -> missing, stale
+--     The release zip's folders beside Polestar: names of the required ones
+--     (Polestar_Guides, Polestar_Codex) that are not installed, and "name
+--     (version)" for any of them whose TOC version differs from Polestar's.
+--     At login a non-empty result prints one line saying to reinstall: a
+--     player who copied only some folders, or one level too deep, finds out.
 
 local ADDON, ns = ...
 
@@ -83,3 +89,54 @@ function Data.Info(name)
 	end
 	return info
 end
+
+-- Folders the release zip puts beside Polestar. The first two must be there;
+-- the quest and item packs are optional (a source install may not build
+-- them), but when present they must be the same version.
+local COMPANIONS = { "Polestar_Guides", "Polestar_Codex", "Polestar_QuestDB", "Polestar_ItemDB" }
+local REQUIRED = { Polestar_Guides = true, Polestar_Codex = true }
+
+local function installed(name)
+	local A = C_AddOns
+	if not A then return true end
+	if alreadyLoaded(name) then return true end
+	if A.DoesAddOnExist then
+		local ok, exists = pcall(A.DoesAddOnExist, name)
+		if ok then return readable(exists) == true end
+	end
+	if not A.GetAddOnInfo then return true end
+	local ok, _, _, _, _, reason = pcall(A.GetAddOnInfo, name)
+	return ok and readable(reason) ~= "MISSING"
+end
+
+local function versionOf(name)
+	local get = C_AddOns and C_AddOns.GetAddOnMetadata
+	if not get then return nil end
+	local ok, v = pcall(get, name, "Version")
+	v = ok and readable(v) or nil
+	return type(v) == "string" and v ~= "" and v or nil
+end
+
+function Data.CheckInstall()
+	local missing, stale = {}, {}
+	local mine = ns.version
+	for _, name in ipairs(COMPANIONS) do
+		if not installed(name) then
+			if REQUIRED[name] then missing[#missing + 1] = name end
+		else
+			local v = versionOf(name)
+			if v and mine and v ~= mine then stale[#stale + 1] = name .. " (" .. v .. ")" end
+		end
+	end
+	return missing, stale
+end
+
+ns.OnLogin(function()
+	local missing, stale = Data.CheckInstall()
+	if #missing == 0 and #stale == 0 then return end
+	local parts = {}
+	if #missing > 0 then parts[#parts + 1] = string.format(ns.L["%s not installed"], table.concat(missing, ", ")) end
+	if #stale > 0 then parts[#parts + 1] = string.format(ns.L["%s from another version"], table.concat(stale, ", ")) end
+	ns.Print(string.format(ns.L["Polestar %s is installed incompletely: %s. Close the game, delete every Polestar folder in Interface/AddOns and unzip the latest Polestar zip there (CurseForge or GitHub Releases, not \"Source code\")."],
+		tostring(ns.version), table.concat(parts, "; ")))
+end)

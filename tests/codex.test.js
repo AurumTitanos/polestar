@@ -309,6 +309,39 @@ emit({ Polestar.Data.Pack("Broken") })
 	assert.deepEqual(raised, [false, 'error']);
 });
 
+// A player who copies only some of the release zip's folders, or an old one
+// over a new one, is told at login. The stub's default TOC version is
+// "0.1.0-test" for every addon, Polestar included.
+function loginWith(addons) {
+	return runAddon({
+		before: `stub.addons = { ${addons.map((a) => `{ name = "${a.name}" }`).join(', ')} }
+${addons.filter((a) => a.version).map((a) => `stub.addonMeta["${a.name}"] = { Version = "${a.version}" }`).join('\n')}`,
+		addons: [FILES],
+		login: true,
+		script: `
+local missing, stale = Polestar.Data.CheckInstall()
+local said = {}
+for _, m in ipairs(stub.messages) do if m:find("installed incompletely", 1, true) then said[#said + 1] = m end end
+emit({ missing = table.concat(missing, ","), stale = table.concat(stale, ","), said = said })`,
+	}).emitted[0];
+}
+
+test('a complete install of one version says nothing at login; the optional data packs may be absent', () => {
+	const out = loginWith([{ name: 'Polestar' }, { name: 'Polestar_Guides' }, { name: 'Polestar_Codex' }]);
+	assert.equal(out.missing, '');
+	assert.equal(out.stale, '');
+	assert.equal(Object.keys(out.said).length, 0);
+});
+
+test('a missing Codex and a Guides folder from an old zip are named once in chat, with how to reinstall', () => {
+	const out = loginWith([{ name: 'Polestar' }, { name: 'Polestar_Guides', version: '0.2.1' }, { name: 'Polestar_QuestDB' }]);
+	assert.equal(out.missing, 'Polestar_Codex');
+	assert.equal(out.stale, 'Polestar_Guides (0.2.1)');
+	assert.equal(out.said.length, 1);
+	assert.match(out.said[0], /Polestar_Codex not installed; Polestar_Guides \(0\.2\.1\) from another version/);
+	assert.match(out.said[0], /delete every Polestar folder.*not "Source code"/);
+});
+
 // ---------------------------------------------------------------------------
 // Merge (tools/lib/codex/build.js) on synthetic importer outputs
 // ---------------------------------------------------------------------------

@@ -53,6 +53,10 @@
 - Without the Codex, Lookup and Dungeons say which case it is: not installed
   (get the Polestar zip from CurseForge or the GitHub Releases page, not
   GitHub's "Source code" download) or turned off in the AddOns list.
+- At login, Polestar says in chat when its install is incomplete: the Codex
+  or the guides missing, or a Polestar folder left from another version
+  (copied over an old install, or unzipped one folder too deep), with how to
+  reinstall cleanly.
 
 ### For guide authors
 
