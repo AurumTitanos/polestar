@@ -658,6 +658,24 @@ test('trainer: off by default; profession trainers, Shift and closing the window
 	assert.equal(out[3], 1, 'closed after the first purchase: no more');
 });
 
+test('trainer: riding, weapon and pet trainers are left alone, so opening one to check a price spends nothing', () => {
+	const out = run(`
+		set("trainAll", true)
+		for _, t in ipairs({                                            -- none of them a class trainer
+			{ npc = 4732, name = "Apprentice Riding", cost = 1000000 },   -- Randal Hunter, riding
+			{ npc = 90001, name = "Swords", cost = 1000 },                -- a weapon master
+			{ npc = 90002, name = "Bite", cost = 500 },                   -- a pet trainer
+		}) do
+			q.money, q.calls = 1000000, {}
+			q.trainer = { tradeskill = false, services = { { name = t.name, rank = "", kind = "available", cost = t.cost } } }
+			q.openTrainer(t.npc); stub.advance(1)
+			emit(#calls("BuyTrainerService"))
+			q.closeTrainer()
+		end
+	`);
+	assert.deepEqual(out, [0, 0, 0]);
+});
+
 // ---------------------------------------------------------------------------
 // Quest rewards
 // ---------------------------------------------------------------------------

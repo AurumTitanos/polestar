@@ -217,6 +217,8 @@ end
 -- a moment later, as from the server: the money is taken, the service is
 -- used and moves to the end of the list (the indexes shift), then
 -- TRAINER_UPDATE. A service with `refuse = true` is refused: nothing comes back.
+-- q.classTrainers holds the npcs the Engine knows as trainers of the
+-- character's class; q.openTrainer(npc) opens one of them unless given another.
 ---------------------------------------------------------------------------
 
 q.trainer = { tradeskill = false, services = {} }
@@ -246,11 +248,14 @@ function BuyTrainerService(i)
 	end)
 end
 
-function q.openTrainer()
+q.classTrainers = { [198] = true }
+function q.openTrainer(npc)
+	q.npc = npc or 198
 	q.trainerOpen = true
 	stub.fire("TRAINER_SHOW")
 end
 function q.closeTrainer()
+	q.npc = nil
 	q.trainerOpen = false
 	stub.fire("TRAINER_CLOSED")
 end
@@ -438,6 +443,7 @@ function Engine.GetStepIndex() return q.engine.step end
 function Engine.GetStepView(i) if i == q.engine.step then return q.engine.view end end
 function Engine.GetGuide() return q.engine.guide end
 function Engine.GetWaypoint() return q.engine.waypoint end
+function Engine.IsClassTrainer(npc) return npc ~= nil and q.classTrainers[npc] == true end
 
 -- A step from raw goals: views get status "active" unless goal.status says otherwise.
 function q.step(goals, index)

@@ -55,7 +55,7 @@
   GitHub's "Source code" download) or turned off in the AddOns list.
 - Class trainers can teach you every new spell you can afford as you open
   them: Options, Quality of Life, Vendors, Learn new spells (off by default;
-  Shift skips). Profession trainers are left alone.
+  Shift skips). Riding, weapon, pet and profession trainers are left alone.
 
 ### For guide authors
 

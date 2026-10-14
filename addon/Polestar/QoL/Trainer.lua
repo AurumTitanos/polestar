@@ -8,8 +8,10 @@
 -- refused, and ends the run. Closing the window counts a purchase still on
 -- its way: it was sent while available and affordable, and the list cannot
 -- be read once the window is gone. Only "available" services you can afford
--- are bought; profession trainers are left alone. Prints what was learned,
--- and what the rest would cost when the money ran out.
+-- are bought, and only from a class trainer of your class that
+-- Core/ClassTrainers.lua knows (Engine.IsClassTrainer): riding, weapon, pet
+-- and profession trainers are left alone. Prints what was learned, and what
+-- the rest would cost when the money ran out.
 --
 -- Client: IsTradeskillTrainer, GetNumTrainerServices, GetTrainerServiceInfo,
 -- GetTrainerServiceCost, BuyTrainerService (Forever Blizzard_TrainerUI);
@@ -105,6 +107,8 @@ function Trainer.OnShow()
 	if QoL.Shift() or not QoL.On("trainAll") then return end
 	if not (GetNumTrainerServices and GetTrainerServiceInfo and GetTrainerServiceCost and BuyTrainerService) then return end
 	if IsTradeskillTrainer and IsTradeskillTrainer() then return end
+	local E = ns.Engine
+	if not (E and E.IsClassTrainer and E.IsClassTrainer(ns.Compat.GetNpcID("npc"))) then return end
 	active = true
 	buyNext()
 end

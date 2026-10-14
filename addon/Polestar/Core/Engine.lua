@@ -2151,6 +2151,17 @@ function Engine.NearestClassTrainer()
 	return p.list[p.i]
 end
 
+-- Whether `npc` is a registered class trainer of the character's class.
+function Engine.IsClassTrainer(npc)
+	local classes = npc and trainerClasses[npc]
+	if not classes then return false end
+	if not player then refreshPlayer() end
+	for _, c in ipairs(classes) do
+		if c == player.class then return true end
+	end
+	return false
+end
+
 -- The active guide sends the character to their class trainer soon.
 local function guideTrainsSoon()
 	if not (guide and current) then return false end
@@ -2191,17 +2202,11 @@ end
 
 -- A trainer window of the character's class: trained at this level.
 local function noteClassTrainer(npc)
-	local classes = npc and trainerClasses[npc]
-	if not classes then return end
+	if not Engine.IsClassTrainer(npc) then return end
 	refreshPlayer()
-	for _, c in ipairs(classes) do
-		if c == player.class then
-			local s = ns.CharState()
-			s.classTrainLevel = player.level or 1
-			ns.Fire("CLASS_TRAINED", s.classTrainLevel)
-			return
-		end
-	end
+	local s = ns.CharState()
+	s.classTrainLevel = player.level or 1
+	ns.Fire("CLASS_TRAINED", s.classTrainLevel)
 end
 
 -- Fresh step state for a new guide in the loaded tab.
