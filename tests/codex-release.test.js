@@ -287,8 +287,8 @@ test('compareCodex: per-kind match against the internal build, missing and diffe
 	assert.equal(r.instanceMap.stockade, 'stormwind-stockade');
 	const s = Object.fromEntries(Object.entries(summary(r)).map(([k, v]) => [k, { total: v.total, match: v.match, share: v.share }]));
 	assert.deepEqual(s.instances, { total: 2, match: 1, share: 0.5 });
-	assert.deepEqual(s['instance entrances'], { total: 1, match: 1, share: 1 }, 'the client corpse point differs, with its reason');
-	assert.match(r.kinds['instance entrances'].different[0].reason, /corpse point/);
+	assert.deepEqual(s['instance entrances'], { total: 1, match: 0, share: 0 }, 'a corpse point is no entrance: a different place does not match');
+	assert.equal(r.kinds['instance entrances'].different[0].reason, undefined);
 	assert.deepEqual(s.bosses, { total: 1, match: 1, share: 1 }, 'Trash is no boss');
 	assert.deepEqual(s['boss loot items'], { total: 2, match: 1, share: 0.5 });
 	assert.deepEqual(s['drop chances'], { total: 1, match: 1, share: 1 });

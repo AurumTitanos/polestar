@@ -217,6 +217,13 @@ function clientFacts(tables, build = BUILD) {
 	for (const [spell, cls] of Object.entries(CLASS_MOUNT_FALLBACK)) if (!spellClass[spell]) spellClass[spell] = cls;
 	// Summon spells the client names as mounts (Mount.SourceSpellID) and companions (BattlePetSpecies.SummonSpellID).
 	const mountSpells = new Set((tables.Mount || []).map((r) => int(r.SourceSpellID)).filter(Boolean));
+	// A miscellaneous item whose spell carries a Mount row's name casts that mount
+	// by script (Black Qiraji Resonating Crystal: 26656 "Summon Black Qiraji Battle Tank").
+	const mountNames = new Set((tables.Mount || []).map((r) => r.Name_lang).filter(Boolean));
+	for (const it of Object.values(items)) {
+		const sp = it.use || it.learn;
+		if (it.classId === 15 && sp && mountNames.has(spellNames[sp])) mountSpells.add(sp);
+	}
 	// Mount.Flags 0x40: hidden from the mount journal until known (retired mounts).
 	const mountHidden = new Set((tables.Mount || []).filter((r) => (int(r.Flags) || 0) & 0x40).map((r) => int(r.SourceSpellID)).filter(Boolean));
 	const petSpells = new Set([...(tables.BattlePetSpecies || []).map((r) => int(r.SummonSpellID)).filter(Boolean), ...summonsPet]);
@@ -410,9 +417,11 @@ function mergeCodex(inputs) {
 			const spawns = spawnsOf(live, zonesIn);
 			let rec = npcs[id];
 			if (!rec) {
-				if (!rareW || !w.name || JUNK.test(w.name) || !spawns.length) continue;
-				rec = npcs[id] = { id: Number(id), name: w.name, level: null, levelMax: null, faction: null, rare: true, elite: w.classification === 'rareelite', boss: false, instance: null, roles: [], spawns };
-				npcRoles[id] = new Set(['rare']);
+				// An NPC only Wowhead knows: a rare with a place, or anything that drops.
+				if (!w.name || JUNK.test(w.name) || !(rareW ? spawns.length : spawns.length || (w.drops || []).length)) continue;
+				const elite = ['rareelite', 'elite', 'boss'].includes(w.classification);
+				rec = npcs[id] = { id: Number(id), name: w.name, level: null, levelMax: null, faction: null, rare: rareW, elite, boss: w.classification === 'boss', instance: null, roles: [], spawns };
+				npcRoles[id] = new Set(rareW ? ['rare'] : []);
 			}
 			if (rec.level == null && w.level) {
 				rec.level = w.level[0];

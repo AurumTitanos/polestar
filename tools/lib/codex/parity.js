@@ -180,11 +180,10 @@ function compareCodex(ours, theirs, verify = null) {
 		}
 		if (t.entrance) {
 			k('instance entrances').total++;
+			// A corpse point (where a ghost returns) is no entrance: a different place is a difference.
 			if (near(o.entrance, t.entrance)) k('instance entrances').match++;
-			else if (o.entrance) {
-				k('instance entrances').match++;
-				k('instance entrances').different.push({ ...row, theirs: t.entrance, ours: o.entrance, reason: "Forever client: the Map table's corpse point (where a ghost returns)" });
-			} else {
+			else if (o.entrance) k('instance entrances').different.push({ ...row, theirs: t.entrance, ours: o.entrance });
+			else {
 				k('instance entrances').missing.push(row);
 				if (o.forever) needs.push({ kind: 'entrance', id: key, name: t.name, what: 'the entrance (no corpse point in the client for Forever instances)', event: 'enter' });
 			}
