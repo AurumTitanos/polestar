@@ -2,7 +2,7 @@
 -- wow_stub.lua. It installs contract-faithful fakes for the Engine, Nav and
 -- Pins (just before ADDON_LOADED, after the addon files ran), overrides the
 -- map half of Compat with one flat test map, and provides the client APIs QoL
--- uses: XP, bags and items, merchant (guild repair), quest rewards, gossip,
+-- uses: XP, bags and items, merchant (guild repair), trainer, quest rewards, gossip,
 -- taxi map, death, loot, requests from other players (q.social), popups
 -- (q.showPopup), UIErrorsFrame message types, and installed-but-unloaded
 -- addons (q.installed).
@@ -209,6 +209,50 @@ end
 function q.closeMerchant()
 	q.merchantOpen = false
 	stub.fire("MERCHANT_CLOSED")
+end
+
+---------------------------------------------------------------------------
+-- Trainer: q.trainer = { tradeskill = bool, services = { { name, rank, kind
+-- ("available" | "unavailable" | "used"), cost }, ... } }. A purchase lands
+-- a moment later, as from the server: the money is taken, the service is
+-- used and moves to the end of the list (the indexes shift), then
+-- TRAINER_UPDATE. A service with `refuse = true` is refused: nothing comes back.
+---------------------------------------------------------------------------
+
+q.trainer = { tradeskill = false, services = {} }
+function IsTradeskillTrainer() return q.trainer.tradeskill end
+function GetNumTrainerServices() return #q.trainer.services end
+function GetTrainerServiceInfo(i)
+	local s = q.trainer.services[i]
+	if s then return s.name, s.kind, 136096, 1, s.rank, "" end
+end
+function GetTrainerServiceCost(i)
+	local s = q.trainer.services[i]
+	if s then return s.cost or 0, q.trainer.tradeskill end
+end
+function BuyTrainerService(i)
+	local s = q.trainer.services[i]
+	call("BuyTrainerService", s and s.name, s and s.rank)
+	C_Timer.After(0.1, function()
+		if not (s and s.kind == "available" and not s.refuse and q.money >= (s.cost or 0)) then return end
+		q.money = q.money - (s.cost or 0)
+		s.kind = "used"
+		local list = q.trainer.services
+		for j = 1, #list do
+			if list[j] == s then table.remove(list, j); break end
+		end
+		list[#list + 1] = s
+		if q.trainerOpen then stub.fire("TRAINER_UPDATE") end
+	end)
+end
+
+function q.openTrainer()
+	q.trainerOpen = true
+	stub.fire("TRAINER_SHOW")
+end
+function q.closeTrainer()
+	q.trainerOpen = false
+	stub.fire("TRAINER_CLOSED")
 end
 
 ---------------------------------------------------------------------------

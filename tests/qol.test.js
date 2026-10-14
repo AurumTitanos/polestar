@@ -56,7 +56,7 @@ test('options: every qol setting is registered, on Questing or Quality of Life, 
 		for _, k in ipairs({ "itemButton", "targetButton", "hearthButton", "buttonScale", "xpTracker", "sellJunk", "autoRepair",
 			"rewardHighlight", "rewardAutoPick", "flightAutoOpen", "flightHighlight", "deathHelper", "instantQuestText",
 			"skipGossip", "fastLoot", "declineDuels", "repairGuild", "hideErrors", "autoReleasePvP", "declineGuildInvites",
-			"declinePartyStrangers", "acceptPartyFriends", "acceptSummon", "acceptResurrect" }) do keys[k] = Polestar.GetDefault("qol." .. k) end
+			"declinePartyStrangers", "acceptPartyFriends", "acceptSummon", "acceptResurrect", "trainAll" }) do keys[k] = Polestar.GetDefault("qol." .. k) end
 		emit(keys)
 	`);
 	const registered = new Set(specs.filter((c) => c.key).map((c) => c.key.replace(/^qol\./, '')));
@@ -67,6 +67,7 @@ test('options: every qol setting is registered, on Questing or Quality of Life, 
 		assert.ok(c.tab && c.section);
 	}
 	assert.equal(defaults.rewardAutoPick, false, 'auto-pick is off by default');
+	assert.equal(defaults.trainAll, false, 'learning at trainers is off by default');
 	assert.equal(defaults.sellJunk, true);
 });
 
@@ -545,6 +546,116 @@ test('merchant: repairs after selling, if affordable; Shift and settings off do 
 	assert.deepEqual(out[1], { repaired: 1, poor: true });
 	assert.equal(out[2], 0, 'Shift: nothing');
 	assert.equal(out[3], 0, 'off: nothing');
+});
+
+// ---------------------------------------------------------------------------
+// Class trainer
+// ---------------------------------------------------------------------------
+
+const SPELLS = `
+	q.trainer = { tradeskill = false, services = {
+		{ name = "Fireball", rank = "Rank 1", kind = "used", cost = 0 },
+		{ name = "Fireball", rank = "Rank 2", kind = "available", cost = 100 },
+		{ name = "Frost Armor", rank = "Rank 1", kind = "available", cost = 200 },
+		{ name = "Arcane Missiles", rank = "Rank 1", kind = "unavailable", cost = 50 },
+	} }
+`;
+
+test('trainer: learns every spell it offers now, one per list update, and prints the total', () => {
+	const [first, bought, after] = run(`${SPELLS}
+		set("trainAll", true)
+		q.money = 1000
+		q.openTrainer()
+		emit(#calls("BuyTrainerService"))   -- one at a time: the list moves after each
+		stub.advance(1)
+		local out = {}
+		for _, c in ipairs(q.calls) do if c[1] == "BuyTrainerService" then out[#out + 1] = c[2] .. " " .. c[3] end end
+		emit(out)
+		emit({ money = q.money, msg = printed("Learned 2 spells for 3s 0c") })
+	`);
+	assert.equal(first, 1);
+	assert.deepEqual(bought, ['Fireball Rank 2', 'Frost Armor Rank 1']);
+	assert.deepEqual(after, { money: 700, msg: true });
+});
+
+test('trainer: waits for each purchase to land before the next, whatever else updates the list', () => {
+	const [out] = run(`${SPELLS}
+		set("trainAll", true)
+		q.money = 1000
+		q.openTrainer()
+		stub.fire("TRAINER_UPDATE")      -- not from the purchase, which has not landed yet
+		stub.fire("TRAINER_UPDATE")
+		local early = #calls("BuyTrainerService")
+		stub.advance(1)
+		emit({ early = early, bought = #calls("BuyTrainerService"), money = q.money, msg = printed("Learned 2 spells for 3s 0c") })
+	`);
+	assert.deepEqual(out, { early: 1, bought: 2, money: 700, msg: true });
+});
+
+test('trainer: a refused purchase ends the run; one still on its way at closing is counted', () => {
+	const out = run(`${SPELLS}
+		set("trainAll", true)
+		q.money = 1000
+		q.trainer.services[3].refuse = true   -- Frost Armor
+		q.openTrainer()
+		stub.advance(3)
+		emit({ bought = #calls("BuyTrainerService"), msg = printed("Learned 1 spell for 1s 0c") })
+		q.closeTrainer()
+
+		stub.messages = {}
+		q.trainer.services = {
+			{ name = "Fireball", rank = "Rank 2", kind = "available", cost = 100 },
+			{ name = "Frost Armor", rank = "Rank 1", kind = "available", cost = 200 },
+		}
+		q.openTrainer()
+		q.closeTrainer()                  -- before the first purchase lands
+		emit(printed("Learned 1 spell for 1s 0c"))
+	`);
+	assert.deepEqual(out[0], { bought: 2, msg: true });
+	assert.equal(out[1], true);
+});
+
+test('trainer: learns what you can afford and says how much more the rest costs', () => {
+	const [out] = run(`${SPELLS}
+		set("trainAll", true)
+		q.money = 150
+		q.openTrainer()
+		stub.advance(1)
+		emit({ bought = #calls("BuyTrainerService"), money = q.money,
+			learned = printed("Learned 1 spell for 1s 0c"), short = printed("Not enough money for 1 more %(2s 0c%)") })
+	`);
+	assert.deepEqual(out, { bought: 1, money: 50, learned: true, short: true });
+});
+
+test('trainer: off by default; profession trainers, Shift and closing the window stop it', () => {
+	const out = run(`${SPELLS}
+		q.money = 1000
+		q.openTrainer(); stub.advance(1)
+		emit(#calls("BuyTrainerService"))
+		q.closeTrainer()
+
+		set("trainAll", true)
+		q.trainer.tradeskill = true
+		q.openTrainer(); stub.advance(1)
+		emit(#calls("BuyTrainerService"))
+		q.closeTrainer()
+		q.trainer.tradeskill = false
+
+		stub.keys.shift = true
+		q.openTrainer(); stub.advance(1)
+		emit(#calls("BuyTrainerService"))
+		q.closeTrainer()
+		stub.keys.shift = false
+
+		q.openTrainer()
+		q.closeTrainer()
+		stub.advance(1)
+		emit(#calls("BuyTrainerService"))
+	`);
+	assert.equal(out[0], 0, 'off by default');
+	assert.equal(out[1], 0, 'profession trainer');
+	assert.equal(out[2], 0, 'Shift');
+	assert.equal(out[3], 1, 'closed after the first purchase: no more');
 });
 
 // ---------------------------------------------------------------------------

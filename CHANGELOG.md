@@ -53,6 +53,9 @@
 - Without the Codex, Lookup and Dungeons say which case it is: not installed
   (get the Polestar zip from CurseForge or the GitHub Releases page, not
   GitHub's "Source code" download) or turned off in the AddOns list.
+- Class trainers can teach you every new spell you can afford as you open
+  them: Options, Quality of Life, Vendors, Learn new spells (off by default;
+  Shift skips). Profession trainers are left alone.
 
 ### For guide authors
 
