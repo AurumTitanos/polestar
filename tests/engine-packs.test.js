@@ -184,3 +184,34 @@ test('an absent guide put into a tab by SetGuide is no longer absent: closed, it
 	assert.ok(!out.afterZed.includes('joe/a'), out.afterZed.join(','));
 	assert.ok(!out.savedAfterZed.includes('joe/a'), out.savedAfterZed.join(','));
 });
+
+test('a tab reopened after its pack returns is no longer absent: closed, it stays closed', () => {
+	const [out] = run({
+		script: `
+			local G = Polestar.Guides
+			local function close(id) for i, t in ipairs(ids().tabs) do if t == id then E.CloseTab(i) end end; flush() end
+			E.OpenTab("test/x"); E.OpenTab("joe/a"); E.OpenTab("joe/b"); flush()
+			G.SetPackShown("joe", false); flush()
+			G.SetPackShown("joe", true); flush()
+			local r = { back = ids().tabs }
+			close("joe/a")
+			r.closed = PolestarCharDB.tabs
+			G.SetPackShown("joe", false); flush()
+			r.hidden = PolestarCharDB.tabs
+			G.SetPackShown("joe", true); flush()
+			r.reopened = ids().tabs
+			close("joe/b")
+			G.SetPackShown("joe", false); flush()
+			G.SetPackShown("joe", true); flush()
+			r.again = ids().tabs
+			r.saved = PolestarCharDB.tabs
+			emit(r)
+		`,
+	});
+	assert.deepEqual(out.back, ['test/x', 'joe/a', 'joe/b']);
+	assert.deepEqual(out.closed, ['test/x', 'joe/b']);
+	assert.deepEqual(out.hidden, ['test/x', 'joe/b'], 'only the open joe tab is kept as absent');
+	assert.deepEqual(out.reopened, ['test/x', 'joe/b']);
+	assert.deepEqual(out.again, ['test/x']);
+	assert.deepEqual(out.saved, ['test/x']);
+});

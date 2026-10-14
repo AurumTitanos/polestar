@@ -2408,7 +2408,6 @@ function Engine.OpenTab(id, activate)
 		return open
 	end
 	if #tabs >= MAX_TABS then return nil end
-	forgetAbsent(id)
 	local tab = { guide = g, passedUpTo = 0, autoChain = false, sawIncomplete = false, placing = GetTime() + PLACE_SECONDS }
 	tabs[#tabs + 1] = tab
 	local index = #tabs
@@ -3360,7 +3359,6 @@ ns.On("PACKS_CHANGED", function()
 	local opened = false
 	for _, b in ipairs(byPlace(back)) do
 		if #tabs >= MAX_TABS then break end
-		forgetAbsent(b.id)
 		if not tabIndexOf(b.id) then
 			table.insert(tabs, math.min(math.max(b.at, 1), #tabs + 1), restoredTab(Guides.Get(b.id)))
 			opened = true
