@@ -16,7 +16,7 @@
 const { dist } = require('../../route/geo');
 const R = require('./route');
 const { RACE_GROUPS } = require('./groups');
-const { FACTIONS, fmt, zoneName, npcSpawn, rankInfo, vendorSpawns } = require('./common');
+const { FACTIONS, GUIDE_HEADER, fmt, zoneName, npcSpawn, rankInfo, vendorSpawns } = require('./common');
 const { ERA_NOTE } = require('./notes');
 
 const SIDE_OF_RACE = {};
@@ -168,7 +168,7 @@ function renderRank(ctx, P, e, L) {
 
 function renderGuide(ctx, P) {
 	P.materials = (ctx.data.professionNamed(P.skill) || {}).materials || {};
-	const L = [`guide forever/professions/${P.file}`, `title ${P.title}`, 'category Professions', 'coords era', `levels ${P.levels}`, 'zone Ironforge', ''];
+	const L = [GUIDE_HEADER, `guide forever/professions/${P.file}`, `title ${P.title}`, 'category Professions', 'coords era', `levels ${P.levels}`, 'zone Ironforge', ''];
 	for (const c of [...P.header, '', ...ERA_NOTE]) L.push(c ? `# ${c}` : '#');
 	for (const e of P.route(ctx)) {
 		if (e.section) L.push('', `# ---------------------------------------------------------------- ${e.section}`);

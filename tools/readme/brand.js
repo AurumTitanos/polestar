@@ -15,6 +15,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { Outliner } = require('./outline');
+const { header } = require('../lib/generated');
 
 const ROOT = path.join(__dirname, '..', '..');
 const OUT = path.join(ROOT, 'docs', 'assets');
@@ -209,7 +210,7 @@ function write() {
 		'download.svg': downloadSvg(),
 	};
 	for (const [name, text] of Object.entries(files)) {
-		fs.writeFileSync(path.join(OUT, name), text);
+		fs.writeFileSync(path.join(OUT, name), `${header('svg', 'readme brand', 'tools/readme/brand.js')}\n${text}`);
 		console.log(`docs/assets/${name} (${(Buffer.byteLength(text) / 1024).toFixed(1)} KB)`);
 	}
 }

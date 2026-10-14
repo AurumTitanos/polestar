@@ -13,10 +13,12 @@ const { writeCodexPack, sampleCodex } = require('../../tests/helpers/codex');
 const { buildQuestDB, writeQuestDB } = require('../lib/questdb/build');
 const { Font } = require('../preview/font');
 const { svg, compose, TextureCache } = require('../preview/render');
+const { header } = require('../lib/generated');
 
 const ROOT = path.join(__dirname, '..', '..');
 const ADDON = path.join(ROOT, 'addon', 'Polestar');
 const OUT = path.join(ROOT, 'docs', 'preview');
+const PREVIEW_HEADER = header('svg', 'preview', "the addon's Lua and the client stubs in tests/lua");
 const FILES = ['Core/Core.xml', 'Theme/Theme.xml', 'Gear/Gear.xml', 'Lookup/Lookup.xml', 'Dungeons/Dungeons.xml', 'UI/UI.xml'];
 // The reward panel scenes also run QoL, which owns the marks.
 const REWARD_FILES = [...FILES, 'QoL/QoL.xml'];
@@ -1019,7 +1021,7 @@ async function run(argv) {
 			cleanupPacks();
 		}
 		const file = path.join(outDir, scene.file);
-		fs.writeFileSync(file, compose(panels, { title: scene.title, shared, backdrop: scene.backdrop }));
+		fs.writeFileSync(file, `${PREVIEW_HEADER}\n${compose(panels, { title: scene.title, shared, backdrop: scene.backdrop })}`);
 		written.push(file);
 		console.log(path.relative(ROOT, file));
 	}

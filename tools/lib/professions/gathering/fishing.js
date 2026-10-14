@@ -9,7 +9,7 @@
 const R = require('./route');
 const { RACE_GROUPS, REGIONS } = require('./groups');
 const { dist } = require('../../route/geo');
-const { FACTIONS, fmt, zoneName, npcSpawn, rankInfo, flightMaster } = require('./common');
+const { FACTIONS, GUIDE_HEADER, fmt, zoneName, npcSpawn, rankInfo, flightMaster } = require('./common');
 const { ERA_NOTE } = require('./notes');
 
 const POLE = { item: 6256, name: 'Fishing Pole' };
@@ -104,7 +104,7 @@ function render(ctx) {
 		return { pt: c.pt, lines: [`zone ${zoneName(ctx, def.zone)}`, `tip ${tip}`, `goto ${fmt(c.pt.x)},${fmt(c.pt.y)} "${def.label}" r 25`, `skill Fishing ${to}`] };
 	};
 
-	L.push('guide forever/professions/fishing', 'title Fishing 1-300', 'category Professions', 'coords era', 'levels 5-60', 'zone Ironforge', '');
+	L.push(GUIDE_HEADER, 'guide forever/professions/fishing', 'title Fishing 1-300', 'category Professions', 'coords era', 'levels 5-60', 'zone Ironforge', '');
 	for (const c of [
 		'Fishing 1-300 for both factions. Every catch can raise the skill wherever you',
 		'fish; low skill only makes fish get away in harder waters, so each band sends',

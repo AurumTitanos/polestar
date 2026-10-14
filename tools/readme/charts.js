@@ -22,6 +22,7 @@ const path = require('node:path');
 const { execFileSync } = require('node:child_process');
 const { Outliner } = require('./outline');
 const { C: BRAND } = require('./brand');
+const { header } = require('../lib/generated');
 
 const ROOT = path.join(__dirname, '..', '..');
 const OUT = path.join(ROOT, 'docs', 'assets', 'charts');
@@ -308,7 +309,7 @@ async function write(o) {
 	fs.mkdirSync(OUT, { recursive: true });
 	const files = { 'levels.svg': levelsChart(new Outliner('l'), data), 'starts.svg': startsChart(new Outliner('s'), data) };
 	for (const [name, text] of Object.entries(files)) {
-		fs.writeFileSync(path.join(OUT, name), text);
+		fs.writeFileSync(path.join(OUT, name), `${header('svg', `readme charts --draft ${o.draft}`, 'data/sim and guides/')}\n${text}`);
 		console.log(`docs/assets/charts/${name} (${(Buffer.byteLength(text) / 1024).toFixed(1)} KB)`);
 	}
 	for (const f of data.factions) {
