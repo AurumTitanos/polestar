@@ -7,6 +7,11 @@ Polestar's source). Every guide id starts with `{{id}}/`. The `polestar`
 command comes from a Polestar clone (`npm link` in it); run it from this
 folder.
 
+Before writing or fixing a guide, read the polestar-guide-pack skill in
+`.agents/skills/polestar-guide-pack/SKILL.md` (the same files are in
+`.claude/skills/`): the workflow from `polestar new` to `polestar pack`, and
+the guide format on one page in its `references/guide-format.md`.
+
 ## Never guess an id, a name or a coordinate
 
 Quest, NPC, object and item ids, guide ids, inn and flight point names and
@@ -31,10 +36,12 @@ After every change, repeat until both pass:
 
 `lint` prints one JSON document: `ok`, the counts, and each problem with its
 file, line, severity, message and, when there is one, a hint. Fix every
-error (and the warnings you can). `playtest` plays each guide to the end in
-the real addon and names the step where a guide gets stuck. Then
-`polestar install` copies the pack into the game to try it, and
-`polestar pack` writes the release zip to `dist/`.
+error and every warning, or tell the author why a warning stays: `ok` only
+means no errors, and a wrong objective number (`quest 788.2` for a quest
+with one objective) is a warning that playtest does not catch. `playtest`
+plays each guide to the end in the real addon and names the step where a
+guide gets stuck. Then `polestar install` copies the pack into the game to
+try it, and `polestar pack` writes the release zip to `dist/`.
 
 ## Only the author's own material
 

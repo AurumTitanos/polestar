@@ -10,6 +10,10 @@ const { defaultFolder, placeholderLicense } = require('../lib/pack/format');
 
 const { ROOT } = require('../lib/paths');
 const TEMPLATE = path.join(ROOT, 'tools', 'templates', 'pack');
+// The pack authors' skill, copied as is into the folders coding tools read a
+// project's skills from: .agents/skills (most of them) and .claude/skills.
+const SKILL = path.join(ROOT, 'skills', 'polestar-guide-pack');
+const SKILL_DIRS = [path.join('.agents', 'skills'), path.join('.claude', 'skills')];
 // Files that need Polestar's repository URL; skipped without one.
 const NEEDS_REPO = [path.join('.github', 'workflows', 'pack.yml'), path.join('.devcontainer', 'devcontainer.json')];
 const KEYS = ['id', 'title', 'author', 'license', 'folder', 'year', 'repo'];
@@ -27,11 +31,12 @@ const usage = `usage: node tools/polestar.js new [dir] [options]
 Starts a guide pack in [dir] (default: the current folder), which must be
 empty or missing (run it before \`git init\`: a folder holding .git is not
 empty): pack.json, an example guide, README.md, LICENSE, .gitignore, VS Code
-tasks, AGENTS.md / CLAUDE.md for AI assistants, and a GitHub workflow and a
-dev container that install Polestar from
-this clone's origin remote. The origin must be an http(s) or SSH URL; it is
-written as https, without a user name, password, query or fragment. With no
-origin, or any other kind, those two are left out.
+tasks, AGENTS.md / CLAUDE.md for AI assistants, the polestar-guide-pack skill
+(skills/ in this clone) in .agents/skills/ and .claude/skills/, and a GitHub
+workflow and a dev container that install Polestar from this clone's origin
+remote. The origin must be an http(s) or SSH URL; it is written as https,
+without a user name, password, query or fragment. With no origin, or any
+other kind, those two are left out.
 Asks for each value not given, unless --yes accepts the defaults; without a
 terminal to ask in, it writes nothing and exits 1 unless --yes or all four
 values are given.
@@ -241,6 +246,7 @@ async function run(argv) {
 		fs.mkdirSync(path.dirname(path.join(dir, f)), { recursive: true });
 		fs.writeFileSync(path.join(dir, f), text);
 	}
+	for (const into of SKILL_DIRS) fs.cpSync(SKILL, path.join(dir, into, path.basename(SKILL)), { recursive: true });
 	fs.writeFileSync(path.join(dir, 'LICENSE'), licenseText(values));
 	console.log(`new: wrote the pack "${values.id}" to ${dir}`);
 	if (origin && !values.repo) {

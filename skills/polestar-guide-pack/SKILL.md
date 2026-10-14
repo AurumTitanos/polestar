@@ -35,10 +35,11 @@ Read it before writing a guide.
   they played (`polestar record`) or guides they wrote. Never copy text, step
   lists or routes from guides you did not write, Polestar's own guides
   included: hand over to them with `next` instead.
-- **Pack naming.** `pack.json`'s `title` is the pack's name alone
-  (`Joe's Routes`); the build titles the addon "Polestar Pack: Joe's Routes"
-  and lists it under Polestar in the game's AddOns list. Publish it under
-  that same "Polestar Pack: <name>" title. Every guide id starts with the
+- **Pack naming.** `pack.json`'s `title` is the pack's own name
+  (`Joe's Routes`), one that cannot be taken for Polestar's own addons. The
+  build titles the addon "Polestar Pack: Joe's Routes" and groups it under
+  Polestar in the game's AddOns list; the addon page should say the same:
+  a guide pack for Polestar, by its author. Every guide id starts with the
   pack id and a slash (`joe-routes/westfall`).
 
 ## Workflow
@@ -105,8 +106,9 @@ Read it before writing a guide.
    lint and playtest again.
 
 6. **Try it and build it.** `polestar play` opens the real addon in a
-   browser with the pack loaded; `polestar dev` rebuilds it into the game's
-   AddOns folder on every save. When lint and playtest pass:
+   browser with the pack loaded; `polestar install` copies the pack into the
+   game, and `polestar dev` rebuilds it there on every save. When lint and
+   playtest pass:
 
    ```sh
    polestar pack      # writes dist/<folder>-<version>.zip
@@ -147,7 +149,8 @@ player ticks by hand.
 ## When something is unclear
 
 - `polestar help <command>` lists every option of a command.
-- Polestar's docs in the clone: `docs/GUIDE_FORMAT.md` (the full format and
-  every lint check), `docs/GUIDE_CHEATSHEET.md` (every line on one page),
+- Polestar's docs in the clone: `docs/GUIDE_PACKS.md` (what a pack is and
+  how to publish one), `docs/GUIDE_FORMAT.md` (the full format and every
+  lint check), `docs/GUIDE_CHEATSHEET.md` (every line on one page),
   `docs/PACKS.md` (the pack handbook, with every lint message and its fix)
   and `docs/PACK_FORMAT.md` (pack.json and the built addon).

@@ -95,7 +95,8 @@ polestar dev --play               # lint and build on every save, with the playg
    - `.vscode/tasks.json`: lint as the default build task, so VS Code
      underlines the lines with problems, and playtest as a test task;
    - `AGENTS.md`, and `CLAUDE.md` pointing to it: how a coding agent works in
-     the pack (below, "With an AI assistant");
+     the pack (below, "With an AI assistant"), and the polestar-guide-pack
+     skill in `.agents/skills/` and `.claude/skills/`;
    - `.github/workflows/pack.yml` (lint and playtest on every push and pull
      request, with read-only access to your repository; on a version tag the
      same job builds the zip, and a second job, run only once that passes,
@@ -249,7 +250,10 @@ notes, routes you played, guides you wrote. Two ways work well:
   (and `CLAUDE.md`, which points to it): look up every id, name and
   coordinate with `polestar find --json` and never guess one; repeat
   `polestar lint --format json` and `polestar playtest` until both pass;
-  write only from the author's own material.
+  write only from the author's own material. It also writes the
+  polestar-guide-pack skill (the workflow and the guide format on one page)
+  into `.agents/skills/` and `.claude/skills/`; for an older pack, copy
+  `skills/polestar-guide-pack/` from your Polestar clone into both.
 
 **The ground rule:** an assistant's quest ids, NPC ids, place names and
 coordinates are guesses until `find`, lint and playtest confirm them.

@@ -66,7 +66,7 @@ function table(text, heading) {
 // The first word of each code span in a row's first cell: `zone <Name>` -> zone.
 const firstWords = (rows) => rows.flatMap((r) => spans(r[0])).map((s) => s.split(/[\s<]/)[0].toLowerCase());
 
-test('SKILL.md front matter follows the Agent Skills format', () => {
+test('SKILL.md front matter follows the agentskills.io format', () => {
 	const m = /^---\n([\s\S]*?)\n---\n/.exec(MAIN);
 	assert.ok(m, 'SKILL.md starts with --- front matter ---');
 	const fields = {};
@@ -86,10 +86,13 @@ test('SKILL.md front matter follows the Agent Skills format', () => {
 	assert.ok(MAIN.split('\n').length < 500, 'SKILL.md under 500 lines');
 });
 
-test('every file SKILL.md links exists', () => {
+test('every file SKILL.md links and every Polestar doc it names exists', () => {
 	const links = [...MAIN.matchAll(/\]\(([^)#]+)\)/g)].map((m) => m[1]).filter((l) => !/^[a-z]+:/.test(l));
 	assert.ok(links.includes('references/guide-format.md'));
 	for (const l of links) assert.ok(fs.existsSync(path.join(SKILL, l)), l);
+	const docs = spans(MAIN + REF).filter((s) => /^docs\/[A-Z_]+\.md$/.test(s));
+	assert.ok(docs.length >= 4);
+	for (const d of docs) assert.ok(fs.existsSync(path.join(__dirname, '..', d)), d);
 });
 
 // Every `polestar <command> ...` the skill writes, from code spans and code

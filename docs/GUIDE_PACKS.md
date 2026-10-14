@@ -121,7 +121,9 @@ polestar dev --play    # lint and build on every save, with the browser playgrou
    `/polestar where` prints where you stand. An AI assistant can help you
    draft guides from your own material:
    [PACKS.md, "With an AI assistant"](PACKS.md#with-an-ai-assistant) says
-   how, and why every id it writes needs checking.
+   how, and why every id it writes needs checking. The pack `new` writes
+   carries a skill for coding agents, polestar-guide-pack, with the
+   workflow and the guide format on one page.
 3. **Check them.** `polestar lint` checks every guide, and
    `polestar playtest` plays each one to the end in the real addon, for
    each race that can reach it and each class it has steps for.

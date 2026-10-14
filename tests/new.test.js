@@ -57,6 +57,29 @@ test('new --yes writes the template with the values filled in', () => {
 	for (const f of ['pack.json', 'guides/example.guide', 'README.md', 'AGENTS.md']) assert.doesNotMatch(read(dir, f), /\{\{\w+\}\}/, f);
 });
 
+// Every file under dir, relative paths, sorted.
+function filesUnder(dir, rel = '') {
+	return fs
+		.readdirSync(path.join(dir, rel), { withFileTypes: true })
+		.flatMap((e) => (e.isDirectory() ? filesUnder(dir, path.join(rel, e.name)) : [path.join(rel, e.name)]))
+		.sort();
+}
+
+test('new copies the polestar-guide-pack skill into .agents/skills and .claude/skills, and AGENTS.md points to it', () => {
+	const dir = path.join(tmp(), 'ann');
+	assert.equal(polestar(['new', dir, ...ARGS], { origin: '' }).status, 0);
+	const skill = path.join(ROOT, 'skills', 'polestar-guide-pack');
+	const files = filesUnder(skill);
+	assert.ok(files.includes('SKILL.md') && files.includes(path.join('references', 'guide-format.md')), files.join(', '));
+	for (const into of ['.agents/skills', '.claude/skills']) {
+		const copy = path.join(dir, into, 'polestar-guide-pack');
+		assert.deepEqual(filesUnder(copy), files, into);
+		for (const f of files) assert.equal(read(copy, f), read(skill, f), `${into}/${f}`);
+	}
+	const agents = read(dir, 'AGENTS.md');
+	for (const p of ['.agents/skills/polestar-guide-pack/SKILL.md', '.claude/skills/']) assert.ok(agents.includes(`\`${p}\``), p);
+});
+
 test("LICENSE: GPL-3.0-only names the pack and its author before the GPL's text, MIT has the author and year, others a reminder", () => {
 	const gpl = path.join(tmp(), 'p');
 	assert.equal(polestar(['new', gpl, ...ARGS, '--license', 'GPL-3.0-only'], { origin: '' }).status, 0);

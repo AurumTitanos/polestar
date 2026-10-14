@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.2 (unreleased)
+
+### For guide authors
+
+- A skill for coding agents, `skills/polestar-guide-pack/`: the workflow from
+  `new` to `pack` (look up every id with `find`, then lint and playtest until
+  both pass) and the guide format on one page. `new` copies it into the pack's
+  `.agents/skills/` and `.claude/skills/`, and the pack's AGENTS.md points to
+  it.
+
 ## 0.2.1 (2026-10-14)
 
 ### For players
