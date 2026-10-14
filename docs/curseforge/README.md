@@ -13,7 +13,10 @@ The description's images and links point at `main` on GitHub
 (`https://raw.githubusercontent.com/fitzforge/polestar/main/...` and
 `https://github.com/fitzforge/polestar/blob/main/...`): CurseForge does not
 show SVG reliably, strips most HTML and cannot follow relative links. The
-screenshots are the README's own, `docs/assets/screenshots/*.png`.
+images load only while the repository is public. The screenshots are the
+README's own, `docs/assets/screenshots/*.png`. CurseForge does not allow
+links to downloads hosted elsewhere, so the description links to the source
+and the docs on GitHub, never to the releases page.
 
 The images are drawn in code: `node tools/polestar.js readme brand` writes
 `docs/assets/avatar.svg` and, with `rsvg-convert` (librsvg) installed, every
@@ -35,13 +38,16 @@ Free, open-source guides for World of Warcraft: Forever: leveling routes for eve
 - [ ] **Slug:** `polestar` (the project URL, curseforge.com/wow/addons/polestar)
 - [ ] **Summary:** the text above
 - [ ] **Description:** [description.md](description.md), pasted whole, editor in Markdown mode
-- [ ] **Avatar:** `images/logo-1024.png` (`images/logo-400.png` where a smaller file is asked for)
+- [ ] **Avatar:** `images/logo-400.png` (CurseForge asks for 400x400 pixels; `images/logo-1024.png` is the large copy)
 - [ ] **Categories:** Quests & Leveling (primary); Map & Minimap, Professions, Tooltip
 - [ ] **Game flavour and version:** Forever, 1.60.1
 - [ ] **Licence:** GNU General Public License version 3 (GPL-3.0)
 - [ ] **Source URL:** https://github.com/fitzforge/polestar
 - [ ] **Issues URL:** https://github.com/fitzforge/polestar/issues
 - [ ] **Wiki or docs URL** (if asked): https://github.com/fitzforge/polestar/blob/main/docs/README.md
+- [ ] **Discord** (if the form has a field for it): https://discord.gg/vMbee6F2e9
+- [ ] **Experimental:** off, so the project syncs to the CurseForge app
+- [ ] **Allow comments:** on
 - [ ] **Relations:** none; Polestar needs no other addon
 
 The categories are CurseForge's World of Warcraft addon categories as its
@@ -58,13 +64,15 @@ indicator.
   (docs/RELEASING.md). Its addon folders sit at the top level, as CurseForge
   and its app expect.
 - **Display name:** `Polestar <version>`
-- **Release type:** Beta (Release from 1.0.0 on, when the GitHub release
-  drops `--prerelease`)
+- **Release type:** Release. CurseForge lists a project in its app only once
+  it has a Release file, and offers Beta files only to players who opt in;
+  the version number (0.x) and the description's "Beta" section say it is a
+  beta. The GitHub release stays a pre-release until 1.0.0.
 - **Game version:** Forever 1.60.1
 - **Changelog:** the version's "For players" section of CHANGELOG.md, in
   Markdown, each list item joined onto one line
 - **Not uploaded:** `Polestar_Recorder-<version>.zip` and `SHA256SUMS` stay on
-  the GitHub release; the description links to it for the Recorder.
+  the GitHub release.
 
 ### The gallery
 

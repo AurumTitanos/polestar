@@ -114,19 +114,19 @@ Anyone can write guides for Polestar and publish them as a guide pack: an ordina
 
 ## Beta
 
-Polestar is in beta. Every guide compiles, lints and plays to the end in a simulator for every race and class it serves, but nothing has been play-tested end to end on Forever yet. Forever's new 30-60 content (Riverglades, Shen'dralas, Mount Hyjal) is not in any data yet; the routes take it in at launch.
+Polestar is in beta. Every guide compiles, lints and plays to the end in a simulator for every race and class it serves, but nothing has been play-tested end to end on Forever yet. Forever's new 30-60 content (Riverglades, Shen'dralas, Mount Hyjal) is not in any data yet; the routes will take it in once it is.
 
-A step in the wrong order, or a quest that is not where the guide says? Please [open an issue on GitHub](https://github.com/fitzforge/polestar/issues) with the guide, the step and what you saw. `/console scriptErrors 1` shows Lua errors.
+A step in the wrong order, or a quest that is not where the guide says? Please tell us on the [Polestar Discord](https://discord.gg/vMbee6F2e9) or [open an issue on GitHub](https://github.com/fitzforge/polestar/issues), with the guide, the step and what you saw. `/console scriptErrors 1` shows Lua errors.
 
 ---
 
 ## Links
 
+- **Discord:** [Polestar | Leveling Guides](https://discord.gg/vMbee6F2e9), for questions and reports
 - **Source code:** [github.com/fitzforge/polestar](https://github.com/fitzforge/polestar)
 - **Issues:** [report a wrong step or a bug](https://github.com/fitzforge/polestar/issues)
 - **Changelog:** [CHANGELOG.md](https://github.com/fitzforge/polestar/blob/main/CHANGELOG.md)
 - **Docs:** [README](https://github.com/fitzforge/polestar/blob/main/README.md), [the documentation index](https://github.com/fitzforge/polestar/blob/main/docs/README.md), [writing a guide pack](https://github.com/fitzforge/polestar/blob/main/docs/PACKS.md)
-- **Recorder:** an optional companion that records your sessions to improve the routes, off until you turn it on. It is a separate download on the [GitHub releases page](https://github.com/fitzforge/polestar/releases).
 
 ## Licence and credits
 
