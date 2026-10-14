@@ -12,7 +12,8 @@
 --      cards that apply live;
 --   3. start: the suggested guide on its painting (its level range, who it
 --      is for), its pitch; the beta callout while ns.routesBeta is true; the
---      Discord community (its invite in a copy box); what guide packs are.
+--      Discord community (its invite as a link to the copy window); what
+--      guide packs are.
 --      Start guide (Choose a guide without one) or Browse guides.
 --
 -- Per character: PolestarCharDB.welcomeSeen, the welcome's version (SEEN).
@@ -568,7 +569,7 @@ local function note(p, heading, width)
 	return n
 end
 
-local COPY_W = 216
+local LINK_ROOM = 200 -- kept right of the Discord row's text for its link
 
 PAGES[#PAGES + 1] = {
 	key = "start",
@@ -599,16 +600,15 @@ PAGES[#PAGES + 1] = {
 		p.Beta = note(p, L["Our routes are still in beta"])
 		p.Beta.Chip = W.Chip(p)
 		p.Beta.Chip:SetPoint("LEFT", p.Beta.Head, "RIGHT", 8, 0)
-		p.Discord = note(p, L["Join us on Discord"], CW - COPY_W - 16 - 24)
+		p.Discord = note(p, L["Join us on Discord"], CW - 24 - LINK_ROOM)
 		p.Discord.Mark = W.Tex(p, "ARTWORK", "discord", "discord")
 		p.Discord.Mark:SetSize(16, 16)
 		p.Discord.Text:SetSpacing(3)
 		Theme.Font(p.Discord.Text, "small")
 		W.Color(p.Discord.Text, "textMuted")
-		-- The game cannot open links: the player copies the invite.
-		F.Discord = W.CopyBox(p)
-		F.Discord:SetWidth(COPY_W)
-		W.SetCopyText(F.Discord, ns.DiscordURL)
+		-- The invite as a link (the scheme left off); a click opens the copy
+		-- window holding it, since the game cannot open links.
+		F.Discord = W.Link(p, (ns.DiscordURL:gsub("^%a+://", "")), function() UI.ShowDiscord() end)
 		p.Packs = note(p, L["Guide packs"])
 
 		F.Start = W.Button(F.Foot, L["Start guide"], startSuggested, { primary = true })
@@ -691,9 +691,9 @@ PAGES[#PAGES + 1] = {
 		lay(p.Beta, beta)
 		if beta then W.SetChip(p.Beta.Chip, string.upper(L["Beta"]), "warning") else p.Beta.Chip:Hide() end
 		p.Discord.Text:SetText(L["Feedback, bug reports and news"])
-		lay(p.Discord, true, F.Discord:GetHeight())
+		lay(p.Discord, true)
 		F.Discord:ClearAllPoints()
-		F.Discord:SetPoint("TOPRIGHT", p, "TOPRIGHT", 0, -(p.Discord.psY + (p.Discord.psH - F.Discord:GetHeight()) / 2))
+		F.Discord:SetPoint("RIGHT", p, "TOPRIGHT", 0, -(p.Discord.psY + p.Discord.psH / 2))
 		p.Packs.Text:SetText((L["Guides made by other players for Polestar, not our own routes: each pack is an addon of its own, installed like any other. Its guides appear in %s under Guide packs, credited to their author, who supports them. More in Options > Guide packs."]):format(cmd("/polestar guides")))
 		lay(p.Packs, true)
 		W.SetButtonText(F.Start, g and L["Start guide"] or L["Choose a guide"])

@@ -16,8 +16,8 @@
   later character), with step dots. It shows the guide window, the arrow and
   every guide at a glance; setup shows each choice's description and the
   colour schemes as cards that apply as you click; the last page shows your
-  first guide on its zone painting, the beta note, the Discord invite to
-  copy, and what guide packs are.
+  first guide on its zone painting, the beta note, the Discord invite as a
+  link that opens it ready to copy, and what guide packs are.
 - The guide menu lists only the guides your character can follow on your own
   faction: an Undead no longer sees the Orc and Troll Durotar and Barrens
   guides there. The other faction's button and All still list every guide.

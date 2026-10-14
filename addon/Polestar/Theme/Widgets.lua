@@ -263,6 +263,45 @@ function W.SetButtonText(b, text)
 	b:SetWidth(b.psFixedWidth or max(72, floor(w + iconW + 32 + 0.5)))
 end
 
+-- A link: an address shown as text in the accent, no box. Under the cursor
+-- it turns to the text colour over a 1px accent underline, with "Click to
+-- copy" as its tooltip; the click (onClick) opens the copy window holding
+-- it. opts: { role = "label" (default) | "note" | any type role }.
+function W.Link(parent, text, onClick, opts)
+	local b = CreateFrame("Button", nil, parent)
+	b.Label = W.Text(b, opts and opts.role or "label", "accent")
+	b.Label:SetPoint("LEFT", b, "LEFT", 0, 0)
+	b.Line = b:CreateTexture(nil, "ARTWORK")
+	b.Line:SetTexture(WHITE)
+	b.Line:SetPoint("TOPLEFT", b.Label, "BOTTOMLEFT", 0, -2)
+	b.Line:SetPoint("TOPRIGHT", b.Label, "BOTTOMRIGHT", 0, -2)
+	W.Painter(b.Line, function(t)
+		t:SetHeight(Theme.Pixel(b))
+		t:SetVertexColor(Theme.Accent())
+	end)
+	b.Line:Hide()
+	b.psTip = L["Click to copy"]
+	b:SetScript("OnEnter", function(self)
+		W.Color(self.Label, "text")
+		self.Line:Show()
+		simpleTip(self)
+	end)
+	b:SetScript("OnLeave", function(self)
+		W.Color(self.Label, "accent")
+		self.Line:Hide()
+		hideTip(self)
+	end)
+	if onClick then b:SetScript("OnClick", onClick) end
+	W.SetLinkText(b, text)
+	return b
+end
+
+-- A link's text; the hit area hugs it, 20px tall.
+function W.SetLinkText(b, text)
+	b.Label:SetText(text or "")
+	b:SetSize(floor(b.Label:GetStringWidth() + 0.5), 20)
+end
+
 -- Buttons that act only on a second click within three seconds.
 function W.Confirm(b, text, fn)
 	b.psConfirmText, b.psConfirmFn = text, fn

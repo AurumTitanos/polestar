@@ -394,3 +394,37 @@ test('a primary button label has no drop shadow, a secondary one keeps it, acros
 	assert.equal(out.promoted, 0);
 	for (const k of ['secondary', 'secondaryAfterScheme', 'demoted']) assert.ok(out[k] > 0.5, `${k}: ${out[k]}`);
 });
+
+test('W.Link: an address in the accent with no box; under the cursor the text colour, an accent underline and "Click to copy"; a click runs its action', () => {
+	const [out] = run(`
+		local parent = CreateFrame("Frame", nil, UIParent)
+		local clicked = 0
+		local link = W.Link(parent, "discord.gg/example", function() clicked = clicked + 1 end, { role = "note" })
+		local function rgb(r, g, b) return { r, g, b } end
+		local out = { text = link.Label:GetText(), width = link:GetWidth() > 0, height = link:GetHeight(),
+			atRest = rgb(link.Label:GetTextColor()), accent = rgb(T.Color("accent")), line = link.Line:IsShown(),
+			skinned = link.psSkin ~= nil }
+		stub.RunScript(link, "OnEnter")
+		out.hover = { color = rgb(link.Label:GetTextColor()), textColor = rgb(T.Color("text")), line = link.Line:IsShown(),
+			lineColor = rgb(link.Line:GetVertexColor()), tip = GameTooltip.owner == link and GameTooltip:IsShown() }
+		stub.RunScript(link, "OnLeave")
+		out.left = { color = rgb(link.Label:GetTextColor()), line = link.Line:IsShown() }
+		link:Click()
+		out.clicked = clicked
+		W.SetLinkText(link, "a much longer address than before")
+		out.grew = link:GetWidth() > 0 and link.Label:GetText()
+		emit(out)`);
+	assert.equal(out.text, 'discord.gg/example');
+	assert.equal(out.width, true);
+	assert.equal(out.height, 20);
+	assert.deepEqual(out.atRest, out.accent, 'the accent at rest');
+	assert.equal(out.line, false);
+	assert.equal(out.skinned, false, 'no box');
+	assert.deepEqual(out.hover.color, out.hover.textColor, 'the text colour under the cursor');
+	assert.equal(out.hover.line, true);
+	assert.deepEqual(out.hover.lineColor, out.accent, 'an accent underline');
+	assert.equal(out.hover.tip, true);
+	assert.deepEqual(out.left, { color: out.accent, line: false });
+	assert.equal(out.clicked, 1);
+	assert.equal(out.grew, 'a much longer address than before');
+});
