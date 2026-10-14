@@ -179,6 +179,25 @@ test('installed packs: on, broken, turned off, not loaded, too new, never regist
 	assert.equal(out.problems, 2);
 });
 
+test('a pack not loaded for a reason the client has no text for shows the reason as given', () => {
+	const [out] = run(`
+		G.ScanInstalled()
+		local r
+		for _, p in ipairs(G.Packs()) do if p.addon == "Lonely" then r = p end end
+		emit({ addon = r.addon, status = r.status, reason = r.reason or false, global = ADDON_DEP_MISSING ~= nil })
+	`, {
+		before: `
+			stub.addons = {
+				{ name = "Polestar", loaded = true },
+				{ name = "Polestar_Guides", loaded = true },
+				{ name = "Lonely", reason = "DEP_MISSING" },
+			}
+			stub.addonMeta.Polestar_Guides = { ["X-Polestar-Pack"] = "guides", ["X-Polestar-Format"] = "1", Title = "Polestar Guides" }
+			stub.addonMeta.Lonely = { ["X-Polestar-Pack"] = "lonely", ["X-Polestar-Format"] = "1", Title = "Lonely Pack" }`,
+	});
+	assert.deepEqual(out, { addon: 'Lonely', status: 'not-loaded', reason: 'DEP_MISSING', global: false });
+});
+
 test('a pack whose file errors after two guides keeps them and stays on', () => {
 	const [out] = run(`
 		local ok = pcall(function()

@@ -67,7 +67,10 @@ test('the copy box is read-only: typing puts the text back; Escape closes the wi
 		stub.RunScript(b, "OnTextChanged", true)
 		out.typed = b:GetText()
 		stub.RunScript(b, "OnEscapePressed")
-		out.closed = not PolestarCopy:IsShown()`);
+		out.closed = not PolestarCopy:IsShown()
+		out.special = false
+		for _, name in ipairs(UISpecialFrames) do if name == "PolestarCopy" then out.special = true end end`);
 	assert.equal(out.typed, 'zone map 1429\ngoto 45.12,62.34 live');
 	assert.equal(out.closed, true);
+	assert.equal(out.special, true, 'the window closes with Escape from anywhere');
 });

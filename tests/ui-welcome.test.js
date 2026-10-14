@@ -260,6 +260,22 @@ test('the setup page writes its settings: quest automation both ways, the login 
 	assert.equal(out.shown, 'Graphite');
 });
 
+test('right-clicking the quest automation switch puts accepting and turning in back to their defaults', () => {
+	const [out] = run(`
+		Wel.Show("setup")
+		local get = Polestar.Get
+		local F = PolestarWelcome
+		F.AutoQuest:Click()
+		local off = { get("behavior.autoAccept"), get("behavior.autoTurnin") }
+		F.AutoQuest:Click("RightButton")
+		local reset = { get("behavior.autoAccept"), get("behavior.autoTurnin"), F.AutoQuest.checked }
+		F.AutoQuest:Click("RightButton")
+		emit({ off = off, reset = reset, again = { get("behavior.autoAccept"), get("behavior.autoTurnin"), F.AutoQuest.checked } })`);
+	assert.deepEqual(out.off, [false, false]);
+	assert.deepEqual(out.reset, [true, true, true]);
+	assert.deepEqual(out.again, [true, true, true], 'from the defaults, right-click leaves them as they are');
+});
+
 test('the guide packs page: Start opens the suggested guide, Browse guides opens the picker', () => {
 	const [out] = run(`
 		Wel.Show("packs")
