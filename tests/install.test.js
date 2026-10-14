@@ -209,7 +209,7 @@ test('inside a pack, install builds it and installs its folder; a second install
 	assert.match(first.out, /added PolestarPack_MiniPack/);
 	const folder = path.join(dest, 'PolestarPack_MiniPack');
 	assert.deepEqual(fs.readdirSync(folder).sort(), ['Guides.lua', 'LICENSE-DATA.txt', 'PolestarPack_MiniPack.toc', 'MapFrames.lua', 'Pack.lua'].sort());
-	assert.match(fs.readFileSync(path.join(folder, 'PolestarPack_MiniPack.toc'), 'utf8'), /## Title: Mini Pack/);
+	assert.match(fs.readFileSync(path.join(folder, 'PolestarPack_MiniPack.toc'), 'utf8'), /^## Title: Polestar Pack: Mini Pack$/m);
 	assert.ok(fs.existsSync(path.join(pack, 'dist', 'PolestarPack_MiniPack', 'Guides.lua')), 'built into the pack\'s dist/');
 	assert.deepEqual(fs.readdirSync(dest).sort(), ['Polestar', 'PolestarPack_MiniPack', 'OtherAddon'].sort(), 'only the pack folder is installed');
 	fs.writeFileSync(path.join(pack, 'guides', 'b.guide'), fs.readFileSync(path.join(pack, 'guides', 'b.guide'), 'utf8').replace('title Mini B', 'title Mini B2'));
