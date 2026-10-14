@@ -4,8 +4,9 @@
 // Local only: it binds 127.0.0.1 and serves client art from the local cache.
 //
 //   GET  /                     the page (and its files)
-//   GET  /api/meta             races, classes, zones (with art), screen size
+//   GET  /api/meta             races, classes, zones (with art), screen size, the version /api/version serves
 //   GET  /api/guides           every registered guide's header
+//   GET  /api/version          { version }: moves once each time reload() (a rebuild) restarts the session
 //   POST /api/act              { action, known } -> a frame (svg, glyphs, hits, state, errors, timing)
 //   POST /api/character        { race, cls, faction } -> a new character (a relog)
 //   POST /api/eui              { on } -> EllesmereUI installed or not (a relog)
@@ -93,6 +94,9 @@ async function startServer(opts = {}) {
 	await session.start();
 	let notice = null; // what the next frame tells the page (a restart, its reason)
 	let busy = Promise.resolve();
+	// Moves only when reload() restarted the session: the page redraws on a
+	// change, so a failed restart must not move it (that would loop).
+	let rebuilds = 0;
 
 	// Restart the Lua session: saving first unless it is gone.
 	async function relog({ save = true, why = null } = {}) {
@@ -138,10 +142,12 @@ async function startServer(opts = {}) {
 			return {
 				screen: SCREEN, races: d.races, raceNames: RACE_NAMES, classNames: CLASS_NAMES,
 				zones: d.zones.map((z) => ({ ...z, art: !!art[z.id] })).sort((a, b) => a.name.localeCompare(b.name)),
-				art: !!session.artDir, config, startMs: session.startMs,
+				art: !!session.artDir, config, startMs: session.startMs, version: rebuilds,
 				emblem: session.textures.uri('emblem', [0.31, 0.82, 0.77, 1]), stars: session.textures.uri('band-stars', [1, 1, 1, 1]),
 			};
 		},
+		// Cheap and not queued: the page polls it to redraw after a rebuild.
+		'GET /api/version': () => ({ version: rebuilds }),
 		'GET /api/guides': () => serial(async () => {
 			const r = await session.call(`local out = {}
 for i, h in ipairs(Polestar.Guides.List()) do
@@ -239,6 +245,7 @@ return out`);
 		return serial(async () => {
 			if (next) session.packs = next;
 			await relog({ why });
+			rebuilds++;
 		});
 	}
 

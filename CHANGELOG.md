@@ -7,6 +7,8 @@
 - `playtest` plays a step for a class none of the guide's races can be, and a
   guide with a `class` header, as the first race on the guide's side that can
   be that class: an `only Druid` step in a Horde guide is played as a Tauren.
+- `play` and `dev --play` stop the Lua session and exit when it cannot start,
+  instead of waiting on it; the page redraws on its own after a rebuild.
 
 ### For contributors
 

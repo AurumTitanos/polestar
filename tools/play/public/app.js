@@ -644,6 +644,27 @@
 		// The menu and the guide window side by side.
 		if (frame && frame.state && !frame.state.hub) act({ type: 'open', what: 'hub', arg: 'side' });
 		screen.focus();
+		watchVersion(meta.version);
+	}
+
+	// `polestar dev` restarts the session after a rebuild: the page asks for the
+	// rebuild count every second and redraws (with the new guide list) when it
+	// changes, without waiting for a click. `known` is the count /api/meta gave
+	// before the first frame, so a rebuild during start-up is not missed.
+	function watchVersion(known) {
+		setInterval(async () => {
+			let version;
+			try {
+				version = (await (await fetch('/api/version')).json()).version;
+			} catch {
+				return;
+			}
+			if (version !== known) {
+				act({ type: 'render' });
+				loadGuides().catch(() => {});
+			}
+			known = version;
+		}, 1000);
 	}
 	// For scripted sessions and debugging: the current hit map and state, and
 	// where a screen point is on the page.

@@ -323,7 +323,13 @@ end`);
 		});
 		proc.on('exit', (code, signal) => this.onExit(proc, code, signal));
 		const ready = await this.wait(this.timeoutMs);
-		if (!ready.ok) throw new Error(`Lua session failed to start: ${ready.error}`);
+		if (!ready.ok) {
+			// A child that never got ready (or hangs) would keep play running.
+			this.kill();
+			fs.rmSync(file, { force: true });
+			this.programFile = null;
+			throw new Error(`Lua session failed to start: ${ready.error}`);
+		}
 		this.startMs = Date.now() - t0;
 		this.log(`session ready in ${this.startMs} ms`);
 		return this;
