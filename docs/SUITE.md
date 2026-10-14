@@ -19,11 +19,12 @@ contracts between the modules are in [docs/ARCHITECTURE.md](ARCHITECTURE.md).
 | Rares | Rare NPC and treasure database with locations and loot, map pins (off by default, Map options), alerts (only through APIs the Forever client has) |
 | Maps | World map without fog of war (the zone-art overlay table), coordinates, zone level ranges, dungeon entrance and travel pins (off by default, Map options) |
 | QoL | Quality of life helpers: action buttons, XP and pace, merchant, reward marks, flight masters, death helper, toggles, requests from other players |
+| Talents (planned) | Where your next talent points go, level by level, on the talent panel, per class and spec. The trees are read from the client; the builds are written by contributors |
 
 Out of scope: a full UI suite (Polestar integrates with EllesmereUI through its
 public skinning API), boss and combat warnings, aura tracking, best-in-slot
-lists, loot browsing and talent builds. Polestar keeps the dungeon quest
-journal and the upgrade indicator on tooltips.
+lists and loot browsing. Polestar keeps the dungeon quest journal and the
+upgrade indicator on tooltips.
 
 Every module can be switched off in options, and none costs memory until it is
 used: modules load their data packs on demand. No surface lists a whole data
@@ -38,10 +39,12 @@ Inputs are read from the installed copies under
 databases wowforevertalents.com, foreverchanges.pro). Polestar itself is
 GPL-3.0; each input keeps its own licence, and the rules follow it:
 
-| Licence of the input | What may enter the repository |
+| Input | What may enter the repository and the releases |
 |---|---|
-| MIT (ForeverLevelingBiS, wowsims) | Derived data, with attribution (THIRD_PARTY.md) |
-| GPL, no licence, All Rights Reserved (AtlasLoot, QuestieDB, DungeonJournal, RareScanner) and web sources | Nothing: the importer code only. Outputs are local build products (gitignored) |
+| MIT (pfQuest, ForeverLevelingBiS, wowsims) | Derived data, with attribution (THIRD_PARTY.md) |
+| QuestieDB (no licence file; its maintainers ask that it be treated as all rights reserved) | Facts only, credited, in the shipped packs (the compiled guides, `Polestar_QuestDB`, `Polestar_Codex`); `data build --no-questie` builds without them if the maintainers ask |
+| Web sources (Wowhead's Forever database, warcraft.wiki.gg, the Forever databases) | Facts only, each with its source: corrections, `entrances.json`, `repgates.json`, the Wowhead caches |
+| GPL-2.0, no licence or All Rights Reserved addons (AtlasLoot, DungeonJournal, RareScanner) | Nothing: the importer code only, read by `codex build --local-extras` for the parity comparison; its output stays local and `pack` refuses it |
 
 Always facts (ids, names, levels, coordinates, drop rates, sources, rewards),
 never another addon's prose, art or code. Every output records its sources and
