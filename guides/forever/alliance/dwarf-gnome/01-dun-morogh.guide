@@ -206,6 +206,7 @@ step Grund and Gozwin
 step Grik'nir the Cold
   tip Grik'nir the Cold sits at the back of the troll cave, east of Grelin's camp.
   collect 2004 quest 218                      -- Grelin Whitebeard's Journal
+  goto 26.93,80.03 live "Troll cave entrance" optional
 
 step Grelin Whitebeard
   turnin 218

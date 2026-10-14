@@ -8322,6 +8322,7 @@ do
 					note = "Grik'nir the Cold sits at the back of the troll cave, east of Grelin's camp.",
 					goals = {
 						{ t = "collect", quest = 218, title = "The Stolen Journal", item = 2004, itemName = "Grelin Whitebeard's Journal", oi = 1, map = 1426, x = 30.48, y = 80.15, f = "e", note = "Grelin Whitebeard's Journal" },
+						{ t = "goto", text = "Troll cave entrance", map = 1426, x = 26.93, y = 80.03, optional = true },
 					},
 				},
 				{
