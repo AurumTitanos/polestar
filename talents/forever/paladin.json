@@ -1,0 +1,981 @@
+{
+	"class": "PALADIN",
+	"source": "ForeverDB",
+	"sourceUrl": "https://foreverdb.net/class/Paladin/talents",
+	"credit": "Builds adapted from ForeverDB's Paladin talent guides (https://foreverdb.net/class/Paladin/talents). Notes rewritten for Polestar.",
+	"checkedOn": "WoW: Forever beta 1.60.1.70291",
+	"summary": "Level as Retribution (quickest solo, with a two-hander and Seal of Command) or Protection (safe group pulls, dungeon-tank ready). Holy suits raids; it can level through its melee build, more slowly, if you want to heal dungeons on the way.",
+	"order": [
+		"Holy",
+		"Protection",
+		"Retribution"
+	],
+	"builds": [
+		{
+			"key": "holy",
+			"spec": "Holy",
+			"split": "31/0/20",
+			"link": "https://foreverdb.net/class/Paladin/talents?lvl=60&t=055fe0.05323003025101051--052250312",
+			"picks": [
+				{
+					"level": 10,
+					"tree": "Holy",
+					"talent": "Divine Intellect",
+					"rank": 1,
+					"note": "Start with Divine Intellect: more mana means you can melee and still cover your own (or a group's) healing."
+				},
+				{
+					"level": 11,
+					"tree": "Holy",
+					"talent": "Divine Intellect",
+					"rank": 2
+				},
+				{
+					"level": 12,
+					"tree": "Holy",
+					"talent": "Divine Intellect",
+					"rank": 3
+				},
+				{
+					"level": 13,
+					"tree": "Holy",
+					"talent": "Divine Intellect",
+					"rank": 4
+				},
+				{
+					"level": 14,
+					"tree": "Holy",
+					"talent": "Divine Intellect",
+					"rank": 5
+				},
+				{
+					"level": 15,
+					"tree": "Holy",
+					"talent": "Improved Seals",
+					"rank": 1,
+					"note": "Improved Seals raises every seal and Judgement here, which is where Holy's leveling damage comes from."
+				},
+				{
+					"level": 16,
+					"tree": "Holy",
+					"talent": "Improved Seals",
+					"rank": 2
+				},
+				{
+					"level": 17,
+					"tree": "Holy",
+					"talent": "Improved Seals",
+					"rank": 3
+				},
+				{
+					"level": 18,
+					"tree": "Holy",
+					"talent": "Healing Light",
+					"rank": 1
+				},
+				{
+					"level": 19,
+					"tree": "Holy",
+					"talent": "Healing Light",
+					"rank": 2
+				},
+				{
+					"level": 20,
+					"tree": "Holy",
+					"talent": "Reverence",
+					"rank": 1,
+					"note": "Reverence keeps a trickle of regen going while casting; three ranks unlock Illumination."
+				},
+				{
+					"level": 21,
+					"tree": "Holy",
+					"talent": "Reverence",
+					"rank": 2
+				},
+				{
+					"level": 22,
+					"tree": "Holy",
+					"talent": "Reverence",
+					"rank": 3
+				},
+				{
+					"level": 23,
+					"tree": "Holy",
+					"talent": "Healing Light",
+					"rank": 3
+				},
+				{
+					"level": 24,
+					"tree": "Holy",
+					"talent": "Spiritual Focus",
+					"rank": 1
+				},
+				{
+					"level": 25,
+					"tree": "Holy",
+					"talent": "Spiritual Focus",
+					"rank": 2
+				},
+				{
+					"level": 26,
+					"tree": "Holy",
+					"talent": "Illumination",
+					"rank": 1,
+					"note": "Illumination refunds mana on critical heals and is the heart of Holy's staying power."
+				},
+				{
+					"level": 27,
+					"tree": "Holy",
+					"talent": "Illumination",
+					"rank": 2
+				},
+				{
+					"level": 28,
+					"tree": "Holy",
+					"talent": "Illumination",
+					"rank": 3
+				},
+				{
+					"level": 29,
+					"tree": "Holy",
+					"talent": "Illumination",
+					"rank": 4
+				},
+				{
+					"level": 30,
+					"tree": "Holy",
+					"talent": "Illumination",
+					"rank": 5
+				},
+				{
+					"level": 31,
+					"tree": "Holy",
+					"talent": "Divine Favor",
+					"rank": 1
+				},
+				{
+					"level": 32,
+					"tree": "Holy",
+					"talent": "Holy Shock",
+					"rank": 1,
+					"note": "Holy Shock is a talent on Forever: an instant heal or Holy hit, handy for emergencies and for pulling."
+				},
+				{
+					"level": 33,
+					"tree": "Holy",
+					"talent": "Infusion of Light",
+					"rank": 1
+				},
+				{
+					"level": 34,
+					"tree": "Holy",
+					"talent": "Infusion of Light",
+					"rank": 2
+				},
+				{
+					"level": 35,
+					"tree": "Holy",
+					"talent": "Holy Power",
+					"rank": 1,
+					"note": "Holy Power raises Holy Shock's crit chance, feeding Illumination and Infusion of Light."
+				},
+				{
+					"level": 36,
+					"tree": "Holy",
+					"talent": "Holy Power",
+					"rank": 2
+				},
+				{
+					"level": 37,
+					"tree": "Holy",
+					"talent": "Holy Power",
+					"rank": 3
+				},
+				{
+					"level": 38,
+					"tree": "Holy",
+					"talent": "Holy Power",
+					"rank": 4
+				},
+				{
+					"level": 39,
+					"tree": "Holy",
+					"talent": "Holy Power",
+					"rank": 5
+				},
+				{
+					"level": 40,
+					"tree": "Holy",
+					"talent": "Light's Vigil",
+					"rank": 1,
+					"note": "Light's Vigil turns Holy Shock into a group-heal burst; this is the signature Forever Holy talent."
+				},
+				{
+					"level": 41,
+					"tree": "Retribution",
+					"talent": "Benediction",
+					"rank": 1,
+					"note": "The remaining 20 points go to Retribution: cheaper spells and more melee crit while questing, ending in Seal of Command."
+				},
+				{
+					"level": 42,
+					"tree": "Retribution",
+					"talent": "Benediction",
+					"rank": 2
+				},
+				{
+					"level": 43,
+					"tree": "Retribution",
+					"talent": "Benediction",
+					"rank": 3
+				},
+				{
+					"level": 44,
+					"tree": "Retribution",
+					"talent": "Benediction",
+					"rank": 4
+				},
+				{
+					"level": 45,
+					"tree": "Retribution",
+					"talent": "Benediction",
+					"rank": 5
+				},
+				{
+					"level": 46,
+					"tree": "Retribution",
+					"talent": "Improved Judgement",
+					"rank": 1
+				},
+				{
+					"level": 47,
+					"tree": "Retribution",
+					"talent": "Improved Judgement",
+					"rank": 2
+				},
+				{
+					"level": 48,
+					"tree": "Retribution",
+					"talent": "Conviction",
+					"rank": 1
+				},
+				{
+					"level": 49,
+					"tree": "Retribution",
+					"talent": "Conviction",
+					"rank": 2
+				},
+				{
+					"level": 50,
+					"tree": "Retribution",
+					"talent": "Conviction",
+					"rank": 3
+				},
+				{
+					"level": 51,
+					"tree": "Retribution",
+					"talent": "Conviction",
+					"rank": 4
+				},
+				{
+					"level": 52,
+					"tree": "Retribution",
+					"talent": "Conviction",
+					"rank": 5
+				},
+				{
+					"level": 53,
+					"tree": "Retribution",
+					"talent": "Seal of Command",
+					"rank": 1
+				},
+				{
+					"level": 54,
+					"tree": "Retribution",
+					"talent": "Sanctified Judgement",
+					"rank": 1
+				},
+				{
+					"level": 55,
+					"tree": "Retribution",
+					"talent": "Sanctified Judgement",
+					"rank": 2
+				},
+				{
+					"level": 56,
+					"tree": "Retribution",
+					"talent": "Sanctified Judgement",
+					"rank": 3
+				},
+				{
+					"level": 57,
+					"tree": "Retribution",
+					"talent": "Holy Conduit",
+					"rank": 1
+				},
+				{
+					"level": 58,
+					"tree": "Retribution",
+					"talent": "Holy Conduit",
+					"rank": 2
+				},
+				{
+					"level": 59,
+					"tree": "Retribution",
+					"talent": "Pursuit of Justice",
+					"rank": 1
+				},
+				{
+					"level": 60,
+					"tree": "Retribution",
+					"talent": "Pursuit of Justice",
+					"rank": 2
+				}
+			]
+		},
+		{
+			"key": "protection",
+			"spec": "Protection",
+			"split": "10/41/0",
+			"link": "https://foreverdb.net/class/Paladin/talents?lvl=60&t=055fe0.50203-5530513321331051",
+			"picks": [
+				{
+					"level": 10,
+					"tree": "Protection",
+					"talent": "Redoubt",
+					"rank": 1,
+					"note": "Open with Redoubt: blocking pays off at once, and Shield Specialization needs all five ranks."
+				},
+				{
+					"level": 11,
+					"tree": "Protection",
+					"talent": "Redoubt",
+					"rank": 2
+				},
+				{
+					"level": 12,
+					"tree": "Protection",
+					"talent": "Redoubt",
+					"rank": 3
+				},
+				{
+					"level": 13,
+					"tree": "Protection",
+					"talent": "Redoubt",
+					"rank": 4
+				},
+				{
+					"level": 14,
+					"tree": "Protection",
+					"talent": "Redoubt",
+					"rank": 5
+				},
+				{
+					"level": 15,
+					"tree": "Protection",
+					"talent": "Precision",
+					"rank": 1,
+					"note": "Precision and Anticipation help you land hits and dodge them while questing with a shield."
+				},
+				{
+					"level": 16,
+					"tree": "Protection",
+					"talent": "Precision",
+					"rank": 2
+				},
+				{
+					"level": 17,
+					"tree": "Protection",
+					"talent": "Precision",
+					"rank": 3
+				},
+				{
+					"level": 18,
+					"tree": "Protection",
+					"talent": "Anticipation",
+					"rank": 1
+				},
+				{
+					"level": 19,
+					"tree": "Protection",
+					"talent": "Anticipation",
+					"rank": 2
+				},
+				{
+					"level": 20,
+					"tree": "Protection",
+					"talent": "Improved Seal of Fury",
+					"rank": 1,
+					"note": "Improved Seal of Fury and Improved Righteous Fury begin the mana and mitigation cycle Forever tanking is built on."
+				},
+				{
+					"level": 21,
+					"tree": "Protection",
+					"talent": "Improved Righteous Fury",
+					"rank": 1
+				},
+				{
+					"level": 22,
+					"tree": "Protection",
+					"talent": "Improved Righteous Fury",
+					"rank": 2
+				},
+				{
+					"level": 23,
+					"tree": "Protection",
+					"talent": "Improved Righteous Fury",
+					"rank": 3
+				},
+				{
+					"level": 24,
+					"tree": "Protection",
+					"talent": "Shield Specialization",
+					"rank": 1
+				},
+				{
+					"level": 25,
+					"tree": "Protection",
+					"talent": "Shield Specialization",
+					"rank": 2
+				},
+				{
+					"level": 26,
+					"tree": "Protection",
+					"talent": "Shield Specialization",
+					"rank": 3
+				},
+				{
+					"level": 27,
+					"tree": "Protection",
+					"talent": "Sacred Duty",
+					"rank": 1
+				},
+				{
+					"level": 28,
+					"tree": "Protection",
+					"talent": "Sacred Duty",
+					"rank": 2
+				},
+				{
+					"level": 29,
+					"tree": "Protection",
+					"talent": "Swift Judgement",
+					"rank": 1,
+					"note": "By 29 (20 points) you match the usual dungeon-tank setup: Shield Specialization, Sacred Duty and Swift Judgement are complete."
+				},
+				{
+					"level": 30,
+					"tree": "Protection",
+					"talent": "Anticipation",
+					"rank": 3
+				},
+				{
+					"level": 31,
+					"tree": "Protection",
+					"talent": "Anticipation",
+					"rank": 4
+				},
+				{
+					"level": 32,
+					"tree": "Protection",
+					"talent": "Anticipation",
+					"rank": 5
+				},
+				{
+					"level": 33,
+					"tree": "Protection",
+					"talent": "Templar's Bulwark",
+					"rank": 1,
+					"note": "Templar's Bulwark is an absorb cooldown that scales with your health, and Holy Shield at 40 requires it."
+				},
+				{
+					"level": 34,
+					"tree": "Protection",
+					"talent": "One-Handed Weapon Specialization",
+					"rank": 1
+				},
+				{
+					"level": 35,
+					"tree": "Protection",
+					"talent": "One-Handed Weapon Specialization",
+					"rank": 2
+				},
+				{
+					"level": 36,
+					"tree": "Protection",
+					"talent": "One-Handed Weapon Specialization",
+					"rank": 3
+				},
+				{
+					"level": 37,
+					"tree": "Protection",
+					"talent": "Iron Creed",
+					"rank": 1,
+					"note": "Iron Creed adds threat and damage reduction to Holy Strike while Righteous Fury is active."
+				},
+				{
+					"level": 38,
+					"tree": "Protection",
+					"talent": "Iron Creed",
+					"rank": 2
+				},
+				{
+					"level": 39,
+					"tree": "Protection",
+					"talent": "Iron Creed",
+					"rank": 3
+				},
+				{
+					"level": 40,
+					"tree": "Protection",
+					"talent": "Iron Creed",
+					"rank": 4
+				},
+				{
+					"level": 41,
+					"tree": "Protection",
+					"talent": "Iron Creed",
+					"rank": 5
+				},
+				{
+					"level": 42,
+					"tree": "Protection",
+					"talent": "Holy Shield",
+					"rank": 1,
+					"note": "Holy Shield is the capstone: more block uptime, with Holy damage each time you block. Ideal for pulling packs."
+				},
+				{
+					"level": 43,
+					"tree": "Protection",
+					"talent": "Toughness",
+					"rank": 1,
+					"note": "Leftover points buy armor, a quicker Hammer of Justice, and Holy Strength and seal damage for leveling."
+				},
+				{
+					"level": 44,
+					"tree": "Protection",
+					"talent": "Toughness",
+					"rank": 2
+				},
+				{
+					"level": 45,
+					"tree": "Protection",
+					"talent": "Toughness",
+					"rank": 3
+				},
+				{
+					"level": 46,
+					"tree": "Protection",
+					"talent": "Toughness",
+					"rank": 4
+				},
+				{
+					"level": 47,
+					"tree": "Protection",
+					"talent": "Toughness",
+					"rank": 5
+				},
+				{
+					"level": 48,
+					"tree": "Protection",
+					"talent": "Improved Hammer of Justice",
+					"rank": 1
+				},
+				{
+					"level": 49,
+					"tree": "Protection",
+					"talent": "Improved Hammer of Justice",
+					"rank": 2
+				},
+				{
+					"level": 50,
+					"tree": "Protection",
+					"talent": "Improved Hammer of Justice",
+					"rank": 3
+				},
+				{
+					"level": 51,
+					"tree": "Holy",
+					"talent": "Divine Strength",
+					"rank": 1
+				},
+				{
+					"level": 52,
+					"tree": "Holy",
+					"talent": "Divine Strength",
+					"rank": 2
+				},
+				{
+					"level": 53,
+					"tree": "Holy",
+					"talent": "Divine Strength",
+					"rank": 3
+				},
+				{
+					"level": 54,
+					"tree": "Holy",
+					"talent": "Divine Strength",
+					"rank": 4
+				},
+				{
+					"level": 55,
+					"tree": "Holy",
+					"talent": "Divine Strength",
+					"rank": 5
+				},
+				{
+					"level": 56,
+					"tree": "Holy",
+					"talent": "Improved Seals",
+					"rank": 1
+				},
+				{
+					"level": 57,
+					"tree": "Holy",
+					"talent": "Improved Seals",
+					"rank": 2
+				},
+				{
+					"level": 58,
+					"tree": "Holy",
+					"talent": "Improved Seals",
+					"rank": 3
+				},
+				{
+					"level": 59,
+					"tree": "Holy",
+					"talent": "Healing Light",
+					"rank": 1
+				},
+				{
+					"level": 60,
+					"tree": "Holy",
+					"talent": "Healing Light",
+					"rank": 2
+				}
+			]
+		},
+		{
+			"key": "retribution",
+			"spec": "Retribution",
+			"split": "10/0/41",
+			"link": "https://foreverdb.net/class/Paladin/talents?lvl=60&t=055fe0.50203--55225331221331021",
+			"picks": [
+				{
+					"level": 10,
+					"tree": "Retribution",
+					"talent": "Benediction",
+					"rank": 1,
+					"note": "Benediction lowers the mana cost of Judgement, Holy Strike and seals, so you rest less between fights."
+				},
+				{
+					"level": 11,
+					"tree": "Retribution",
+					"talent": "Benediction",
+					"rank": 2
+				},
+				{
+					"level": 12,
+					"tree": "Retribution",
+					"talent": "Benediction",
+					"rank": 3
+				},
+				{
+					"level": 13,
+					"tree": "Retribution",
+					"talent": "Benediction",
+					"rank": 4
+				},
+				{
+					"level": 14,
+					"tree": "Retribution",
+					"talent": "Benediction",
+					"rank": 5
+				},
+				{
+					"level": 15,
+					"tree": "Retribution",
+					"talent": "Improved Judgement",
+					"rank": 1
+				},
+				{
+					"level": 16,
+					"tree": "Retribution",
+					"talent": "Improved Judgement",
+					"rank": 2
+				},
+				{
+					"level": 17,
+					"tree": "Retribution",
+					"talent": "Conviction",
+					"rank": 1
+				},
+				{
+					"level": 18,
+					"tree": "Retribution",
+					"talent": "Conviction",
+					"rank": 2
+				},
+				{
+					"level": 19,
+					"tree": "Retribution",
+					"talent": "Conviction",
+					"rank": 3
+				},
+				{
+					"level": 20,
+					"tree": "Retribution",
+					"talent": "Seal of Command",
+					"rank": 1,
+					"note": "Seal of Command is the main two-hander seal for leveling; take it as soon as it opens."
+				},
+				{
+					"level": 21,
+					"tree": "Retribution",
+					"talent": "Sanctified Judgement",
+					"rank": 1,
+					"note": "Sanctified Judgement gives mana back and is the prerequisite arrow for Vengeance."
+				},
+				{
+					"level": 22,
+					"tree": "Retribution",
+					"talent": "Sanctified Judgement",
+					"rank": 2
+				},
+				{
+					"level": 23,
+					"tree": "Retribution",
+					"talent": "Sanctified Judgement",
+					"rank": 3
+				},
+				{
+					"level": 24,
+					"tree": "Retribution",
+					"talent": "Conviction",
+					"rank": 4
+				},
+				{
+					"level": 25,
+					"tree": "Retribution",
+					"talent": "Conviction",
+					"rank": 5
+				},
+				{
+					"level": 26,
+					"tree": "Retribution",
+					"talent": "Vindication",
+					"rank": 1
+				},
+				{
+					"level": 27,
+					"tree": "Retribution",
+					"talent": "Vindication",
+					"rank": 2
+				},
+				{
+					"level": 28,
+					"tree": "Retribution",
+					"talent": "Vindication",
+					"rank": 3
+				},
+				{
+					"level": 29,
+					"tree": "Retribution",
+					"talent": "Sacred Arbiter",
+					"rank": 1,
+					"note": "Sacred Arbiter strengthens Holy Strike and keeps Judgements rolling, and completes the 20 points row 5 asks for."
+				},
+				{
+					"level": 30,
+					"tree": "Retribution",
+					"talent": "Vengeance",
+					"rank": 1,
+					"note": "Vengeance, then Two-Handed Weapon Specialization: the crit-driven damage core of the two-hander plan."
+				},
+				{
+					"level": 31,
+					"tree": "Retribution",
+					"talent": "Vengeance",
+					"rank": 2
+				},
+				{
+					"level": 32,
+					"tree": "Retribution",
+					"talent": "Vengeance",
+					"rank": 3
+				},
+				{
+					"level": 33,
+					"tree": "Retribution",
+					"talent": "Two-Handed Weapon Specialization",
+					"rank": 1
+				},
+				{
+					"level": 34,
+					"tree": "Retribution",
+					"talent": "Two-Handed Weapon Specialization",
+					"rank": 2
+				},
+				{
+					"level": 35,
+					"tree": "Retribution",
+					"talent": "Two-Handed Weapon Specialization",
+					"rank": 3
+				},
+				{
+					"level": 36,
+					"tree": "Retribution",
+					"talent": "Pursuit of Justice",
+					"rank": 1,
+					"note": "Pursuit of Justice adds run speed. Champion of the Light is left out while the Retribution Aura spell-power bug keeps spell damage low."
+				},
+				{
+					"level": 37,
+					"tree": "Retribution",
+					"talent": "Pursuit of Justice",
+					"rank": 2
+				},
+				{
+					"level": 38,
+					"tree": "Retribution",
+					"talent": "Holy Conduit",
+					"rank": 1
+				},
+				{
+					"level": 39,
+					"tree": "Retribution",
+					"talent": "Holy Conduit",
+					"rank": 2
+				},
+				{
+					"level": 40,
+					"tree": "Retribution",
+					"talent": "Twist of Light",
+					"rank": 1,
+					"note": "Twist of Light makes swapping seals cheaper and adds seal echoes; it is Forever's seal-twisting talent."
+				},
+				{
+					"level": 41,
+					"tree": "Retribution",
+					"talent": "Instrument of Law",
+					"rank": 1
+				},
+				{
+					"level": 42,
+					"tree": "Retribution",
+					"talent": "Instrument of Law",
+					"rank": 2
+				},
+				{
+					"level": 43,
+					"tree": "Holy",
+					"talent": "Divine Strength",
+					"rank": 1,
+					"note": "Spare points go to Divine Strength and Holy's Improved Seals for damage, then Deflection for survival."
+				},
+				{
+					"level": 44,
+					"tree": "Holy",
+					"talent": "Divine Strength",
+					"rank": 2
+				},
+				{
+					"level": 45,
+					"tree": "Holy",
+					"talent": "Divine Strength",
+					"rank": 3
+				},
+				{
+					"level": 46,
+					"tree": "Holy",
+					"talent": "Divine Strength",
+					"rank": 4
+				},
+				{
+					"level": 47,
+					"tree": "Holy",
+					"talent": "Divine Strength",
+					"rank": 5
+				},
+				{
+					"level": 48,
+					"tree": "Holy",
+					"talent": "Improved Seals",
+					"rank": 1
+				},
+				{
+					"level": 49,
+					"tree": "Holy",
+					"talent": "Improved Seals",
+					"rank": 2
+				},
+				{
+					"level": 50,
+					"tree": "Holy",
+					"talent": "Improved Seals",
+					"rank": 3
+				},
+				{
+					"level": 51,
+					"tree": "Holy",
+					"talent": "Healing Light",
+					"rank": 1
+				},
+				{
+					"level": 52,
+					"tree": "Holy",
+					"talent": "Healing Light",
+					"rank": 2
+				},
+				{
+					"level": 53,
+					"tree": "Retribution",
+					"talent": "Deflection",
+					"rank": 1
+				},
+				{
+					"level": 54,
+					"tree": "Retribution",
+					"talent": "Deflection",
+					"rank": 2
+				},
+				{
+					"level": 55,
+					"tree": "Retribution",
+					"talent": "Deflection",
+					"rank": 3
+				},
+				{
+					"level": 56,
+					"tree": "Retribution",
+					"talent": "Deflection",
+					"rank": 4
+				},
+				{
+					"level": 57,
+					"tree": "Retribution",
+					"talent": "Deflection",
+					"rank": 5
+				},
+				{
+					"level": 58,
+					"tree": "Retribution",
+					"talent": "Repentance",
+					"rank": 1
+				},
+				{
+					"level": 59,
+					"tree": "Retribution",
+					"talent": "Eye for an Eye",
+					"rank": 1
+				},
+				{
+					"level": 60,
+					"tree": "Retribution",
+					"talent": "Eye for an Eye",
+					"rank": 2
+				}
+			]
+		}
+	]
+}
