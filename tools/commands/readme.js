@@ -10,14 +10,15 @@ brand: rewrites docs/assets/{banner-dark,banner-light,emblem,logo,download}.svg,
 drawn in code from the emblem geometry and the wordmark fonts.
 
 charts: rewrites docs/assets/charts/{levels,starts}.svg. Scores the guides
-under the simulator's model (as \`sim compare\` does) against an earlier draft
+under the simulator's model (as \`sim compare\` does) against an earlier set
 of them; the best route found and the consensus route are drawn when the
 results in --sim were searched on the world being scored.
 
-  --draft <dir|rev>    the earlier draft: a guides folder, or a git revision
-                       whose guides/ is used. The README's charts use 773e3d4^,
-                       the guides before they were rebuilt from the simulator
-                       routes.
+  --draft <dir|rev>    the earlier guides: a guides folder, or a git revision
+                       whose guides/ is used. The README's charts use v0.1.0,
+                       the first release.
+  --draft-label <text> how the charts name them (default: "Polestar <x.y.z>"
+                       for a release tag vX.Y.Z, else "Earlier guides")
   --sim <dir>          simulator outputs: world, params, results, consensus
                        (default data/sim)
   --guides <dir>       the guides to score (default guides/)`;
@@ -33,7 +34,7 @@ async function run(argv) {
 	try {
 		({ values, positionals } = parseArgs({
 			args: argv,
-			options: { draft: { type: 'string' }, sim: { type: 'string' }, guides: { type: 'string' } },
+			options: { draft: { type: 'string' }, 'draft-label': { type: 'string' }, sim: { type: 'string' }, guides: { type: 'string' } },
 			allowPositionals: true,
 			strict: true,
 		}));

@@ -3,7 +3,7 @@
 // in-process under the simulator's model (tools/lib/sim/compare.js, the same
 // scoring as `sim compare`) and writes nothing outside docs/assets/charts:
 //   levels.svg   hours to each level, per faction: the guides and an earlier
-//                draft of them (and the best route found when the sim results match)
+//                set of them, a release (and the best route found when the sim results match)
 //   starts.svg   hours to 60 and hours of grinding, per start
 //
 // The best route found and the consensus route are drawn only when the
@@ -11,10 +11,11 @@
 // (compare() refuses stale results; consensus is checked here), so every
 // number in a chart comes from one world.
 //
-//   node tools/polestar.js readme charts --draft <dir|git rev> [--sim <dir>] [--guides <dir>]
+//   node tools/polestar.js readme charts --draft <dir|git rev> [--draft-label <text>] [--sim <dir>] [--guides <dir>]
 //
-// o.draft is the earlier draft to compare against: a guides folder, or a git
-// revision whose guides/ is extracted to a temporary folder.
+// o.draft is the earlier guides to compare against: a guides folder, or a git
+// revision whose guides/ is extracted to a temporary folder (the README uses
+// the first release, v0.1.0); o['draft-label'] names them in the charts.
 
 const fs = require('node:fs');
 const os = require('node:os');
@@ -92,7 +93,9 @@ async function score(o) {
 	} finally {
 		prev.cleanup();
 	}
-	return { worldHash: hash, draft: prev.label, factions };
+	const tag = /^v(\d+\.\d+\.\d+)$/.exec(o.draft || '');
+	const draftName = o['draft-label'] || (tag ? `Polestar ${tag[1]}` : 'Earlier guides');
+	return { worldHash: hash, draft: prev.label, draftName, factions };
 }
 
 const raceName = (r, faction) => (r === 'Skyborne' ? `Skyborne (${faction})` : r === 'NightElf' ? 'Night Elf' : r);
@@ -205,7 +208,7 @@ function levelsChart(o, data) {
 			const a = f1(Math.min(...v)), b = f1(Math.max(...v));
 			return a === b ? `${a} h` : `${a}\u2013${b} h`;
 		};
-		const notes = [['guides', 'Guides', C.guides], ['draft', 'Earlier draft', C.draft]];
+		const notes = [['guides', 'Guides', C.guides], ['draft', data.draftName, C.draft]];
 		if (has('best')) notes.splice(1, 0, ['best', 'Best found', C.best]);
 		notes.forEach(([k, label, color], i) => {
 			const y = top + 196 + i * 24;
@@ -213,10 +216,10 @@ function levelsChart(o, data) {
 			body.push(o.text(rng(k), { font: 'semibold', size: 14, x: xr, y, anchor: 'end', fill: color }));
 			body.push(o.text(label, { font: 'medium', size: 14, x: xr - 100, y, anchor: 'end', fill: C.textDim }));
 		});
-		// The strip: hours ahead of the earlier draft, by level.
+		// The strip: hours ahead of the earlier guides, by level.
 		const SX = (l) => x0 + ((l - 1) / 59) * panelW;
 		const SY = (d) => stripTop + stripH / 2 - (d / span) * (stripH / 2);
-		body.push(o.text('Hours ahead of the earlier draft, by level', { font: 'medium', size: 13, x: x0, y: stripTop - 16, fill: C.textDim }));
+		body.push(o.text(`Hours ahead of ${data.draftName}, by level`, { font: 'medium', size: 13, x: x0, y: stripTop - 16, fill: C.textDim }));
 		body.push(`<rect x="${x0}" y="${stripTop}" width="${panelW}" height="${stripH}" fill="#000005" fill-opacity="0.18"/>`);
 		body.push(`<rect x="${x0}" y="${f2(SY(0))}" width="${panelW}" height="1" fill="${C.hair}"/>`);
 		for (const d of [-span, span]) body.push(o.text(`${d > 0 ? '+' : '\u2212'}${Math.abs(d)}`, { font: 'medium', size: 12, x: x0 - 10, y: SY(d) + (d > 0 ? 10 : 0), anchor: 'end', fill: C.textMuted }));
@@ -233,7 +236,7 @@ function levelsChart(o, data) {
 	const entries = [{ label: 'Guides', color: C.guides }];
 	if (has('best')) entries.push({ label: 'Best found', color: C.best, width: 1.5, dash: '5 4' });
 	if (has('consensus')) entries.push({ label: 'Consensus', color: C.consensus, kind: 'dot' });
-	entries.push({ label: 'Earlier draft', color: C.draft, width: 2 });
+	entries.push({ label: data.draftName, color: C.draft, width: 2 });
 	return card(o, {
 		W, Hh,
 		title: 'Level by hours played',
@@ -294,7 +297,7 @@ function startsChart(o, data) {
 	const entries = [{ label: 'Guides', color: C.guides, kind: 'dot' }];
 	if (has('best')) entries.push({ label: 'Best found', color: C.best, kind: 'dot' });
 	if (has('consensus')) entries.push({ label: 'Consensus', color: C.consensus, kind: 'dot' });
-	entries.push({ label: 'Earlier draft', color: C.draft, kind: 'dot' });
+	entries.push({ label: data.draftName, color: C.draft, kind: 'dot' });
 	return card(o, {
 		W, Hh,
 		title: 'Per start: hours to 60 and grinding',
@@ -309,7 +312,8 @@ async function write(o) {
 	fs.mkdirSync(OUT, { recursive: true });
 	const files = { 'levels.svg': levelsChart(new Outliner('l'), data), 'starts.svg': startsChart(new Outliner('s'), data) };
 	for (const [name, text] of Object.entries(files)) {
-		fs.writeFileSync(path.join(OUT, name), `${header('svg', `readme charts --draft ${o.draft}`, 'data/sim and guides/')}\n${text}`);
+		const draftArgs = `--draft ${o.draft}${o['draft-label'] ? ` --draft-label "${o['draft-label']}"` : ''}`;
+		fs.writeFileSync(path.join(OUT, name), `${header('svg', `readme charts ${draftArgs}`, 'data/sim and guides/')}\n${text}`);
 		console.log(`docs/assets/charts/${name} (${(Buffer.byteLength(text) / 1024).toFixed(1)} KB)`);
 	}
 	for (const f of data.factions) {
@@ -319,7 +323,7 @@ async function write(o) {
 			console.log(`${f.faction.padEnd(8)} ${s.race.padEnd(9)} best ${h(s.best)}  consensus ${h(s.consensus)}  guides ${h(s.guides)}${g(s.guides)}  draft ${h(s.draft)}${g(s.draft)}`);
 		}
 	}
-	console.log(`world ${data.worldHash.slice(0, 12)}, earlier draft from ${data.draft}`);
+	console.log(`world ${data.worldHash.slice(0, 12)}, compared with ${data.draftName} (${data.draft})`);
 }
 
 module.exports = { score, levelsChart, startsChart, write };
