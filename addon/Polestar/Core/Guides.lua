@@ -318,7 +318,7 @@ local OFFICIAL_ADDON = "Polestar_Guides"
 local REQUIRED_META = { "addon", "title", "author", "version", "license" }
 local OPTIONAL_META = { "website", "source", "notes" }
 
-local find, gsub = string.find, string.gsub
+local find = string.find
 
 -- Does pack `packId` own guide id `guideId`? Ours (`guides`) owns forever/
 -- and draft/, the internal `lookup` pack lookup/, every other pack `<id>/`.
@@ -343,6 +343,12 @@ end
 -- the id so its guides drop without a problem each.
 local function accepted(r)
 	return r.status == "on" or r.status == "off"
+end
+
+-- Why a pack that needs a newer Polestar does not run; needs: its escaped
+-- X-Polestar-Needs, or nil.
+local function tooNewReason(needs)
+	return needs and (L["Needs Polestar %s or newer."]):format(needs) or L["Needs a newer Polestar."]
 end
 
 local function problem(r, kind, message, guideId)
@@ -460,7 +466,7 @@ function ns.RegisterPack(meta)
 			and C_AddOns.GetAddOnMetadata(addon, "X-Polestar-Needs") or nil
 		r.status = "too-new"
 		r.needs = type(needs) == "string" and needs ~= "" and escape(needs) or nil
-		r.reason = r.needs and (L["Needs Polestar %s or newer."]):format(r.needs) or L["Needs a newer Polestar."]
+		r.reason = tooNewReason(r.needs)
 		problem(r, "pack-refused", r.reason)
 		return false, r.reason
 	end
@@ -593,14 +599,19 @@ function Guides.PackShown(id)
 end
 local packShown = Guides.PackShown
 
+-- Is accepted pack record r on and shown?
+local function packVisible(r)
+	return accepted(r) and packShown(r.id)
+end
+
 -- A registered pack's guides are visible while it is on and shown.
 local function visible(g)
 	local r = packs[g.pack]
-	return r ~= nil and (r.status == "on" or r.status == "off") and packShown(g.pack)
+	return r ~= nil and packVisible(r)
 end
 
 local function syncStatus(r)
-	if r.status == "on" or r.status == "off" then r.status = packShown(r.id) and "on" or "off" end
+	if accepted(r) then r.status = packShown(r.id) and "on" or "off" end
 	return r
 end
 
@@ -708,7 +719,7 @@ local function fromToc(r, name, reason, enabled)
 	r.reason = nil
 	if r.format and not Guides.FORMATS[r.format] then
 		r.status = "too-new"
-		r.reason = r.needs and (L["Needs Polestar %s or newer."]):format(r.needs) or L["Needs a newer Polestar."]
+		r.reason = tooNewReason(r.needs)
 	elseif reason == "DISABLED" or not enabled then
 		r.status = "disabled"
 	elseif not C_AddOns.IsAddOnLoaded(name) then
@@ -734,7 +745,7 @@ function Guides.ScanInstalled()
 					forget(installed[name])
 					installed[name] = nil
 				end
-				if (r.status == "on" or r.status == "off") and r.guideCount == 0 then noGuides(r) end
+				if accepted(r) and r.guideCount == 0 then noGuides(r) end
 			else
 				r = installed[name]
 				if not r then
@@ -823,7 +834,7 @@ end
 local function canSuggest(id)
 	if id == "guides" then return true end
 	local r = type(id) == "string" and packs[id]
-	return r and not r.internal and (r.status == "on" or r.status == "off") and packShown(id) and hasLeveling(r) or false
+	return r and not r.internal and packVisible(r) and hasLeveling(r) or false
 end
 
 -- The packs suggestions can come from, ours ("guides") first, then the
@@ -858,7 +869,7 @@ end
 -- the best of the rest. -> fitting { id, ... }, best id | nil
 local function rank(packId, player, here, zone)
 	local r = packs[packId]
-	if not (r and (r.status == "on" or r.status == "off") and packShown(packId)) then return {}, nil end
+	if not (r and packVisible(r)) then return {}, nil end
 	local level = player.level or 1
 	local fitting, best, bestKey = {}, nil, nil
 	for i, id in ipairs(r.guides) do
