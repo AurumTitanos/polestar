@@ -115,6 +115,13 @@
   Tannok are taken on the way out of Shadowglen and Coldridge Valley, by the
   path where Porthannius and Hands Springsprocket stand, and A Task
   Unfinished starts the cougar hunt at Antur Fallow's end of Camp Narache.
+- Quest items that vanish after a while reach their turn-in in time: Dun
+  Morogh takes the Scalding Mornbrew (five minutes) from Nori just before
+  Anvilmar instead of before the troll cave, the Blasted Lands go to
+  Nethergarde Keep with the Crate of Power Stones (an hour) before the
+  bloodmages' beasts, and Horde Warriors in the Barrens gather the Twitching
+  Antennae (fifteen minutes) on the way back from Gann Stonespire and hearth
+  to Ruga at once. Teldrassil says Iverron's Antidote lasts five minutes.
 
 ### For guide authors
 

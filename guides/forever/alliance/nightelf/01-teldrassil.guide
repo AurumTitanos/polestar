@@ -180,7 +180,7 @@ step Aldrassil
   accept 3522
 
 step The moonwell and Iverron
-  tip The moonwell sits north of Aldrassil; Iverron is a little further north-west.
+  tip The moonwell sits north of Aldrassil; Iverron is a little further north-west. Iverron's Antidote lasts five minutes: fill the phial and go straight on to him.
   collect 5184 quest 921.1 @60.0,33.0         -- Use the Crystal Phial at the moonwell
   turnin 3522                                 -- Iverron
 
