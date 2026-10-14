@@ -120,7 +120,9 @@ Replace `0.2.0` with the new version throughout.
    simulator's model estimates and are written as such, with the world they
    come from.
    The notes start from CHANGELOG.md's "unreleased" section, which then
-   takes the version and the release date.
+   takes the version and the release date. Join each paragraph and list
+   item onto one line in the notes: GitHub shows every line break of a
+   release's notes, so the changelog's wrapped lines would break mid-sentence.
 
 9. Publish the release with the three files from step 4:
 
