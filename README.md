@@ -17,7 +17,7 @@
 <p align="center">
   <a href="LICENSE"><img alt="Licence: GPL-3.0" src="https://img.shields.io/badge/licence-GPL--3.0-e6ba66?style=flat-square&labelColor=232a3f"></a>
   <img alt="World of Warcraft: Forever, client 1.60.1" src="https://img.shields.io/badge/WoW-Forever_1.60.1-94c9ff?style=flat-square&labelColor=232a3f">
-  <img alt="Version 0.2.0, beta" src="https://img.shields.io/badge/version-0.2.0_beta-fabf4d?style=flat-square&labelColor=232a3f">
+  <img alt="Version 0.2.1, beta" src="https://img.shields.io/badge/version-0.2.1_beta-fabf4d?style=flat-square&labelColor=232a3f">
   <a href="https://github.com/fitzforge/polestar/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/fitzforge/polestar/actions/workflows/ci.yml/badge.svg"></a>
 </p>
 

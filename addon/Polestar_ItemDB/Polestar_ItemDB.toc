@@ -3,7 +3,7 @@
 ## Notes: Item stats for Polestar's gear advice. Loaded on demand.
 ## Author: Polestar
 ## X-License: GPL-3.0-only
-## Version: 0.2.0
+## Version: 0.2.1
 ## Category: Quests
 ## LoadOnDemand: 1
 ## Dependencies: Polestar
