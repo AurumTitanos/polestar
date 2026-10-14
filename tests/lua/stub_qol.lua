@@ -170,15 +170,28 @@ end
 function C_Item.GetItemIconByID(id) return (q.items[id] and q.items[id].icon) or 134400 end
 function C_Item.IsItemInRange() return q.inRange end
 function C_Item.IsUsableItem(id) return true end
--- Wearing takes one copy out of the bags.
+-- Wearing lands a moment later, once the server answers: one copy leaves the
+-- bags for q.worn[slot] (slot -> item ID), BAG_UPDATE_DELAYED, then
+-- PLAYER_EQUIPMENT_CHANGED. q.refuse[id]: that item never goes on (its bind
+-- confirmation cancelled).
+q.worn, q.refuse = {}, {}
 function C_Item.EquipItemByName(item, slot)
 	call("EquipItemByName", item, slot)
 	local id = tonumber(tostring(item):match("item:(%d+)"))
-	for bag = 0, 4 do
-		for s, it in pairs(q.bags[bag].slots) do
-			if it.itemID == id then q.bags[bag].slots[s] = nil; return end
+	if q.refuse[id] then return end
+	C_Timer.After(0.1, function()
+		for bag = 0, 4 do
+			for s, it in pairs(q.bags[bag].slots) do
+				if it.itemID == id then
+					q.bags[bag].slots[s] = nil
+					if slot then q.worn[slot] = id end
+					stub.fire("BAG_UPDATE_DELAYED")
+					stub.fire("PLAYER_EQUIPMENT_CHANGED", slot, false)
+					return
+				end
+			end
 		end
-	end
+	end)
 end
 function C_Item.GetItemSpell(id) local it = q.items[id]; if it and it.spell then return "Use", it.spell end end
 function C_Item.GetItemInfoInstant(id)

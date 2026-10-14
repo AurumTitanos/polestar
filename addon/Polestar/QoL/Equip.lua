@@ -3,30 +3,36 @@
 -- gives) is put on once it reaches the bags, when Polestar.Gear calls it an
 -- upgrade (qol.rewardEquip, default off; Shift at the turn-in skips). Never in
 -- combat: wearing waits for combat to end. Only a new copy of what that
--- turn-in gave counts (the bag count must rise within WAIT seconds), and it
--- goes in the slot Gear.CompareToEquipped names (the weaker ring or trinket).
+-- turn-in gave counts (the bag count must rise within WAIT seconds). Rewards
+-- go on one at a time, each in the slot Gear.CompareToEquipped names (the
+-- weaker ring or trinket) against what is worn once the last one is on.
 -- Quest rewards bind when picked up, so wearing one asks nothing; an item
 -- that would bind when worn brings up the client's own confirmation, which is
 -- left to you.
 --
 -- Client: GetQuestReward (post-hooked), GetQuestItemLink, GetNumQuestRewards
 -- (Mainline QuestInfo.lua); C_Item.EquipItemByName (ItemDocumentation);
--- BAG_UPDATE_DELAYED (ContainerDocumentation).
+-- BAG_UPDATE_DELAYED (ContainerDocumentation); PLAYER_EQUIPMENT_CHANGED
+-- (PaperDollInfoDocumentation).
 
 local ADDON, ns = ...
 local L = ns.L
 local QoL = ns.QoL
 local Client = QoL.Client
 
-local format, floor = string.format, math.floor
+local format, floor, tremove = string.format, math.floor, table.remove
 
 local Equip = {}
 QoL.Equip = Equip
 
-local WAIT = 10 -- seconds a reward may take to reach the bags
+local WAIT = 10 -- seconds a reward may take to reach the bags, or to go on
+local MAIN, OFF = 16, 17 -- hand slots
+local TWO_HANDER = 17 -- INVTYPE_2HWEAPON
+local HAND = { [13] = MAIN, [21] = MAIN, [14] = OFF, [22] = OFF, [23] = OFF } -- one-hand and off-hand pieces
 
 local expected = {} -- { link, id, before, at }: given by a turn-in, not arrived yet
 local landed = {}   -- { link }: arrived, waiting to be worn
+local waiting       -- { id, slot }: the reward last put on, until it is on (or WAIT passes)
 
 local function itemID(link) return link and tonumber(link:match("item:(%d+)")) end
 
@@ -57,16 +63,41 @@ local function onReward(choice)
 	for i = 1, (GetNumQuestRewards and GetNumQuestRewards() or 0) do add("reward", i) end
 end
 
+-- Where a reward goes and how much better it is, or nil to leave it. With a
+-- two-hander worn, Gear weighs a one-hand or off-hand reward together with
+-- the best partner in the bags, but only the reward goes on: it must beat the
+-- two-hander by itself, and a weapon that fits the main hand goes there.
+local function placement(G, link)
+	local up, _, pct = G.IsUpgrade(link)
+	if not up then return nil end
+	local r = G.CompareToEquipped(link)
+	local mainLink = G.Client.InventoryLink(MAIN)
+	local main, info = mainLink and G.GetItemInfo(mainLink), G.GetItemInfo(link)
+	if not (main and main.inv == TWO_HANDER and info and HAND[info.inv]) then return r and r.slot, pct end
+	local gain = r.score - r.old
+	pct = r.old > 0 and gain / r.old * 100 or nil
+	if gain <= 0 or (pct and pct < (tonumber(ns.Get("gear.minUpgrade")) or 0)) then return nil end
+	return HAND[info.inv], pct
+end
+
+-- One reward at a time: the next is scored once the last is on
+-- (PLAYER_EQUIPMENT_CHANGED), so a second ring takes the other finger only
+-- when it beats the ring there, and never replaces the first. One that never
+-- goes on (its bind confirmation cancelled) holds up the rest for WAIT seconds.
 local function wear()
-	local G = gear()
-	if G and C_Item and C_Item.EquipItemByName then
-		for _, link in ipairs(landed) do
-			local up, _, pct = G.IsUpgrade(link)
-			if up then
-				local r = G.CompareToEquipped and G.CompareToEquipped(link)
-				C_Item.EquipItemByName(link, r and r.slot)
-				ns.Print(pct and format(L["Wearing %s (%d%% better)."], link, floor(pct)) or format(L["Wearing %s."], link))
-			end
+	local G = QoL.On("rewardEquip") and gear()
+	while G and C_Item and C_Item.EquipItemByName and #landed > 0 do
+		local link = tremove(landed, 1)
+		local slot, pct = placement(G, link)
+		if slot then
+			C_Item.EquipItemByName(link, slot)
+			ns.Print(pct and format(L["Wearing %s (%d%% better)."], link, floor(pct)) or format(L["Wearing %s."], link))
+			local this = { id = itemID(link), slot = slot }
+			waiting = this
+			C_Timer.After(WAIT, function()
+				if waiting == this then waiting = nil; QoL.Secure("rewardEquip", wear) end
+			end)
+			return
 		end
 	end
 	wipe(landed)
@@ -85,8 +116,17 @@ local function onBags()
 		end
 	end
 	expected = keep
+	if #landed > 0 and not waiting then QoL.Secure("rewardEquip", wear) end
+end
+
+-- Only the pending reward reaching its slot moves on to the next one.
+local function onEquipment()
+	local G = ns.Gear
+	if not (waiting and G and itemID(G.Client.InventoryLink(waiting.slot)) == waiting.id) then return end
+	waiting = nil
 	if #landed > 0 then QoL.Secure("rewardEquip", wear) end
 end
 
 if hooksecurefunc and GetQuestReward then hooksecurefunc("GetQuestReward", onReward) end
 ns.RegisterEvent("BAG_UPDATE_DELAYED", onBags)
+ns.RegisterEvent("PLAYER_EQUIPMENT_CHANGED", onEquipment)
