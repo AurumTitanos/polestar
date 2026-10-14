@@ -1898,6 +1898,66 @@ built.
   `collects` keeps an item obtainable, and Forever-only rows are trusted.
   Companions have no such client flag: a release build retires none.
 
+- Parity (`tools/lib/codex/parity.js`): a release build compares itself,
+  entity by entity, with the last `--local-extras` build in
+  `data/local/codex-extras` (when there is one), writes
+  `data/local/codex-parity.json` and `.md` (per kind: total, matching,
+  missing and different rows; a difference whose value comes from a
+  better-evidenced input, such as the client's corpse point for an entrance,
+  says so and counts as a match) and records the match per kind in its
+  `meta.parity`; without the internal build it claims none. `codex parity
+  [--ours <dir>] [--against <dir>]` reruns the comparison. The report also
+  lists what only play can fill and the Recorder event that fills it
+  (Forever instances and their entrances: `enter`, `encounter`; Forever
+  rares: `rare`, `slain` + `drop`; quest givers, enders, rewards: `accept`,
+  `turnin`). On 2026-10-14 (Forever client 1.60.1.70338, the same
+  `data/forever`):
+
+  | Kind | Internal | Release matching | Match |
+  |---|---:|---:|---:|
+  | instances | 44 | 37 | 84.1% |
+  | instance levels | 29 | 29 | 100.0% |
+  | instance entrances | 14 | 10 | 71.4% |
+  | bosses | 373 | 272 | 72.9% |
+  | bosses with loot | 265 | 262 | 98.9% |
+  | boss loot items | 2066 | 1671 | 80.9% |
+  | drop chances | 20707 | 17770 | 85.8% |
+  | rares | 413 | 387 | 93.7% |
+  | rare positions | 363 | 357 | 98.3% |
+  | rare levels | 387 | 387 | 100.0% |
+  | rare loot | 14016 | 13816 | 98.6% |
+  | treasures | 65 | 60 | 92.3% |
+  | treasure positions | 31 | 31 | 100.0% |
+  | treasure loot | 1548 | 1508 | 97.4% |
+  | items with a source | 15967 | 15901 | 99.6% |
+  | items: drop | 8806 | 8666 | 98.4% |
+  | items: quest | 2092 | 2091 | 100.0% |
+  | items: vendor | 2248 | 2248 | 100.0% |
+  | items: object | 3288 | 3287 | 100.0% |
+  | items: world | 4152 | 4145 | 99.8% |
+  | items: craft | 1797 | 1797 | 100.0% |
+  | items: container | 2095 | 2095 | 100.0% |
+  | tabards | 40 | 40 | 100.0% |
+  | mounts | 135 | 134 | 99.3% |
+  | items: rep | 689 | 484 | 70.2% |
+  | pets | 89 | 87 | 97.8% |
+  | items: pvp | 763 | 451 | 59.1% |
+  | journal quests | 929 | 880 | 94.7% |
+  | quest givers | 641 | 628 | 98.0% |
+  | quest enders | 680 | 671 | 98.7% |
+  | quest rewards | 552 | 547 | 99.1% |
+  | quest XP | 731 | 722 | 98.8% |
+  | quest chains | 489 | 469 | 95.9% |
+
+  The gaps: seven Forever instances AtlasLoot lists ahead of release are not
+  in the client (no `Map` row); Forever instances have no corpse point, so
+  their entrances wait for a recording; AtlasLoot's extra bosses (the Ring of
+  Law's fighters, rare spawns, chests) are not `DungeonEncounter` rows;
+  reputation standings that vendors gate in gossip, and battleground rewards
+  AtlasLoot files as PvP, are in no client table (`ItemSparse` carries no
+  `MinFactionID` or `RequiredPVPRank` for them); 26 Forever rares no
+  database ranks yet.
+
 ### Reference data (`data/forever/`, built by `data build`, gitignored)
 
 ```

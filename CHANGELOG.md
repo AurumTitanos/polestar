@@ -45,6 +45,12 @@
   `--local-extras` adds AtlasLoot, RareScanner and DungeonJournal for a
   local-only comparison build. `pack` ships the Codex with its
   `LICENSE-DATA.txt` and refuses to run without a release-safe one.
+- A release `codex build` measures itself against the last `--local-extras`
+  build, entity by entity (`data/local/codex-parity.md`, `codex parity`), and
+  lists what only play can fill with the Recorder event that fills it.
+- `data build` keeps the droppers of pfQuest's reference loot tables (raid
+  and boss loot) at an unknown rate instead of dropping them: Molten Core's
+  tier pieces now name their bosses.
 - A skill for coding agents, `skills/polestar-guide-pack/`: the workflow from
   `new` to `pack` (look up every id with `find`, then lint and playtest until
   both pass) and the guide format on one page. `new` copies it into the pack's

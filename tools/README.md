@@ -64,6 +64,7 @@ sources, so they run on a maintainer's machine, never in CI.
 | `gear build` / `gear fetch` | Forever item stats, reward choices and stat weight bands / refresh the cached sims |
 | `questdb build` | The `Polestar_QuestDB` data addon |
 | `codex build` | Lookup's Codex: `data/forever/codex/*.json` and the `Polestar_Codex` data addon |
+| `codex parity` | The release Codex against the last `--local-extras` build, per kind: `data/local/codex-parity.{json,md}` |
 | `media` | Regenerates the addon's textures from `tools/media/*.js` |
 | `readme brand` / `readme charts` | Redraws the README's art: the banners, emblem, logo, download and CurseForge buttons and the CurseForge avatar / the route charts (needs `data/sim`); both also export the CurseForge listing's PNGs when `rsvg-convert` is installed |
 

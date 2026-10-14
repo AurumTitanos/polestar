@@ -204,15 +204,21 @@ function normalizeItems(raw) {
 		const put = (m, k, chance) => {
 			const c = Number(chance);
 			if (!Number.isInteger(k) || k <= 0 || !Number.isFinite(c) || c <= 0) return;
-			if (!m.has(k) || m.get(k) < c) m.set(k, c);
+			if (!m.has(k) || m.get(k) === null || m.get(k) < c) m.set(k, c);
 		};
 		for (const [u, c] of r.U) put(npc, u, c);
 		for (const [o, c] of r.O) put(object, o, c);
+		// Reference loot (raid and boss loot tables) often carries chance 0:
+		// pfQuest knows the dropper, not the rate. It stays, chance unknown (null).
+		const ref0 = (m, k) => {
+			if (Number.isInteger(k) && k > 0 && !m.has(k)) m.set(k, null);
+		};
 		for (const [ref, c] of r.R) {
 			const rl = raw.refloot.get(ref);
 			if (!rl) continue;
-			for (const u of rl.U.keys()) put(npc, u, c);
-			for (const o of rl.O.keys()) put(object, o, c);
+			const known = Number(c) > 0;
+			for (const u of rl.U.keys()) known ? put(npc, u, c) : ref0(npc, u);
+			for (const o of rl.O.keys()) known ? put(object, o, c) : ref0(object, o);
 		}
 		const sorted = (m) => {
 			const o = {};

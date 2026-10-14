@@ -260,3 +260,42 @@ test('buildCodex: a release build says so in its meta and ships its notices; a -
 	assert.match(releaseRefusal(x.packDir), /--local-extras build/);
 	assert.match(releaseRefusal(path.join(tmp, 'nowhere')), /not built/);
 });
+
+test('compareCodex: per-kind match against the internal build, missing and different rows, reasons, and what needs recording', () => {
+	const { compareCodex, summary, markdown } = require('../tools/lib/codex/parity');
+	const theirs = {
+		instances: {
+			stockade: { name: 'The Stockade', areaId: 717, levels: [15, 24, 32], entrance: { map: 1453, x: 52.4, y: 70 }, bosses: [{ name: 'Bazil Thredd', npc: 1716, items: [2926, 3] }, { name: 'Trash', npc: null, items: [9] }] },
+			'alcaz-prison': { name: 'Alcaz Prison', forever: true, bosses: [] },
+		},
+		items: {
+			2926: { name: 'Head of Bazil Thredd', kind: 'item', sources: [{ type: 'drop', npc: 1716, chance: 100, from: ['atlasloot'] }] },
+			3: { name: 'Thing', kind: 'item', sources: [{ type: 'rep', faction: 1, from: ['atlasloot'] }] },
+		},
+		npcs: { 61: { name: 'Thuros', rare: true, level: 11, spawns: [{ map: 1429, x: 89, y: 79 }], loot: [2926] }, 62: { name: 'Gone', rare: true } },
+		objects: {},
+		journal: { dungeons: { stockade: { name: 'The Stockade', quests: [{ id: 386, title: 'What Comes Around', start: { map: 1453, x: 10, y: 10 }, rewards: { items: [{ id: 1 }], xp: 900 } }] } } },
+	};
+	const ours = {
+		instances: { 'stormwind-stockade': { name: 'Stormwind Stockade', areaId: 717, levels: [15, 23, 29], entrance: { map: 1453, x: 50.4, y: 66.2 }, bosses: [{ name: 'Bazil Thredd', npc: 1716, items: [2926] }] } },
+		items: { 2926: { name: 'Head of Bazil Thredd', kind: 'item', sources: [{ type: 'drop', npc: 1716, chance: 100, from: ['pfquest'] }] }, 3: { name: 'Thing', kind: 'item', sources: [] } },
+		npcs: { 61: { name: 'Thuros', rare: true, level: 11, spawns: [{ map: 1429, x: 89.4, y: 79.3 }], loot: [] } },
+		objects: {},
+		journal: { dungeons: { 'stormwind-stockade': { quests: [{ id: 386, start: { map: 1453, x: 10.5, y: 10 }, rewards: { items: [{ id: 1 }], xp: 900 } }] } } },
+	};
+	const r = compareCodex(ours, theirs);
+	assert.equal(r.instanceMap.stockade, 'stormwind-stockade');
+	const s = summary(r);
+	assert.deepEqual(s.instances, { total: 2, match: 1, share: 0.5 });
+	assert.deepEqual(s['instance entrances'], { total: 1, match: 1, share: 1 }, 'the client corpse point differs, with its reason');
+	assert.match(r.kinds['instance entrances'].different[0].reason, /corpse point/);
+	assert.deepEqual(s.bosses, { total: 1, match: 1, share: 1 }, 'Trash is no boss');
+	assert.deepEqual(s['boss loot items'], { total: 2, match: 1, share: 0.5 });
+	assert.deepEqual(s['drop chances'], { total: 1, match: 1, share: 1 });
+	assert.deepEqual(s.rares, { total: 2, match: 1, share: 0.5 });
+	assert.deepEqual(s['rare positions'], { total: 1, match: 1, share: 1 });
+	assert.deepEqual(s['items: rep'], { total: 1, match: 0, share: 0 });
+	assert.deepEqual([s['journal quests'].share, s['quest givers'].share, s['quest rewards'].share, s['quest XP'].share], [1, 1, 1, 1]);
+	assert.deepEqual(r.needsRecording.map((n) => [n.kind, n.event]), [['instance', 'enter, encounter'], ['rare', 'rare, slain + drop']]);
+	assert.match(markdown(r), /^\| instances \| 2 \| 1 \| 50\.0% \| 1 \| 0 \|$/m);
+});

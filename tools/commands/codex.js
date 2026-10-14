@@ -1,10 +1,11 @@
 'use strict';
-// node tools/polestar.js codex build [options]
+// node tools/polestar.js codex build|parity [options]
 
 const path = require('node:path');
 const { parseArgs } = require('node:util');
 
 const usage = `usage: node tools/polestar.js codex build [options]
+       node tools/polestar.js codex parity [--ours <dir>] [--against <dir>]
 
 Builds Lookup's Codex: every item, mount, pet, recipe, NPC, rare, quest,
 zone, dungeon and treasure, with where each item comes from, and the
@@ -17,12 +18,23 @@ with its LICENSE-DATA.txt; \`pack\` ships that folder in the release zip.
 
   --addons <dir>     the Forever client's Interface/AddOns (default: detected)
   --offline          use cached client tables only
-  --out <dir>        JSON output (default data/forever/codex)
-  --pack <dir>       pack output (default addon/Polestar_Codex)
+  --out <dir>        JSON output (default data/forever/codex; with
+                     --local-extras data/local/codex-extras)
+  --pack <dir>       pack output (default addon/Polestar_Codex; with
+                     --local-extras data/local/codex-extras/Polestar_Codex)
   --local-extras     also merge the installed AtlasLoot (GPL-2.0), RareScanner
                      (All Rights Reserved) and data/forever/dungeons.json
                      (DungeonJournal, no licence). For this machine only: the
-                     pack's meta says local and \`pack\` refuses to ship it.`;
+                     pack's meta says local and \`pack\` refuses to ship it.
+
+A release build compares itself with the last --local-extras build (when
+data/local/codex-extras exists), entity by entity, writes
+data/local/codex-parity.json and .md and records the match per kind in its
+meta (\`parity\`). \`codex parity\` reruns that comparison on two built
+folders (default ours data/forever/codex, against data/local/codex-extras).
+
+  --ours <dir>       parity: the release build (default data/forever/codex)
+  --against <dir>    parity: the internal build (default data/local/codex-extras)`;
 
 function fail(msg) {
 	console.error(`${msg}\n\n${usage}`);
@@ -46,6 +58,12 @@ async function runBuild(rest) {
 	}
 	const { buildCodex } = require('../lib/codex/build');
 	const abs = (p) => (p ? path.resolve(p) : undefined);
+	const { ROOT } = require('../lib/paths');
+	// A --local-extras build never lands where `pack` and `install` look.
+	if (values['local-extras']) {
+		values.out = values.out || path.join(ROOT, 'data', 'local', 'codex-extras');
+		values.pack = values.pack || path.join(ROOT, 'data', 'local', 'codex-extras', 'Polestar_Codex');
+	}
 	const res = await buildCodex({
 		addons: abs(values.addons),
 		offline: values.offline,
@@ -65,12 +83,42 @@ async function runBuild(rest) {
 	console.log(`pack: ${meta.pack.files} files, ${kb(meta.pack.bytes)}; memory ${mem}`);
 	if (meta.localExtras) console.log('local build (--local-extras): not for release; `pack` refuses it');
 	console.log(`sources: ${meta.sources.map((s) => `${s.name}${s.version ? ` ${s.version}` : ''}`).join('; ')}`);
+	if (res.parity) printParity(res.parity.report, res.parity.files);
+	return 0;
+}
+
+function printParity(report, files) {
+	const rel = (p) => path.relative(process.cwd(), p) || p;
+	for (const [name, c] of Object.entries(report.kinds)) {
+		console.log(`${name.padEnd(22)} ${String(c.match).padStart(6)} / ${String(c.total).padEnd(6)} ${(c.share * 100).toFixed(1).padStart(5)}%${c.missingCount ? `  missing ${c.missingCount}` : ''}`);
+	}
+	console.log(`needs recording: ${report.needsRecording.length}`);
+	if (files) console.log(`wrote ${files.map(rel).join(' and ')}`);
+}
+
+async function runParity(rest) {
+	let values;
+	try {
+		({ values } = parseArgs({ args: rest, options: { ours: { type: 'string' }, against: { type: 'string' } }, strict: true }));
+	} catch (err) {
+		return fail(err.message);
+	}
+	const { ROOT } = require('../lib/paths');
+	const { readCodex } = require('../lib/codex/parity');
+	const { writeParity } = require('../lib/codex/build');
+	const ours = path.resolve(values.ours || path.join(ROOT, 'data', 'forever', 'codex'));
+	const against = path.resolve(values.against || path.join(ROOT, 'data', 'local', 'codex-extras'));
+	const fs = require('node:fs');
+	for (const d of [ours, against]) if (!fs.existsSync(path.join(d, 'meta.json'))) return fail(`no Codex build in ${d}`);
+	const { report, files } = writeParity(readCodex(ours), readCodex(against), path.join(ROOT, 'data', 'local'));
+	printParity(report, files);
 	return 0;
 }
 
 async function run(argv) {
 	const [sub, ...rest] = argv;
 	if (sub === 'build') return runBuild(rest);
+	if (sub === 'parity') return runParity(rest);
 	return fail(sub ? `unknown subcommand "${sub}"` : 'missing subcommand');
 }
 

@@ -41,8 +41,9 @@
 //                AreaTrigger rows name no instance, and the trigger nearest
 //                the Corpse point is as often a city or inn trigger, so they
 //                are not used.
-//   loot         a boss's items: its npcs.json drops at MIN_LOOT% or more
-//                (pfQuest, QuestieDB, recordings), best chance first.
+//   loot         a boss's items: its items.json drops at MIN_LOOT% or more, or
+//                at an unknown rate (pfQuest reference loot tables, QuestieDB
+//                droppers), best chance first.
 
 const fs = require('node:fs');
 const path = require('node:path');
@@ -194,8 +195,9 @@ function buildInstances(facts, ctx = {}) {
 	const lootOf = {}; // npc -> [[item, chance]]
 	for (const [id, it] of Object.entries(itemsIn)) {
 		for (const [npc, chance] of Object.entries((it.drops && it.drops.npc) || {})) {
-			const c = Number(chance);
-			if (!(c >= MIN_LOOT)) continue;
+			// null: a known dropper at an unknown rate (pfQuest reference loot, QuestieDB).
+			const c = chance === null ? null : Number(chance);
+			if (c !== null && !(c >= MIN_LOOT)) continue;
 			(lootOf[npc] = lootOf[npc] || []).push([Number(id), c]);
 		}
 	}
@@ -245,8 +247,8 @@ function buildInstances(facts, ctx = {}) {
 			}
 			npcs = [...new Set(npcs)];
 			const loot = new Map();
-			for (const id of npcs) for (const [item, c] of lootOf[id] || []) if (!(loot.get(item) >= c)) loot.set(item, c);
-			const items = [...loot.entries()].sort((a, b) => b[1] - a[1] || a[0] - b[0]).slice(0, BOSS_LOOT_CAP).map(([id]) => id);
+			for (const id of npcs) for (const [item, c] of lootOf[id] || []) if (!loot.has(item) || (c !== null && !(loot.get(item) >= c))) loot.set(item, c);
+			const items = [...loot.entries()].sort((a, b) => (b[1] ?? -1) - (a[1] ?? -1) || a[0] - b[0]).slice(0, BOSS_LOOT_CAP).map(([id]) => id);
 			bosses.push({ name: e.name, npc: npcs[0] ?? null, npcs, items, encounter: e.id });
 			for (const id of npcs) bossInstance[id] = bossInstance[id] || key;
 		}

@@ -1209,6 +1209,15 @@ async function buildCodex(opts = {}) {
 	const { buildJournal, emitJournal } = require('./journal');
 	const journal = buildJournal(inputs, codex);
 	extraFiles.push(...emitJournal(journal));
+	// Parity with the last --local-extras build (tools/lib/codex/parity.js):
+	// a release build records the match per kind; without that build, none.
+	const against = opts.parityAgainst || (opts.inputs ? null : path.join(ROOT, 'data', 'local', 'codex-extras'));
+	let parity = null;
+	if (!meta.localExtras && against && fs.existsSync(path.join(against, 'meta.json'))) {
+		const { readCodex, summary } = require('./parity');
+		parity = writeParity({ ...codex, journal }, readCodex(against), opts.parityOut || path.join(ROOT, 'data', 'local'));
+		meta.parity = summary(parity.report);
+	}
 	const files = emitPack({ ...codex, meta, frames }, { version, build: meta.build, extraFiles });
 	const bytes = Object.values(files).reduce((n, t) => n + Buffer.byteLength(t), 0);
 	writePackDir(packDir, files);
@@ -1227,7 +1236,17 @@ async function buildCodex(opts = {}) {
 	const out = { meta, items: codex.items, npcs: codex.npcs, objects: codex.objects, quests: codex.quests, instances: codex.instances, zones: codex.zones, factions: codex.factions, spells: codex.spells, frames };
 	out.journal = journal;
 	for (const [name, value] of Object.entries(out)) writeAtomic(path.join(outDir, `${name}.json`), `${JSON.stringify(sortKeysDeep(value), null, '\t')}\n`);
-	return { codex: out, files, outDir, packDir, bytes, memory, warnings: [...(inputs.warnings || []), ...mergeWarnings], ms: Date.now() - t0 };
+	return { codex: out, files, outDir, packDir, bytes, memory, parity, warnings: [...(inputs.warnings || []), ...mergeWarnings], ms: Date.now() - t0 };
 }
 
-module.exports = { buildCodex, loadInputs, mergeCodex, clientFacts, cluster, slug, BUILD, TABLES };
+// ours, theirs: Codex objects -> { report, files } with codex-parity.json and .md written to dir.
+function writeParity(ours, theirs, dir) {
+	const { compareCodex, markdown } = require('./parity');
+	const report = compareCodex(ours, theirs);
+	const files = [path.join(dir, 'codex-parity.json'), path.join(dir, 'codex-parity.md')];
+	writeAtomic(files[0], `${JSON.stringify(report, null, '\t')}\n`);
+	writeAtomic(files[1], markdown(report));
+	return { report, files };
+}
+
+module.exports = { buildCodex, loadInputs, mergeCodex, clientFacts, cluster, slug, writeParity, BUILD, TABLES };
