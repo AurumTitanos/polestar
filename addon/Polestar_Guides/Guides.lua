@@ -8231,11 +8231,10 @@ do
 				},
 				{
 					title = "The troggs",
-					note = "Rockjaw Troggs and Burly Rockjaw Troggs dig all over the valley floor south of Anvilmar. Hands Springsprocket stands at the mouth of the tunnel to the east.",
+					note = "Rockjaw Troggs and Burly Rockjaw Troggs dig all over the valley floor south of Anvilmar.",
 					goals = {
 						{ t = "kill", quest = 170, title = "A New Threat", target = "Rockjaw Trogg", npc = 707, count = 6, oi = 1, map = 1426, x = 31.05, y = 73.95, f = "e", spots = { { x = 30.9, y = 75, r = 52, n = 10 }, { x = 31.5, y = 76.8, r = 40, n = 5 }, { x = 32.6, y = 75.2, r = 40, n = 5 }, { x = 29.5, y = 77, r = 51, n = 9 }, { x = 23.7, y = 77.8, r = 40, n = 2 }, { x = 22.8, y = 76.3, r = 40, n = 1 }, { x = 23.4, y = 73.6, r = 40, n = 2 }, { x = 21.8, y = 72.9, r = 40, n = 2 }, { x = 19.8, y = 73.8, r = 40, n = 2 }, { x = 24.3, y = 71, r = 40, n = 1 } }, spread = true, note = "Rockjaw Trogg" },
 						{ t = "kill", quest = 170, title = "A New Threat", target = "Burly Rockjaw Trogg", npc = 724, count = 6, oi = 2, map = 1426, x = 31.63, y = 73.69, f = "e", spots = { { x = 31.6, y = 73.7, r = 40, n = 1 }, { x = 30.4, y = 75.4, r = 59, n = 7 }, { x = 30, y = 77.4, r = 40, n = 1 }, { x = 28.5, y = 77.4, r = 50, n = 3 }, { x = 31.9, y = 76.2, r = 40, n = 3 }, { x = 26.4, y = 72.8, r = 80, n = 16 }, { x = 23.5, y = 74, r = 66, n = 10 }, { x = 21.4, y = 74.1, r = 53, n = 5 }, { x = 20.4, y = 71.6, r = 53, n = 5 }, { x = 20, y = 76.5, r = 40, n = 2 }, { x = 22.3, y = 77.2, r = 54, n = 5 }, { x = 24, y = 79.6, r = 40, n = 1 } }, spread = true, note = "Burly Rockjaw Trogg" },
-						{ t = "accept", quest = 2160, title = "Supplies to Tannok", npc = 6782, npcName = "Hands Springsprocket", minLevel = 1, qlvl = 5, map = 1426, x = 33.85, y = 72.24, f = "e", note = "Hands Springsprocket, at the tunnel" },
 					},
 				},
 				{
@@ -8356,11 +8355,12 @@ do
 				},
 				{
 					title = "The tunnel",
-					note = "Mountaineer Thalos guards the tunnel out of the valley, east of Anvilmar.",
+					note = "Mountaineer Thalos guards the tunnel out of the valley, east of Anvilmar. Hands Springsprocket stands beside him.",
 					goals = {
 						{ t = "turnin", quest = 282, title = "Senir's Observations", npc = 1965, npcName = "Mountaineer Thalos", map = 1426, x = 33.48, y = 71.84, f = "e", note = "Mountaineer Thalos" },
 						{ t = "accept", quest = 420, title = "Senir's Observations", npc = 1965, npcName = "Mountaineer Thalos", minLevel = 1, qlvl = 5, pre = { 282 }, preTitles = { [282] = "Senir's Observations" }, map = 1426, x = 33.48, y = 71.84, f = "e" },
 						{ t = "accept", quest = 96628, title = "The Adventurer", npc = 1965, npcName = "Mountaineer Thalos", minLevel = 4, qlvl = 6, pre = { 282 }, closedBy = { 96608, 96627, 96630, 96638, 96652, 96656, 96659 }, preTitles = { [282] = "Senir's Observations", [96608] = "The Great Outdoors", [96627] = "The Adventurer", [96630] = "The Adventurer", [96638] = "The Adventurer", [96652] = "The Adventurer", [96656] = "The Adventurer", [96659] = "The Adventurer" }, map = 1426, x = 33.48, y = 71.84, f = "e", note = "Mountaineer Thalos" },
+						{ t = "accept", quest = 2160, title = "Supplies to Tannok", npc = 6782, npcName = "Hands Springsprocket", minLevel = 1, qlvl = 5, map = 1426, x = 33.85, y = 72.24, f = "e", note = "Hands Springsprocket" },
 					},
 				},
 				{

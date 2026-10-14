@@ -32,6 +32,8 @@ next forever/alliance/02-westfall
 #   Leopard Prowler is safe at level 4 for every class (done before leaving
 #   Coldridge on every Dwarf and Gnome class in the beta; recorded on a
 #   Gnome Mage and a Dwarf Rogue, about 3 minutes each).
+# - "Supplies to Tannok" (2160) is taken from Hands Springsprocket at the
+#   tunnel on the way out, not during the troggs.
 # - The Kharanos and depot pickups are grouped: the simulator shuttled between
 #   them several times. Beldin's "A Visitor to Dun Morogh" (96408) is taken at
 #   the depot on the way east after Brewnall instead of from the quarry.
@@ -146,10 +148,9 @@ step Anvilmar
   train class                                 -- Level 2 spells, inside Anvilmar
 
 step The troggs
-  tip Rockjaw Troggs and Burly Rockjaw Troggs dig all over the valley floor south of Anvilmar. Hands Springsprocket stands at the mouth of the tunnel to the east.
+  tip Rockjaw Troggs and Burly Rockjaw Troggs dig all over the valley floor south of Anvilmar.
   kill 707 quest 170                          -- Rockjaw Trogg
   kill 724 quest 170                          -- Burly Rockjaw Trogg
-  accept 2160                                 -- Hands Springsprocket, at the tunnel
 
 step Back to Anvilmar
   turnin 170                                  -- Balir Frosthammer
@@ -229,10 +230,11 @@ step Call of Earth
   turnin 94375                                -- Teo Hammerstorm: Stoneskin Totem and your Earth Totem
 
 step The tunnel
-  tip Mountaineer Thalos guards the tunnel out of the valley, east of Anvilmar.
+  tip Mountaineer Thalos guards the tunnel out of the valley, east of Anvilmar. Hands Springsprocket stands beside him.
   turnin 282                                  -- Mountaineer Thalos
   accept 420
   accept 96628                                -- Mountaineer Thalos
+  accept 2160                                 -- Hands Springsprocket
 
 # ---------------------------------------------------------------- Kharanos
 
