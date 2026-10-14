@@ -127,6 +127,10 @@ command.
   affects (for example "Westfall: turn in at Sentinel Hill before the farms"), not
   how it was made.
 - Behaviour changes come with tests that show the behaviour.
+- A change goes into CHANGELOG.md under the coming release. A fix for a
+  reported bug (Discord, an issue, the in-game report) credits the person
+  who reported it at the end of its entry, by the name they reported under:
+  "(thanks Tom)". A contribution credits its author the same way.
 
 ## Licence
 
