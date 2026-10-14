@@ -39,7 +39,6 @@ const { blockingPrereqs } = require('../data/prereqs');
 
 const { ROOT, DATA, SOURCES } = require('../paths');
 const { CLASSES, FACTION_RACES } = require('../game/races');
-const BUILD = '1.60.1.70338';
 // Map, AreaTable, DungeonEncounter, LFGDungeons, MapDifficulty and ContentTuning
 // give the dungeons and raids (tools/lib/codex/instances.js); Mount and
 // BattlePetSpecies the mount and companion summon spells.
@@ -156,7 +155,7 @@ function sortKeysDeep(v) {
 //   mountAura: Set(spellId), skillLines: { id: name }, skillAbility: { spell: skillLine },
 //   mountSkill: [spellId], companionSkill: [spellId], spellClass: { spell: CLASS },
 //   creates: { item: [spellId] } (SpellEffect 24, create item; no profession's spell) }
-function clientFacts(tables, build = BUILD) {
+function clientFacts(tables, build = null) {
 	const items = {};
 	for (const r of tables.ItemSparse || []) {
 		const id = int(r.ID);
@@ -1293,12 +1292,20 @@ function writePackDir(dir, files) {
 	fs.rmSync(old, { recursive: true, force: true });
 }
 
+// The Forever client build to read (tools/lib/data/wago.js, as `data build`
+// --forever-build): `build` when given, else the newest 1.60+ build wago.tools
+// lists, else (offline or unreachable) the newest cached one holding every
+// table the Codex reads. -> { build, warnings }
+function pickForeverBuild({ sourcesDir, build, offline = false, fetchImpl } = {}) {
+	return require('../data/wago').pickBuild({ sourcesDir: sourcesDir || SOURCES, build, offline, fetchImpl, product: 'forever', tables: TABLES });
+}
+
 // localExtras: also merge the installed AtlasLoot (GPL-2.0), RareScanner (All
 // Rights Reserved) and data/forever/dungeons.json (DungeonJournal, no
 // licence). Such a build is for this machine only: its meta says `local`
 // and `pack` refuses to ship it. Without it every input is release-safe
 // (docs/ARCHITECTURE.md, "Codex (`codex build`)").
-async function loadInputs({ addons, offline = false, dataDir, sourcesDir, build = BUILD, fetchImpl, localExtras = false, guidesDir, log = () => {} } = {}) {
+async function loadInputs({ addons, offline = false, dataDir, sourcesDir, build, fetchImpl, localExtras = false, guidesDir, log = () => {} } = {}) {
 	dataDir = dataDir || DATA;
 	sourcesDir = sourcesDir || SOURCES;
 	guidesDir = guidesDir || path.join(ROOT, 'guides');
@@ -1344,7 +1351,10 @@ async function loadInputs({ addons, offline = false, dataDir, sourcesDir, build 
 		}
 	}
 	const { loadTables } = require('../professions/tables');
-	const loaded = await loadTables({ sourcesDir, build, offline, fetchImpl, log, tables: TABLES });
+	const picked = await pickForeverBuild({ sourcesDir, build, offline, fetchImpl });
+	warnings.push(...picked.warnings);
+	log(`Forever client build ${picked.build}${build ? ' (--build)' : ''}`);
+	const loaded = await loadTables({ sourcesDir, build: picked.build, offline, fetchImpl, log, tables: TABLES });
 	warnings.push(...loaded.warnings);
 	const client = clientFacts(loaded.tables, loaded.build);
 	client.instanceMaps = require('./journal').instanceMapsOf(loaded.tables.Map || [], loaded.tables.AreaTable || []);
@@ -1476,7 +1486,7 @@ async function buildCodex(opts = {}) {
 	const meta = {
 		schema: SCHEMA,
 		builtAt: opts.builtAt || (inputs.forever.meta && inputs.forever.meta.builtAt) || null,
-		build: (inputs.client && inputs.client.build) || BUILD,
+		build: (inputs.client && inputs.client.build) || null,
 		// A --local-extras build (AtlasLoot, RareScanner, DungeonJournal): never released.
 		localExtras: !!(inputs.localExtras || inputs.atlasloot || inputs.rarescanner || (inputs.forever && inputs.forever.dungeons)),
 		sources: sourcesMeta(inputs),
@@ -1543,4 +1553,4 @@ function writeParity(ours, theirs, dir, verify = null) {
 	return { report, files };
 }
 
-module.exports = { buildCodex, loadInputs, mergeCodex, clientFacts, curatedRepGates, loadRepGateTable, cluster, slug, writeParity, BUILD, TABLES };
+module.exports = { buildCodex, loadInputs, mergeCodex, clientFacts, curatedRepGates, loadRepGateTable, cluster, slug, writeParity, pickForeverBuild, TABLES };

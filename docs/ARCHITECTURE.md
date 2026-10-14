@@ -1860,10 +1860,14 @@ registers through `ZoneArt.RegisterOverlays` the way `MapFrames.lua` and
 
 ### Codex (`codex build`)
 
-`node tools/polestar.js codex build [--addons <dir>] [--offline] [--out <dir>] [--local-extras]`
+`node tools/polestar.js codex build [--addons <dir>] [--build <version>] [--offline] [--out <dir>] [--local-extras]`
 merges `data/forever/*.json` (pfQuest, QuestieDB facts, recordings,
 corrections, Wowhead and web XP facts), the Forever client's tables
-(wago.tools, cached under `data/sources/wago/<build>/`), the installed
+(wago.tools, cached under `data/sources/wago/<build>/`: the newest 1.60+
+`wow_classic_beta` build wago.tools lists, as `data build` picks its
+`--forever-build` (`pickBuild` in `tools/lib/data/wago.js`); `--build`
+names one; offline or with wago.tools unreachable, the newest cached build
+holding every table the Codex reads; `meta.json` records it), the installed
 ForeverLevelingBiS (MIT) and Polestar's own guides into
 `data/forever/codex/*.json`, then emits the load-on-demand pack
 `addon/Polestar_Codex/` (`tools/lib/codex/pack.js`) with its

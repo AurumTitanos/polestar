@@ -12,13 +12,16 @@ Builds Lookup's Codex: every item, mount, pet, recipe, NPC, rare, quest,
 zone, dungeon and treasure, with where each item comes from, and the
 Dungeons journal. Release-safe inputs only: the data/forever/*.json tables
 (pfQuest, QuestieDB facts, recordings, corrections), the Forever client's
-tables (wago.tools build 1.60.1.70338, cached under data/sources/wago/),
-the installed ForeverLevelingBiS (MIT) and Polestar's own guides. Writes
-data/forever/codex/*.json and the load-on-demand pack addon/Polestar_Codex
-with its LICENSE-DATA.txt; \`pack\` ships that folder in the release zip.
+tables (the newest 1.60+ build wago.tools lists, cached under
+data/sources/wago/; meta.json records it), the installed ForeverLevelingBiS
+(MIT) and Polestar's own guides. Writes data/forever/codex/*.json and the
+load-on-demand pack addon/Polestar_Codex with its LICENSE-DATA.txt; \`pack\`
+ships that folder in the release zip.
 
   --addons <dir>     the Forever client's Interface/AddOns (default: detected)
-  --offline          use cached client tables only
+  --build <version>  wago.tools Forever build (default: newest listed)
+  --offline          use cached client tables only (the newest cached build
+                     holding every table the Codex reads)
   --out <dir>        JSON output (default data/forever/codex; with
                      --local-extras data/local/codex-extras)
   --pack <dir>       pack output (default addon/Polestar_Codex; with
@@ -67,7 +70,7 @@ async function runBuild(rest) {
 	try {
 		({ values } = parseArgs({
 			args: rest,
-			options: { addons: { type: 'string' }, offline: { type: 'boolean' }, out: { type: 'string' }, pack: { type: 'string' }, 'local-extras': { type: 'boolean' } },
+			options: { addons: { type: 'string' }, build: { type: 'string' }, offline: { type: 'boolean' }, out: { type: 'string' }, pack: { type: 'string' }, 'local-extras': { type: 'boolean' } },
 			strict: true,
 		}));
 	} catch (err) {
@@ -83,6 +86,7 @@ async function runBuild(rest) {
 	}
 	const res = await buildCodex({
 		addons: abs(values.addons),
+		build: values.build,
 		offline: values.offline,
 		outDir: abs(values.out),
 		packDir: abs(values.pack),
@@ -113,6 +117,17 @@ function printParity(report, files) {
 	if (files) console.log(`wrote ${files.map(rel).join(' and ')}`);
 }
 
+// The client tables directory of the build a Codex folder was built from
+// (its meta.json), else of the newest cached Forever build.
+async function clientDir(codexDir) {
+	const fs = require('node:fs');
+	const { SOURCES } = require('../lib/paths');
+	const meta = path.join(codexDir, 'meta.json');
+	let build = fs.existsSync(meta) ? JSON.parse(fs.readFileSync(meta, 'utf8')).build : null;
+	if (!build) build = await require('../lib/codex/build').pickForeverBuild({ offline: true }).then((p) => p.build, () => null);
+	return build ? path.join(SOURCES, 'wago', build) : null;
+}
+
 async function runParity(rest) {
 	let values;
 	try {
@@ -130,10 +145,10 @@ async function runParity(rest) {
 	const { SOURCES } = require('../lib/paths');
 	const { loadWowhead } = require('../lib/codex/wowhead');
 	const { parseCsv } = require('../lib/data/csv');
-	const { BUILD } = require('../lib/codex/build');
+	const wago = await clientDir(ours);
 	const csv = (table) => {
-		const f = path.join(SOURCES, 'wago', BUILD, `${table}.csv`);
-		return fs.existsSync(f) ? parseCsv(fs.readFileSync(f, 'utf8')) : null;
+		const f = wago && path.join(wago, `${table}.csv`);
+		return f && fs.existsSync(f) ? parseCsv(fs.readFileSync(f, 'utf8')) : null;
 	};
 	const mapRows = csv('Map');
 	const areaRows = csv('AreaTable');
@@ -161,10 +176,11 @@ async function runWowhead(rest) {
 	const report = read(path.join(ROOT, 'data', 'local', 'codex-parity.json'));
 	if (!report) return fail('no data/local/codex-parity.json: run `codex build --local-extras`, then `codex build`');
 	// The client's create-item spells (SpellEffect), for the items ours has no source for.
-	const { BUILD, clientFacts } = require('../lib/codex/build');
+	const { clientFacts } = require('../lib/codex/build');
 	const { parseCsv } = require('../lib/data/csv');
-	const effects = path.join(SOURCES, 'wago', BUILD, 'SpellEffect.csv');
-	const { creates } = clientFacts({ SpellEffect: fs.existsSync(effects) ? parseCsv(fs.readFileSync(effects, 'utf8')) : [] });
+	const wago = await clientDir(path.join(ROOT, 'data', 'forever', 'codex'));
+	const effects = wago && path.join(wago, 'SpellEffect.csv');
+	const { creates } = clientFacts({ SpellEffect: effects && fs.existsSync(effects) ? parseCsv(fs.readFileSync(effects, 'utf8')) : [] });
 	const ours = { items: read(path.join(ROOT, 'data', 'forever', 'codex', 'items.json')) || {}, creates };
 	const want = wowheadWants(report, read(path.join(ROOT, 'data', 'forever', 'codex', 'instances.json')) || {}, read(path.join(ROOT, 'data', 'forever', 'objects.json')) || {}, ours);
 	// The parity report's open gaps (no instance bosses, name matches or

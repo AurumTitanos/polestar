@@ -138,6 +138,13 @@
   103 list requests (151 the first time). `--dry-run` counts a run's
   requests. The Codex reads the lists for NPC levels only; parity is
   unchanged.
+- `codex build` reads the newest Forever client build wago.tools lists
+  (1.60.1.70374 today, was pinned to 1.60.1.70338), picked as `data build`
+  picks its `--forever-build` (`pickBuild`, tools/lib/data/wago.js);
+  `--build <version>` names one, and offline the newest cached build holding
+  every table the Codex reads is used. `meta.json` records the build;
+  `codex parity` and `codex wowhead` read the client tables of the build the
+  Codex was made from.
 
 ## 0.2.3 (2026-10-14)
 
