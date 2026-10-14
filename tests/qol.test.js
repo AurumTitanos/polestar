@@ -763,6 +763,54 @@ test('buying: selling greys pays for it first; goods for other currencies, Shift
 	assert.equal(out[4], 0, 'off: nothing');
 });
 
+test('buying: optional buy goals are left to the player, like the raptor colours ("buy any you want, or none")', () => {
+	const [requests, msg] = run(`${GOODS}
+		set("buyGoals", true)
+		q.money = 1000000                 -- 100g
+		q.items[8588] = { name = "Whistle of the Emerald Raptor", quality = 1, price = 50000 }
+		q.items[8591] = { name = "Whistle of the Turquoise Raptor", quality = 1, price = 50000 }
+		q.items[8592] = { name = "Whistle of the Violet Raptor", quality = 1, price = 50000 }
+		q.goods = { { id = 8588, price = 200000 }, { id = 8591, price = 200000 }, { id = 8592, price = 200000 } }
+		q.step({
+			{ t = "buy", item = 8588, npc = 7952, optional = true, itemName = "Whistle of the Emerald Raptor" },
+			{ t = "buy", item = 8591, npc = 7952, optional = true, itemName = "Whistle of the Turquoise Raptor" },
+			{ t = "buy", item = 8592, npc = 7952, optional = true, itemName = "Whistle of the Violet Raptor" },
+		})
+		q.openMerchant()
+		stub.advance(1)
+		emit(#bought())
+		emit(printed("Raptor"))
+	`);
+	assert.equal(requests, 0, 'no whistle bought');
+	assert.equal(msg, false, 'and nothing said about them');
+});
+
+test('buying: a goal costing over 50g is left to the player with a line saying so; a big stack of thread under it is bought', () => {
+	const [requests, money, left, thread] = run(`${GOODS}
+		set("buyGoals", true)
+		q.money = 3000000                 -- 300g
+		q.items[19030] = { name = "Stormpike Battle Charger", quality = 3, price = 0 }
+		q.items[8343] = { name = "Heavy Silken Thread", quality = 1, price = 500 }
+		q.goods = { { id = 19030, price = 2000000 }, { id = 8343, price = 2000, maxStack = 20 } }
+		q.step({
+			{ t = "buy", item = 19030, npc = 13217, itemName = "Stormpike Battle Charger" },
+			{ t = "buy", item = 8343, count = 120, itemName = "Heavy Silken Thread" },   -- 24g
+		})
+		q.openMerchant()
+		stub.advance(1)
+		local n = 0
+		for _, c in ipairs(q.calls) do if c[1] == "BuyMerchantItem" and c[2] == 1 then n = n + 1 end end
+		emit(n)
+		emit(q.money)
+		emit(printed("Left 1 Stormpike Battle Charger %(200g 0s 0c%) for you to buy"))
+		emit(C_Item.GetItemCount(8343))
+	`);
+	assert.equal(requests, 0, 'the 200g mount is not bought');
+	assert.equal(money, 3000000 - 240000, 'only the thread is paid for');
+	assert.equal(left, true);
+	assert.equal(thread, 120);
+});
+
 // ---------------------------------------------------------------------------
 // Quest rewards
 // ---------------------------------------------------------------------------

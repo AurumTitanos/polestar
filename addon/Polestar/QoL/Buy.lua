@@ -8,9 +8,10 @@
 -- limit, and limited stock and your money cap the rest. The client's source
 -- does not say whether stock counts items or purchases; it is read as items
 -- rounded down to whole purchases, at least one while any is left. Goods for
--- other currencies or items are left alone. Prints what was bought once it
--- lands in the bags (a refused purchase never is), and what money was short
--- for.
+-- other currencies or items are left alone, and so are optional goals and a
+-- goal that would cost over MAX_SPEND (it says so). Prints what was bought
+-- once it lands in the bags (a refused purchase never is), and what money
+-- was short for.
 --
 -- Client: GetMerchantNumItems, GetMerchantItemID, GetMerchantItemInfo,
 -- GetMerchantItemMaxStack, BuyMerchantItem (Forever Vanilla MerchantFrame.lua:
@@ -28,6 +29,9 @@ QoL.Buy = Buy
 
 local LAND_WAIT = 1
 local PENDING_WAIT = 5    -- a purchase not landed by then was refused
+-- A goal that would cost more is left to you: the required mounts (200g).
+-- The dearest other buy goal in the guides is a profession's thread, ~24g.
+local MAX_SPEND = 500000  -- 50g
 
 local pending = {}        -- itemID -> { before, items, at }: bought, not landed
 
@@ -50,7 +54,7 @@ local function wanted()
 	local out
 	for g, gv in ipairs(view.goals) do
 		local goal = raw[g]
-		if goal and goal.t == "buy" and goal.item and QoL.Open(gv) then
+		if goal and goal.t == "buy" and goal.item and not goal.optional and QoL.Open(gv) then
 			out = out or {}
 			local w = out[goal.item]
 			local count = goal.count or 1
@@ -91,6 +95,10 @@ function Buy.Run()
 			if need > 0 and not extendedCost and (price or 0) > 0 then
 				perStack = (perStack and perStack > 0) and perStack or 1
 				local items, cost, shortItems, shortCost = Buy.Plan(need, price, perStack, numAvailable, money)
+				if cost + shortCost > MAX_SPEND then
+					ns.Print(format(L["Left %d %s (%s) for you to buy."], items + shortItems, name, QoL.Money(cost + shortCost)))
+					items, shortItems = 0, 0
+				end
 				if shortItems > 0 then
 					ns.Print(format(L["Not enough money to buy %d %s (%s)."], shortItems, name, QoL.Money(shortCost)))
 				end
