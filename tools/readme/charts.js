@@ -312,8 +312,8 @@ async function write(o) {
 	fs.mkdirSync(OUT, { recursive: true });
 	const files = { 'levels.svg': levelsChart(new Outliner('l'), data), 'starts.svg': startsChart(new Outliner('s'), data) };
 	for (const [name, text] of Object.entries(files)) {
-		const draftArgs = `--draft ${o.draft}${o['draft-label'] ? ` --draft-label "${o['draft-label']}"` : ''}`;
-		fs.writeFileSync(path.join(OUT, name), `${header('svg', `readme charts ${draftArgs}`, 'data/sim and guides/')}\n${text}`);
+		const source = `data/sim and guides/, compared with ${data.draftName} (the options are in tools/README.md)`;
+		fs.writeFileSync(path.join(OUT, name), `${header('svg', 'readme charts', source)}\n${text}`);
 		console.log(`docs/assets/charts/${name} (${(Buffer.byteLength(text) / 1024).toFixed(1)} KB)`);
 	}
 	for (const f of data.factions) {

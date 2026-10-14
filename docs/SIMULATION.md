@@ -491,6 +491,41 @@ corrections, world `165d88c5eaaa`. Best found / consensus, hours to 60:
   cost 5.1-5.6 h (Horde) and 9.9-10.5 h (Alliance), almost all of it the
   grinding the flow rules add.
 
+### Third and fourth searches (0.2.0)
+
+Two more independent searches checked the routes again before 0.2.0, with
+the guides as they ship scored on the fourth world:
+
+- Third: seed 3, `--paths 10000000` (cap 30M), world `5a8503dbb43a`; 17.7-30.2M
+  routes per start, seven of eight reached the cap still improving.
+- Fourth: seed 4, `--paths 6000000` (cap 18M), world `329281f957a5`, the data
+  0.2.0 ships with; every start reached the cap still improving.
+
+| start | third: best / consensus | fourth: best / consensus | guides 0.2.0 on the fourth world (grinding) | guides 0.1.0 there (grinding) |
+|---|---|---|---|---|
+| Orc | 117.7 / 116.8 | 119.6 / 117.3 | 123.8 (16.1) | 123.0 (14.4) |
+| Tauren | 118.3 / 116.5 | 117.1 / 116.8 | 123.2 (15.6) | 122.5 (13.9) |
+| Undead | 119.3 / 117.0 | 118.8 / 117.4 | 124.3 (15.7) | 123.5 (14.0) |
+| Skyborne H | 116.3 / 116.3 | 116.8 / 116.8 | 123.6 (14.7) | 122.9 (13.2) |
+| Human | 119.2 / 116.8 | 119.3 / 118.9 | 128.2 (28.7) | 128.7 (28.5) |
+| Dwarf | 117.4 / 117.3 | 119.8 / 118.8 | 128.7 (28.6) | 129.3 (28.4) |
+| NightElf | 119.0 / 117.5 | 119.1 / 119.1 | 128.7 (28.9) | 129.2 (28.8) |
+| Skyborne A | 118.2 / 117.3 | 119.0 / 118.4 | 129.1 (27.9) | 129.0 (27.7) |
+
+- Robustness: the best found route stays within 1% of each draw's best in
+  87-100% (third) and 76-100% (fourth) of draws.
+- Across the four searches every start's best found route lies within
+  116.3-121.2 h and every consensus within 116.3-120.6 h.
+- Against the fourth consensus the guides cost 6.4-6.9 h (Horde) and
+  9.3-10.7 h (Alliance). The Horde guides lost 0.7-0.8 h against 0.1.0 by
+  dropping quests a player cannot take (a chain started by a dungeon drop,
+  quests removed from the game, a chain without its first quest) and moving
+  the level-35 Dustwallow quests from 30 to 39; the Alliance guides gained
+  about 0.5 h from a northern Stranglethorn loop and the Shimmering Flats.
+- The third world predates the data correction that places Sulhasa in the
+  southern Barrens, so it charges the Horde guides a trip to Un'Goro Crater
+  for Field to Clear (about 0.9 h); the fourth world has the correction.
+
 ## Known limitations
 
 - **No recordings**: time parameters (kill time, travel detours, talk and

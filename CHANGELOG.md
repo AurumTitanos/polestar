@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.1 (unreleased)
+
+### For contributors
+
+- Two more independent route searches (the fourth on the data 0.2.0 ships
+  with) back the README's numbers and docs/SIMULATION.md; the charts compare
+  the guides with those of 0.1.0.
+- The README charts display again: an SVG's generated header no longer holds
+  `--`, which XML comments forbid, and a test checks every committed SVG for
+  it.
+
 ## 0.2.0 (2026-10-14)
 
 ### For players
