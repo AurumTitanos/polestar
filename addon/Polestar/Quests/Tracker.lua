@@ -554,13 +554,24 @@ local function objectivePins(e, byKey)
 	end
 end
 
+-- Quests in ID order, so the pins (and the refs a shared pin lists) come
+-- out in the same order whatever order pairs() walks the log in: overlapping
+-- markers stack the same way in every session.
+local rebuildIDs = {}
 local function rebuildObjectiveMarkers()
 	stats.rebuilds = stats.rebuilds + 1
 	poolGen = poolGen + 1
 	clearMarkers(LAYER_OBJECTIVES)
 	clearMarkers(LAYER_TURNIN)
 	local byKey = {}
-	for _, e in pairs(entries) do objectivePins(e, byKey) end
+	local n = 0
+	for q in pairs(entries) do
+		n = n + 1
+		rebuildIDs[n] = q
+	end
+	for i = #rebuildIDs, n + 1, -1 do rebuildIDs[i] = nil end
+	table.sort(rebuildIDs)
+	for i = 1, n do objectivePins(entries[rebuildIDs[i]], byKey) end
 	prune(LAYER_OBJECTIVES)
 	prune(LAYER_TURNIN)
 end
