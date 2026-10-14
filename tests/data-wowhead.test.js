@@ -126,6 +126,19 @@ describe('Wowhead zone list cache', () => {
 		assert.equal(later.rows.get(5).xp, 200);
 	});
 
+	test('a cache from before a page was added is read again, however fresh: the class pages reach an old zones.json', async () => {
+		const sourcesDir = tmpdir('polestar-wowhead-');
+		fs.mkdirSync(path.join(sourcesDir, 'wowhead'), { recursive: true });
+		// Written an hour ago by a build that read only the zone pages.
+		fs.writeFileSync(path.join(sourcesDir, 'wowhead', 'zones.json'), JSON.stringify({ fetchedAt: new Date(T0).toISOString(), zones: { 11: [{ id: 5, xp: 100 }] } }));
+		const calls = [];
+		await loadZoneQuests({ sourcesDir, zones, fetchImpl: fakeFetch(calls), now: T0 + 3600e3 });
+		assert.ok(calls.includes('https://www.wowhead.com/forever/quests/classes/warrior'), 'the class pages are fetched');
+		const n = calls.length;
+		await loadZoneQuests({ sourcesDir, zones, fetchImpl: fakeFetch(calls), now: T0 + 2 * 3600e3 });
+		assert.equal(calls.length, n, 'then the cache, which now records every page it read, is enough');
+	});
+
 	test('a failed refresh keeps the cached lists; --offline never fetches', async () => {
 		const sourcesDir = tmpdir('polestar-wowhead-');
 		await loadZoneQuests({ sourcesDir, zones, fetchImpl: fakeFetch([]), now: T0 });

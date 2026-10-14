@@ -10,8 +10,9 @@
 // negative category per class). Wowhead answers an unknown path with a generic
 // list, so only rows whose category is the page's own count.
 //
-// Cache: <sources>/wowhead/zones.json ({ fetchedAt, zones: { "<area>": rows } }),
-// refetched once it is a day old (Wowhead adds quests as players find them);
+// Cache: <sources>/wowhead/zones.json ({ fetchedAt, pages: ["<area>", ...],
+// zones: { "<area>": rows } }), refetched once it is a day old (Wowhead adds
+// quests as players find them) or when it lacks a page the build now reads;
 // --offline builds read it and fetch nothing.
 //
 // What the build does with it:
@@ -144,10 +145,15 @@ async function loadZoneQuests({ sourcesDir, zones, offline = false, fetchImpl = 
 	const file = path.join(sourcesDir, 'wowhead', 'zones.json');
 	let cache = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : null;
 	const warnings = [];
-	if ((!cache || now - Date.parse(cache.fetchedAt) >= ZONE_TTL_MS) && !offline) {
-		const pages = zonePages(zones);
+	const pages = zonePages(zones);
+	// A cache read before a page was added to the list (the class pages, a new
+	// zone) is stale too, whatever its age: it records the pages it read
+	// (older caches: the pages that had rows).
+	const read = new Set((cache && (cache.pages || Object.keys(cache.zones || {}))) || []);
+	const missing = pages.some((z) => !read.has(String(z.area)));
+	if ((!cache || missing || now - Date.parse(cache.fetchedAt) >= ZONE_TTL_MS) && !offline) {
 		log(`reading ${pages.length} Wowhead Forever zone quest lists`);
-		const fresh = { fetchedAt: new Date(now).toISOString(), zones: {} };
+		const fresh = { fetchedAt: new Date(now).toISOString(), pages: pages.map((z) => String(z.area)), zones: {} };
 		let errors = 0;
 		await pool(pages, async (z) => {
 			try {
