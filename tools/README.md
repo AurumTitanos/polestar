@@ -57,6 +57,7 @@ sources, so they run on a maintainer's machine, never in CI.
 | `profession build` | Builds `data/forever/professions.json`; `profession draft <Profession>` drafts a 1-300 crafting guide; `profession gathering build` / `check` writes or checks the six generated gathering and secondary guides |
 | `exploration build` / `exploration check` | Writes or checks the exploration guides in `guides/forever/exploration` |
 | `trainers build` | Builds `data/forever/trainers.json` and `Core/ClassTrainers.lua` |
+| `talents build` / `talents check` | Writes or checks `Talents/Builds.lua`: the plans in `talents/forever/` resolved by name on the Forever trait tree and replayed under its rules |
 | `travel build` | Builds the travel network: `data/forever/travel.json`, `Nav/TravelData.lua`, `Polestar_Travel`; `travel route` runs the in-game planner between two points |
 | `maps build` / `maps overlays` | Zone level ranges (`Maps/ZoneLevels.lua`) / zone art overlays (`UI/ZoneArtOverlays.lua`) |
 | `qol build` | Spirit healers and flight masters (`QoL/Data.lua`) |
@@ -139,6 +140,7 @@ file's language written by `header()` in `lib/generated.js`:
 | `data/forever/professions.json` | `profession build` | client tables, `data/forever` items, npcs, objects | local | none |
 | `data/forever/trainers.json` | `trainers build` | `train` goals under `guides/`, `data/recordings`, the curated list, `npcs.json` | local | none |
 | `addon/Polestar/Core/ClassTrainers.lua` | `trainers build` | the same | yes | rerun |
+| `addon/Polestar/Talents/Builds.lua` | `talents build` | `talents/forever/*.json`, Forever trait tables from wago.tools (build pinned in `tools/commands/talents.js`) | yes | `talents check`; `tests/talents-build.test.js` runs it when the tables are cached |
 | `data/forever/travel.json` | `travel build` | client tables, `data/forever` map-frames, zones, npcs, objects, `data/recordings` | local | none |
 | `addon/Polestar/Nav/TravelData.lua` | `travel build` | the same | yes | rerun; `tests/travel-build.test.js` loads the committed file |
 | `addon/Polestar_Travel/` | `travel build` | the local crossings file `data/local/crossings.json` | local | `tests/travel-crossings.test.js` validates the crossings file |
@@ -170,7 +172,7 @@ build, new recordings or a change to an installed source addon:
 1. `node tools/polestar.js data build`
 2. `node tools/polestar.js dungeons build`
 3. `node tools/polestar.js profession build`
-4. `node tools/polestar.js trainers build`
+4. `node tools/polestar.js trainers build` (and `talents build` after a new client build)
 5. `node tools/polestar.js travel build`
 6. `node tools/polestar.js maps build` and `node tools/polestar.js maps overlays`
 7. `node tools/polestar.js qol build`
