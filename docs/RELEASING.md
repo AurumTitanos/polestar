@@ -129,3 +129,7 @@ Replace `0.2.0` with the new version throughout.
    ```
 
    Drop `--prerelease` from 1.0.0 on.
+
+10. Upload `dist/Polestar-0.2.0.zip` to CurseForge (Forever 1.60.1, release
+    type Beta until 1.0.0) and refresh the project description: the steps
+    and settings are in [docs/curseforge/README.md](curseforge/README.md).

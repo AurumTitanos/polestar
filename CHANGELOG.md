@@ -38,6 +38,10 @@
 - The README charts display again: an SVG's generated header no longer holds
   `--`, which XML comments forbid, and a test checks every committed SVG for
   it.
+- docs/curseforge holds the CurseForge listing: the description to paste,
+  the summary, the project settings and what to upload where. `readme
+  brand` draws the project avatar and, with `rsvg-convert` installed, writes
+  the listing's PNGs (avatar, banner, route charts) beside it.
 
 ## 0.2.0 (2026-10-14)
 

@@ -24,6 +24,7 @@ and maintainers who release. Paths are from the repository root.
 | [docs/SIMULATION.md](SIMULATION.md) | contributors | The route simulator: world model, character model, search, calibration, results |
 | [docs/DESIGN.md](DESIGN.md) | contributors | The design system: who the windows are for and what they must do, then colour, type, layout and component tokens |
 | [docs/RELEASING.md](RELEASING.md) | maintainers | What ships, setting the version, and the release steps |
+| [docs/curseforge/README.md](curseforge/README.md) | maintainers | The CurseForge listing: the summary, the project settings, what to upload where, and the description to paste ([description.md](curseforge/description.md)) |
 | [THIRD_PARTY.md](../THIRD_PARTY.md) | guide authors, maintainers | Where every input comes from, its licence, and what may enter the repository or a release |
 
 `docs/preview/` holds renders of the addon's windows (`node tools/polestar.js
