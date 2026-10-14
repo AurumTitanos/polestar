@@ -10,9 +10,9 @@ next forever/alliance/02-westfall
 # One visit, levels 1 to about 12.3, no grind stops.
 #
 # Flow: Coldridge Valley -> Kharanos (bind) and Steelgrill's Depot -> the
-# Grizzled Den and Gretchen's camp -> Rumbleshot and a short return to
-# Coldridge for Grund -> Brewnall Village and Frostmane Hold -> back east to
-# Kharanos and the depot -> Misty Pine Refuge -> Amberstill Ranch and the
+# Grizzled Den and Gretchen's camp -> Rumbleshot -> Brewnall Village and
+# Frostmane Hold -> back east to Kharanos and the depot -> Misty Pine
+# Refuge -> Amberstill Ranch and the
 # Gol'Bolar Quarry -> North Gate Outpost -> hearth to Kharanos -> Brewnall ->
 # South Gate Outpost -> Farsen above the quarry -> Old Icebeard's cave ->
 # Ironforge (training) and the tram to Stormwind.
@@ -23,7 +23,15 @@ next forever/alliance/02-westfall
 #   "Scalding Mornbrew Delivery" (3364) has a five minute timer, so it is
 #   taken with "The Stolen Journal" (218) and run straight to Anvilmar;
 #   Grik'nir comes after, so the journal and "Bring Back the Mug" (3365) are
-#   handed in on one visit to Grelin's camp.
+#   handed in on one visit to Grelin's camp. Grund (97277) is handed in on
+#   the way back to the tunnel.
+# - "Grund and Gozwin" (97277, level 4) is done from Anvilmar while still in
+#   the valley, and "The Adventurer" (96628) is taken from Thalos on the way
+#   out, so the route no longer returns to Coldridge after Rumbleshot.
+#   The level 4 spells are trained in Anvilmar first: with them the Snow
+#   Leopard Prowler is safe at level 4 for every class (done before leaving
+#   Coldridge on every Dwarf and Gnome class in the beta; recorded on a
+#   Gnome Mage and a Dwarf Rogue, about 3 minutes each).
 # - The Kharanos and depot pickups are grouped: the simulator shuttled between
 #   them several times. Beldin's "A Visitor to Dun Morogh" (96408) is taken at
 #   the depot on the way east after Brewnall instead of from the quarry.
@@ -41,8 +49,8 @@ next forever/alliance/02-westfall
 # Left out: "The Reports" (291) and "Stout to Kadrell" (414) are accepted by
 # the route but never turned in (the route goes to Westfall, not Ironforge's
 # senator or Loch Modan).
-# "The Adventurer" (96628) is kept as the export has it, taken from Thalos after
-# "The Great Outdoors": skip it if Thalos no longer offers it.
+# "The Adventurer" (96628) is taken from Thalos once "Senir's Observations"
+# (282) is handed in: skip it if Thalos no longer offers it.
 # "The Quarry's Smith" (95217) is optional: Frast Dokner offers it to
 # blacksmiths (QuestieDB lists Blacksmithing), and its Copper Bars come from
 # smelting Copper Ore or the trade vendors. The new export drops it.
@@ -185,8 +193,15 @@ step Anvilmar
   turnin 3361                                 -- Felix Whindlebolt
   turnin 3364                                 -- Durnan Furcutter, inside Anvilmar
   accept 3365
+  train class                                 -- Level 4 spells, before Gozwin's camp
   turnin 1599 only Warlock                    -- Alamar Grimm: Summon Imp
   accept 94373 only Shaman                    -- Teo Hammerstorm, inside Anvilmar
+
+step Grund and Gozwin
+  tip Grund Drokda stands by Felix at the door of Anvilmar. Gozwin's camp is in the hills just north-west; the Snow Leopard Prowler prowls around it.
+  accept 97277                                -- Grund Drokda
+  collect 277976 quest 97277                  -- Gozwin's Mechanic's Log, in the camp
+  kill 269075 quest 97277                     -- Snow Leopard Prowler
 
 step Grik'nir the Cold
   tip Grik'nir the Cold sits at the back of the troll cave, east of Grelin's camp.
@@ -197,6 +212,10 @@ step Grelin Whitebeard
   accept 282
   turnin 3365                                 -- Nori Pridedrift, next to him
   collect 264356 quest 94373.1 only Shaman    -- Iceclaw Bear Pendants, from the Frostmane Troll Whelps on the slopes above the camp
+
+step Grund Drokda
+  tip Back by Felix at the door of Anvilmar, on the way to the tunnel.
+  turnin 97277                                -- Grund Drokda
 
 step Call of Earth
   only Shaman
@@ -212,6 +231,7 @@ step The tunnel
   tip Mountaineer Thalos guards the tunnel out of the valley, east of Anvilmar.
   turnin 282                                  -- Mountaineer Thalos
   accept 420
+  accept 96628                                -- Mountaineer Thalos
 
 # ---------------------------------------------------------------- Kharanos
 
@@ -285,15 +305,6 @@ step Rumbleshot's Ammo
   tip The ammo crate sits in the Frostmane camp on Shimmer Ridge; Hegnar Rumbleshot camps south of it, by the road to Coldridge.
   complete 5541
   turnin 5541                                 -- Hegnar Rumbleshot
-
-step Mountaineer Thalos
-  accept 96628                                -- Mountaineer Thalos, at the Coldridge tunnel
-
-step Grund and Gozwin
-  tip Grund Drokda stands in Coldridge Valley by Felix. Gozwin's camp is in the hills to the north-west of him; the Snow Leopard Prowler prowls around it.
-  accept 97277                                -- Grund Drokda
-  complete 97277
-  turnin 97277
 
 # ---------------------------------------------------------------- Brewnall Village
 
