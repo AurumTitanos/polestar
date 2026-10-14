@@ -54,8 +54,12 @@ their versions in its `meta`.
   Lua-literal reader (`lua.js`); QuestieDB is read by `data build`,
   DungeonJournal by `dungeons build`. Each returns plain JSON. Web sources are
   cached under `data/sources/` and only fetched when asked.
-- `node tools/polestar.js codex build` runs every importer, merges the results
-  with `data/forever/*.json` and writes `data/forever/codex/*.json` (local).
+- `node tools/polestar.js codex build` merges ForeverLevelingBiS,
+  `data/forever/*.json` and the Forever client's tables into
+  `data/forever/codex/*.json` and the `Polestar_Codex` pack, which ships in
+  every release (release-safe inputs only; ARCHITECTURE, "Codex"). With
+  `--local-extras` it also merges AtlasLoot, RareScanner and DungeonJournal:
+  a local-only build that `pack` refuses.
 - Precedence for a fact found in several places: recordings > the Forever
   client's tables > Forever-specific sources (QuestieDB Forever, DungeonJournal,
   the Forever sites) > Era sources (pfQuest, AtlasLoot Era tables) > Wowhead
@@ -69,13 +73,14 @@ their versions in its `meta`.
 | `Polestar_Guides` | `guides/**` | yes | always |
 | `Polestar_ItemDB` | client item tables | yes | on demand |
 | `Polestar_QuestDB` | `data/forever` (includes QuestieDB) | no (local) | on demand |
-| `Polestar_Codex` | `data/forever/codex` | no (local) | on demand (first search, tooltip or lookup) |
+| `Polestar_Codex` | `data/forever/codex` (release-safe inputs) | no (generated); in every release zip | on demand (first search, tooltip or lookup) |
 | `Polestar_Travel` | a local crossings file (`travel build`) | no (local) | always, when built |
 | community guide packs (`PolestarPack_*` by default) | a pack's `.guide` files, by its author (`docs/PACKS.md`) | in the author's repository | always, when installed |
 
 Local packs are generated into gitignored folders and installed by
 `node tools/polestar.js install` like the rest. Without them the core still
-works: Lookup and Dungeons say what is missing instead of failing. Every addon, what it holds and how it is built: [ARCHITECTURE, "Overview"](ARCHITECTURE.md#overview).
+works: Lookup, Dungeons and Rares say the Codex is missing or disabled
+(reinstall Polestar or enable it) instead of failing. Every addon, what it holds and how it is built: [ARCHITECTURE, "Overview"](ARCHITECTURE.md#overview).
 
 Guide packs (ours and the community's) register through one registry
 (`Core/Guides.lua`, ARCHITECTURE "The guide registry"; the rules in

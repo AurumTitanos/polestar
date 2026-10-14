@@ -28,7 +28,7 @@ one into the other. The addons:
 | community guide packs | Addons by other authors (`X-Polestar-Pack` in their TOC; `docs/PACKS.md`, `docs/PACK_FORMAT.md`) | the same compiler, from their own repositories | in their own repositories | by their authors |
 | `Polestar_ItemDB` (`addon/Polestar_ItemDB/`) | Item stats and Forever reward choices for the gear advice; loaded on demand | `itemdb build` (`Items.lua`), then `gear build` (`Forever.lua`) | yes (generated) | yes |
 | `Polestar_QuestDB` (`addon/Polestar_QuestDB/`) | The quest database behind quest markers and tooltips; loaded on demand | `questdb build` | no (local, gitignored) | yes, when built |
-| `Polestar_Codex` (`addon/Polestar_Codex/`) | Lookup's Codex, and the Dungeons and Rares data; loaded on demand | `codex build` | no (local, gitignored) | no |
+| `Polestar_Codex` (`addon/Polestar_Codex/`) | Lookup's Codex, and the Dungeons and Rares data; loaded on demand | `codex build`, from release-safe inputs (`--local-extras` builds a local-only one) | no (generated, gitignored) | yes, always: `pack` fails without it |
 | `Polestar_Travel` (`addon/Polestar_Travel/`) | Zone crossings for the travel planner, from an optional local crossings file; loaded with Polestar | `travel build` | no (local, gitignored) | no, never packaged (Nav, "Travel planner and zone crossings") |
 | `Polestar_Recorder` (`addon/Polestar_Recorder/`) | The optional standalone recorder of play sessions, for authoring | hand-written | yes | yes, as its own zip |
 
@@ -1322,15 +1322,21 @@ Polestar.Lookup.QuestStep(quest, from) -> step         -- accept, objectives, tu
 
 ## Dungeons — dungeon quest journal and pick-up guide
 
-The dungeon data comes from `dungeons.json` (Toolchain, "Reference data").
+The dungeon pages come from the Codex's instances (Toolchain, "Codex"): in a
+release build the Forever client's tables and `data/forever/*.json`; with
+`--local-extras` also `dungeons.json` (DungeonJournal).
 
-The Dungeons section of the hub reads it through the Codex: `codex build` always runs
+The Dungeons section of the hub reads them through the Codex: `codex build` always runs
 `tools/lib/codex/journal.js`, which writes one page per Codex instance into the
 pack as `Dungeons1.lua` (a summary table per dungeon for the list, and the page
-as Lua source compiled only when opened): quests from `dungeons.json`, plus
-quests QuestieDB files under the instance's areas or whose objectives point
-into it, each with giver and ender, our own objective line, chain, rewards
-(items with quality and choice, XP, money, reputation) and DungeonJournal's
+as Lua source compiled only when opened): the quests QuestieDB files under the
+instance's areas (the areas on the instance's map and the outdoor areas of its
+name, as the solo filter's instance classification reads them,
+`tools/lib/sim/solo.js`) or whose objectives or starting item point into it
+(plus, with `--local-extras`, `dungeons.json`'s), each with giver and ender
+and their positions, our own objective line, chain, rewards (items with
+quality and choice from recordings and ForeverLevelingBiS, XP from
+`quests.json`, money, reputation) and, with `--local-extras`, DungeonJournal's
 audited shareability; bosses in kill order with the quests tied to them;
 entrances from the Codex, else the client's Map table (the corpse point, placed
 on its zone). No loot tables. Runtime: `addon/Polestar/Dungeons/Dungeons.lua`
@@ -1804,40 +1810,93 @@ registers through `ZoneArt.RegisterOverlays` the way `MapFrames.lua` and
 
 ### Codex (`codex build`)
 
-`node tools/polestar.js codex build [--addons <dir>] [--offline] [--out <dir>]`
-runs the importers under `tools/lib/consume/` and merges them with
-`data/forever/*.json` and the Forever client's item and spell tables
-(wago.tools, cached under `data/sources/wago/<build>/`) into
+`node tools/polestar.js codex build [--addons <dir>] [--offline] [--out <dir>] [--local-extras]`
+merges `data/forever/*.json` (pfQuest, QuestieDB facts, recordings,
+corrections, Wowhead and web XP facts), the Forever client's tables
+(wago.tools, cached under `data/sources/wago/<build>/`), the installed
+ForeverLevelingBiS (MIT) and Polestar's own guides into
 `data/forever/codex/*.json`, then emits the load-on-demand pack
-`addon/Polestar_Codex/` (`tools/lib/codex/pack.js`). Both are local build
-products (gitignored); `install` ships the pack when it has been built.
+`addon/Polestar_Codex/` (`tools/lib/codex/pack.js`) with its
+`LICENSE-DATA.txt`, which lists every source with its version and licence.
+Both are build products (gitignored); the pack is part of the release:
+`pack` puts it in the zip and fails without it, `install` copies it when
+built.
 
-- Importers, one per input, all reading through `tools/lib/consume/lua.js`
-  (`addonVersion`, `readAddonLua`: the installed addon's files, found with
-  `tools/lib/addons.js`, run sandboxed in Lua 5.1 with the namespace the
-  client passes them):
+- Release-safe by default. `--local-extras` also merges three inputs that
+  may not be redistributed: AtlasLoot (GPL-2.0, incompatible with
+  Polestar's GPL-3.0-only), RareScanner (All Rights Reserved) and
+  `data/forever/dungeons.json` (DungeonJournal, no licence). That build's
+  `meta.json` and `Meta.lua` carry `localExtras = true`, its
+  `LICENSE-DATA.txt` says not to share it, and `pack` refuses it, as it
+  refuses a pack whose sources name any of the three
+  (`releaseRefusal` in `tools/lib/codex/pack.js`). It exists for comparison
+  on the developer's machine.
+- Importers, one per installed addon, all reading through
+  `tools/lib/consume/lua.js` (`addonVersion`, `readAddonLua`: the installed
+  addon's files, found with `tools/lib/addons.js`, run sandboxed in Lua 5.1
+  with the namespace the client passes them): `foreverlevelingbis.js` (item
+  sources: quest rewards, drops, crafts); with `--local-extras` also
   `atlasloot.js` (DungeonsAndRaids incl. `forever.lua` and `droprate.lua`,
-  Collections, Crafting, Factions, PvP), `foreverlevelingbis.js` (item
-  sources: quest rewards, drops, crafts), `rarescanner.js` (rares, their loot,
-  treasures, mount and pet items). Each returns plain JSON with a `meta`
-  naming its source, version and licence.
+  Collections, Crafting, Factions, PvP) and `rarescanner.js` (rares, their
+  loot, treasures, mount and pet items). Each returns plain JSON with a
+  `meta` naming its source, version and licence.
+- Client tables: `Item`, `ItemSparse` (names, quality, levels, prices, the
+  reputation and PvP rank an item requires: rep and pvp sources), `ItemEffect`,
+  `ItemXItemEffect`, `SpellEffect`, `SpellName`, `SkillLine`,
+  `SkillLineAbility`, `Mount` and `BattlePetSpecies` (the summon spells that
+  make an item a mount or a companion), and for the dungeons `Map`,
+  `AreaTable`, `DungeonEncounter`, `LFGDungeons`, `MapDifficulty`,
+  `ContentTuning`; the Classic Era `Item`, `ItemSparse`, `ItemEffect` and `Map`
+  fill items Forever's tables lack and tell Forever's own instances apart.
+- Dungeons and raids (`tools/lib/codex/instances.js`, release build): every
+  `Map` instance that Forever's dungeon finder (`LFGDungeons`) names, or that
+  belongs to the original game (map id below 1000) and has `DungeonEncounter`
+  rows; Season of Discovery maps the client also carries stay out. `forever`
+  = absent from the Era client's `Map`. Levels `[entry, min, max]`: the
+  `MapDifficulty` "at least level N" message, the `ContentTuning` minimum of
+  its dungeon-finder entries, the highest boss level (at most 60). Bosses:
+  the `DungeonEncounter` rows of the normal difficulty in `OrderIndex` order,
+  each matched to `npcs.json` (a recorded encounter's NPCs, else the same name
+  among NPCs placed in the instance, else the same name preferring elites
+  without open-world spawns at the instance's level, else one spawnless NPC
+  whose name starts with it or is within two letters of it; "A and B"
+  encounters name both). A boss's loot is its `items.json` drops at 1% or
+  more, best chance first. The entrance: a recorded one (Recorder `enter`,
+  `data/forever/instances.json`), else the `Map` Corpse point (where a ghost
+  comes back) on the zone holding it, else a guide's `goto x,y "<instance
+  name> ..."`. `AreaTrigger` rows name no instance and the trigger nearest a
+  Corpse point is as often an inn or city trigger, so they are not used. Every
+  NPC placed in an instance (`npcs.json` `instances`, from QuestieDB and
+  recordings) belongs to it: its drops carry the instance. An instance's
+  boss or mob the data ranks rare is not a rare unless RareScanner lists it.
+  `--local-extras` takes the instances from AtlasLoot and `dungeons.json`
+  instead.
+- Rares and treasures: NPCs ranked rare (4) or rare elite (2) in `npcs.json`
+  (pfQuest, QuestieDB, recordings), with their spawns and every drop the
+  Codex knows; treasures are objects with the `chest` role, with their loot.
 - Precedence for a fact found in several places follows `docs/SUITE.md`;
   sources are deduplicated by type and id, keep their `from` provenance and the
   best-known drop chance.
-- Output: `meta.json` (`sources`, `counts` by kind, `coverage` = items with at
-  least one source, `pack` = files, bytes and measured memory), `items.json`
+- Output: `meta.json` (`sources`, `localExtras`, `counts` by kind, `coverage`
+  = items with at least one source, `pack` = files, bytes and measured
+  memory), `items.json`
   (`{ id, name, quality, kind: item|mount|pet|recipe|tabard, spell, reqLevel,
   repFaction, repStanding, reqSkill, reqSkillRank, status, sources }`; a source
   is `{ type: vendor|drop|object|quest|craft|rep|pvp|
   container|world, from, ... }`), `npcs.json`, `objects.json`, `quests.json`
-  (with `pre` = every blocking prerequisite, `preAny`, rewards), `instances.json`,
-  `zones.json`, `factions.json`, `spells.json` (mount and pet aura spell →
-  item, class), `frames.json` (Era bounds for the pack's maps).
+  (with `pre` = every blocking prerequisite, `preAny`, rewards from recordings
+  and ForeverLevelingBiS), `instances.json`, `zones.json`, `factions.json`,
+  `spells.json` (mount and pet aura spell → item, class), `frames.json` (Era
+  bounds for the pack's maps), `journal.json` (the Dungeons pages).
   An item's `status` is `nosource` without a source, and `retired` for a mount
-  or pet whose every source is an Era vendor row (pfQuest provenance) that
-  neither AtlasLoot Forever's collection lists nor a curated guide's `collects`
-  names: the stock the pre-1.4 epic mounts were retired from. Forever-only rows
-  are trusted.
+  or pet whose every source is an Era vendor row (pfQuest provenance) and,
+  in a release build, whose summon spell's `Mount` row the Forever client
+  flags hidden until known (`Flags` 0x40: kept only for those who already
+  have it; the still-sold Black Stallion is not flagged), or, with
+  `--local-extras`, that AtlasLoot Forever's collection lists do not name: the
+  stock the pre-1.4 epic mounts were retired from. A curated guide's
+  `collects` keeps an item obtainable, and Forever-only rows are trusted.
+  Companions have no such client flag: a release build retires none.
 
 ### Reference data (`data/forever/`, built by `data build`, gitignored)
 

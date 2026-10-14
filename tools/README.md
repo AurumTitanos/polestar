@@ -147,7 +147,7 @@ file's language written by `header()` in `lib/generated.js`:
 | `addon/Polestar_ItemDB/Items.lua`, its TOC | `itemdb build` | Classic Era client item tables | yes | rerun; `tests/itemdb.test.js` loads it within its size budget |
 | `addon/Polestar_ItemDB/Forever.lua` and `LICENSE-DATA.txt`, `addon/Polestar/Gear/SpecData.lua` and `LICENSE-DATA.txt`; `data/forever/gear/report.json` | `gear build`, after `itemdb build` | the installed ForeverLevelingBiS, the sims cached in `data/sources/wowsims` (`gear fetch`) | yes; the report is local | rerun |
 | `addon/Polestar_QuestDB/` | `questdb build` | `data/forever` quests, npcs, objects, items, map-frames | local; ships in the release zip when built | `tests/questdb.test.js` loads it within its budget |
-| `data/forever/codex/*.json`, `addon/Polestar_Codex/` | `codex build` | installed AtlasLoot, RareScanner and ForeverLevelingBiS; `data/forever` including dungeons, trainers and professions; Forever client tables | local; never packaged | none |
+| `data/forever/codex/*.json`, `addon/Polestar_Codex/` (with `LICENSE-DATA.txt`) | `codex build` | the installed ForeverLevelingBiS; `data/forever` including instances, trainers and professions; Forever and Era client tables; our guides. `--local-extras` adds AtlasLoot, RareScanner and `dungeons.json` (local-only) | local; always in the release zip (`pack` fails without a release-safe one) | `tests/lookup-codex.test.js` loads it in game |
 | `guides/forever/exploration/*.guide` (7) | `exploration build` | client map tables, `data/forever` zones, map-frames, travel | yes | `exploration check`; `tests/exploration.test.js` |
 | `guides/forever/professions/` mining, herbalism, skinning, cooking, first-aid, fishing | `profession gathering build` | `data/forever` professions, items, npcs, objects | yes | `profession gathering check`; `tests/profession-gathering.test.js` |
 | `guides/forever/professions/` alchemy, blacksmithing, enchanting, engineering, leatherworking, tailoring | `profession draft <Profession> --out` | `data/forever` including professions | yes | rerun |
@@ -175,7 +175,7 @@ build, new recordings or a change to an installed source addon:
 7. `node tools/polestar.js qol build`
 8. `node tools/polestar.js itemdb build`, then `node tools/polestar.js gear build`
 9. `node tools/polestar.js questdb build`
-10. `node tools/polestar.js codex build` (reads `dungeons.json`, `professions.json` and `trainers.json`)
+10. `node tools/polestar.js codex build` (reads `professions.json`, `trainers.json` and the recorded `instances.json`; `dungeons.json` only with `--local-extras`)
 11. The generated guides: `node tools/polestar.js exploration build` (reads `travel.json`), `node tools/polestar.js profession gathering build` and `node tools/polestar.js profession draft <Profession> --out` for each crafting profession (read `professions.json`)
 12. `node tools/polestar.js lint`, then `node tools/polestar.js compile`
 13. `node tools/polestar.js preview`: it reads no reference data and no compiled guides, but the addon Lua that steps 4 to 8 write is part of what it draws

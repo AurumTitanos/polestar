@@ -12,7 +12,7 @@ skip with a reason.
 
 | File | Contents |
 |---|---|
-| `Polestar-<version>.zip` | `Polestar` (with `LICENSE` and a player `README.txt`), `Polestar_Guides`, and `Polestar_QuestDB` / `Polestar_ItemDB` when built |
+| `Polestar-<version>.zip` | `Polestar` (with `LICENSE` and a player `README.txt`), `Polestar_Guides`, `Polestar_QuestDB` / `Polestar_ItemDB` when built, and always `Polestar_Codex` (with its `LICENSE-DATA.txt`) |
 | `Polestar_Recorder-<version>.zip` | `Polestar_Recorder` (optional, with `LICENSE`) |
 | `SHA256SUMS` | checksums of both zips, in the format `sha256sum -c` reads |
 
@@ -42,9 +42,12 @@ follow `x.y.z`; `0.x` releases are betas.
 
 Releases are built from the full local data build of the steps below.
 [THIRD_PARTY.md](../THIRD_PARTY.md) ("Distributing Polestar") lists what
-that puts in the zip: QuestieDB facts in the guide pack and
-`Polestar_QuestDB`, nothing from DungeonJournal, and never the Codex or the
-zone crossings pack (`pack` leaves both out).
+that puts in the zip: QuestieDB facts in the guide pack, `Polestar_QuestDB`
+and `Polestar_Codex`, nothing from AtlasLoot, RareScanner or DungeonJournal,
+and never the zone crossings pack (`pack` leaves it out). The Codex is part of
+Polestar (Lookup, Dungeons and Rares read it): `pack` stops when
+`Polestar_Codex` is not built, or was built with `--local-extras`, or names
+one of those three among its sources.
 
 ## Steps
 
@@ -60,6 +63,7 @@ Replace `0.2.0` with the new version throughout.
    node tools/polestar.js data build
    node tools/polestar.js questdb build
    node tools/polestar.js itemdb build && node tools/polestar.js gear build
+   node tools/polestar.js codex build        # release-safe; never --local-extras here
    node tools/polestar.js lint
    node tools/polestar.js compile
    ```
@@ -76,7 +80,7 @@ Replace `0.2.0` with the new version throughout.
    ```sh
    rm -rf dist && node tools/polestar.js pack
    (cd dist && sha256sum -c SHA256SUMS)
-   unzip -l dist/Polestar-0.2.0.zip
+   unzip -l dist/Polestar-0.2.0.zip      # Polestar_Codex/ and its LICENSE-DATA.txt are listed
    ```
 
 5. Smoke-test the zips as a player gets them: unpack both into an empty

@@ -1534,9 +1534,9 @@ end
 ---------------------------------------------------------------------------
 
 local REASON = {
-	nodata = "This Codex pack was built before the Dungeons. Install the current Polestar_Codex addon, then /reload.",
-	missing = "Install the Polestar_Codex addon, then /reload.",
-	disabled = "Enable Polestar_Codex in the AddOns list, then /reload.",
+	nodata = "The Polestar_Codex addon is older than this Polestar: reinstall Polestar, then /reload.",
+	missing = "The Polestar_Codex addon is missing or disabled: reinstall Polestar or enable it in the AddOns list, then /reload.",
+	disabled = "The Polestar_Codex addon is missing or disabled: reinstall Polestar or enable it in the AddOns list, then /reload.",
 }
 
 local function renderEmpty(reason)

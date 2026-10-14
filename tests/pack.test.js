@@ -23,8 +23,11 @@ function python(...args) {
 
 const hasPython = spawnSync('python3', ['--version']).status === 0;
 
-test('pack zips Polestar + Polestar_Guides and the recorder separately, reproducibly', { skip: !hasPython && 'python3 not installed' }, async () => {
-	const addons = fakeAddons(tmpdir());
+// The release always holds a release-safe Codex (`codex build`).
+const RELEASE = ['Polestar', 'Polestar_Guides', 'Polestar_Recorder', 'Polestar_Codex'];
+
+test('pack zips Polestar + Polestar_Guides + Polestar_Codex and the recorder separately, reproducibly', { skip: !hasPython && 'python3 not installed' }, async () => {
+	const addons = fakeAddons(tmpdir(), RELEASE);
 	const zips = [];
 	for (const n of [1, 2]) {
 		const dist = tmpdir();
@@ -55,6 +58,11 @@ test('pack zips Polestar + Polestar_Guides and the recorder separately, reproduc
 		'Polestar_Guides/MapFrames.lua',
 		'Polestar_Guides/Pack.lua',
 		'Polestar_Guides/Polestar_Guides.toc',
+		'Polestar_Codex/',
+		'Polestar_Codex/LICENSE-DATA.txt',
+		'Polestar_Codex/Main.lua',
+		'Polestar_Codex/Meta.lua',
+		'Polestar_Codex/Polestar_Codex.toc',
 	]);
 	assert.equal(python('-t', path.join(zips[0], `Polestar-${VERSION}.zip`)).status, 0);
 	const rec = python('-l', path.join(zips[0], `Polestar_Recorder-${VERSION}.zip`));
@@ -64,7 +72,7 @@ test('pack zips Polestar + Polestar_Guides and the recorder separately, reproduc
 });
 
 test('the Polestar folder in the zip carries the GPL and install steps naming every folder shipped', async () => {
-	const addons = fakeAddons(tmpdir(), ['Polestar', 'Polestar_Guides', 'Polestar_Recorder', 'Polestar_QuestDB', 'Polestar_ItemDB']);
+	const addons = fakeAddons(tmpdir(), [...RELEASE, 'Polestar_QuestDB', 'Polestar_ItemDB']);
 	const dist = tmpdir();
 	const { result, out } = await quiet(() => pack.run(['--guides', GUIDES_DIR, '--data', DATA_DIR, '--addons', addons, '--dist', dist]));
 	assert.equal(result, 0, out);
@@ -74,14 +82,15 @@ test('the Polestar folder in the zip carries the GPL and install steps naming ev
 	assert.match(readme, new RegExp(`^Polestar ${VERSION.replace(/\./g, '\\.')}\r\n`));
 	assert.match(readme, /_forever_\/Interface\/AddOns\//);
 	assert.match(readme, /\/reload does not/);
-	for (const n of ['Polestar', 'Polestar_Guides', 'Polestar_QuestDB', 'Polestar_ItemDB']) assert.match(readme, new RegExp(`^ +${n}\r$`, 'm'));
+	for (const n of ['Polestar', 'Polestar_Guides', 'Polestar_QuestDB', 'Polestar_ItemDB', 'Polestar_Codex']) assert.match(readme, new RegExp(`^ +${n}\r$`, 'm'));
+	assert.match(readme, /part of Polestar: Polestar_Codex holds what Lookup,/);
 	assert.doesNotMatch(readme, /^ +Polestar_Recorder\r$/m);
 	assert.doesNotMatch(readme.replace(/\r\n/g, ''), /\n/, 'CRLF line endings throughout');
 });
 
 test('pack writes SHA256SUMS for the zips it wrote, in the format sha256sum -c reads', async () => {
 	const dist = tmpdir();
-	const { result, out } = await quiet(() => pack.run(['--guides', GUIDES_DIR, '--data', DATA_DIR, '--addons', fakeAddons(tmpdir()), '--dist', dist]));
+	const { result, out } = await quiet(() => pack.run(['--guides', GUIDES_DIR, '--data', DATA_DIR, '--addons', fakeAddons(tmpdir(), RELEASE), '--dist', dist]));
 	assert.equal(result, 0, out);
 	const sum = (f) => crypto.createHash('sha256').update(fs.readFileSync(path.join(dist, f))).digest('hex');
 	assert.equal(
@@ -91,17 +100,47 @@ test('pack writes SHA256SUMS for the zips it wrote, in the format sha256sum -c r
 });
 
 test('the release zip includes the built data addons and leaves out ones not built', async () => {
-	const addons = fakeAddons(tmpdir(), ['Polestar', 'Polestar_Guides', 'Polestar_Recorder', 'Polestar_QuestDB']);
+	const addons = fakeAddons(tmpdir(), [...RELEASE, 'Polestar_QuestDB']);
 	const dist = tmpdir();
 	const { result, out } = await quiet(() => pack.run(['--guides', GUIDES_DIR, '--data', DATA_DIR, '--addons', addons, '--dist', dist]));
 	assert.equal(result, 0, out);
 	assert.match(out, /note: Polestar_ItemDB not built/);
 	const tops = [...new Set(readZip(path.join(dist, `Polestar-${VERSION}.zip`)).map((e) => e.name.split('/')[0]))];
-	assert.deepEqual(tops, ['Polestar', 'Polestar_Guides', 'Polestar_QuestDB']);
+	assert.deepEqual(tops, ['Polestar', 'Polestar_Guides', 'Polestar_QuestDB', 'Polestar_Codex']);
 	fakeAddons(addons, ['Polestar_ItemDB']);
 	assert.equal((await quiet(() => pack.run(['--guides', GUIDES_DIR, '--data', DATA_DIR, '--addons', addons, '--dist', dist]))).result, 0);
 	const all = [...new Set(readZip(path.join(dist, `Polestar-${VERSION}.zip`)).map((e) => e.name.split('/')[0]))];
-	assert.deepEqual(all, ['Polestar', 'Polestar_Guides', 'Polestar_QuestDB', 'Polestar_ItemDB']);
+	assert.deepEqual(all, ['Polestar', 'Polestar_Guides', 'Polestar_QuestDB', 'Polestar_ItemDB', 'Polestar_Codex']);
+});
+
+test('pack refuses a release without the Codex, or with a --local-extras one, and writes no zip', async () => {
+	const run = async (addons) => {
+		const dist = tmpdir();
+		const r = await quiet(() => pack.run(['--guides', GUIDES_DIR, '--data', DATA_DIR, '--addons', addons, '--dist', dist]));
+		return { ...r, files: fs.readdirSync(dist) };
+	};
+	const none = await run(fakeAddons(tmpdir()));
+	assert.equal(none.result, 1);
+	assert.match(none.out, /pack failed: Polestar_Codex not built \(run `node tools\/polestar\.js codex build`\)/);
+	assert.deepEqual(none.files, []);
+
+	const local = fakeAddons(tmpdir(), RELEASE);
+	const meta = path.join(local, 'Polestar_Codex', 'Meta.lua');
+	fs.writeFileSync(meta, fs.readFileSync(meta, 'utf8').replace('localExtras = false', 'localExtras = true'));
+	const refused = await run(local);
+	assert.equal(refused.result, 1);
+	assert.match(refused.out, /pack failed: Polestar_Codex it is a --local-extras build/);
+	assert.deepEqual(refused.files, []);
+
+	// An older local build that predates the flag still names its inputs.
+	fs.writeFileSync(meta, 'C.Register("meta", {\n\tsources = {\n\t\t{\n\t\t\tlicence = "GPL-2.0",\n\t\t\tname = "AtlasLootClassic",\n\t\t},\n\t},\n})\n');
+	const named = await run(local);
+	assert.equal(named.result, 1);
+	assert.match(named.out, /its sources include a local-only input \(AtlasLootClassic\)/);
+
+	fs.rmSync(path.join(local, 'Polestar_Codex', 'LICENSE-DATA.txt'));
+	fs.writeFileSync(meta, 'C.Register("meta", {})\n');
+	assert.match((await run(local)).out, /LICENSE-DATA\.txt is missing/);
 });
 
 test('zip: UTF-8 names, empty and binary files, stored and deflated entries round-trip and pass python checks', { skip: !hasPython && 'python3 not installed' }, () => {
@@ -217,14 +256,14 @@ test('pack without reference data stops with one error and writes nothing; --no-
 });
 
 test('our release: the guide pack folder is not checked for a TOC before it is generated, and write errors are reported', async () => {
-	const addons = fakeAddons(tmpdir(), ['Polestar', 'Polestar_Recorder']);
+	const addons = fakeAddons(tmpdir(), ['Polestar', 'Polestar_Recorder', 'Polestar_Codex']);
 	const dist = tmpdir();
 	const ok = await quiet(() => pack.run(['--guides', GUIDES_DIR, '--data', DATA_DIR, '--addons', addons, '--dist', dist]));
 	assert.equal(ok.result, 0, ok.out);
 	assert.doesNotMatch(ok.out, /Polestar_Guides\.toc says version/);
 	assert.ok(fs.existsSync(path.join(addons, 'Polestar_Guides', 'Polestar_Guides.toc')));
 	// A Polestar_Guides folder we did not generate is refused cleanly.
-	const foreign = fakeAddons(tmpdir(), ['Polestar', 'Polestar_Recorder']);
+	const foreign = fakeAddons(tmpdir(), ['Polestar', 'Polestar_Recorder', 'Polestar_Codex']);
 	fs.mkdirSync(path.join(foreign, 'Polestar_Guides'));
 	fs.writeFileSync(path.join(foreign, 'Polestar_Guides', 'mine.txt'), 'mine\n');
 	const bad = await quiet(() => pack.run(['--guides', GUIDES_DIR, '--data', DATA_DIR, '--addons', foreign, '--dist', tmpdir()]));
@@ -241,7 +280,7 @@ async function packReading(file, text) {
 		return readFileSync.call(this, f, ...rest);
 	};
 	try {
-		const addons = fakeAddons(tmpdir(), ['Polestar', 'Polestar_Recorder'], packageVersion());
+		const addons = fakeAddons(tmpdir(), ['Polestar', 'Polestar_Recorder', 'Polestar_Codex'], packageVersion());
 		return await quiet(() => pack.run(['--guides', GUIDES_DIR, '--data', DATA_DIR, '--addons', addons, '--dist', tmpdir()]));
 	} finally {
 		fs.readFileSync = readFileSync;

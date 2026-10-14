@@ -355,7 +355,7 @@ test('Speed: pages reuse pooled frames, only cards in view are painted, open and
 	for (const k of ['tHome', 'tOpen', 'tTabs', 'tBig']) assert.ok(out[k] < 0.25, `${k} ${out[k]}s`);
 });
 
-test('Without the Codex pack: an empty state that says what to install; leaving the section restores the header', () => {
+test('Without the Codex pack: an empty state that says to reinstall or enable it; leaving the section restores the header', () => {
 	const [out] = run(`
 		Polestar.Dungeons.Open("wailing-caverns")
 		local _, home = DS.Frames()
@@ -363,7 +363,7 @@ test('Without the Codex pack: an empty state that says what to install; leaving 
 		P.ShowSection("Guides")
 		emit({ empty = empty, title = PolestarPicker.Title:GetAlpha(), band = PolestarPicker.Band:IsShown(), segs = segs() })`, { withPack: false });
 	assert.equal(out.empty[0], 'missing');
-	assert.match(out.empty[2], /Polestar_Codex/);
+	assert.equal(out.empty[2], 'The Polestar_Codex addon is missing or disabled: reinstall Polestar or enable it in the AddOns list, then /reload.');
 	assert.equal(out.empty[3], true);
 	assert.equal(out.title, 1);
 	assert.equal(out.band, true);

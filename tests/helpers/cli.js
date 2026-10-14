@@ -41,6 +41,11 @@ function fakeAddons(root, names = ['Polestar', 'Polestar_Guides', 'Polestar_Reco
 		const files = n === 'Polestar_Guides' ? `${TOC_MARKER}\n\nPack.lua\nMapFrames.lua\nGuides.lua` : '\nMain.lua';
 		fs.writeFileSync(path.join(dir, `${n}.toc`), `## Interface: 16001\n## Title: ${n}\n## Version: ${version}\n${files}\n`);
 		if (n !== 'Polestar_Guides') fs.writeFileSync(path.join(dir, 'Main.lua'), `local ADDON, ns = ...\n-- ${n}\n`);
+		// A release-safe Codex as `pack` checks it (tools/lib/codex/pack.js releaseRefusal).
+		if (n === 'Polestar_Codex') {
+			fs.writeFileSync(path.join(dir, 'Meta.lua'), 'C.Register("meta", {\n\tlocalExtras = false,\n\tsources = {\n\t\t{\n\t\t\tname = "pfQuest",\n\t\t},\n\t},\n})\n');
+			fs.writeFileSync(path.join(dir, 'LICENSE-DATA.txt'), 'Polestar Codex: third-party notices\n');
+		}
 		fs.writeFileSync(path.join(dir, '.hidden'), 'not shipped\n');
 	}
 	return root;

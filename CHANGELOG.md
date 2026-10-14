@@ -4,6 +4,14 @@
 
 ### For players
 
+- The release now includes the Codex (the `Polestar_Codex` folder, part of
+  Polestar), so Lookup, Dungeons and Rares work: search items, mounts, pets,
+  recipes, NPCs and quests and see where to get them; every dungeon and raid
+  with its levels, entrance, bosses and their loot, and its quests; rares and
+  treasures with their spawns and drops. It is built from the game's own data
+  tables, the quest and creature databases Polestar already uses, and our
+  recordings. If it is missing or disabled, Lookup, Dungeons and Rares say
+  so: reinstall Polestar or enable it in the AddOns list, then /reload.
 - Distances can read in metres: Options, Arrow & routes, Distances.
 - The starting zones follow Forever's new quest chains: a follow-up is taken
   once the quest before it is handed in, where the guides offered several
@@ -24,6 +32,14 @@
 
 ### For guide authors
 
+- `codex build` uses only inputs Polestar may redistribute: the dungeons and
+  raids (levels, entrances, bosses) come from the Forever client's tables
+  (`Map`, `DungeonEncounter`, `LFGDungeons`, `MapDifficulty`,
+  `ContentTuning`), boss loot from the drops in `items.json`, mounts and
+  companions from `Mount` and `BattlePetSpecies`, rares from npc ranks.
+  `--local-extras` adds AtlasLoot, RareScanner and DungeonJournal for a
+  local-only comparison build. `pack` ships the Codex with its
+  `LICENSE-DATA.txt` and refuses to run without a release-safe one.
 - A skill for coding agents, `skills/polestar-guide-pack/`: the workflow from
   `new` to `pack` (look up every id with `find`, then lint and playtest until
   both pass) and the guide format on one page. `new` copies it into the pack's

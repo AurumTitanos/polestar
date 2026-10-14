@@ -28,7 +28,7 @@ not the layer. They fall into these layers:
 
 | Layer | What runs | Examples |
 |---|---|---|
-| Tool library | Plain Node: a `tools/lib` module called on fixtures | `dsl*.test.js`, `data*.test.js`, `route.test.js`, `sim*.test.js`, `travel-build.test.js`, `consume*.test.js`, `find.test.js`, `pack-manifest.test.js` |
+| Tool library | Plain Node: a `tools/lib` module called on fixtures | `dsl*.test.js`, `data*.test.js`, `codex*.test.js`, `route.test.js`, `sim*.test.js`, `travel-build.test.js`, `consume*.test.js`, `find.test.js`, `pack-manifest.test.js` |
 | Commands | `node tools/polestar.js <command>` run as a child process (or in-process with its output captured), its exit code and output checked | `compile.test.js`, `lint*.test.js`, `install.test.js`, `pack.test.js`, `new.test.js`, `dev.test.js`, `record.test.js`, `release.test.js` (`version`), `play.test.js`, `cli-help.test.js` (`--help` prints the usage and does no work) |
 | Addon modules | The addon's own Lua under Lua 5.1, against the fake client, through `helpers/lua.js` | `core.test.js`, `engine*.test.js`, `nav*.test.js`, `quests*.test.js`, `gear*.test.js`, `maps*.test.js`, `qol.test.js`, `lookup*.test.js`, `dungeons-*.test.js`, `ui*.test.js`, `rares.test.js`, `recorder*.test.js` |
 | End to end | A guide compiled by the real compiler and played in the whole addon | `e2e.test.js`, `guides.test.js` (every authored guide, every class), `playtest.test.js`, `acceptance-packs.test.js` |
@@ -98,7 +98,7 @@ CI, they skip; everything else runs.
 | `data/forever/*.json` (reference data) | `data build` and the other data commands | `guides.test.js`, `engine-placement.test.js`, `perf.test.js`, `acceptance-packs.test.js`, `playtest.test.js`, `play.test.js`, `play-pack.test.js`, `play-start.test.js`, `new.test.js`, `dev.test.js`, `dsl.test.js`, `maps-zonelevels.test.js`, `profession-gathering.test.js`, `questdb.test.js` |
 | Client map tables cached in `data/sources/wago` | `exploration build` | `exploration.test.js` |
 | `addon/Polestar_QuestDB` | `questdb build` | `questdb.test.js`, `quests.test.js` |
-| `addon/Polestar_Codex` | `codex build` | `lookup-codex.test.js` |
+| `addon/Polestar_Codex` | `codex build` | `lookup-codex.test.js` (release-safe, and Lookup, Dungeons and Rares read it in game) |
 | `addon/Polestar_ItemDB/Items.lua` | `itemdb build` (committed, so present on a clone) | `itemdb.test.js` |
 | `data/local/crossings.json`, `addon/Polestar_Travel` | the local crossings file, `travel build` | `travel-crossings.test.js`, `nav-crossings.test.js` |
 | Installed addons in the game's AddOns folder | the game client | `consume.test.js` |

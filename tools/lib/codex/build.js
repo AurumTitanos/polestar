@@ -10,10 +10,14 @@
 //
 // inputs = {
 //   forever: { items, npcs, objects, quests, zones, factions, professions, trainers,
-//              mapFrames, meta, dungeons|null },        (data/forever/*.json as written)
-//   atlasloot|null, rarescanner|null, flbis|null,        (tools/lib/consume/* outputs)
-//   client: clientFacts(tables)|null,
+//              mapFrames, meta, instances (recorded), dungeons|null },  (data/forever/*.json)
+//   flbis|null,                                           (tools/lib/consume/foreverlevelingbis.js)
+//   atlasloot|null, rarescanner|null                      (--local-extras only)
+//   client: clientFacts(tables) + { instanceMaps, instances: instanceFacts() }|null,
+//   curated: [item ids guides collect], entrances: curatedEntrances(), localExtras,
 // }
+// Without AtlasLoot and dungeons.json the instances come from the client
+// tables (tools/lib/codex/instances.js).
 //
 // Precedence for one fact found in several inputs (docs/SUITE.md, "Data
 // layer"): recordings > client tables > Forever-specific (QuestieDB Forever,
@@ -27,16 +31,23 @@ const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const { emitPack, packOrder, ADDON, SCHEMA } = require('./pack');
+const { instanceFacts, buildInstances, curatedEntrances } = require('./instances');
 const { blockingPrereqs } = require('../data/prereqs');
 
 const { ROOT, DATA, SOURCES } = require('../paths');
 const { CLASSES, FACTION_RACES } = require('../game/races');
 const BUILD = '1.60.1.70338';
-const TABLES = ['Item', 'ItemSparse', 'ItemEffect', 'ItemXItemEffect', 'SpellEffect', 'SpellName', 'SkillLine', 'SkillLineAbility', 'Map', 'AreaTable'];
+// Map, AreaTable, DungeonEncounter, LFGDungeons, MapDifficulty and ContentTuning
+// give the dungeons and raids (tools/lib/codex/instances.js); Mount and
+// BattlePetSpecies the mount and companion summon spells.
+const TABLES = [
+	'Item', 'ItemSparse', 'ItemEffect', 'ItemXItemEffect', 'SpellEffect', 'SpellName', 'SkillLine', 'SkillLineAbility', 'Map', 'AreaTable',
+	'DungeonEncounter', 'LFGDungeons', 'MapDifficulty', 'ContentTuning', 'Mount', 'BattlePetSpecies',
+];
 // The Forever client's ItemSparse lacks ~5k items Forever still has; their
 // names, quality and levels fall back to the Classic Era client (lower rank).
 const ERA_BUILD = '1.15.9.70003';
-const ERA_TABLES = ['Item', 'ItemSparse', 'ItemEffect'];
+const ERA_TABLES = ['Item', 'ItemSparse', 'ItemEffect', 'Map'];
 
 const RANK = { recordings: 0, client: 1, questie: 2, flbis: 2, rarescanner: 2, dungeons: 2, journal: 2, forever: 2, pfquest: 3, atlasloot: 3, wowhead: 4 };
 const KEY_FIELD = { vendor: 'npc', drop: 'npc', object: 'object', quest: 'quest', craft: 'spell', rep: 'faction', pvp: null, container: 'item', world: null };
@@ -198,7 +209,12 @@ function clientFacts(tables, build = BUILD) {
 		if (classes.length === 1) spellClass[spell] = classes[0];
 	}
 	for (const [spell, cls] of Object.entries(CLASS_MOUNT_FALLBACK)) if (!spellClass[spell]) spellClass[spell] = cls;
-	return { build, items, spellNames, mountAura, skillLines, skillAbility, mountSkill: [...new Set(mountSkill)].sort(byId), companionSkill: [...new Set(companionSkill)].sort(byId), spellClass };
+	// Summon spells the client names as mounts (Mount.SourceSpellID) and companions (BattlePetSpecies.SummonSpellID).
+	const mountSpells = new Set((tables.Mount || []).map((r) => int(r.SourceSpellID)).filter(Boolean));
+	// Mount.Flags 0x40: hidden from the mount journal until known (retired mounts).
+	const mountHidden = new Set((tables.Mount || []).filter((r) => (int(r.Flags) || 0) & 0x40).map((r) => int(r.SourceSpellID)).filter(Boolean));
+	const petSpells = new Set((tables.BattlePetSpecies || []).map((r) => int(r.SummonSpellID)).filter(Boolean));
+	return { build, items, spellNames, mountAura, mountSpells, mountHidden, petSpells, skillLines, skillAbility, mountSkill: [...new Set(mountSkill)].sort(byId), companionSkill: [...new Set(companionSkill)].sort(byId), spellClass };
 }
 
 // ---------------------------------------------------------------------------
@@ -287,7 +303,8 @@ function factionOfRaces(races) {
 }
 
 // Candidate sources -> deduped, field-merged, capped, ordered list.
-function finalizeSources(cands, npcLevel) {
+// isBoss(npc): a boss's drops stay past the cap (its instance's loot list).
+function finalizeSources(cands, npcLevel, isBoss = () => true) {
 	const groups = new Map();
 	for (const c of cands) {
 		const kf = KEY_FIELD[c.type];
@@ -332,7 +349,7 @@ function finalizeSources(cands, npcLevel) {
 	const seen = {};
 	out = out.filter((s) => {
 		seen[s.type] = (seen[s.type] || 0) + 1;
-		return !CAP[s.type] || seen[s.type] <= CAP[s.type] || (s.type === 'drop' && s.instance);
+		return !CAP[s.type] || seen[s.type] <= CAP[s.type] || (s.type === 'drop' && s.instance && isBoss(s.npc));
 	});
 	return out;
 }
@@ -430,9 +447,12 @@ function mergeCodex(inputs) {
 		}
 	}
 
-	// ----- instances (AtlasLoot dungeons and raids, entrances from dungeons.json)
+	// ----- instances. A release build: the client tables, npcs.json and
+	// items.json (tools/lib/codex/instances.js). A --local-extras build:
+	// AtlasLoot dungeons and raids, entrances and Forever bosses from dungeons.json.
 	const instances = {};
 	const bossInstance = {}; // npc -> key
+	const npcInstance = {}; // npc -> key: bosses and the NPCs placed inside (drop sources' `instance`)
 	const dungeonsByName = {};
 	for (const d of (fv.dungeons && fv.dungeons.dungeons) || []) dungeonsByName[normName(d.name)] = d;
 	const usedDungeons = new Set();
@@ -504,6 +524,21 @@ function mergeCodex(inputs) {
 		};
 		for (const b of d.bosses || []) if (b.npc) bossInstance[b.npc] = bossInstance[b.npc] || key;
 	}
+	if (!al && !fv.dungeons && cl && cl.instances) {
+		const built = buildInstances(cl.instances, {
+			npcs: fv.npcs,
+			items: fv.items,
+			zones: zonesIn,
+			frames: (fv.mapFrames && fv.mapFrames.forever) || {},
+			recorded: fv.instances || {},
+			curated: inputs.entrances || [],
+		});
+		Object.assign(instances, built.instances);
+		Object.assign(bossInstance, built.bossInstance);
+		Object.assign(npcInstance, built.npcInstance);
+	}
+	for (const [npc, key] of Object.entries(bossInstance)) if (!npcInstance[npc]) npcInstance[npc] = key;
+	for (const [npc, key] of Object.entries(npcInstance)) if (npcs[npc] && !bossInstance[npc]) npcs[npc].instance = key;
 	for (const [npc, key] of Object.entries(bossInstance)) {
 		if (!npcs[npc]) {
 			const boss = instances[key].bosses.find((b) => b.npc === Number(npc));
@@ -514,6 +549,12 @@ function mergeCodex(inputs) {
 		npcs[npc].boss = true;
 		npcs[npc].elite = true;
 		npcs[npc].instance = key;
+	}
+	// A rare is met in the open world (Rares detects none inside an instance):
+	// an instance's boss or mob that the data ranks rare elite (Edwin VanCleef)
+	// is not one, unless RareScanner lists it.
+	for (const [npc, key] of Object.entries(npcInstance)) {
+		if (npcs[npc] && npcs[npc].rare && key && !rareLoot[npc] && !npcs[npc].spawns.length) npcs[npc].rare = false;
 	}
 	for (const [id, set] of Object.entries(npcRoles)) if (npcs[id]) npcs[id].roles = [...set].sort();
 
@@ -529,7 +570,7 @@ function mergeCodex(inputs) {
 		names[id] = it.name;
 		const from = fromLabels(it.source);
 		for (const [npc, chance] of Object.entries((it.drops && it.drops.npc) || {})) {
-			if (npcs[npc]) add(id, { type: 'drop', npc: Number(npc), chance: Number(chance) || null, instance: bossInstance[npc] || null, from });
+			if (npcs[npc]) add(id, { type: 'drop', npc: Number(npc), chance: Number(chance) || null, instance: npcInstance[npc] || null, from });
 		}
 		for (const [obj, chance] of Object.entries((it.drops && it.drops.object) || {})) add(id, { type: 'object', object: Number(obj), chance: Number(chance) || null, from });
 		// Vendors nobody can find (no spawns, e.g. Forever's GM "World Mount Vendor") are left out.
@@ -573,12 +614,26 @@ function mergeCodex(inputs) {
 	for (const [npc, loot] of Object.entries(rareLoot)) {
 		for (const it of loot) add(it, { type: 'drop', npc: Number(npc), from: ['rarescanner'] });
 	}
-	// Quest rewards (ForeverLevelingBiS quests, dungeons.json quests).
+	// Quest rewards (recordings, ForeverLevelingBiS quests, dungeons.json quests).
 	const questRewards = {}; // quest -> { rewards: Set, choices: Set }
 	const reward = (quest, item, choice) => {
 		const q = (questRewards[quest] = questRewards[quest] || { rewards: new Set(), choices: new Set() });
 		(choice ? q.choices : q.rewards).add(Number(item));
 	};
+	// Recorded quest rewards (quests.json `rewards`, Recorder `turnin` / `accept`).
+	for (const [qid, q] of Object.entries(fv.quests || {})) {
+		const r = q.rewards;
+		if (!r) continue;
+		const from = fromLabels(q.source);
+		for (const it of r.items || []) {
+			reward(qid, it, false);
+			add(it, { type: 'quest', quest: Number(qid), from });
+		}
+		for (const it of r.choices || []) {
+			reward(qid, it, true);
+			add(it, { type: 'quest', quest: Number(qid), choice: true, from });
+		}
+	}
 	const flbQuests = (flb && flb.quests) || {};
 	for (const [qid, q] of Object.entries(flbQuests)) {
 		for (const it of (q.rewards && q.rewards.items) || []) {
@@ -630,7 +685,7 @@ function mergeCodex(inputs) {
 					const choice = !!(flbQuests[s.id] && flbQuests[s.id].rewards && (flbQuests[s.id].rewards.choices || []).includes(Number(id)));
 					add(id, { type: 'quest', quest: s.id, choice: choice || null, from: ['flbis'] });
 				} else if (s.type === 'drop' && s.npcId) {
-					add(id, { type: 'drop', npc: s.npcId, chance: s.pct || null, instance: bossInstance[s.npcId] || null, from: ['flbis'] });
+					add(id, { type: 'drop', npc: s.npcId, chance: s.pct || null, instance: npcInstance[s.npcId] || null, from: ['flbis'] });
 				} else if (s.type === 'crafted' && s.spellId) {
 					const line = skillLineOf[s.profession] ?? null;
 					if (line !== null) add(id, { type: 'craft', spell: s.spellId, skillLine: line, profession: s.profession, skill: s.skill ?? null, from: ['flbis'] });
@@ -652,31 +707,40 @@ function mergeCodex(inputs) {
 	for (const list of Object.values((rs && rs.mounts) || {})) for (const it of list) mountItems.add(Number(it));
 	for (const list of Object.values((rs && rs.pets) || {})) for (const it of list) petItems.add(Number(it));
 	if (cl) {
+		const mountSpells = cl.mountSpells || new Set();
+		const petSpells = cl.petSpells || new Set();
 		for (const [id, it] of Object.entries(cl.items)) {
 			const learn = it.learn;
-			if ((it.classId === 15 && it.subclassId === 5) || (learn && cl.mountAura.has(learn))) {
+			const spell = learn || it.use;
+			if ((it.classId === 15 && it.subclassId === 5) || (learn && cl.mountAura.has(learn)) || (spell && mountSpells.has(spell))) {
 				mountItems.add(Number(id));
 				if (!names[id] && !it.era) names[id] = it.name;
-			} else if (it.classId === 15 && it.subclassId === 2 && learn) {
+			} else if ((it.classId === 15 && it.subclassId === 2 && learn) || (spell && petSpells.has(spell))) {
 				petItems.add(Number(id));
 				if (!names[id] && !it.era) names[id] = it.name;
 			}
 		}
 	}
 
-	// Mounts and pets that are no longer obtainable. AtlasLoot Forever's
-	// collection lists and Polestar's own curated guides (`collects`) name the
-	// collectibles the game hands out; the Era databases (pfQuest, and Questie
-	// where it inherits them) still list vendor stock that was retired or
-	// replaced (the pre-1.4 epic mounts the exchange quests traded in). A mount
-	// or pet whose every source is such an Era vendor row, and that neither
-	// list names, is retired. Forever-only rows (Questie without pfQuest) are
-	// trusted: AtlasLoot lags behind Forever's new collectibles.
+	// Mounts and pets that are no longer obtainable. The Era databases
+	// (pfQuest, and Questie where it inherits them) still list vendor stock
+	// that was retired or replaced (the pre-1.4 epic mounts the exchange quests
+	// traded in). A mount or pet whose every source is such an Era vendor row
+	// is retired when, in a release build, the Forever client's Mount row for
+	// its summon spell is flagged hidden until known (Mount.Flags 0x40: the
+	// client keeps it only for those who already have it; Black Stallion,
+	// still sold, is not flagged), or, in a --local-extras build, when
+	// AtlasLoot's collection lists do not name it. Polestar's own curated
+	// guides (`collects`) name collectibles the game hands out: never retired.
+	// Forever-only rows (Questie without pfQuest) are trusted. Companions have
+	// no such client flag, so a release build retires none.
 	const listed = new Set([...((al && al.collections) || []).map((c) => Number(c.item)), ...(inputs.curated || []).map(Number)]);
-	const statusOf = (id, kind, sources) => {
+	const hiddenMount = (spell) => !!(cl && cl.mountHidden && spell && cl.mountHidden.has(spell));
+	const statusOf = (id, kind, sources, spell) => {
 		if (!sources.length) return 'nosource';
 		if (kind !== 'mount' && kind !== 'pet') return null;
 		if (listed.has(id)) return null;
+		if (!al && !(kind === 'mount' && hiddenMount(spell))) return null;
 		const eraVendor = (s) => s.type === 'vendor' && (s.from || []).includes('pfquest');
 		return sources.every(eraVendor) ? 'retired' : null;
 	};
@@ -707,7 +771,7 @@ function mergeCodex(inputs) {
 				if (vendor) s.npc = vendor.npc;
 			}
 		}
-		const sources = finalizeSources(list, npcLevel);
+		const sources = finalizeSources(list, npcLevel, (npc) => !!bossInstance[npc]);
 		if (!sources.length && JUNK.test(name)) continue;
 		let kind = 'item';
 		if (mountItems.has(id)) kind = 'mount';
@@ -740,7 +804,7 @@ function mergeCodex(inputs) {
 			repStanding,
 			reqSkill: c ? c.reqSkill : null,
 			reqSkillRank: c ? c.reqSkillRank : null,
-			status: statusOf(id, kind, sources),
+			status: statusOf(id, kind, sources, spell),
 			sources,
 		};
 	}
@@ -1008,9 +1072,15 @@ function writePackDir(dir, files) {
 	fs.rmSync(old, { recursive: true, force: true });
 }
 
-async function loadInputs({ addons, offline = false, dataDir, sourcesDir, build = BUILD, fetchImpl, log = () => {} } = {}) {
+// localExtras: also merge the installed AtlasLoot (GPL-2.0), RareScanner (All
+// Rights Reserved) and data/forever/dungeons.json (DungeonJournal, no
+// licence). Such a build is for this machine only: its meta says `local`
+// and `pack` refuses to ship it. Without it every input is release-safe
+// (docs/ARCHITECTURE.md, "Codex (`codex build`)").
+async function loadInputs({ addons, offline = false, dataDir, sourcesDir, build = BUILD, fetchImpl, localExtras = false, guidesDir, log = () => {} } = {}) {
 	dataDir = dataDir || DATA;
 	sourcesDir = sourcesDir || SOURCES;
+	guidesDir = guidesDir || path.join(ROOT, 'guides');
 	const j = (f, opt) => readJson(path.join(dataDir, f), opt);
 	const forever = {
 		items: j('items.json'),
@@ -1023,7 +1093,9 @@ async function loadInputs({ addons, offline = false, dataDir, sourcesDir, build 
 		trainers: j('trainers.json', true) || {},
 		mapFrames: j('map-frames.json', true) || {},
 		meta: j('meta.json', true) || {},
-		dungeons: j('dungeons.json', true),
+		// Recorder `enter` / `encounter` facts (tools/lib/data/recordings.js), when built.
+		instances: j('instances.json', true) || {},
+		dungeons: localExtras ? j('dungeons.json', true) : null,
 	};
 	const warnings = [];
 	const { resolveAddonsDir } = require('../addons');
@@ -1031,15 +1103,17 @@ async function loadInputs({ addons, offline = false, dataDir, sourcesDir, build 
 	let atlasloot = null;
 	let rarescanner = null;
 	let flbis = null;
-	if (!dir) warnings.push('no Forever AddOns folder found (pass --addons): AtlasLoot, RareScanner and ForeverLevelingBiS skipped');
+	if (!dir) warnings.push(`no Forever AddOns folder found (pass --addons): ForeverLevelingBiS${localExtras ? ', AtlasLoot and RareScanner' : ''} skipped`);
 	else {
 		log(`reading addons in ${dir}`);
-		const { readAtlasLoot } = require('../consume/atlasloot');
-		const { readRareScanner } = require('../consume/rarescanner');
 		const { readForeverLevelingBiS } = require('../consume/foreverlevelingbis');
-		atlasloot = readAtlasLoot(dir);
-		rarescanner = readRareScanner(dir);
-		for (const w of [...((atlasloot.meta && atlasloot.meta.warnings) || []), ...((rarescanner.meta && rarescanner.meta.warnings) || [])]) warnings.push(w);
+		if (localExtras) {
+			const { readAtlasLoot } = require('../consume/atlasloot');
+			const { readRareScanner } = require('../consume/rarescanner');
+			atlasloot = readAtlasLoot(dir);
+			rarescanner = readRareScanner(dir);
+			for (const w of [...((atlasloot.meta && atlasloot.meta.warnings) || []), ...((rarescanner.meta && rarescanner.meta.warnings) || [])]) warnings.push(w);
+		}
 		try {
 			flbis = readForeverLevelingBiS({ addons: dir });
 		} catch (err) {
@@ -1051,9 +1125,11 @@ async function loadInputs({ addons, offline = false, dataDir, sourcesDir, build 
 	warnings.push(...loaded.warnings);
 	const client = clientFacts(loaded.tables, loaded.build);
 	client.instanceMaps = require('./journal').instanceMapsOf(loaded.tables.Map || [], loaded.tables.AreaTable || []);
+	let eraMaps = null;
 	try {
 		const era = await loadTables({ sourcesDir, build: ERA_BUILD, offline, fetchImpl, log, tables: ERA_TABLES });
 		const eraItems = clientFacts(era.tables, era.build).items;
+		eraMaps = era.tables.Map || null;
 		let filled = 0;
 		for (const [id, it] of Object.entries(eraItems)) {
 			if (client.items[id]) continue;
@@ -1065,7 +1141,8 @@ async function loadInputs({ addons, offline = false, dataDir, sourcesDir, build 
 	} catch (err) {
 		warnings.push(`Era client tables ${ERA_BUILD}: ${err.message}`);
 	}
-	return { forever, atlasloot, rarescanner, flbis, client, curated: curatedCollects(), warnings };
+	client.instances = instanceFacts(loaded.tables, eraMaps);
+	return { forever, atlasloot, rarescanner, flbis, client, curated: curatedCollects(guidesDir), entrances: curatedEntrances(guidesDir), localExtras: !!localExtras, warnings };
 }
 
 // Item ids that Polestar's own guides obtain (`collects` headers under guides/).
@@ -1118,6 +1195,8 @@ async function buildCodex(opts = {}) {
 		schema: SCHEMA,
 		builtAt: opts.builtAt || (inputs.forever.meta && inputs.forever.meta.builtAt) || null,
 		build: (inputs.client && inputs.client.build) || BUILD,
+		// A --local-extras build (AtlasLoot, RareScanner, DungeonJournal): never released.
+		localExtras: !!(inputs.localExtras || inputs.atlasloot || inputs.rarescanner || (inputs.forever && inputs.forever.dungeons)),
 		sources: sourcesMeta(inputs),
 		counts,
 		coverage,

@@ -1,9 +1,11 @@
 'use strict';
-// The Dungeons section's data (docs/ARCHITECTURE.md, "Reference data"): a
-// journal page per dungeon and raid the way DungeonJournal presents them:
-// every quest with where it starts and ends, its objective, its chain and its
-// rewards, the bosses in kill order with the quests tied to them, and the
-// entrance. No loot tables. Built by `codex build` and shipped inside the
+// The Dungeons section's data (docs/ARCHITECTURE.md, "Dungeons"): a journal
+// page per Codex dungeon and raid: every quest with where it starts and ends,
+// its objective, its chain and its rewards, the bosses in kill order with the
+// quests tied to them, and the entrance. No loot tables (the Codex's
+// instances carry each boss's loot for Lookup). A release build reads only
+// release-safe inputs; dungeons.json (DungeonJournal) is present only in a
+// --local-extras build. Built by `codex build` and shipped inside the
 // load-on-demand Codex pack as Dungeons1.lua, which registers into
 // Polestar.Dungeons (addon/Polestar/Dungeons/Dungeons.lua).
 //
@@ -278,7 +280,7 @@ function buildPages(inputs, codex) {
 			rewards: {
 				items: [...(src.rewards || []).map((i) => rewardItem(i, false, codex)), ...(src.choices || []).map((i) => rewardItem(i, true, codex))],
 				xp: f.xp ?? null,
-				money: null,
+				money: (f.rewards && f.rewards.money) ?? null,
 				rep: repOf(f, factions),
 			},
 			bosses: [],

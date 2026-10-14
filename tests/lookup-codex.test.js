@@ -129,3 +129,52 @@ test('"Frostsaber": the sabers on sale and covered by a guide come first, the re
 	assert.equal(found.mounts[retired].status, 'retired');
 	assert.ok(found.mounts.slice(retired).every((m) => m.status), 'nothing obtainable ranks below it');
 });
+
+test('the built Codex is release-safe, and in game Lookup finds items, mounts and NPCs, Dungeons lists dungeons with bosses and quests, Rares lists rares', { skip }, () => {
+	const { releaseRefusal } = require('../tools/lib/codex/pack');
+	assert.equal(releaseRefusal(PACK), null, 'pack would ship it');
+	const [out] = runAddon({
+		stubs: ['stub_world.lua'],
+		before: packLua(),
+		addons: ['Polestar'],
+		script: `
+stub.login()
+local C = Polestar.Codex
+local loaded = C.Load()
+local function first(q, kind)
+	for _, r in ipairs(Polestar.Search.Query(q)) do if r.kind == kind then return r.id end end
+	return false
+end
+local D = Polestar.Dungeons
+D.Load()
+local list, bossed, quested = 0, 0, 0
+for _, d in ipairs(D.List()) do
+	list = list + 1
+	if d.bosses > 0 then bossed = bossed + 1 end
+	if d.quests.A + d.quests.H > 0 then quested = quested + 1 end
+end
+local wc = {}
+for _, b in ipairs(D.Bosses("wailing-caverns")) do wc[#wc + 1] = b.name end
+local rares = 0
+C.Each("rare", function() rares = rares + 1 end)
+local thuros = C.Npc(61)
+local dm = C.Instance("deadmines")
+emit({ loaded = loaded, item = first("Linen Cloth", "item"), mount = first("Deathcharger", "mount"), npc = first("Lelanai", "npc"),
+	list = list, bossed = bossed, quested = quested, wc = wc, wcQuests = #D.Quests("wailing-caverns"),
+	rares = rares, thuros = { thuros.rare and true or false, #thuros.spawns > 0 },
+	dm = { #dm.bosses, dm.entrance and dm.entrance.map or false, #dm.bosses[#dm.bosses].items } })`,
+	}).emitted;
+	assert.equal(out.loaded, true);
+	assert.equal(out.item, 2589);
+	assert.equal(out.mount, 13335);
+	assert.equal(out.npc, 4730);
+	assert.ok(out.list >= 25, `dungeons listed: ${out.list}`);
+	assert.ok(out.bossed >= 25 && out.quested >= 25, `with bosses ${out.bossed}, with quests ${out.quested}`);
+	assert.ok(out.wc.includes('Mutanus the Devourer'), out.wc.join(', '));
+	assert.ok(out.wcQuests > 0);
+	assert.ok(out.rares >= 300, `rares: ${out.rares}`);
+	assert.deepEqual(out.thuros, [true, true]);
+	assert.equal(out.dm[0], 8);
+	assert.equal(out.dm[1], 1436, 'the Deadmines entrance is in Westfall');
+	assert.ok(out.dm[2] > 0, "VanCleef's loot");
+});

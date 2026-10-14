@@ -251,7 +251,8 @@ test('without the Codex pack the section says what is missing and still finds gu
 		Polestar.UI.Picker.SetQuery("west"); stub.advance(0.3)
 		emit({ idle = idle, none = none, rows = rowTexts(LK.results.Child), sel = LK.detail.primary })`);
 	assert.equal(out.idle.title, 'The Codex is not loaded');
-	assert.match(out.idle.note, /Polestar_Codex\) is not installed/);
+	assert.match(out.idle.note, /^The Polestar_Codex addon is missing or disabled: reinstall Polestar or enable it in the AddOns list, then \/reload\.\n/);
+	assert.doesNotMatch(out.idle.note, /tools\/polestar|codex build/, 'no developer command in a player message');
 	assert.match(out.idle.list, /search the guides/);
 	assert.match(out.idle.codex, /Codex not installed/);
 	assert.deepEqual(out.idle.navs, ['all'], 'no kind is offered that nothing was found in');

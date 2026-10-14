@@ -145,10 +145,8 @@ function LK.ReasonText(reason)
 		return L["Loading the Codex\226\128\166"]
 	elseif reason == "off" then
 		return L["Lookup is turned off in Options > Discovery > Lookup. Items, mounts, NPCs and quests are not searched."]
-	elseif reason == "missing" then
-		return L["The Codex pack (Polestar_Codex) is not installed. Build and install it (node tools/polestar.js codex build), then reload."]
-	elseif reason == "disabled" then
-		return L["The Codex pack is disabled. Enable Polestar_Codex in the AddOns list, then reload."]
+	elseif reason == "missing" or reason == "disabled" then
+		return L["The Polestar_Codex addon is missing or disabled: reinstall Polestar or enable it in the AddOns list, then /reload."]
 	elseif reason == "combat" then
 		return L["The Codex loads when combat ends."]
 	elseif reason == "notloaded" or reason == nil then

@@ -15,14 +15,17 @@ const { commandPack, packArgument } = require('../lib/pack/locate');
 const { PACK_OPTIONS, PACK_USAGE, otherPack, noDataConflict, noDataCache, buildPack, folderIn } = require('../lib/pack/build');
 const { writeZip, directoryEntries } = require('../lib/zip');
 const { ROOT, DATA } = require('../lib/paths');
+const { releaseRefusal, ADDON: CODEX } = require('../lib/codex/pack');
 
 const usage = `usage: node tools/polestar.js pack [<dir>] [options]
 
 In the repository: compiles our guides, then writes dist/Polestar-<version>.zip
-(Polestar, Polestar_Guides, and Polestar_QuestDB / Polestar_ItemDB when built),
-dist/Polestar_Recorder-<version>.zip and dist/SHA256SUMS. Polestar/ in the
-zip also carries LICENSE and README.txt (install steps), Polestar_Recorder/
-the LICENSE.
+(Polestar, Polestar_Guides, Polestar_Codex, and Polestar_QuestDB /
+Polestar_ItemDB when built), dist/Polestar_Recorder-<version>.zip and
+dist/SHA256SUMS. Polestar/ in the zip also carries LICENSE and README.txt
+(install steps), Polestar_Recorder/ the LICENSE. The Codex must be built
+first (\`codex build\`) from release-safe inputs: pack stops on a missing
+Codex or a --local-extras one.
 
 Given another guide pack (<dir>, --pack, or run inside one): lints and builds it with our
 guides as context, then writes <pack>/dist/<folder>-<version>.zip holding its
@@ -71,7 +74,9 @@ function readme(version, names) {
 		'   World of Warcraft/_forever_/Interface/AddOns/',
 		'   (_classic_beta_ instead of _forever_ on the beta client):',
 		...names.map((n) => `     ${n}`),
-		'   To update, delete the old Polestar folders there first.',
+		'   They are all part of Polestar: Polestar_Codex holds what Lookup,',
+		'   Dungeons and Rares show. To update, delete the old Polestar folders',
+		'   there first.',
 		'2. Quit the game completely and start it again. A /reload does not',
 		'   load new addon folders.',
 		'',
@@ -112,6 +117,13 @@ function pack(dirs, version) {
 	}
 	if (manifest.version !== version) console.warn(`warning: guides/pack.json says version ${manifest.version}, package.json says ${version}`);
 	const product = project.releaseAddons(dirs.addons);
+	// The Codex is part of Polestar (Lookup, Dungeons, Rares): built from
+	// release-safe inputs, or no release.
+	const codexRefusal = releaseRefusal(path.join(dirs.addons, CODEX));
+	if (codexRefusal) {
+		console.error(`pack failed: ${CODEX} ${codexRefusal}`);
+		return 1;
+	}
 	for (const n of product.skipped) console.log(`note: ${n} not built (no ${n}/${n}.toc); leaving it out of the zip`);
 	const license = { name: 'LICENSE', data: fs.readFileSync(path.join(ROOT, 'LICENSE')) };
 	const archives = [

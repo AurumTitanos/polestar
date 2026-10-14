@@ -16,7 +16,7 @@ const { PACK_OPTIONS, PACK_USAGE, otherPack, noDataConflict, noDataCache, buildP
 
 // Data addons built locally from inputs that may not be redistributed
 // (docs/SUITE.md, "In-game packs"): installed when built, never packaged.
-const LOCAL_DATA_ADDONS = ['Polestar_Codex', 'Polestar_Travel'];
+const LOCAL_DATA_ADDONS = ['Polestar_Travel'];
 
 const usage = `usage: node tools/polestar.js install [<dir>] [options]
 
