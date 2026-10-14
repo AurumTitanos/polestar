@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  Questions, feedback and bug reports: join the <a href="https://discord.gg/vMbee6F2e9"><b>Polestar Discord</b></a>.
+  On <a href="https://www.curseforge.com/wow/addons/polestar-guides"><b>CurseForge</b></a>, or from the Releases page. Questions, feedback and bug reports: join the <a href="https://discord.gg/vMbee6F2e9"><b>Polestar Discord</b></a>.
 </p>
 
 <p align="center">
@@ -24,6 +24,7 @@
   <img alt="Version 0.2.1, beta" src="https://img.shields.io/badge/version-0.2.1_beta-fabf4d?style=flat-square&labelColor=232a3f">
   <a href="https://github.com/fitzforge/polestar/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/fitzforge/polestar/actions/workflows/ci.yml/badge.svg"></a>
   <a href="https://discord.gg/vMbee6F2e9"><img alt="Discord: join the Polestar community" src="https://img.shields.io/badge/Discord-join_us-5865f2?style=flat-square&logo=discord&logoColor=white&labelColor=232a3f"></a>
+  <a href="https://www.curseforge.com/wow/addons/polestar-guides"><img alt="CurseForge: Polestar Guides" src="https://img.shields.io/badge/CurseForge-Polestar_Guides-f16436?style=flat-square&logo=curseforge&logoColor=white&labelColor=232a3f"></a>
 </p>
 
 <p align="center">
@@ -49,7 +50,10 @@
 
 ## Quick start
 
-1. **Download** `Polestar-<version>.zip` from the newest release on the
+1. **Install it with the CurseForge app** (search for
+   [Polestar Guides](https://www.curseforge.com/wow/addons/polestar-guides)),
+   then skip to step 3. **Or download** `Polestar-<version>.zip` from the
+   newest release on the
    [Releases page](https://github.com/fitzforge/polestar/releases), under
    *Assets* (not "Source code").
 2. **Unzip it into the game's AddOns folder**, so the Polestar folders
