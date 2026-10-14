@@ -1945,8 +1945,15 @@ built.
   encounters and by level, the NPCs placed inside that the data or Wowhead
   ranks rare or boss, or that alone drop an item of quality 2 or better at 5% or more.
 - Rares and treasures: NPCs ranked rare (4) or rare elite (2) in `npcs.json`
-  (pfQuest, QuestieDB, recordings), with their spawns and every drop the
-  Codex knows; treasures are objects with the `chest` role, with their loot.
+  (pfQuest, QuestieDB, recordings), with their spawns and loot; treasures are
+  objects with the `chest` role, with their loot. Loot (`Codex.Loot`, where
+  the Rares view picks a signature drop) is every drop or object candidate
+  naming it, its own first (items no other NPC or object drops or holds:
+  Bayne's Bite, Serrated Shadowclaw), then best chance first, at most 150 (a
+  rare's candidates run to hundreds, median 286; 150 keeps every drop the
+  internal build names that Wowhead Forever confirms, for about 215 KB of
+  pack). An item keeps its 10 likeliest droppers (6 objects, 10 vendors) plus
+  the drops of its instances' bosses.
 - Precedence for a fact found in several places follows `docs/SUITE.md`;
   sources are deduplicated by type and id, keep their `from` provenance and the
   best-known drop chance.
@@ -1978,7 +1985,10 @@ built.
   missing and different rows; a difference whose value comes from a
   better-evidenced input says so and counts as a match; a corpse point is
   never taken for an entrance) and records the match per kind in its
-  `meta.parity`; without the internal build it claims none. `codex parity
+  `meta.parity`; without the internal build it claims none. A confirmed
+  missing drop or loot row that the build knows but a cap left out (the
+  merge's `evidence.cut`, not shipped) says so ("cut by a cap") and is
+  counted on its own line. `codex parity
   [--ours <dir>] [--against <dir>]` reruns the comparison. The report also
   lists what only play can fill and the Recorder event that fills it
   (Forever instances and their entrances: `enter`, `encounter`; Forever
@@ -1993,15 +2003,15 @@ built.
   | instance entrances | 14 | 13 | 92.9% |
   | bosses | 373 | 272 | 72.9% |
   | bosses with loot | 265 | 262 | 98.9% |
-  | boss loot items | 2066 | 1671 | 80.9% |
-  | drop chances | 20707 | 17770 | 85.8% |
+  | boss loot items | 2164 | 1862 | 86.0% |
+  | drop chances | 20707 | 17129 | 82.7% |
   | rares | 413 | 387 | 93.7% |
   | rare positions | 363 | 357 | 98.3% |
   | rare levels | 387 | 387 | 100.0% |
-  | rare loot | 14016 | 13816 | 98.6% |
+  | rare loot | 14223 | 14188 | 99.8% |
   | treasures | 65 | 60 | 92.3% |
   | treasure positions | 31 | 31 | 100.0% |
-  | treasure loot | 1548 | 1508 | 97.4% |
+  | treasure loot | 1548 | 1548 | 100.0% |
   | items with a source | 15967 | 15901 | 99.6% |
   | items: drop | 8806 | 8666 | 98.4% |
   | items: quest | 2092 | 2091 | 100.0% |
@@ -2031,7 +2041,10 @@ built.
   reputation standings that vendors gate in gossip, and battleground rewards
   AtlasLoot files as PvP, are in no client table (`ItemSparse` carries no
   `MinFactionID` or `RequiredPVPRank` for them); 26 Forever rares no
-  database ranks yet.
+  database ranks yet. The 455 confirmed drop chances the release lacks are
+  all cut by an item's 10-dropper cap (the internal build keeps AtlasLoot's
+  instance trash past it; every dropper of every item would be 1.6 million
+  sources against 74 thousand).
 
 ### Reference data (`data/forever/`, built by `data build`, gitignored)
 

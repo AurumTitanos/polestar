@@ -72,8 +72,12 @@ const CAP = { drop: 10, object: 6, vendor: 10, container: 6 };
 const WORLD_DROP_NPCS = 12;
 // Spawns: clusters per map, maps per entity.
 const SPAWN = { radius: 3, perMap: 5, maps: 4 };
-// Loot listed on a rare NPC or treasure (Codex.Loot): best-known chance first.
-const LOOT_CAP = 40;
+// Loot listed on a rare NPC or treasure (Codex.Loot; the Rares view picks its
+// signature drop from it): its own drops (items nothing else drops or holds)
+// first, then best-known chance. A rare's candidates run to hundreds (the
+// world-drop pool; median 286), so the list is cut: 150 keeps every drop
+// RareScanner names for a rare or treasure Wowhead Forever confirms.
+const LOOT_CAP = 150;
 
 // Class mount spells the client tables give no class for (SkillLineAbility
 // ClassMask 0 and no SpellClassOptions row on 1.60.1.70338).
@@ -318,7 +322,8 @@ function factionOfRaces(races) {
 
 // Candidate sources -> deduped, field-merged, capped, ordered list.
 // isBoss(npc): a boss's drops stay past the cap (its instance's loot list).
-function finalizeSources(cands, npcLevel, isBoss = () => true) {
+// onCut(source): each merged source the cap leaves out (parity's evidence).
+function finalizeSources(cands, npcLevel, isBoss = () => true, onCut = null) {
 	const groups = new Map();
 	for (const c of cands) {
 		const kf = KEY_FIELD[c.type];
@@ -363,7 +368,9 @@ function finalizeSources(cands, npcLevel, isBoss = () => true) {
 	const seen = {};
 	out = out.filter((s) => {
 		seen[s.type] = (seen[s.type] || 0) + 1;
-		return !CAP[s.type] || seen[s.type] <= CAP[s.type] || (s.type === 'drop' && s.instance && isBoss(s.npc));
+		const keep = !CAP[s.type] || seen[s.type] <= CAP[s.type] || (s.type === 'drop' && s.instance && isBoss(s.npc));
+		if (!keep && onCut) onCut(s);
+		return keep;
 	});
 	return out;
 }
@@ -811,7 +818,10 @@ function mergeCodex(inputs) {
 	const items = {};
 	const factionByName = {};
 	for (const f of Object.values(factions)) factionByName[normName(f.name)] = f.id;
-	const evidence = { noRep: [], noPvp: [] }; // items Wowhead's Forever tooltip shows without a reputation / PvP rank
+	// noRep, noPvp: items Wowhead's Forever tooltip shows without a reputation /
+	// PvP rank. cut: what a cap left out (parity's reason, not shipped):
+	// drop { item: [npc] }, rare { npc: [item] }, treasure { object: [item] }.
+	const evidence = { noRep: [], noPvp: [], cut: { drop: {}, rare: {}, treasure: {} } };
 	const allIds = new Set([...Object.keys(names), ...Object.keys(cands)].map(Number));
 	for (const id of [...allIds].sort(byId)) {
 		const c = cl && cl.items[id];
@@ -844,7 +854,12 @@ function mergeCodex(inputs) {
 				if (vendor) s.npc = vendor.npc;
 			}
 		}
-		const sources = finalizeSources(list, npcLevel, (npc) => !!bossInstance[npc]);
+		const sources = finalizeSources(
+			list,
+			npcLevel,
+			(npc) => !!bossInstance[npc],
+			(s) => s.type === 'drop' && (evidence.cut.drop[id] = evidence.cut.drop[id] || []).push(s.npc),
+		);
 		if (!sources.length && JUNK.test(name)) continue;
 		let kind = 'item';
 		if (mountItems.has(id)) kind = 'mount';
@@ -988,12 +1003,22 @@ function mergeCodex(inputs) {
 	}
 
 	// ----- loot of rares and treasures: RareScanner loot plus every drop/object
-	// candidate naming them (before the per-item caps), items known to the Codex only.
-	const lootOf = (rec, chances, listed) => {
+	// candidate naming them (before the per-item caps), items known to the Codex
+	// only; its own drops first (the only drop or object candidate of the item).
+	const holderOf = {}; // item -> 'n<npc>' | 'o<object>' when one alone drops or holds it, else null
+	for (const [item, list] of Object.entries(cands)) {
+		for (const s of list) {
+			if (s.type !== 'drop' && s.type !== 'object') continue;
+			const h = s.type === 'drop' ? `n${s.npc}` : `o${s.object}`;
+			holderOf[item] = holderOf[item] === undefined || holderOf[item] === h ? h : null;
+		}
+	}
+	const lootOf = (rec, holder, chances, listed, cut) => {
 		const ids = new Set([...(listed || []), ...chances.keys()].filter((id) => items[id]));
-		rec.loot = [...ids]
-			.sort((a, b) => (chances.get(b) ?? -1) - (chances.get(a) ?? -1) || (items[b].quality ?? -1) - (items[a].quality ?? -1) || a - b)
-			.slice(0, LOOT_CAP);
+		const own = (id) => (holderOf[id] === holder ? 0 : 1);
+		const ranked = [...ids].sort((a, b) => own(a) - own(b) || (chances.get(b) ?? -1) - (chances.get(a) ?? -1) || (items[b].quality ?? -1) - (items[a].quality ?? -1) || a - b);
+		rec.loot = ranked.slice(0, LOOT_CAP);
+		if (ranked.length > LOOT_CAP) cut[rec.id] = ranked.slice(LOOT_CAP);
 	};
 	const npcChances = {};
 	const objectChances = {};
@@ -1009,11 +1034,11 @@ function mergeCodex(inputs) {
 		}
 	}
 	for (const [id, n] of Object.entries(npcs)) {
-		if (n.rare) lootOf(n, npcChances[id] || new Map(), rareLoot[id]);
+		if (n.rare) lootOf(n, `n${id}`, npcChances[id] || new Map(), rareLoot[id], evidence.cut.rare);
 		else n.loot = [];
 	}
 	for (const [id, o] of Object.entries(objects)) {
-		if (o.treasure) lootOf(o, objectChances[id] || new Map(), treasureLoot[id]);
+		if (o.treasure) lootOf(o, `o${id}`, objectChances[id] || new Map(), treasureLoot[id], evidence.cut.treasure);
 		else o.loot = [];
 	}
 

@@ -14,6 +14,9 @@
 // Row = { id, name, field?, theirs?, ours?, reason? }. A difference whose
 // value ours takes from a better-evidenced input (the Forever client, a
 // recording) carries `reason` and counts as a match ("ours differs, reason").
+// A confirmed missing drop or loot row that ours knows but a cap leaves out
+// (`ours.evidence.cut`, a release build's) carries `reason` too and counts in
+// `internalOnly.cut` (still a confirmed gap: the fact is real, not shipped).
 //
 // Kinds: instances (present), instance levels, instance entrances, bosses
 // (present in the mapped instance), bosses with loot, boss loot items, drop
@@ -429,11 +432,27 @@ function compareCodex(ours, theirs, verify = null) {
 	};
 	for (const [name, n] of Object.entries(oursOnly)) if (K[name]) K[name].oursOnly = n;
 	// Each internal-only row: confirmed in Forever (ours lacks it), not in Forever, unverified.
+	// A confirmed row ours knows but a cap leaves out (ours.evidence.cut, from
+	// the build) carries that reason and counts in internalOnly.cut too.
+	// Row id `<a>/<b>`: what the cap cut from a's list (an item's droppers, a rare's or treasure's loot) holds b.
+	const cut = (ours.evidence || {}).cut || {};
+	const cutBy = { 'drop chances': cut.drop, 'rare loot': cut.rare, 'treasure loot': cut.treasure };
+	const CUT_REASON = {
+		'drop chances': "cut by a cap: ours keeps an item's likeliest droppers (and its instances' bosses); this one ranks below them",
+		'rare loot': "cut by a cap: ours keeps a rare's own drops, then its likeliest; this one ranks below them",
+		'treasure loot': "cut by a cap: ours keeps a treasure's own contents, then its likeliest; this one ranks below them",
+	};
 	for (const [name, c] of Object.entries(K)) {
 		c.internalOnly = { confirmed: 0, notInForever: 0, unverified: 0 };
 		for (const r of c.missing) {
 			r.verdict = verdictOf(name, r, verify, theirs);
 			c.internalOnly[r.verdict === 'confirmed' ? 'confirmed' : r.verdict === 'not in Forever' ? 'notInForever' : 'unverified']++;
+			if (r.verdict !== 'confirmed' || !cutBy[name]) continue;
+			const [a, b] = String(r.id).split('/').map(Number);
+			if ((cutBy[name][a] || []).includes(b)) {
+				r.reason = CUT_REASON[name];
+				c.internalOnly.cut = (c.internalOnly.cut || 0) + 1;
+			}
 		}
 	}
 	// Differences with a reason count as matches already; the rest are not.
@@ -481,6 +500,7 @@ function markdown(report, { theirs = 'internal (--local-extras)', ours = 'releas
 		const io = c.internalOnly || { confirmed: 0, notInForever: 0, unverified: 0 };
 		lines.push(`| ${name} | ${c.total} | ${c.match} | ${pct(c.share)} | ${io.confirmed} | ${io.notInForever} | ${io.unverified} | ${c.oursOnly ?? ''} | ${bad} |`);
 		if (c.withinTolerance) lines.push(`| ${name}: within tolerance | | ${c.withinTolerance} | | | | | | |`);
+		if (io.cut) lines.push(`| ${name}: confirmed, cut by a cap | | | | ${io.cut} | | | | |`);
 	}
 	lines.push('');
 	for (const [name, c] of Object.entries(report.kinds)) {
@@ -489,7 +509,7 @@ function markdown(report, { theirs = 'internal (--local-extras)', ours = 'releas
 		if (c.missing.length) {
 			lines.push(`Missing (${c.missingCount}):`, '');
 			const order = { confirmed: 0, unverified: 1, 'not in Forever': 2 };
-			for (const r of c.missing.slice().sort((x, y) => (order[x.verdict] ?? 1) - (order[y.verdict] ?? 1)).slice(0, 60)) lines.push(`- ${r.id} ${r.name || ''}${r.ours ? ` (ours: ${r.ours})` : ''} [${r.verdict || 'unverified'}]`);
+			for (const r of c.missing.slice().sort((x, y) => (order[x.verdict] ?? 1) - (order[y.verdict] ?? 1)).slice(0, 60)) lines.push(`- ${r.id} ${r.name || ''}${r.ours ? ` (ours: ${r.ours})` : ''} [${r.verdict || 'unverified'}]${r.reason ? ` (${r.reason})` : ''}`);
 			if (c.missing.length > 60) lines.push(`- ... ${c.missingCount - 60} more (codex-parity.json)`);
 			lines.push('');
 		}
