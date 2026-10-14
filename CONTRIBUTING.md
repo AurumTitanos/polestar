@@ -44,6 +44,25 @@ level, the versions and any errors Polestar caught. Add what is wrong.
 - Your Polestar version (shown at the foot of the Options sidebar and in the
   game's AddOns list).
 
+## How a report is handled
+
+A report is a lead, not a verdict: players are sometimes on an old version,
+have an incomplete install, misread a step or meet another addon's lines. Each
+report goes through the same steps before anything changes:
+
+1. **Check the version and install.** The report's first line names the
+   Polestar version. Is the step still the same on the coming release?
+2. **Reproduce it.** In the data (`data/forever/*.json`, the compiled guide),
+   in the test client (`tests/`, see tests/README.md) or in the game. A
+   report that can't be reproduced gets an answer saying so, and why.
+3. **Check it against the sources.** The game's own data, Wowhead's Forever
+   database, recordings. A player's memory of Classic is not a source: Forever
+   changed many quests.
+4. **Fix it only if it is real,** with a test that fails before the fix and
+   passes after it (or, for a guide, lint and `playtest`).
+5. **Credit the reporter** in CHANGELOG.md, "(thanks <name>)", and tell them
+   which release carries the fix.
+
 ## Fixing a guide
 
 Each guide's title leads to its file: the leveling guides live under
