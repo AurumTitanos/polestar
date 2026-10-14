@@ -28,11 +28,14 @@
 -- flag (betaNoticeSeen) is dropped.
 --
 -- It opens a moment after login, never in combat (it waits for the fight to
--- end), and never over the route choice: while that window is up the welcome
--- waits for it to close, and if a route choice opens over the welcome it
--- steps aside until it is done, then comes back on the page it left. About's
--- "Show the welcome again" and /polestar welcome (SHOW_WELCOME) open it with
--- every page.
+-- end), never during a cinematic, and never over the route choice: while that
+-- window is up the welcome waits for it to close, and if a route choice opens
+-- over the welcome it steps aside until it is done, then comes back on the
+-- page it left. A new character's first login plays the intro cinematic,
+-- whose start closes every special window (CloseAllWindows) and hides the UI:
+-- a welcome closed that way is not marked seen and comes back on the page it
+-- left once the cinematic stops. About's "Show the welcome again" and
+-- /polestar welcome (SHOW_WELCOME) open it with every page.
 --
 -- Built on first use; colours are Theme tokens only.
 
@@ -61,6 +64,11 @@ local hookedRC
 
 local function inCombat()
 	return InCombatLockdown and InCombatLockdown() or false
+end
+
+-- The intro cinematic or a cinematic scene is playing.
+local function inCinematic()
+	return (InCinematic and InCinematic()) or (IsInCinematicScene and IsInCinematicScene()) or false
 end
 
 -- This character has had its welcome.
@@ -386,9 +394,14 @@ local function build()
 
 	F:SetScript("OnShow", function(self) Anim.To(self, "alpha", 0, 1, Anim.BASE, "out") end)
 	-- Any close marks it seen, for the character and the account; stepping
-	-- aside for the route choice does not.
+	-- aside for the route choice does not, nor does a cinematic closing it
+	-- (it comes back after the cinematic, on the same page).
 	F:SetScript("OnHide", function()
 		if stepping then return end
+		if inCinematic() then
+			pending = "asked"
+			return
+		end
 		ns.CharState().welcomeSeen = SEEN
 		ns.DB().welcomeSeen = SEEN
 		pending = nil
@@ -439,7 +452,7 @@ end
 -- allow. A showing at login starts on the first page, with Set up while the
 -- account has not had its welcome.
 local function open(why)
-	if inCombat() then
+	if inCombat() or inCinematic() then
 		pending = pending == "asked" and "asked" or why
 		return
 	end
@@ -520,6 +533,10 @@ end)
 ns.RegisterEvent("PLAYER_REGEN_ENABLED", function()
 	yieldToRouteChoice()
 	try()
+end)
+-- After a cinematic, once the UI is back.
+ns.RegisterEvent("CINEMATIC_STOP", function()
+	if C_Timer and C_Timer.After then C_Timer.After(1, try) else try() end
 end)
 ns.On("ROUTE_CHOICE", yieldToRouteChoice)
 ns.On("SHOW_WELCOME", function(page) WEL.Show(page) end)

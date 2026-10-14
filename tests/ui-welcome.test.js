@@ -161,6 +161,51 @@ test('in combat it waits for the fight to end', () => {
 	assert.deepEqual(out, { during: { shown: false, char: 0 }, after: true, seen: false });
 });
 
+// A new character's first login plays the intro cinematic. As it starts, the
+// client's CinematicFrame opens as a full-screen panel: CloseAllWindows hides
+// every special window (the welcome is one) and the UI hides until it ends.
+const CINEMATIC = `
+function InCinematic() return stub.cinematic == true end
+function cinematic(on)
+	stub.cinematic = on
+	if on then
+		for _, name in ipairs(UISpecialFrames) do local f = _G[name]; if f and f:IsShown() then f:Hide() end end
+		stub.fire("CINEMATIC_START", true, 0)
+	else
+		stub.fire("CINEMATIC_STOP")
+	end
+end`;
+
+test('the intro cinematic does not use it up: closed as the cinematic starts, it comes back on the same page after it', () => {
+	const [out] = run(`
+		stub.advance(3)
+		PolestarWelcome.Next:Click()
+		local before = { shown = shown(), step = PolestarWelcome.Subtitle:GetText() }
+		cinematic(true)
+		stub.advance(5)
+		local during = { shown = shown(), account = PolestarDB.welcomeSeen or false }
+		cinematic(false)
+		stub.advance(2)
+		emit({ before = before, during = during, after = shown(), step = PolestarWelcome.Subtitle:GetText(),
+			account = PolestarDB.welcomeSeen or false })`, { before: CINEMATIC });
+	assert.deepEqual(out, {
+		before: { shown: true, step: '2 of 4' },
+		during: { shown: false, account: false },
+		after: true, step: '2 of 4', account: false,
+	});
+});
+
+test('a cinematic playing when the welcome is due holds it until the cinematic ends', () => {
+	const [out] = run(`
+		cinematic(true)
+		stub.advance(3)
+		local during = { shown = shown(), char = PolestarCharDB.welcomeSeen }
+		cinematic(false)
+		stub.advance(2)
+		emit({ during = during, after = shown(), first = title(), char = PolestarCharDB.welcomeSeen })`, { before: CINEMATIC });
+	assert.deepEqual(out, { during: { shown: false, char: 0 }, after: true, first: 'Hello, Testchar', char: 1 });
+});
+
 test('it never opens over the route choice: it waits for that window to close, and steps aside if one opens', () => {
 	const [out] = run(`
 		local E = Polestar.Engine

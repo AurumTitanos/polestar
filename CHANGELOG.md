@@ -4,6 +4,9 @@
 
 ### For players
 
+- A new character's welcome survives the intro cinematic: the cinematic
+  closed it as it started and it never came back. It now waits for the
+  cinematic to end, or comes back on the page it was on.
 - Guide packs page: the problem report box grows to fit long problem
   messages.
 - Search ranks an item first as covered by a guide only when a guide Lookup
