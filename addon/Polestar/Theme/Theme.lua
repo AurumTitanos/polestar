@@ -61,6 +61,15 @@ local ART = {
 	mapUnexplored = { 0.6, 0.66, 0.9, 1 }, -- multiplied onto unexplored map overlays
 }
 
+-- Another brand's colour, for its mark only: Discord's Blurple, as its
+-- brand guidelines give it, on the Discord logo wherever Polestar links its
+-- Discord (UI/Report.lua: the report window, the invite's copy window, the
+-- sidebars' link). A logo, never text, so it sits outside the legibility
+-- guard, the same in every scheme.
+local BRAND = {
+	discord = { 0.345, 0.396, 0.949, 1 },
+}
+
 -- A scheme: the grounds (bg window, panel raised panels and popups, panelAlt
 -- controls, sidebar, footer, sky the top of the header band), the text
 -- ladder (100/70/50, tinted toward the ground so secondary text stays in the
@@ -368,6 +377,7 @@ local function resolve()
 	local out = {}
 	for name, c in pairs(SHARED) do out[name] = copy(c) end
 	for name, c in pairs(ART) do out[name] = copy(c) end
+	for name, c in pairs(BRAND) do out[name] = copy(c) end
 	for name, c in pairs(src) do out[name] = copy(c) end
 	if key == "ellesmere" then
 		local panel = euiPanel()

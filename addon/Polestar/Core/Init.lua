@@ -30,6 +30,9 @@ function ns.DocsURL()
 	return site .. "/blob/HEAD/docs/PACKS.md"
 end
 
+-- The Polestar Discord's invite: where players report problems (UI/Report.lua).
+ns.DiscordURL = "https://discord.gg/vMbee6F2e9"
+
 local pcall, type, pairs, select, tostring = pcall, type, pairs, select, tostring
 
 -- enUS only for now; a missing key renders as itself.
@@ -44,10 +47,31 @@ function ns.EscapeText(s)
 	return (s:gsub("|", "||"))
 end
 
+-- The errors Polestar caught this session, for the report a player copies
+-- (UI/Report.lua): each message's first line with how often it came, oldest
+-- first, the last few kept.
+local MAX_ERRORS = 5
+local errors = {}
+function ns.NoteError(err)
+	local msg = tostring(err):match("^[^\n]*")
+	for i = 1, #errors do
+		if errors[i].msg == msg then
+			errors[i].count = errors[i].count + 1
+			return
+		end
+	end
+	if #errors >= MAX_ERRORS then table.remove(errors, 1) end
+	errors[#errors + 1] = { msg = msg, count = 1 }
+end
+function ns.Errors() return errors end
+
 -- Run a callback; report its error without stopping the caller's loop.
 local function call(fn, ...)
 	local ok, err = pcall(fn, ...)
-	if not ok then geterrorhandler()(err) end
+	if not ok then
+		ns.NoteError(err)
+		geterrorhandler()(err)
+	end
 end
 ns.SafeCall = call
 

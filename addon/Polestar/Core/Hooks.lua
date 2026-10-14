@@ -45,6 +45,7 @@ local type, pcall, tonumber, ipairs = type, pcall, tonumber, ipairs
 local secret = ns.Compat.IsSecret
 
 local function report(err)
+	ns.NoteError(err)
 	local handler = geterrorhandler and geterrorhandler()
 	if handler then pcall(handler, err) end
 end

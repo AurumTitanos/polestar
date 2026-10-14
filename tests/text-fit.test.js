@@ -2,9 +2,10 @@
 // Text stays inside its window. Every scene of `node tools/polestar.js
 // preview` that shows one of Polestar's windows (the guide window, the hub on
 // each section, Options on every page and tab, the welcome, the route
-// choice, the rare alert) is laid out through the preview's frame dump, in
-// the game font and in Inter, and every visible string is checked against
-// its window's edges and the frames that clip it.
+// choice, the rare alert, the report window and the copy window) is laid out
+// through the preview's frame dump, in the game font and in Inter, and every
+// visible string is checked against its window's edges and the frames that
+// clip it.
 //
 // In game the client's font sets text about 13% wider than the preview's
 // Inter metrics predict, so every glyph is measured 15% wider than the
@@ -23,7 +24,7 @@ const { resolve, wrap, measure } = require('../tools/preview/render');
 const SLACK = 1.15;
 const H = { LEFT: 0, CENTER: 0.5, RIGHT: 1, TOPLEFT: 0, TOP: 0.5, TOPRIGHT: 1, BOTTOMLEFT: 0, BOTTOM: 0.5, BOTTOMRIGHT: 1 };
 const V = { TOP: 0, CENTER: 0.5, BOTTOM: 1, TOPLEFT: 0, LEFT: 0.5, TOPRIGHT: 0, RIGHT: 0.5, BOTTOMLEFT: 1, BOTTOMRIGHT: 1 };
-const WINDOWS = new Set(['PolestarGuideFrame', 'PolestarOptions', 'PolestarPicker', 'PolestarWelcome', 'PolestarRouteChoice', 'PolestarMenu', 'PolestarRareToast']);
+const WINDOWS = new Set(['PolestarGuideFrame', 'PolestarOptions', 'PolestarPicker', 'PolestarWelcome', 'PolestarRouteChoice', 'PolestarMenu', 'PolestarRareToast', 'PolestarReport', 'PolestarCopy']);
 const PASSES = [['game font', ''], ['Inter', 'Polestar.Set("ui.font", "inter")\n']];
 
 // The preview's fonts, every advance SLACK times wider.

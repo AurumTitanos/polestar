@@ -520,12 +520,14 @@ local function buildAbout(view)
 	local cmdH, cmdText = block(L["Commands"], hex .. "/polestar|r   " .. L["show or hide the guide window"] .. "\n"
 		.. hex .. "/polestar guides|r   " .. L["choose a guide"] .. "\n"
 		.. hex .. "/polestar next, prev, skip|r   " .. L["move through steps"] .. "\n"
+		.. hex .. "/polestar report|r   " .. L["report a problem with a step on the Polestar Discord"] .. "\n"
 		.. hex .. "/polestar help|r   " .. L["every command"])
 	local welcome = W.Button(view, L["Show the welcome again"], function() ns.Fire("SHOW_WELCOME") end)
 	view.Welcome = welcome
 	local credH, credText = block(L["Credits"], L["Inter typeface by The Inter Project Authors, SIL Open Font License 1.1."] .. "\n"
 		.. L["Wordmark set in Cinzel by The Cinzel Project Authors, SIL Open Font License 1.1."] .. "\n"
 		.. L["Quest and map data includes pfQuest by shagu (MIT License)."] .. "\n"
+		.. L["Discord and its logo are trademarks of Discord Inc.; the logo marks the link to the Polestar Discord."] .. "\n"
 		.. L["With EllesmereUI installed, Polestar can follow its accent, font and panel colour through its public skinning API."])
 	local maintH = W.SectionHeader(view)
 	W.SetSection(maintH, L["Maintenance"])
@@ -980,6 +982,7 @@ local function build()
 		end,
 	})
 	O.frame = win
+	UI.Report.SidebarLink(win)
 end
 
 local function renderRail()

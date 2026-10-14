@@ -69,9 +69,12 @@ Good to know:
   it on.
 - **Guide packs** by other players install the same way, next to the
   `Polestar` folders: see [Guide packs](#guide-packs).
-- Something wrong? `/console scriptErrors 1` shows Lua errors; please
-  [open an issue](https://github.com/fitzforge/polestar/issues) with what you
-  saw. The release's `SHA256SUMS` holds the zips' checksums.
+- Something wrong? Click the bug in the guide window, beside Skip: say what
+  went wrong, copy the report (it already holds the step, where you stand and
+  the versions) and paste it on the
+  [Polestar Discord](https://discord.gg/vMbee6F2e9). `/polestar report` opens
+  it too, and [issues](https://github.com/fitzforge/polestar/issues) are
+  welcome as well. The release's `SHA256SUMS` holds the zips' checksums.
 
 ## What it is
 

@@ -54,6 +54,7 @@ function M.SetThumbTexture(self, t) if type(t) == "table" then self.thumbTexture
 function M.GetThumbTexture(self) return self.thumbTexture end
 function M.SetClipsChildren(self, v) self.clips = v and true or false end
 function M.SetTextInsets(self, l, r, t, b) self.insets = { l, r, t, b } end
+function M.SetMultiLine(self, v) self.multiLine = v and true or false end
 -- Gradients (the modern signature: orientation, min colour, max colour; for
 -- VERTICAL, min is the bottom) and desaturation, for the renderer.
 function M.SetGradient(self, orientation, minColor, maxColor)
@@ -242,7 +243,8 @@ local function entry(o)
 end
 
 -- An edit box's typed text, as the client draws it: in the box's font and
--- colour, inside its text insets, left-aligned, one line.
+-- colour, inside its text insets, left-aligned; one line, or wrapped from
+-- the top in a multi-line box.
 local typed = setmetatable({}, { __mode = "k" }) -- edit box -> stand-in font string
 local function typedText(box)
 	if box.kind ~= "EditBox" or type(box.text) ~= "string" or box.text == "" or box.shown == false then return nil end
@@ -252,13 +254,14 @@ local function typedText(box)
 		typed[box] = fs
 	end
 	local ins = box.insets or {}
+	local multi = box.multiLine == true
 	fs.kind, fs.parent, fs.layer = "FontString", box, "OVERLAY"
 	fs.points = {
-		{ point = "TOPLEFT", rel = box, relPoint = "TOPLEFT", x = ins[1] or 0, y = 0 },
-		{ point = "BOTTOMRIGHT", rel = box, relPoint = "BOTTOMRIGHT", x = -(ins[2] or 0), y = 0 },
+		{ point = "TOPLEFT", rel = box, relPoint = "TOPLEFT", x = ins[1] or 0, y = multi and -(ins[3] or 0) or 0 },
+		{ point = "BOTTOMRIGHT", rel = box, relPoint = "BOTTOMRIGHT", x = -(ins[2] or 0), y = multi and (ins[4] or 0) or 0 },
 	}
 	fs.text, fs.font, fs.textColor = box.text, box.font, box.textColor
-	fs.justifyH, fs.justifyV, fs.wrap = "LEFT", "MIDDLE", false
+	fs.justifyH, fs.justifyV, fs.wrap = "LEFT", multi and "TOP" or "MIDDLE", multi
 	fs.shadow, fs.shadowColor = box.shadow, box.shadowColor
 	return fs
 end

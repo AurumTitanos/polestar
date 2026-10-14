@@ -2,7 +2,7 @@
 -- (docs/DESIGN.md, "Intent" and "The Guide Window"). From the top:
 --
 --   tab strip      one tab per open guide, + opens another
---   navigator      prev, "8 / 29", next, menu
+--   navigator      prev, "8 / 29", next, Skip, the bug (UI/Report.lua), menu
 --   banner         why the guide skipped a quest / out-levelled / training due
 --   focus          the person to talk to now: icon, name in NPC colour, where;
 --                  under it only that person's goals, one line each, the
@@ -24,10 +24,10 @@
 -- night-sky band behind the tabs and navigator. "transparent" draws no fills
 -- or borders; every string is outlined so it reads over any terrain, the
 -- progress track stays as a faint ink line, and the chrome (tabs, the whole
--- navigator: prev, "8 / 29", next, title, menu; the grip) shows only while
--- the cursor is over the window: the step number fades with the chevrons
--- that change it, so it never floats alone. Compact mode (ui.compact) keeps
--- the navigator, the focus goals and the progress bar.
+-- navigator: prev, "8 / 29", next, title, Skip, the bug, menu; the grip)
+-- shows only while the cursor is over the window: the step number fades with
+-- the chevrons that change it, so it never floats alone. Compact mode
+-- (ui.compact) keeps the navigator, the focus goals and the progress bar.
 --
 -- Colour: the accent marks interaction and where you are (the active tab,
 -- the arrow's target mark, the current goal's glyph, primary buttons, the
@@ -1030,7 +1030,8 @@ function GF.Layout()
 	local steps = nav.Steps:IsShown()
 	nav.Title:SetShown((not showStrip or not steps) and nav.Title:GetText() ~= nil and nav.Title:GetText() ~= "")
 	local skipW = nav.Skip:IsShown() and nav.Skip:GetWidth() + 4 or 0
-	nav.Title:SetWidth(max(40, width - PAD - (steps and nav.Steps:GetWidth() + 12 or 0) - 24 - 8 - 8 - skipW))
+	local reportW = nav.Report:IsShown() and nav.Report:GetWidth() or 0
+	nav.Title:SetWidth(max(40, width - PAD - (steps and nav.Steps:GetWidth() + 12 or 0) - 24 - 8 - 8 - skipW - reportW))
 	card:SetWidth(width)
 
 	local y = 0
@@ -1195,6 +1196,7 @@ local function navigatorFor(guide, index)
 	W.SetIconState(nav.Prev, false, guide ~= nil)
 	W.SetIconState(nav.Next, false, guide ~= nil and index ~= nil)
 	GF.PaintSkip(guide ~= nil, guide ~= nil and index ~= nil)
+	nav.Report:SetShown(guide ~= nil)
 	-- No guide: no steps to walk; the navigator names the addon instead.
 	nav.Steps:SetShown(guide ~= nil)
 	nav.Title:ClearAllPoints()
@@ -1681,6 +1683,7 @@ local function openMenu(button)
 		{ text = L["Choose guide"], icon = "search", onClick = function() UI.ShowPicker() end },
 		{ text = L["Open in new tab"], icon = "plus", disabled = not (E and E.OpenTab), onClick = function() UI.ShowPicker({ newTab = true }) end },
 		{ text = L["Skip this step"], icon = "skip", disabled = not hasGuide, onClick = function() GF.SkipStep() end },
+		{ text = L["Report a problem"], icon = "bug", onClick = function() UI.ShowReport() end },
 		{ separator = true },
 		{ text = L["Compact mode"], icon = "compact", checked = compact(), onClick = function() ns.Set("ui.compact", not compact()) end },
 		{ text = L["Transparent"], icon = "layers", checked = clear, onClick = function() ns.Set("ui.style", clear and "standard" or "transparent") end },
@@ -1744,7 +1747,8 @@ local function build()
 	hoverable(strip.Add)
 	chrome[#chrome + 1] = strip
 
-	-- Navigator: prev, "8 / 29", next on the left; the menu on the right.
+	-- Navigator: prev, "8 / 29", next on the left; Skip, the bug (report a
+	-- problem) and the menu on the right.
 	nav = CreateFrame("Frame", nil, F)
 	nav:SetPoint("TOPLEFT", strip, "BOTTOMLEFT", 0, 0)
 	nav:SetPoint("TOPRIGHT", strip, "BOTTOMRIGHT", 0, 0)
@@ -1774,8 +1778,14 @@ local function build()
 	nav.Menu = W.IconButton(nav, "menu", 24, L["Menu"], openMenu)
 	nav.Menu:SetPoint("RIGHT", nav, "RIGHT", -8, 0)
 	GF.menuButton = nav.Menu
+	-- Report a problem with the step on screen (UI/Report.lua): the bug, left
+	-- of the menu.
+	nav.Report = W.IconButton(nav, "bug", 24, L["Report a problem"], function() UI.ShowReport() end)
+	nav.Report.psTipLines = { L["Write what went wrong, copy the report and paste it on the Polestar Discord."] }
+	nav.Report:SetPoint("RIGHT", nav.Menu, "LEFT", 0, 0)
+	nav.Report:Hide()
 	-- Skip: the 11px skip glyph and a Small label, a ghost button left of the
-	-- menu.
+	-- bug.
 	local skip = CreateFrame("Button", nil, nav)
 	skip:SetHeight(24)
 	W.Hover(skip, 0.7)
@@ -1786,7 +1796,7 @@ local function build()
 	skip.Label:SetPoint("LEFT", skip.Icon, "RIGHT", 5, 0)
 	skip.Label:SetText(L["Skip"])
 	skip:SetWidth(floor(7 + 11 + 5 + skip.Label:GetStringWidth() + 8 + 0.5))
-	skip:SetPoint("RIGHT", nav.Menu, "LEFT", -2, 0)
+	skip:SetPoint("RIGHT", nav.Report, "LEFT", -2, 0)
 	skip:SetScript("OnClick", function() GF.SkipStep() end)
 	skip:SetScript("OnEnter", function(self)
 		if self:IsEnabled() then
@@ -1815,11 +1825,11 @@ local function build()
 		GF.HoverIn()
 	end)
 	countHit:SetScript("OnLeave", function(self) W.HideTooltip(self) end)
-	for _, b in ipairs({ nav.Menu, nav.Next, nav.Prev, nav.Skip }) do hoverable(b) end
+	for _, b in ipairs({ nav.Menu, nav.Report, nav.Next, nav.Prev, nav.Skip }) do hoverable(b) end
 	-- Transparent chrome: the step number fades with its chevrons (nav.Steps
 	-- holds all three) and the title with them; a lone "3 / 8" over the world
 	-- would read as a stray number. Progress stays readable in the foot.
-	for _, c in ipairs({ nav.Menu, nav.Skip, nav.Steps, nav.Title }) do chrome[#chrome + 1] = c end
+	for _, c in ipairs({ nav.Menu, nav.Report, nav.Skip, nav.Steps, nav.Title }) do chrome[#chrome + 1] = c end
 
 	-- Body
 	body = CreateFrame("Frame", nil, F)

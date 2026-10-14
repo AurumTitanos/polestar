@@ -19,6 +19,16 @@
   chosen under Suggest guides from.
 - Polestar is open source: the code, the guides and the tools that build
   them are on GitHub under the GPL-3.0.
+- Report a problem from the game: the bug in the guide window, beside Skip,
+  opens a report on the step on screen. Say what went wrong and Polestar
+  writes the rest (the step and each goal's state and position, where you
+  stand, your race, class and level, the versions and any errors it caught),
+  sized to fit one Discord message, for you to copy and paste on the Polestar
+  Discord, whose invite sits under it. The guide window's menu and
+  `/polestar report` open it too.
+- The Polestar Discord is one click away: Discord's mark at the foot of the
+  hub's and the settings' sidebars, and `/polestar discord`, give its invite
+  to copy.
 
 ### For guide authors
 
@@ -54,6 +64,10 @@
   the summary, the project settings and what to upload where. `readme
   brand` draws the project avatar and, with `rsvg-convert` installed, writes
   the listing's PNGs (avatar, banner, route charts) beside it.
+- `preview` draws a multi-line edit box's text wrapped from the top, and the
+  report window and the Discord invite are scenes of their own, held to the
+  text-fit audit. THIRD_PARTY.md credits Discord's mark, the one piece of
+  art Polestar ships that it did not draw.
 
 ## 0.2.0 (2026-10-14)
 

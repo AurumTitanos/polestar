@@ -151,4 +151,7 @@ ns.RegisterCommand("where", function()
 	ns.Fire("SHOW_COPY", L["Your position"], table.concat(lines, "\n"))
 end, L["Print your map and position as guide lines"])
 
+ns.RegisterCommand("report", function() ns.Fire("SHOW_REPORT") end, L["Report a problem with the step on screen"])
+ns.RegisterCommand("discord", function() ns.Fire("SHOW_DISCORD") end, L["The invite to the Polestar Discord"])
+
 ns.RegisterCommand("packs", function() ns.Fire("SHOW_OPTIONS", L["Guide packs"]) end, L["Open the Guide packs page"])

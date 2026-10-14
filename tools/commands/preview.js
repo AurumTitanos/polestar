@@ -681,6 +681,20 @@ uistub.update()`,
 		],
 	},
 	{
+		file: 'report.svg',
+		title: 'Report a problem (the guide window\'s bug button): what went wrong, the report to copy, the Polestar Discord; the invite on its own (the sidebar\'s Discord mark)',
+		panels: [
+			{
+				roots: ['PolestarReport'],
+				script: `${TABS}; Polestar.UI.ShowReport()
+local d = PolestarReport.Desc
+d:SetText("The vermin were all on the far side of the camp, by the tents.")
+stub.RunScript(d, "OnTextChanged", true)`,
+			},
+			{ roots: ['PolestarCopy'], script: 'Polestar.UI.ShowDiscord()' },
+		],
+	},
+	{
 		file: 'guide-ellesmere.svg',
 		title: 'With EllesmereUI: Polestar follows its accent and font by default; every colour stays editable',
 		panels: [

@@ -627,7 +627,7 @@ test('the header menu: picker, new tab, compact, transparent, lock; destructive 
 		menuPick("Options")
 		emit({ items = items, locked = Polestar.Get("ui.locked"), style = style, armed = armed, reset = lastCall("ResetProgress"),
 			picker = picker, options = PolestarOptions:IsShown(), pickerAfter = PolestarPicker:IsShown() })`);
-	assert.deepEqual(out.items, ['Choose guide', 'Open in new tab', 'Skip this step', 'Compact mode', 'Transparent', 'Lock window',
+	assert.deepEqual(out.items, ['Choose guide', 'Open in new tab', 'Skip this step', 'Report a problem', 'Compact mode', 'Transparent', 'Lock window',
 		'Reset guide progress', 'Options', 'Hide window']);
 	assert.equal(out.locked, true);
 	assert.equal(out.style, 'transparent');

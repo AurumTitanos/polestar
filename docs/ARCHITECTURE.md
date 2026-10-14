@@ -127,6 +127,8 @@ Messages:
 | `SHOW_OPTIONS` | section or nil | commands → UI |
 | `SHOW_WELCOME` | page or nil | About's "Show the welcome again", `/polestar welcome` → UI/Welcome.lua |
 | `SHOW_COPY` | title, text | `/polestar where` → UI/Copy.lua |
+| `SHOW_REPORT` | — | `/polestar report` → UI/Report.lua |
+| `SHOW_DISCORD` | — | `/polestar discord` → UI/Report.lua |
 
 Modules fire their own (`TABS_CHANGED`, `ROUTE_*`, `TRAIN_DUE`,
 `CLASS_TRAINED`, `GUIDE_OUTLEVELED`, `QUESTDB_*`, `CODEX_LOADED`,
@@ -183,15 +185,32 @@ registered commands. Core registers: `guides`, `options`, `show`, `hide`,
 (skip the step shown, for good), `reset` (clear ticks, latches, skips and
 the saved view for the current guide), `guide <id>`, `status`, `tabs`,
 `tab <n>`, `close`, `path` (the route choice), `welcome` (`SHOW_WELCOME`),
-`packs` (Options at Guide packs), `where`, `debug`; Nav adds `arrow`, `way`
-and `route`; modules add theirs (`xp`, `gear`, `instances`, `dungeons`,
-`lookup`, `mount`, `rares`, `questdb`).
+`packs` (Options at Guide packs), `where`, `report` (`SHOW_REPORT`),
+`discord` (`SHOW_DISCORD`), `debug`; Nav adds `arrow`, `way` and `route`;
+modules add theirs (`xp`, `gear`, `instances`, `dungeons`, `lookup`, `mount`,
+`rares`, `questdb`).
 
 `where` prints the player's map and position as two guide lines, `zone map
 <uiMapID>` and `goto <x>,<y> live` (two decimals, the client's live frame,
 marked `live` because typed coordinates are read in the Era frame), then "For
 another goal, add @x,y live", and fires `SHOW_COPY` with the two lines. In an
 instance or on a map without a position it prints why instead.
+
+### Caught errors and the Polestar Discord
+
+```lua
+Polestar.SafeCall(fn, ...)    -- runs fn; an error is noted, then handed to the error handler
+Polestar.NoteError(err)       -- notes an error Polestar caught (SafeCall, Hooks' callbacks)
+Polestar.Errors() -> { { msg, count }, ... }   -- this session's, oldest first, the last 5 kept
+Polestar.DiscordURL           -- the Polestar Discord's invite
+```
+
+Every message and game-event handler, init and login callback and command
+runs through `SafeCall`, and Hooks' callbacks through their own `pcall`, so
+the errors Polestar catches are noted by their first line, counted, for the
+report a player copies (UI, "Reporting a problem"). Polestar never replaces
+the game's error handler: wrapping it would shift the stack the game and
+!BugGrabber show for every error.
 
 ### Localisation
 
@@ -820,7 +839,8 @@ Polestar.Theme.Color(name) -> r, g, b, a
    -- "scrim" (dark grounds on zone art),"onAccent" (text on accent fills),"shadow";
    -- "success","warning","danger","quest","npc","item","place","object","level","skill",...,
    -- "dungeon" (dungeon and raid entrances); "mapUnexplored" (tint multiplied onto unexplored
-   -- world map overlays: game art, the same in every scheme, outside the legibility guard)
+   -- world map overlays: game art, the same in every scheme, outside the legibility guard);
+   -- "discord" (Discord's Blurple, on its own mark only, outside the legibility guard)
 Polestar.Theme.Wash(role) -> r, g, b, a     -- ink at the role's alpha: "border","divider","hover",
    -- "selected","progress","track","toggle","box","thumb","swatch","chip","watermark","mover"
 Polestar.Theme.Hex(name) -> "ffrrggbb"     -- for |c escapes
@@ -1395,11 +1415,12 @@ rail does not move.
 Reading flow: `docs/DESIGN.md` ("Intent" and "The Guide Window").
 
 - **Guide window** (`UI/GuideFrame.lua`): tab strip, a slim navigator (prev,
-  step number, next, Skip, menu), one focus block from the step view's
-  `groups`/`focus` (the person to talk to now with only their goals, or a field
-  step's objectives), counters right after the goal text (in text, success
-  once complete; the accent is kept for the current goal's glyph, the arrow's
-  target mark, tabs, primary buttons and the progress fill), a "Then: <next
+  step number, next, Skip, the bug that opens the report window, menu), one
+  focus block from the step view's `groups`/`focus` (the person to talk to
+  now with only their goals, or a field step's objectives), counters right
+  after the goal text (in text, success once complete; the accent is kept
+  for the current goal's glyph, the arrow's target mark, tabs, primary
+  buttons and the progress fill), a "Then: <next
   person>" line with "Person n of N", tips folded to one line, and the guide's
   progress bar with percent. Up next is off by default (`ui.upcoming = 0`).
   Transparent mode fades the whole navigator (step number with its chevrons)
@@ -1575,7 +1596,38 @@ Reading flow: `docs/DESIGN.md` ("Intent" and "The Guide Window").
 - **Copy window** (`UI/Copy.lua`, frame `PolestarCopy`, `UI.ShowCopy(title,
   text)` or `SHOW_COPY`): a small window with the band, a title, a read-only
   `W.CopyBox` holding the text, selected and focused, and how to copy it; ✕
-  and Escape close it. `/polestar where` uses it.
+  and Escape close it. `/polestar where` uses it. `opts` (`UI.ShowCopy(title,
+  text, opts)`): `icon` and `iconColor` put a mark before the title, `hint`
+  replaces the line above the box; the Polestar Discord's invite
+  (`UI.ShowDiscord`) comes with Discord's mark.
+- **Reporting a problem** (`UI/Report.lua`, frame `PolestarReport`,
+  `UI.ShowReport()` or `SHOW_REPORT`): the guide window's bug (in the
+  navigator while a guide is open), its menu's "Report a problem" and
+  `/polestar report` open it on the step on screen. The player types what
+  went wrong (250 letters); the report box holds `UI.Report.Text(description,
+  details)`: their words after "**What went wrong:**", then
+  `UI.Report.Details()` in a code block, one fact a line, taken when the
+  window opens: Polestar's version and stage, the client build and locale;
+  race, class, level (XP %) and faction (never the name or realm); the guide
+  (title, id, pack and version); "Step n of N: title", with "the guide is at
+  step m" while another step is looked at, or "skipped"; each goal (the first
+  six, then "... k more goals") as `[>]` the arrow's, `[x]` done, `[-]`
+  skipped, `[n/a]` not for this character or `[ ]` open, its line and count,
+  `quest`, `npc`, `item`, `object` ids, `map <id> @x,y` as a guide writes it
+  (`live` unless in the Era frame) and `spot i of n` for the arrow's spawn
+  spot; the arrow's target and distance (and "your own waypoint" with its
+  position when the player set it); where the player stands (zone, subzone,
+  `map <id> @x,y live`); other guide packs that are on; and the errors
+  (`Polestar.Errors()`, plus with !BugGrabber its errors this session in
+  Polestar's files, `BugGrabber:GetDB()`), the newest three, counted, by
+  their path from the AddOns folder. Every line is cut at 100 bytes, so at
+  its longest the report fits one Discord message (2000 characters). Under
+  it, Discord's mark, "Polestar on Discord" and the invite
+  (`Polestar.DiscordURL`) in a copy box. What the player typed stays while
+  the window is reopened on the same step. The hub's and the settings'
+  sidebars carry the Discord's mark at the end of the version line
+  (`UI.Report.SidebarLink(shell)`), which opens the invite like
+  `/polestar discord` (`UI.ShowDiscord`, `SHOW_DISCORD`).
 - **Per-character UI state** in `CharState().ui`: `recentGuides` (ids, newest
   first, at most 10), `favoriteGuides` (id -> true), `pickerSelected` (id).
 
