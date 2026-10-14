@@ -84,19 +84,27 @@ westfall.pitch, westfall.pros, westfall.cons = "Farms and bandits.", { "Compact"
 
 test('browse: folders by faction and band, then by category; faction filter and band derivation', () => {
 	const [out] = run(`
-		emit({ alliance = kinds(P.Entries("Alliance", "", "Leveling")), all = kinds(P.Entries("All", "", "Leveling")),
-			horde = kinds(P.Entries("Horde", "")), bands = { { P.Band({ id = "forever/horde/30-40/01-desolace", minLevel = 12 }) }, { P.Band({ id = "a/b", minLevel = 44 }) }, { P.Band({ id = "a/b", minLevel = 29 }) } } })`);
-	// Within a folder: faction, then minimum level, then id (the four level 1 starts by their race folder).
+		local alliance = kinds(P.Entries("Alliance", "", "Leveling"))
+		local horde = kinds(P.Entries("Horde", ""))
+		local all = kinds(P.Entries("All", "", "Leveling"))
+		uistub.player.race, uistub.player.faction = "Scourge", "Horde"
+		emit({ alliance = alliance, all = all, horde = horde, undeadHorde = kinds(P.Entries("Horde", "", "Leveling")),
+			bands = { { P.Band({ id = "forever/horde/30-40/01-desolace", minLevel = 12 }) }, { P.Band({ id = "a/b", minLevel = 44 }) }, { P.Band({ id = "a/b", minLevel = 29 }) } } })`);
+	// Within a folder: faction, then minimum level, then id. On the player's own
+	// faction, a Human sees no other race's start (Dun Morogh, Teldrassil, Zephras Isle).
 	assert.deepEqual(out.alliance, [
-		'[Alliance 1\u201330 6]', 'Dun Morogh', 'Elwynn Forest', 'Teldrassil', 'Zephras Isle', 'Westfall', 'Darkshore',
+		'[Alliance 1\u201330 3]', 'Elwynn Forest', 'Westfall', 'Darkshore',
 		'[Alliance 30\u201340 1]', 'Desolace',
 		'[Alliance 40\u201350 2]', 'Badlands & The Hinterlands', 'Feralas',
 	]);
-	// The player's faction first; the other one follows when every faction is listed.
+	// The player's faction first; every faction and every race's guides when all are listed.
 	assert.deepEqual(out.all.filter((k) => k.startsWith('[')), ['[Alliance 1\u201330 6]', '[Alliance 30\u201340 1]', '[Alliance 40\u201350 2]', '[Horde 1\u201330 3]', '[Horde 30\u201340 1]']);
-	// The only collectible (Horse) is Alliance's; the Legacy guide is for everyone.
+	// The other faction lists all of its guides, races included.
 	assert.deepEqual(out.horde.filter((k) => k.startsWith('[')), ['[Horde 1\u201330 3]', '[Horde 30\u201340 1]', '[Professions 3]', '[Reputation 1]', '[Exploration 1]', '[Legacy 1]']);
+	assert.ok(out.horde.includes('Durotar'));
 	assert.ok(out.horde.includes('Orgrimmar Reputation') && !out.horde.includes('Stormwind Reputation'));
+	// An Undead on the Horde list: the Orc and Troll start is left out, the shared guides stay.
+	assert.ok(!out.undeadHorde.includes('Durotar') && out.undeadHorde.includes('The Barrens'));
 	assert.deepEqual(out.bands, [[30, 40], [40, 50], [1, 30]]);
 });
 
@@ -155,7 +163,7 @@ test('left pane: the rail holds the sections and Options; the sidebar holds the 
 	assert.equal(out.sections[0], 'Guides');
 	assert.equal(out.sections[1], 'Lookup');
 	assert.deepEqual(out.rail, ['Options', 'Guides*', ...out.sections.slice(1)]);
-	assert.deepEqual(out.labels, ['All guides 16', 'Leveling 9', 'Professions 3', 'Reputation 1', 'Exploration 1', 'Legacy 1', 'Collectibles 1', 'Favourites 0']);
+	assert.deepEqual(out.labels, ['All guides 13', 'Leveling 6', 'Professions 3', 'Reputation 1', 'Exploration 1', 'Legacy 1', 'Collectibles 1', 'Favourites 0']);
 	assert.match(out.icon, /\\star$/);
 	assert.deepEqual(out.r, {
 		view: 'browse', category: 'Professions', title: 'Professions', folders: ['Professions 3'],

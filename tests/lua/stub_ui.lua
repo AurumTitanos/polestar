@@ -580,6 +580,8 @@ function Guides.Suggestions() return uistub.suggestions or { uistub.suggest } en
 function Guides.Suggest() return Guides.Suggestions()[1] end
 -- The scenes' guides are all ours.
 function Guides.SuggestSource() return "guides" end
+-- Whether a character can follow a guide: the real registry's rule.
+function Guides.GuideMatches(g, player) return uistub.realGuides.GuideMatches(g, player) end
 
 local Nav = {}
 function Nav.SetTarget(map, x, y, label, f)

@@ -18,6 +18,9 @@
   colour schemes as cards that apply as you click; the last page shows your
   first guide on its zone painting, the beta note, the Discord invite to
   copy, and what guide packs are.
+- The guide menu lists only the guides your character can follow on your own
+  faction: an Undead no longer sees the Orc and Troll Durotar and Barrens
+  guides there. The other faction's button and All still list every guide.
 - Guide packs page: the problem report box grows to fit long problem
   messages.
 - Search ranks an item first as covered by a guide only when a guide Lookup

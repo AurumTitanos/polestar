@@ -1454,7 +1454,10 @@ Reading flow: `docs/DESIGN.md` ("Intent" and "The Guide Window").
   Recent tabs over one line per guide,
   `Title (min–max)`, in folders (a guide's `folder` when set, else leveling by
   faction and band, other guides by category); search also matches `folder`
-  and `keywords`. Right: the
+  and `keywords`. The faction filter (`ui.pickerFaction`, default this
+  character's) on the player's own faction lists only the guides this
+  character can follow (`Guides.GuideMatches`: no other race's or class's
+  guides); the other faction and All list every guide. Right: the
   selected guide's zone art, facts, progress, pitch, pros and cons, a favourite
   star, "Load guide" and "Open in new tab". Selecting never loads; the buttons,
   a double-click or Enter do.

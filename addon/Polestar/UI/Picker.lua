@@ -238,16 +238,23 @@ local function rankOfFaction(f, mine)
 end
 
 -- filter: faction ("Alliance" | "Horde" | "All"); q: search text; cat: a
--- category, "Favorites" or "All".
+-- category, "Favorites" or "All". On the player's own faction only the
+-- guides this character can follow are listed (none for other races or
+-- classes); the other faction and "All" list every guide.
 -- -> entries { kind = "folder"|"guide", text, count, guide },
 --    number of guides listed, { [category] = matching guides, Favorites = n }
 --    (before the category filter)
 function P.Entries(filter, q, cat)
-	local G = ns.Guides
+	local G, C = ns.Guides, ns.Compat
 	local list = G and G.List and G.List() or {}
 	q = (q or ""):lower():gsub("^%s+", ""):gsub("%s+$", "")
 	cat = cat or "All"
 	local mine = UI.PlayerFaction()
+	local player
+	if filter == mine and G and G.GuideMatches and C and C.GetPlayerInfo then
+		local ok, info = pcall(C.GetPlayerInfo)
+		if ok and type(info) == "table" then player = info end
+	end
 	local favs = uiState().favoriteGuides
 	local counts, picked = { Favorites = 0 }, {}
 	for _, g in ipairs(list) do
@@ -257,6 +264,7 @@ function P.Entries(filter, q, cat)
 			if cat == "Favorites" then picked[#picked + 1] = g end
 		end
 		local okFaction = filter == "All" or g.faction == nil or g.faction == filter
+		if okFaction and player and not G.GuideMatches(g, player) then okFaction = false end
 		if okFaction and hit then
 			local c = bucketOf(g)
 			counts[c] = (counts[c] or 0) + 1
