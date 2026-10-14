@@ -14,10 +14,20 @@ const { spawnSync } = require('node:child_process');
 
 const ROOT = path.join(__dirname, '..');
 
+// Every file under p (p itself when it is a file).
+function walk(p) {
+	if (fs.statSync(p).isFile()) return [p];
+	return fs.readdirSync(p).sort().flatMap((name) => walk(path.join(p, name)));
+}
+
+// The SVGs the repository holds: tracked ones and new ones git would add,
+// never ignored local renders. Outside a git checkout (an exported copy),
+// every SVG under the repository's own folders.
 function committedSvgs() {
 	const git = spawnSync('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard', '--', '*.svg'], { cwd: ROOT, encoding: 'utf8' });
-	assert.equal(git.status, 0, 'git ls-files failed');
-	return git.stdout.split('\0').filter(Boolean).sort();
+	if (git.status === 0) return git.stdout.split('\0').filter(Boolean).sort();
+	return ['addon', 'docs', 'tools'].flatMap((dir) => walk(path.join(ROOT, dir)))
+		.filter((f) => f.endsWith('.svg')).map((f) => path.relative(ROOT, f)).sort();
 }
 
 test('every committed SVG opens with its root or a comment, and no comment holds "--"', () => {
