@@ -24,6 +24,10 @@
 - Alliance 40-50: less grinding. Keeping Pace on the ride through the
   Shimmering Flats into Tanaris; The Curse of the Tides, Pearl Diving and
   Return to Corporal Kaleb on one loop through northern Stranglethorn.
+- Horde leveling guides: each training stop is for the classes whose trainer
+  stands there, with stops of their own for Druids (Thunder Bluff) and Undead
+  Paladins (Brill, the Undercity, Thunder Bluff), no gap of more than about
+  five levels, and riding at 40 from each race's own riding trainer.
 - Collectible, Legacy and reputation guides: clearer notes (warlock mount
   hand-offs, Merchant's Favor camps, Timbermaw and Cenarion Circle
   standings), and optional extras marked as such.

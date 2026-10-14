@@ -207,7 +207,7 @@ step Orgrimmar
   zone Orgrimmar
   tip Fly to Orgrimmar and train.
   fly "Orgrimmar"
-  train class
+  train class only Warrior,Hunter,Rogue,Priest,Shaman,Mage,Warlock
 
 step The Undercity
   zone Undercity

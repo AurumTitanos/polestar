@@ -36,8 +36,10 @@ next forever/horde/40-50/06-azshara
 # - A short grind check after the bloodmages (level 48) covers the
 #   experience lost with the dropped stops here and in the previous guide.
 #
-# Class training: the Undercity for Mages, Priests, Rogues, Warlocks and
-# Warriors; the others train in Orgrimmar and Thunder Bluff in the next guide.
+# Class training: the Undercity for Warriors, Paladins, Rogues, Priests,
+# Mages and Warlocks; Hunters, Shamans and Druids trained at the end of the
+# previous guide and train next in Orgrimmar and Thunder Bluff in the next
+# guide.
 #
 # Optional: Find and Rescue OOX-09/HL! (485, 836): the beacon is a rare drop.
 #
@@ -112,7 +114,7 @@ step Undercity
   zone Undercity
   accept 2995                           -- Oran Snakewrithe, the Royal Quarter
   accept 3784                           -- Innkeeper Norman: for Thunder Bluff, around level 50
-  train class only Mage,Priest,Rogue,Warlock,Warrior
+  train class only Warrior,Paladin,Rogue,Priest,Mage,Warlock
 
 step Fly to Tarren Mill
   fly "Tarren Mill"

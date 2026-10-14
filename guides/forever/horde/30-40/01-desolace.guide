@@ -40,7 +40,7 @@ next forever/horde/30-40/02-stranglethorn-vale
 # - The Thunder Bluff stop (visit 18) is dropped: a flight detour for two
 #   small hand-ins, Sacred Fire (5062) and Melor Sends Word (1130). It also
 #   accepted The Sacred Flame (1195) and Steelsnap (1131), which the export
-#   never turns in. Druids train there; everyone else trains in Orgrimmar.
+#   never turns in. Druids and Paladins still fly there to train (below).
 # - Stonetalon and the Undercity hand-in (visits 20-21) dropped: Test of Lore
 #   (1152, 1154, 6627, 1159) needs the Legacy of the Aspects from
 #   south-eastern Ashenvale, two Talondeep Path crossings from Braug
@@ -86,6 +86,11 @@ next forever/horde/30-40/02-stranglethorn-vale
 # - Warrior: Berserker Stance (The Islander 1718, The Affray 1719) waits for
 #   forever/horde/30-40/03-arathi-highlands: Big Will is level 33.
 #
+# Class training: Orgrimmar at 30 and 32 for everyone but Druids and
+# Paladins. Druids fly to Thunder Bluff at 30 (from Orgrimmar) and at 32
+# (from Shadowprey Village); Paladins train in Thunder Bluff at 30 and with
+# Garen Largo in the Undercity at 32.
+#
 # Carried on: Hunting in Stranglethorn (5763) for Hemet Nesingwary in the
 # next guide; The Hammer May Fall (676) for Hammerfall and Regthar Deathgate
 # (1361) for the Barrens, later on the route.
@@ -104,9 +109,16 @@ step Alliance Relations
   accept 1432
 
 step Train
+  only Warrior,Hunter,Rogue,Priest,Shaman,Mage,Warlock
   tip Train your new spells.
-  train class only !Druid
-  note Druids: your trainer is in Thunder Bluff, one flight away.
+  train class
+
+step Thunder Bluff
+  only Druid,Paladin
+  zone Thunder Bluff
+  tip Your trainer is in Thunder Bluff, one flight away: Turak Runetotem (Druids) on Elder Rise, Alodan the Hopeful (Paladins). Fly on to Sun Rock Retreat from there.
+  fly "Thunder Bluff"
+  train class
 
 step Orgrimmar class quests
   only Shaman,Warlock
@@ -256,11 +268,17 @@ step Shadowprey Village
 
 # ---------------------------------------------------------------- To Tarren Mill
 
+step Thunder Bluff
+  only Druid
+  zone Thunder Bluff
+  tip Fly to Thunder Bluff from Shadowprey and train with Turak Runetotem on Elder Rise, then fly on to Orgrimmar.
+  fly "Thunder Bluff"
+  train class
+
 step Fly to Orgrimmar
   zone Orgrimmar
   fly "Orgrimmar"                     -- Shadowprey Village flight master
-  train class only !Druid
-  note Druids: your trainer is in Thunder Bluff.
+  train class only Warrior,Hunter,Rogue,Priest,Shaman,Mage,Warlock
 
 step Zeppelin to the Undercity
   zone Durotar
@@ -273,6 +291,12 @@ step Jorah Annison
   tip Jorah Annison stands in the Magic Quarter.
   turnin 1801                         -- Jorah Annison
   accept 1803
+
+step Garen Largo
+  only Paladin
+  zone Undercity
+  tip Garen Largo trains Paladins in the Undercity.
+  train class
 
 step Brazier of Everfount
   only Shaman

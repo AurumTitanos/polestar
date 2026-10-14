@@ -15,7 +15,8 @@ next forever/horde/07-ashenvale
 # Tarren Mill -> Stanley and the southern fields (peasants, skulls) -> Tarren
 # Mill -> the smithy -> Tarren Mill -> the town hall -> hearth -> Azurelode
 # Mine -> Tarren Mill -> fly to the Undercity (Elixir of Agony, training) ->
-# zeppelin to Orgrimmar, fly to Camp Taurajo (bind) ->
+# zeppelin to Orgrimmar (Hunters and Shamans train; Druids fly to Thunder
+# Bluff to train), fly to Camp Taurajo (bind) ->
 # Bael Modan (Tear of the Moons) -> Grish Longrunner at the Great Lift ->
 # hearth to Camp Taurajo -> fly to Ratchet: Mahren Skyseer, Isha Awak,
 # Sputtervalve -> forever/horde/07-ashenvale.
@@ -51,9 +52,10 @@ next forever/horde/07-ashenvale
 # Added: Scout Support (98094, Forever): Darthalia's orders for Deathstalker
 # Masoj, who hides on the way from Durnholde to the Mudsnout Blossoms.
 #
-# Class training: in the Undercity at 26-27 (no Hunter, Shaman or Druid
-# trainer there; Hunters and Shamans train in Orgrimmar on the way through,
-# Druids in Thunder Bluff later on the route).
+# Class training: in the Undercity at 26-27 for Warriors, Paladins, Rogues,
+# Priests, Mages and Warlocks (no Hunter, Shaman or Druid trainer there);
+# Hunters and Shamans train in Orgrimmar on the way through, Druids fly from
+# Orgrimmar to Thunder Bluff before Camp Taurajo.
 #
 # Class quests: Shaman Call of Water (1536, from the previous guide): fill
 # the waterskin at the Spring Well in Tarren Mill and hand it to Brine south
@@ -198,7 +200,7 @@ step Master Apothecary Faranell
   fly "Undercity"
   turnin 513                          -- Master Apothecary Faranell, in the Apothecarium
   accept 515                          -- Keep it: the Hillsbrad coast, later on the route
-  train class only !Hunter,!Shaman,!Druid
+  train class only Warrior,Paladin,Rogue,Priest,Mage,Warlock
   vendor nearest
 
 # ---------------------------------------------------------------- The Barrens
@@ -207,6 +209,13 @@ step Orgrimmar
   only Hunter,Shaman
   zone Orgrimmar
   tip Take the zeppelin from the towers outside the Undercity to Orgrimmar and train before you fly on.
+  train class
+
+step Thunder Bluff
+  only Druid
+  zone Thunder Bluff
+  tip From Orgrimmar (zeppelin from the towers outside the Undercity) fly to Thunder Bluff and train on Elder Rise, then fly on to Camp Taurajo.
+  fly "Thunder Bluff"
   train class
 
 step Camp Taurajo

@@ -77,6 +77,10 @@ next forever/horde/05-stonetalon-mountains
 # Skyborne hand Turak's Moonglade welcome (94913) to Dendrite on the same
 # trip, Tauren finish Aquatic Form (30, 31).
 #
+# Class training: Orgrimmar at 20 and 23 for everyone but Druids and
+# Paladins. Druids train in Thunder Bluff at 20 and 23; Paladins in Thunder
+# Bluff at 23 (Alodan the Hopeful), after Brill at 19 in the previous guide.
+#
 # No grind stops: the export has none here.
 
 # ---------------------------------------------------------------- Ratchet
@@ -146,8 +150,9 @@ step Level 20
 # ---------------------------------------------------------------- Orgrimmar at 20
 
 step Orgrimmar
+  only Warrior,Hunter,Rogue,Priest,Shaman,Mage,Warlock
   zone Orgrimmar
-  tip Fly to Orgrimmar to train your level 20 ranks (Druids train in Thunder Bluff instead). Sorek is in the Valley of Honor, Searn Firewarder in the Valley of Wisdom.
+  tip Fly to Orgrimmar to train your level 20 ranks. Sorek is in the Valley of Honor, Searn Firewarder in the Valley of Wisdom.
   fly "Orgrimmar"
   train class
   accept 1823 only Warrior            -- Sorek
@@ -176,6 +181,13 @@ step Ur'kyo
   accept 5680 only Troll              -- Ur'kyo
   turnin 5680 only Troll              -- Ur'kyo: Shadowguard
   accept 5646 only Undead             -- Ur'kyo: Aelthalyste in the Undercity, two guides on
+
+step Thunder Bluff
+  only Druid
+  zone Thunder Bluff
+  tip Fly to Thunder Bluff and train your level 20 ranks: Turak Runetotem is on Elder Rise.
+  fly "Thunder Bluff"
+  train class
 
 step Back to the Crossroads
   zone The Barrens
@@ -467,9 +479,18 @@ step Thun'grim Firegaze
 # ---------------------------------------------------------------- Orgrimmar at 23
 
 step Orgrimmar
+  only Warrior,Hunter,Rogue,Priest,Shaman,Mage,Warlock
   zone Orgrimmar
-  tip Fly to Orgrimmar to train (Druids train in Thunder Bluff instead).
+  tip Fly to Orgrimmar to train.
   fly "Orgrimmar"
+  train class
+
+step Thunder Bluff
+  only Paladin
+  zone Thunder Bluff
+  tip Alodan the Hopeful teaches Paladins in Thunder Bluff. You have no flight path there yet: fly to Camp Taurajo, ride west through Mulgore and up a lift, and take the flight path from Tal on the central rise.
+  fly "Camp Taurajo"
+  getfp "Thunder Bluff" npc 2995      -- Tal
   train class
 
 step The Binding
@@ -489,7 +510,9 @@ step Shenthul
 step The Great Cat Spirit
   only Druid
   zone Thunder Bluff
-  tip Turak Runetotem trains you on Elder Rise in Thunder Bluff.
+  tip Fly to Thunder Bluff to train: Turak Runetotem is on Elder Rise.
+  fly "Thunder Bluff"
+  train class
   accept 98340                        -- Turak Runetotem
 
 step Moonglade

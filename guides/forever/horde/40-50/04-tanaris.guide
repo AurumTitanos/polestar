@@ -13,7 +13,8 @@ next forever/horde/40-50/05-the-hinterlands
 # Rivetseeker -> the Noxious Lair -> Dunemaul Compound -> Thistleshrub
 # Valley -> Tooga's escort to Steamwheedle Port -> Gadgetzan -> Marvon ->
 # Scrimshank's gear (OOX-17/TN if you found its beacon) -> hearth Gadgetzan
-# -> fly Ratchet -> boat to Booty Bay -> fly Kargath -> the Grimesilt Dig
+# -> (Hunters and Shamans: fly Orgrimmar to train; Druids: Thunder Bluff) ->
+# fly Ratchet -> boat to Booty Bay -> fly Kargath -> the Grimesilt Dig
 # Site -> Thorium Point (flight path) -> Kalaran Windblade and the Cauldron
 # -> the Slag Pit -> the lava spiders -> the Lookouts -> Thorium Point,
 # where the next guide flies on to Stonard.
@@ -41,6 +42,11 @@ next forever/horde/40-50/05-the-hinterlands
 # Accepted here, finished later on the route: Sprinkle's Secret Ingredient
 # (2641: the Violet Tragan grows in the Hinterlands), Rise of the Silithid
 # (32, Orgrimmar around 50).
+#
+# Class training: Hunters and Shamans fly from Gadgetzan to Orgrimmar, and
+# Druids to Thunder Bluff, at about 47, before Ratchet: the next training
+# stop, in the Undercity, has no trainer for them. Everyone else trains in
+# the Undercity in the next guide.
 #
 # Left out: Into the Field (243: no longer accepted on this route), Ledger
 # from Tanaris (4450: the export never hands it in), Broken Alliances (782),
@@ -140,6 +146,20 @@ step Gadgetzan
   accept 113
   turnin 113                            -- Senior Surveyor Fizzledowser
   accept 32                             -- for Zilzibin Drumlore in Orgrimmar, around level 50
+
+step Orgrimmar
+  only Hunter,Shaman
+  zone Orgrimmar
+  tip Fly to Orgrimmar and train: the next guide's training stop is the Undercity, which has no Hunter or Shaman trainer. Then fly to Ratchet.
+  fly "Orgrimmar"
+  train class
+
+step Thunder Bluff
+  only Druid
+  zone Thunder Bluff
+  tip Fly to Thunder Bluff and train with Turak Runetotem on Elder Rise, then fly to Ratchet.
+  fly "Thunder Bluff"
+  train class
 
 # ---------------------------------------------------------------- To the Searing Gorge
 

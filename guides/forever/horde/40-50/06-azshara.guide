@@ -13,8 +13,9 @@ next forever/horde/50-60/01-un-goro-crater
 # Base Camp -> Ruins of Eldarath -> Kim'jael -> Valormok and Archmage Xylem ->
 # fly to Orgrimmar -> zeppelin to Grom'gol -> Ironjaw basilisks -> Booty Bay ->
 # fly to Grom'gol -> zeppelin to Orgrimmar (turn-ins, training) -> Thunder
-# Bluff -> Camp Mojache (bind) -> the Muisek chain and Zorbin's coast -> hearth
-# to Camp Mojache -> fly to Gadgetzan (bind) -> Broken Pillar, at the road
+# Bluff (Druid and Paladin training) -> Camp Mojache (bind) -> the Muisek
+# chain and Zorbin's coast -> hearth to Camp Mojache -> fly to Gadgetzan
+# (bind) -> Broken Pillar, at the road
 # into Un'Goro Crater, where the next guide starts.
 #
 # Deviations from the export:
@@ -214,20 +215,21 @@ step Orgrimmar
   accept 4300
   accept 3504                         -- Belgrom Rockmaul, Valley of Honor
   turnin 3923                         -- Rilli Greasygob, Valley of Honor
-  train class
+  train class only Warrior,Hunter,Rogue,Priest,Shaman,Mage,Warlock
   note Keep Jes'rimon's payment and Ag'tor's Betrayed: they go back to Valormok on a later visit.
 
 # ---------------------------------------------------------------- Thunder Bluff
 
 step Thunder Bluff
   zone Thunder Bluff
-  tip Fly to Thunder Bluff; it is on the way to Camp Mojache. No flight path there yet? Fly to Camp Taurajo and ride west through Mulgore. Hamuul and Magatha are on the Elder Rise.
+  tip Fly to Thunder Bluff; it is on the way to Camp Mojache. No flight path there yet? Fly to Camp Taurajo and ride west through Mulgore. Hamuul and Magatha are on the Elder Rise; Druids and Paladins train here (Turak Runetotem, Alodan the Hopeful).
   fly "Thunder Bluff"
   getfp "Thunder Bluff" npc 2995      -- Tal
   turnin 3784                         -- Arch Druid Hamuul Runetotem
   accept 3761
   turnin 3518                         -- Magatha Grimtotem
   accept 3562
+  train class only Druid,Paladin
   note Un'Goro Soil is gathered in the next guide; Magatha's payment goes back to Jediga later.
 
 # ---------------------------------------------------------------- Camp Mojache

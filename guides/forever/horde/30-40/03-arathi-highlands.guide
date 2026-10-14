@@ -10,7 +10,9 @@ next forever/horde/30-40/04-dustwallow-marsh
 # Badlands 38.4-39.2, The Barrens 39.2. Shared by every Horde start.
 # Era + known Forever quests only.
 #
-# Flow: fly Booty Bay -> Grom'gol, zeppelin to the Undercity, fly to Tarren
+# Flow: fly Booty Bay -> Grom'gol, zeppelin to the Undercity (training;
+# Hunters and Shamans train in Orgrimmar, Druids in Thunder Bluff, on the
+# way there), fly to Tarren
 # Mill -> ride into Arathi: the Boulderfist camp -> the Shards of Myzrael ->
 # Hammerfall (flight path, bind) -> raptor eyes outside the walls -> Hammerfall -> Drywhisker
 # Gorge and the Stone of East Binding -> Witherbark Village -> Fleshstalker
@@ -21,7 +23,8 @@ next forever/horde/30-40/04-dustwallow-marsh
 # (flight path, bind) -> rock elementals -> coyotes, buzzards and the Greater
 # Rock Elementals -> Kargath -> the Dustbowl -> Valley of Fangs -> Agmond's
 # End -> the Ancient Chest -> Agmond's End -> hearth to Kargath -> fly to
-# Grom'gol -> zeppelin to Orgrimmar (train) -> fly to the Crossroads -> the
+# Grom'gol -> zeppelin to Orgrimmar (train; Druids and Paladins in Thunder
+# Bluff) -> fly to the Crossroads -> the
 # Forgotten Pools -> the Crossroads -> fly to Ratchet (bind).
 #
 # Deviations from the export:
@@ -46,7 +49,10 @@ next forever/horde/30-40/04-dustwallow-marsh
 #   from Agmond's End.
 # - The Crossroads bind is dropped: the Ratchet bind replaces it the same
 #   hour.
-# - Class training added in Orgrimmar (level 38-39), on the way through.
+# - Class training added at about 37.5 (the Undercity, or Orgrimmar and
+#   Thunder Bluff for the classes the Undercity cannot train) and in
+#   Orgrimmar at 38-39 (Thunder Bluff for Druids and Paladins), on the way
+#   through.
 #
 # Left out (accepted by the export, never turned in): Dragonmaw Rumors
 # (95663), WANTED: Baron Vardus (566), Pearl Diving (705), Uldaman Reagent
@@ -91,12 +97,30 @@ step Fly to Grom'gol
   fly "Grom'gol"
   goto 31.5,29.4 "Zeppelin to the Undercity"
 
+step Orgrimmar
+  only Hunter,Shaman
+  zone Orgrimmar
+  tip The Undercity has no Hunter or Shaman trainer: take the Orgrimmar zeppelin from the same tower instead and train in the city, then take the Undercity zeppelin from the tower outside Orgrimmar's main gate.
+  train class
+
+step Thunder Bluff
+  only Druid
+  zone Thunder Bluff
+  tip Cast Teleport: Moonglade and take Bunthen Plainswind's flight to Thunder Bluff; Turak Runetotem trains you on Elder Rise. Then fly to Orgrimmar and take the Undercity zeppelin from the tower outside the main gate.
+  train class
+
 step Jorah Annison
   only Warlock
   zone Undercity
   tip Ride down into the Undercity: Jorah Annison stands in the Magic Quarter.
   turnin 1803                         -- Jorah Annison
   accept 1805
+
+step Undercity trainers
+  only Warrior,Paladin,Rogue,Priest,Mage,Warlock
+  zone Undercity
+  tip Train while you are in the Undercity: the trainers stand in the War Quarter, the Rogues' Quarter and the Magic Quarter (Paladins: Garen Largo).
+  train class
 
 step Fly to Tarren Mill
   zone Hillsbrad Foothills
@@ -361,8 +385,18 @@ step Zeppelin to Orgrimmar
 
 step Orgrimmar
   zone Orgrimmar
-  train class
+  train class only Warrior,Hunter,Rogue,Priest,Shaman,Mage,Warlock
   accept 1718 only Warrior            -- Sorek, Valley of Honor
+
+step Thunder Bluff
+  only Druid,Paladin
+  zone Thunder Bluff
+  tip Your trainer is in Thunder Bluff, one flight from Orgrimmar: Turak Runetotem (Druids) on Elder Rise, Alodan the Hopeful (Paladins). Fly on to the Crossroads from there.
+  fly "Thunder Bluff"
+  train class
+
+step The Crossroads
+  zone The Barrens
   fly "Crossroads"
 
 step Regthar Deathgate

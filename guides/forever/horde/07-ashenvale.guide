@@ -49,15 +49,16 @@ next forever/horde/30-40/01-desolace
 #   previous guide, below his level-23 requirement).
 # - Test of Endurance (1150) needs Grenka's Claw (Roguefeather Den); the
 #   export hands it in without the trip. Test of Strength (1151) needs
-#   Rok'Alim the Pounder, an elite: optional, and so is Test of Lore (1152),
-#   which follows it.
+#   Rok'Alim the Pounder, an elite: optional. Its follow-up, Test of Lore
+#   (1152), is not taken: it ends with Braug Dimspirit in Stonetalon, which
+#   the route does not visit again.
 #
 # Optional: Test of Strength (1151): Rok'Alim the Pounder is elite: grouping
 # up is advised.
 #
-# Carried on: Hemet Nesingwary (5762), Test of Lore (1152) and Martek the
-# Exiled (1106, the Badlands in forever/horde/30-40/03-arathi-highlands) are
-# turned in later on the route.
+# Carried on: Hemet Nesingwary (5762) and Martek the Exiled (1106, the
+# Badlands in forever/horde/30-40/03-arathi-highlands) are turned in later
+# on the route.
 #
 # Restored: Wanted - Arnak Grimtotem (5147): the poster is at Freewind, Arnak
 # (29, not elite) stands beside Lakota on Darkcloud Pinnacle, and the
@@ -317,7 +318,6 @@ step Rok'Alim the Pounder
   tip Rok'Alim, a hard-hitting rock elemental, walks the cliffs of Highperch. Rok'Alim the Pounder is elite: grouping up is advised.
   collect 5844 quest 1151 optional
   turnin 1151 optional                -- Dorn Plainstalker
-  accept 1152 optional                -- Test of Lore: for Stonetalon, later on the route
 
 # ---------------------------------------------------------------- Shimmering Flats
 

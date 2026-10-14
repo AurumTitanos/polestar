@@ -13,7 +13,8 @@ next forever/horde/50-60/04-azshara
 # Darkwhisper Gorge -> Winterfall Village -> Donova -> Salfa (beads) ->
 # hearth to Everlook -> grind to 55 -> Mau'ari -> fly to Camp Mojache
 # (Videre Elixir, Talo) -> Thunder Bluff (Morrowgrain, Hamuul, Nara, cloth
-# donations) -> Orgrimmar (bind, cloth donations), where the next guide
+# donations, Druid and Paladin training) -> Orgrimmar (bind, cloth
+# donations), where the next guide
 # starts.
 #
 # Deviations from the export:
@@ -206,6 +207,7 @@ step Elder Rise
   turnin 1000
   accept 1123
   turnin 4987                         -- Nara Wildmane
+  train class only Druid,Paladin      -- Turak Runetotem on Elder Rise; Alodan the Hopeful
   note Rabine Saturna waits in Moonglade: keep it for later.
 
 step Bashana Runetotem

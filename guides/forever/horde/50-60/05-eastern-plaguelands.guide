@@ -18,7 +18,8 @@ next forever/horde/50-60/06-silithus
 # Terrordale (Egan) -> Quel'Lithien Lodge -> Zul'Mashar -> Northdale ->
 # Corin's Crossing (Living Rot) -> Nathanos -> Hameya's mound -> hearth to
 # Light's Hope Chapel (Carlin) -> fly to Thunder Bluff (bind, cloth
-# donations) -> fly to Bloodvenom Post (Trull, Deadwood Cauldron, Kernda) ->
+# donations, Druid and Paladin training) -> fly to Bloodvenom Post (Trull,
+# Deadwood Cauldron, Kernda) ->
 # Timbermaw Hold to Moonglade (Rabine Saturna) -> Winterspring (Donova,
 # Moontouched Owlbeasts) -> hearth to Thunder Bluff -> fly to Gadgetzan
 # (Sprinkle, Egg-O-Matic, Linken's sword) -> fly to
@@ -149,6 +150,7 @@ step Fly to Thunder Bluff
   tip Fly to the Undercity, take the zeppelin to Orgrimmar and fly on to Thunder Bluff.
   fly "Thunder Bluff"
   sethome "Thunder Bluff"
+  train class only Druid,Paladin      -- Turak Runetotem on Elder Rise; Alodan the Hopeful
 
 step Rumstag Proudstrider
   tip On Hunter Rise. Have the Wool, Silk and Mageweave in your bags.

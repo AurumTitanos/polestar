@@ -63,8 +63,11 @@ next forever/horde/30-40/03-arathi-highlands
 # the Damaged Chest north of the post, Tome of the Cabal 1803), and the hearth
 # back. Both quests started in forever/horde/30-40/01-desolace.
 #
-# Class training: none in Stranglethorn: the guide stays between Grom'gol and
-# Booty Bay. You train next in Orgrimmar at about 38, in the next guide.
+# Class training: Shamans and Warlocks train in Orgrimmar on their hop (about
+# 33); otherwise none in Stranglethorn: the guide stays between Grom'gol and
+# Booty Bay. You train next at about 37.5 at the start of the next guide, on
+# the way through the Undercity (Hunters and Shamans in Orgrimmar, Druids in
+# Thunder Bluff), and again in Orgrimmar at about 39.
 #
 # Carried on: Trollbane (638) for Arathi.
 #
@@ -85,6 +88,12 @@ step Grom'gol Base Camp
   getfp "Grom'gol" npc 1387           -- Thysta
   sethome "Grom'gol Base Camp" npc 5814 -- Innkeeper Thulbek
   accept 581                          -- Nimboya
+
+step Orgrimmar
+  only Shaman,Warlock
+  zone Orgrimmar
+  tip Take the Orgrimmar zeppelin from the tower on the west side of Grom'gol and train in the city before you fly on.
+  train class
 
 step Islen Waterseer
   only Shaman

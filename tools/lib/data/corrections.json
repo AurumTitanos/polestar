@@ -1,6 +1,18 @@
 {
 	"_about": "Polestar's own fixes to the merged reference data (data build applies them after QuestieDB, before recordings). One entry per fact, with where the fact comes from. quests: `set` replaces fields. npcs/objects: `set` replaces fields (Forever elite and rare ranks, which QuestieDB's Forever store lacks); `addSpawns` adds { \"<uiMapID>\": { f, pts } } maps the entity lacks (an existing map is replaced). items: `removeDrops` { npc: [ids], object: [ids] } and `removeVendors` [ids] drop wrong sources the pfQuest/QuestieDB union kept. Documented in docs/ARCHITECTURE.md (Reference data, Sources and precedence).",
 	"quests": {
+		"1501": {
+			"set": {
+				"races": 146
+			},
+			"note": "Creature of the Void (Warlock voidwalker) is open to Orc, Undead and Troll Warlocks: Wowhead Forever https://www.wowhead.com/forever/quest=1501 lists Races [race=2], [race=5], [race=8] (checked 2026-10-14). The merged data has races 2 (Orc only), which excludes the Troll Warlocks the Durotar guide sends to Ruzan."
+		},
+		"1504": {
+			"set": {
+				"races": 146
+			},
+			"note": "The Binding (Warlock voidwalker, after 1501) is open to Orc, Undead and Troll Warlocks: Wowhead Forever https://www.wowhead.com/forever/quest=1504 lists Races [race=2], [race=5], [race=8] (checked 2026-10-14). The merged data has races 2 (Orc only)."
+		},
 		"92479": {
 			"set": {
 				"classes": 4

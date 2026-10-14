@@ -13,10 +13,11 @@ next forever/horde/50-60/02-felwood
 # gorillas, Fire Plume Ridge (Ringo) -> escort Ringo to the refuge -> loop 2:
 # northern pylon, eastern pylon, Lar'korwi, Torwa, western pylon, Krakle,
 # Fire Plume Ridge's vent, Krakle -> refuge -> hearth to Gadgetzan -> fly to
-# Orgrimmar, zeppelin to Grom'gol, fly to Kargath -> ride through Blackrock
-# Mountain to Flame Crest (flight
-# path) -> broodlings -> Dreadmaul Rock -> Thaurissan dig site -> Flame Crest
-# -> fly to Kargath -> fly to the Undercity (training) -> the Bulwark -> ride
+# Orgrimmar (Hunters and Shamans train; Druids train in Thunder Bluff on the
+# way), zeppelin to Grom'gol, fly to Kargath -> ride through Blackrock
+# Mountain to Flame Crest (flight path) -> broodlings -> Dreadmaul Rock ->
+# Thaurissan dig site -> Flame Crest -> fly to Kargath -> fly to the
+# Undercity (training for the other classes) -> the Bulwark -> ride
 # east to the Eastern Plaguelands: Terrordale -> Light's Hope Chapel (flight
 # path, bind) -> Darrowshire -> hearth to Light's Hope Chapel, where the next
 # guide starts.
@@ -278,6 +279,20 @@ step Gadgetzan
   turnin 4496                         -- Alchemist Pestlezugg
   note Pestlezugg's next quest needs the Gorishi Hive Queen, an elite boss. Skip it.
 
+step Orgrimmar
+  only Hunter,Shaman
+  zone Orgrimmar
+  tip Fly to Orgrimmar and train before the Grom'gol zeppelin: the Undercity stop later in this guide has no Hunter or Shaman trainer.
+  fly "Orgrimmar"
+  train class
+
+step Thunder Bluff
+  only Druid
+  zone Thunder Bluff
+  tip Fly to Thunder Bluff and train with Turak Runetotem on Elder Rise, then fly to Orgrimmar for the Grom'gol zeppelin.
+  fly "Thunder Bluff"
+  train class
+
 # ---------------------------------------------------------------- Kargath
 
 step Fly to Kargath
@@ -342,7 +357,7 @@ step Undercity
   accept 3564
   accept 5094                         -- Harbinger Balthazad, the Trade Quarter
   accept 3568                         -- Chemist Cuely, the Apothecarium: the vials fill in Azshara later
-  train class
+  train class only Warrior,Paladin,Rogue,Priest,Mage,Warlock
 
 step The Bulwark
   zone Tirisfal Glades

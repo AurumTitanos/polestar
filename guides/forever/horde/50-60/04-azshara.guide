@@ -41,7 +41,7 @@ step Orgrimmar
   zone Orgrimmar
   turnin 4300                         -- Jes'rimon, the Cleft of Shadow
   accept 8276                         -- Cenarion Emissary Blackhoof, Valley of Wisdom: keep it for Silithus
-  train class
+  train class only Warrior,Hunter,Rogue,Priest,Shaman,Mage,Warlock
 
 # ---------------------------------------------------------------- The Barrens
 
