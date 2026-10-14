@@ -53,6 +53,10 @@
 - Without the Codex, Lookup and Dungeons say which case it is: not installed
   (get the Polestar zip from CurseForge or the GitHub Releases page, not
   GitHub's "Source code" download) or turned off in the AddOns list.
+- A step that asks you to buy something can buy it for you at a merchant
+  that sells it, after selling greys and repairing: Options, Quality of
+  Life, Vendors, Buy for the guide (off by default; Shift skips). Only what
+  your bags still lack, and only for money.
 
 ### For guide authors
 

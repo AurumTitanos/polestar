@@ -1,5 +1,6 @@
--- Merchant: sell grey items and repair, when a merchant opens. Holding Shift
--- skips both. Selling goes a few slots per tick (the server throttles bursts)
+-- Merchant: sell grey items and repair, when a merchant opens, then buy
+-- what the step needs (QoL/Buy.lua). Holding Shift skips all three. Selling
+-- goes a few slots per tick (the server throttles bursts)
 -- and re-reads every slot right before selling it, so an item moved or
 -- swapped in the meantime is never sold: only Poor-quality items with a
 -- vendor price ever are. Repair runs after the selling (the sale pays for it);
@@ -83,7 +84,10 @@ local function finish()
 	end
 	sold, earned = 0, 0
 	qi, qn = 1, 0
-	if open then repair() end
+	if open then
+		repair()
+		QoL.Buy.Run()
+	end
 end
 
 local function step()
@@ -123,6 +127,7 @@ function Vendor.OnMerchantShow()
 	end
 	if qn == 0 then
 		repair()
+		QoL.Buy.Run()
 		return
 	end
 	step()

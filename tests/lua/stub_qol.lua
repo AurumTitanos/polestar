@@ -2,7 +2,7 @@
 -- wow_stub.lua. It installs contract-faithful fakes for the Engine, Nav and
 -- Pins (just before ADDON_LOADED, after the addon files ran), overrides the
 -- map half of Compat with one flat test map, and provides the client APIs QoL
--- uses: XP, bags and items, merchant (guild repair), quest rewards, gossip,
+-- uses: XP, bags and items, merchant (guild repair, goods), quest rewards, gossip,
 -- taxi map, death, loot, requests from other players (q.social), popups
 -- (q.showPopup), UIErrorsFrame message types, and installed-but-unloaded
 -- addons (q.installed).
@@ -200,6 +200,50 @@ function RepairAllItems(guild)
 	call("RepairAllItems", guild and "guild" or "own")
 	q.money = q.money - (guild and 0 or q.repair.cost)
 	q.repair.cost = 0
+end
+
+-- Goods for sale: q.goods = { { id, price (per purchase), stackCount (items
+-- per purchase), numAvailable (-1: unlimited), maxStack, extendedCost } }.
+-- A purchase is paid at once and lands in the bags q.landDelay seconds later,
+-- as the server answers.
+q.goods = {}
+q.landDelay = 0.1
+function GetMerchantNumItems() return #q.goods end
+function GetMerchantItemID(i) return q.goods[i] and q.goods[i].id end
+function GetMerchantItemInfo(i)
+	local g = q.goods[i]
+	if not g then return nil end
+	local it = q.items[g.id] or {}
+	return it.name, 134400, g.price or 0, g.stackCount or 1, g.numAvailable or -1, true, true, g.extendedCost or false
+end
+function GetMerchantItemMaxStack(i) return q.goods[i] and (q.goods[i].maxStack or 20) or 0 end
+-- The server refuses a purchase over the stack limit, not in whole stacks,
+-- beyond the stock (counted in items here) or your money: nothing is paid
+-- and nothing lands (q.refused counts them).
+q.refused = 0
+function BuyMerchantItem(i, quantity)
+	quantity = quantity or 1
+	call("BuyMerchantItem", i, quantity)
+	local g = q.goods[i]
+	if not (g and q.merchantOpen) then return end
+	local per = g.stackCount or 1
+	local cost = (g.price or 0) * quantity / per
+	local stock = g.numAvailable or -1
+	if quantity > (g.maxStack or 20) or quantity % per ~= 0 or cost > q.money or (stock >= 0 and quantity > stock) then
+		q.refused = q.refused + 1
+		return
+	end
+	q.money = q.money - cost
+	if stock >= 0 then g.numAvailable = stock - quantity end
+	C_Timer.After(q.landDelay, function()
+		for slot = 1, q.bags[0].size do
+			if not q.bags[0].slots[slot] then
+				q.addItem(0, slot, g.id, quantity)
+				break
+			end
+		end
+		stub.fire("BAG_UPDATE_DELAYED")
+	end)
 end
 
 function q.openMerchant()

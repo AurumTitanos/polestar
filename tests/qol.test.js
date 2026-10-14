@@ -56,7 +56,7 @@ test('options: every qol setting is registered, on Questing or Quality of Life, 
 		for _, k in ipairs({ "itemButton", "targetButton", "hearthButton", "buttonScale", "xpTracker", "sellJunk", "autoRepair",
 			"rewardHighlight", "rewardAutoPick", "flightAutoOpen", "flightHighlight", "deathHelper", "instantQuestText",
 			"skipGossip", "fastLoot", "declineDuels", "repairGuild", "hideErrors", "autoReleasePvP", "declineGuildInvites",
-			"declinePartyStrangers", "acceptPartyFriends", "acceptSummon", "acceptResurrect" }) do keys[k] = Polestar.GetDefault("qol." .. k) end
+			"declinePartyStrangers", "acceptPartyFriends", "acceptSummon", "acceptResurrect", "buyGoals" }) do keys[k] = Polestar.GetDefault("qol." .. k) end
 		emit(keys)
 	`);
 	const registered = new Set(specs.filter((c) => c.key).map((c) => c.key.replace(/^qol\./, '')));
@@ -67,6 +67,7 @@ test('options: every qol setting is registered, on Questing or Quality of Life, 
 		assert.ok(c.tab && c.section);
 	}
 	assert.equal(defaults.rewardAutoPick, false, 'auto-pick is off by default');
+	assert.equal(defaults.buyGoals, false, 'buying for the guide is off by default');
 	assert.equal(defaults.sellJunk, true);
 });
 
@@ -545,6 +546,221 @@ test('merchant: repairs after selling, if affordable; Shift and settings off do 
 	assert.deepEqual(out[1], { repaired: 1, poor: true });
 	assert.equal(out[2], 0, 'Shift: nothing');
 	assert.equal(out[3], 0, 'off: nothing');
+});
+
+// ---------------------------------------------------------------------------
+// Buying for the step's buy goals
+// ---------------------------------------------------------------------------
+
+const GOODS = `
+	q.items[20] = { name = "Soothing Spices", quality = 1, price = 10 }
+	q.items[21] = { name = "Bronze Tube", quality = 1, price = 100 }
+	q.items[22] = { name = "Refreshing Spring Water", quality = 1, price = 1 }
+	q.items[23] = { name = "Flagon of Mead", quality = 1, price = 5 }
+	q.goods = {
+		{ id = 22, price = 25, stackCount = 5, maxStack = 20 },
+		{ id = 20, price = 40 },
+		{ id = 23, price = 80, numAvailable = 1 },
+	}
+	local function bought()
+		local out = {}
+		for _, c in ipairs(q.calls) do if c[1] == "BuyMerchantItem" then out[#out + 1] = c[2] .. "x" .. c[3] end end
+		return out
+	end
+`;
+
+test('buying: buys what the open buy goals still need from this merchant, after the items land prints the total', () => {
+	const [first, out, money, msg, again] = run(`${GOODS}
+		set("buyGoals", true)
+		q.money = 1000
+		q.addItem(0, 1, 20, 1)
+		q.step({
+			{ t = "buy", item = 20, count = 3, itemName = "Soothing Spices" },
+			{ t = "buy", item = 21, count = 1, itemName = "Bronze Tube" },      -- not sold here
+			{ t = "buy", item = 23, count = 1, status = "done" },
+			{ t = "kill", target = "Kobold Vermin" },
+		})
+		q.openMerchant()
+		emit(bought())
+		stub.advance(1)
+		emit(bought())
+		emit(q.money)
+		emit(printed("Bought 2 Soothing Spices for 80c"))
+		q.closeMerchant()
+		q.openMerchant()                  -- the bags hold three now
+		stub.advance(1)
+		emit(#bought())
+	`);
+	assert.deepEqual(first, ['2x2'], 'two more spices, one purchase each');
+	assert.deepEqual(out, ['2x2']);
+	assert.equal(money, 920);
+	assert.equal(msg, true);
+	assert.equal(again, 1, 'nothing more once the goal is met');
+});
+
+test('buying: a purchase still on its way counts, so opening the merchant again before it lands buys nothing more', () => {
+	const [first, reopened, landed, count] = run(`${GOODS}
+		set("buyGoals", true)
+		q.money = 1000
+		q.landDelay = 0.5
+		q.step({
+			{ t = "buy", item = 20, count = 3, itemName = "Soothing Spices" },
+			{ t = "buy", item = 20, count = 2, itemName = "Soothing Spices" },   -- the same item twice: the larger count
+		})
+		q.openMerchant()
+		emit(#bought())
+		q.closeMerchant()
+		q.openMerchant()                  -- before the spices land
+		emit(#bought())
+		stub.advance(2)
+		q.closeMerchant()
+		q.openMerchant()
+		stub.advance(2)
+		emit(#bought())
+		emit(C_Item.GetItemCount(20))
+	`);
+	assert.equal(first, 1);
+	assert.equal(reopened, 1, 'not bought twice');
+	assert.equal(landed, 1);
+	assert.equal(count, 3);
+});
+
+test('buying: a goal raised while a purchase is on its way buys only the difference, however often the merchant opens', () => {
+	const [requested, count, msgs] = run(`${GOODS}
+		set("buyGoals", true)
+		q.money = 1000
+		q.landDelay = 0.5
+		q.step({ { t = "buy", item = 20, count = 3, itemName = "Soothing Spices" } })
+		q.openMerchant()
+		q.closeMerchant()
+		q.step({ { t = "buy", item = 20, count = 5, itemName = "Soothing Spices" } })
+		q.openMerchant()
+		q.closeMerchant()
+		q.openMerchant()
+		q.closeMerchant()
+		stub.advance(2)
+		local n = 0
+		for _, c in ipairs(q.calls) do if c[1] == "BuyMerchantItem" then n = n + c[3] end end
+		emit(n)
+		emit(C_Item.GetItemCount(20))
+		local n5, other = 0, false
+		for _, m in ipairs(stub.messages) do
+			if m:find("Bought 5 Soothing Spices for 2s 0c") then n5 = n5 + 1 elseif m:find("Bought") then other = true end
+		end
+		emit({ n5, other })
+	`);
+	assert.equal(requested, 5);
+	assert.equal(count, 5);
+	assert.deepEqual(msgs, [1, false], 'the five that landed, reported once');
+});
+
+test('buying: a purchase the server refuses is never reported as bought', () => {
+	const [requests, msgs] = run(`${GOODS}
+		set("buyGoals", true)
+		q.money = 1000
+		q.landDelay = 0.5
+		q.step({ { t = "buy", item = 20, count = 3, itemName = "Soothing Spices" } })
+		q.openMerchant()
+		q.closeMerchant()
+		local buy = BuyMerchantItem       -- the server refuses the next purchase (sold out meanwhile)
+		BuyMerchantItem = function(i, n) table.insert(q.calls, { "BuyMerchantItem", i, n }) end
+		q.step({ { t = "buy", item = 20, count = 5, itemName = "Soothing Spices" } })
+		q.openMerchant()
+		BuyMerchantItem = buy
+		emit(bought())                    -- the 3 on their way, then 2 more
+		stub.advance(2)
+		local out = {}
+		for _, m in ipairs(stub.messages) do
+			local b = m:match("(Bought.*)")
+			if b then out[#out + 1] = b end
+		end
+		emit(out)
+	`);
+	assert.deepEqual(requests, ['2x3', '2x2']);
+	assert.deepEqual(msgs, ['Bought 3 Soothing Spices for 1s 20c.']);
+});
+
+test('buying: goods sold in stacks are bought in whole stacks within the stack limit; stock and money cap the rest', () => {
+	const out = run(`${GOODS}
+		set("buyGoals", true)
+		q.money = 1000
+		q.step({ { t = "buy", item = 22, count = 27, itemName = "Refreshing Spring Water" } })
+		q.openMerchant()
+		stub.advance(1)
+		emit(bought())                    -- 30 in calls of at most 20
+		q.closeMerchant()
+
+		q.calls = {}
+		q.step({ { t = "buy", item = 23, count = 3, itemName = "Flagon of Mead" } })
+		q.openMerchant()
+		stub.advance(1)
+		emit(bought())                    -- one left in stock
+		q.closeMerchant()
+
+		q.calls = {}
+		q.goods[1].numAvailable = 6       -- six bottles left, sold five at a time
+		q.step({ { t = "buy", item = 22, count = 57, itemName = "Refreshing Spring Water" } })
+		q.openMerchant()
+		stub.advance(1)
+		emit(bought())
+		emit(q.refused)
+		q.closeMerchant()
+
+		q.calls = {}
+		q.money = 90
+		stub.messages = {}
+		q.step({ { t = "buy", item = 20, count = 4, itemName = "Soothing Spices" } })
+		q.openMerchant()
+		stub.advance(1)
+		emit(bought())
+		emit(printed("Not enough money to buy 2 Soothing Spices %(80c%)"))
+	`);
+	assert.deepEqual(out[0], ['1x20', '1x10']);
+	assert.deepEqual(out[1], ['3x1']);
+	assert.deepEqual(out[2], ['1x5'], 'one whole purchase the stock covers');
+	assert.equal(out[3], 0, 'nothing refused');
+	assert.deepEqual(out[4], ['2x2'], 'what 90c covers');
+	assert.equal(out[5], true);
+});
+
+test('buying: selling greys pays for it first; goods for other currencies, Shift and the setting off buy nothing', () => {
+	const out = run(`${BAGS}${GOODS}
+		set("buyGoals", true)
+		q.money = 0
+		q.step({ { t = "buy", item = 20, count = 1, itemName = "Soothing Spices" } })
+		q.openMerchant()                  -- from 0c: the greys sell for 99c first
+		stub.advance(2)
+		emit(bought())
+		emit(printed("Bought 1 Soothing Spices for 40c"))
+		q.closeMerchant()
+
+		q.calls = {}
+		q.money = 1000
+		q.goods[2].extendedCost = true
+		q.step({ { t = "buy", item = 20, count = 3, itemName = "Soothing Spices" } })
+		q.openMerchant()
+		stub.advance(1)
+		emit(#bought())
+		q.closeMerchant()
+		q.goods[2].extendedCost = false
+
+		stub.keys.shift = true
+		q.openMerchant()
+		stub.advance(1)
+		emit(#bought())
+		q.closeMerchant()
+		stub.keys.shift = false
+
+		set("buyGoals", false)
+		q.openMerchant()
+		stub.advance(1)
+		emit(#bought())
+	`);
+	assert.deepEqual(out[0], ['2x1'], 'the sale paid for it');
+	assert.equal(out[1], true);
+	assert.equal(out[2], 0, 'paid in another currency: left alone');
+	assert.equal(out[3], 0, 'Shift: nothing');
+	assert.equal(out[4], 0, 'off: nothing');
 });
 
 // ---------------------------------------------------------------------------
