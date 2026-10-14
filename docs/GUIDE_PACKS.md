@@ -114,7 +114,8 @@ polestar dev --play    # lint and build on every save, with the browser playgrou
 ```
 
 1. **`polestar new`** writes the pack: `pack.json`, an example guide, a
-   README for your players, the `LICENSE` you chose, and a GitHub workflow.
+   README for your players and the `LICENSE` you chose. In a clone of the
+   public repository it also writes a GitHub workflow that checks every push.
 2. **Write your guides** in the `.guide` files. `polestar find <text>`
    prints quest, NPC and place lines ready to paste; in the game,
    `/polestar where` prints where you stand.

@@ -12,10 +12,10 @@ Polestar and registers guides with it. Polestar's own guides are a pack too
 
 ## `pack.json`
 
-The pack's manifest, in the root of the pack's folder. Every tool finds the
-pack by the nearest `pack.json` in the current folder or a parent, or takes
-its folder as the one argument (`polestar lint ../joe-routes`) or
-`--pack <dir>`.
+The pack's manifest, in the root of the pack's folder. Every tool works on
+the pack folder given as its one argument (`polestar lint ../joe-routes`) or
+with `--pack <dir>`, else on the nearest `pack.json` in the current folder or
+a parent.
 
 ```json
 {
@@ -40,11 +40,11 @@ its folder as the one argument (`polestar lint ../joe-routes`) or
 | `website` | no | `https://` or `http://` address; at most 200 characters |
 | `source` | no | where the guides come from, in the author's words; at most 200 characters |
 | `notes` | no | one line for the AddOns list, shown when the player points at the pack there; at most 200 characters (default "Guide pack for Polestar by <author>") |
-| `folder` | no | the addon's folder name: 1 to 64 letters, digits, `_` and `-`, not `Polestar` and not starting with `Polestar_` (in any case); default `PolestarPack_` and the title in CamelCase (`Joe's Routes` → `PolestarPack_JoesRoutes`) |
+| `folder` | no | the addon's folder name: 1 to 64 letters, digits, `_` and `-`, not `Polestar` and not starting with `Polestar_` (in any case); default `PolestarPack_` and the title in CamelCase (`Joe's Routes` → `PolestarPack_JoesRoutes`), or the id when the title has no letters or digits |
 
-Every value is a string on one line. A missing or invalid required field is a
-lint error; an unknown key is a warning; a `|` in a displayed value is a
-warning (it prints literally in game).
+Every value is a string on one line. A missing required field, or a value
+that breaks these rules, is a lint error; an unknown key is a warning; a `|`
+in a displayed value is a warning (it prints literally in game).
 
 The pack folder holds `pack.json`, the `.guide` files in any layout,
 `drafts/` (Recorder drafts, compiled only with `--include-drafts`) and `dist/`
@@ -98,11 +98,11 @@ Guides.lua
 | Field | Value |
 |---|---|
 | `Interface` | copied from `addon/Polestar/Polestar.toc` at build time |
-| `Title` | "Polestar Pack: " and `pack.json` `title` (the title alone when it already starts so), so the AddOns list reads the addon as a pack. Polestar's own menus show the title without it |
+| `Title` | "Polestar Pack: " and `pack.json` `title` (the title alone when it already starts so), so the AddOns list reads the addon as a pack. Polestar's own menus show the title without it. Polestar's own pack (`guides`) gets no prefix |
 | `Author`, `Version` | from `pack.json` |
 | `Notes` | `pack.json` `notes`, else "Guide pack for Polestar by <author>" |
 | `Category` | `Quests`, Polestar's category in the AddOns list |
-| `Group` | `Polestar`: the AddOns list shows the pack under Polestar's own entry, beside Polestar's own addons |
+| `Group` | `Polestar`: the AddOns list shows the pack under Polestar's own entry, beside Polestar's own addons. Not written for Polestar's own pack |
 | `Dependencies` | `Polestar`: the client loads Polestar first |
 | `X-Polestar-Pack` | the pack id. Polestar lists every addon carrying it on the Guide packs page, loaded or not |
 | `X-Polestar-Format` | the pack format (below) |
@@ -111,10 +111,15 @@ Guides.lua
 | `X-Website` | `pack.json` `website`, only when given |
 
 The comment line is the **generated-folder marker**, and with
-`X-Polestar-Pack` it makes the folder rule: `compile`, `pack`, `install`,
-`dev` and `play` write a pack folder only when it is absent, empty, or
-carrying the generated marker for the same pack id; anything else is
-refused.
+`X-Polestar-Pack` it makes the folder rule: `compile` (its output folder),
+`install` (`dist/<folder>/` and the folder in AddOns, where a symlink is
+replaced without the check) and `dev` (the folder
+in AddOns) write a pack folder only when it is absent, empty, or carrying
+the generated marker and no other pack's id. Anything else is refused: a
+folder without the marker as "not a generated guide pack", one generated
+for another pack as holding that pack, with the hint to set `folder` in
+`pack.json`. `pack` builds a guide pack's zip in memory, and `play` writes
+into a new temporary folder, so neither touches an existing pack folder.
 
 ## Rules Polestar enforces
 
@@ -133,20 +138,28 @@ before a pack is built (`tests/packs-parity.test.js` holds the two together).
    with "Pack id <id> is reserved for Polestar.". Either way the guides and
    map frames its files register for that id while it loads are dropped,
    never given to the holder, and the dropped guides are counted in the
-   problem. A guide registered before its pack is refused (listed once the
-   pack registers); one for a pack that never registers is ignored, since
-   there is no row to list it on.
+   problem. A pack with a malformed id, no `format` or a required field
+   missing is refused too ("Pack id <id> is not valid: …", "The pack is
+   missing <field>."), and its guides are dropped without a problem each.
+   A guide registered before its pack is refused (listed once the pack
+   registers); one for a pack that never registers is ignored, since there
+   is no row to list it on.
 4. **Map frames.** A pack may add Era map frames for maps Polestar's lack; for
-   a map both cover, Polestar's win whatever the load order (lint warns).
+   a map both cover, Polestar's win whatever the load order (lint warns when
+   the bounds differ). Frames for a pack that is not registered, or was
+   refused, are dropped.
 5. **Format.** A pack declaring a format Polestar does not read is refused
-   whole with "Needs Polestar <X-Polestar-Needs> or newer.". An unknown verb
-   or a malformed field inside a known format refuses only that guide.
+   whole, with the status `too-new` and "Needs Polestar <X-Polestar-Needs> or
+   newer." ("Needs a newer Polestar." when its TOC has no
+   `X-Polestar-Needs`). An unknown verb or a malformed field inside a known
+   format refuses only that guide.
 6. **Visible problems.** Every refusal is recorded against its pack with a
    kind: `pack-refused` (the pack), `guide-refused` (one guide, with its id),
    `no-guides` (the addon loaded but registered no guides, usually a Lua error
    in its files). The Guide packs page shows them.
 7. **Text prints literally.** Every string a pack registers is escaped once,
-   at registration (`|` doubled), so colour and link codes do not work.
+   at registration (`|` doubled), so colour and link codes do not work. A
+   guide's ids (`id`, `pack`, `next`, `nextChoices`) are left as written.
 8. **Missing guides keep their place.** Saved tabs of a guide whose pack is
    missing or switched off reopen in their old place when it comes back.
 9. **Packs on disk.** At login Polestar lists every addon whose TOC carries
@@ -216,7 +229,7 @@ Guide keys (the compiler writes them in this order):
 | `races` | no | list of race file names (`"Human"`, `"Scourge"`, `"NightElf"`, …); absent: any |
 | `classes` | no | list of class file names (`"WARRIOR"`, …); absent: any |
 | `minLevel`, `maxLevel` | no | numbers |
-| `category` | no | `"Leveling"` (default), `"Professions"`, `"Reputation"`, `"Legacy"`, `"Exploration"`, `"Collectibles"`, `"Dungeons"` |
+| `category` | no | `"Leveling"` (default), `"Professions"`, `"Reputation"`, `"Legacy"`, `"Exploration"`, `"Collectibles"`, `"Dungeons"`; the compiler passes another name through with a warning |
 | `folder` | no | the guide menu folder |
 | `keywords` | no | list of extra search words |
 | `collects` | no | list of item ids the guide obtains |
@@ -231,7 +244,8 @@ Guide keys (the compiler writes them in this order):
 
 Step keys: `title` (optional), `note` (optional, player-facing), `only`
 (optional: `{ classes = { ... }, races = { ... }, factions = { ... } }`, AND
-across keys, OR within) and `goals` (at least one).
+across keys, OR within; Polestar also reads an entry `"!X"` as "not X", but
+the compiler writes positive lists only) and `goals` (at least one).
 
 Goal keys common to every verb: `t` (the verb), `text` (display text),
 `note`, `optional` (`true`: never blocks the step), `only` (as on a step),
@@ -254,7 +268,7 @@ goal's target spawns, below; with `map`).
 | `hearth` | `location` | — |
 | `getfp` | `location` | `npc`, `npcName` |
 | `fly` | `location` | — |
-| `train` | — | `npc`, `npcName`, `class`, `skill`, `skillLine`, `rank`, `rankMax`, `level`, `candidates` |
+| `train` | — | `npc`, `npcName`, `class`, `skill`, `skillLine`, `rank`, `rankMax`, `candidates` |
 | `buy` | `item`, `itemName` | `count`, `npc`, `npcName`, `candidates` |
 | `vendor` | — | `npc`, `npcName`, `candidates` |
 | `level` | `level` | — |
@@ -272,7 +286,7 @@ The fields:
 |---|---|
 | `quest`, `npc`, `object`, `item`, `spell`, `faction`, `achievement` | numeric ids |
 | `title`, `npcName`, `objName`, `itemName`, `spellName`, `factionName`, `achievementName`, `target` | names |
-| `count` | number to collect, kill or craft |
+| `count` | number to collect, kill or buy; on `craft`, the number of items to make |
 | `oi` | 1-based quest objective index (`C_QuestLog.GetQuestObjectives`) |
 | `minLevel` | the level an `accept` needs; `qlvl` the quest's level (number or string) |
 | `pre` | prerequisite quest ids, any one suffices; `preAll` every one needed |
@@ -281,8 +295,8 @@ The fields:
 | `location` | an inn, flight point or zone name as the game shows it |
 | `class` | `true` on `train`: the nearest trainer of the player's class |
 | `skill` | a profession name; `skillLine` its skill line id |
-| `rank`, `rankMax` | on `train`: the profession rank (1 Apprentice to 4 Artisan) and its skill cap |
-| `level` | on `level`: the level to reach; on `skill`: the rank to reach; on `train`: the skill the rank needs |
+| `rank`, `rankMax` | on `train`: the profession rank (1 Apprentice to 4 Artisan; Polestar also reads a rank name or a skill cap) and its skill cap (written by the compiler, not read by Polestar) |
+| `level` | on `level`: the level to reach; on `skill`: the skill to reach |
 | `untilSkill` | on `craft`: craft until the profession reaches this skill |
 | `reagents` | `{ { item, itemName, count } }` |
 | `standing` | 1 Hated to 8 Exalted |
@@ -306,19 +320,22 @@ Polestar.RegisterMapFrames({
 }, "joe-routes")
 ```
 
-The Era world bounds of every map the pack's guides use with `f = "e"`
-coordinates: `c` the continent, `left`/`right` world Y, `top`/`bottom` world X.
-For a map Polestar already covers, Polestar's bounds win (rule 4).
+The Era world bounds of every map the pack's guides place a goal or a
+candidate on, where the reference data has them: `c` the continent,
+`left`/`right` world Y, `top`/`bottom` world X. For a map Polestar already
+covers, Polestar's bounds win (rule 4). Call it after `RegisterPack`: the
+frames of a pack that is not registered are dropped.
 
 ## Versioning
 
 - The format number changes when a verb, a field or a field's meaning is
-  added or changed. Fields Polestar does not read are ignored only where this
-  page says so; an unknown verb refuses the guide.
+  added or changed. Polestar ignores keys it does not know; an unknown verb
+  refuses the guide.
 - Polestar keeps reading every format it has shipped, so a published pack
   keeps working when Polestar updates.
 - The compiler writes the first Polestar version that reads the pack's format
   into the TOC as `X-Polestar-Needs`. Format 1 is read by Polestar 0.1.0 and
   later.
-- A pack in a format this Polestar does not read is shown as "needs Polestar
-  <version> or newer" and registers nothing.
+- A pack in a format this Polestar does not read registers nothing; the
+  Guide packs page shows it as `too-new` with "Needs Polestar <version> or
+  newer." (rule 5).
