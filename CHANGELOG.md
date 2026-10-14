@@ -47,6 +47,9 @@
   when several goals share it. The guide menu tags guides with group content
   on their route "Group" in the list, on the Continue cards and in the
   details.
+- The Deathcharger guide's arrow points at Stratholme's Service Entrance
+  (41.5,17.7), not at the spot its Era map position falls on Forever's
+  redrawn Eastern Plaguelands map.
 
 ### For guide authors
 

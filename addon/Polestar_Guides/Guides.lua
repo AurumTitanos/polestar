@@ -17970,8 +17970,8 @@ do
 					title = "Stratholme: Baron Rivendare",
 					note = "Stratholme is a group of five, level 58-60. The Service Entrance at Elders' Square, in north-western Eastern Plaguelands, leads to the undead side; Baron Rivendare waits in the Slaughter House at its end. Our data gives the reins a 0.02% drop chance (pfQuest, Era): one in about five thousand kills. Nothing shows Forever changing it.",
 					goals = {
-						{ t = "goto", text = "Stratholme Service Entrance", map = 1423, x = 47.9, y = 23.8, f = "e" },
-						{ t = "collect", item = 13335, itemName = "Deathcharger's Reins", map = 1423, x = 47.9, y = 23.8, f = "e", note = "Baron Rivendare", group = { kind = "elite", rank = 1 } },
+						{ t = "goto", text = "Stratholme Service Entrance", map = 1423, x = 41.5, y = 17.7, f = "e" },
+						{ t = "collect", item = 13335, itemName = "Deathcharger's Reins", map = 1423, x = 41.5, y = 17.7, f = "e", note = "Baron Rivendare", group = { kind = "elite", rank = 1 } },
 					},
 				},
 			},
