@@ -305,6 +305,25 @@ test('the hub\'s guide search lists Codex matches under its guides; one opens th
 	assert.equal(out.query, 'saber');
 });
 
+test('clearing the hub\'s search takes its Codex matches away: none stay drawn over the guide list', () => {
+	const [out] = run(`
+		UI.ShowPicker()
+		Polestar.UI.Picker.SetQuery("saber"); stub.advance(0.3)
+		local body = PolestarPicker.Scroll.Child
+		local before = rowFor(body, "Frostsaber Provisions") and true or false
+		Polestar.UI.Picker.SetQuery(""); stub.advance(0.3)
+		local stale = {}
+		for _, r in ipairs(shownRows(body)) do
+			local t = r.Title and r.Title:GetText() or ""
+			if t:find("saber") or t:find("Look up everything") then stale[#stale + 1] = t end
+		end
+		emit({ before = before, stale = table.concat(stale, " / "), count = UI.LookupCount(), total = UI.LookupTotal() })`);
+	assert.equal(out.before, true);
+	assert.equal(out.stale, '');
+	assert.equal(out.count, 0);
+	assert.equal(out.total, 0);
+});
+
 test('with the real Search, Codex and Lookup runtime over the sample pack', () => {
 	const pack = writeCodexPack(sampleCodex());
 	try {

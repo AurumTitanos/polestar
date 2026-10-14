@@ -33,7 +33,8 @@
 --
 -- The hub's guide search lists entity matches under its guide results
 -- through UI.LookupRows / UI.LookupCount / UI.LookupTotal (an "In the
--- Codex" folder, a few per kind); picking one opens this section at it.
+-- Codex" folder, a few per kind; UI.HideLookupRows clears them before the
+-- menu draws a list); picking one opens this section at it.
 
 local ADDON, ns = ...
 local UI, Theme, W = ns.UI, ns.Theme, ns.Widgets
@@ -1709,6 +1710,17 @@ function UI.LookupRows(parent, y, q, width, x)
 	for i = n + 1, #pool.rows do pool.rows[i]:Hide() end
 	pickerCount = #picked
 	return y
+end
+
+-- Hides the matches drawn in `parent` by UI.LookupRows. The guide menu calls
+-- it before every render: a list drawn without them (search cleared, another
+-- view) must not show the last search's rows over its own.
+function UI.HideLookupRows(parent)
+	local pool = pickerPools[parent]
+	pickerCount, pickerTotal = 0, 0
+	if not pool then return end
+	if pool.folder then pool.folder:Hide() end
+	for _, r in ipairs(pool.rows) do r:Hide() end
 end
 
 -- Entity rows the guide menu shows now (its empty state stays away).

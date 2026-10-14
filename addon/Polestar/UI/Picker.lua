@@ -1328,6 +1328,9 @@ function P.Render()
 		visibleIds[#visibleIds + 1] = g.id
 	end
 	local empty
+	-- The last search's Codex matches go away first; a browse with a query
+	-- draws them again below.
+	if UI.HideLookupRows then UI.HideLookupRows(win.Body) end
 	if view == "browse" then
 		local lastFolder = false
 		for _, e in ipairs(entries) do
