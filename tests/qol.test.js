@@ -680,6 +680,24 @@ test('buying: a purchase the server refuses is never reported as bought', () => 
 	assert.deepEqual(msgs, ['Bought 3 Soothing Spices for 1s 20c.']);
 });
 
+test('buying: a purchase that lands late, on a slow server, is still reported once', () => {
+	const [msgs] = run(`${GOODS}
+		set("buyGoals", true)
+		q.money = 1000
+		q.landDelay = 1.5
+		q.step({ { t = "buy", item = 20, count = 3, itemName = "Soothing Spices" } })
+		q.openMerchant()
+		stub.advance(6)
+		local out = {}
+		for _, m in ipairs(stub.messages) do
+			local b = m:match("(Bought.*)")
+			if b then out[#out + 1] = b end
+		end
+		emit(out)
+	`);
+	assert.deepEqual(msgs, ['Bought 3 Soothing Spices for 1s 20c.']);
+});
+
 test('buying: goods sold in stacks are bought in whole stacks within the stack limit; stock and money cap the rest', () => {
 	const out = run(`${GOODS}
 		set("buyGoals", true)

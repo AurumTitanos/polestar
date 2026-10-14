@@ -124,13 +124,18 @@ function Buy.Run()
 						pending[id] = p
 					end
 					if C_Timer and C_Timer.After then
-						C_Timer.After(LAND_WAIT, function()
+						local function report()
 							local got = min(Client.ItemCount(id) - p.before, p.items) - p.reported
 							if got > 0 then
 								p.reported = p.reported + got
 								ns.Print(format(L["Bought %d %s for %s."], got, name, QoL.Money(got * price / perStack)))
 							end
-						end)
+							-- Some not landed yet: look again while they still may.
+							if p.reported < p.items and GetTime() - p.at < PENDING_WAIT then
+								C_Timer.After(LAND_WAIT, report)
+							end
+						end
+						C_Timer.After(LAND_WAIT, report)
 					end
 				end
 			end
