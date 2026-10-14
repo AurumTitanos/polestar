@@ -72,7 +72,8 @@ checks, and they are run before it is merged.
 ## Setup
 
 - Node 24 or newer: every command.
-- Lua 5.1 or LuaJIT: `play`, `playtest`, `record import` and the addon tests.
+- Lua 5.1 or LuaJIT: `play`, `playtest`, `record import`, `travel route` and
+  the addon tests.
   `$LUA` picks one when you have several.
 - The reference data, `data/forever/`: quest titles, givers and coordinates,
   used by every guide command. `node tools/polestar.js data build` assembles
