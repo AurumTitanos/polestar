@@ -96,8 +96,10 @@ are written from that route and scored under the same model
 
 Guide packs written by other players install the same way, next to Polestar
 ([Guide packs](#guide-packs)). Each new character's first login opens a short
-welcome: a hello, the guide Polestar suggests for that character and the
-three things to know (`/polestar welcome` shows it again).
+welcome: a hello and what Polestar does; on the account's first character,
+quest automation, the guide at login and the colour scheme; then the guide
+Polestar suggests for that character, the Discord and guide packs
+(`/polestar welcome` shows it again).
 
 > [!NOTE]
 > **Beta.** Every guide compiles, lints and plays to the end in a simulator
@@ -298,10 +300,10 @@ steps and detours, the steps to fix first.
 
 ### Slash commands
 
-`/polestar` (or `/pole`) opens the guide window; settings live in
+`/polestar` (or `/pole`) shows or hides the guide window; settings live in
 `/polestar options`, grouped by what you came to do: Guide, Appearance, Map,
-Questing, Discovery, Quality of Life, Recorder and About, with a search that
-finds any setting.
+Questing, Discovery, Quality of Life, Guide packs, Recorder and About, with a
+search that finds any setting.
 
 <details>
 <summary><b>Every slash command</b></summary>
@@ -333,6 +335,8 @@ finds any setting.
 | `packs` | Open Options > Guide packs |
 | `welcome` | Show the welcome again |
 | `where` | Print your map and position as guide lines (`zone map <id>`, `goto x,y live`), in a box to copy |
+| `report` | Report a problem with the step on screen (the guide window's bug button) |
+| `discord` | The invite to the Polestar Discord, to copy |
 | `debug` | Toggle debug output |
 
 The Recorder has its own: `/psrec on | off | mark <text> | clear` and a
@@ -486,11 +490,12 @@ on one line):
   goals = {
     { t = "collect", quest = 97279, title = "Wayward Weapons",
       item = 277653, itemName = "Abandoned Training Weapon", count = 6, oi = 1,
-      map = 1411, x = 44, y = 67.2, f = "e" },
+      map = 1411, x = 44, y = 67.2, f = "e",
+      spots = { { x = 44.4, y = 66.6, r = 45, n = 4 }, --[[ eleven more spawn clusters ]] } },
     { t = "kill", quest = 788, title = "Cutting Teeth",
       target = "Mottled Boar", npc = 3098, count = 10, oi = 1,
       map = 1411, x = 44.49, y = 65.1, f = "e",
-      spots = { { x = 43, y = 64.5, r = 97, n = 5 }, --[[ five more spawn clusters ]] }, spread = true },
+      spots = { { x = 45, y = 65.7, r = 56, n = 8 }, --[[ ten more spawn clusters ]] } },
   },
 },
 ```
@@ -577,14 +582,15 @@ node tools/polestar.js compile            # build addon/Polestar_Guides
 node --test "tests/**/*.test.js"          # the test suite
 node tools/polestar.js preview            # render the UI to docs/preview/*.svg
 node tools/polestar.js install --recorder # into a detected Forever or beta client
-node tools/polestar.js version            # the release version in package.json and every addon TOC
+node tools/polestar.js version            # the release version in package.json, guides/pack.json and every addon TOC
 node tools/polestar.js pack               # release zips and SHA256SUMS into dist/
 ```
 
 `npm test` runs the suite. [CI](.github/workflows/ci.yml) runs it on every
 push to main and every pull request, where the tests that need the locally
-built data skip with a reason, and fails when the committed textures differ
-from a fresh `media` build; with the data built, all pass locally. `install`
+built data skip with a reason, and fails when the committed textures or UI
+renders differ from a fresh `media` or `preview` build; with the data built,
+all pass locally. `install`
 finds the client under Wine, Proton and similar prefixes in your home folder,
 or takes `$WOW_FOREVER_ADDONS` or `--dest <Interface/AddOns>`; `--link`
 symlinks the folders instead, so an edit needs only a `/reload`.
@@ -694,8 +700,8 @@ show the game (© Blizzard Entertainment) and are not part of the release.
 
 The Inter typeface (SIL Open Font License 1.1) ships with the addon; the
 POLESTAR wordmark is cut from Cinzel (SIL Open Font License 1.1) and ships
-only as images. The README's banner, download button, logo and charts are
-drawn by [`tools/readme`](tools/readme) from the same sources, with
+only as images. The README's banner, download button, logo, charts and the
+CurseForge avatar are drawn by [`tools/readme`](tools/readme) from the same sources, with
 Marcellus (SIL Open Font License 1.1) for the banner's lines.
 
 [LICENSE-EXCEPTION.md](LICENSE-EXCEPTION.md) adds a permission under section
