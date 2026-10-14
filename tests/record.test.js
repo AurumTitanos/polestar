@@ -167,6 +167,31 @@ test('import archives the raw file once per distinct content, under the account 
 	assert.deepEqual(fs.readdirSync(path.join(out, 'raw')).sort(), ['20261012T153000Z-MYACCOUNT.lua', '20261012T153200Z-MYACCOUNT.lua']);
 });
 
+test('an anonymized import keeps no character name or realm anywhere, keys each character by a stable hash, and archives nothing', () => {
+	const dir = tmpdir('polestar-record-');
+	const out = path.join(dir, 'recordings');
+	const sv = writeSv(dir, svText());
+	const result = importFile(sv, { outDir: out, anonymize: true });
+	assert.equal(result.archive.path, null);
+	assert.equal(fs.existsSync(path.join(out, 'raw')), false);
+	const files = fs.readdirSync(out).sort();
+	assert.equal(files.length, 2);
+	for (const f of files) {
+		const text = fs.readFileSync(path.join(out, f), 'utf8');
+		for (const secret of ['Testchar', 'Altchar', 'Test Realm']) {
+			assert.ok(!f.includes(secret) && !text.includes(secret), `${f} still holds ${secret}`);
+		}
+	}
+	const [undead, human] = result.sessions.map((s) => s.session);
+	assert.match(human.char.id, /^[0-9a-f]{8}$/);
+	assert.notEqual(human.char.id, undead.char.id);
+	assert.equal(human.session, `1791000000-${human.char.id}`);
+	assert.equal(human.char.race, 'Human');
+	// The same character in a later file gets the same id, so its sessions group together.
+	const again = importFile(writeSv(tmpdir('polestar-record-'), svText({ undead: null })), { outDir: path.join(dir, 'other'), anonymize: true });
+	assert.equal(again.sessions[0].session.char.id, human.char.id);
+});
+
 test('a session already imported keeps the longer event list; sessions missing from a reset file survive', () => {
 	const dir = tmpdir('polestar-record-');
 	const out = path.join(dir, 'recordings');

@@ -45,7 +45,7 @@ const DETOUR_FACTOR = 3; // XP per yard this many times below the guide's
 
 function charKey(s) {
 	const c = s.char || {};
-	return c.name ? `${c.name}-${c.realm || ''}` : `session:${s.session}`;
+	return c.name ? `${c.name}-${c.realm || ''}` : c.id ? `char:${c.id}` : `session:${s.session}`;
 }
 
 function num(v) {

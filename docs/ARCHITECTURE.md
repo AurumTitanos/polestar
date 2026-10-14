@@ -2167,6 +2167,11 @@ Normalised from `PolestarRecorderDB` by `record import`:
   events: [ { t, e, ...fields } ], maps: { "<uiMapID>": { name, type, parent, c, left, right, top, bottom } } }
 ```
 
+`record import --anonymize` (a file a player sent in) sets `char.name` and
+`char.realm` to null and adds `char.id`, 8 hex digits of a SHA-256 of
+"name-realm", which also replaces the name in the session key; no raw copy is
+archived.
+
 `t` = seconds since session start. Event kinds and fields:
 `accept {q, title, qlvl, lvl, xp, map, x, y, npc, npcName, object}`,
 `turnin {q, xpReward, money, lvl, map, x, y, npc, npcName}`,

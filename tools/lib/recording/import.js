@@ -8,6 +8,10 @@
 // the per-session JSON files; nothing is ever deleted. That is what protects
 // recordings from Forever's cold-start bug, where the client restores nil and
 // the next logout overwrites the file with only the new session.
+// `anonymize` (a file a player sent in) drops the character's name and realm,
+// keys the character by a short hash of both instead (its sessions still group
+// together), puts that hash where the session key held the name, and keeps no
+// raw copy.
 
 const crypto = require('node:crypto');
 const fs = require('node:fs');
@@ -303,9 +307,20 @@ function writeSession(outDir, session) {
 	return { file, status, session: next };
 }
 
-// Archive, convert and write one SavedVariables file.
-function importFile(svPath, { outDir = DEFAULT_OUT, now = new Date() } = {}) {
-	const archive = archiveRaw(svPath, outDir, now);
+// The character's name and realm, replaced by `char.id` (8 hex digits of a
+// SHA-256 of "name-realm"); the session key's "-<name>" part becomes "-<id>".
+function anonymize(session) {
+	const { name, realm } = session.char;
+	if (!name && !realm) return session;
+	const id = crypto.createHash('sha256').update(`${name || ''}-${realm || ''}`).digest('hex').slice(0, 8);
+	const key = name ? session.session.split(`-${name}`).join(`-${id}`) : session.session;
+	return { ...session, session: key, char: { ...session.char, name: null, realm: null, id } };
+}
+
+// Archive, convert and write one SavedVariables file (`anonymize`: see the
+// header; no archive then, so `archive` is { created: false, path: null }).
+function importFile(svPath, { outDir = DEFAULT_OUT, now = new Date(), anonymize: anon = false } = {}) {
+	const archive = anon ? { created: false, path: null } : archiveRaw(svPath, outDir, now);
 	const db = readDb(svPath);
 	const results = [];
 	if (db && typeof db === 'object') {
@@ -314,10 +329,11 @@ function importFile(svPath, { outDir = DEFAULT_OUT, now = new Date() } = {}) {
 		for (const key of Object.keys(sessions).sort()) {
 			const raw = sessions[key];
 			if (!raw || typeof raw !== 'object') continue;
-			results.push(writeSession(outDir, normalizeSession(key, raw, dbMaps)));
+			const session = normalizeSession(key, raw, dbMaps);
+			results.push(writeSession(outDir, anon ? anonymize(session) : session));
 		}
 	}
-	return { sv: svPath, account: accountOf(svPath), archive, sessions: results, keys: results.map((r) => r.session.session) };
+	return { sv: svPath, account: anon ? 'anonymized' : accountOf(svPath), archive, sessions: results, keys: results.map((r) => r.session.session) };
 }
 
 module.exports = {
@@ -325,6 +341,7 @@ module.exports = {
 	defaultWtfDirs,
 	findSavedVariables,
 	normalizeSession,
+	anonymize,
 	importFile,
 	safeName,
 };

@@ -13,11 +13,18 @@ package them. You can help without touching any code.
   or open an issue with the "Wrong step" form.
 - **Fix a guide.** Guides are plain text files; a fix is often one line. See
   [Fixing a guide](#fixing-a-guide).
-- **Record a session.** The Polestar Recorder addon (shipped beside Polestar)
-  logs your play while you follow a guide. Import it with
-  `node tools/polestar.js record import` and attach the output of
-  `node tools/polestar.js record report`: per step times, XP per hour, deaths
-  and detours show where a route is slow.
+- **Record a session.** The Polestar Recorder addon (its own download beside
+  Polestar on the GitHub release; it runs with or without Polestar) logs your
+  play: quests, routes, rares you see, what creatures and chests drop, the
+  dungeons you enter. Turn it on with `/psrec on` and play. No tools needed to
+  share it: after logging out, send the file
+  `WTF/Account/<your account>/SavedVariables/Polestar_Recorder.lua` on Discord
+  or attach it to an issue. We import it with
+  `node tools/polestar.js record import --sv <file> --anonymize`, which keeps
+  no character name or realm. With the tools set up you can measure a route
+  yourself: `node tools/polestar.js record import`, then
+  `node tools/polestar.js record report` gives per step times, XP per hour,
+  deaths and detours.
 - **Code.** Bugs in the addon or the tools; see [Code changes](#code-changes).
   For a Lua error, use the "Bug report" form.
 

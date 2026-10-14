@@ -33,7 +33,9 @@
   it is on: rares you see (on nameplates, as target or mouseover, or on the
   minimap), treasures, what each corpse or chest drops and how often, the
   dungeons you enter and where, and boss encounters, plus the rewards quest
-  windows offer.
+  windows offer. To share a recording, send the `Polestar_Recorder.lua` file
+  from your SavedVariables folder (CONTRIBUTING.md says where); it is imported
+  without your character's name or realm.
 
 ### For guide authors
 
@@ -62,6 +64,12 @@
   set X where the data still holds the old value (Scaring Shaky now gives
   3300 XP, not 820). Quests still without XP take Wowhead's. `--no-wowhead`
   skips it; guide pack workflows and Codespaces build with it.
+
+### For contributors
+
+- `record import --anonymize` for a file a player sent in: character names and
+  realms are dropped, a short hash keys the character (its sessions still
+  group together) and no raw copy is archived.
 
 ## 0.2.1 (2026-10-14)
 

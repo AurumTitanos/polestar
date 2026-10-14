@@ -21,7 +21,9 @@ const usage = `usage: node tools/polestar.js record <subcommand> [options]
   import                 Archive and convert the recorder's SavedVariables:
                          raw copy -> data/recordings/raw/<timestamp>-<account>.lua,
                          one JSON per session -> data/recordings/<session>.json
-                         (a session already on disk keeps the longer event list)
+                         (a session already on disk keeps the longer event list);
+                         --anonymize for a file a player sent in: no name or
+                         realm (a hash keys the character), no raw copy
   watch                  Import again whenever the client rewrites the file
                          (keeps sessions safe from the cold-start SavedVariables reset)
   draft <session|file>   Write a draft guide from a session key or JSON file
@@ -46,12 +48,13 @@ options:
   --recordings <dir>     draft/report: where sessions are read (default data/recordings)
   --interval <ms>        watch: polling interval (default 1000)
   --force                draft: overwrite an existing draft
+  --anonymize            import: drop character names and realms (see import)
   --guide <text>         report: only guides whose id or title contains <text>
   --top <n>              report: length of the ranked lists (default 10)
   --json                 report: print the report as JSON`;
 
 function parse(argv) {
-	const opts = { sv: [], wtf: null, out: null, recordings: null, interval: 1000, force: false, guide: null, top: 10, json: false, positional: [] };
+	const opts = { sv: [], wtf: null, out: null, recordings: null, interval: 1000, force: false, anonymize: false, guide: null, top: 10, json: false, positional: [] };
 	for (let i = 0; i < argv.length; i++) {
 		const a = argv[i];
 		const value = () => {
@@ -64,6 +67,7 @@ function parse(argv) {
 		else if (a === '--recordings') opts.recordings = value();
 		else if (a === '--interval') opts.interval = Number(value());
 		else if (a === '--force') opts.force = true;
+		else if (a === '--anonymize') opts.anonymize = true;
 		else if (a === '--pack') opts.pack = value();
 		else if (a === '--guide') opts.guide = value();
 		else if (a === '--top') {
@@ -94,7 +98,7 @@ function report(result, missing = []) {
 	const by = { new: 0, updated: 0, unchanged: 0 };
 	for (const s of result.sessions) by[s.status]++;
 	console.log(
-		`${result.account}: ${result.sessions.length} session(s) — ${by.new} new, ${by.updated} updated, ${by.unchanged} unchanged; raw ${result.archive.created ? 'archived to' : 'unchanged at'} ${rel(result.archive.path)}`,
+		`${result.account}: ${result.sessions.length} session(s) — ${by.new} new, ${by.updated} updated, ${by.unchanged} unchanged; raw ${result.archive.path === null ? 'not kept (anonymized)' : `${result.archive.created ? 'archived to' : 'unchanged at'} ${rel(result.archive.path)}`}`,
 	);
 	for (const s of result.sessions) if (s.status !== 'unchanged') console.log(`  ${s.status.padEnd(7)} ${rel(s.file)} (${s.session.events.length} events)`);
 	if (missing.length) {
@@ -108,7 +112,7 @@ function doImport(opts) {
 	const files = svFiles(opts);
 	if (!files.length) return 1;
 	const outDir = path.resolve(opts.out || DEFAULT_OUT);
-	for (const file of files) report(importFile(file, { outDir }));
+	for (const file of files) report(importFile(file, { outDir, anonymize: opts.anonymize }));
 	return 0;
 }
 
