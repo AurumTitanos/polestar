@@ -278,11 +278,17 @@ end
 -- Indexes (tooltips, nameplates)
 ---------------------------------------------------------------------------
 
+-- An objective is listed once per key: an item dropped by several objects
+-- that share a name (Sapphire of Aku'Mai: three) meets the name key once per
+-- object.
 local function push(t, id, o)
 	local list = t[id]
 	if not list then
-		list = {}
-		t[id] = list
+		t[id] = { o }
+		return
+	end
+	for i = 1, #list do
+		if list[i] == o then return end
 	end
 	list[#list + 1] = o
 end

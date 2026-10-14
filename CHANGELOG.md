@@ -102,6 +102,9 @@
   and shows up to 150 items.
 - On the quest reward panel the coin always marks the reward that sells for
   most, beside any upgrade arrow, not only when no reward is an upgrade.
+- An object a quest item drops from names the quest once on its tooltip,
+  not once per object of that name: the Sapphire of Aku'Mai in Blackfathom
+  Deeps listed its quest three times (thanks Mightie).
 
 ### For guide authors
 
