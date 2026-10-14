@@ -119,6 +119,9 @@ command.
 
 ## Commits and pull requests
 
+- Open pull requests against `next`, the next release in progress (the
+  repository's default branch). `main` is the latest release: it moves only
+  when a release is made, by merging `next` into it.
 - One change per commit.
 - Plain messages that describe the change for the players or authors it
   affects (for example "Westfall: turn in at Sentinel Hill before the farms"), not
