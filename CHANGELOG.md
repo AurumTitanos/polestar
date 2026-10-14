@@ -93,6 +93,15 @@
   the standing first.
 - 286 more NPCs show their level in Lookup (from Wowhead Forever's NPC list,
   where nothing else gave one).
+- Dungeons list more than their encounters: the Ring of Law's fighters,
+  event and rare bosses (Edge of Madness, Theldren, Mor Grayhoof) after the
+  encounter bosses, and boss chests with their loot (Chest of The Seven,
+  Gordok Tribute, Cache of the Firelord). Kirtonos the Herald shows his loot.
+- A boss's loot lists its own drops first, so world drops no longer push
+  them out, and a rare's or a treasure's list starts with what only it drops
+  and shows up to 150 items.
+- On the quest reward panel the coin always marks the reward that sells for
+  most, beside any upgrade arrow, not only when no reward is an upgrade.
 
 ### For guide authors
 
