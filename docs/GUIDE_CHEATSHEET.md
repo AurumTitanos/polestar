@@ -83,7 +83,7 @@ Before the first `step`. `guide`, `title`, `levels` and `zone` are required.
 |---|---|---|
 | `kill <npc>` / `kill "<Name>"` | Kill a mob; `quest Q.O` ties it to a quest objective | `kill 6 x10 quest 7.1` |
 | `x<N>` | How many (kills, items, purchases, crafts) | `kill "Cloth Kobold" x5 @65,75` |
-| `quest <quest>.<objective>` | Counts the goal by that quest objective (`quest <quest>` alone lets the data find it) | `interact 1617 quest 9400.1` |
+| `quest <quest>.<objective>` | Counts the goal by that quest objective, numbered as the quest log lists them (`quest <quest>` alone lets the data find it) | `interact 1617 quest 9400.1` |
 | `collect <item> ["Name"]` | Gather or loot items; without `quest`, counted in the bags | `collect 750 x8` |
 | `nearest` | On `collect`: the closest place mobs drop the item, by level and faction | `collect 4306 x10 nearest` |
 | `interact <object>` | Click a game object | `interact 2843` |

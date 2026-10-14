@@ -169,7 +169,7 @@ Modifiers, in any order after the positional arguments:
 | `@x,y` or `@ x,y` | Coordinates (0–100) in the current zone. |
 | `map <uiMapID>` | Zone for this goal's `@` coordinates only. |
 | `npc <id>` / `object <id>` / `item <id>` | Explicit entity (e.g. which quest giver). |
-| `quest <id>` / `quest <id>.<objective>` | Quest objective link (1-based objective). |
+| `quest <id>` / `quest <id>.<objective>` | Quest objective link (1-based objective, numbered in the order the game's quest log lists them; `polestar find <quest id>` prints them). |
 | `x<N>` | Count. |
 | `"text"` | Display text override (for `goto`: the label). A quoted token directly after the entity id of `kill`, `talk`, `interact`, `train` or `vendor` (like `collect`/`use`/`buy`) names that entity instead, for new Forever content missing from the data. |
 | `r <yards>` | Arrival radius (`goto`, default 8). |
