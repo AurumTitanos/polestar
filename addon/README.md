@@ -48,7 +48,7 @@ never in saved variables.
 | 7 | QoL | `QoL/QoL.xml` | `QoL` | Quality of life helpers: action buttons, XP and pace, merchant, reward marks, flight masters, death helper, toggles, requests from other players |
 | 8 | Lookup | `Lookup/Lookup.xml` | `Codex`, `Lookup` | The Codex reader, where things come from, generated guides, mount spotting |
 | 9 | Dungeons | `Dungeons/Dungeons.xml` | `Dungeons` | A quest journal per dungeon and raid, and the guide that picks up a dungeon's quests |
-| 10 | UI | `UI/UI.xml` | `UI` | The guide window, the hub and its Guides, Lookup and Dungeons sections, zone art, route choice, welcome, options |
+| 10 | UI | `UI/UI.xml` | `UI` | The guide window, the hub and its Guides, Lookup and Dungeons sections, zone art, route choice, welcome, problem report, options |
 | 11 | Rares | `Rares/Rares.xml` | `Rares` | Rare NPCs and treasures: detection, pins, alerts and the hub's Rares section |
 
 `Bindings.xml` at the addon root declares the key bindings; it calls into
@@ -176,6 +176,7 @@ never in saved variables.
 | `RouteChoice.lua` | `UI.RouteChoice` | "Choose your path": one card per zone where a guide offers several next guides |
 | `Welcome.lua` | `UI.Welcome` | The welcome a character sees the first time Polestar meets it |
 | `Copy.lua` | `UI.ShowCopy` | A small window holding text to copy |
+| `Report.lua` | `UI.Report` | "Report a problem" (the guide window's bug button, `/polestar report`): a report on the step on screen to copy for the Polestar Discord; `UI.ShowDiscord`, the invite on its own |
 | `Packs.lua` | `UI.Packs` | The Guide packs page of the options window |
 | `Options.lua` | `UI.Options` | The options window: pages, tabs, sections, settings search |
 
