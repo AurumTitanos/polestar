@@ -3,7 +3,7 @@
 // line numbers; filling from reference data happens in resolve.js.
 //
 // parseGuide(text, file, diag) -> guide | null
-//   guide = { file, id, line, header: { ... }, lines: { <headerKey>: line }, steps: [step] }
+//   guide = { file, id, line, header: { ... }, lines: { <headerKey>: line, pros: [line], cons: [line] }, steps: [step] }
 //   step  = { line, title, only, tip, goals: [goal] }
 //   goal  = { line, verb, zone, note, ...positional/modifier fields }
 // `zone` on a goal is the zone spec in effect ({ name } | { map }, with line),
@@ -359,6 +359,7 @@ function parseHeader(guide, kw, line, lex, ln, err, warn) {
 		case 'con': {
 			const key = kw === 'pro' ? 'pros' : 'cons';
 			(h[key] = h[key] || []).push(rest);
+			(guide.lines[key] = guide.lines[key] || []).push(ln);
 			return;
 		}
 		case 'levels': {

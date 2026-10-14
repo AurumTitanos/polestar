@@ -11,6 +11,8 @@
   instead of waiting on it; the page redraws on its own after a rebuild.
 - `new` keeps the port of an http origin (`http://host:3000/...`) in the
   pack's workflow and dev container.
+- `lint` reports a `|` in a second or later `pro` or `con` at that entry's own
+  line, once for each entry that has one.
 
 ### For contributors
 

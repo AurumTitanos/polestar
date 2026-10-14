@@ -268,3 +268,15 @@ test('--guides with a pack folder is a usage error that names the pack folder, g
 		}
 	}
 });
+
+test('a "|" in a later pro or con is reported at its own line, once per entry', () => {
+	const text = ['guide joe/e', 'title Extra', 'faction Alliance', 'levels 6-8', 'zone Elwynn Forest', 'pro Fast', 'pro Fun | short', 'con Slow', 'con Long | dull', 'con Grey | flat', '', 'step S', '  talk 197', ''].join('\n');
+	const r = packCmd('lint', joeCopy({ 'e.guide': text }));
+	assert.equal(r.status, 0, r.stderr);
+	const pipes = r.stderr.split('\n').filter((l) => l.includes('contains "|"')).map((l) => l.replace(/^.*e\.guide:/, 'e.guide:'));
+	assert.deepEqual(pipes, [
+		'e.guide:7: warning: `pro` contains "|", which prints literally in game',
+		'e.guide:9: warning: `con` contains "|", which prints literally in game',
+		'e.guide:10: warning: `con` contains "|", which prints literally in game',
+	]);
+});

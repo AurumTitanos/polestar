@@ -121,7 +121,11 @@ function checkPipes(g, diag) {
 	const h = ast.header || {};
 	for (const [key, keyword] of PIPE_HEADER) {
 		const v = h[key];
-		if ((Array.isArray(v) ? v : [v]).some(hasPipe)) warn(ast.lines[keyword] || ast.line, `\`${keyword}\``);
+		if (Array.isArray(v)) {
+			// pro and con repeat: each entry at its own line.
+			const at = ast.lines[key] || [];
+			v.forEach((x, i) => hasPipe(x) && warn(at[i] || ast.lines[keyword] || ast.line, `\`${keyword}\``));
+		} else if (hasPipe(v)) warn(ast.lines[keyword] || ast.line, `\`${keyword}\``);
 	}
 	for (const s of ast.steps || []) {
 		if (hasPipe(s.title)) warn(s.line, 'the step title');
