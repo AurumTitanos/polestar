@@ -17,7 +17,9 @@
 //
 // Kinds: instances (present), instance levels, instance entrances, bosses
 // (present in the mapped instance), bosses with loot, boss loot items, drop
-// chances (same item and npc on both sides), rares (present), rare positions,
+// chances (same item and npc on both sides; equal within 25% relative or 1
+// point, else different: a match only when ours comes from recordings,
+// QuestieDB's Forever rates or Wowhead Forever's looted-kill counts), rares (present), rare positions,
 // rare levels, rare loot, treasures, treasure positions, treasure loot,
 // items with a source, items per source type, mounts / pets / tabards
 // (present, kind, sources, status), journal quests (on the page), quest
@@ -97,7 +99,51 @@ function bossKey(b) {
 	return b.npc ? `n${b.npc}` : `s${norm(b.name)}`;
 }
 
-function compareCodex(ours, theirs) {
+// Evidence for a disagreement, strongest first: recordings > the Forever
+// client's tables > Wowhead Forever > pfQuest / QuestieDB > AtlasLoot /
+// RareScanner / DungeonJournal. `verify` = { wowhead: loadWowhead(),
+// clientInstances: Set(normalised Map names) } checks each internal-only
+// entity or value: `confirmed` (Forever has it: a gap of ours), `not in
+// Forever` (the internal build is wrong or ahead of the game), `unverified`
+// (no checked source says either way).
+function verdictOf(kindName, row, verify, theirs) {
+	if (!verify) return 'unverified';
+	const wh = verify.wowhead || { npc: {}, object: {}, item: {} };
+	const [a, b, c] = String(row.id).split('/');
+	if (kindName === 'instances') return verify.clientInstances && verify.clientInstances.has(norm((theirs.instances[a] || {}).name)) ? 'confirmed' : 'not in Forever';
+	if (['rares', 'rare positions', 'rare levels'].includes(kindName)) {
+		const w = wh.npc[a];
+		if (!w) return 'unverified';
+		if (kindName === 'rares') return w.classification === 'rare' || w.classification === 'rareelite' ? 'confirmed' : 'not in Forever';
+		return Object.keys(w.spawns || {}).length ? 'confirmed' : 'not in Forever';
+	}
+	if (kindName === 'bosses') {
+		const w = wh.npc[b];
+		if (!w) return 'unverified';
+		return w.drops.length || Object.keys(w.spawns || {}).length || w.classification ? 'confirmed' : 'not in Forever';
+	}
+	const dropCheck = (npc, item) => {
+		const w = wh.npc[npc];
+		if (!w) return 'unverified';
+		return w.drops.some((d) => d.item === Number(item)) ? 'confirmed' : 'not in Forever';
+	};
+	if (kindName === 'boss loot items') return dropCheck(b, c);
+	if (kindName === 'rare loot') return dropCheck(a, b);
+	if (kindName === 'drop chances') return dropCheck(b, a);
+	if (kindName === 'items: rep' || kindName === 'items: pvp') {
+		const t = wh.item[a];
+		if (!t) return 'unverified';
+		return (kindName === 'items: rep' ? (t.rep || []).length : t.pvpRank) ? 'confirmed' : 'not in Forever';
+	}
+	if (kindName === 'treasure loot') {
+		const w = wh.object[a];
+		if (!w) return 'unverified';
+		return w.drops.some((d) => d.item === Number(b)) ? 'confirmed' : 'not in Forever';
+	}
+	return 'unverified';
+}
+
+function compareCodex(ours, theirs, verify = null) {
 	const K = {};
 	const k = (name) => (K[name] = K[name] || kind());
 	const needs = [];
@@ -107,6 +153,8 @@ function compareCodex(ours, theirs) {
 	const oItems = ours.items || {};
 	const tItems = theirs.items || {};
 	const oNpcs = ours.npcs || {};
+	const noRep = new Set(((ours.evidence || {}).noRep || []).map(Number));
+	const noPvp = new Set(((ours.evidence || {}).noPvp || []).map(Number));
 	const tNpcs = theirs.npcs || {};
 
 	// ----- instances
@@ -186,11 +234,27 @@ function compareCodex(ours, theirs) {
 				k('drop chances').missing.push(row);
 				continue;
 			}
-			k('drop chances').match++;
-			if (Math.abs(mine.chance - s.chance) > CHANCE_TOLERANCE * Math.max(mine.chance, s.chance)) {
-				const reason = (mine.from || []).includes('recordings') ? 'recorded kills and loot' : (s.from || []).includes('atlasloot') ? null : 'same inputs, other rounding';
-				k('drop chances').different.push({ ...row, theirs: s.chance, ours: mine.chance, reason });
+			// Within CHANCE_TOLERANCE (relative) or 1 point: the same chance.
+			const gap = Math.abs(mine.chance - s.chance);
+			if (gap === 0) {
+				k('drop chances').match++;
+				continue;
 			}
+			if (gap <= 1 || gap <= CHANCE_TOLERANCE * Math.max(mine.chance, s.chance)) {
+				k('drop chances').match++;
+				k('drop chances').withinTolerance = (k('drop chances').withinTolerance || 0) + 1;
+				continue;
+			}
+			const from = mine.from || [];
+			const reason = from.includes('recordings')
+				? 'recorded kills and loot'
+				: from.includes('questie')
+					? 'QuestieDB Forever drop rate'
+					: from[0] === 'wowhead'
+						? "Wowhead Forever's looted-kill counts"
+						: null;
+			if (reason) k('drop chances').match++;
+			k('drop chances').different.push({ ...row, theirs: s.chance, ours: mine.chance, reason });
 		}
 	}
 
@@ -267,7 +331,11 @@ function compareCodex(ours, theirs) {
 			if (!types.has(ty)) continue;
 			k(`items: ${ty}`).total++;
 			if (mine.has(ty)) k(`items: ${ty}`).match++;
-			else k(`items: ${ty}`).missing.push(row);
+			else if ((ty === 'rep' && noRep.has(Number(id))) || (ty === 'pvp' && noPvp.has(Number(id)))) {
+				// Forever's own tooltip asks for no standing / rank: ours keeps the vendor only.
+				k(`items: ${ty}`).match++;
+				k(`items: ${ty}`).different.push({ ...row, theirs: ty, ours: [...mine], reason: `Wowhead Forever's tooltip shows no ${ty === 'rep' ? 'reputation' : 'PvP rank'} requirement` });
+			} else k(`items: ${ty}`).missing.push(row);
 		}
 		if (['mount', 'pet', 'tabard'].includes(t.kind)) {
 			const c = k(`${t.kind}s`);
@@ -280,7 +348,8 @@ function compareCodex(ours, theirs) {
 					const reason = t.kind === 'mount' && o.status === 'retired' ? "Forever client: the Mount row is hidden until known, and only Era vendors list it" : null;
 					c.different.push({ ...row, field: 'status', theirs: t.status || null, ours: o.status || null, reason });
 				}
-				const lack = [...types].filter((ty) => !mine.has(ty));
+				// A rep / pvp source Forever's tooltip does not ask for is no gap.
+				const lack = [...types].filter((ty) => !mine.has(ty) && !(ty === 'rep' && noRep.has(Number(id))) && !(ty === 'pvp' && noPvp.has(Number(id))));
 				if (lack.length) c.different.push({ ...row, field: 'sources', theirs: [...types], ours: [...mine] });
 			}
 		}
@@ -347,6 +416,27 @@ function compareCodex(ours, theirs) {
 		}
 	}
 
+	// Ours only: entities the internal build lacks.
+	const oursOnly = {
+		instances: Object.keys(oi).filter((key) => !Object.values(instanceMap).includes(key)).length,
+		rares: Object.entries(oNpcs).filter(([id, n]) => n.rare && !(tNpcs[id] && tNpcs[id].rare)).length,
+		treasures: Object.entries(ours.objects || {}).filter(([id, o]) => o.treasure && !((theirs.objects || {})[id] || {}).treasure).length,
+		'items with a source': Object.entries(oItems).filter(([id, it]) => it.sources.length && !((tItems[id] || {}).sources || []).length).length,
+		'journal quests': Object.entries((ours.journal || {}).dungeons || {}).reduce((n, [key, p]) => {
+			const tkey = Object.keys(instanceMap).find((tk) => instanceMap[tk] === key);
+			const tq = new Set(((((theirs.journal || {}).dungeons || {})[tkey] || {}).quests || []).map((q) => q.id));
+			return n + p.quests.filter((q) => !tq.has(q.id)).length;
+		}, 0),
+	};
+	for (const [name, n] of Object.entries(oursOnly)) if (K[name]) K[name].oursOnly = n;
+	// Each internal-only row: confirmed in Forever (ours lacks it), not in Forever, unverified.
+	for (const [name, c] of Object.entries(K)) {
+		c.internalOnly = { confirmed: 0, notInForever: 0, unverified: 0 };
+		for (const r of c.missing) {
+			r.verdict = verdictOf(name, r, verify, theirs);
+			c.internalOnly[r.verdict === 'confirmed' ? 'confirmed' : r.verdict === 'not in Forever' ? 'notInForever' : 'unverified']++;
+		}
+	}
 	// Differences with a reason count as matches already; the rest are not.
 	for (const c of Object.values(K)) {
 		c.share = c.total ? Math.round((c.match / c.total) * 1000) / 1000 : 1;
@@ -354,7 +444,12 @@ function compareCodex(ours, theirs) {
 		c.missingCount = c.missing.length;
 	}
 	const seen = new Set();
+	// What Forever does not have is no recording target.
+	const notInForever = new Set();
+	for (const [name, c] of Object.entries(K)) for (const r of c.missing) if (r.verdict === 'not in Forever') notInForever.add(`${name}|${r.id}`);
 	const needsRecording = needs.filter((n) => {
+		if (n.kind === 'instance' && notInForever.has(`instances|${n.id}`)) return false;
+		if (n.kind === 'rare' && notInForever.has(`rares|${n.id}`)) return false;
 		const key = `${n.kind}|${n.id}`;
 		return !seen.has(key) && seen.add(key);
 	});
@@ -363,7 +458,7 @@ function compareCodex(ours, theirs) {
 
 function summary(report) {
 	const out = {};
-	for (const [name, c] of Object.entries(report.kinds)) out[name] = { total: c.total, match: c.match, share: c.share };
+	for (const [name, c] of Object.entries(report.kinds)) out[name] = { total: c.total, match: c.match, share: c.share, internalOnly: c.internalOnly, oursOnly: c.oursOnly ?? null };
 	return out;
 }
 
@@ -376,10 +471,17 @@ function capped(report) {
 function markdown(report, { theirs = 'internal (--local-extras)', ours = 'release' } = {}) {
 	const pct = (v) => `${(v * 100).toFixed(1)}%`;
 	const lines = ['# Codex parity', '', `Ours: ${ours}. Theirs: ${theirs}. A difference with a reason (ours from a better-evidenced input) counts as a match.`, ''];
-	lines.push('| Kind | Theirs | Ours matching | Match | Missing | Different (no reason) |', '|---|---:|---:|---:|---:|---:|');
+	lines.push(
+		'Evidence for a disagreement, strongest first: recordings > Forever client tables > Wowhead Forever > pfQuest / QuestieDB > AtlasLoot / RareScanner / DungeonJournal. Internal only: confirmed = Forever has it and ours lacks it (a gap); not in Forever = the internal build is wrong or ahead of the game; unverified = no checked source says.',
+		'',
+		'| Kind | Internal | Agree | Match | Internal only: confirmed | not in Forever | unverified | Ours only | Value differs, unresolved |',
+		'|---|---:|---:|---:|---:|---:|---:|---:|---:|',
+	);
 	for (const [name, c] of Object.entries(report.kinds)) {
 		const bad = c.different.filter((d) => !d.reason).length;
-		lines.push(`| ${name} | ${c.total} | ${c.match} | ${pct(c.share)} | ${c.missingCount} | ${bad} |`);
+		const io = c.internalOnly || { confirmed: 0, notInForever: 0, unverified: 0 };
+		lines.push(`| ${name} | ${c.total} | ${c.match} | ${pct(c.share)} | ${io.confirmed} | ${io.notInForever} | ${io.unverified} | ${c.oursOnly ?? ''} | ${bad} |`);
+		if (c.withinTolerance) lines.push(`| ${name}: within tolerance | | ${c.withinTolerance} | | | | | | |`);
 	}
 	lines.push('');
 	for (const [name, c] of Object.entries(report.kinds)) {
@@ -387,7 +489,8 @@ function markdown(report, { theirs = 'internal (--local-extras)', ours = 'releas
 		lines.push(`## ${name}`, '');
 		if (c.missing.length) {
 			lines.push(`Missing (${c.missingCount}):`, '');
-			for (const r of c.missing.slice(0, 60)) lines.push(`- ${r.id} ${r.name || ''}${r.ours ? ` (ours: ${r.ours})` : ''}`);
+			const order = { confirmed: 0, unverified: 1, 'not in Forever': 2 };
+			for (const r of c.missing.slice().sort((x, y) => (order[x.verdict] ?? 1) - (order[y.verdict] ?? 1)).slice(0, 60)) lines.push(`- ${r.id} ${r.name || ''}${r.ours ? ` (ours: ${r.ours})` : ''} [${r.verdict || 'unverified'}]`);
 			if (c.missing.length > 60) lines.push(`- ... ${c.missingCount - 60} more (codex-parity.json)`);
 			lines.push('');
 		}

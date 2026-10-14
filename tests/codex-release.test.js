@@ -285,7 +285,7 @@ test('compareCodex: per-kind match against the internal build, missing and diffe
 	};
 	const r = compareCodex(ours, theirs);
 	assert.equal(r.instanceMap.stockade, 'stormwind-stockade');
-	const s = summary(r);
+	const s = Object.fromEntries(Object.entries(summary(r)).map(([k, v]) => [k, { total: v.total, match: v.match, share: v.share }]));
 	assert.deepEqual(s.instances, { total: 2, match: 1, share: 0.5 });
 	assert.deepEqual(s['instance entrances'], { total: 1, match: 1, share: 1 }, 'the client corpse point differs, with its reason');
 	assert.match(r.kinds['instance entrances'].different[0].reason, /corpse point/);
@@ -297,5 +297,13 @@ test('compareCodex: per-kind match against the internal build, missing and diffe
 	assert.deepEqual(s['items: rep'], { total: 1, match: 0, share: 0 });
 	assert.deepEqual([s['journal quests'].share, s['quest givers'].share, s['quest rewards'].share, s['quest XP'].share], [1, 1, 1, 1]);
 	assert.deepEqual(r.needsRecording.map((n) => [n.kind, n.event]), [['instance', 'enter, encounter'], ['rare', 'rare, slain + drop']]);
-	assert.match(markdown(r), /^\| instances \| 2 \| 1 \| 50\.0% \| 1 \| 0 \|$/m);
+	assert.match(markdown(r), /^\| instances \| 2 \| 1 \| 50\.0% \| 0 \| 0 \| 1 \| 0 \| 0 \|$/m);
+
+	// Checked against Wowhead Forever and the client: what Forever lacks is the internal build's error, not a gap.
+	const verify = { wowhead: { npc: { 62: { classification: 'normal', drops: [], spawns: {} } }, object: {}, item: { 3: { rep: [], pvpRank: null } } }, clientInstances: new Set() };
+	const v = compareCodex(ours, theirs, verify);
+	assert.deepEqual(v.kinds.instances.internalOnly, { confirmed: 0, notInForever: 1, unverified: 0 });
+	assert.deepEqual(v.kinds.rares.internalOnly, { confirmed: 0, notInForever: 1, unverified: 0 });
+	assert.deepEqual(v.kinds['items: rep'].internalOnly, { confirmed: 0, notInForever: 1, unverified: 0 });
+	assert.deepEqual(v.needsRecording, [], 'nothing to record for what Forever does not have');
 });

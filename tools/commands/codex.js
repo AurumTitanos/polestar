@@ -1,11 +1,12 @@
 'use strict';
-// node tools/polestar.js codex build|parity [options]
+// node tools/polestar.js codex build|parity|wowhead [options]
 
 const path = require('node:path');
 const { parseArgs } = require('node:util');
 
 const usage = `usage: node tools/polestar.js codex build [options]
        node tools/polestar.js codex parity [--ours <dir>] [--against <dir>]
+       node tools/polestar.js codex wowhead [--delay <ms>] [--limit <n>]
 
 Builds Lookup's Codex: every item, mount, pet, recipe, NPC, rare, quest,
 zone, dungeon and treasure, with where each item comes from, and the
@@ -33,8 +34,16 @@ data/local/codex-parity.json and .md and records the match per kind in its
 meta (\`parity\`). \`codex parity\` reruns that comparison on two built
 folders (default ours data/forever/codex, against data/local/codex-extras).
 
+\`codex wowhead\` fetches from Wowhead's Forever database the pages of what
+data/local/codex-parity.json lists as missing or different, and of our
+instances' bosses (NPC and object pages, item tooltips), one request at a
+time, and caches their facts under data/sources/wowhead/codex/ (a release
+\`codex build\` reads that cache; tools/lib/codex/wowhead.js).
+
   --ours <dir>       parity: the release build (default data/forever/codex)
-  --against <dir>    parity: the internal build (default data/local/codex-extras)`;
+  --against <dir>    parity: the internal build (default data/local/codex-extras)
+  --delay <ms>       wowhead: pause between requests (default 1500)
+  --limit <n>        wowhead: fetch at most n pages this run`;
 
 function fail(msg) {
 	console.error(`${msg}\n\n${usage}`);
@@ -110,15 +119,49 @@ async function runParity(rest) {
 	const against = path.resolve(values.against || path.join(ROOT, 'data', 'local', 'codex-extras'));
 	const fs = require('node:fs');
 	for (const d of [ours, against]) if (!fs.existsSync(path.join(d, 'meta.json'))) return fail(`no Codex build in ${d}`);
-	const { report, files } = writeParity(readCodex(ours), readCodex(against), path.join(ROOT, 'data', 'local'));
+	const { SOURCES } = require('../lib/paths');
+	const { loadWowhead } = require('../lib/codex/wowhead');
+	const { parseCsv } = require('../lib/data/csv');
+	const { BUILD } = require('../lib/codex/build');
+	const mapCsv = path.join(SOURCES, 'wago', BUILD, 'Map.csv');
+	const norm = (x) => String(x || '').toLowerCase().replace(/^the\s+/, '').replace(/[^a-z0-9]/g, '');
+	const clientInstances = new Set(fs.existsSync(mapCsv) ? parseCsv(fs.readFileSync(mapCsv, 'utf8')).filter((r) => r.InstanceType === '1' || r.InstanceType === '2').map((r) => norm(r.MapName_lang)) : []);
+	const oursCodex = { ...readCodex(ours), evidence: null };
+	const { report, files } = writeParity(oursCodex, readCodex(against), path.join(ROOT, 'data', 'local'), { wowhead: loadWowhead(SOURCES), clientInstances });
 	printParity(report, files);
 	return 0;
+}
+
+async function runWowhead(rest) {
+	let values;
+	try {
+		({ values } = parseArgs({ args: rest, options: { delay: { type: 'string' }, limit: { type: 'string' } }, strict: true }));
+	} catch (err) {
+		return fail(err.message);
+	}
+	const fs = require('node:fs');
+	const { ROOT, SOURCES } = require('../lib/paths');
+	const { fetchEntities, wowheadWants } = require('../lib/codex/wowhead');
+	const read = (f) => (fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : null);
+	const report = read(path.join(ROOT, 'data', 'local', 'codex-parity.json'));
+	if (!report) return fail('no data/local/codex-parity.json: run `codex build --local-extras`, then `codex build`');
+	const want = wowheadWants(report, read(path.join(ROOT, 'data', 'forever', 'codex', 'instances.json')) || {});
+	let left = values.limit ? Number(values.limit) : Infinity;
+	for (const t of Object.keys(want)) {
+		want[t] = want[t].slice(0, Math.max(0, left));
+		left -= want[t].length;
+	}
+	const res = await fetchEntities({ sourcesDir: SOURCES, want, delayMs: values.delay ? Number(values.delay) : undefined, log: (m) => console.error(m) });
+	console.log(`wowhead: ${res.fetched} fetched, ${res.cached} cached, ${res.missing} not on Wowhead, ${res.failed.length} failed`);
+	for (const f of res.failed.slice(0, 20)) console.error(`  ${f.type}=${f.id}: ${f.error}`);
+	return res.failed.length ? 1 : 0;
 }
 
 async function run(argv) {
 	const [sub, ...rest] = argv;
 	if (sub === 'build') return runBuild(rest);
 	if (sub === 'parity') return runParity(rest);
+	if (sub === 'wowhead') return runWowhead(rest);
 	return fail(sub ? `unknown subcommand "${sub}"` : 'missing subcommand');
 }
 

@@ -174,7 +174,7 @@ emit({ loaded = loaded, item = first("Linen Cloth", "item"), mount = first("Deat
 	assert.ok(out.wcQuests > 0);
 	assert.ok(out.rares >= 300, `rares: ${out.rares}`);
 	assert.deepEqual(out.thuros, [true, true]);
-	assert.equal(out.dm[0], 8);
+	assert.ok(out.dm[0] >= 8, `Deadmines bosses: ${out.dm[0]}`);
 	assert.equal(out.dm[1], 1436, 'the Deadmines entrance is in Westfall');
 	assert.ok(out.dm[2] > 0, "VanCleef's loot");
 });

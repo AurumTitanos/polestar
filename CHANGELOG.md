@@ -12,6 +12,12 @@
   tables, the quest and creature databases Polestar already uses, and our
   recordings. If it is missing or disabled, Lookup, Dungeons and Rares say
   so: reinstall Polestar or enable it in the AddOns list, then /reload.
+- The Codex knows more: the battleground war mounts and tabards show their
+  PvP rank and reputation, the Orange Murloc Egg and Green Helper Box are
+  companions, Molten Core and the other raids list their bosses' loot,
+  dungeons list their rare spawns and named fighters (the Ring of Law) after
+  their bosses, more rares are known, and a dungeon's entrance comes from a
+  guide's own marker before the spot where a ghost returns.
 - Distances can read in metres: Options, Arrow & routes, Distances.
 - The starting zones follow Forever's new quest chains: a follow-up is taken
   once the quest before it is handed in, where the guides offered several
@@ -50,6 +56,13 @@
 - A release `codex build` measures itself against the last `--local-extras`
   build, entity by entity (`data/local/codex-parity.md`, `codex parity`), and
   lists what only play can fill with the Recorder event that fills it.
+- `codex wowhead` fetches, one page at a time, Wowhead Forever's facts for
+  what the parity report lists as missing (NPC level, rank, positions and
+  drops with counts; object contents; item tooltip requirements) into
+  `data/sources/wowhead/codex/`, which a release `codex build` reads. The
+  parity report now checks every internal-only fact against Forever (the
+  client, Wowhead) and says whether it is a gap of ours, not in Forever, or
+  unverified.
 - `data build` keeps the droppers of pfQuest's reference loot tables (raid
   and boss loot) at an unknown rate instead of dropping them: Molten Core's
   tier pieces now name their bosses.

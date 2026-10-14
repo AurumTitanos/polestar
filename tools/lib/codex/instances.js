@@ -35,12 +35,16 @@
 //   levels       entry: MapDifficulty's "at least level N" message; min:
 //                ContentTuning MinLevelSquish of the map's LFGDungeons entries
 //                (or MapDifficulty's); max: the highest boss level, at most 60.
-//   entrance     a recorded entrance (Recorder `enter`), else the map's Corpse
-//                point (where a ghost comes back) on the zone holding it,
-//                else a guide's `goto x,y "<instance name> ..."` line.
+//   entrance     a recorded entrance (Recorder `enter`), else a guide's
+//                `goto x,y "<instance name> ..."` line, else the map's Corpse
+//                point (where a ghost comes back, near but not at the portal)
+//                on the zone holding it.
 //                AreaTrigger rows name no instance, and the trigger nearest
 //                the Corpse point is as often a city or inn trigger, so they
 //                are not used.
+//   more bosses  after the encounters, by level: NPCs placed inside that the
+//                data or Wowhead ranks rare or boss, or that alone drop an
+//                item of quality 2 or better at 5% or more.
 //   loot         a boss's items: its items.json drops at MIN_LOOT% or more, or
 //                at an unknown rate (pfQuest reference loot tables, QuestieDB
 //                droppers), best chance first.
@@ -49,7 +53,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { instanceMapsOf, zonePoint } = require('./journal');
 
-const MIN_LOOT = 1; // % below which an item is a world drop, not the boss's loot
+const JUNK_NPC = /^(?:\[|zz|Test |Monster - )|\(DND\)|\bDND\b|Trigger|Bunny|Invisible/i;
+const MIN_LOOT = 1;
+const OWN_LOOT = 5; // % at which an item one NPC alone drops makes it a boss // % below which an item is a world drop, not the boss's loot
 const BOSS_LOOT_CAP = 30;
 // Maps of the original game; the Era client also carries Season of Discovery's
 // (2700+), which Forever lists in no dungeon finder.
@@ -202,6 +208,18 @@ function buildInstances(facts, ctx = {}) {
 		}
 	}
 
+	// Wowhead's drops of an NPC (release build): loot our tables lack.
+	for (const [npc, w] of Object.entries((ctx.wowhead && ctx.wowhead.npc) || {})) {
+		for (const d of w.drops || []) {
+			const c = Math.round((d.count / d.outof) * 10000) / 100;
+			if (c >= MIN_LOOT) (lootOf[npc] = lootOf[npc] || []).push([d.item, c]);
+		}
+	}
+	// item -> npcs dropping it (any rate): an item one NPC alone drops is its own loot.
+	const droppers = {};
+	for (const [id, it] of Object.entries(itemsIn)) for (const npc of Object.keys((it.drops && it.drops.npc) || {})) (droppers[id] = droppers[id] || new Set()).add(Number(npc));
+	for (const [npc, w] of Object.entries((ctx.wowhead && ctx.wowhead.npc) || {})) for (const d of w.drops || []) if (!d.common) (droppers[d.item] = droppers[d.item] || new Set()).add(Number(npc));
+	const quality = ctx.quality || (() => null);
 	const instances = {};
 	const bossInstance = {};
 	const npcInstance = {};
@@ -252,10 +270,35 @@ function buildInstances(facts, ctx = {}) {
 			bosses.push({ name: e.name, npc: npcs[0] ?? null, npcs, items, encounter: e.id });
 			for (const id of npcs) bossInstance[id] = bossInstance[id] || key;
 		}
+		// Further bosses, after the encounters: NPCs placed inside (npcs.json
+		// `instances`) that the data or Wowhead ranks rare or boss, or that alone
+		// drop an item of quality 2 or better at OWN_LOOT% or more (the Ring of
+		// Law's fighters, rare spawns), by level.
+		const taken = new Set(bosses.flatMap((b) => b.npcs));
+		const extra = [];
+		for (const [id, n] of Object.entries(npcsIn)) {
+			const nid = Number(id);
+			if (taken.has(nid) || !(n.instances || []).map(Number).includes(m.id) || !n.name || JUNK_NPC.test(n.name)) continue;
+			const w = ctx.wowhead && ctx.wowhead.npc[id];
+			const ranked = [2, 3, 4].includes(num(n.rank)) || (w && ['boss', 'rare', 'rareelite'].includes(w.classification));
+			// Its own loot: an item of quality 2+ that it alone drops, at 5% or more
+			// (a dungeon's trash drops its shared blues far more rarely).
+			const own = (lootOf[id] || []).some(([item, c]) => c !== null && c >= OWN_LOOT && (quality(item) ?? 0) >= 2 && droppers[item] && droppers[item].size === 1);
+			if (ranked || own) extra.push(nid);
+		}
+		extra.sort((a, b) => num(npcsIn[a].level) - num(npcsIn[b].level) || a - b);
+		for (const id of extra) {
+			const loot = new Map();
+			for (const [item, c] of lootOf[id] || []) if (!loot.has(item) || (c !== null && !(loot.get(item) >= c))) loot.set(item, c);
+			const items = [...loot.entries()].sort((a, b) => (b[1] ?? -1) - (a[1] ?? -1) || a[0] - b[0]).slice(0, BOSS_LOOT_CAP).map(([i]) => i);
+			bosses.push({ name: npcsIn[id].name, npc: id, npcs: [id], items });
+			bossInstance[id] = bossInstance[id] || key;
+		}
 		// Levels.
 		const bossLevels = bosses.flatMap((b) => b.npcs.map((id) => num(npcsIn[id].levelMax) || num(npcsIn[id].level))).filter((l) => l > 0);
 		const entry = (facts.entry && facts.entry[m.id]) || null;
-		const min = level || null;
+		// The finder's minimum, never below the level the game lets you in at.
+		const min = level && entry ? Math.max(level, entry) : level || null;
 		let max = bossLevels.length ? Math.min(MAX_LEVEL, Math.max(...bossLevels)) : null;
 		if (max !== null && min !== null && max < min) max = min;
 		const levels = min || entry || max ? [entry, min ?? max, max ?? min] : null;
@@ -263,10 +306,6 @@ function buildInstances(facts, ctx = {}) {
 		let entrance = null;
 		const recE = (rec.entrances || []).slice().sort((a, b) => num(b.n) - num(a.n))[0];
 		if (recE && recE.map) entrance = { map: Number(recE.map), x: round1(recE.x), y: round1(recE.y), f: recE.f === 'e' ? 'e' : null };
-		if (!entrance && m.corpse) {
-			const prefer = Object.values(zonesIn).filter((z) => z.areaId && m.zones.includes(z.areaId)).map((z) => z.id);
-			entrance = zonePoint(ctx.frames || {}, m.corpse.c, m.corpse.x, m.corpse.y, prefer);
-		}
 		if (!entrance) {
 			const n = norm(m.name);
 			const zoneId = (name) => {
@@ -275,6 +314,10 @@ function buildInstances(facts, ctx = {}) {
 			};
 			const c = (ctx.curated || []).find((g) => n.length >= 5 && norm(g.label).includes(n) && (g.map || (g.zone && zoneId(g.zone))));
 			if (c) entrance = { map: c.map || zoneId(c.zone), x: round1(c.x), y: round1(c.y), f: null };
+		}
+		if (!entrance && m.corpse) {
+			const prefer = Object.values(zonesIn).filter((z) => z.areaId && m.zones.includes(z.areaId)).map((z) => z.id);
+			entrance = zonePoint(ctx.frames || {}, m.corpse.c, m.corpse.x, m.corpse.y, prefer);
 		}
 		instances[key] = {
 			key,

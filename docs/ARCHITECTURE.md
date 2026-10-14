@@ -1862,15 +1862,28 @@ built.
   whose name starts with it or is within two letters of it; "A and B"
   encounters name both). A boss's loot is its `items.json` drops at 1% or
   more, best chance first. The entrance: a recorded one (Recorder `enter`,
-  `data/forever/instances.json`), else the `Map` Corpse point (where a ghost
-  comes back) on the zone holding it, else a guide's `goto x,y "<instance
-  name> ..."`. `AreaTrigger` rows name no instance and the trigger nearest a
+  `data/forever/instances.json`), else a guide's `goto x,y "<instance
+  name> ..."`, else the `Map` Corpse point (where a ghost comes back: near
+  the portal, not at it) on the zone holding it. `AreaTrigger` rows name no instance and the trigger nearest a
   Corpse point is as often an inn or city trigger, so they are not used. Every
   NPC placed in an instance (`npcs.json` `instances`, from QuestieDB and
   recordings) belongs to it: its drops carry the instance. An instance's
   boss or mob the data ranks rare is not a rare unless RareScanner lists it.
   `--local-extras` takes the instances from AtlasLoot and `dungeons.json`
   instead.
+- Wowhead Forever per entity (`tools/lib/codex/wowhead.js`, release build
+  only, lowest precedence): `codex wowhead` fetches the NPC and object pages
+  and item tooltips of what `data/local/codex-parity.json` lists as missing
+  or different, and of our instances' bosses, one request at a time (1.5 s
+  apart, a growing pause on 403/429), and caches each entity's facts under
+  `data/sources/wowhead/codex/<npc|object|item>/<id>.json` for 14 days;
+  `codex build` only reads the cache. From them: an NPC's level, rare rank and
+  spawns where ours lack them (and the rares only Wowhead places), drops and
+  object contents with chance = looted count / looted kills, and the
+  reputation ("Requires <Faction> - <Standing>") and PvP rank ("(Rank N)") an
+  item's Forever tooltip asks for. An instance also lists, after its
+  encounters and by level, the NPCs placed inside that the data or Wowhead
+  ranks rare or boss, or that alone drop an item of quality 2 or better at 5% or more.
 - Rares and treasures: NPCs ranked rare (4) or rare elite (2) in `npcs.json`
   (pfQuest, QuestieDB, recordings), with their spawns and every drop the
   Codex knows; treasures are objects with the `chest` role, with their loot.

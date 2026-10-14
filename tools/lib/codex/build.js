@@ -32,6 +32,7 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const { emitPack, packOrder, ADDON, SCHEMA } = require('./pack');
 const { instanceFacts, buildInstances, curatedEntrances } = require('./instances');
+const { loadWowhead, chanceOf } = require('./wowhead');
 const { blockingPrereqs } = require('../data/prereqs');
 
 const { ROOT, DATA, SOURCES } = require('../paths');
@@ -188,8 +189,13 @@ function clientFacts(tables, build = BUILD) {
 	const spellNames = {};
 	for (const r of tables.SpellName || []) spellNames[int(r.ID)] = r.Name_lang;
 	const mountAura = new Set();
+	const teaches = {}; // spell -> the spell it teaches (Effect 36, learn spell)
+	const petCreatures = new Set((tables.BattlePetSpecies || []).map((r) => int(r.CreatureID)).filter(Boolean));
+	const summonsPet = new Set(); // spells that summon a companion creature (Effect 28)
 	for (const r of tables.SpellEffect || []) {
+		if (int(r.Effect) === 28 && petCreatures.has(int(r.EffectMiscValue_0))) summonsPet.add(int(r.SpellID));
 		if (int(r.Effect) === EFFECT_AURA && int(r.EffectAura) === AURA_MOUNTED) mountAura.add(int(r.SpellID));
+		if (int(r.Effect) === 36 && int(r.EffectTriggerSpell) && !teaches[int(r.SpellID)]) teaches[int(r.SpellID)] = int(r.EffectTriggerSpell);
 	}
 	const skillLines = {};
 	for (const r of tables.SkillLine || []) skillLines[int(r.ID)] = r.DisplayName_lang;
@@ -213,8 +219,8 @@ function clientFacts(tables, build = BUILD) {
 	const mountSpells = new Set((tables.Mount || []).map((r) => int(r.SourceSpellID)).filter(Boolean));
 	// Mount.Flags 0x40: hidden from the mount journal until known (retired mounts).
 	const mountHidden = new Set((tables.Mount || []).filter((r) => (int(r.Flags) || 0) & 0x40).map((r) => int(r.SourceSpellID)).filter(Boolean));
-	const petSpells = new Set((tables.BattlePetSpecies || []).map((r) => int(r.SummonSpellID)).filter(Boolean));
-	return { build, items, spellNames, mountAura, mountSpells, mountHidden, petSpells, skillLines, skillAbility, mountSkill: [...new Set(mountSkill)].sort(byId), companionSkill: [...new Set(companionSkill)].sort(byId), spellClass };
+	const petSpells = new Set([...(tables.BattlePetSpecies || []).map((r) => int(r.SummonSpellID)).filter(Boolean), ...summonsPet]);
+	return { build, items, spellNames, mountAura, teaches, mountSpells, mountHidden, petSpells, skillLines, skillAbility, mountSkill: [...new Set(mountSkill)].sort(byId), companionSkill: [...new Set(companionSkill)].sort(byId), spellClass };
 }
 
 // ---------------------------------------------------------------------------
@@ -391,7 +397,34 @@ function mergeCodex(inputs) {
 			roles: [],
 			spawns: spawnsOf(n.spawns, zonesIn),
 		};
-		npcRoles[id] = new Set((n.roles || []).filter((r) => r !== 'rare'));
+		npcRoles[id] = new Set(n.roles || []);
+	}
+	// Wowhead Forever per-entity facts (tools/lib/codex/wowhead.js), release
+	// build only: a level, rare rank or spawns our data lacks, and the rares
+	// only Wowhead knows (with a name and a place).
+	const wh = (!al && inputs.wowhead) || null;
+	if (wh) {
+		for (const [id, w] of Object.entries(wh.npc)) {
+			const rareW = w.classification === 'rare' || w.classification === 'rareelite';
+			const live = Object.fromEntries(Object.entries(w.spawns || {}).map(([m, pts]) => [m, { f: null, pts }]));
+			const spawns = spawnsOf(live, zonesIn);
+			let rec = npcs[id];
+			if (!rec) {
+				if (!rareW || !w.name || JUNK.test(w.name) || !spawns.length) continue;
+				rec = npcs[id] = { id: Number(id), name: w.name, level: null, levelMax: null, faction: null, rare: true, elite: w.classification === 'rareelite', boss: false, instance: null, roles: [], spawns };
+				npcRoles[id] = new Set(['rare']);
+			}
+			if (rec.level == null && w.level) {
+				rec.level = w.level[0];
+				rec.levelMax = w.level[1] !== w.level[0] ? w.level[1] : null;
+			}
+			if (rareW && !rec.rare) {
+				rec.rare = true;
+				if (w.classification === 'rareelite') rec.elite = true;
+				npcRoles[id].add('rare');
+			}
+			if (!rec.spawns.length && spawns.length) rec.spawns = spawns;
+		}
 	}
 	const addRole = (id, role) => {
 		if (!npcs[id]) return;
@@ -532,6 +565,8 @@ function mergeCodex(inputs) {
 			frames: (fv.mapFrames && fv.mapFrames.forever) || {},
 			recorded: fv.instances || {},
 			curated: inputs.entrances || [],
+			quality: (id) => (cl.items[id] ? cl.items[id].quality : null),
+			wowhead: wh,
 		});
 		Object.assign(instances, built.instances);
 		Object.assign(bossInstance, built.bossInstance);
@@ -554,7 +589,10 @@ function mergeCodex(inputs) {
 	// an instance's boss or mob that the data ranks rare elite (Edwin VanCleef)
 	// is not one, unless RareScanner lists it.
 	for (const [npc, key] of Object.entries(npcInstance)) {
-		if (npcs[npc] && npcs[npc].rare && key && !rareLoot[npc] && !npcs[npc].spawns.length) npcs[npc].rare = false;
+		if (npcs[npc] && npcs[npc].rare && key && !rareLoot[npc] && !npcs[npc].spawns.length) {
+			npcs[npc].rare = false;
+			if (npcRoles[npc]) npcRoles[npc].delete('rare');
+		}
 	}
 	for (const [id, set] of Object.entries(npcRoles)) if (npcs[id]) npcs[id].roles = [...set].sort();
 
@@ -578,6 +616,13 @@ function mergeCodex(inputs) {
 			if (npcs[npc] && npcs[npc].spawns.length) add(id, { type: 'vendor', npc: Number(npc), cost: (cl && cl.items[id] && cl.items[id].buyPrice) || null, from });
 		}
 		for (const c of it.containers || []) add(id, { type: 'container', item: Number(c), from });
+	}
+	if (wh) {
+		for (const [npc, w] of Object.entries(wh.npc)) {
+			if (!npcs[npc]) continue;
+			for (const d of w.drops) add(d.item, { type: 'drop', npc: Number(npc), chance: chanceOf(d), instance: npcInstance[npc] || null, from: ['wowhead'] });
+		}
+		for (const [obj, w] of Object.entries(wh.object)) for (const d of w.drops) add(d.item, { type: 'object', object: Number(obj), chance: chanceOf(d), from: ['wowhead'] });
 	}
 	// Professions: craft sources, recipe items.
 	const recipeSpell = {}; // recipe item -> craft spell
@@ -711,7 +756,9 @@ function mergeCodex(inputs) {
 		const petSpells = cl.petSpells || new Set();
 		for (const [id, it] of Object.entries(cl.items)) {
 			const learn = it.learn;
-			const spell = learn || it.use;
+			// The item's spell, or the spell it teaches (Orange Murloc Egg's use spell teaches the summon).
+			const spells = [learn, it.use].filter(Boolean).flatMap((x) => [x, (cl.teaches || {})[x]]).filter(Boolean);
+			const spell = spells.find((x) => mountSpells.has(x) || petSpells.has(x)) || learn || it.use;
 			if ((it.classId === 15 && it.subclassId === 5) || (learn && cl.mountAura.has(learn)) || (spell && mountSpells.has(spell))) {
 				mountItems.add(Number(id));
 				if (!names[id] && !it.era) names[id] = it.name;
@@ -751,6 +798,9 @@ function mergeCodex(inputs) {
 		return [n.level, n.levelMax || n.level];
 	};
 	const items = {};
+	const factionByName = {};
+	for (const f of Object.values(factions)) factionByName[normName(f.name)] = f.id;
+	const evidence = { noRep: [], noPvp: [] }; // items Wowhead's Forever tooltip shows without a reputation / PvP rank
 	const allIds = new Set([...Object.keys(names), ...Object.keys(cands)].map(Number));
 	for (const id of [...allIds].sort(byId)) {
 		const c = cl && cl.items[id];
@@ -760,6 +810,18 @@ function mergeCodex(inputs) {
 		if (c && c.minFaction) {
 			const vendor = list.find((s) => s.type === 'vendor');
 			list.push({ type: 'rep', faction: c.minFaction, standing: c.minStanding, npc: vendor ? vendor.npc : null, from: ['client'] });
+		}
+		// Wowhead Forever's tooltip: the reputation and PvP rank the item asks for.
+		const tip = wh && wh.item[id];
+		if (tip) {
+			const vendor = list.find((s) => s.type === 'vendor');
+			for (const r of tip.rep || []) {
+				const faction = factionByName[normName(r.faction)];
+				if (faction) list.push({ type: 'rep', faction, standing: r.standing, npc: vendor ? vendor.npc : null, from: ['wowhead'] });
+			}
+			if (tip.pvpRank) list.push({ type: 'pvp', rank: tip.pvpRank, npc: vendor ? vendor.npc : null, from: ['wowhead'] });
+			if (!(tip.rep || []).length) evidence.noRep.push(id);
+			if (!tip.pvpRank) evidence.noPvp.push(id);
 		}
 		if (c && c.pvpRank) {
 			const vendor = list.find((s) => s.type === 'vendor');
@@ -967,7 +1029,7 @@ function mergeCodex(inputs) {
 	for (const o of Object.values(objects)) for (const s of o.spawns) want(s.map, s.f);
 	for (const i of Object.values(instances)) if (i.entrance) want(i.entrance.map, i.entrance.f);
 
-	return { items, npcs, objects, quests, instances, zones, factions, spells, frames, warnings };
+	return { items, npcs, objects, quests, instances, zones, factions, spells, frames, evidence, warnings };
 }
 
 // counts / coverage for meta.json
@@ -1097,6 +1159,8 @@ async function loadInputs({ addons, offline = false, dataDir, sourcesDir, build 
 		instances: j('instances.json', true) || {},
 		dungeons: localExtras ? j('dungeons.json', true) : null,
 	};
+	// Wowhead Forever per-entity facts (`codex wowhead`), release builds only.
+	const wowhead = localExtras ? null : loadWowhead(sourcesDir);
 	const warnings = [];
 	const { resolveAddonsDir } = require('../addons');
 	const dir = resolveAddonsDir(addons);
@@ -1142,7 +1206,7 @@ async function loadInputs({ addons, offline = false, dataDir, sourcesDir, build 
 		warnings.push(`Era client tables ${ERA_BUILD}: ${err.message}`);
 	}
 	client.instances = instanceFacts(loaded.tables, eraMaps);
-	return { forever, atlasloot, rarescanner, flbis, client, curated: curatedCollects(guidesDir), entrances: curatedEntrances(guidesDir), localExtras: !!localExtras, warnings };
+	return { forever, atlasloot, rarescanner, flbis, client, wowhead, curated: curatedCollects(guidesDir), entrances: curatedEntrances(guidesDir), localExtras: !!localExtras, warnings };
 }
 
 // Item ids that Polestar's own guides obtain (`collects` headers under guides/).
@@ -1175,6 +1239,11 @@ function sourcesMeta(inputs) {
 	for (const [x, name, licence] of imp) if (x) out.push({ name, version: (x.meta && x.meta.version) || null, licence: (x.meta && x.meta.licence) || licence });
 	const d = inputs.forever.dungeons;
 	if (d && d.source) out.push({ name: `dungeons.json (${d.source.name || 'DungeonJournal'})`, version: d.source.version || null, licence: 'All Rights Reserved' });
+	const wh = inputs.wowhead;
+	if (wh) {
+		const n = Object.keys(wh.npc).length + Object.keys(wh.object).length + Object.keys(wh.item).length;
+		if (n) out.push({ name: 'Wowhead Forever database (wowhead.com/forever): NPC and object pages, item tooltips', version: `${n} entities; cache data/sources/wowhead/codex`, licence: 'Public web pages; facts only (levels, classification, positions, drop counts, requirements)' });
+	}
 	if (inputs.client) out.push({ name: 'World of Warcraft: Forever client tables via wago.tools', version: inputs.client.build, licence: 'Blizzard Entertainment game data, facts only' });
 	if (inputs.client && inputs.client.eraBuild) out.push({ name: 'World of Warcraft Classic Era client item tables via wago.tools (items missing from the Forever tables)', version: inputs.client.eraBuild, licence: 'Blizzard Entertainment game data, facts only' });
 	return out;
@@ -1189,7 +1258,7 @@ async function buildCodex(opts = {}) {
 	const inputs = opts.inputs || (await loadInputs(opts));
 	log('merging');
 	const merged = mergeCodex(inputs);
-	const { warnings: mergeWarnings, frames, ...codex } = merged;
+	const { warnings: mergeWarnings, frames, evidence, ...codex } = merged;
 	const { counts, coverage } = summarize(codex);
 	const meta = {
 		schema: SCHEMA,
@@ -1215,7 +1284,7 @@ async function buildCodex(opts = {}) {
 	let parity = null;
 	if (!meta.localExtras && against && fs.existsSync(path.join(against, 'meta.json'))) {
 		const { readCodex, summary } = require('./parity');
-		parity = writeParity({ ...codex, journal }, readCodex(against), opts.parityOut || path.join(ROOT, 'data', 'local'));
+		parity = writeParity({ ...codex, journal, evidence }, readCodex(against), opts.parityOut || path.join(ROOT, 'data', 'local'), verifyOf(inputs));
 		meta.parity = summary(parity.report);
 	}
 	const files = emitPack({ ...codex, meta, frames }, { version, build: meta.build, extraFiles });
@@ -1239,10 +1308,20 @@ async function buildCodex(opts = {}) {
 	return { codex: out, files, outDir, packDir, bytes, memory, parity, warnings: [...(inputs.warnings || []), ...mergeWarnings], ms: Date.now() - t0 };
 }
 
+// What checks an internal-only fact (tools/lib/codex/parity.js): Wowhead's
+// cached pages and the Forever client's instance maps.
+function verifyOf(inputs) {
+	const norm = (x) => String(x || '').toLowerCase().replace(/^the\s+/, '').replace(/[^a-z0-9]/g, '');
+	return {
+		wowhead: inputs.wowhead || { npc: {}, object: {}, item: {} },
+		clientInstances: new Set(((inputs.client && inputs.client.instanceMaps) || []).map((m) => norm(m.name))),
+	};
+}
+
 // ours, theirs: Codex objects -> { report, files } with codex-parity.json and .md written to dir.
-function writeParity(ours, theirs, dir) {
+function writeParity(ours, theirs, dir, verify = null) {
 	const { compareCodex, markdown } = require('./parity');
-	const report = compareCodex(ours, theirs);
+	const report = compareCodex(ours, theirs, verify);
 	const files = [path.join(dir, 'codex-parity.json'), path.join(dir, 'codex-parity.md')];
 	writeAtomic(files[0], `${JSON.stringify(report, null, '\t')}\n`);
 	writeAtomic(files[1], markdown(report));
