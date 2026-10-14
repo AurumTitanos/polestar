@@ -70,7 +70,7 @@ function publicUrl(origin) {
 		return null;
 	}
 	if (u.protocol === 'ssh:' || u.protocol === 'git+ssh:') u = new URL(`https://${u.hostname}${u.pathname}`);
-	else if (u.protocol === 'http:') u = new URL(`https://${u.hostname}${u.pathname}`);
+	else if (u.protocol === 'http:') u = new URL(`https://${u.host}${u.pathname}`);
 	if (u.protocol !== 'https:') return null;
 	u.username = '';
 	u.password = '';

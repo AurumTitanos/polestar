@@ -9,6 +9,8 @@
   be that class: an `only Druid` step in a Horde guide is played as a Tauren.
 - `play` and `dev --play` stop the Lua session and exit when it cannot start,
   instead of waiting on it; the page redraws on its own after a rebuild.
+- `new` keeps the port of an http origin (`http://host:3000/...`) in the
+  pack's workflow and dev container.
 
 ### For contributors
 

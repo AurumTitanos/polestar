@@ -166,6 +166,8 @@ test('origin URLs: SSH and http become https; credentials, query and fragment ar
 		['ssh://git@github.com/example/polestar.git', 'https://github.com/example/polestar.git'],
 		['https://someone:s3cret@github.com/example/polestar.git', 'https://github.com/example/polestar.git'],
 		['http://github.com/example/polestar.git', 'https://github.com/example/polestar.git'],
+		['http://git.example.com:3000/o/r.git', 'https://git.example.com:3000/o/r.git'],
+		['ssh://git@git.example.com:2222/o/r.git', 'https://git.example.com/o/r.git'],
 		['https://github.com/example/polestar.git?ref=x;rm%20-rf#frag', 'https://github.com/example/polestar.git'],
 	]) {
 		const dir = path.join(tmp(), 'p');
