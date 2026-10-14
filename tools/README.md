@@ -86,7 +86,7 @@ The release steps are in [docs/RELEASING.md](../docs/RELEASING.md).
 | `media/` | Texture generators run by `media`: `nav.js`, `qol.js`, `ui.js`; the wordmark fonts in `media/fonts` |
 | `preview/` | `preview`'s renderer: a geometry-recording client stub (`stub.lua`), font outlines, SVG drawing, and a zlib encoder of its own for the textures (`deflate.js`), so the renders are byte-identical on any Node |
 | `play/` | The playground: server, Lua session, driver and the page in `play/public` |
-| `readme/` | The README's art, drawn by `readme`: `brand.js` (banners, emblem, logo, download button, CurseForge avatar), `charts.js` (route charts) and `png.js` (the listing's PNG copies, through `rsvg-convert`) |
+| `readme/` | The README's art, drawn by `readme`: `brand.js` (banners, emblem, logo, download button, CurseForge avatar) with the wordmark outlines of `outline.js`, `charts.js` (route charts) and `png.js` (the listing's PNG copies, through `rsvg-convert`) |
 | `templates/pack/` | What `new` copies into a new guide pack |
 
 ### tools/lib
@@ -151,7 +151,7 @@ file's language written by `header()` in `lib/generated.js`:
 | `guides/forever/exploration/*.guide` (7) | `exploration build` | client map tables, `data/forever` zones, map-frames, travel | yes | `exploration check`; `tests/exploration.test.js` |
 | `guides/forever/professions/` mining, herbalism, skinning, cooking, first-aid, fishing | `profession gathering build` | `data/forever` professions, items, npcs, objects | yes | `profession gathering check`; `tests/profession-gathering.test.js` |
 | `guides/forever/professions/` alchemy, blacksmithing, enchanting, engineering, leatherworking, tailoring | `profession draft <Profession> --out` | `data/forever` including professions | yes | rerun |
-| `addon/Polestar_Guides/` | `compile` | `guides/**/*.guide`, `guides/pack.json`, `data/forever` (including trainers, travel, professions, dungeons) | yes | rerun; `tests/guides-parse.test.js` fails when a guide is added, renamed or removed without `compile` |
+| `addon/Polestar_Guides/` | `compile` | `guides/**/*.guide`, `guides/pack.json`, `data/forever` (including trainers, travel, professions, factions, races; never `dungeons.json`) | yes | rerun; `tests/guides-parse.test.js` fails when a guide is added, renamed or removed without `compile` |
 | `addon/Polestar/Media/Nav/*.tga`, `addon/Polestar/Media/UI/*.tga` | `media` | `tools/media/*.js`, `tools/lib/tga.js`, `tools/media/fonts` (no data) | yes | rerun: the output is byte-identical, and CI fails when it differs from the committed files; `tests/media-refs.test.js` checks the addon names every texture |
 | `docs/preview/*.svg` | `preview` | the addon's Lua (Core, Theme, Nav, Quests, Gear, Maps, QoL, Lookup, Dungeons, Rares, UI), its generated files included; `tests/lua` (the client stubs, `stub_ui.lua`'s sample guides), `tests/fixtures`, among them six compiled Horde guides frozen in `tests/fixtures/preview/guides.lua`; no reference data and not the shipped `addon/Polestar_Guides`, so a guide recompile never changes the renders. `POLESTAR_CLIENT_ART` (with `POLESTAR_DUNGEONS_PACK`) renders local art and data into its own folder, never here | yes | rerun: the output is byte-identical, and CI fails when it differs from the committed files or a render is missing; a full run removes the renders of scenes that are gone |
 | `docs/assets/{banner-dark,banner-light,emblem,logo,download,avatar}.svg` | `readme brand` | the emblem geometry, the wordmark fonts | yes | rerun |
