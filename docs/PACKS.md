@@ -1,10 +1,16 @@
 # Writing guide packs
 
-A guide pack is an addon of your own guides for Polestar. Players install it
-like any addon; its guides then appear in Polestar's guide menu beside ours,
-under "Guide packs", with your name on them. You write guides as plain text
-(`.guide` files, [GUIDE_FORMAT.md](GUIDE_FORMAT.md)), and Polestar's tools
-check them, play them to the end without the game, and build the addon.
+A guide pack is your own guides for Polestar, published as your own addon.
+Players install it next to Polestar; its guides then appear in Polestar's
+guide menu under "Guide packs", with your name on them. You write guides as
+plain text (`.guide` files, [GUIDE_FORMAT.md](GUIDE_FORMAT.md)), and
+Polestar's tools check them, play them to the end without the game, and
+build the addon.
+
+Players: [GUIDE_PACKS.md](GUIDE_PACKS.md) explains what a pack is, how to
+install one and who supports it. Authors: start there too for the short
+version (the steps, what the tools require, what we ask of you); this page
+is the full handbook.
 
 This handbook covers setting up, a first pack, the ways to write guides,
 testing, publishing and updating, and every problem the tools or the game can

@@ -23,6 +23,9 @@
   guides there. The other faction's button and All still list every guide.
 - Guide packs page: the problem report box grows to fit long problem
   messages.
+- Options > Guide packs says plainly what a guide pack is: someone else's
+  guides in a separate addon, supported by its author. Its link opens
+  docs/GUIDE_PACKS.md, a new page on packs for players and for authors.
 - Search ranks an item first as covered by a guide only when a guide Lookup
   would open for it collects it: one of Polestar's own, or one from the pack
   chosen under Suggest guides from.
@@ -42,6 +45,13 @@
 
 ### For guide authors
 
+- A pack reads as a pack in the game's AddOns list: its TOC title is
+  "Polestar Pack: <title>", it sits under Polestar's entry next to
+  Polestar's own addons, and without `notes` in `pack.json` its line is
+  "Guide pack for Polestar by <author>". Polestar's menus show the title
+  as written.
+- docs/GUIDE_PACKS.md: what a pack is, the steps from `new` to publishing,
+  what the tools require and what we ask of authors.
 - `playtest` plays a step for a class none of the guide's races can be, and a
   guide with a `class` header, as the first race on the guide's side that can
   be that class: an `only Druid` step in a Horde guide is played as a Tauren.

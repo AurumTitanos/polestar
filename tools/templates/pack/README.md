@@ -1,17 +1,22 @@
 # {{title}}
 
 A guide pack for Polestar, the leveling guide addon for World of Warcraft:
-Forever, by {{author}}.
+Forever, by {{author}}. It is a separate addon with {{author}}'s own guides;
+it is not made by Polestar.
 
 ## For players
 
 1. Install Polestar first.
 2. Download `{{folder}}-<version>.zip` from this project's releases and unzip
    it into the game's `Interface/AddOns/` folder, next to `Polestar`.
-3. Start the game. The pack's guides appear in Polestar's guide list; type
-   `/polestar packs` to turn the pack on or off.
+3. Restart the game. The pack's guides appear in Polestar's guide menu
+   (`/polestar guides`) under Guide packs; Options > Guide packs
+   (`/polestar packs`) turns the pack on or off.
 
 Credits: {{author}}. Licence: {{license}} (see `LICENSE`).
+
+This pack is supported by {{author}}, not by Polestar: report its problems
+here.
 
 ## For authors
 
@@ -31,4 +36,6 @@ run in it (`polestar doctor` checks all of it). From this folder:
 
 Polestar's source describes the guide format on one page in
 docs/GUIDE_CHEATSHEET.md, in full in docs/GUIDE_FORMAT.md, and packs in
-docs/PACKS.md. Start from `guides/example.guide`.
+docs/GUIDE_PACKS.md (what a pack is, what the tools require, what is asked
+of authors) and docs/PACKS.md (the full handbook). Start from
+`guides/example.guide`.

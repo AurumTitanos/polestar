@@ -44,7 +44,7 @@ Around the guides it adds a 3D waypoint arrow with a travel planner, quest marke
 
 - **Leveling, professions, reputations, exploration, Legacy challenges, mounts and pets**, each guide with its levels, steps and the guide that follows it.
 - **Professions** send you to the nearest trainer, vendor or inn of your own faction from where you stand.
-- **Guide packs** written by other players appear here too, each credited to its author.
+- **Guide packs**, other people's guides for Polestar, appear here too under their own heading, each credited to its author.
 
 ## Lookup, Dungeons and Rares
 
@@ -110,7 +110,13 @@ To update by hand, delete the old Polestar folders first, then unzip the new ver
 
 ## Guide packs
 
-Anyone can write guides for Polestar and publish them as a guide pack: an ordinary addon that depends on Polestar, made and supported by its author. A pack installs like any addon, its guides appear in the hub credited to their author, and Options > Guide packs (`/polestar packs`) switches each pack on and off. To write one, start with the [guide pack handbook](https://github.com/fitzforge/polestar/blob/main/docs/PACKS.md).
+A guide pack is someone else's guides for Polestar. It is a separate addon, made by its author, not by Polestar, and its guides are not Polestar's leveling routes.
+
+Get a pack from its author's own project page and install it like any addon. Its guides then appear in the guide menu under Guide packs, credited to the author, and Options > Guide packs (`/polestar packs`) turns each pack on or off.
+
+Each pack is supported by its author: report a pack's problems to them, not to Polestar. A pack is an addon like any other, so install packs from authors you trust.
+
+Write leveling guides of your own? Polestar's guide format, compiler, checks, playtests, arrow and markers are yours to use. Publish your guides as your own addon and they appear in Polestar's menus as a pack. [Guide packs explained](https://github.com/fitzforge/polestar/blob/main/docs/GUIDE_PACKS.md) covers both sides.
 
 ## Beta
 
@@ -126,7 +132,7 @@ A step in the wrong order, or a quest that is not where the guide says? Please t
 - **Source code:** [github.com/fitzforge/polestar](https://github.com/fitzforge/polestar)
 - **Issues:** [report a wrong step or a bug](https://github.com/fitzforge/polestar/issues)
 - **Changelog:** [CHANGELOG.md](https://github.com/fitzforge/polestar/blob/main/CHANGELOG.md)
-- **Docs:** [README](https://github.com/fitzforge/polestar/blob/main/README.md), [the documentation index](https://github.com/fitzforge/polestar/blob/main/docs/README.md), [writing a guide pack](https://github.com/fitzforge/polestar/blob/main/docs/PACKS.md)
+- **Docs:** [README](https://github.com/fitzforge/polestar/blob/main/README.md), [the documentation index](https://github.com/fitzforge/polestar/blob/main/docs/README.md), [guide packs explained](https://github.com/fitzforge/polestar/blob/main/docs/GUIDE_PACKS.md), [writing a guide pack](https://github.com/fitzforge/polestar/blob/main/docs/PACKS.md)
 
 ## Licence and credits
 

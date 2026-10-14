@@ -67,8 +67,8 @@ Good to know:
 - **Optional:** `Polestar_Recorder-<version>.zip` from the same release
   records your sessions to improve the routes. It does nothing until you turn
   it on.
-- **Guide packs** by other players install the same way, next to the
-  `Polestar` folders: see [Guide packs](#guide-packs).
+- **Guide packs** are other people's guides for Polestar, each a separate
+  addon from its own author: see [Guide packs](#guide-packs).
 - Something wrong? Click the bug in the guide window, beside Skip: say what
   went wrong, copy the report (it already holds the step, where you stand and
   the versions) and paste it on the
@@ -94,7 +94,8 @@ start, and keeps the one that reaches 60 soonest under its model; the guides
 are written from that route and scored under the same model
 ([How the routes are made](#how-the-routes-are-made)).
 
-Guide packs written by other players install the same way, next to Polestar
+Other people can publish their own guides for Polestar as guide packs:
+separate addons, made and supported by their authors
 ([Guide packs](#guide-packs)). Each new character's first login opens a short
 welcome: a hello and what Polestar does; on the account's first character,
 quest automation, the guide at login and the colour scheme; then the guide
@@ -506,24 +507,33 @@ Every verb, modifier and condition is in
 
 ## Guide packs
 
-Anyone can write guides for Polestar and publish them as a **guide pack**: an
-ordinary addon that depends on Polestar, made and supported by its author.
-Polestar shows the packs you have installed; it does not host, bundle or
-recommend any.
+A **guide pack** is someone else's guides for Polestar. It is a separate
+addon, made and supported by its author; its guides are not Polestar's
+leveling routes. Polestar does not ship, host or recommend any pack.
+[docs/GUIDE_PACKS.md](docs/GUIDE_PACKS.md) explains packs in full, for
+players and for authors.
 
 ### Installing a guide pack
 
-A pack installs like any addon: extract its zip into the AddOns folder next to
-the `Polestar` folders and restart the game. Its guides appear in the hub
-under "Guide packs", each credited to its author. Options > Guide packs
-(`/polestar packs`) lists every installed pack with its status and any
-problems, switches a pack off and on without a reload, and picks where the
-guide for your level is suggested from (Polestar's own guides unless you
-choose a pack). A pack never replaces Polestar's guides or another pack's.
+Download the pack from wherever its author publishes it and install it like
+any addon, next to the `Polestar` folders, then restart the game. Its guides
+appear in the guide menu (`/polestar guides`) under "Guide packs", each
+credited to its author. Options > Guide packs (`/polestar packs`) lists every
+pack you have installed and turns each one on or off without a reload; it
+also picks where the guide for your level is suggested from (Polestar's own
+guides unless you choose a pack). A pack never replaces Polestar's guides or
+another pack's.
+
+Report a problem in a pack to its author, not to Polestar. A pack is an
+addon like any other, so install packs from authors you trust.
 
 ### Writing a guide pack
 
-A pack lives in its own folder, beside a clone of Polestar that provides the
+You can write your own leveling guides with the tools Polestar uses for its
+own: the guide format, the compiler, `lint`, `playtest`, and in the game the
+guide engine, the arrow and the map markers. Publish them as your own addon
+on the addon sites, and they appear in Polestar's guide menu as a pack. A
+pack lives in its own folder, beside a clone of Polestar that provides the
 tools (Node 24 or later; Lua 5.1 for `play` and `playtest`):
 
 ```sh
@@ -544,8 +554,14 @@ Forever client (`polestar help data` lists every source). `new` writes an
 example guide that already lints and plays to the end. Before publishing,
 `polestar playtest` plays every guide to the end in the real addon, for each
 race that can reach it and each class it has steps for, and `polestar pack`
-builds the zip, byte for byte reproducible.
+builds the zip, byte for byte reproducible. Upload it as your own addon
+project, with Polestar as a required dependency, a title that cannot be
+mistaken for Polestar's own addons, your name, a version, and a website or
+support link where players can reach you. Write your own guide text: do not
+copy Polestar's.
 
+- [docs/GUIDE_PACKS.md](docs/GUIDE_PACKS.md): what a pack is, the steps from
+  `new` to publishing, what the tools require and what we ask of authors
 - [docs/PACKS.md](docs/PACKS.md): the handbook (setup, a first pack in 15
   minutes, testing, publishing, every problem and its fix)
 - [docs/GUIDE_CHEATSHEET.md](docs/GUIDE_CHEATSHEET.md): the guide format on
