@@ -244,6 +244,17 @@ end
 
 local function levelText(n) return L["Requires level"] .. " " .. n end
 
+-- A standing the row needs (a vendor's or a quest's): unmet, the row is
+-- unavailable and costs the grind.
+local function repGate(r, faction, need)
+	local have = tonumber((ns.Compat.GetFactionStanding(faction))) or 4
+	if have >= need then return end
+	local f = Codex().Faction(faction)
+	local name = f and f.name or (L["Faction"] .. " " .. faction)
+	r.effort = (r.effort or 0) + (need - have) * REP_STANDING
+	block(r, "reputation", L["Requires"] .. " " .. L[STANDINGS[need] or ""] .. " (" .. name .. ")")
+end
+
 -- Quest availability for this character: why, text | nil
 local function questBlock(q, p)
 	if q.faction and not sideOK(q.faction, p) then return "faction", sideText(q.faction) end
@@ -302,6 +313,18 @@ builders.vendor = function(src, p, from)
 	r.detail = detail(L["Vendor"], r.zone)
 	r.price = src.cost
 	if src.limited then r.effort = LIMITED_RESTOCK end
+	if npc and not sideOK(npc.faction, p) then block(r, "faction", sideText(npc.faction)) end
+	r.guideable = npc ~= nil and located(r)
+	return r
+end
+
+-- An NPC hands it out (casts the spell that creates it: Duke Hydraxis's Aqual Quintessence).
+builders.gift = function(src, p, from)
+	local r = newRow(src, "gift")
+	local npc, s, t = npcSpawn(src.npc, from)
+	r.label = npc and npc.name or L["Given by an NPC"]
+	place(r, s, t)
+	r.detail = detail(L["Given by an NPC"], r.zone)
 	if npc and not sideOK(npc.faction, p) then block(r, "faction", sideText(npc.faction)) end
 	r.guideable = npc ~= nil and located(r)
 	return r
@@ -377,6 +400,7 @@ builders.quest = function(src, p, from)
 	r.effort = questEffort(q, p)
 	local why, text = questBlock(q, p)
 	if why then block(r, why, text) end
+	if q.repFaction and q.repStanding then repGate(r, q.repFaction, q.repStanding) end
 	local startsFromItem = q.start and q.start.item and #q.start.item > 0
 	r.guideable = (giver ~= nil or startsFromItem) and finish ~= nil
 	return r
@@ -516,17 +540,7 @@ end
 local PURCHASE = { vendor = true, pvp = true }
 
 local function purchaseGates(item, r)
-	local C = Codex()
-	if item.repFaction and item.repStanding then
-		local have = tonumber((ns.Compat.GetFactionStanding(item.repFaction))) or 4
-		local need = item.repStanding
-		if have < need then
-			local f = C.Faction(item.repFaction)
-			local name = f and f.name or (L["Faction"] .. " " .. item.repFaction)
-			r.effort = (r.effort or 0) + (need - have) * REP_STANDING
-			block(r, "reputation", L["Requires"] .. " " .. L[STANDINGS[need] or ""] .. " (" .. name .. ")")
-		end
-	end
+	if item.repFaction and item.repStanding then repGate(r, item.repFaction, item.repStanding) end
 	if item.reqSkill and item.reqSkillRank then
 		local rank = ns.Compat.GetSkillRank(item.reqSkill)
 		if not rank or rank < item.reqSkillRank then
@@ -683,6 +697,9 @@ local function sourceLine(src)
 	elseif t == "quest" then
 		local q = src.quest and C.Quest(src.quest)
 		return detail(L["Quest reward"], q and q.zone and zoneName(q.zone))
+	elseif t == "gift" then
+		local npc = src.npc and C.Npc(src.npc)
+		return detail(L["Given by an NPC"], npc and firstZone(npc.spawns))
 	elseif t == "craft" then
 		local name = Lookup.ProfessionName(src.skillLine)
 		return name and detail(L["Crafted"], L[name]) or L["Crafted"]

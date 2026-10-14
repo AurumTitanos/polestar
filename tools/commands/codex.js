@@ -152,7 +152,13 @@ async function runWowhead(rest) {
 	const read = (f) => (fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : null);
 	const report = read(path.join(ROOT, 'data', 'local', 'codex-parity.json'));
 	if (!report) return fail('no data/local/codex-parity.json: run `codex build --local-extras`, then `codex build`');
-	const want = wowheadWants(report, read(path.join(ROOT, 'data', 'forever', 'codex', 'instances.json')) || {}, read(path.join(ROOT, 'data', 'forever', 'objects.json')) || {});
+	// The client's create-item spells (SpellEffect), for the items ours has no source for.
+	const { BUILD, clientFacts } = require('../lib/codex/build');
+	const { parseCsv } = require('../lib/data/csv');
+	const effects = path.join(SOURCES, 'wago', BUILD, 'SpellEffect.csv');
+	const { creates } = clientFacts({ SpellEffect: fs.existsSync(effects) ? parseCsv(fs.readFileSync(effects, 'utf8')) : [] });
+	const ours = { items: read(path.join(ROOT, 'data', 'forever', 'codex', 'items.json')) || {}, creates };
+	const want = wowheadWants(report, read(path.join(ROOT, 'data', 'forever', 'codex', 'instances.json')) || {}, read(path.join(ROOT, 'data', 'forever', 'objects.json')) || {}, ours);
 	let left = values.limit ? Number(values.limit) : Infinity;
 	for (const t of Object.keys(want)) {
 		want[t] = want[t].slice(0, Math.max(0, left));

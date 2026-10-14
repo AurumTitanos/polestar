@@ -383,10 +383,13 @@ function syntheticInputs() {
 			16342: { id: 16342, name: "Sergeant's Cape", drops: { npc: {}, object: {} }, vendors: [] },
 			20000: { id: 20000, name: 'Wintersaber Trinket', drops: { npc: {}, object: {} }, vendors: [4730] },
 			20001: { id: 20001, name: 'Wintersaber Reward', drops: { npc: {}, object: {} }, vendors: [] },
+			20002: { id: 20002, name: 'Wintersaber Hat', drops: { npc: {}, object: {} }, vendors: [] },
 			1179: { id: 1179, name: 'Ice Cold Milk', drops: { npc: {}, object: { 2843: 25 } }, vendors: [] },
 		},
 		quests: {
 			176: { id: 176, title: 'Wanted: "Hogger"', level: 11, minLevel: 5, races: 77, classes: null, start: { npc: [], object: [68], item: [] }, end: { npc: [240], object: [] }, pre: [1], preAll: [33], preAny: [7, 783], objectives: [{ type: 'item', id: 1931, count: null, text: 'Huge Gnoll Claw' }], zone: 1429 },
+			// QuestieDB requiredMinRep 3000 (Friendly) and a reputation objective 9000 (Honored): the rewards need Honored.
+			9001: { id: 9001, title: 'Frostsaber Errand', level: 60, minLevel: 55, races: null, classes: null, start: { npc: [4730], object: [], item: [] }, end: { npc: [4730], object: [] }, pre: [], objectives: [], zone: 1438, minRep: { faction: 589, value: 3000 }, reputation: { faction: 589, value: 9000 }, rewards: { items: [20002] }, source: ['questie-forever'] },
 		},
 		professions: {
 			164: { id: 164, name: 'Blacksmithing', trainers: { Alliance: [5164] }, ranks: [], recipes: [{ spell: 2660, name: 'Rough Sharpening Stone', item: 2862, learnedAt: 1 }] },
@@ -498,6 +501,15 @@ test('mergeCodex applies precedence, dedupes sources and keeps provenance', () =
 	// Gossip-gated vendor items (nothing in ItemSparse) take the reputation reward's faction and standing.
 	assert.deepEqual([it[20000].repFaction, it[20000].repStanding], [589, 6]);
 	assert.deepEqual([it[20001].repFaction, it[20001].repStanding], [null, null], 'a reputation reward nobody sells is not a purchase requirement');
+	// A quest's gate (QuestieDB requiredMinRep, a reputation objective: the higher) is a rep
+	// source naming no vendor, and stays on the quest, not on the item's purchase.
+	assert.deepEqual(it[20002].sources, [
+		{ type: 'quest', quest: 9001, from: ['questie'] },
+		{ type: 'rep', faction: 589, standing: 6, from: ['questie'] },
+	]);
+	assert.deepEqual([it[20002].repFaction, it[20002].repStanding], [null, null]);
+	assert.deepEqual([codex.quests[9001].repFaction, codex.quests[9001].repStanding], [589, 6]);
+	assert.equal(codex.quests[176].repFaction, undefined, 'an ungated quest carries no standing');
 	// Quest source from FLB items and FLB quest rewards dedupe (choice kept); RareScanner loot adds a drop.
 	assert.deepEqual(it[2933].sources, [
 		{ type: 'quest', quest: 176, choice: true, from: ['flbis'] },
@@ -628,4 +640,24 @@ test('buildCodex writes deterministic JSON and a pack whose memory it measures',
 	assert.ok(meta.sources.some((s) => s.name === 'AtlasLootClassic' && s.licence === 'GPL-2.0'));
 	const toc = fs.readFileSync(path.join(a.packDir, 'Polestar_Codex.toc'), 'utf8');
 	assert.match(toc, /^Meta\.lua$/m);
+});
+
+test('curatedRepGates: a collectible guide reaching a standing before it buys the item gates that vendor', () => {
+	const { curatedRepGates } = require('../tools/lib/codex/build');
+	const dir = tmpdir('polestar-codex-gates-');
+	fs.writeFileSync(path.join(dir, 'saber.guide'), [
+		'guide x/saber', 'collects 13086', '', 'step Rep', '  rep "Wintersaber Trainers" Exalted', '  talk 10618',
+		'step Buy', '  buy 13086 npc 10618                 -- Rivern Frostwind', '  buy 99 npc 10618',
+	].join('\n'));
+	fs.writeFileSync(path.join(dir, 'plain.guide'), ['guide x/plain', 'step A', '  rep 589 Honored', '  buy 5 npc 1'].join('\n'));
+	assert.deepEqual(curatedRepGates(dir), { 13086: [{ npc: 10618, faction: null, factionName: 'Wintersaber Trainers', standing: 8 }] });
+});
+
+test('mergeCodex: an NPC casting a spell that creates the item hands it out (gift)', () => {
+	const inputs = syntheticInputs();
+	delete inputs.atlasloot;
+	inputs.client.creates = { 20001: [21357] };
+	inputs.wowhead = { npc: {}, object: {}, item: {}, spell: { 21357: { id: 21357, usedBy: [4730, 424242] } } };
+	const it = mergeCodex(inputs).items;
+	assert.deepEqual(it[20001].sources, [{ type: 'gift', npc: 4730, spell: 21357, from: ['wowhead'] }], 'an NPC the data does not know is left out');
 });

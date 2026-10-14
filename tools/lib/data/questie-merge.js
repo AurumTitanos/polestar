@@ -313,6 +313,7 @@ function questRecord(q, pf, ctx) {
 	const enders = [1, 2].map((i) => luaGet(q.finishedBy, i));
 	const skill = luaList(q.requiredSkill);
 	const rep = luaList(luaGet(q.objectives, 4));
+	const minRep = luaList(q.requiredMinRep);
 	const hasObjectives = luaPairs(q.objectives).length > 0 || Boolean(q.triggerEnd);
 	return {
 		title: typeof q.name === 'string' && q.name ? q.name : null,
@@ -341,6 +342,8 @@ function questRecord(q, pf, ctx) {
 		sourceItem: num(q.sourceItemId),
 		requiredItems: ids(q.requiredSourceItems),
 		reputation: rep.length >= 2 && num(rep[0]) ? { faction: Number(rep[0]), value: Number(rep[1]) } : null,
+		// requiredMinRep: the standing (reputation value, 3000 Friendly) a character needs to take the quest.
+		minRep: minRep.length >= 2 && num(minRep[0]) ? { faction: Number(minRep[0]), value: Number(minRep[1]) } : null,
 	};
 }
 
@@ -399,6 +402,7 @@ function mergeQuest(id, pf, r, ctx) {
 	if (has(r.sourceItem)) out.sourceItem = r.sourceItem;
 	if (r.requiredItems.length) out.requiredItems = r.requiredItems;
 	if (r.reputation) out.reputation = r.reputation;
+	if (r.minRep) out.minRep = r.minRep;
 	// AreaTable id of the quest's zone or instance (QuestieDB zoneOrSort > 0; negative QuestSort ids omitted).
 	if (r.zoneOrSort > 0) out.area = r.zoneOrSort;
 	if (!pf || out.zone === null) {

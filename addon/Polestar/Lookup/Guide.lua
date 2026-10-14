@@ -336,6 +336,17 @@ builders.vendor = function(ctx, row)
 	return steps
 end
 
+-- An NPC hands it out: go, talk, have it.
+builders.gift = function(ctx, row)
+	local npc = Codex().Npc(row.src.npc)
+	if not (npc and located(row)) then return nil, "nolocation" end
+	return { { title = npc.name, goals = {
+		at({ t = "goto" }, row),
+		at({ t = "talk", npc = npc.id, npcName = npc.name, optional = true }, row),
+		{ t = "collect", item = ctx.id, itemName = ctx.name, count = 1 },
+	} } }
+end
+
 builders.drop = function(ctx, row)
 	local C = Codex()
 	local npc = C.Npc(row.src.npc)

@@ -89,7 +89,7 @@ local FALLBACK_KINDS = {
 }
 
 local SOURCE_ICON = {
-	vendor = "icon-vendor", drop = "icon-kill", object = "icon-interact", quest = "icon-accept", craft = "icon-craft",
+	vendor = "icon-vendor", drop = "icon-kill", object = "icon-interact", quest = "icon-accept", gift = "icon-talk", craft = "icon-craft",
 	rep = "icon-rep", pvp = "icon-achieve", container = "icon-use", world = "icon-explore",
 }
 

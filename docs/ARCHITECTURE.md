@@ -2068,7 +2068,20 @@ built.
   Law's fighters, rare spawns, chests) are not `DungeonEncounter` rows;
   reputation standings that vendors gate in gossip, and battleground rewards
   AtlasLoot files as PvP, are in no client table (`ItemSparse` carries no
-  `MinFactionID` or `RequiredPVPRank` for them); 26 Forever rares no
+  `MinFactionID` or `RequiredPVPRank` for them, and Wowhead Forever's Sells
+  standing is that same `MinReputation`): a vendor's gate comes only from a
+  curated guide that collects the item and reaches the standing before its
+  `buy` (`curatedRepGates`, provenance `guides`: the Winterspring
+  Frostsaber, the Stormpike Battle Charger, the Frostwolf Howler), a quest's
+  from QuestieDB (`minRep` or a reputation objective, the higher: a `rep`
+  source naming no vendor, and the quest's `repFaction`/`repStanding`, which
+  blocks its reward row in Lookup), and the rest stay missing in parity
+  (a tooltip without a standing disproves no gate). An NPC that casts a
+  spell creating an item (client `SpellEffect` 24; who casts it, Wowhead
+  Forever's spell page, `codex wowhead` fetching those of items ours has no
+  source for) hands it out: a `gift { npc, spell }` source (Duke Hydraxis's
+  Aqual and Eternal Quintessence; the standing he asks is in no release
+  input). 26 Forever rares no
   database ranks yet. The 455 confirmed drop chances the release lacks are
   all cut by an item's 10-dropper cap (the internal build keeps AtlasLoot's
   instance trash past it; every dropper of every item would be 1.6 million
@@ -2164,7 +2177,9 @@ suffices; preQuestSingle), `breadcrumbFor` (the quest this optional breadcrumb
 leads to), `breadcrumbs` (breadcrumbs leading here), `parent` (must be active;
 parentQuest), `children` (childQuests), `requiredItems` (needed, not
 objectives), `sourceItem` (handed over at accept), `maxLevel`, `skillLevel`,
-`repeatable`, `reputation { faction, value }` (an objective), `area` (AreaTable id
+`repeatable`, `reputation { faction, value }` (an objective), `minRep { faction,
+value }` (requiredMinRep: the reputation value, 3000 Friendly, a character needs
+to take it), `area` (AreaTable id
 of the quest's zone or dungeon, QuestieDB zoneOrSort > 0); kill objectives
 `credit` (every npc id that gives the kill credit). `pre` keeps pfQuest's
 meaning (any one suffices, optional breadcrumbs included) for every quest

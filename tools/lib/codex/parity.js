@@ -35,7 +35,7 @@ const FILES = ['meta', 'items', 'npcs', 'objects', 'quests', 'instances', 'journ
 const POS_TOLERANCE = 3; // map percent
 const LEVEL_TOLERANCE = 2;
 const CHANCE_TOLERANCE = 0.25; // relative
-const SOURCE_TYPES = ['drop', 'vendor', 'quest', 'craft', 'rep', 'pvp', 'container', 'object', 'world'];
+const SOURCE_TYPES = ['drop', 'vendor', 'quest', 'gift', 'craft', 'rep', 'pvp', 'container', 'object', 'world'];
 const LIST_CAP = 400; // rows kept per list in the JSON (counts stay exact)
 
 const norm = (s) =>
@@ -134,10 +134,18 @@ function verdictOf(kindName, row, verify, theirs) {
 	if (kindName === 'boss loot items') return dropCheck(b, c);
 	if (kindName === 'rare loot') return dropCheck(a, b);
 	if (kindName === 'drop chances') return dropCheck(b, a);
-	if (kindName === 'items: rep' || kindName === 'items: pvp') {
+	if (kindName === 'items: rep') {
+		// A standing on the tooltip confirms; none proves nothing (a vendor's
+		// or a quest's gate is on no tooltip, and Wowhead's Sells standing is
+		// the same ItemSparse MinReputation).
 		const t = wh.item[a];
 		if (!t) return 'unverified';
-		return (kindName === 'items: rep' ? (t.rep || []).length : t.pvpRank) ? 'confirmed' : 'not in Forever';
+		return (t.rep || []).length ? 'confirmed' : 'unverified';
+	}
+	if (kindName === 'items: pvp') {
+		const t = wh.item[a];
+		if (!t) return 'unverified';
+		return t.pvpRank ? 'confirmed' : 'not in Forever';
 	}
 	if (kindName === 'treasure loot') {
 		const w = wh.object[a];
@@ -157,7 +165,6 @@ function compareCodex(ours, theirs, verify = null) {
 	const oItems = ours.items || {};
 	const tItems = theirs.items || {};
 	const oNpcs = ours.npcs || {};
-	const noRep = new Set(((ours.evidence || {}).noRep || []).map(Number));
 	const noPvp = new Set(((ours.evidence || {}).noPvp || []).map(Number));
 	const tNpcs = theirs.npcs || {};
 
@@ -336,10 +343,10 @@ function compareCodex(ours, theirs, verify = null) {
 			if (!types.has(ty)) continue;
 			k(`items: ${ty}`).total++;
 			if (mine.has(ty)) k(`items: ${ty}`).match++;
-			else if ((ty === 'rep' && noRep.has(Number(id))) || (ty === 'pvp' && noPvp.has(Number(id)))) {
-				// Forever's own tooltip asks for no standing / rank: ours keeps the vendor only.
+			else if (ty === 'pvp' && noPvp.has(Number(id))) {
+				// Forever's own tooltip asks for no rank: ours keeps the vendor only.
 				k(`items: ${ty}`).match++;
-				k(`items: ${ty}`).different.push({ ...row, theirs: ty, ours: [...mine], reason: `Wowhead Forever's tooltip shows no ${ty === 'rep' ? 'reputation' : 'PvP rank'} requirement` });
+				k(`items: ${ty}`).different.push({ ...row, theirs: ty, ours: [...mine], reason: "Wowhead Forever's tooltip shows no PvP rank requirement" });
 			} else k(`items: ${ty}`).missing.push(row);
 		}
 		if (['mount', 'pet', 'tabard'].includes(t.kind)) {
@@ -353,8 +360,9 @@ function compareCodex(ours, theirs, verify = null) {
 					const reason = t.kind === 'mount' && o.status === 'retired' ? "Forever client: the Mount row is hidden until known, and only Era vendors list it" : null;
 					c.different.push({ ...row, field: 'status', theirs: t.status || null, ours: o.status || null, reason });
 				}
-				// A rep / pvp source Forever's tooltip does not ask for is no gap.
-				const lack = [...types].filter((ty) => !mine.has(ty) && !(ty === 'rep' && noRep.has(Number(id))) && !(ty === 'pvp' && noPvp.has(Number(id))));
+				// A pvp source Forever's tooltip does not ask for is no gap (a
+				// reputation gate sits on the vendor or quest: no tooltip disproves it).
+				const lack = [...types].filter((ty) => !mine.has(ty) && !(ty === 'pvp' && noPvp.has(Number(id))));
 				if (lack.length) c.different.push({ ...row, field: 'sources', theirs: [...types], ours: [...mine] });
 			}
 		}

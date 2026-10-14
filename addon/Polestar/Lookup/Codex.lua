@@ -118,7 +118,7 @@ local SPAN = { item = ITEM_GROUPS, npc = NPC_GROUPS, object = OBJECT_GROUPS }
 
 -- Same letters as FROM in tools/lib/codex/pack.js.
 local FROM = {
-	a = "atlasloot", c = "client", d = "dungeons", f = "flbis", j = "journal", l = "recordings",
+	a = "atlasloot", c = "client", d = "dungeons", f = "flbis", g = "guides", j = "journal", l = "recordings",
 	p = "pfquest", q = "questie", r = "rarescanner", w = "wowhead", e = "forever",
 }
 
@@ -128,6 +128,7 @@ local SOURCE = {
 	d = { "drop", { "npc", "chance", "instance" } },
 	o = { "object", { "object", "chance" } },
 	q = { "quest", { "quest", "choice" } },
+	g = { "gift", { "npc", "spell" } }, -- an NPC hands it out (casts a spell that creates it)
 	c = { "craft", { "spell", "skillLine", "skill" } },
 	r = { "rep", { "faction", "standing", "npc" } },
 	p = { "pvp", { "rank", "npc" } },
@@ -279,10 +280,15 @@ local function decodeQuest(group, id, s)
 	}
 	for i = 16, n do
 		local f = t[i]
-		local kind = OBJECTIVE[sub(f, 1, 1)]
+		local lead = sub(f, 1, 1)
+		local kind = OBJECTIVE[lead]
 		if kind then
 			local _, _, oid, count, text = find(f, "^.([^,]*),([^,]*),(.*)$")
 			rec.objectives[#rec.objectives + 1] = { type = kind, id = tonumber(oid), count = tonumber(count), text = unesc(text) }
+		elseif lead == "r" then
+			-- The standing its rewards need: r<faction>,<standing> (1..8, Hated..Exalted).
+			local _, _, fid, standing = find(f, "^r(%d+),(%d+)$")
+			rec.repFaction, rec.repStanding = tonumber(fid), tonumber(standing)
 		end
 	end
 	return rec

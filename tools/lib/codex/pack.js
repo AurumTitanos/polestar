@@ -35,15 +35,17 @@
 //            status = r (retired: no longer obtainable) | n (no known source), right after the quality digit
 //            source = <type letter><f1>,<f2>,...,<from letters>
 //              v vendor npc,cost,limited   d drop npc,chance,instance   o object object,chance
-//              q quest quest,choice        c craft spell,skillLine,skill
+//              q quest quest,choice        g gift npc,spell (an NPC hands it out)   c craft spell,skillLine,skill
 //              r rep faction,standing,npc  p pvp rank,npc               n container item,chance
 //              w world minLevel,maxLevel
 //   npc      level;levelMax;faction;flags(r e b);instance;roles;loot;<spawns>...
 //            spawns = map,f,x,y,x,y...   (one group per map); loot = item,item,...
 //   object   treasure(1|empty);loot;<spawns>...
 //   quest    level;minLevel;faction;races;classes;zone;startNpc;startObject;startItem;
-//            endNpc;endObject;pre;rewards;choices;preAny;<objective>...
+//            endNpc;endObject;pre;rewards;choices;preAny;<objective>...[;<rep>]
 //            objective = <k|i|o|e><id>,<count>,<text>
+//            rep = r<faction>,<standing>: the standing its rewards need (an older
+//                  reader skips it: no objective kind is r)
 //   instance kind;forever(1|empty);areaId;map;entrance(map,x,y,f[,a]);levels;<boss>...
 //            a: approximate (the client's corpse point, not the way in)
 //            boss = name,ref,item,item...   ref = <npc> | o<object> (a chest boss), then
@@ -66,6 +68,7 @@ const FROM = {
 	dungeons: 'd',
 	flbis: 'f',
 	journal: 'j',
+	guides: 'g',
 	recordings: 'l',
 	pfquest: 'p',
 	questie: 'q',
@@ -79,6 +82,7 @@ const SOURCE = {
 	drop: ['d', ['npc', 'chance', 'instance']],
 	object: ['o', ['object', 'chance']],
 	quest: ['q', ['quest', 'choice']],
+	gift: ['g', ['npc', 'spell']],
 	craft: ['c', ['spell', 'skillLine', 'skill']],
 	rep: ['r', ['faction', 'standing', 'npc']],
 	pvp: ['p', ['rank', 'npc']],
@@ -245,7 +249,8 @@ function encodeQuest(rec) {
 		if (!t) throw new Error(`codex pack: quest ${rec.id}: unknown objective type "${o.type}"`);
 		return `${t}${num(o.id)},${num(o.count)},${esc(o.text)}`;
 	});
-	return [...head, ...objectives].join(';');
+	const rep = rec.repFaction && rec.repStanding ? [`r${num(rec.repFaction)},${num(rec.repStanding)}`] : [];
+	return [...head, ...objectives, ...rep].join(';');
 }
 
 function encodeInstance(rec) {

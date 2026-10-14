@@ -14,7 +14,7 @@
 //   flbis|null,                                           (tools/lib/consume/foreverlevelingbis.js)
 //   atlasloot|null, rarescanner|null                      (--local-extras only)
 //   client: clientFacts(tables) + { instanceMaps, instances: instanceFacts() }|null,
-//   curated: [item ids guides collect], entrances: curatedEntrances(),
+//   curated: [item ids guides collect], curatedGates: curatedRepGates(), entrances: curatedEntrances(),
 //   entranceTable: loadEntranceTable() (tools/lib/codex/entrances.json), localExtras,
 // }
 // Without AtlasLoot and dungeons.json the instances come from the client
@@ -51,14 +51,17 @@ const TABLES = [
 const ERA_BUILD = '1.15.9.70003';
 const ERA_TABLES = ['Item', 'ItemSparse', 'ItemEffect', 'Map'];
 
-const RANK = { recordings: 0, client: 1, questie: 2, flbis: 2, rarescanner: 2, dungeons: 2, journal: 2, forever: 2, pfquest: 3, atlasloot: 3, wowhead: 4 };
-const KEY_FIELD = { vendor: 'npc', drop: 'npc', object: 'object', quest: 'quest', craft: 'spell', rep: 'faction', pvp: null, container: 'item', world: null };
-const TYPE_ORDER = ['vendor', 'quest', 'craft', 'rep', 'pvp', 'drop', 'object', 'container', 'world'];
+// guides: Polestar's own curated guides (a collectible's `rep` before its `buy`).
+const RANK = { recordings: 0, client: 1, guides: 1, questie: 2, flbis: 2, rarescanner: 2, dungeons: 2, journal: 2, forever: 2, pfquest: 3, atlasloot: 3, wowhead: 4 };
+// gift: an NPC hands the item out (casts a spell that creates it).
+const KEY_FIELD = { vendor: 'npc', drop: 'npc', object: 'object', quest: 'quest', gift: 'npc', craft: 'spell', rep: 'faction', pvp: null, container: 'item', world: null };
+const TYPE_ORDER = ['vendor', 'quest', 'gift', 'craft', 'rep', 'pvp', 'drop', 'object', 'container', 'world'];
 const SOURCE_FIELDS = {
 	vendor: ['npc', 'cost', 'limited'],
 	drop: ['npc', 'chance', 'instance'],
 	object: ['object', 'chance'],
 	quest: ['quest', 'choice'],
+	gift: ['npc', 'spell'],
 	craft: ['spell', 'skillLine', 'profession', 'skill'],
 	rep: ['faction', 'standing', 'npc'],
 	pvp: ['rank', 'npc'],
@@ -88,6 +91,7 @@ const SKILL_MOUNTS = 777;
 const SKILL_COMPANIONS = 778;
 const AURA_MOUNTED = 78;
 const EFFECT_AURA = 6;
+const EFFECT_CREATE_ITEM = 24;
 const TRIGGER_LEARN = 6;
 const TRIGGER_USE = 0;
 
@@ -146,7 +150,8 @@ function sortKeysDeep(v) {
 // { build, items: { id: { name, quality, reqLevel, buyPrice, classId, subclassId, inventoryType,
 //   minFaction, minStanding, pvpRank, learn, use } }, spellNames: { id: name },
 //   mountAura: Set(spellId), skillLines: { id: name }, skillAbility: { spell: skillLine },
-//   mountSkill: [spellId], companionSkill: [spellId], spellClass: { spell: CLASS } }
+//   mountSkill: [spellId], companionSkill: [spellId], spellClass: { spell: CLASS },
+//   creates: { item: [spellId] } (SpellEffect 24, create item; no profession's spell) }
 function clientFacts(tables, build = BUILD) {
 	const items = {};
 	for (const r of tables.ItemSparse || []) {
@@ -220,6 +225,17 @@ function clientFacts(tables, build = BUILD) {
 		if (classes.length === 1) spellClass[spell] = classes[0];
 	}
 	for (const [spell, cls] of Object.entries(CLASS_MOUNT_FALLBACK)) if (!spellClass[spell]) spellClass[spell] = cls;
+	// Spells that create an item (Effect 24) outside a skill line: an NPC's
+	// gift (Duke Hydraxis's Create Aqual Quintessence), an item's use.
+	const creates = {};
+	for (const r of tables.SpellEffect || []) {
+		const spell = int(r.SpellID);
+		const item = int(r.EffectItemType);
+		if (int(r.Effect) !== EFFECT_CREATE_ITEM || !item || !spell || spell in skillAbility) continue;
+		const list = (creates[item] = creates[item] || []);
+		if (!list.includes(spell)) list.push(spell);
+	}
+	for (const list of Object.values(creates)) list.sort(byId);
 	// Summon spells the client names as mounts (Mount.SourceSpellID) and companions (BattlePetSpecies.SummonSpellID).
 	const mountSpells = new Set((tables.Mount || []).map((r) => int(r.SourceSpellID)).filter(Boolean));
 	// A miscellaneous item whose spell carries a Mount row's name casts that mount
@@ -232,7 +248,7 @@ function clientFacts(tables, build = BUILD) {
 	// Mount.Flags 0x40: hidden from the mount journal until known (retired mounts).
 	const mountHidden = new Set((tables.Mount || []).filter((r) => (int(r.Flags) || 0) & 0x40).map((r) => int(r.SourceSpellID)).filter(Boolean));
 	const petSpells = new Set([...(tables.BattlePetSpecies || []).map((r) => int(r.SummonSpellID)).filter(Boolean), ...summonsPet]);
-	return { build, items, spellNames, mountAura, teaches, mountSpells, mountHidden, petSpells, skillLines, skillAbility, mountSkill: [...new Set(mountSkill)].sort(byId), companionSkill: [...new Set(companionSkill)].sort(byId), spellClass };
+	return { build, items, spellNames, mountAura, teaches, mountSpells, mountHidden, petSpells, skillLines, skillAbility, mountSkill: [...new Set(mountSkill)].sort(byId), companionSkill: [...new Set(companionSkill)].sort(byId), spellClass, creates };
 }
 
 // ---------------------------------------------------------------------------
@@ -294,6 +310,29 @@ function fromLabels(list) {
 	}
 	if (!out.size) out.add('forever');
 	return [...out];
+}
+
+// Reputation value -> standing 1..8 (Hated..Exalted): the lowest value of each.
+const STANDING_FLOOR = [-42000, -6000, -3000, 0, 3000, 9000, 21000, 42000];
+function standingOf(value) {
+	let s = 1;
+	for (let i = 0; i < STANDING_FLOOR.length; i++) if (value >= STANDING_FLOOR[i]) s = i + 1;
+	return s;
+}
+
+// The standing a quest's rewards need (data/forever quests.json, QuestieDB):
+// `minRep` to take it, or a `reputation` objective to finish it, the higher
+// of the two -> { faction, standing } | null. Neutral counts (Timbermaw Hold
+// starts below it); Hated gates nothing.
+function questRep(q) {
+	let best = null;
+	for (const r of [q && q.minRep, q && q.reputation]) {
+		if (!r || !r.faction || typeof r.value !== 'number') continue;
+		const standing = standingOf(r.value);
+		if (standing <= 1) continue;
+		if (!best || standing > best.standing) best = { faction: r.faction, standing };
+	}
+	return best;
 }
 
 function rankOf(from) {
@@ -801,6 +840,8 @@ function mergeCodex(inputs) {
 	// Forever-only rows (Questie without pfQuest) are trusted. Companions have
 	// no such client flag, so a release build retires none.
 	const listed = new Set([...((al && al.collections) || []).map((c) => Number(c.item)), ...(inputs.curated || []).map(Number)]);
+	// { item: [{ npc, faction|factionName, standing }] } (curatedRepGates).
+	const curatedGates = inputs.curatedGates || {};
 	const hiddenMount = (spell) => !!(cl && cl.mountHidden && spell && cl.mountHidden.has(spell));
 	const statusOf = (id, kind, sources, spell) => {
 		if (!sources.length) return 'nosource';
@@ -819,10 +860,10 @@ function mergeCodex(inputs) {
 	const items = {};
 	const factionByName = {};
 	for (const f of Object.values(factions)) factionByName[normName(f.name)] = f.id;
-	// noRep, noPvp: items Wowhead's Forever tooltip shows without a reputation /
-	// PvP rank. cut: what a cap left out (parity's reason, not shipped):
-	// drop { item: [npc] }, rare { npc: [item] }, treasure { object: [item] }.
-	const evidence = { noRep: [], noPvp: [], cut: { drop: {}, rare: {}, treasure: {} } };
+	// noPvp: items Wowhead's Forever tooltip shows without a PvP rank. cut:
+	// what a cap left out (parity's reason, not shipped): drop { item: [npc] },
+	// rare { npc: [item] }, treasure { object: [item] }.
+	const evidence = { noPvp: [], cut: { drop: {}, rare: {}, treasure: {} } };
 	const allIds = new Set([...Object.keys(names), ...Object.keys(cands)].map(Number));
 	for (const id of [...allIds].sort(byId)) {
 		const c = cl && cl.items[id];
@@ -842,8 +883,21 @@ function mergeCodex(inputs) {
 				if (faction) list.push({ type: 'rep', faction, standing: r.standing, npc: vendor ? vendor.npc : null, from: ['wowhead'] });
 			}
 			if (tip.pvpRank) list.push({ type: 'pvp', rank: tip.pvpRank, npc: vendor ? vendor.npc : null, from: ['wowhead'] });
-			if (!(tip.rep || []).length) evidence.noRep.push(id);
 			if (!tip.pvpRank) evidence.noPvp.push(id);
+		}
+		// A curated guide that collects the item reaches a standing before it
+		// buys the item from a vendor: that vendor's gate (13086 Winterspring
+		// Frostsaber: Exalted, server-side, on no tooltip).
+		for (const g of curatedGates[id] || []) {
+			const faction = g.faction || factionByName[normName(g.factionName)];
+			if (faction) list.push({ type: 'rep', faction, standing: g.standing, npc: g.npc, from: ['guides'] });
+		}
+		// An NPC that casts a spell creating the item (the client's SpellEffect;
+		// who casts it, Wowhead Forever's spell page) hands it out.
+		for (const spell of (cl && cl.creates && cl.creates[id]) || []) {
+			for (const npc of (wh && wh.spell && wh.spell[spell] && wh.spell[spell].usedBy) || []) {
+				if (npcs[npc]) list.push({ type: 'gift', npc, spell, from: ['wowhead'] });
+			}
 		}
 		if (c && c.pvpRank) {
 			const vendor = list.find((s) => s.type === 'vendor');
@@ -854,6 +908,13 @@ function mergeCodex(inputs) {
 				const vendor = list.find((v) => v.type === 'vendor');
 				if (vendor) s.npc = vendor.npc;
 			}
+		}
+		// A quest's reputation gate (questRep, QuestieDB's): its rewards need
+		// that standing. It names no vendor (added after the fill above), so it
+		// never gates a purchase; the quest record carries it too.
+		for (const s of list.filter((x) => x.type === 'quest')) {
+			const g = questRep((fv.quests || {})[s.quest]);
+			if (g) list.push({ type: 'rep', faction: g.faction, standing: g.standing, npc: null, from: ['questie'] });
 		}
 		const sources = finalizeSources(
 			list,
@@ -873,11 +934,13 @@ function mergeCodex(inputs) {
 		// Purchase requirements: reputation (standing 1..8, Hated..Exalted, as
 		// Compat.GetFactionStanding) and profession skill, from the client tables.
 		// Some reputation vendors gate items in their gossip, not in ItemSparse
-		// (13086 Winterspring Frostsaber): an item both sold and listed as a
-		// reputation reward takes that reward's faction and standing.
+		// (13086 Winterspring Frostsaber): an item sold by the npc a reputation
+		// source stands at takes that source's faction and standing. A quest's
+		// gate (its giver's) stays on the quest.
 		let repFaction = (c && c.minFaction) || null;
 		let repStanding = repFaction ? c.minStanding : null;
-		const rep = !repFaction && sources.some((s) => s.type === 'vendor') ? sources.find((s) => s.type === 'rep' && s.faction && s.standing) : null;
+		const vendors = new Set(sources.filter((s) => s.type === 'vendor').map((s) => s.npc));
+		const rep = !repFaction ? sources.find((s) => s.type === 'rep' && s.faction && s.standing && vendors.has(s.npc)) : null;
 		if (rep) {
 			repFaction = rep.faction;
 			repStanding = rep.standing;
@@ -979,6 +1042,9 @@ function mergeCodex(inputs) {
 				rewards,
 				choices,
 			};
+			// The standing its rewards need (questRep): an unmet one blocks its reward row.
+			const gate = questRep(q);
+			if (gate) Object.assign(quests[id], { repFaction: gate.faction, repStanding: gate.standing });
 			continue;
 		}
 		const f = flbQuests[id];
@@ -1244,25 +1310,58 @@ async function loadInputs({ addons, offline = false, dataDir, sourcesDir, build 
 		warnings.push(`Era client tables ${ERA_BUILD}: ${err.message}`);
 	}
 	client.instances = instanceFacts(loaded.tables, eraMaps);
-	return { forever, atlasloot, rarescanner, flbis, client, wowhead, curated: curatedCollects(guidesDir), entrances: curatedEntrances(guidesDir), entranceTable: loadEntranceTable(), localExtras: !!localExtras, warnings };
+	return { forever, atlasloot, rarescanner, flbis, client, wowhead, curated: curatedCollects(guidesDir), curatedGates: curatedRepGates(guidesDir), entrances: curatedEntrances(guidesDir), entranceTable: loadEntranceTable(), localExtras: !!localExtras, warnings };
+}
+
+// Every .guide file under dir -> [{ file, text }], by path.
+function guideTexts(dir) {
+	const out = [];
+	const walk = (d) => {
+		if (!fs.existsSync(d)) return;
+		for (const e of fs.readdirSync(d, { withFileTypes: true }).sort((a, b) => (a.name < b.name ? -1 : 1))) {
+			const p = path.join(d, e.name);
+			if (e.isDirectory()) walk(p);
+			else if (e.name.endsWith('.guide')) out.push({ file: p, text: fs.readFileSync(p, 'utf8') });
+		}
+	};
+	walk(dir);
+	return out;
+}
+
+function collectsOf(text) {
+	const m = text.match(/^collects\s+(.+)$/m);
+	return m ? m[1].split(/[\s,]+/).filter((id) => /^\d+$/.test(id)).map(Number) : [];
 }
 
 // Item ids that Polestar's own guides obtain (`collects` headers under guides/).
 function curatedCollects(dir = path.join(ROOT, 'guides')) {
 	const out = new Set();
-	const walk = (d) => {
-		if (!fs.existsSync(d)) return;
-		for (const e of fs.readdirSync(d, { withFileTypes: true })) {
-			const p = path.join(d, e.name);
-			if (e.isDirectory()) walk(p);
-			else if (e.name.endsWith('.guide')) {
-				const m = fs.readFileSync(p, 'utf8').match(/^collects\s+(.+)$/m);
-				if (m) for (const id of m[1].split(/[\s,]+/)) if (/^\d+$/.test(id)) out.add(Number(id));
-			}
-		}
-	};
-	walk(dir);
+	for (const { text } of guideTexts(dir)) for (const id of collectsOf(text)) out.add(id);
 	return [...out].sort(byId);
+}
+
+// The vendor gates Polestar's own guides state: in a guide that collects an
+// item, the last `rep <faction> <Standing>` goal before `buy <item> npc <id>`
+// -> { item: [{ npc, faction|null, factionName|null, standing }] }.
+const GUIDE_STANDINGS = { hated: 1, hostile: 2, unfriendly: 3, neutral: 4, friendly: 5, honored: 6, revered: 7, exalted: 8 };
+function curatedRepGates(dir = path.join(ROOT, 'guides')) {
+	const out = {};
+	for (const { text } of guideTexts(dir)) {
+		const collects = new Set(collectsOf(text));
+		if (!collects.size) continue;
+		let rep = null;
+		for (const line of text.split(/\r?\n/)) {
+			const goal = line.replace(/\s--.*$/, '').trim();
+			const r = /^rep\s+(?:(\d+)\s+)?(?:"([^"]+)"\s+)?([A-Za-z]+)$/.exec(goal);
+			if (r && GUIDE_STANDINGS[r[3].toLowerCase()] && (r[1] || r[2])) {
+				rep = { faction: r[1] ? Number(r[1]) : null, factionName: r[2] || null, standing: GUIDE_STANDINGS[r[3].toLowerCase()] };
+				continue;
+			}
+			const b = /^buy\s+(\d+)\b.*\bnpc\s+(\d+)/.exec(goal);
+			if (b && rep && collects.has(Number(b[1]))) (out[b[1]] = out[b[1]] || []).push({ npc: Number(b[2]), ...rep });
+		}
+	}
+	return out;
 }
 
 function sourcesMeta(inputs) {
@@ -1370,4 +1469,4 @@ function writeParity(ours, theirs, dir, verify = null) {
 	return { report, files };
 }
 
-module.exports = { buildCodex, loadInputs, mergeCodex, clientFacts, cluster, slug, writeParity, BUILD, TABLES };
+module.exports = { buildCodex, loadInputs, mergeCodex, clientFacts, curatedRepGates, cluster, slug, writeParity, BUILD, TABLES };

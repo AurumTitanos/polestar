@@ -74,6 +74,12 @@
   routed. The button leads once a quest is finished, the pick-up guide's
   last step points to it and its end offers it, and the hand-in guide takes
   the finished pick-up guide's tab (thanks Feverish).
+- Reputation the Codex knew nothing of: quest rewards say the standing their
+  quest needs (the Bloodsail Admiral's Hat, the Cenarion Circle's Ahn'Qiraj
+  gear) and Lookup marks the quest unavailable until you have it; the
+  Winterspring Frostsaber, Stormpike Battle Charger and Frostwolf Howler
+  ask for Exalted at their vendor; Aqual and Eternal Quintessence come from
+  Duke Hydraxis.
 
 ### For guide authors
 
