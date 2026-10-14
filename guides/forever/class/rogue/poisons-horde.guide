@@ -1,0 +1,68 @@
+guide forever/class/rogue/poisons-horde
+title Poisons (Horde)
+category Class
+class Rogue
+folder Rogue
+faction Horde
+levels 20-26
+zone Orgrimmar
+keywords Poisons, The Shattered Salute, Deep Cover, Shenthul, Taskmaster Fizzule, Flare Gun, Fizzule's Whistle, Mission: Possible But Not Probable, Gallywix, Foreman Silixiz, Venture Co. tower, Hinott's Assistance, Serge Hinott, Hinott's Oil, Tarren Mill, Thistle Tea, Rogue, class spell
+
+# Poisons for Horde Rogues: The Shattered Salute (2460) and Deep Cover (2458)
+# from Shenthul in Orgrimmar's Cleft of Shadow to Taskmaster Fizzule at the
+# Venture Co. tower in the northern Barrens; Mission: Possible But Not
+# Probable (2478) there; then Hinott's Assistance (2479, 2480) to Serge
+# Hinott in Tarren Mill.
+# Forever change (Wowhead Forever's Rogue class page,
+# data/local/quest-audit/wowhead-class-quests.json): Hinott's Assistance
+# (2480) now teaches Poisons (Forever moved it from the trainer onto this
+# quest). Rewards from the same page: Fizzule's Whistle (Deep Cover), Recipe:
+# Thistle Tea (Mission: Possible), Hinott's Oil (2480).
+# Mission: Possible needs Grand Foreman Puzik Gallywix's head, and Gallywix
+# is an elite (npcs.json): bring a friend. Wowhead files it as a group
+# quest. No Gallywix, no Poisons: 2479 needs 2478 turned in.
+# Sources: quests.json, npcs.json, objects.json and items.json for the givers,
+# drops and places; travel.json for the flight points.
+# horde/04-the-barrens and horde/06-hillsbrad-foothills carry this chain on
+# the route (2478 onwards optional there); this guide is for anyone off it or
+# coming back with a group for Gallywix.
+
+step The Shattered Salute
+  zone Orgrimmar
+  tip At 20 Shenthul stands in the Cleft of Shadow, the canyon under the Valley of Strength. Target him and type /salute.
+  level 20
+  accept 2460                                 -- Shenthul
+  complete 2460                               -- /salute Shenthul
+  turnin 2460
+  accept 2458                                 -- Deep Cover: keep the Flare Gun
+
+step Taskmaster Fizzule
+  zone The Barrens
+  tip Fly to the Crossroads and ride north to the Venture Co. tower north of the Sludge Fen. In sight of the tower, fire the Flare Gun twice, then /salute Taskmaster Fizzule before he attacks you.
+  use 8051 @55.4,5.6                          -- Flare Gun, twice, in sight of the tower
+  turnin 2458 reward 8066                     -- Taskmaster Fizzule: Fizzule's Whistle
+  accept 2478
+
+step Mission: Possible But Not Probable
+  tip Stay stealthed. Foreman Silixiz carries the tower key; Gallywix (elite) and his lockbox are at the top of the tower. Kill two each of the drones, patrollers and lookouts around it.
+  collect 8072 quest 2478.5                   -- Silixiz's Tower Key: Foreman Silixiz
+  kill 7310 quest 2478.1                      -- Mutated Venture Co. Drone
+  kill 7308 quest 2478.3                      -- Venture Co. Patroller
+  kill 7307 quest 2478.2                      -- Venture Co. Lookout
+  collect 8074 quest 2478.4                   -- Gallywix's Head: Grand Foreman Puzik Gallywix (elite)
+  collect 8073 quest 2478.6                   -- Cache of Zanzil's Altered Mixture: Gallywix's Lockbox
+
+step Back to Shenthul
+  zone Orgrimmar
+  tip Fly back to Orgrimmar.
+  turnin 2478 reward 18160                    -- Shenthul: Recipe: Thistle Tea
+  accept 2479
+
+step Serge Hinott
+  zone Hillsbrad Foothills
+  tip Take the zeppelin from Orgrimmar to the Undercity and ride south through Silverpine Forest to Tarren Mill in Hillsbrad. Serge Hinott stands in Tarren Mill; wait beside him while he brews the cure.
+  getfp "Tarren Mill" optional
+  turnin 2479                                 -- Serge Hinott
+  accept 2480
+  complete 2480                               -- Wait for the cure
+  turnin 2480 reward 8095                     -- Serge Hinott: Poisons

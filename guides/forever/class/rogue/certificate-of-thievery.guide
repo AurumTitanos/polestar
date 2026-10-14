@@ -1,0 +1,83 @@
+guide forever/class/rogue/certificate-of-thievery
+title Certificate of Thievery
+category Class
+class Rogue
+folder Rogue
+faction Alliance
+levels 16-20
+zone Stormwind City
+keywords Certificate of Thievery, Lockpicking, Renzik The Shiv, Redridge Rendezvous, Lucius, Alther's Mill, Lucius's Lockbox, Token of Thievery, Erion Shadewhisper, Erion's Behest, To Hulfdan!, Kingly Shakedown, SI:7, Lakeshire, Rogue, lockpicking quest
+
+# The Alliance Rogue level 16 lockpicking chain: one breadcrumb per home town
+# to Renzik "The Shiv" at SI:7 in Stormwind (SI:7 2300 from Keryn Sylvius in
+# Goldshire; To Hulfdan! and Kingly Shakedown 2299, 2298 from Hogral Bakkan
+# in Kharanos; Erion Shadewhisper and Erion's Behest 2259, 2260 from Jannok
+# Breezesong in Dolanaar), then Redridge Rendezvous (2281) and Alther's Mill
+# (2282, the Certificate of Thievery) with Lucius in Lakeshire.
+# Sources: Wowhead Forever's Rogue class page
+# (data/local/quest-audit/wowhead-class-quests.json) for which quests Forever
+# has, the rewards and Forever's changes (none for this chain);
+# quests.json, npcs.json, objects.json and items.json for the givers, drops
+# and places.
+# Not confirmed in Forever: Horns of Nez'ra (2358), Arantir's follow-up in
+# Lakeshire, is in the Classic data but not on Wowhead Forever's Rogue page,
+# so it is left out.
+# The three breadcrumbs exclude one another: take the one of your town. Their
+# race masks take any Alliance race; Skyborne, in Stormwind by about 15,
+# take Keryn Sylvius's in Goldshire.
+# Alther's Mill gives you Thieves' Tools for Lucius's Lockbox.
+# The leveling guides leave these out: they teach no spell.
+
+# ---------------------------------------------------------------- To Renzik
+
+step SI:7 (Goldshire)
+  only Human,Skyborne
+  zone Elwynn Forest
+  tip At 16 Keryn Sylvius, the rogue trainer in the Lion's Pride Inn in Goldshire, sends you to Renzik "The Shiv" in Stormwind.
+  level 16
+  accept 2300                                 -- Keryn Sylvius
+
+step To Hulfdan! (Kharanos)
+  only Dwarf,Gnome
+  zone Dun Morogh
+  tip At 16 Hogral Bakkan in the Thunderbrew Distillery in Kharanos sends you to Hulfdan Blackbeard, in the north of Ironforge.
+  level 16
+  accept 2299                                 -- Hogral Bakkan
+
+step Hulfdan Blackbeard
+  only Dwarf,Gnome
+  zone Ironforge
+  turnin 2299                                 -- Hulfdan Blackbeard
+  accept 2298
+
+step Erion Shadewhisper (Dolanaar)
+  only NightElf
+  zone Teldrassil
+  tip At 16 Jannok Breezesong in Dolanaar sends you to Erion Shadewhisper in Darnassus.
+  level 16
+  accept 2259                                 -- Jannok Breezesong
+  turnin 2259                                 -- Erion Shadewhisper, Darnassus
+  accept 2260
+
+step Renzik "The Shiv"
+  zone Stormwind City
+  tip Renzik stands beside Master Mathias Shaw at SI:7 in Old Town. Dwarves and Gnomes take the Deeprun Tram from Ironforge; Night Elves take the boat from Auberdine to Stormwind Harbor.
+  turnin 2300 only Human,Skyborne             -- Renzik "The Shiv"
+  turnin 2298 only Dwarf,Gnome
+  turnin 2260 only NightElf
+  accept 2281
+
+# ---------------------------------------------------------------- Lakeshire
+
+step Lucius
+  zone Redridge Mountains
+  tip Ride east through Elwynn Forest into Redridge, or fly to Lakeshire. Lucius waits on the west side of Lakeshire and gives you Thieves' Tools.
+  turnin 2281                                 -- Lucius
+  accept 2282
+
+step Alther's Mill
+  tip Alther's Mill stands east of Lakeshire, up off the road. Open Lucius's Lockbox there.
+  collect 7871 quest 2282.1                   -- Token of Thievery: Lucius's Lockbox
+
+step Back to Lucius
+  turnin 2282 reward 7907                     -- Lucius: Certificate of Thievery

@@ -1,0 +1,67 @@
+guide forever/class/paladin/lumina-windsinger
+title Lumina Windsinger
+category Class
+class Paladin
+folder Paladin
+faction Horde
+race Undead
+levels 18-24
+zone Tirisfal Glades
+keywords Lumina Windsinger, Diplomatic Incident, Trevan Rol, Earthen Ring, Fenris Isle, Fenris Keep, The Windshaper's Wrath, The Debt, Danitha Morr, Forsaken Paladin, class quest
+
+# The Forsaken Paladins' Silverpine chain, new in Forever: Diplomatic
+# Incident (91858) from Danitha Morr at Bandarion Keep, A Curious Pair
+# (91859), A Grim Fate (91860), Into Fenris Keep (91861), Lumina Windsinger
+# (91862), The Windshaper's Wrath (96204, an escort) and The Debt (95034).
+# Sources: quests.json, npcs.json, objects.json and items.json (Questie-Forever)
+# for givers, enders, objectives and spawns; Wowhead Forever's quest pages for
+# the order of the chain (the data has no prerequisites for these quests) and
+# for where things are: the pyre "on the shores of Fenris Isle", Lumina caged
+# in Fenris Keep, the Fenris Isle Key on the Rot Hide gnolls.
+# Left out: the rest of the chain, the Moonsilver Blade. A Moon-Kissed Blade
+# (95036) asks for an Enchanted Silver Ingot (item 267361) that no source
+# places: our data has no spawn for the object it comes from (629065), and
+# wow-forever.gg's item page says "nothing in the game data or in play shows a
+# way to get it yet". An Underrated Talent (95111), Ott's Masterwork (95125),
+# The Moonsilver Blade (95126) and Old Fire-Eye (95140, elite, needs the
+# blade) follow from it, and Seeking the Kor Gem (95042, Ulric Frostveil in
+# Ashenvale, Blackfathom Deeps) only feeds it. Wowhead's news of 10 October
+# 2026 ("New Paladin-Exclusive Cloak Currently Alliance Only") notes the
+# Paladin weapon quests of both factions keep changing in the beta.
+# The leveling route passes the Sepulcher in forever/horde/03-silverpine-forest
+# (levels 16-20). The chain starts with Danitha Morr in Tirisfal Glades, a
+# ride north from there, and needs level 18.
+
+step Danitha Morr
+  tip Danitha Morr leads the Paladins of Tyr's Watch from inside Bandarion Keep, on the bluffs north-west of the Solliden Farmstead.
+  accept 91858                        -- Danitha Morr
+
+step The Sepulcher
+  zone Silverpine Forest
+  tip Ride south through Silverpine Forest to the Sepulcher. Trevan Rol stands in the town; Deathguard Baldren keeps watch near its entrance.
+  turnin 91858                        -- Trevan Rol
+  accept 91859
+  turnin 91859                        -- Deathguard Baldren
+  accept 91860
+
+step The pyre on Fenris Isle
+  tip Fenris Isle lies in the lake east of the Sepulcher. The charred remains are on its shore.
+  turnin 91860                        -- Charred Remains
+  accept 91861                        -- from the Charred Remains
+
+step Fenris Keep
+  tip Lumina Windsinger is caged inside Fenris Keep, at the north end of the isle. The Rot Hide gnolls around her carry the key.
+  turnin 91861                        -- Lumina Windsinger
+  accept 91862
+  collect 267412 quest 91862.1        -- Fenris Isle Key, from the Rot Hide gnolls
+
+step Free Lumina
+  tip Free her with the key, then stay close while she fights her way out of the keep.
+  turnin 91862                        -- Lumina Windsinger
+  accept 96204
+
+step Back to the Sepulcher
+  tip Once she is clear of Fenris Keep, Lumina waits for you in the Sepulcher. Speak with her again to hear what really happened on the road.
+  turnin 96204                        -- Lumina Windsinger, the Sepulcher
+  accept 95034
+  turnin 95034

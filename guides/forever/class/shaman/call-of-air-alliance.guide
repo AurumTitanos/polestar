@@ -1,0 +1,96 @@
+guide forever/class/shaman/call-of-air-alliance
+title Call of Air and the Tempest's Weapons (Alliance)
+category Class
+class Shaman
+folder Shaman
+faction Alliance
+levels 30-40
+zone Ironforge
+keywords Air Totem, Elemental Aid, Storm, Earth, and Fire, Heed My Call, The Tempest's Weapons, Eldrun Stormbreaker, Veyric Thunderhame, Bath'rah the Windwatcher, Razorfen Kraul, Charlga Razorflank, Twisted Totem, Ravaging Tempest, Eye of the Tempest, Lightning's Grasp, Tidebringer's Claw, Rage of the Storm, Elementalist's Guard, Shaman, class quest, totem, weapon
+
+# Call of Air at 30 (Eldrun Stormbreaker in Ironforge -> Veyric Thunderhame
+# in the northern hills of Arathi: the Air Totem), then Forever's Alliance
+# version of the 33-40 chain against the Razormane ritual, all from Veyric:
+# Elemental Aid (Charlga Razorflank in Razorfen Kraul) -> Storm, Earth, and
+# Fire (five Twisted Totems of each element from the Badlands, the Swamp of
+# Sorrows, Dustwallow Marsh and Desolace) -> Heed My Call (the Ravaging
+# Tempest at the steam pools of Thousand Needles) -> The Tempest's Weapons,
+# handed to Bath'rah the Windwatcher in Alterac Mountains for the weapon.
+# Sources: quests.json, npcs.json and items.json (givers, enders, the Twisted
+# Totems' droppers, the Ravaging Tempest's spawns, Razorfen Kraul's entrance
+# from dungeons.json); Wowhead Forever's Shaman class page
+# (data/local/quest-audit/wowhead-class-quests.json) and quest pages
+# (https://www.wowhead.com/forever/quest=94789, 96264, 79358, 96135, 96016)
+# for the order and the rewards: Air Totem; 96016 gives the Elementalist's
+# Guard and a choice of Lightning's Grasp, Tidebringer's Claw or Rage of the
+# Storm.
+# Storm, Earth, and Fire (79358) is shared with the Horde chain; the data
+# lists Rau Cliffrunner and Veyric as its enders, and its text asks for the
+# totems "for Veyric Thunderhame in Arathi Highlands": handed to Veyric.
+# Elite and dungeon work: Charlga Razorflank is the last boss of Razorfen
+# Kraul (a dungeon), and Wowhead marks Heed My Call as an elite quest.
+# The Alliance leveling guides leave this out: Veyric sits in Arathi and the
+# chain then crosses both continents.
+# Beta capped at 30: nothing past Call of Air was played; it follows the data
+# above.
+
+step Eldrun Stormbreaker
+  zone Ironforge
+  tip At 30 Eldrun Stormbreaker, the shaman trainer in Ironforge, sends you to Veyric Thunderhame in Arathi Highlands.
+  accept 94789                                -- Eldrun Stormbreaker
+
+step Veyric Thunderhame
+  zone Arathi Highlands
+  tip Veyric camps in the northern hills of Arathi Highlands.
+  turnin 94789 reward 5178                    -- Veyric Thunderhame: your Air Totem
+  accept 96264
+
+step Charlga Razorflank
+  zone The Barrens
+  tip Razorfen Kraul is a dungeon at the southern edge of the Barrens (the arrow points at its entrance); Charlga Razorflank is its last boss. Bring a group.
+  collect 274463 quest 96264.1 @42.9,90.2 live -- Tattered Note, from Charlga Razorflank
+
+step Veyric Thunderhame
+  zone Arathi Highlands
+  turnin 96264                                -- Veyric Thunderhame
+  accept 79358
+
+step Twisted Fire Totems
+  zone Badlands
+  tip The Stonevault troggs in the south of the Badlands carry the Twisted Fire Totems.
+  collect 274044 quest 79358.1                -- Twisted Fire Totem
+
+step Twisted Earth Totems
+  zone Swamp of Sorrows
+  tip The Lost Ones in the north of the Swamp of Sorrows carry the Twisted Earth Totems.
+  collect 274045 quest 79358.3                -- Twisted Earth Totem
+
+step Twisted Water Totems
+  zone Dustwallow Marsh
+  tip The Mirefin murlocs of northern Dustwallow Marsh carry the Twisted Water Totems.
+  collect 274046 quest 79358.4                -- Twisted Water Totem
+
+step Twisted Air Totems
+  zone Desolace
+  tip The Maraudine centaurs of western Desolace carry the Twisted Air Totems.
+  collect 274047 quest 79358.2                -- Twisted Air Totem
+
+step Veyric Thunderhame
+  zone Arathi Highlands
+  turnin 79358 npc 259023                     -- Veyric Thunderhame
+  accept 96135
+
+step The steam pools
+  zone Thousand Needles
+  tip Veyric hands you the Corrupted Totems: place them at the steam pools of Thousand Needles and defeat the Ravaging Tempest they call. Heed My Call is an elite quest: grouping up is advised.
+  collect 212792 quest 96135.1                -- Eye of the Tempest, from the Ravaging Tempest
+
+step Veyric Thunderhame
+  zone Arathi Highlands
+  turnin 96135                                -- Veyric Thunderhame
+  accept 96016
+
+step Bath'rah the Windwatcher
+  zone Alterac Mountains
+  tip Bath'rah camps in the east of Alterac Mountains, north-east of Tarren Mill.
+  turnin 96016 reward 280696 choose 280607 280605 280604 -- Bath'rah the Windwatcher: the Elementalist's Guard and your weapon

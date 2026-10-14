@@ -1,0 +1,124 @@
+guide forever/class/druid/cat-form
+title Cat Form
+category Class
+folder Druid
+keywords Cat Form, The Great Cat Spirit, The Great Windborne Cat Spirit, Avatar of Saeyleenan, Blessings of the Great Cat Spirit, Stormrage Barrow Dens, Relic of the Fang, Relic of the Claw, Relic of the Silent Shadow, Moonglade, Skyborne, class quest
+class Druid
+levels 20-22
+zone Moonglade
+
+# Cat Form, Forever-new at level 20 (Wowhead Forever's druid class page lists
+# the chain as new): your trainer sends you to Dendrite Starblaze in
+# Moonglade, who sends you to the Great Cat Spirit (Night Elves, Tauren) or
+# the Avatar of Saeyleenan (Skyborne, the Windborne quests 98341, 98404,
+# 98738); three relics from the Stormrage Barrow Dens, then back to Dendrite
+# and your trainer.
+# - Alliance: The Great Cat Spirit (98393, Mathrengyl Bearwalker) -> 98394,
+#   98396, 98731 (Night Elves) or 98341, 98404, 98738 (Skyborne) -> To
+#   Darnassus (98397).
+# - Horde: The Great Cat Spirit (98340, Turak Runetotem) -> 98405, 98342,
+#   98739 (Tauren) or 98341, 98404, 98738 (Skyborne) -> To Thunder Bluff
+#   (98362).
+# The leveling guides carry the chain inline (alliance/03-darkshore,
+# horde/04-the-barrens): this guide is for druids off our route.
+# Sources: quests.json (Questie 12.1.0, Forever) and the relic points and
+# tips of the leveling guides above (from players' reports in the first
+# weeks of the beta).
+
+# ---------------------------------------------------------------- Alliance
+
+step The Great Cat Spirit
+  only NightElf,Skyborne,Alliance
+  zone Darnassus
+  tip Mathrengyl Bearwalker stands in the Cenarion Enclave. Skyborne without the Rut'theran flight path: take the boat from Auberdine.
+  level 20
+  accept 98393                          -- Mathrengyl Bearwalker
+
+step Dendrite Starblaze
+  only NightElf,Skyborne,Alliance
+  zone Moonglade
+  tip Cast Teleport: Moonglade. Dendrite Starblaze is in Nighthaven; learn the flight path there if you do not have it.
+  turnin 98393                          -- Dendrite Starblaze
+  accept 98394 only NightElf
+  accept 98341 only Skyborne
+  getfp "Moonglade"
+
+step The relics of the Barrow Dens
+  only NightElf,Skyborne,Alliance
+  tip The Great Cat Spirit (Night Elves) waits on the southern hill above the bridge, the Avatar of Saeyleenan (Skyborne) south of the twin bridges. The relics lie in the Stormrage Barrow Dens east of the lake: leave your form, click the statue at the entrance for five minutes of stealth, keep clear of the spirits inside and take one of each relic; the Relic of the Silent Shadow lies at the foot of the white cat statue. A relic gives no loot while another player is looting it: wait a moment and try again.
+  turnin 98394 only NightElf            -- Great Cat Spirit
+  accept 98396 only NightElf
+  turnin 98341 only Skyborne            -- Avatar of Saeyleenan
+  accept 98404 only Skyborne
+  collect 280502 quest 98396.1 @72.4,66.0 only NightElf -- Relic of the Fang
+  collect 280679 quest 98396.2 @75.2,67.2 only NightElf -- Relic of the Claw
+  collect 280680 quest 98396.3 @74.4,65.4 only NightElf -- Relic of the Silent Shadow
+  collect 280502 quest 98404.1 @72.4,66.0 only Skyborne -- Relic of the Fang
+  collect 280679 quest 98404.2 @75.2,67.2 only Skyborne -- Relic of the Claw
+  collect 280680 quest 98404.3 @74.4,65.4 only Skyborne -- Relic of the Silent Shadow
+  turnin 98396 only NightElf            -- Great Cat Spirit
+  accept 98731 only NightElf
+  turnin 98404 only Skyborne            -- Avatar of Saeyleenan
+  accept 98738 only Skyborne
+
+step Back to Dendrite
+  only NightElf,Skyborne,Alliance
+  tip Back to Dendrite Starblaze in Nighthaven, then fly to Rut'theran Village.
+  turnin 98731 only NightElf            -- Dendrite Starblaze
+  turnin 98738 only Skyborne
+  accept 98397
+  fly "Rut'theran Village"
+
+step To Darnassus
+  only NightElf,Skyborne,Alliance
+  zone Darnassus
+  tip Take the portal up to Mathrengyl in the Cenarion Enclave.
+  turnin 98397                          -- Mathrengyl Bearwalker: Cat Form
+
+# ---------------------------------------------------------------- Horde
+
+step The Great Cat Spirit
+  only Tauren,Skyborne,Horde
+  zone Thunder Bluff
+  tip Turak Runetotem stands on Elder Rise.
+  level 20
+  accept 98340                          -- Turak Runetotem
+
+step Dendrite Starblaze
+  only Tauren,Skyborne,Horde
+  zone Moonglade
+  tip Cast Teleport: Moonglade. Dendrite Starblaze is in Nighthaven.
+  turnin 98340                          -- Dendrite Starblaze
+  accept 98405 only Tauren
+  accept 98341 only Skyborne
+
+step The Stormrage Barrow Dens
+  only Tauren,Skyborne,Horde
+  tip The Great Cat Spirit (Tauren) waits on the southern hill above the bridge, the Avatar of Saeyleenan (Skyborne) south of the twin bridges. The relics lie in the Stormrage Barrow Dens east of the lake: leave your form, click the statue at the entrance for five minutes of stealth, keep clear of the spirits inside and take one of each relic; the Relic of the Silent Shadow lies at the foot of the white cat statue. A relic gives no loot while another player is looting it: wait a moment and try again.
+  turnin 98405 only Tauren              -- Great Cat Spirit
+  accept 98342 only Tauren
+  turnin 98341 only Skyborne            -- Avatar of Saeyleenan
+  accept 98404 only Skyborne
+  collect 280502 quest 98342.1 @72.4,66.0 only Tauren -- Relic of the Fang
+  collect 280679 quest 98342.2 @75.2,67.2 only Tauren -- Relic of the Claw
+  collect 280680 quest 98342.3 @74.4,65.4 only Tauren -- Relic of the Silent Shadow
+  collect 280502 quest 98404.1 @72.4,66.0 only Skyborne -- Relic of the Fang
+  collect 280679 quest 98404.2 @75.2,67.2 only Skyborne -- Relic of the Claw
+  collect 280680 quest 98404.3 @74.4,65.4 only Skyborne -- Relic of the Silent Shadow
+  turnin 98342 only Tauren              -- Great Cat Spirit
+  accept 98739 only Tauren
+  turnin 98404 only Skyborne            -- Avatar of Saeyleenan
+  accept 98738 only Skyborne
+
+step Back to Dendrite
+  only Tauren,Skyborne,Horde
+  tip Back to Dendrite Starblaze in Nighthaven, then take Bunthen Plainswind's flight to Thunder Bluff.
+  turnin 98739 only Tauren              -- Dendrite Starblaze
+  turnin 98738 only Skyborne
+  accept 98362
+  fly "Thunder Bluff"
+
+step To Thunder Bluff
+  only Tauren,Skyborne,Horde
+  zone Thunder Bluff
+  turnin 98362                          -- Turak Runetotem: Cat Form

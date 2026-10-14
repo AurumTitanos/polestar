@@ -1,0 +1,103 @@
+guide forever/class/warrior/whirlwind-weapon
+title Whirlwind Weapon
+category Class
+class Warrior
+folder Warrior
+levels 30-40
+zone The Barrens
+keywords Berserker Stance, The Islander, The Affray, Klannoc Macleod, Fray Island, Big Will, Bath'rah the Windwatcher, Cyclonian, Essence of the Exile, Whirlwind Axe, Whirlwind Sword, Whirlwind Warhammer, Warrior, class weapon
+
+# Berserker Stance and the Whirlwind weapon: The Islander and The Affray
+# (1718, 1719, level 30), The Windwatcher (1791), Cyclonian with Essence of
+# the Exile (1712, 1714), The Summoning (1713) and Whirlwind Weapon (1792,
+# level 40).
+# Sources: quests.json, npcs.json, objects.json and items.json for the chain,
+# objectives, drops and places; Wowhead Forever's Warrior class page
+# (data/local/quest-audit/wowhead-class-quests.json) for the rewards and
+# Forever's changes: The Affray now teaches Berserker Stance; Whirlwind Weapon
+# lets you choose the Whirlwind Axe, Sword or Warhammer.
+# The leveling guides take The Islander and The Affray on the route
+# (alliance/30-40/01-hillsbrad-foothills and 40-50/01-stranglethorn-vale;
+# horde/30-40/03-arathi-highlands); they are repeated here for anyone off it.
+# The rest is left out of the leveling guides: it ends in an elite fight and
+# runs from the Barrens to Alterac, Arathi and Stranglethorn.
+# Level 30 and up is above the beta's level cap: this guide is written from
+# the data, not from play.
+
+step The Islander (Stormwind)
+  only Human,NightElf,Skyborne,Alliance
+  zone Stormwind City
+  tip At 30, Wu Shen in Old Town, beside the Pig and Whistle, sends you to Klannoc Macleod on Fray Island in the Barrens.
+  level 30
+  accept 1718 npc 5479                        -- Wu Shen
+
+step The Islander (Ironforge)
+  only Dwarf,Gnome
+  zone Ironforge
+  tip At 30, Kelv Sternhammer, the warrior trainer of Ironforge, sends you to Klannoc Macleod on Fray Island in the Barrens.
+  level 30
+  accept 1718 npc 5113                        -- Kelv Sternhammer
+
+step The Islander (Orgrimmar)
+  only Orc,Troll,Skyborne,Horde
+  zone Orgrimmar
+  tip At 30, Sorek in the Valley of Honor sends you to Klannoc Macleod on Fray Island in the Barrens.
+  level 30
+  accept 1718 npc 3354                        -- Sorek
+
+step The Islander (Thunder Bluff)
+  only Tauren
+  zone Thunder Bluff
+  tip At 30, Torm Ragetotem, the warrior trainer of Thunder Bluff, sends you to Klannoc Macleod on Fray Island in the Barrens.
+  level 30
+  accept 1718 npc 3041                        -- Torm Ragetotem
+
+step The Islander (Undercity)
+  only Undead
+  zone Undercity
+  tip At 30, Baltus Fowler, a warrior trainer of the Undercity, sends you to Klannoc Macleod on Fray Island in the Barrens.
+  level 30
+  accept 1718 npc 4595                        -- Baltus Fowler
+
+step The Affray
+  zone The Barrens
+  tip Ride south along the coast from Ratchet to Fray Island. Klannoc Macleod stands by the arena: step on the grate to start the fight; the challengers come one at a time, then Big Will (33).
+  turnin 1718                                 -- Klannoc Macleod
+  accept 1719
+  complete 1719                               -- Defeat the challengers and Big Will
+  turnin 1719                                 -- Klannoc Macleod: Berserker Stance
+  accept 1791
+
+step Bath'rah the Windwatcher
+  zone Alterac Mountains
+  tip Bath'rah the Windwatcher camps in the south-east of Alterac Mountains, above Hillsbrad Foothills; his cauldron stands beside him. He asks for a Liferoot, a Bloodscalp Tusk and the Essence of the Exile, which his cauldron brews from three charms.
+  turnin 1791                                 -- Bath'rah the Windwatcher
+  accept 1712
+  accept 1714                                 -- Bath'rah's Cauldron
+
+step The exiles of Arathi
+  zone Arathi Highlands
+  tip Three kinds of elemental exiles roam Arathi Highlands: Burning Exiles in the north-west, Thundering Exiles in the middle, Cresting Exiles in the north-east. Each drops its charm.
+  collect 4479 quest 1714.2                   -- Burning Charm from the Burning Exiles
+  collect 4480 quest 1714.1                   -- Thundering Charm from the Thundering Exiles
+  collect 4481 quest 1714.3                   -- Cresting Charm from the Cresting Exiles
+
+step Essence of the Exile
+  zone Alterac Mountains
+  turnin 1714                                 -- Bath'rah's Cauldron: Essence of the Exile
+  collect 3357 quest 1712.1                   -- Liferoot: Herbalism, or the auction house
+
+step Bloodscalp Tusk
+  zone Stranglethorn Vale
+  tip The Bloodscalp trolls hold the north-west of Stranglethorn Vale; they drop the Bloodscalp Tusk.
+  collect 3901 quest 1712.2                   -- Bloodscalp Tusk
+
+step The Summoning
+  zone Alterac Mountains
+  tip Cyclonian waits just north of Bath'rah's camp and carries the Whirlwind Heart. Cyclonian is elite: grouping up is advised.
+  turnin 1712                                 -- Bath'rah the Windwatcher
+  accept 1713
+  collect 6894 quest 1713.1                   -- Whirlwind Heart from Cyclonian
+  turnin 1713
+  accept 1792
+  turnin 1792 choose 6975 6977 6976           -- Bath'rah the Windwatcher

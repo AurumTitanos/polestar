@@ -1,0 +1,47 @@
+guide forever/class/warrior/heirloom-weapon
+title Heirloom Weapon
+category Class
+class Warrior
+folder Warrior
+faction Horde
+race Undead
+levels 10-11
+zone Tirisfal Glades
+keywords Defensive Stance, Ulag the Cleaver, Deathguard Dillinger, Coleman Farthing, Agamand Heirlooms, Agamand Mills, Heirloom Axe, Heirloom Hammer, Heirloom Dagger, Heirloom Sword, Warrior, class weapon
+
+# Speak with Coleman, Agamand Heirlooms and Heirloom Weapon (1820, 1821,
+# 1822): the weapon after Ulag the Cleaver (1819), the Undead Defensive
+# Stance quest in Brill.
+# Sources: quests.json, npcs.json and objects.json for the chain, Ulag and the
+# four Agamand Weapon Racks; Wowhead Forever's Warrior class page
+# (data/local/quest-audit/wowhead-class-quests.json) for the rewards: Ulag the
+# Cleaver teaches Defensive Stance, Heirloom Weapon lets you choose the
+# Heirloom Axe, Hammer, Dagger or Sword.
+# horde/undead/01-tirisfal-glades does Ulag the Cleaver on the route; this
+# guide repeats it for anyone off the route. Orc, Troll and Tauren Warriors
+# take Path of Defense (1498) instead, which the game does not offer together
+# with Ulag, and get their weapon from Forged Steel (1503) on the route.
+
+step Ulag the Cleaver
+  tip Deathguard Dillinger stands in Brill. Ulag waits in the mausoleum on the hill just north of town: open the gate and fight him.
+  accept 1819                                 -- Deathguard Dillinger
+  kill 6390 quest 1819.1
+  turnin 1819                                 -- Deathguard Dillinger: Defensive Stance
+  accept 1820
+
+step Coleman Farthing
+  tip Coleman Farthing is in the inn, the Gallows' End Tavern, in Brill.
+  turnin 1820                                 -- Coleman Farthing
+  accept 1821
+
+step Agamand Mills
+  tip The four Agamand Weapon Racks stand among the buildings of Agamand Mills, north of Brill. The mills' undead attack on sight.
+  collect 7567 quest 1821.1                   -- Agamand Family Axe
+  collect 7568 quest 1821.2                   -- Agamand Family Dagger
+  collect 7569 quest 1821.3                   -- Agamand Family Mace
+  collect 7566 quest 1821.4                   -- Agamand Family Sword
+
+step Back to Coleman Farthing
+  turnin 1821                                 -- Coleman Farthing
+  accept 1822
+  turnin 1822 choose 7115 7117 7116 7118      -- Coleman Farthing

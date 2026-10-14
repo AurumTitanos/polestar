@@ -1,0 +1,209 @@
+guide forever/class/druid/bear-form
+title Bear Form & Teleport: Moonglade
+category Class
+folder Druid
+keywords Bear Form, Teleport: Moonglade, Moonglade, Heeding the Call, Great Bear Spirit, Body and Heart, Moonkin Stone, Lunaclaw, Child of Nature, Great Ursera Spirit, Strength and Mercy, Ur'endra, Skyborne, class quest
+class Druid
+levels 10-12
+zone Moonglade
+
+# The level-10 druid quests: Teleport: Moonglade and Bear Form. In Forever
+# Bear Form is no longer trained: Body and Heart (6001 Night Elf, 6002 Tauren)
+# and Strength and Mercy (94638, Skyborne) reward it (Wowhead Forever's druid
+# class page: "Rewards: adds Bear Form").
+# - Night Elves: Heeding the Call (5923 Denatharion, 5924 Theridran in
+#   Stormwind, 5925 Kal in Dolanaar: one of them) -> Moonglade (5921) -> Great
+#   Bear Spirit (5929) -> Back to Darnassus (5931) -> Body and Heart (6001) at
+#   the Moonkin Stone by Auberdine.
+# - Tauren: Heeding the Call (5926 Innkeeper Pala, 5928 Gennia Runetotem in
+#   Bloodhoof Village; 5927 Innkeeper Gryshka in Orgrimmar also leads to
+#   Turak) -> Moonglade (5922) -> Great Bear Spirit (5930) -> Back to Thunder
+#   Bluff (5932) -> Body and Heart (6002) at the Moonkin Stone in the pass out
+#   of Mulgore.
+# - Skyborne: Bear Form comes from Lotheluum Starbreeze on Zephras Isle (The
+#   Great Ursera Spirit 94006, Strength and Mercy 94638). The Moonglade welcome
+#   is Forever-new: Horde Skyborne get Child of Nature (94911) from Muln
+#   Earthfury where the airship lands in Mulgore and Moonglade (94913) from
+#   Turak Runetotem; Alliance Skyborne get Child of Nature (94912) from Alfina
+#   Nightgaze beside the Skyborne Portal west of Dalaran (Archmage Ansirem
+#   Runeweaver offers it too) and Moonglade (94914) from Sheldras Moontree in
+#   Stormwind. Both reward Nightclaw Druids reputation (Wowhead).
+# Left out: Stalk With The Earthmother (76156, 76160, 76240, Boarton
+# Shadetotem in Thunder Bluff). Wowhead's Forever change notes open 76156 and
+# 76160 to every class (not druid quests) and 76240 to Hunters, Shamans and
+# Druids, but the data cannot place their objectives (no source for the
+# Seaforium Mining Charges, Windfury Cones or Raw Brilliant Smallfish) and
+# still gives 76240 to Shamans only.
+# The leveling guides carry all of this inline (nightelf/01-teldrassil,
+# tauren/01-mulgore, both skyborne/01-zephras-isle; the Alliance Skyborne
+# Moonglade welcome is proposed for them): this guide is for druids off our
+# route.
+# Sources: quests.json and npcs.json (Questie 12.1.0, Forever); Wowhead
+# Forever quest pages 94911-94914; the skyboat points are the ones of
+# collectibles/pets/shadowgale-squirrel.
+
+# ---------------------------------------------------------------- Night Elves
+
+step Heeding the Call
+  only NightElf
+  zone Teldrassil
+  tip At 10 a druid's call reaches you: Kal in Dolanaar, Denatharion in Darnassus or Theridran in Stormwind. Any one of them sends you to Mathrengyl Bearwalker in the Cenarion Enclave of Darnassus.
+  level 10
+  accept 5925 optional                  -- Kal, Dolanaar; Denatharion's and Theridran's letters lead to the same place
+
+step Mathrengyl Bearwalker
+  only NightElf
+  zone Darnassus
+  tip Mathrengyl Bearwalker stands in the Cenarion Enclave.
+  turnin 5925 optional                  -- or whichever of the three letters you carry
+  accept 5921
+
+step Moonglade
+  only NightElf
+  zone Moonglade
+  tip Cast Teleport: Moonglade. Dendrite Starblaze is in Nighthaven; the Great Bear Spirit sits in the woods to the north-west. Learn the Moonglade flight path, then fly to Rut'theran Village (by way of Auberdine) and take the portal up to Darnassus.
+  turnin 5921                           -- Dendrite Starblaze
+  accept 5929
+  complete 5929 @39.1,27.5              -- Speak with the Great Bear Spirit
+  turnin 5929
+  accept 5931
+  getfp "Moonglade"
+  fly "Rut'theran Village"
+
+step Back to Darnassus
+  only NightElf
+  zone Darnassus
+  turnin 5931                           -- Mathrengyl Bearwalker
+  accept 6001
+
+step The Moonkin Stone
+  only NightElf
+  zone Darkshore
+  tip Fly from Rut'theran Village to Auberdine. The Moonkin Stone stands in the hills just east of the village: use the Cenarion Moondust there, defeat Lunaclaw and speak to the Lunaclaw Spirit.
+  fly "Auberdine"
+  use 15208 @43.5,46.0                  -- Cenarion Moondust
+  complete 6001
+
+step Body and Heart
+  only NightElf
+  zone Darnassus
+  tip Fly back to Rut'theran Village and take the portal up to Mathrengyl.
+  fly "Rut'theran Village"
+  turnin 6001                           -- Mathrengyl Bearwalker: Bear Form
+
+# ---------------------------------------------------------------- Tauren
+
+step Heeding the Call
+  only Tauren
+  zone Mulgore
+  tip At 10 a druid's call reaches you: Gennia Runetotem in Bloodhoof Village or Innkeeper Pala in Thunder Bluff (Innkeeper Gryshka's letter in Orgrimmar works too). Any one of them sends you to Turak Runetotem on Elder Rise in Thunder Bluff.
+  level 10
+  accept 5928 optional                  -- Gennia Runetotem, Bloodhoof Village; Pala's and Gryshka's letters lead to the same place
+
+step Turak Runetotem
+  only Tauren
+  zone Thunder Bluff
+  tip Turak Runetotem stands on Elder Rise.
+  turnin 5928 optional                  -- or whichever of the three letters you carry
+  accept 5922
+
+step Moonglade
+  only Tauren
+  zone Moonglade
+  tip Cast Teleport: Moonglade. Dendrite Starblaze is in Nighthaven; the Great Bear Spirit sits in the woods to the north-west. Bunthen Plainswind in Nighthaven flies druids to Thunder Bluff.
+  turnin 5922                           -- Dendrite Starblaze
+  accept 5930
+  complete 5930 @39.1,27.5              -- Speak with the Great Bear Spirit
+  turnin 5930
+  accept 5932
+  fly "Thunder Bluff"
+
+step Back to Thunder Bluff
+  only Tauren
+  zone Thunder Bluff
+  turnin 5932                           -- Turak Runetotem
+  accept 6002
+
+step The Moonkin Stone
+  only Tauren
+  zone Mulgore
+  tip The Moonkin Stone stands in the pass from Mulgore into the Barrens. Use the Cenarion Lunardust there, defeat Lunaclaw and speak to the Lunaclaw Spirit.
+  use 15710 @71.7,65.0                  -- Cenarion Lunardust
+  complete 6002
+
+step Body and Heart
+  only Tauren
+  zone Thunder Bluff
+  tip Back to Turak Runetotem on Elder Rise.
+  turnin 6002                           -- Turak Runetotem: Bear Form
+
+# ---------------------------------------------------------------- Skyborne: Bear Form on Zephras Isle
+
+step Skyboat from Dalaran
+  only Skyborne,Alliance
+  zone Alterac Mountains
+  tip Bear Form is taught on Zephras Isle. Skip this if you are still on the isle; otherwise take the skyboat from the north side of Dalaran.
+  goto 12.5,51.8 "Skyboat to Zephras Isle" live
+
+step Skyboat from Thunder Bluff
+  only Skyborne,Horde
+  zone Mulgore
+  tip Bear Form is taught on Zephras Isle. Skip this if you are still on the isle; otherwise take the skyboat from the cliffs south of Skywatcher Plateau, north of Thunder Bluff.
+  goto 34.3,25.8 "Skyboat to Zephras Isle" live
+
+step Lotheluum Starbreeze
+  only Skyborne
+  zone Zephras Isle
+  tip Lotheluum Starbreeze stands in Valanaar.
+  level 10
+  accept 94006
+
+step Urs'endris and Ur'endra
+  only Skyborne
+  tip Urs'endris waits by the falls north-east of Valanaar. Ur'endra prowls the Shen'dar Highlands, west of Valanaar.
+  turnin 94006                          -- Urs'endris
+  accept 94638
+  kill 258443 quest 94638.1             -- Ur'endra
+
+step Strength and Mercy
+  only Skyborne
+  tip Back to Urs'endris by the falls.
+  turnin 94638                          -- Urs'endris: Bear Form
+
+# ---------------------------------------------------------------- Skyborne: Teleport: Moonglade
+
+step Child of Nature
+  only Skyborne,Horde
+  zone Mulgore
+  tip Muln Earthfury waits where the airship from Zephras Isle lands, in northern Mulgore beside Thunder Bluff.
+  level 10
+  accept 94911                          -- Muln Earthfury
+
+step Turak Runetotem
+  only Skyborne,Horde
+  zone Thunder Bluff
+  tip Turak Runetotem trains druids on Elder Rise.
+  turnin 94911
+  accept 94913
+
+step Child of Nature
+  only Skyborne,Alliance
+  zone Alterac Mountains
+  tip Alfina Nightgaze stands beside Denaaris Stargale and the Skyborne Portal, west of Dalaran, where the skycutter from Zephras Isle lands. Archmage Ansirem Runeweaver offers the same quest.
+  level 10
+  accept 94912 npc 270459               -- Alfina Nightgaze
+
+step Sheldras Moontree
+  only Skyborne,Alliance
+  zone Stormwind City
+  tip The Skyborne Portal takes you to Stormwind. Sheldras Moontree is the city's druid trainer.
+  turnin 94912
+  accept 94914
+
+step Dendrite Starblaze
+  only Skyborne
+  zone Moonglade
+  tip Cast Teleport: Moonglade. Dendrite Starblaze is in Nighthaven. Learn the Moonglade flight path while you are here.
+  turnin 94913 only Horde               -- Dendrite Starblaze
+  turnin 94914 only Alliance
+  getfp "Moonglade"

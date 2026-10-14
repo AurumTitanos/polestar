@@ -1,0 +1,35 @@
+guide forever/class/priest/touch-of-weakness-and-dark-sacrifice
+title Touch of Weakness and Dark Sacrifice
+category Class
+class Priest
+folder Priest
+faction Horde
+race Undead
+levels 10-20
+zone Undercity
+keywords Touch of Weakness, Dark Sacrifice, Devouring Plague, Aelthalyste, War Quarter, Undead, Forsaken, racial, Priest
+
+# The Undead Priest spell quests: Touch of Weakness at 10 (5658) and Dark
+# Sacrifice at 20 (5679), both from Aelthalyste in the Undercity.
+# Sources: quests.json and npcs.json for the givers; Wowhead Forever's
+# Priest class page (data/local/quest-audit/wowhead-class-quests.json):
+# Dark Sacrifice (5644, 5646, 5679) is Devouring Plague renamed and teaches
+# Dark Sacrifice instead (every Priest now trains Devouring Plague at 20:
+# classicwowforever.com/racials); Touch of Weakness is unchanged.
+# horde/undead/01-tirisfal-glades carries Touch of Weakness on the route
+# and horde/04-the-barrens and 05-stonetalon-mountains carry Dark Sacrifice
+# (5646, from Ur'kyo in Orgrimmar); this guide repeats them for anyone off
+# the route. The game offers one quest of each set.
+# Not checked in game: written from the sources above.
+
+step Touch of Weakness
+  tip At 10, go to Aelthalyste in the Undercity's War Quarter. Priest trainers elsewhere (Ur'kyo in Orgrimmar, Tai'jin in Razor Hill, Miles Welsh in Thunder Bluff) send you to her with a quest of the same name.
+  level 10
+  accept 5658                                 -- Aelthalyste
+  turnin 5658                                 -- Aelthalyste: Touch of Weakness
+
+step Dark Sacrifice
+  tip At 20, Aelthalyste teaches Dark Sacrifice. Ur'kyo in Orgrimmar and Miles Welsh in Thunder Bluff send you to her with a quest of the same name.
+  level 20
+  accept 5679                                 -- Aelthalyste
+  turnin 5679                                 -- Aelthalyste: Dark Sacrifice

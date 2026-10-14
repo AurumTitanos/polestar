@@ -1,0 +1,145 @@
+guide forever/class/warrior/brutal-armor
+title Brutal Armor
+category Class
+class Warrior
+folder Warrior
+faction Horde
+levels 20-32
+zone The Barrens
+keywords Ruga Ragetotem, Trial at the Field of Giants, Ruga's Bulwark, Thun'grim Firegaze, Brutal Hauberk, Brutal Gauntlets, Brutal Helm, Brutal Legguards, Roogug, Razorfen Kraul, Warrior, class armor
+
+# The Horde Warrior armor chain: Speak with Ruga, Trial at the Field of Giants
+# and Speak with Thun'grim (1823-1825, level 20), then Brutal Armor (1838),
+# Brutal Hauberk (1848) and three pieces from three crafters: Ula'elek in
+# Sen'jin Village (1839, 1842, 1843), Orm Stonehoof in Thunder Bluff (1840,
+# 1844, 1845) and Velora Nitely in the Undercity (1841, 1846, 1847), level 30.
+# Sources: quests.json, npcs.json, objects.json and items.json for the chain,
+# objectives, drops and places; Wowhead Forever's Warrior class page
+# (data/local/quest-audit/wowhead-class-quests.json) for the rewards and
+# Forever's changes (none for this chain); the Razorfen Kraul entrance from
+# data/forever/dungeons.json (The Barrens 42.9,90.2, live frame). Roogug, who
+# drops the Vial of Phlogiston, has no spawn in the data: he is a quilboar
+# elite inside Razorfen Kraul (https://www.wowhead.com/zone=491/razorfen-kraul,
+# https://wowwiki-archive.fandom.com/wiki/Vial_of_Phlogiston). Iron Bars have
+# no source in the data: they are smelted (Mining) or bought; the guide points
+# at the Orgrimmar auction house (Auctioneer Thathung, npc 8673).
+# horde/04-the-barrens does 1823-1825 on the route; they are repeated here for
+# anyone off it. Brutal Armor needs a dungeon (Razorfen Kraul), and the pieces
+# send you to Ashenvale, Stonetalon, the Wetlands and three capitals: a guide
+# of its own, not a leveling step.
+# Brutal Armor and its follow-ups (level 30) are above the beta's level cap:
+# this part is written from the data, not from play.
+
+step Speak with Ruga (Orgrimmar)
+  only Orc,Troll,Skyborne
+  zone Orgrimmar
+  tip At 20, Sorek in the Valley of Honor sends you to Ruga Ragetotem in Camp Taurajo.
+  level 20
+  accept 1823 npc 3354                        -- Sorek
+
+step Speak with Ruga (Thunder Bluff)
+  only Tauren
+  zone Thunder Bluff
+  tip At 20, Torm Ragetotem, the warrior trainer of Thunder Bluff, sends you to Ruga Ragetotem in Camp Taurajo.
+  level 20
+  accept 1823 npc 3041                        -- Torm Ragetotem
+
+step Speak with Ruga (Undercity)
+  only Undead
+  zone Undercity
+  tip At 20, Baltus Fowler, a warrior trainer of the Undercity, sends you to Ruga Ragetotem in Camp Taurajo.
+  level 20
+  accept 1823 npc 4595                        -- Baltus Fowler
+
+step Trial at the Field of Giants
+  zone The Barrens
+  tip Fly to Camp Taurajo. South of the camp the Silithid Mounds dot the Field of Giants: the silithid there carry the Twitching Antennae.
+  turnin 1823                                 -- Ruga Ragetotem
+  accept 1824
+  collect 7119 quest 1824.1                   -- Twitching Antennae from the silithid
+  turnin 1824 reward 7120                     -- Ruga Ragetotem
+  accept 1825
+
+step Thun'grim Firegaze
+  tip Thun'grim camps beside the road east of the Crossroads. Brutal Armor is a level 30 quest; you can take it now and gather for it on the way.
+  turnin 1825
+  accept 1838
+
+step Roogug in Razorfen Kraul
+  tip Roogug is an elite quilboar inside Razorfen Kraul, the dungeon at the south end of the Barrens; he drops the Vial of Phlogiston. Razorfen Kraul is a dungeon: grouping up is advised.
+  collect 6841 quest 1838.4 @42.9,90.2 live   -- Vial of Phlogiston, from Roogug
+
+step Windshear Mine
+  zone Stonetalon Mountains
+  tip The Windshear Mine lies at the east end of Windshear Crag in Stonetalon. Its kobolds drop the Smoky Iron Ingots.
+  collect 7126 quest 1838.1                   -- Smoky Iron Ingots from the Windshear kobolds
+
+step Hillsbrad Miners
+  zone Hillsbrad Foothills
+  tip The Hillsbrad Miners work the mine in the west of Hillsbrad Foothills; they drop the Powdered Azurite. Take the zeppelin from Orgrimmar to Tirisfal Glades and ride south through Silverpine Forest.
+  collect 7127 quest 1838.2                   -- Powdered Azurite from the Hillsbrad Miners
+
+step Iron Bars
+  zone Orgrimmar
+  tip Miners smelt Iron Bars from Iron Ore (Mining 125); everyone else buys them at the auction house in Orgrimmar.
+  collect 3575 quest 1838.3 @55.9,62.7        -- Iron Bars: Auctioneer Thathung
+
+step Brutal Hauberk
+  zone The Barrens
+  tip Back to Thun'grim beside the road east of the Crossroads. Brutal Hauberk is the first piece; he then sends you to three crafters for the rest.
+  turnin 1838                                 -- Thun'grim Firegaze
+  accept 1848
+  turnin 1848 reward 7133
+  accept 1839
+  accept 1840
+  accept 1841
+
+step Ula'elek
+  zone Durotar
+  tip Ula'elek is in Sen'jin Village on the Durotar coast.
+  turnin 1839                                 -- Ula'elek
+  accept 1842
+
+step Satyr Hooves
+  zone Ashenvale
+  tip The Xavian satyrs camp in eastern Ashenvale, with the Felmusk satyrs further west; both drop Uncloven Satyr Hooves.
+  collect 7128 quest 1842.1                   -- Uncloven Satyr Hooves
+
+step Brutal Gauntlets
+  zone Durotar
+  turnin 1842                                 -- Ula'elek, Sen'jin Village
+  accept 1843
+  turnin 1843 reward 7129
+
+step Orm Stonehoof
+  zone Thunder Bluff
+  turnin 1840                                 -- Orm Stonehoof
+  accept 1844
+
+step Chimaeric Horn
+  zone Stonetalon Mountains
+  tip The Chimaera Matriarch roams the south-west of Stonetalon near the Fledgling and Young Chimaeras; she drops the Galvanized Horn.
+  collect 6840 quest 1844.1                   -- Galvanized Horn from the Chimaera Matriarch
+
+step Brutal Helm
+  zone Thunder Bluff
+  turnin 1844                                 -- Orm Stonehoof
+  accept 1845
+  turnin 1845 reward 7130
+
+step Velora Nitely
+  zone Undercity
+  tip Take the zeppelin from Orgrimmar to Tirisfal Glades; the Undercity lies below the Ruins of Lordaeron.
+  turnin 1841                                 -- Velora Nitely
+  accept 1846
+
+step Dragonmaw Shinbones
+  zone Wetlands
+  tip The Dragonmaw orcs camp in the middle of the Wetlands, south of the road; Raiders, Swamprunners, Centurions, Shadowwarders and Bonewarders all drop the Sturdy Dragonmaw Shinbones.
+  collect 7134 quest 1846.1                   -- Sturdy Dragonmaw Shinbones
+
+step Brutal Legguards
+  zone Undercity
+  turnin 1846                                 -- Velora Nitely
+  accept 1847
+  turnin 1847 reward 7132

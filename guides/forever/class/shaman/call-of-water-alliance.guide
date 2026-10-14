@@ -1,0 +1,103 @@
+guide forever/class/shaman/call-of-water-alliance
+title Call of Water (Alliance)
+category Class
+class Shaman
+folder Shaman
+faction Alliance
+levels 20-23
+zone Ironforge
+keywords Water Totem, Healing Stream Totem, Water Sapta, Eldrun Stormbreaker, Norric Lochthane, Hervdana Saegrund, waterskin, Stonewatch Falls, Astranaar, Stendel's Pond, Forgotten Shrine, Minor Manifestation of Water, Shaman, class quest, totem
+
+# Call of Water for Alliance (Dwarf) Shamans, Forever's own chain (94494 to
+# 94505): Eldrun Stormbreaker in Ironforge -> Norric Lochthane in Loch Modan
+# -> Hervdana Saegrund in the Wetlands, who sends you for three waterskins
+# (below her cave, Stonewatch Falls in Redridge, the lake of Astranaar in
+# Ashenvale) -> Norric (Water Sapta) -> Stendel's Pond in Westfall -> Norric,
+# who teaches Healing Stream Totem and gives the Water Totem.
+# Sources: quests.json, npcs.json and objects.json for givers, enders and the
+# Forgotten Shrine; Wowhead Forever's quest pages
+# (https://www.wowhead.com/forever/quest=94494 and the chain's "Series" box)
+# for the order, the fill places (their objective texts) and the rewards
+# (94501: Water Sapta; 94505: Healing Stream Totem and the Water Totem).
+# Places the data does not have:
+# - The waterskins have no fill object in the data. Their points are the
+#   places the objectives name: Hervdana's cave (her own spawn), the Murloc
+#   Nightcrawlers at the foot of Stonewatch Falls (npc 544's spawns) and
+#   Astranaar (its flight master's spot; fill the skin in the lake around the
+#   town).
+# - The data places the Corrupt Minor Manifestation of Water (5894) and the
+#   Minor Manifestation of Water (5895) only by the Brazier of Everfount in
+#   Silverpine Forest, where the Horde chain meets them. 94502's text sends
+#   you to Stendel's Pond outside Moonbrook, and 94503's to the Minor
+#   Manifestation "in Westfall", called forth at the Forgotten Shrine: both
+#   are pinned to the shrine (45.6,59.9), so lint warns that the two npcs have
+#   no known spawn there.
+# Water Sapta (94616): Norric replaces a lost Water Sapta; not a step.
+# The Alliance leveling guides leave this chain out (see
+# forever/alliance/dwarf-gnome/01-dun-morogh's header): Hervdana's three
+# waterskins send you back to the Wetlands three times.
+# Beta capped at 30: the chain was not played; it follows the data above.
+
+step Eldrun Stormbreaker
+  zone Ironforge
+  tip At 20 Eldrun Stormbreaker, the shaman trainer in Ironforge, sends you to Norric Lochthane in Loch Modan.
+  accept 94494                                -- Eldrun Stormbreaker
+
+step Norric Lochthane
+  zone Loch Modan
+  tip Norric's burrow hut stands on the north-western edge of the loch, south of Stonewrought Dam.
+  turnin 94494                                -- Norric Lochthane
+  accept 94495
+
+step Hervdana Saegrund
+  zone Wetlands
+  tip Hervdana's family lives in a cave beneath the southern falls of the Wetlands.
+  turnin 94495                                -- Hervdana Saegrund
+  accept 94497
+
+step The brown waterskin
+  tip Fill the Unfilled Brown Waterskin at the bottom of the waterfalls below Hervdana's cave, where the fresh water meets the brackish.
+  collect 265734 quest 94497.1 @65.8,76.5     -- Full Brown Waterskin
+
+step Hervdana Saegrund
+  turnin 94497                                -- Hervdana Saegrund
+  accept 94499
+
+step The red waterskin
+  zone Redridge Mountains
+  tip Stonewatch Falls pour out of Lake Everstill at the east end of Redridge. Fill the Unfilled Red Waterskin at their foot, where the Murloc Nightcrawlers gather.
+  collect 265748 quest 94499.1 @76.0,59.7     -- Full Red Waterskin
+
+step Hervdana Saegrund
+  zone Wetlands
+  turnin 94499                                -- Hervdana Saegrund
+  accept 94500
+
+step The blue waterskin
+  zone Ashenvale
+  tip Hervdana: take the boat from Menethil Harbor to Auberdine (it stops in Southshore on the way), then go south to Astranaar. Fill the Unfilled Blue Waterskin in the lake around the town.
+  collect 265773 quest 94500.1 @34.5,48.0     -- Full Blue Waterskin
+
+step Hervdana Saegrund
+  zone Wetlands
+  turnin 94500                                -- Hervdana Saegrund
+  accept 94501                                -- the Vial of Purest Water, for Norric
+
+step Norric Lochthane
+  zone Loch Modan
+  turnin 94501 reward 6637                    -- Norric Lochthane: your Water Sapta
+  accept 94502
+
+step Stendel's Pond
+  zone Westfall
+  tip Stendel's Pond lies outside Moonbrook. Drink the Water Sapta there and defeat the Corrupt Minor Manifestation of Water for its bracers, then place them and the Remaining Drops of Purest Water on the Forgotten Shrine. The Minor Manifestation of Water it calls forth gives you the Shard of Water.
+  use 6637 @45.6,59.9                         -- Water Sapta
+  collect 7812 quest 94502.1 @45.6,59.9       -- Corrupt Manifestation's Bracers
+  turnin 94502                                -- Forgotten Shrine
+  accept 94503
+  turnin 94503 @45.6,59.9                     -- Minor Manifestation of Water, at the shrine
+  accept 94505 @45.6,59.9
+
+step Norric Lochthane
+  zone Loch Modan
+  turnin 94505 reward 5177                    -- Norric Lochthane: Healing Stream Totem and your Water Totem

@@ -1,0 +1,104 @@
+guide forever/class/rogue/blade-of-cunning-alliance
+title Blade of Cunning (Alliance)
+category Class
+class Rogue
+folder Rogue
+faction Alliance
+levels 10-12
+zone Elwynn Forest
+keywords Blade of Cunning, Keryn Sylvius, Seek out SI: 7, Snatch and Grab, Mathias Shaw, Defias Dockmaster, Hogral Bakkan, Road to Salvation, Simple Subterfugin', Onin's Report, Hulfdan Blackbeard, Onin MacHammar, Jannok Breezesong, The Apple Falls, Destiny Calls, Syurna, Sethir the Ancient, Rogue, class weapon
+
+# The Alliance Rogue level 10 quests, one chain per home town, each ending
+# with the Blade of Cunning (7298), a dagger:
+# - Goldshire (Humans, and Skyborne, who reach Stormwind at about 15): Seek
+#   out SI: 7 and Snatch and Grab (2205, 2206).
+# - Kharanos (Dwarves, Gnomes): Road to Salvation, Simple Subterfugin' and
+#   Onin's Report (2218, 2238, 2239).
+# - Dolanaar (Night Elves): The Apple Falls and Destiny Calls (2241, 2242).
+# Sources: quests.json, npcs.json, objects.json and items.json for the givers,
+# drops and places; travel.json for the inns; Wowhead Forever's Rogue class
+# page (data/local/quest-audit/wowhead-class-quests.json) for the rewards and
+# Forever's changes (none for these chains). The quests' race masks take any
+# Alliance race; the race split follows where each race is at level 10.
+# The leveling guides leave these out: they teach no spell.
+
+# ---------------------------------------------------------------- Goldshire
+
+step Seek out SI: 7
+  only Human,Skyborne
+  tip At 10 Keryn Sylvius, the rogue trainer in the Lion's Pride Inn in Goldshire, gives you a package for Master Mathias Shaw in Stormwind.
+  level 10
+  accept 2205                                 -- Keryn Sylvius
+
+step Master Mathias Shaw
+  only Human,Skyborne
+  zone Stormwind City
+  tip Ride north to Stormwind; Mathias Shaw is at SI:7 in Old Town.
+  turnin 2205                                 -- Master Mathias Shaw
+  accept 2206
+
+step Defias Dockmaster
+  only Human,Skyborne
+  zone Elwynn Forest
+  tip The Defias Dockmaster stands by the river at Elwynn's southern edge, south of Goldshire. He carries the shipping schedule.
+  collect 7675 quest 2206.1                   -- Defias Shipping Schedule: Defias Dockmaster
+
+step Back to Mathias Shaw
+  only Human,Skyborne
+  zone Stormwind City
+  turnin 2206 reward 7298                     -- Master Mathias Shaw, SI:7
+
+# ---------------------------------------------------------------- Kharanos
+
+step Road to Salvation
+  only Dwarf,Gnome
+  zone Dun Morogh
+  tip At 10 Hogral Bakkan, the rogue trainer in the Thunderbrew Distillery in Kharanos, sends you to Hulfdan Blackbeard in Ironforge.
+  level 10
+  accept 2218                                 -- Hogral Bakkan
+
+step Hulfdan Blackbeard
+  only Dwarf,Gnome
+  zone Ironforge
+  tip Hulfdan Blackbeard stands in the north of Ironforge.
+  turnin 2218                                 -- Hulfdan Blackbeard
+  accept 2238
+
+step Onin MacHammar
+  only Dwarf,Gnome
+  zone Dun Morogh
+  tip Onin waits near Gnomeregan, in western Dun Morogh.
+  turnin 2238                                 -- Onin MacHammar
+  accept 2239
+
+step Back to Hulfdan
+  only Dwarf,Gnome
+  zone Ironforge
+  turnin 2239 reward 7298                     -- Hulfdan Blackbeard, Ironforge
+
+# ---------------------------------------------------------------- Dolanaar
+
+step The Apple Falls
+  only NightElf
+  zone Teldrassil
+  tip At 10 Jannok Breezesong, the rogue trainer in Dolanaar, gives you a rose for Syurna in Darnassus.
+  level 10
+  accept 2241                                 -- Jannok Breezesong
+
+step Syurna
+  only NightElf
+  zone Darnassus
+  tip Ride west to Darnassus. Syurna stands in the north-west of the city.
+  turnin 2241                                 -- Syurna
+  accept 2242
+
+step Sethir the Ancient
+  only NightElf
+  zone Teldrassil
+  tip Sethir the Ancient lives in the north of Teldrassil, north-east of Darnassus. Take his journal.
+  collect 7737 quest 2242.1                   -- Sethir's Journal: Sethir the Ancient
+
+step Back to Syurna
+  only NightElf
+  zone Darnassus
+  turnin 2242 reward 7298                     -- Syurna, Darnassus

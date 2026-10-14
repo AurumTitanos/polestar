@@ -1,0 +1,57 @@
+guide forever/class/mage/nether-lace-garment
+title Nether-lace Garment
+category Class
+class Mage
+folder Mage
+faction Horde
+race Undead,Troll
+levels 26-30
+zone Orgrimmar
+keywords Anastasia Hartwell, Speak with Deino, Waters of Xavian, Laughing Sisters, Raynewood Retreat, Ashenvale, Kil'hala, Crossroads, Nether-lace Robe, Nether-lace Tunic, Mage, class robe
+
+# The Horde mage robe at 26: Speak with Deino (1943), Waters of Xavian (1944),
+# Laughing Sisters (1945) and Nether-lace Garment (1946).
+# Sources: quests.json, npcs.json, objects.json and items.json for the chain,
+# the Xavian Waterfall and the Laughing Sisters; Wowhead Forever's Mage class
+# page (data/local/quest-audit/wowhead-class-quests.json, all four unchanged)
+# and quest pages (https://www.wowhead.com/forever/quest=1943, 1944, 1945 and
+# 1946, checked 2026-10-14) for the races (Undead and Troll only: Orc mages
+# have no level 26 robe quest) and the reward choice; the quest texts for the
+# waterfall and Raynewood Retreat.
+# Waters of Xavian needs Speak with Deino first (quests.json), and only
+# Anastasia Hartwell in the Undercity gives it. Laughing Sisters opens only
+# after Waters of Xavian, so Ashenvale is visited twice.
+
+step Anastasia Hartwell
+  zone Undercity
+  tip Anastasia Hartwell stands in the Undercity's Magic Quarter. Trolls take the zeppelin from Orgrimmar to Tirisfal Glades for her.
+  level 26
+  accept 1943                                 -- Anastasia Hartwell
+
+step Deino
+  zone Orgrimmar
+  tip Take the zeppelin to Orgrimmar. Deino is one of Orgrimmar's mage trainers.
+  turnin 1943                                 -- Deino
+  accept 1944
+
+step The Xavian Waterfall
+  zone Ashenvale
+  tip Satyrs hold the ruins of Xavian in eastern Ashenvale. Fill Deino's Flask at the bottom of the highest waterfall.
+  collect 7268 quest 1944.1                   -- Xavian Water Sample
+
+step Back to Deino
+  zone Orgrimmar
+  turnin 1944                                 -- Deino
+  accept 1945
+
+step The Laughing Sisters
+  zone Ashenvale
+  tip The Laughing Sisters, dryads, gather near the Raynewood Retreat in central Ashenvale.
+  collect 7270 quest 1945.1                   -- Laughing Sister's Hair
+
+step Kil'hala
+  zone The Barrens
+  tip Kil'hala, a troll tailor, works at the Crossroads.
+  turnin 1945                                 -- Kil'hala
+  accept 1946
+  turnin 1946 choose 7512 9515                -- Nether-lace Garment

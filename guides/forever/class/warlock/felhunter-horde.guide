@@ -1,0 +1,79 @@
+guide forever/class/warlock/felhunter-horde
+title Felhunter (Horde)
+category Class
+class Warlock
+folder Warlock
+faction Horde
+levels 30-33
+zone The Barrens
+keywords Summon Felhunter, Tome of the Cabal, Seeking Strahad, Strahad Farsan, Jorah Annison, Moldy Tome, Tattered Manuscript, Rod of Channeling, The Binding, Warlock, class pet
+
+# The felhunter for Horde warlocks: Seeking Strahad (2996 from Gan'rul
+# Bloodeye, or 3001 from Carendin Halgar) to Strahad Farsan in Ratchet, Tome
+# of the Cabal (1801, 1803, 1805) with Jorah Annison in the Undercity, and The
+# Binding (1795) back in Ratchet.
+# Sources: quests.json, npcs.json, objects.json and items.json (Questie 12.1.0
+# and Questie-Forever) for the givers, the tome, the chest, the rods and the
+# summoning circle; Wowhead Forever's Warlock class page
+# (data/local/quest-audit/wowhead-class-quests.json): the chain is unchanged in
+# Forever and The Binding pays a Box of Souls.
+# Gan'rul's and Carendin's Seeking Strahad exclude each other; the guide sends
+# Orcs and Trolls to Gan'rul and the Undead to Carendin.
+# Based on data, not play: the beta caps at level 30 until launch on
+# 4 November, and the chain starts at 30, so it has not been checked in game.
+
+step Seeking Strahad (Orgrimmar)
+  only Orc,Troll
+  zone Orgrimmar
+  tip At 30 Gan'rul Bloodeye, in the Cleft of Shadow under the Valley of Strength, sends you to Strahad Farsan in Ratchet.
+  level 30
+  accept 2996                         -- Gan'rul Bloodeye
+
+step Seeking Strahad (Undercity)
+  only Undead
+  zone Undercity
+  tip At 30 Carendin Halgar, in the Magic Quarter, sends you to Strahad Farsan in Ratchet. The zeppelin from Tirisfal Glades flies to Durotar.
+  level 30
+  accept 3001                         -- Carendin Halgar
+
+step Strahad Farsan
+  zone The Barrens
+  tip Fly to Ratchet; Strahad Farsan stands on the hill in town.
+  turnin 2996 only Orc,Troll          -- Strahad Farsan
+  turnin 3001 only Undead             -- Strahad Farsan
+  accept 1801
+
+step Jorah Annison
+  zone Undercity
+  tip Jorah Annison stands in the Magic Quarter.
+  turnin 1801                         -- Jorah Annison
+  accept 1803
+
+step Moldy Tome
+  zone Hillsbrad Foothills
+  tip The Moldy Tome lies on the shore west of Southshore, past the Torn Fin murloc camps.
+  collect 6931 quest 1803.1           -- Moldy Tome
+
+step Tattered Manuscript
+  zone Thousand Needles
+  tip The Damaged Chest lies in the canyon north of Freewind Post.
+  collect 6997 quest 1803.2           -- Tattered Manuscript, in the Damaged Chest
+
+step Jorah Annison
+  zone Undercity
+  turnin 1803                         -- Jorah Annison
+  accept 1805
+
+step Rods of Channeling
+  zone Wetlands
+  tip The Dragonmaw Bonewarders and Shadowwarders hold the hills east of the road through the Wetlands: the rods drop from them.
+  collect 6930 quest 1805.1           -- Rods of Channeling
+
+step The Binding
+  zone The Barrens
+  tip Back to Strahad Farsan in Ratchet. Use the Tome of the Cabal on the summoning circle beside him and defeat the felhunter to bind it.
+  turnin 1805                         -- Strahad Farsan
+  accept 1795
+  use 6999 @62.6,35.3                 -- Tome of the Cabal
+  kill 6268 quest 1795.1              -- Summoned Felhunter
+  turnin 1795                         -- Strahad Farsan: he binds the felhunter to you

@@ -1,0 +1,60 @@
+guide forever/class/warlock/orb-of-dar-orahil
+title The Orb of Dar'Orahil
+category Class
+class Warlock
+folder Warlock
+levels 38-40
+zone The Barrens
+keywords Shard of a Felhound, Acolyte Wytula, Felhas Ruby, Imprisoned Felhound Spirit, Mana Eater, Fragments of the Orb of Orahil, Cleansing of the Orb of Orahil, Tabetha, Orb of Dar'Orahil, Staff of Dar'Orahil, Warlock, class weapon
+pitch Acolyte Wytula's path: a felhound's spirit, for the Orb or Staff of Dar'Orahil.
+pro Ends with your choice of an off-hand orb or a staff
+
+# The felhound path of the Orb of Orahil (after forever/class/warlock/orb-of-orahil):
+# Shard of a Felhound (4962) from Acolyte Wytula, the Infernal Orb for
+# Fragments of the Orb of Orahil (1799), Cleansing of the Orb of Orahil (4961)
+# and Returning the Cleansed Orb (4976) with Tabetha in Dustwallow Marsh, and
+# The Completed Orb of Dar'Orahil (4964) from Menara Voidrender.
+# Shard of a Felhound and Shard of an Infernal (4963,
+# forever/class/warlock/orb-of-noh-orahil) exclude each other.
+# Sources: quests.json, npcs.json and items.json (Questie 12.1.0 and
+# Questie-Forever) for the givers, drops and spawns; Wowhead's Classic quest
+# pages (wowhead.com/classic/quest=4962, =4964) for using the Felhas Ruby on a
+# felhound and for waiting while Menara finishes the orb; Wowhead Forever's
+# Warlock class page (data/local/quest-audit/wowhead-class-quests.json):
+# unchanged in Forever.
+# The Demon of the Orb (4961) is elite.
+# Based on data, not play: the beta caps at level 30 until launch on
+# 4 November, so nothing here has been checked in game.
+
+step Acolyte Wytula
+  zone The Barrens
+  tip Acolyte Wytula stands beside Menara Voidrender in the tower above Ratchet. She gives you the Felhas Ruby.
+  accept 4962                         -- Acolyte Wytula
+
+step Mannoroc Coven
+  zone Desolace
+  tip The demons of Mannoroc Coven, in southern Desolace, have both. Burning Blade Summoners carry the Infernal Orb. Use the Felhas Ruby on a Mana Eater, a felhound, and kill it for its spirit.
+  collect 7291 quest 1799.1           -- Infernal Orb, from the Burning Blade Summoners
+  collect 12648 quest 4962.1          -- Imprisoned Felhound Spirit, from a Mana Eater
+
+step The felhound's spirit
+  zone The Barrens
+  tip Back to Menara Voidrender in the tower above Ratchet with the spirit first: Tabetha's cleansing follows it.
+  turnin 4962                         -- Menara Voidrender
+
+step Tabetha
+  zone Dustwallow Marsh
+  tip Tabetha lives at her farm in western Dustwallow Marsh. She calls the Demon of the Orb out of the Infernal Orb; it is elite: grouping up is advised.
+  turnin 1799                         -- Tabetha
+  accept 4961
+  kill 6549 quest 4961.1              -- Demon of the Orb
+  turnin 4961                         -- Tabetha
+  accept 4976
+
+step Menara Voidrender
+  zone The Barrens
+  tip Back to Menara in the tower above Ratchet with the cleansed orb. Wait while she completes the Orb of Dar'Orahil, then speak to her again.
+  turnin 4976                         -- Menara Voidrender
+  accept 4964
+  complete 4964                       -- Wait for the orb
+  turnin 4964 choose 15108 15106      -- Menara Voidrender

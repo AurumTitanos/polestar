@@ -1,0 +1,53 @@
+guide forever/class/mage/fragmented-magic
+title Fragmented Magic
+category Class
+class Mage
+folder Mage
+levels 60-60
+zone Azshara
+keywords Archmage Xylem, Sanath Lim-yo, Warlord Krellian, Prismatic Shell, Ruins of Eldarath, Temple of Zin-Malor, Spitelash, Polymorph Clone, Polymorph, pig, Mage, class spell
+
+# Archmage Xylem's level 60 pair, both factions: Warlord Krellian (9362) and
+# Fragmented Magic (9364), which teaches the pig Polymorph (spell 28272).
+# Level 60: the Forever beta stops at 30 until launch on 4 November, so this
+# guide is based on data, not play.
+# Sources: quests.json, npcs.json and items.json for Xylem, Sanath Lim-yo,
+# Warlord Krellian and the Polymorph Clones; travel.json for the Azshara flight
+# points; Wowhead Forever's Mage class page
+# (data/local/quest-audit/wowhead-class-quests.json, both unchanged), quest
+# page (https://www.wowhead.com/forever/quest=9364) and spell tooltip
+# (https://nether.wowhead.com/forever/tooltip/spell/28272: "Polymorph",
+# "Transforms the enemy into a pig"), checked 2026-10-14; the quest texts for
+# the Temple of Zin-Malor and the clones. Wowhead's Classic guide "Mage Class
+# Quests in WoW Classic" (https://www.wowhead.com/classic/guide/mage-class-quests-classic-wow,
+# Sh3rro, 2023-11-09) places Krellian in the biggest building in the middle of
+# the Ruins of Eldarath.
+# Left out, not class quest chains: the raid and dungeon set quests Wowhead
+# Forever has for mages (Zul'Gurub 8060, 8068, 8069, 8101-8104, 8189; Ahn'Qiraj
+# 8625, 8631-8634, 8691, 8699, 8707; Naxxramas 9095-9102, 9238-9240 and the
+# Atiesh quests 9250, 9251, 9270; the Magister's set upgrade 8907, 8915, 8932,
+# 8939, 8953, 9001, 9014, 9018). Magma or Lava? (84396, Jennea Cannon) wants a
+# book none of our data drops; Research Access (97286, Garion Wendell) has no
+# objective, reward or XP.
+
+step Sanath Lim-yo
+  tip Fly to Talrendis Point (Alliance) or Valormok (Horde). Sanath Lim-yo camps below Archmage Xylem's tower: from the fork of Azshara's main road at the Ruins of Eldarath, head straight north to the cliffs. He teleports you up to the Archmage.
+  level 60
+  accept 9362                                 -- Archmage Xylem
+
+step Warlord Krellian
+  tip Krellian hides behind his Spitelash guards in the Temple of Zin-Malor, the biggest building in the middle of the Ruins of Eldarath. He drops the Prismatic Shell.
+  collect 23250 quest 9362.1                  -- Prismatic Shell: Warlord Krellian
+
+step Archmage Xylem
+  tip Back to Sanath Lim-yo and up to the tower.
+  turnin 9362                                 -- Archmage Xylem
+  accept 9364
+
+step Polymorph Clones
+  tip Carry the Prismatic Shell back to the Ruins of Eldarath. Polymorph a Spitelash naga and wait a few seconds: it splits into small Polymorph Clones. Kill the clones quickly; the shell collects their essence.
+  kill 16479 quest 9364.1                     -- Polymorph Clone
+
+step Fragmented Magic
+  tip Back to Sanath Lim-yo and up to the tower.
+  turnin 9364                                 -- Archmage Xylem: Polymorph (pig)

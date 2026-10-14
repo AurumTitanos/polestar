@@ -1,0 +1,61 @@
+guide forever/class/priest/benediction
+title Benediction
+category Class
+class Priest
+folder Priest
+levels 60-60
+zone Eastern Plaguelands
+keywords Benediction, Anathema, The Balance of Light and Shadow, A Warning, Eris Havenfire, The Eye of Divinity, The Eye of Shadow, Splinter of Nordrassil, Molten Core, epic staff, class quest
+collects 18608
+
+# The level 60 Priest staff: A Warning and The Balance of Light and Shadow
+# (7621, 7622) from Eris Havenfire in the Eastern Plaguelands give the
+# Splinter of Nordrassil, which makes Benediction with The Eye of Divinity
+# and The Eye of Shadow.
+# Sources: quests.json, npcs.json and items.json (Questie 12.1.0 and
+# Questie-Forever) for Eris, the event point and the drops; Wowhead
+# Forever's Priest class page (data/local/quest-audit/wowhead-class-quests.json:
+# no Forever change to either quest; 7622 rewards the Splinter of
+# Nordrassil). How it works: Icy Veins, "Benediction/Anathema Quest: Guide
+# to The Balance of Light and Shadow"
+# (icy-veins.com/wow-classic/benediction-anathema-quest-guide-to-the-balance-of-light-and-shadow):
+# the quest needs The Eye of Divinity from Majordomo Executus in Molten
+# Core, a failed attempt waits about two hours for the next, helpers who
+# join the fight call a demon that kills everyone nearby, and the splinter
+# needs both Eyes to become Benediction. Wowpedia (Eris Havenfire): Eris is
+# seen only with The Eye of Divinity equipped.
+# Raid content: The Eye of Divinity is in the Cache of the Firelord after
+# Majordomo Executus in Molten Core, a 40-player raid; the data has no
+# position for it. The Eye of Shadow drops from elite demons (Lord Kazzak,
+# Doomguard Commanders and Manahounds in the Blasted Lands, the Hederine of
+# Winterspring) and binds when equipped, so the Auction House may have it.
+# The quests are Forever-confirmed (both on Wowhead Forever's Priest class
+# page, unchanged); that the splinter turns into Benediction with both Eyes
+# is from the Classic sources above, used only for that detail.
+# Left out: Holy Bologna: What the Light Won't Tell You (7504, in Forever's
+# database) starts from a book found in Dire Maul and ends at Lorekeeper
+# Javon inside it; the data places neither. The Troll Scroll (79731, on the
+# class page) is not in the reference quest data: not confirmed in Forever.
+# Based on data, not play: the beta caps at level 30 until launch on
+# 4 November, so nothing here has been checked in game.
+
+step The Eye of Shadow
+  zone Blasted Lands
+  tip You need The Eye of Divinity first: it comes from the Cache of the Firelord after Majordomo Executus in Molten Core. The Eye of Shadow drops from elite demons (Lord Kazzak, a world boss, always; Doomguard Commanders and Manahounds rarely); it binds when equipped, so buying one works too.
+  collect 18665 x1                            -- The Eye of Shadow
+
+step Eris Havenfire
+  zone Eastern Plaguelands
+  tip Equip The Eye of Divinity to see Eris Havenfire, a ghost on the mountainside in the north-west of the Eastern Plaguelands. Come with full mana, Major Mana Potions and Oil of Immolation: if you fail, the event takes about two hours to return.
+  level 60
+  accept 7621                                 -- Eris Havenfire
+  turnin 7621
+  accept 7622
+
+step The Balance of Light and Shadow
+  tip Save 50 peasants before 15 die. Kill the skeletons that attack them, cure their diseases (the purple ones first) and heal the wounded with Renew. Friends may buff you beforehand but must stay out of the fight, or a demon appears and kills everyone.
+  complete 7622
+
+step Benediction
+  turnin 7622 reward 18659                    -- Eris Havenfire: Splinter of Nordrassil
+  use 18659 @17.2,12.8 live                   -- With both Eyes in your bags: Benediction

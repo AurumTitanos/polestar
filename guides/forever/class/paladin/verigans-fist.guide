@@ -1,0 +1,121 @@
+guide forever/class/paladin/verigans-fist
+title Verigan's Fist
+category Class
+class Paladin
+folder Paladin
+faction Alliance
+levels 20-30
+zone Stormwind City
+keywords The Tome of Valor, The Test of Righteousness, Verigan's Fist, Bastion of Stormwind, Duthorian Rall, Tiza Battleforge, Daphne Stilwell, Jordan Stilwell, Bailor Stonehand, Thundris Windweaver, Seeking the Kor Gem, Whitestone Oak Lumber, Jordan's Smithing Hammer, Deadmines, Shadowfang Keep, Blackfathom Deeps, Paladin, class weapon
+collects 9607, 6953
+
+# The Alliance Paladin weapon chain: The Tome of Valor (1793 Human, 1794
+# Dwarf, then 1649-1652: Daphne Stilwell's stand in Westfall, Bastion of
+# Stormwind) and The Test of Righteousness (1653, 1654, 1806: Jordan Stilwell
+# outside Ironforge forges Verigan's Fist from four parts), with Bailor's Ore
+# Shipment (1655) and Seeking the Kor Gem (1442) for two of the parts.
+# Sources: quests.json, npcs.json, objects.json and items.json for givers,
+# enders, objectives, droppers and spawns; Wowhead Forever's Paladin class page
+# (data/local/quest-audit/wowhead-class-quests.json) for the rewards and that
+# Forever leaves these quests unchanged; Warcraft Wiki, "Paladin quests"
+# (warcraft.wiki.gg/wiki/Paladin_quests), for where the parts are: the
+# Whitestone Oak Lumber from the Goblin Woodcarvers in the Deadmines, Jordan's
+# Smithing Hammer on a box in the stables of Shadowfang Keep's courtyard, the
+# ore crate in the Mo'grosh ogre camp, the Corrupted Kor Gem from the
+# Blackfathom naga outside Blackfathom Deeps; dungeon entrances from
+# dungeons.json (DungeonJournal, live map frame).
+# Three parts are dungeon work (the Deadmines, Shadowfang Keep, the naga at
+# Blackfathom Deeps, all elite) and the Mo'grosh ogres are elite: bring a
+# group. The parts can be gathered in any order once Jordan has given you The
+# Test of Righteousness.
+
+# ---------------------------------------------------------------- The Tome of Valor
+
+step The Tome of Valor (Ironforge)
+  only Dwarf
+  zone Ironforge
+  tip At 20 Tiza Battleforge in the Mystic Ward gives you the Tome of Valor; it sends you to Duthorian Rall in Stormwind's Cathedral of Light. Take the tram from Ironforge to Stormwind.
+  level 20
+  accept 1794                         -- Tiza Battleforge
+  turnin 1794
+
+step The Tome of Valor
+  zone Stormwind City
+  tip Duthorian Rall stands in the Cathedral of Light. Right-click the Tome of Valor to start its quest.
+  level 20
+  accept 1793 only Human              -- Duthorian Rall
+  turnin 1793 only Human
+  accept 1649                         -- from the Tome of Valor
+  turnin 1649                         -- Duthorian Rall
+  accept 1650
+
+step Daphne Stilwell
+  zone Westfall
+  tip Daphne Stilwell's farmhouse stands on the south-west coast of Westfall. Waves of Defias attack it during her quest: keep her alive, and heal her if she needs it.
+  turnin 1650                         -- Daphne Stilwell
+  accept 1651
+  complete 1651                       -- Protect Daphne Stilwell
+  turnin 1651
+  accept 1652
+
+step Duthorian Rall
+  zone Stormwind City
+  turnin 1652                         -- Duthorian Rall: Bastion of Stormwind
+  accept 1653
+
+# ---------------------------------------------------------------- The Test of Righteousness
+
+step Jordan Stilwell
+  zone Dun Morogh
+  tip Jordan Stilwell stands outside the gates of Ironforge. He gives you Jordan's Weapon Notes, which list the four parts.
+  turnin 1653                         -- Jordan Stilwell
+  accept 1654
+
+step Bailor Stonehand
+  zone Loch Modan
+  tip Bailor Stonehand is in Thelsamar.
+  accept 1655                         -- Bailor Stonehand
+
+step Bailor's Ore
+  tip The ore crate lies by the trees in the middle of the Mo'grosh ogre camp in north-east Loch Modan. The Mo'grosh ogres are elite: grouping up is advised.
+  collect 6992 quest 1655.1           -- Bailor's Ore crate
+
+step Back to Bailor
+  tip Bailor turns the ore into Jordan's Refined Ore Shipment.
+  turnin 1655                         -- Bailor Stonehand
+  collect 6993 quest 1654.2
+
+step Whitestone Oak Lumber
+  zone Westfall
+  tip The Deadmines is a group of five under Moonbrook; the instance portal is inside the Moonbrook mine. The Goblin Woodcarvers in the Mast Room, with Sneed, drop the lumber.
+  goto 42.5,71.7 live "The Deadmines, in the Moonbrook mine"
+  collect 6994 quest 1654.1 @42.5,71.7 live -- Goblin Woodcarvers, inside
+
+step Jordan's Smithing Hammer
+  zone Silverpine Forest
+  tip Shadowfang Keep is a level 20-30 dungeon in southern Silverpine Forest. The hammer lies on a box inside the stables, at the far end of the courtyard before the ramp up.
+  goto 44.8,67.8 live "Shadowfang Keep"
+  collect 6895 quest 1654.3 @44.8,67.8 live -- Jordan's Hammer, inside
+
+step Thundris Windweaver
+  zone Darkshore
+  tip Thundris Windweaver is in Auberdine.
+  accept 1442                         -- Thundris Windweaver
+
+step The Corrupted Kor Gem
+  zone Ashenvale
+  tip The Blackfathom naga by the entrance of Blackfathom Deeps on Ashenvale's north-west coast drop the Corrupted Kor Gem. They are elite: grouping up is advised.
+  collect 6995 quest 1442.1
+
+step The Purified Kor Gem
+  zone Darkshore
+  tip Back to Thundris in Auberdine: he purifies the gem.
+  turnin 1442                         -- Thundris Windweaver
+  collect 7083 quest 1654.4
+
+step Verigan's Fist
+  zone Dun Morogh
+  tip Bring the four parts to Jordan Stilwell outside Ironforge.
+  turnin 1654                         -- Jordan Stilwell
+  accept 1806
+  turnin 1806                         -- Verigan's Fist

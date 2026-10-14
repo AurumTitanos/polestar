@@ -21,9 +21,21 @@
   the Bluff, The Kolkar of Desolace and Draenethyst Crystals; the Tauren
   start no longer walks to Durotar. Elite quests on the way (Aggor the Young,
   Riptear, Carnage, The Offering of Blood) are optional.
+- A Class category in the guide menu, after Leveling, with 65 guides for the
+  class quest chains of every class: Druid forms and Cure Poison, Rhok'delar
+  and The Hunter's Charm, the Mage robes, orbs and wands, Verigan's Fist and
+  the Paladin's Tyr's Watch and Lumina Windsinger chains, the Priest spell
+  quests and Benediction, Ravenholdt, Poisons and the Rogue's key and horn
+  chains, the Shaman totems and Darkreaver, the Warlock pets (felhunter,
+  incubus) and orbs, and the Warrior's armour and weapon chains. The four
+  class mounts (Paladin Warhorse and Charger, Warlock Felsteed and
+  Dreadsteed) moved there from Collectibles.
 
 ### For guide authors
 
+- `category Class` files a guide under the new Class category (class quest
+  chains, mounts and weapons; pair it with a `class` header), listed after
+  Leveling in the guide menu with the trainer icon.
 - `data build` applies Wowhead Forever's "Renamed from Y" notes too: a quest
   whose title is still Y takes Forever's name (its `source` gains
   `wowhead:title`). It also reads Wowhead Forever's class quest pages, so

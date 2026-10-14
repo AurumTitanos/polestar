@@ -1,0 +1,60 @@
+guide forever/class/warlock/orb-of-orahil
+title The Orb of Orahil
+category Class
+class Warlock
+folder Warlock
+levels 35-40
+zone The Barrens
+keywords Knowledge of the Orb of Orahil, Fragments of the Orb of Orahil, Menara Voidrender, Infernal Orb, Tabetha, Orb of Dar'Orahil, Orb of Noh'Orahil, Staff of Dar'Orahil, Staff of Noh'Orahil, Warlock, class weapon
+next forever/class/warlock/orb-of-dar-orahil, forever/class/warlock/orb-of-noh-orahil
+
+# The Orb of Orahil: Knowledge of the Orb of Orahil (4965, 4967, 4968, 4969)
+# from your trainer to Menara Voidrender in Ratchet, and Fragments of the Orb
+# of Orahil (1799). Menara's two acolytes then each offer one path, and the
+# game lets you take only one (Shard of a Felhound 4962 and Shard of an
+# Infernal 4963 exclude each other): the next guide is your choice of path,
+# and both end with an off-hand orb or a staff.
+# Sources: quests.json, npcs.json and items.json (Questie 12.1.0 and
+# Questie-Forever) for the givers and the chain; Wowhead's Classic quest pages
+# (wowhead.com/classic/quest=1799 and =4962, =4963) for taking the acolyte's
+# path before the Infernal Orb; Wowhead Forever's Warlock class page
+# (data/local/quest-audit/wowhead-class-quests.json): unchanged in Forever.
+# Based on data, not play: the beta caps at level 30 until launch on
+# 4 November, so nothing here has been checked in game.
+
+step Knowledge of the Orb of Orahil (Stormwind)
+  only Human
+  zone Stormwind City
+  tip At 35 Demisette Cloyce in the Slaughtered Lamb, in the Mage Quarter, sends you to Menara Voidrender in Ratchet.
+  level 35
+  accept 4968                         -- Demisette Cloyce
+
+step Knowledge of the Orb of Orahil (Ironforge)
+  only Gnome
+  zone Ironforge
+  tip At 35 Briarthorn in Ironforge sends you to Menara Voidrender in Ratchet.
+  level 35
+  accept 4965                         -- Briarthorn
+
+step Knowledge of the Orb of Orahil (Orgrimmar)
+  only Orc,Troll
+  zone Orgrimmar
+  tip At 35 Zevrost in the Cleft of Shadow sends you to Menara Voidrender in Ratchet.
+  level 35
+  accept 4967                         -- Zevrost
+
+step Knowledge of the Orb of Orahil (Undercity)
+  only Undead
+  zone Undercity
+  tip At 35 Kaal Soulreaper in the Magic Quarter sends you to Menara Voidrender in Ratchet. The zeppelin from Tirisfal Glades flies to Durotar.
+  level 35
+  accept 4969                         -- Kaal Soulreaper
+
+step Menara Voidrender
+  zone The Barrens
+  tip Menara Voidrender and her two acolytes stand in the tower on the hill above Ratchet, beside Strahad Farsan. Next, choose one acolyte's path: the next guide is that choice.
+  turnin 4968 only Human              -- Menara Voidrender
+  turnin 4965 only Gnome              -- Menara Voidrender
+  turnin 4967 only Orc,Troll          -- Menara Voidrender
+  turnin 4969 only Undead             -- Menara Voidrender
+  accept 1799

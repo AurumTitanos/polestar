@@ -1,0 +1,107 @@
+guide forever/class/rogue/blade-of-cunning-horde
+title Blade of Cunning (Horde)
+category Class
+class Rogue
+folder Rogue
+faction Horde
+levels 10-13
+zone Durotar
+keywords Blade of Cunning, Kaplak, Therzok, The Shattered Hand, Tazan, Tazan's Satchel, Tazan's Key, Gamon, Marion Call, Mennet Carkad, The Deathstalkers, Astor Hadren, Andron Gant, Andron's Ledger, Varimathras, Rogue, class weapon
+
+# The Horde Rogue level 10 quests, each ending with the Blade of Cunning
+# (7298), a dagger:
+# - Orcs and Trolls: The Shattered Hand (1963, 1858) from Therzok in
+#   Orgrimmar's Cleft of Shadow. Orcs are sent to him by Kaplak in Razor Hill
+#   (Therzok, 1859); Trolls take 1963 from Therzok directly.
+# - Undead: Mennet Carkad and The Deathstalkers (1885, 1886, 1898, 1899,
+#   1978), from Marion Call in Brill to the Undercity, Silverpine Forest and
+#   back.
+# Sources: quests.json, npcs.json, objects.json and items.json for the givers,
+# drops and places; travel.json for the inns (Gamon and Marion Call stand by
+# the innkeepers); Wowhead Forever's Rogue class page
+# (data/local/quest-audit/wowhead-class-quests.json) for the rewards and
+# Forever's changes (none for these chains). Tazan's Key has one source in
+# the data, Gamon in Orgrimmar; the quest asks you to steal it.
+# Horde Skyborne have no level 10 Rogue quest in the data.
+# The leveling guides leave these out: they teach no spell.
+
+# ---------------------------------------------------------------- Orcs and Trolls
+
+step Therzok
+  only Orc
+  tip At 10 Kaplak, the rogue trainer in Razor Hill, sends you to Therzok in Orgrimmar.
+  level 10
+  accept 1859                                 -- Kaplak
+
+step The Shattered Hand
+  only Orc,Troll
+  zone Orgrimmar
+  tip Therzok stands in the Cleft of Shadow, the canyon under the Valley of Strength. Trolls: take The Shattered Hand from him at 10.
+  level 10
+  turnin 1859 only Orc                        -- Therzok
+  accept 1963
+
+step Tazan
+  only Orc,Troll
+  zone The Barrens
+  tip Tazan stands on the Barrens coast south of Ratchet. Kill him for his satchel.
+  collect 7209 quest 1963.1                   -- Tazan's Satchel: Tazan
+
+step Back to Therzok
+  only Orc,Troll
+  zone Orgrimmar
+  turnin 1963                                 -- Therzok, Cleft of Shadow
+  accept 1858
+
+step Tazan's Key
+  only Orc,Troll
+  tip Gamon drinks in the inn in the Valley of Strength. Pick his pocket for Tazan's Key, then open Tazan's Satchel.
+  collect 7208 x1                             -- Tazan's Key: Gamon
+  use 7209 @54.0,68.0                         -- Tazan's Satchel, once you have the key
+  collect 7295 quest 1858.1 @54.0,68.0        -- Tazan's Logbook, from the satchel
+
+step Therzok's reward
+  only Orc,Troll
+  turnin 1858 reward 7298                     -- Therzok, Cleft of Shadow
+
+# ---------------------------------------------------------------- Undead
+
+step Mennet Carkad
+  only Undead
+  zone Tirisfal Glades
+  tip At 10 Marion Call, the rogue trainer in the Gallows' End Tavern in Brill, sends you to Mennet Carkad in the Undercity.
+  level 10
+  accept 1885                                 -- Marion Call
+
+step The Rogues' Quarter
+  only Undead
+  zone Undercity
+  tip Mennet Carkad stands in the Rogues' Quarter.
+  turnin 1885                                 -- Mennet Carkad
+  accept 1886
+
+step Astor Hadren
+  only Undead
+  zone Silverpine Forest
+  tip Astor Hadren stands north-east of the Sepulcher. Take his Letter of Introduction from him.
+  collect 7231 quest 1886.1                   -- Astor's Letter of Introduction: Astor Hadren
+
+step Back to Mennet Carkad
+  only Undead
+  zone Undercity
+  turnin 1886                                 -- Mennet Carkad, Rogues' Quarter
+  accept 1898
+
+step Andron Gant
+  only Undead
+  tip Andron Gant's ledger sits on the bookshelf beside him.
+  turnin 1898                                 -- Andron Gant
+  accept 1899
+  collect 7294 quest 1899.1                   -- Andron's Ledger: Andron's Bookshelf
+
+step Mennet and Varimathras
+  only Undead
+  tip Mennet sends the ledger on to Varimathras in the Hall of the Dark Lady, the Royal Quarter.
+  turnin 1899                                 -- Mennet Carkad, Rogues' Quarter
+  accept 1978
+  turnin 1978 reward 7298                     -- Varimathras, Royal Quarter

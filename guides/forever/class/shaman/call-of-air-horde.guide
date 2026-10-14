@@ -1,0 +1,125 @@
+guide forever/class/shaman/call-of-air-horde
+title Call of Air and the Tempest's Weapons (Horde)
+category Class
+class Shaman
+folder Shaman
+faction Horde
+levels 30-40
+zone Orgrimmar
+keywords Air Totem, Elemental Aid, Eyes on the Sky, Storm, Earth, and Fire, Heed My Call, The Tempest's Weapons, Prate Cloudseer, Rau Cliffrunner, Bath'rah the Windwatcher, Razorfen Kraul, Charlga Razorflank, Twisted Totem, Ravaging Tempest, Eye of the Tempest, Lightning's Grasp, Tidebringer's Claw, Rage of the Storm, Rune of the Storm, Shaman, class quest, totem, weapon
+
+# Call of Air at 30 (your trainer -> Prate Cloudseer by Freewind Post: the Air
+# Totem), then Forever's reworked 33-40 chain against the Razormane ritual:
+# Elemental Aid (Charlga Razorflank in Razorfen Kraul) -> Eyes on the Sky ->
+# Storm, Earth, and Fire (five Twisted Totems of each element from Desolace,
+# Dustwallow Marsh, the Badlands and the Swamp of Sorrows) -> Heed My Call
+# (the Ravaging Tempest at the steam pools) -> The Tempest's Weapons, handed
+# to Bath'rah the Windwatcher in Alterac Mountains for the weapon.
+# Sources: quests.json, npcs.json and items.json (givers, enders, the Twisted
+# Totems' droppers, the Ravaging Tempest's spawns, Razorfen Kraul's entrance
+# from dungeons.json); Wowhead Forever's Shaman class page
+# (data/local/quest-audit/wowhead-class-quests.json) and quest pages
+# (https://www.wowhead.com/forever/quest=79360 to 79442) for what Forever
+# changed, the givers and enders of each step and the rewards: Air Totem;
+# 79442 gives the Rune of the Storm and a choice of Lightning's Grasp,
+# Tidebringer's Claw or Rage of the Storm.
+# Who gives what: the data lists two givers or enders for most of the chain
+# (the Season of Discovery ones beside Forever's). The steps follow each
+# quest's own text: Prate gives Elemental Aid (Forever adds her as a giver),
+# Rau Cliffrunner at Freewind Post takes it and gives Eyes on the Sky back to
+# Prate; Prate gives Storm, Earth, and Fire (totems "for Prate Cloudseer") and
+# Heed My Call ("report back to Rau Cliffrunner"); Rau gives The Tempest's
+# Weapons.
+# Elite and dungeon work: Charlga Razorflank is the last boss of Razorfen
+# Kraul (a dungeon), and Wowhead marks Heed My Call as an elite quest.
+# Heed My Call's rewards (items 212994, 212996, 212997) are not in the item
+# data and Wowhead names none of them: no `choose` line.
+# Skyborne: Forever gives Skyborne their own Call of Air (96136, to Prate
+# Cloudseer); neither the data nor Wowhead names its giver, so it is a tip
+# here and the chain picks them up at Prate.
+# Left out: With Wind Beneath Your Wings (79365, Bath'rah to Rau with a
+# Squall-breakers Potion) is on Wowhead Forever's Shaman page, but it is not in
+# the quest data and Forever's Heed My Call no longer uses the potion ("no
+# longer Squall-breakers Potion"): the Season of Discovery step it served is
+# gone.
+# Left out: Grant's Shield and Silvia's Sword (79362, 79363; in Wowhead's
+# Forever database, not on its Shaman page) are limited to Orc, Tauren and
+# Troll Shamans, yet start from drops of Duskwood's Lost Knight and Lost
+# Defender and send you to Sirra Von'Indi in Darkshire, an Alliance npc a
+# Horde character cannot hand in to (Bath'rah is the other ender the data
+# lists). Until play shows how a Horde Shaman finishes them, they are not
+# guided; the Alliance Valor family quests (96137-96139) are the same story.
+# Beta capped at 30: nothing past Call of Air was played; it follows the data
+# above.
+
+step Searn Firewarder
+  only Orc,Troll
+  zone Orgrimmar
+  tip At 30 Searn Firewarder in the Valley of Wisdom sends you to Prate Cloudseer in Thousand Needles.
+  accept 1531                                 -- Searn Firewarder
+
+step Xanis Flameweaver
+  only Tauren
+  zone Thunder Bluff
+  tip At 30 Xanis Flameweaver, a shaman trainer in Thunder Bluff, sends you to Prate Cloudseer in Thousand Needles.
+  accept 1532                                 -- Xanis Flameweaver
+
+step Prate Cloudseer
+  zone Thousand Needles
+  tip Fly to Freewind Post. Prate Cloudseer hides in a small cave in the canyon wall north-east of the post. Skyborne: your own Call of Air (96136) ends with her too.
+  turnin 1531 reward 5178 only Orc,Troll      -- Prate Cloudseer: your Air Totem
+  turnin 1532 reward 5178 only Tauren         -- Prate Cloudseer: your Air Totem
+  accept 79360 npc 5905
+
+step Charlga Razorflank
+  zone The Barrens
+  tip Razorfen Kraul is a dungeon at the southern edge of the Barrens (the arrow points at its entrance); Charlga Razorflank is its last boss. Bring a group.
+  collect 274463 quest 79360.1 @42.9,90.2 live -- Tattered Note, from Charlga Razorflank
+
+step Rau Cliffrunner
+  zone Thousand Needles
+  tip Rau Cliffrunner stands at Freewind Post.
+  turnin 79360 npc 4722                       -- Rau Cliffrunner
+  accept 79364 npc 4722
+
+step Prate Cloudseer
+  turnin 79364 npc 5905                       -- Prate Cloudseer
+  accept 79361 npc 5905
+
+step Twisted Air Totems
+  zone Desolace
+  tip The Maraudine centaurs of western Desolace carry the Twisted Air Totems.
+  collect 274047 quest 79361.1                -- Twisted Air Totem
+
+step Twisted Water Totems
+  zone Dustwallow Marsh
+  tip The Mirefin murlocs of northern Dustwallow Marsh carry the Twisted Water Totems.
+  collect 274046 quest 79361.4                -- Twisted Water Totem
+
+step Twisted Fire Totems
+  zone Badlands
+  tip The Stonevault troggs in the south of the Badlands carry the Twisted Fire Totems.
+  collect 274044 quest 79361.3                -- Twisted Fire Totem
+
+step Twisted Earth Totems
+  zone Swamp of Sorrows
+  tip The Lost Ones in the north of the Swamp of Sorrows carry the Twisted Earth Totems.
+  collect 274045 quest 79361.2                -- Twisted Earth Totem
+
+step Prate Cloudseer
+  zone Thousand Needles
+  turnin 79361 npc 5905                       -- Prate Cloudseer
+  accept 79366 npc 5905
+
+step The steam pools
+  tip Prate hands you the Corrupted Totems: place them at the steam pools west of Freewind Post and defeat the Ravaging Tempest they call. Heed My Call is an elite quest: grouping up is advised.
+  collect 212792 x1                           -- Eye of the Tempest, from the Ravaging Tempest
+
+step Rau Cliffrunner
+  turnin 79366 npc 4722                       -- Rau Cliffrunner
+  accept 79442
+
+step Bath'rah the Windwatcher
+  zone Alterac Mountains
+  tip Bath'rah camps in the east of Alterac Mountains, north-east of Tarren Mill.
+  turnin 79442 reward 213086 choose 280607 280605 280604 -- Bath'rah the Windwatcher: the Rune of the Storm and your weapon

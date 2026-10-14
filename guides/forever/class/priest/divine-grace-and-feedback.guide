@@ -1,0 +1,42 @@
+guide forever/class/priest/divine-grace-and-feedback
+title Divine Grace and Feedback
+category Class
+class Priest
+folder Priest
+faction Alliance
+race Human
+levels 10-20
+zone Stormwind City
+keywords Divine Grace, Feedback, Arcane Feedback, High Priestess Laurena, Cathedral of Light, Human, racial, Priest
+
+# The Human Priest spell quests: Divine Grace at 10 (94773, new in Forever)
+# and Arcane Feedback at 20 (5676), both from High Priestess Laurena in
+# Stormwind's Cathedral of Light.
+# Sources: quests.json and npcs.json for the givers; Wowhead Forever's
+# Priest class page (data/local/quest-audit/wowhead-class-quests.json):
+# Divine Grace (94773-94779) is new, Arcane Feedback unchanged; Wowhead
+# Forever's page for Laurena (wowhead.com/forever/npc=376, checked
+# 2026-10-14) lists both as starting and ending with her.
+# Desperate Prayer is not in this guide: Wowhead Forever lists Humans as
+# well as Dwarves for some of its quests (5635, 5637, 5639), so it is in
+# desperate-prayer-and-chastise, which is for both races. Third-party
+# Forever sites (classicwowforever.com/racials) say Humans no longer learn
+# the spell; the quest data does not confirm that either way.
+# alliance/human/01-elwynn-forest and 02-westfall carry Divine Grace on the
+# route (94774, from Priestess Josetta in Goldshire) and
+# alliance/04-redridge-mountains carries Arcane Feedback; this guide repeats
+# them for anyone off the route. Priest trainers in other cities send you to
+# Laurena with a quest of the same name; the game offers one of each set.
+# Not checked in game: written from the sources above.
+
+step Divine Grace
+  tip At 10, go to High Priestess Laurena in the Cathedral of Light. Priestess Josetta in Goldshire sends you to her with a quest of the same name.
+  level 10
+  accept 94773                                -- High Priestess Laurena
+  turnin 94773                                -- High Priestess Laurena: Divine Grace
+
+step Arcane Feedback
+  tip At 20, High Priestess Laurena teaches Feedback. High Priest Rohan in Ironforge and Priestess Alathea in Darnassus send you to her with a quest of the same name.
+  level 20
+  accept 5676                                 -- High Priestess Laurena
+  turnin 5676                                 -- High Priestess Laurena: Feedback
