@@ -21,6 +21,9 @@
 - Leveling guides of both factions reworked: quests that block a solo player
   dropped or made optional, flight paths and training at the right levels,
   Forever's own additions, rare drops optional, fixed points and level tips.
+- Alliance 40-50: less grinding. Keeping Pace on the ride through the
+  Shimmering Flats into Tanaris; The Curse of the Tides, Pearl Diving and
+  Return to Corporal Kaleb on one loop through northern Stranglethorn.
 - Collectible, Legacy and reputation guides: clearer notes (warlock mount
   hand-offs, Merchant's Favor camps, Timbermaw and Cenarion Circle
   standings), and optional extras marked as such.

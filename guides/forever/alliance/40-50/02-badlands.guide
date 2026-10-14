@@ -1,18 +1,20 @@
 # The Badlands and the Hinterlands, Alliance ~42.8 to ~43.3 (consensus visits
 # 43-45). Flow: fly to Thelsamar > the Badlands (Sigrun, Garek, Murdaloc,
-# Camp Boff, the Scalding Whelps) > back to Thelsamar, fly to Southshore >
-# ride to Aerie Peak > the Witherbark villages > fly to Menethil, boat to
-# Theramore > fly to Nijel's Point, on the way to Feathermoon Stronghold,
-# where the next guide starts.
+# Rigglefuzz, Camp Boff, the Scalding Whelps) > back to Thelsamar, fly to
+# Southshore > ride to Aerie Peak > the Witherbark villages > fly to Menethil,
+# boat to Theramore > fly to Nijel's Point, on the way to Feathermoon
+# Stronghold, where the next guide starts.
 #
-# Grind: the previous guides dropped long detours (the Shimmering Flats,
-# Stranglethorn's far north, Teldrassil, Searing Gorge); to keep the level,
-# this guide grinds to 43 on the Scalding Whelps while hunting Sigrun's
-# Black Drake's Heart (a 2% drop, so the heart is optional).
+# Grind: the previous guides dropped long detours (the Shimmering Flats stop,
+# Teldrassil, Searing Gorge); to keep the level, this guide grinds to 43 on
+# the Scalding Whelps while hunting Sigrun's Black Drake's Heart (a 2% drop,
+# so the heart is optional).
 #
 # Deviations from the export:
-# - Pearl Diving (705) is gone with Stranglethorn's north-west coast; Caught!
-#   (4449) is taken by a later guide at the Searing Gorge outhouse.
+# - Pearl Diving (705), carried from 30-40/06-badlands with its pearls from
+#   Stranglethorn's north-west coast, is handed in to Rigglefuzz on the ride
+#   west to Camp Boff. Caught! (4449) is taken by a later guide at the
+#   Searing Gorge outhouse.
 # - The Southshore turn-in of Down the Scarlet Path (1052) is made here, on
 #   the way from Thelsamar to Aerie Peak; there is no hearth to Southshore
 #   (no bind there any more), so the guide flies from Thelsamar.
@@ -55,6 +57,11 @@ step Agmond's End
   accept 739                          -- Battered Dwarven Skeleton
   kill 2945 quest 739                 -- Murdaloc
   kill 2893 quest 739                 -- Stonevault Bonesnapper
+
+step Rigglefuzz
+  tip Ride west to the Valley of Fangs in the middle of the Badlands; Rigglefuzz camps beside Martek.
+  turnin 705                          -- Blue Pearls from Stranglethorn
+  note Rigglefuzz's next quest pays no experience: skip it.
 
 step Boss Tho'grun
   tip Ride west across the Badlands to the Dustbelcher camp at Camp Boff. Boss Tho'grun stands in its middle with Wyrmhunters and Maulers around him.

@@ -1,12 +1,13 @@
 # Tanaris, Alliance 45 to 46. Consensus route visit 47 (Tanaris); visit 48
 # (Searing Gorge) is folded into later guides, see below.
 #
-# Flow: Gadgetzan (flight path, bind, the first Wastewander bounties),
-# Steamwheedle Port and Lost Rigger Cove, the Wastewander camps, the water
-# survey, one sweep through the deep desert (Broken Pillar, Dunemaul, Noxious
-# Lair, Thistleshrub) ending with Tooga's walk home to Steamwheedle, then
-# Gadgetzan, Caliph and the Gaping Chasm, and the hearth. Then north: class
-# training in Ironforge and the bind at Aerie Peak for the Hinterlands.
+# Flow: the Mirage Raceway on the way in (Keeping Pace), Gadgetzan (flight
+# path, bind, the first Wastewander bounties), Steamwheedle Port and Lost
+# Rigger Cove, the Wastewander camps, the water survey, one sweep through the
+# deep desert (Broken Pillar, Dunemaul, Noxious Lair, Thistleshrub) ending
+# with Tooga's walk home to Steamwheedle, then Gadgetzan, Caliph and the
+# Gaping Chasm, and the hearth. Then north: class training in Ironforge and
+# the bind at Aerie Peak for the Hinterlands.
 #
 # Deviations from the export (local order only): the route enters Tanaris
 # from Thousand Needles, so Gadgetzan comes first (flight path, bind, Tran'rek
@@ -15,6 +16,10 @@
 # Valley instead of after a hearth and a ride back; Caliph Scorpidsting (2781)
 # is picked up at Steamwheedle where Tooga's walk ends and killed on the way
 # to the Gaping Chasm. One hearth instead of two.
+#
+# Added: Keeping Pace and Rizzle's Schematics (1190, 1194, with Zamek's
+# Distraction 1191), from News for Fizzle (1137, carried from Martek in
+# 30-40/06-badlands): the Mirage Raceway lies on the ride in from Thalanaar.
 #
 # Dropped: the Searing Gorge stop (export visit 48, 0.3 h): a flight and a
 # long ride through the Badlands for one turn-in. Caught! (4449) is handed in
@@ -36,10 +41,29 @@ levels 45-47
 zone Tanaris
 next forever/alliance/40-50/05-the-hinterlands
 
+# ---------------------------------------------------------------- The Shimmering Flats
+
+step Mirage Raceway
+  zone Thousand Needles
+  tip From the Forgotten Coast dock, boat to Feathermoon and fly to Thalanaar, then ride east through Thousand Needles to the Mirage Raceway on the Shimmering Flats. Fizzle Brassbolts and Pozzik are in the camps beside the track; Zamek stands by the goblin camp.
+  turnin 1137                         -- Fizzle Brassbolts
+  accept 1190                         -- Pozzik
+  accept 1191                         -- Zamek
+  turnin 1191                         -- He runs off to keep Rizzle busy
+
+step Rizzle's plans
+  tip While Zamek keeps Rizzle talking, his plans lie unguarded in the gnome camp across the track.
+  turnin 1190                         -- Rizzle's Unguarded Plans
+  accept 1194
+
+step Pozzik
+  turnin 1194
+
 # ---------------------------------------------------------------- Gadgetzan
 
 step Gadgetzan
-  tip From the Forgotten Coast dock, boat to Feathermoon and fly to Thalanaar, then ride east through Thousand Needles, across the Shimmering Flats and south into Tanaris. Gadgetzan is just inside the border.
+  zone Tanaris
+  tip Ride south-east off the Shimmering Flats into Tanaris. Gadgetzan is just inside the border.
   getfp "Gadgetzan" npc 7823          -- Bera Stonehammer
   sethome "Gadgetzan" npc 7733        -- Innkeeper Fizzgrimble
   turnin 2864                         -- Tran'rek, north side of town

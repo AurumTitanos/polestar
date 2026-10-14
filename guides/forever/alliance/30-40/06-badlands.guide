@@ -9,9 +9,10 @@
 #
 # Deviations from the export:
 # - The Shimmering Flats and Ratchet stops (visits 30-31) are dropped: a long
-#   ride from Dustwallow for small breadcrumbs (News for Fizzle 1137,
-#   Wharfmaster Dizzywig 1111, Goblin Sponsorship 1178/1180, Parts for Kravel
-#   1112), about 4,000 XP. News for Fizzle is not taken from Martek.
+#   ride from Dustwallow for small breadcrumbs (Wharfmaster Dizzywig 1111,
+#   Goblin Sponsorship 1178/1180, Parts for Kravel 1112). News for Fizzle
+#   (1137) is taken from Martek and carried to 40-50/04-tanaris, which crosses
+#   the Shimmering Flats at 45 and does Keeping Pace there.
 # - Dustwallow Marsh's two visits are merged into one loop at the start of the
 #   next guide; this guide only passes Theramore for the flight path and the
 #   two turn-ins by the flight master. Lieutenant Paval Reethe's badge (1252)
@@ -27,9 +28,10 @@
 #   are escorts, handled as a goto with a note.
 # - Stone Is Better than Cloth (716) and Jarl Needs a Blade (1203, next guide)
 #   want crafted items (Patterned Bronze Bracers, a Moonsteel Broadsword): optional.
-# Left out: A Sign of Hope (721, to Hammertoe Grez inside Uldaman) and Pearl
-# Diving (705, its clams lie on Stranglethorn's far north-west coast, which the
-# route no longer visits): never finished on the route.
+# Left out: A Sign of Hope (721, to Hammertoe Grez inside Uldaman): never
+# finished on the route. Pearl Diving (705) is carried: its clams lie on
+# Stranglethorn's north-west coast (40-50/01-stranglethorn-vale) and it is
+# handed in at 40-50/02-badlands.
 # Dropped: Khan Jehn (1374) and the Gelkis turn-ins: they follow the centaur
 # war, which 30-40/02-desolace no longer takes (one character cannot be
 # Friendly with both clans).
@@ -73,6 +75,7 @@ step Valley of Fangs
   turnin 1106                         -- Martek the Exiled
   accept 1108
   accept 703                          -- Rigglefuzz
+  accept 705                          -- The clams lie on Stranglethorn's north-west coast, in the next guide: keep it
 
 step Ogres and buzzards
   tip The Dustbelcher ogres camp just south of the valley; any of them drops scrap. Buzzards circle the plain to the east.
@@ -90,7 +93,7 @@ step Agmond's End
 step Valley of Fangs
   turnin 703                          -- Rigglefuzz
   turnin 1108                         -- Martek the Exiled
-  note Martek's next errand goes to the Shimmering Flats: skip it.
+  accept 1137                         -- for Fizzle Brassbolts in the Shimmering Flats: the Tanaris guide crosses them at 45, keep it
 
 step Lotwil Veriatus
   tip Ride west into the Dustbowl; Lotwil works by his machines in the middle of it.

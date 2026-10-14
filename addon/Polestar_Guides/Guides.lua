@@ -3509,6 +3509,7 @@ do
 						{ t = "turnin", quest = 1106, title = "Martek the Exiled", npc = 4618, npcName = "Martek the Exiled", map = 1418, x = 42.22, y = 52.69, f = "e", note = "Martek the Exiled" },
 						{ t = "accept", quest = 1108, title = "Indurium", npc = 4618, npcName = "Martek the Exiled", minLevel = 28, qlvl = 39, pre = { 1106 }, preTitles = { [1106] = "Martek the Exiled" }, map = 1418, x = 42.22, y = 52.69, f = "e" },
 						{ t = "accept", quest = 703, title = "Barbecued Buzzard Wings", npc = 2817, npcName = "Rigglefuzz", minLevel = 33, qlvl = 40, map = 1418, x = 42.39, y = 52.93, f = "e", note = "Rigglefuzz" },
+						{ t = "accept", quest = 705, title = "Pearl Diving", npc = 2817, npcName = "Rigglefuzz", minLevel = 30, qlvl = 37, map = 1418, x = 42.39, y = 52.93, f = "e", note = "The clams lie on Stranglethorn's north-west coast, in the next guide: keep it" },
 					},
 				},
 				{
@@ -3535,7 +3536,7 @@ do
 					goals = {
 						{ t = "turnin", quest = 703, title = "Barbecued Buzzard Wings", npc = 2817, npcName = "Rigglefuzz", map = 1418, x = 42.39, y = 52.93, f = "e", note = "Rigglefuzz" },
 						{ t = "turnin", quest = 1108, title = "Indurium", npc = 4618, npcName = "Martek the Exiled", map = 1418, x = 42.22, y = 52.69, f = "e", note = "Martek the Exiled" },
-						{ t = "note", text = "Martek's next errand goes to the Shimmering Flats: skip it." },
+						{ t = "accept", quest = 1137, title = "News for Fizzle", npc = 4618, npcName = "Martek the Exiled", minLevel = 28, qlvl = 38, pre = { 1108 }, preTitles = { [1108] = "Indurium" }, map = 1418, x = 42.22, y = 52.69, f = "e", note = "for Fizzle Brassbolts in the Shimmering Flats: the Tanaris guide crosses them at 45, keep it" },
 					},
 				},
 				{
@@ -3969,7 +3970,7 @@ do
 						{ t = "accept", quest = 209, title = "Skullsplitter Tusks", npc = 737, npcName = "Kebok", minLevel = 37, qlvl = 42, pre = { 189 }, preTitles = { [189] = "Bloodscalp Ears" }, map = 1434, x = 27, y = 77.13, f = "e", note = "Kebok" },
 						{ t = "accept", quest = 2864, title = "Tran'rek", npc = 773, npcName = "Krazek", minLevel = 40, qlvl = 45, closedBy = { 2865 }, preTitles = { [2865] = "Scarab Shells" }, map = 1434, x = 26.95, y = 77.21, f = "e", note = "Krazek: for Tran'rek in Tanaris, keep it" },
 						{ t = "turnin", quest = 627, title = "Favor for Krazek", npc = 773, npcName = "Krazek", map = 1434, x = 26.95, y = 77.21, f = "e", note = "Krazek" },
-						{ t = "note", text = "Krazek's next errand goes back north to the Rebel Camp: skip it." },
+						{ t = "accept", quest = 622, title = "Return to Corporal Kaleb", npc = 773, npcName = "Krazek", minLevel = 32, qlvl = 37, pre = { 627 }, preTitles = { [627] = "Favor for Krazek" }, map = 1434, x = 26.95, y = 77.21, f = "e", note = "for Corporal Kaleb at the Rebel Camp, on the northern loop" },
 						{ t = "accept", quest = 617, title = "Akiris by the Bundle", npc = 2494, npcName = "Privateer Bloads", minLevel = 38, qlvl = 43, map = 1434, x = 26.76, y = 76.38, f = "e", note = "Privateer Bloads" },
 						{ t = "turnin", quest = 669, title = "Sunken Treasure", npc = 2487, npcName = "Fleet Master Seahorn", map = 1434, x = 27.17, y = 77.01, f = "e", note = "Fleet Master Seahorn, top floor" },
 						{ t = "note", text = "Seahorn's next errand goes back to Arathi: skip it." },
@@ -3996,7 +3997,7 @@ do
 						{ t = "accept", quest = 576, title = "Keep An Eye Out", npc = 2493, npcName = "Dizzy One-Eye", minLevel = 37, qlvl = 42, pre = { 597 }, preTitles = { [597] = "The Bloodsail Buccaneers" }, map = 1434, x = 28.59, y = 75.9, f = "e", note = "Dizzy One-Eye" },
 						{ t = "accept", quest = 587, title = "Up to Snuff", npc = 2488, npcName = "Deeg", minLevel = 37, qlvl = 41, pre = { 597 }, preTitles = { [597] = "The Bloodsail Buccaneers" }, map = 1434, x = 26.92, y = 77.35, f = "e", note = "Deeg" },
 						{ t = "turnin", quest = 610, title = "\"Pretty Boy\" Duncan", npc = 2542, npcName = "Catelyn the Blade", map = 1434, x = 27.28, y = 77.53, f = "e", note = "Catelyn the Blade" },
-						{ t = "note", text = "Catelyn's next errand goes to the far north-west coast: skip it." },
+						{ t = "accept", quest = 611, title = "The Curse of the Tides", npc = 2542, npcName = "Catelyn the Blade", minLevel = 32, qlvl = 40, pre = { 610 }, preTitles = { [610] = "\"Pretty Boy\" Duncan" }, map = 1434, x = 27.28, y = 77.53, f = "e", note = "Gazban swims off the north-west coast, on the northern loop" },
 					},
 				},
 				{
@@ -4111,9 +4112,25 @@ do
 					},
 				},
 				{
+					title = "The north-west coast",
+					note = "Ride north-west from the mine to the bay on the north-west coast. The Giant Clams lie on its floor and hold the pearls; Gazban swims among them and drops the Stone of the Tides.",
+					goals = {
+						{ t = "collect", quest = 705, title = "Pearl Diving", item = 4611, itemName = "Blue Pearl", count = 9, oi = 1, map = 1434, x = 27.6, y = 29.2, f = "e", spots = { { x = 26, y = 29.4, r = 49, n = 4 }, { x = 27.6, y = 26.6, r = 59, n = 6 }, { x = 25.7, y = 26.8, r = 49, n = 5 }, { x = 24.3, y = 29.4, r = 42, n = 4 }, { x = 25.8, y = 24.7, r = 52, n = 5 }, { x = 24, y = 27.6, r = 31, n = 2 }, { x = 27.6, y = 29.2, r = 15, n = 1, alt = true }, { x = 26.8, y = 30.8, r = 15, n = 1, alt = true }, { x = 27.4, y = 23.4, r = 31, n = 3, alt = true }, { x = 24, y = 25.4, r = 15, n = 1, alt = true }, { x = 25.5, y = 22.8, r = 15, n = 2, alt = true }, { x = 23.6, y = 23.4, r = 15, n = 1, alt = true } }, note = "Blue Pearl" },
+						{ t = "collect", quest = 611, title = "The Curse of the Tides", item = 4034, itemName = "Stone of the Tides", count = 1, oi = 1, map = 1434, x = 24.97, y = 23.58, f = "e", spots = { { x = 25, y = 23.6, r = 15, n = 1 }, { x = 19.8, y = 22.5, r = 15, n = 1 } }, note = "Stone of the Tides" },
+					},
+				},
+				{
+					title = "Rebel Camp",
+					note = "Ride north-east past Nesingwary's camp and follow the road north to the camp at the top of the vale.",
+					goals = {
+						{ t = "turnin", quest = 622, title = "Return to Corporal Kaleb", npc = 770, npcName = "Corporal Kaleb", map = 1434, x = 37.74, y = 3.3, f = "e", note = "Corporal Kaleb" },
+					},
+				},
+				{
 					title = "Booty Bay",
 					goals = {
 						{ t = "hearth", location = "Booty Bay" },
+						{ t = "turnin", quest = 611, title = "The Curse of the Tides", npc = 2496, npcName = "Baron Revilgaz", map = 1434, x = 27.23, y = 76.87, f = "e", note = "Baron Revilgaz" },
 						{ t = "turnin", quest = 609, title = "Voodoo Dues", npc = 2501, npcName = "\"Sea Wolf\" MacKinley", map = 1434, x = 27.78, y = 77.07, f = "e", note = "\"Sea Wolf\" MacKinley" },
 						{ t = "note", text = "MacKinley's next task sends you after elite ogres: skip it." },
 						{ t = "turnin", quest = 600, title = "Venture Company Mining", npc = 2498, npcName = "Crank Fizzlebub", map = 1434, x = 27.12, y = 77.21, f = "e", note = "Crank Fizzlebub" },
@@ -4291,6 +4308,14 @@ do
 						{ t = "accept", quest = 739, title = "Murdaloc", object = 2875, objName = "Battered Dwarven Skeleton", minLevel = 30, qlvl = 42, pre = { 738 }, preTitles = { [738] = "Find Agmond" }, map = 1418, x = 50.89, y = 62.4, f = "e", note = "Battered Dwarven Skeleton" },
 						{ t = "kill", quest = 739, title = "Murdaloc", target = "Murdaloc", npc = 2945, oi = 1, map = 1418, x = 49.63, y = 66.31, f = "e", note = "Murdaloc" },
 						{ t = "kill", quest = 739, title = "Murdaloc", target = "Stonevault Bonesnapper", npc = 2893, count = 12, oi = 2, map = 1418, x = 50.17, y = 67.12, f = "e", spots = { { x = 51.3, y = 67, r = 61, n = 9 }, { x = 49, y = 71, r = 56, n = 5 } }, note = "Stonevault Bonesnapper" },
+					},
+				},
+				{
+					title = "Rigglefuzz",
+					note = "Ride west to the Valley of Fangs in the middle of the Badlands; Rigglefuzz camps beside Martek.",
+					goals = {
+						{ t = "turnin", quest = 705, title = "Pearl Diving", npc = 2817, npcName = "Rigglefuzz", map = 1418, x = 42.39, y = 52.93, f = "e", note = "Blue Pearls from Stranglethorn" },
+						{ t = "note", text = "Rigglefuzz's next quest pays no experience: skip it." },
 					},
 				},
 				{
@@ -4687,8 +4712,32 @@ do
 			version = 1,
 			steps = {
 				{
+					title = "Mirage Raceway",
+					note = "From the Forgotten Coast dock, boat to Feathermoon and fly to Thalanaar, then ride east through Thousand Needles to the Mirage Raceway on the Shimmering Flats. Fizzle Brassbolts and Pozzik are in the camps beside the track; Zamek stands by the goblin camp.",
+					goals = {
+						{ t = "turnin", quest = 1137, title = "News for Fizzle", npc = 4454, npcName = "Fizzle Brassbolts", map = 1441, x = 78.06, y = 77.13, f = "e", note = "Fizzle Brassbolts" },
+						{ t = "accept", quest = 1190, title = "Keeping Pace", npc = 4630, npcName = "Pozzik", minLevel = 29, qlvl = 41, pre = { 1137 }, preTitles = { [1137] = "News for Fizzle" }, map = 1441, x = 80.18, y = 75.88, f = "e", note = "Pozzik" },
+						{ t = "accept", quest = 1191, title = "Zamek's Distraction", npc = 4709, npcName = "Zamek", minLevel = 29, qlvl = 41, map = 1441, x = 79.81, y = 77.03, f = "e", note = "Zamek" },
+						{ t = "turnin", quest = 1191, title = "Zamek's Distraction", npc = 4709, npcName = "Zamek", map = 1441, x = 79.81, y = 77.03, f = "e", note = "He runs off to keep Rizzle busy" },
+					},
+				},
+				{
+					title = "Rizzle's plans",
+					note = "While Zamek keeps Rizzle talking, his plans lie unguarded in the gnome camp across the track.",
+					goals = {
+						{ t = "turnin", quest = 1190, title = "Keeping Pace", object = 20805, objName = "Rizzle's Unguarded Plans", map = 1441, x = 77.21, y = 77.39, f = "e", note = "Rizzle's Unguarded Plans" },
+						{ t = "accept", quest = 1194, title = "Rizzle's Schematics", object = 20805, objName = "Rizzle's Unguarded Plans", minLevel = 29, qlvl = 41, pre = { 1190 }, preTitles = { [1190] = "Keeping Pace" }, map = 1441, x = 77.21, y = 77.39, f = "e" },
+					},
+				},
+				{
+					title = "Pozzik",
+					goals = {
+						{ t = "turnin", quest = 1194, title = "Rizzle's Schematics", npc = 4630, npcName = "Pozzik", map = 1441, x = 80.18, y = 75.88, f = "e" },
+					},
+				},
+				{
 					title = "Gadgetzan",
-					note = "From the Forgotten Coast dock, boat to Feathermoon and fly to Thalanaar, then ride east through Thousand Needles, across the Shimmering Flats and south into Tanaris. Gadgetzan is just inside the border.",
+					note = "Ride south-east off the Shimmering Flats into Tanaris. Gadgetzan is just inside the border.",
 					goals = {
 						{ t = "getfp", npc = 7823, npcName = "Bera Stonehammer", location = "Gadgetzan", map = 1446, x = 51.01, y = 29.34, f = "e", note = "Bera Stonehammer" },
 						{ t = "sethome", npc = 7733, npcName = "Innkeeper Fizzgrimble", location = "Gadgetzan", map = 1446, x = 52.51, y = 27.91, f = "e", note = "Innkeeper Fizzgrimble" },
