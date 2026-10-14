@@ -24,8 +24,9 @@
   writes the rest (the step and each goal's state and position, where you
   stand, your race, class and level, the versions and any errors it caught),
   sized to fit one Discord message, for you to copy and paste on the Polestar
-  Discord, whose invite sits under it. The guide window's menu and
-  `/polestar report` open it too.
+  Discord (the game can't open links: "Get the invite" gives the invite once
+  if you haven't joined yet). The guide window's menu and `/polestar report`
+  open it too.
 - The Polestar Discord is one click away: Discord's mark at the foot of the
   hub's and the settings' sidebars, and `/polestar discord`, give its invite
   to copy.

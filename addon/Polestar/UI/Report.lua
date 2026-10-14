@@ -5,12 +5,14 @@
 -- with every goal's state, ids and position, the arrow, where the player
 -- stands, the versions, other packs and the errors Polestar caught. One
 -- report, selected for copying, sized to stay inside one Discord message,
--- and under it the Polestar Discord (ns.DiscordURL) with its invite.
--- UI.ShowDiscord: the invite alone, in the copy window with Discord's mark
--- (the section rail's Discord entry, /polestar discord).
+-- and under it where to paste it: the Polestar Discord, with "Get the
+-- invite" for a player not in it yet. UI.ShowDiscord: the invite alone
+-- (ns.DiscordURL), in the copy window with Discord's mark (that button, the
+-- sidebars' Discord mark, /polestar discord).
 --
--- The game gives addons no clipboard and no links: everything to take away
--- sits in a read-only copy box, selected for Ctrl+C.
+-- The game gives addons no clipboard and opens no links (LaunchURL is
+-- Blizzard's alone): everything to take away sits in a read-only copy box,
+-- selected for Ctrl+C, and a member copies only the report.
 -- Built on first use; colours are Theme tokens only.
 
 local ADDON, ns = ...
@@ -279,8 +281,8 @@ local function layout()
 	y = y + F.DiscordTitle:GetStringHeight() + 4
 	put(F.DiscordNote, TEXT_X, y)
 	y = y + F.DiscordNote:GetStringHeight() + 10
-	put(F.Link, TEXT_X, y)
-	y = y + F.Link:GetHeight()
+	put(F.Invite, TEXT_X, y)
+	y = y + F.Invite:GetHeight()
 	F:SetHeight(floor(y + PAD + 0.5))
 end
 
@@ -398,7 +400,7 @@ local function build()
 	F.Box = W.CopyBox(F, { lines = 2 })
 	Theme.Font(F.Box, "small")
 	F.Box:SetWidth(BOX_W)
-	F.Box:SetScript("OnTabPressed", function() F.Link:SetFocus() end)
+	F.Box:SetScript("OnTabPressed", function() F.Desc:SetFocus() end)
 	-- The report's text in the box's font at its inner width, never seen:
 	-- what the box's height is measured on.
 	F.Measure = W.Text(F, "small", "text")
@@ -419,11 +421,11 @@ local function build()
 	F.DiscordNote:SetWidth(WIDTH - TEXT_X - PAD)
 	F.DiscordNote:SetJustifyH("LEFT")
 	F.DiscordNote:SetWordWrap(true)
-	F.DiscordNote:SetText(L["Copy your report with Ctrl+C (Cmd+C on a Mac) and paste it there. Not a member yet? Open this invite in your browser first."])
-	F.Link = W.CopyBox(F)
-	F.Link:SetWidth(WIDTH - TEXT_X - PAD)
-	W.SetCopyText(F.Link, ns.DiscordURL)
-	F.Link:SetScript("OnTabPressed", function() F.Desc:SetFocus() end)
+	F.DiscordNote:SetText(L["Copy your report with Ctrl+C (Cmd+C on a Mac), switch to Discord and paste it in the Polestar server. Not in it yet? Get the invite once and open it in your browser."])
+	-- The game opens no links, so the invite is one more copy: only for a
+	-- player who has not joined yet, in the copy window, never here beside
+	-- the report.
+	F.Invite = W.Button(F, L["Get the invite"], function() UI.ShowDiscord() end)
 
 	F:SetScript("OnShow", function(self) Anim.To(self, "alpha", 0, 1, Anim.FAST, "out") end)
 	if UISpecialFrames then tinsert(UISpecialFrames, "PolestarReport") end

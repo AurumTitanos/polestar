@@ -38,8 +38,13 @@ test('the bug in the navigator reports the step on screen: the player\'s words, 
 		stub.RunScript(F.Desc, "OnTextChanged", true)
 		local text = F.Box:GetText()
 		F.Select:Click()
-		emit({ noGuide = noGuide, shown = shown, opened = opened, text = text, selected = stub.focus == F.Box,
-			link = F.Link:GetText(), height = F:GetHeight(), boxH = F.Box:GetHeight() })`);
+		local selected = stub.focus == F.Box
+		local boxH = F.Box:GetHeight()
+		local reportCopies = 0
+		for _, b in ipairs({ F:GetChildren() }) do if b.psText and b:IsShown() then reportCopies = reportCopies + 1 end end
+		F.Invite:Click()
+		emit({ noGuide = noGuide, shown = shown, opened = opened, text = text, selected = selected, copies = reportCopies,
+			invite = { shown = PolestarCopy:IsShown(), text = PolestarCopy.Box:GetText(), focus = stub.focus == PolestarCopy.Box }, boxH = boxH })`);
 	assert.equal(out.noGuide, false, 'no guide, no step to report: the bug is not there');
 	assert.equal(out.shown, true);
 	assert.deepEqual(out.opened, { shown: true, typing: true, context: 'Step 3 of 8  \u00b7  Kobold Camp  \u00b7  Elwynn Forest' });
@@ -63,7 +68,8 @@ test('the bug in the navigator reports the step on screen: the player\'s words, 
 	assert.ok(versions.startsWith('Polestar ') && versions.includes('client 1.60.1 (70338)') && versions.endsWith('enUS'), versions);
 	assert.ok(lines.includes('Errors: none'), out.text);
 	assert.equal(out.selected, true, 'Select report puts the report in focus, selected for Ctrl+C');
-	assert.equal(out.link, INVITE, 'the Discord invite under it');
+	assert.equal(out.copies, 1, 'one thing to copy in the window: the report (a member needs no invite)');
+	assert.deepEqual(out.invite, { shown: true, text: INVITE, focus: true }, 'Get the invite opens the invite on its own, selected');
 	assert.ok(out.boxH >= lines.length * 11, `the box holds every line (${out.boxH}px for ${lines.length})`);
 });
 

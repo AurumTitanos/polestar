@@ -1622,11 +1622,12 @@ Reading flow: `docs/DESIGN.md` ("Intent" and "The Guide Window").
   Polestar's files, `BugGrabber:GetDB()`), the newest three, counted, by
   their path from the AddOns folder. Every line is cut at 100 bytes, so at
   its longest the report fits one Discord message (2000 characters). Under
-  it, Discord's mark, "Polestar on Discord" and the invite
-  (`Polestar.DiscordURL`) in a copy box. What the player typed stays while
-  the window is reopened on the same step. The hub's and the settings'
-  sidebars carry the Discord's mark at the end of the version line
-  (`UI.Report.SidebarLink(shell)`), which opens the invite like
+  it, Discord's mark, "Polestar on Discord" and "Get the invite", which opens
+  the invite (`Polestar.DiscordURL`) in the copy window: the game opens no
+  links for addons, so the report is the only text a member copies. What the
+  player typed stays while the window is reopened on the same step. The
+  hub's and the settings' sidebars carry the Discord's mark at the end of
+  the version line (`UI.Report.SidebarLink(shell)`), which opens the invite like
   `/polestar discord` (`UI.ShowDiscord`, `SHOW_DISCORD`).
 - **Per-character UI state** in `CharState().ui`: `recentGuides` (ids, newest
   first, at most 10), `favoriteGuides` (id -> true), `pickerSelected` (id).
