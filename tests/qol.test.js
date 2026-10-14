@@ -56,7 +56,7 @@ test('options: every qol setting is registered, on Questing or Quality of Life, 
 		for _, k in ipairs({ "itemButton", "targetButton", "hearthButton", "buttonScale", "xpTracker", "sellJunk", "autoRepair",
 			"rewardHighlight", "rewardAutoPick", "flightAutoOpen", "flightHighlight", "deathHelper", "instantQuestText",
 			"skipGossip", "fastLoot", "declineDuels", "repairGuild", "hideErrors", "autoReleasePvP", "declineGuildInvites",
-			"declinePartyStrangers", "acceptPartyFriends", "acceptSummon", "acceptResurrect" }) do keys[k] = Polestar.GetDefault("qol." .. k) end
+			"declinePartyStrangers", "acceptPartyFriends", "acceptSummon", "acceptResurrect", "rewardEquip" }) do keys[k] = Polestar.GetDefault("qol." .. k) end
 		emit(keys)
 	`);
 	const registered = new Set(specs.filter((c) => c.key).map((c) => c.key.replace(/^qol\./, '')));
@@ -67,6 +67,7 @@ test('options: every qol setting is registered, on Questing or Quality of Life, 
 		assert.ok(c.tab && c.section);
 	}
 	assert.equal(defaults.rewardAutoPick, false, 'auto-pick is off by default');
+	assert.equal(defaults.rewardEquip, false, 'wearing rewards is off by default');
 	assert.equal(defaults.sellJunk, true);
 });
 
@@ -682,6 +683,119 @@ test('rewards: auto-pick takes the best when on; Shift, quest cost and a disable
 	assert.deepEqual(out[0], [2], 'disabled Gear: vendor value decides');
 	assert.equal(out[1], 0);
 	assert.equal(out[2], 0);
+});
+
+const WEAR = `
+	q.items[11] = { name = "Sturdy Boots", quality = 2 }
+	q.items[12] = { name = "Light Gloves", quality = 2 }
+	q.items[13] = { name = "Old Belt", quality = 1 }
+	q.landRewards = true
+	-- A quest offering the boots or the gloves, the belt with every turn-in;
+	-- the panel empties after each turn-in, as the client's does.
+	local function offer(choices, rewards)
+		q.choices, q.rewards = choices or { { id = 11 }, { id = 12 } }, rewards or { { id = 13 } }
+		q.questComplete(); stub.runTimers()
+	end
+	local function turnIn(i, choices, rewards)
+		offer(choices, rewards)
+		GetQuestReward(i)
+		stub.advance(1)
+	end
+	Polestar.Gear = {
+		IsEnabled = function() return true end,
+		IsUpgrade = function(link)
+			if link:find("item:11|", 1, true) then return true, 6, 12.5 end
+			if link:find("item:13|", 1, true) then return true, 2, nil end
+			return false, -1
+		end,
+		CompareToEquipped = function(link) return { slot = link:find("item:11|", 1, true) and 8 or 6 } end,
+	}
+	local function worn()
+		local out = {}
+		for _, c in ipairs(q.calls) do
+			if c[1] == "EquipItemByName" then out[#out + 1] = c[2]:match("item:(%d+)") .. "@" .. tostring(c[3]) end
+		end
+		return out
+	end
+`;
+
+test('rewards: what a turn-in gives is worn once it reaches the bags, when it is an upgrade', () => {
+	const [out] = run(`${WEAR}
+		set("rewardEquip", true)
+		offer()
+		GetQuestReward(1)                 -- the player's pick; the belt comes with every turn-in
+		local early = #worn()
+		stub.advance(1)
+		emit({ early = early, worn = worn(), boots = printed("Wearing |Hitem:11|h%[Sturdy Boots%]|h %(12%% better%)"), belt = printed("Wearing |Hitem:13|h%[Old Belt%]|h%.") })
+	`);
+	assert.deepEqual(out, { early: 0, worn: ['11@8', '13@6'], boots: true, belt: true });
+});
+
+test('rewards: wearing waits for combat to end; off by default, Shift at the turn-in, a pick that is no upgrade and a disabled Gear module wear nothing', () => {
+	const out = run(`${WEAR}
+		turnIn(1)
+		emit(#worn())                       -- off by default
+
+		set("rewardEquip", true)
+		q.combat(true)
+		turnIn(1)
+		local inCombat = #worn()
+		q.combat(false)
+		emit({ inCombat = inCombat, after = worn() })
+
+		q.calls = {}
+		stub.keys.shift = true
+		turnIn(1)
+		stub.keys.shift = false
+		emit(#worn())
+
+		turnIn(2, nil, {})
+		emit(#worn())                       -- the gloves are no upgrade
+
+		Polestar.Gear.IsEnabled = function() return false end
+		turnIn(1)
+		emit(#worn())
+	`);
+	assert.equal(out[0], 0, 'off by default');
+	assert.deepEqual(out[1], { inCombat: 0, after: ['11@8', '13@6'] });
+	assert.equal(out[2], 0, 'Shift');
+	assert.equal(out[3], 0, 'no upgrade');
+	assert.equal(out[4], 0, 'Gear disabled');
+});
+
+test('rewards: a turn-in made before anything else sees the panel wears that quest\'s item, not the last quest\'s', () => {
+	const [out] = run(`${WEAR}
+		set("rewardEquip", true)
+		turnIn(2, nil, {})                  -- the gloves: nothing worn, but this panel offered the boots too
+		q.calls = {}
+		q.early = true                      -- turns in on QUEST_COMPLETE, ahead of Polestar, as automation does
+		offer({ { id = 13 } }, {})          -- the only reward: the belt
+		stub.advance(1)
+		emit(worn())
+	`, {
+		before: `
+			local f = CreateFrame("Frame")
+			f:RegisterEvent("QUEST_COMPLETE")
+			f:SetScript("OnEvent", function() if stub.qol.early then GetQuestReward(1) end end)
+		`,
+	});
+	assert.deepEqual(out, ['13@6']);
+});
+
+test('rewards: only a new copy counts: an older one in the bags, or a turn-in that never delivers, wears nothing', () => {
+	const [out] = run(`${WEAR}
+		set("rewardEquip", true)
+		q.addItem(0, 9, 11, 1)              -- boots from before
+		q.landRewards = false               -- the turn-in never delivers
+		offer()
+		GetQuestReward(1)
+		stub.fire("BAG_UPDATE_DELAYED")     -- something else moves in the bags
+		stub.advance(12)
+		q.addItem(0, 10, 11, 1)             -- boots from elsewhere, long after the turn-in
+		stub.fire("BAG_UPDATE_DELAYED")
+		emit(worn())
+	`);
+	assert.deepEqual(out, {});
 });
 
 test('rewards: waits for uncached item data before ranking; an upgrade is marked from its item ID meanwhile, the frame once it settles', () => {

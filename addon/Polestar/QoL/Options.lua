@@ -42,6 +42,8 @@ register(QUESTING, L["Rewards & gear"], L["Quest rewards"], {
 		help = L["On the reward choices, a green arrow marks each upgrade for your spec (with Gear advice on), a thin frame in your accent colour the one to take, and a coin the one that sells for most when none is an upgrade."] },
 	{ kind = "toggle", key = "qol.rewardAutoPick", label = L["Take the best reward"],
 		help = L["Chooses that reward for you when you complete the quest. Hold Shift to choose yourself."] },
+	{ kind = "toggle", key = "qol.rewardEquip", label = L["Wear reward upgrades"],
+		help = L["Puts on what a turn-in gives when it is an upgrade for your spec (with Gear advice on), once it reaches your bags and you are out of combat. Hold Shift at the turn-in to skip."] },
 })
 
 register(QUESTING, L["Quests"], L["Faster questing"], {

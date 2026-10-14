@@ -53,6 +53,9 @@
 - Without the Codex, Lookup and Dungeons say which case it is: not installed
   (get the Polestar zip from CurseForge or the GitHub Releases page, not
   GitHub's "Source code" download) or turned off in the AddOns list.
+- Quest rewards that are upgrades can go on by themselves once they reach
+  your bags, out of combat: Options, Questing, Rewards & gear, Wear reward
+  upgrades (off by default; Shift at the turn-in skips).
 
 ### For guide authors
 
