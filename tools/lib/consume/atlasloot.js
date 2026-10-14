@@ -633,7 +633,7 @@ function readModule(dir, coreDir, module, opts) {
 	const warnings = [];
 	const core = (CORE_FILES[module] || []).map((f) => path.join(coreDir, f)).filter((f) => {
 		if (fs.existsSync(f)) return true;
-		warnings.push(`${CORE}/${path.relative(coreDir, f)} missing: ${module} rows lack its facts`);
+		warnings.push(`${CORE}/${path.relative(coreDir, f).split(path.sep).join('/')} missing: ${module} rows lack its facts`);
 		return false;
 	});
 	const extraFiles = [];
@@ -641,7 +641,7 @@ function readModule(dir, coreDir, module, opts) {
 		const forever = path.join(modDir, 'forever.lua');
 		if (fs.existsSync(forever) && !luaFiles.includes(forever)) extraFiles.push(forever);
 	}
-	for (const f of luaFiles) if (!fs.existsSync(f)) warnings.push(`${folder}/${path.relative(modDir, f)} listed in ${toc} but missing`);
+	for (const f of luaFiles) if (!fs.existsSync(f)) warnings.push(`${folder}/${path.relative(modDir, f).split(path.sep).join('/')} listed in ${toc} but missing`);
 	const run = (extra) => {
 		const all = [...core, ...luaFiles.filter((f) => fs.existsSync(f)), ...extra];
 		const res = readAddonLua({
