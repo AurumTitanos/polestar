@@ -129,9 +129,11 @@ function pack(dirs, version) {
 			if (v !== version) console.warn(`warning: ${n}.toc says version ${v}, package.json says ${version}`);
 		}
 	}
-	const built = compile(ours, dirs);
-	if (!built) return 1;
+	let built;
 	try {
+		// Building reads Polestar.toc's `## Interface` line: a missing one is an error here too.
+		built = compile(ours, dirs);
+		if (!built) return 1;
 		project.writePackDir(path.join(dirs.addons, manifest.folder), built.files);
 		const sums = [];
 		for (const { file, names, extras } of archives) {

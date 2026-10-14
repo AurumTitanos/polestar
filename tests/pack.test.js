@@ -231,3 +231,25 @@ test('our release: the guide pack folder is not checked for a TOC before it is g
 	assert.equal(bad.result, 1, bad.out);
 	assert.match(bad.out, /^pack failed: refusing to write into .*Polestar_Guides/m);
 });
+
+// Runs `pack` for our release while reading `file` gives `text` (one of the
+// repository's own files, left untouched on disk).
+async function packReading(file, text) {
+	const readFileSync = fs.readFileSync;
+	fs.readFileSync = function (f, ...rest) {
+		if (typeof f === 'string' && path.resolve(f) === file) return text;
+		return readFileSync.call(this, f, ...rest);
+	};
+	try {
+		const addons = fakeAddons(tmpdir(), ['Polestar', 'Polestar_Recorder'], packageVersion());
+		return await quiet(() => pack.run(['--guides', GUIDES_DIR, '--data', DATA_DIR, '--addons', addons, '--dist', tmpdir()]));
+	} finally {
+		fs.readFileSync = readFileSync;
+	}
+}
+
+test('our release: a Polestar.toc without an `## Interface` line is a clear error, not a stack trace', async () => {
+	const r = await packReading(path.join(ROOT, 'addon', 'Polestar', 'Polestar.toc'), '## Title: Polestar\nMain.lua\n');
+	assert.equal(r.result, 1, r.out);
+	assert.match(r.out, /^pack failed: .*Polestar\.toc has no ## Interface line$/m);
+});
