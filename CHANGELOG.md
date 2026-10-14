@@ -30,6 +30,17 @@
   incubus) and orbs, and the Warrior's armour and weapon chains. The four
   class mounts (Paladin Warhorse and Charger, Warlock Felsteed and
   Dreadsteed) moved there from Collectibles.
+- Class quests on the leveling route: every start takes its level 1 class
+  letter to the trainer; Night Elf and Tauren Druids learn Cure Poison on
+  the way (Darkshore, the Barrens), Mages do Mirror Lake (Alliance) and The
+  Balnir Farmstead (Undead), Hunters' taming quests say they teach Tame
+  Beast and Beast Training (Orc and Troll Hunters hand Training the Beast in
+  before leaving Durotar), Undead Paladins take Coming to Terms, Call of Fire
+  names the Totem of Charged Flames it gives Shamans, Rogues may do The
+  Touch of Zanzil in Stormwind and Alliance Warlocks the incubus. The
+  Warlock felhunter chain left the Horde 30-40 guides for its Class guide,
+  and the leveling guides point at the Class guides for the long chains they
+  leave out.
 
 ### For guide authors
 

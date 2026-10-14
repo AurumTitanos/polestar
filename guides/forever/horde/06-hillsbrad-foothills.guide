@@ -69,7 +69,9 @@ next forever/horde/07-ashenvale
 # of Camp Taurajo, who gives the blue waterskin (1534) for the Ruins of
 # Stardust in forever/horde/07-ashenvale. Rogues who finished Mission:
 # Possible But Not Probable hand Hinott's Assistance (2479, 2480, optional:
-# Gallywix is elite) to Serge Hinott in Tarren Mill and learn Poisons.
+# Gallywix is elite) to Serge Hinott in Tarren Mill and learn Poisons. Those
+# who skipped Gallywix are pointed at the Class guide Poisons (Horde)
+# (forever/class/rogue/poisons-horde): 2479 needs 2478 turned in.
 
 # ---------------------------------------------------------------- Tarren Mill
 
@@ -93,6 +95,7 @@ step Serge Hinott
   accept 2480 optional
   complete 2480 optional
   turnin 2480 optional                -- Serge Hinott: Poisons
+  note "No Gallywix yet? The Class guide Poisons (Horde) runs the chain from Shenthul again, with a group for Gallywix."
 
 # ---------------------------------------------------------------- West: the hills and Hillsbrad Fields
 

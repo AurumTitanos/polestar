@@ -66,6 +66,13 @@ next forever/horde/02-the-barrens
 #   (94050) with Quel'ana Quickgale in Valanaar: a Windsong Crawler by the
 #   lakes north-west of town, a Vuldren Alpha at the orchard, an Ornery
 #   Galestrider in the fields west of town, done after the orchard.
+# - Class letters at 2: once Harmony in Balance (92461) is turned in, Rorian
+#   gives each class its trainer quest, handed in a few steps away in the
+#   village: The Warrior's Path (92532) to Blademaster Ren in the
+#   watchtower; The Way of the Hunter (92482) to Tai'ree Farsight; Embracing
+#   the Elements (92484) to Windshaper Boro; A Student of Nature (92485) to
+#   Xyton Silverwind. Rogue: At Home in the Shadows (92483): Rorian to Akeri
+#   Duskblade in the watchtower, at the level 4 turn-ins (no spell).
 #
 # Added: The Earthen Ring (95349). The export accepts it but never turns it
 # in; its ender, Alaana Stormwalker, stands where the airship lands, so it is
@@ -105,6 +112,14 @@ step Back to Thendal Village
   turnin 92462                        -- Elatrell Featherlight
   accept 92463
   turnin 92461                        -- Rorian the Dayseeker
+  accept 92532 only Warrior           -- Rorian the Dayseeker: the Crumpled Note
+  accept 92482 only Hunter            -- Rorian the Dayseeker: a note from your trainer
+  accept 92484 only Shaman            -- Rorian: examine the Humming Recall Crystal
+  accept 92485 only Druid             -- Rorian: A Student of Nature
+  turnin 92532 only Warrior           -- Blademaster Ren, in the watchtower
+  turnin 92482 only Hunter            -- Tai'ree Farsight
+  turnin 92484 only Shaman            -- Windshaper Boro, at the village centre
+  turnin 92485 only Druid             -- Xyton Silverwind, the druid trainer, on the ground floor of the tree behind Rorian
   accept 93552                        -- Dalia the Collector
   accept 94414                        -- Halaan Hawk-Eye
   complete 94414 @43.77,24.08         -- talk to Halaan Hawk-Eye
@@ -145,6 +160,8 @@ step Thendal Village turn-ins
   turnin 92463                        -- Elatrell Featherlight
   turnin 92598                        -- Ventaari Brightwish
   turnin 92469                        -- Rorian the Dayseeker
+  accept 92483 only Rogue             -- Rorian the Dayseeker: read the Simple Note
+  turnin 92483 only Rogue             -- Akeri Duskblade, in the watchtower
   level 4
   accept 92471
   turnin 92471                        -- Aetheen of the Gales
@@ -518,7 +535,7 @@ step The Eternal Flame
   turnin 97245                        -- Olariaan Swiftburn
   accept 97257
   complete 97257
-  turnin 97257                        -- Sessaria Skystride: Searing Totem and your Fire Totem
+  turnin 97257 reward 5176 263412     -- Sessaria Skystride: Searing Totem, your Fire Totem and the Totem of Charged Flames
 
 step Unfortunate News
   turnin 92644                        -- Talaanis Shadowsong

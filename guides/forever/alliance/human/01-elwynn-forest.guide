@@ -67,15 +67,29 @@ next forever/alliance/02-westfall
 #   Summons (1685, Remen Marcot) to Surena Caledon (1688) and The Binding
 #   (1689, Summon Voidwalker): a trip to Stormwind and the Brackwell Pumpkin
 #   Patch before Westfall.
-# - Hunter: Josephine Carson's three Taming the Beast quests (94792, 94863,
-#   94864) and Training the Beast (94793, Isaac Chan), all around Goldshire.
+# - Hunter: A Scribbled Letter (92479) from Marshal McBride to Tordrin
+#   Sternblade in Northshire; Josephine Carson's three Taming the Beast
+#   quests (94792, 94863, 94864: Tame Beast) and Training the Beast (94793,
+#   Isaac Chan: Beast Training), all around Goldshire.
 # - Paladin: Tome of Divinity (2998, Brother Wilhelm) through Henze Faulk by
 #   Stone Cairn Lake to Redemption (1788): a trip to Stormwind and east
 #   Elwynn before Westfall.
 # - Priest: Desperate Prayer (5635) and Divine Grace (94774) from Priestess
 #   Josetta, handed in at the Cathedral of Light (02-westfall).
+#   Forever rewords Desperate Prayer to name High Priest Rohan in Ironforge;
+#   the quest data still has Laurena take it, so the route keeps her.
+# - Priest: In Favor of the Light / Garments of the Light (5623, 5624) reward
+#   a robe, not a spell: not taken.
 # - Warrior: the Defensive Stance quests are taken in Stormwind (02-westfall).
-# - Mage and Rogue: their level 10 quests reward items, not spells: not taken.
+# - Mage: Glyphic Letter (3104) in the Abbey. Speak with Jennea (1860,
+#   Zaldimar Wefhellt in Goldshire) and Mirror Lake (1861): a Stormwind stop
+#   and the Mirror Lake waterfall on the way to Westfall; handed in at the
+#   Stormwind stop of 02-westfall (Ley Staff or Ley Orb).
+# - Rogue: their level 10 quests reward items, not spells: not taken.
+#   Rogues: see the Class guide Blade of Cunning (Alliance).
+# - Level 1 class letters are taken: every class's letter from Marshal
+#   McBride (3100-3105, 92479) goes to its trainer in the Abbey once Kobold
+#   Camp Cleanup is handed in.
 # Train at the Abbey and in Goldshire.
 # Left out: An Enchanting Lesson (91753, it needs Enchanting to disenchant
 # the effigies). Rare Books (91777, after Book Return) wants two books from
@@ -121,6 +135,20 @@ step Northshire Abbey
   turnin 92124                                -- Daniel, in the library
   accept 91743                                -- Brother Paxton
   turnin 7                                    -- Marshal McBride
+  accept 3100 only Warrior                    -- Marshal McBride: Simple Letter
+  turnin 3100 only Warrior                    -- Llane Beshere, the warrior trainer
+  accept 3101 only Paladin                    -- Marshal McBride: Consecrated Letter
+  turnin 3101 only Paladin                    -- Brother Sammuel, the paladin trainer
+  accept 92479 only Hunter                    -- Marshal McBride: A Scribbled Letter
+  turnin 92479 only Hunter                    -- Tordrin Sternblade, by the Abbey
+  accept 3102 only Rogue                      -- Marshal McBride: Encrypted Letter
+  turnin 3102 only Rogue                      -- Jorik Kerridan, the rogue trainer
+  accept 3103 only Priest                     -- Marshal McBride: Hallowed Letter
+  turnin 3103 only Priest                     -- Priestess Anetta, the priest trainer
+  accept 3104 only Mage                       -- Marshal McBride: Glyphic Letter
+  turnin 3104 only Mage                       -- Khelden Bremen, the mage trainer, inside the Abbey
+  accept 3105 only Warlock                    -- Marshal McBride: Tainted Letter
+  turnin 3105 only Warlock                    -- Drusilla La Salle, outside the Abbey
   accept 15
 
 step Echo Ridge Mine
@@ -467,22 +495,36 @@ step Goldshire
   accept 2998 only Paladin                    -- Brother Wilhelm: Duthorian Rall in Stormwind takes it
   accept 5635 only Priest                     -- Priestess Josetta: High Priestess Laurena in Stormwind takes both
   accept 94774 only Priest
+  accept 1860 only Mage                       -- Zaldimar Wefhellt: Jennea Cannon in Stormwind takes it
   train class
 
 step Taming the Beast
   only Hunter
   tip Josephine Carson stands with the Goldshire trainers. Each of her quests hands you a Taming Rod: use it on the beast she names, then bring the rod back to her. Rockhide Boars and Young Forest Bears roam the hills south of the Maclure Vineyards, Gray Forest Wolves the woods east of Crystal Lake.
   accept 94792                                -- Josephine Carson
-  goto 43.3,77.9 "Rockhide Boars"
+  kill 524 quest 94792.1                      -- Rockhide Boar: tame it with the Taming Rod
   turnin 94792
   accept 94863
-  goto 58.4,62.1 "Gray Forest Wolves"
+  kill 1922 quest 94863.1                     -- Gray Forest Wolf: tame it with the Taming Rod
   turnin 94863
   accept 94864
-  goto 45.0,80.0 "Young Forest Bears"
-  turnin 94864                                -- Taming Lesson: Tame Beast
+  kill 822 quest 94864.1                      -- Young Forest Bear: tame it with the Taming Rod
+  turnin 94864                                -- Tame Beast
   accept 94793
-  turnin 94793                                -- Isaac Chan, beside her: Training Lesson
+  turnin 94793                                -- Isaac Chan, beside her: Beast Training
+
+step Jennea Cannon
+  only Mage
+  zone Stormwind City
+  tip Follow the road north from Goldshire into Stormwind. Jennea Cannon stands in the Wizard's Sanctum, the tower of the Mage Quarter; she gives you a flask for the Mirror Lake waterfall.
+  turnin 1860                                 -- Jennea Cannon
+  accept 1861
+
+step Mirror Lake
+  only Mage
+  zone Elwynn Forest
+  tip Leave Stormwind by the main gate. The Mirror Lake waterfall is south-west of the gates, on the way west to Westfall: fill Jennea's Flask at its base.
+  collect 7206 quest 1861.1                   -- Mirror Lake Water Sample
 
 # ---------------------------------------------------------------- Warlocks and Paladins: Stormwind and east Elwynn
 

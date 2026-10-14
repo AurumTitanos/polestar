@@ -66,6 +66,11 @@ next forever/alliance/07-thousand-needles
 # Rut'theran flight; in Ironforge, Dwarf and Gnome Priests hand in Chastise
 # (5645) and Contingency Plan (94819). Class training in Ironforge, Druids
 # in Stormwind (Ironforge has no druid trainer).
+# Paladins: A Strange Artifact (78088, level 30, from 22) starts at the
+# Strange Orb atop the Tower of Althalaxx in Darkshore and runs through
+# Delgren at Maestra's Post, Stormwind, Redridge and Demon Fall Canyon to the
+# Cloak of the Divine Storm: the Class guide
+# forever/class/paladin/cloak-of-the-divine-storm.
 #
 # Left out (the export accepts them but never turns them in): Journey to
 # Stonetalon Peak (1056), Pridewings of Stonetalon (1134), Mage Summoner

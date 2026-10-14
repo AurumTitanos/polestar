@@ -54,8 +54,12 @@ next forever/alliance/03-darkshore
 # Class quests: Human Warriors take the Defensive Stance quests (1638, 1639,
 # 1640, 1665) and Human Priests hand in Desperate Prayer and Divine Grace
 # (5635, 94774, from Goldshire) at the Stormwind stop; the other races do
-# theirs in their start guides. Train in Stormwind before the boat; Stormwind
-# has no shaman trainer, so Shamans take the Deeprun Tram to Ironforge.
+# theirs in their start guides. Mages of every race hand in Mirror Lake
+# (1861, Ley Staff or Ley Orb) to Jennea Cannon at the Stormwind stop; their
+# start guides take it. Night Elf Druids may buy Earthroot from Maria Lumere
+# there for Cure Poison (6123, next guide). Train in Stormwind before the
+# boat; Stormwind has no shaman trainer, so Shamans take the Deeprun Tram to
+# Ironforge.
 #
 # Not taken: The Defias Brotherhood's later steps (132-155, 166: the
 # Stormwind trip for 135/141, the Deadmines), Captain Sander's treasure
@@ -235,7 +239,9 @@ step Stormwind
   zone Stormwind City
   tip Fly or ride to Stormwind. Trainers: Old Town (Warriors, Rogues), the Cathedral (Paladins, Priests), the Mage Quarter (Mages, Warlocks), the Park (Druids). Sprite Jumpsprocket works in the Dwarven District, Morgan Pestle in the Trade District.
   train class only Warrior,Paladin,Hunter,Rogue,Priest,Mage,Warlock,Druid -- Level 12, 14 and 16 spells
+  buy 2449 x5 npc 1313 optional only NightElf,Druid -- Earthroot for Gathering the Cure (6123) in Darkshore: Maria Lumere, Alchemy Supplies; herbalists pick it there instead
   turnin 92748                                -- Sprite Jumpsprocket, Dwarven District
+  turnin 1861 only Mage choose 9513 7508      -- Jennea Cannon, Wizard's Sanctum: Mirror Lake
   turnin 61 only Human                        -- Morgan Pestle, Trade District
 
 step Fishin' Time

@@ -53,6 +53,15 @@ next forever/alliance/04-redridge-mountains
 # - Night Elf and Skyborne Druids: Cat Form (98393 to 98397, Mathrengyl
 #   Bearwalker, the Great Cat Spirit or the Avatar of Saeyleenan in
 #   Moonglade) at the end, about level 21, before the boat.
+# - Night Elf Druids: Cure Poison (6121-6125: Lessons Anew from Mathrengyl on
+#   the A Lesson to Learn trip, the Cliffspring sampler on the north loop,
+#   Alanndarian's herbs after the third loop and the deer on the last legs,
+#   Power over Poison on the Cat Form trip). Forever rewards Cure Poison only
+#   through it. Earthroot needs Herbalism or the Stormwind purchase
+#   (02-westfall); the moonkin caves for the Lunar Fungus are Wowhead
+#   Forever's (quest 6123), the Lunar Fungal Blooms objects.json's.
+# - Skyborne Druids hand Sheldras's Moonglade welcome (94914, from their start
+#   guide) to Dendrite on the Cat Form trip.
 
 # ---------------------------------------------------------------- Auberdine
 
@@ -162,12 +171,15 @@ step A Lesson to Learn
   tip Fly from Auberdine to Rut'theran Village and take the portal up to Mathrengyl Bearwalker in the Cenarion Enclave.
   fly "Rut'theran Village"
   accept 26                                   -- Mathrengyl Bearwalker
+  accept 6121                                 -- Mathrengyl Bearwalker: Lessons Anew
 
 step Trial of the Lake
   only NightElf,Druid
   zone Moonglade
   tip Cast Teleport: Moonglade. Dendrite Starblaze is in Nighthaven. Shrine Baubles lie in the containers on the floor of Lake Elune'ara, below Nighthaven: take one to the Shrine of Remulos in the north-west, use it there and speak to Tajarri. Then fly back to Auberdine from Nighthaven.
   turnin 26                                   -- Dendrite Starblaze
+  turnin 6121
+  accept 6122                                 -- The Principal Source: fill the sampler at Cliffspring Falls
   accept 29
   collect 15877 x1                            -- Shrine Bauble, from a Bauble Container in the lake
   use 15877 @36.0,41.4                        -- At the Shrine of Remulos
@@ -204,6 +216,7 @@ step The red crystal
 step Cliffspring Falls
   tip Follow the hills north to the Cliffspring River and up to the falls. Three more beached remains lie on the north shore: near the Ruins of Mathystra, north of Bashal'Aran and west of Bashal'Aran.
   collect 12349 quest 4762                    -- Cliffspring River Sample, at the waterfall
+  collect 15845 quest 6122.1 only NightElf,Druid -- Filled Cliffspring Falls Sampler: at the mouth of the cave by the falls
   accept 4727                                 -- Beached Sea Turtle
   accept 4725                                 -- Beached Sea Turtle
   accept 4723                                 -- Beached Sea Creature
@@ -213,6 +226,8 @@ step Bashal'Aran
 
 step Auberdine
   turnin 4762                                 -- Thundris Windweaver
+  turnin 6122 only NightElf,Druid             -- Alanndarian Nightsong
+  accept 6123 only NightElf,Druid
   turnin 985                                  -- Terenthis
   turnin 4813                                 -- Sentinel Glynda Nal'Shea
   turnin 4728                                 -- Gwennyth Bly'Leggonde
@@ -276,6 +291,12 @@ step Hearth to Auberdine
   turnin 87760                                -- Gwennyth Bly'Leggonde
   vendor nearest
 
+step Lunar Fungus and Earthroot
+  only NightElf,Druid
+  tip The Lunar Fungal Blooms grow in the moonkin caves in the hills just east of Auberdine; the moonkin there are irritable. Earthroot needs Herbalism: herbalists pick it all over Darkshore, anyone else brings it from Stormwind (Maria Lumere) or the Auction House.
+  collect 15851 x12 quest 6123.2              -- Lunar Fungus
+  collect 2449 x5 quest 6123.1                -- Earthroot
+
 # ---------------------------------------------------------------- Fourth loop: the south
 
 step The Grove of the Ancients
@@ -323,6 +344,8 @@ step Auberdine
   turnin 4732
   turnin 4733
   turnin 4740                                 -- Sentinel Glynda Nal'Shea
+  turnin 6123 only NightElf,Druid             -- Alanndarian Nightsong
+  accept 6124 only NightElf,Druid             -- She gives you the Curative Animal Salve
   turnin 98042                                -- Thundris Windweaver
   turnin 986                                  -- Terenthis
   accept 993
@@ -345,6 +368,7 @@ step Volcor
   turnin 993                                  -- Volcor
   accept 994
   complete 994
+  kill 12298 quest 6124.1 only NightElf,Druid -- Sickly Deer: use the Curative Animal Salve on them; they roam all of Darkshore
 
 step Auberdine
   turnin 994                                  -- Terenthis
@@ -369,7 +393,10 @@ step Dendrite Starblaze
   tip Cast Teleport: Moonglade. Dendrite Starblaze is in Nighthaven; learn the flight path there if you do not have it.
   turnin 98393                                -- Dendrite Starblaze
   accept 98394 only NightElf
+  turnin 6124 only NightElf                   -- Dendrite Starblaze
+  accept 6125 only NightElf
   accept 98341 only Skyborne
+  turnin 94914 only Skyborne                  -- Dendrite Starblaze: the welcome from Sheldras
   getfp "Moonglade"
 
 step The relics of the Barrow Dens
@@ -403,4 +430,5 @@ step To Darnassus
   zone Darnassus
   tip Take the portal up to Mathrengyl, then fly back to Auberdine for the boat to Stormwind.
   turnin 98397                                -- Mathrengyl Bearwalker: Cat Form
+  turnin 6125 only NightElf                   -- Mathrengyl Bearwalker: Cure Poison
   fly "Auberdine"

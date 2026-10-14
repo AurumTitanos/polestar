@@ -34,7 +34,11 @@
 # Honored), so they are left out too; see 30-40/06-badlands.
 # Class quests: Warlocks pick up the Heartswood (1738) north-west of
 # Astranaar on the way to the Talondeep Path; Gakin takes it in Stormwind
-# (30-40/05-arathi-highlands).
+# (30-40/05-arathi-highlands). Warlocks with What Is Love? (65602, the
+# incubus, optional, from Takar in 07-thousand-needles) also pick up the
+# Wooden Figurine on that detour (Ashenvale 26.6,22.0, Questie Forever object
+# 375544); Gakin takes it at the same Stormwind stop. Forever data, not play:
+# forever/class/warlock/incubus-alliance has the whole chain.
 guide forever/alliance/30-40/02-desolace
 title Desolace
 faction Alliance
@@ -57,8 +61,9 @@ step Auberdine
 step Heartswood
   only Warlock
   zone Ashenvale
-  tip From Astranaar ride north-west into the hills: the Heartswood is a glowing tree north of the road to Maestra's Post. Then back past Astranaar to the Talondeep Path.
+  tip From Astranaar ride north-west into the hills: the Heartswood is a glowing tree north of the road to Maestra's Post. If you took What Is Love?, the Wooden Figurine lies in a house among the trees north of Maestra's Post (26.6,22.0). Then back past Astranaar to the Talondeep Path.
   collect 6912 quest 1738.1               -- Heartswood
+  collect 190309 quest 65602.1 optional   -- Wooden Figurine, north of Maestra's Post
 
 step The Talondeep Path
   zone Stonetalon Mountains

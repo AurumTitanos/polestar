@@ -55,7 +55,10 @@
 #   Seahorn in Booty Bay in that same later guide; Goblin Sponsorship (1182)
 #   needs the Ratchet chain (1180, 1181), which no Alliance guide takes.
 # Class quests: Warlocks hand the Heartswood to Gakin and summon their
-# Succubus (1738, 1739) at the Stormwind stop.
+# Succubus (1738, 1739) at the Stormwind stop. Warlocks who took What Is
+# Love? (65602, optional, Forever) hand Gakin the Wooden Figurine there too
+# and bind the incubus (The Binding 65603, Small Soul Pouch) at the same
+# circle (Forever data, not play; forever/class/warlock/incubus-alliance).
 # Class training: Stormwind, around level 38 (Shamans by the Deeprun Tram in
 # Ironforge), and Ironforge again at 39 on the way to Loch Modan (Druids:
 # Ironforge has no druid trainer).
@@ -132,11 +135,15 @@ step Stormwind
 
 step The Binding
   only Warlock
-  tip Gakin the Darkbinder waits in the Slaughtered Lamb's cellar, in the Mage Quarter. Use the Heartswood Core at the summoning circle there and defeat the succubus it calls.
+  tip Gakin the Darkbinder waits in the Slaughtered Lamb's cellar, in the Mage Quarter. Use the Heartswood Core at the summoning circle there and defeat the succubus it calls. If you took What Is Love?, hand him the Wooden Figurine too, place it at the same circle and defeat the incubus.
   turnin 1738                         -- Gakin the Darkbinder
   accept 1739
   complete 1739                       -- Subdue the succubus
   turnin 1739                         -- Summon Succubus
+  turnin 65602 optional               -- What Is Love?, if you took it
+  accept 65603 optional
+  kill 185335 quest 65603.1 optional  -- Summoned Incubus, at the same circle
+  turnin 65603 optional               -- Gakin binds the incubus to you
 
 step Shaman training
   only Shaman

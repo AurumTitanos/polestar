@@ -60,11 +60,17 @@ next forever/horde/02-the-barrens
 # Class quests at 10 (Thunder Bluff stop):
 # - Warrior: Veteran Uzzek (1505), continued in the Barrens guide.
 # - Shaman: Call of Fire (1523), continued in the Barrens guide.
-# - Hunter: The Hunter's Path (6065) and the taming chain at Bloodhoof to
-#   Training the Beast (6089), handed in on a flight back from the Crossroads.
+# - Hunter: The Hunter's Path (6065) and the taming chain at Bloodhoof (6061,
+#   6087, 6088: Tame Beast) to Training the Beast (6089, Beast Training),
+#   handed in on a flight back from the Crossroads.
 # - Druid: Heeding the Call (5926) through the Great Bear Spirit in Moonglade
 #   to Body and Heart (6002) at the Moonkin Stone in the eastern pass, handed
 #   in on a flight back from the Crossroads.
+#
+# Class letters at 1: Grull Hawkwind's letter for each class (Simple Note
+# 3091 Warrior, Etched Note 3092 Hunter, Rune-Inscribed Note 3093 Shaman,
+# Verdant Note 3094 Druid) is taken after The Hunt Begins and handed to the
+# trainer in Camp Narache.
 #
 # Class training: Camp Narache, Bloodhoof Village and Thunder Bluff.
 #
@@ -85,6 +91,14 @@ step The Hunt Begins
 step Grull Hawkwind
   turnin 747
   accept 750
+  accept 3091 only Warrior            -- Grull Hawkwind: Simple Note
+  accept 3092 only Hunter             -- Grull Hawkwind: Etched Note
+  accept 3093 only Shaman             -- Grull Hawkwind: Rune-Inscribed Note
+  accept 3094 only Druid              -- Grull Hawkwind: Verdant Note
+  turnin 3091 only Warrior            -- Harutt Thunderhorn, the warrior trainer
+  turnin 3092 only Hunter             -- Lanka Farshot, the hunter trainer
+  turnin 3093 only Shaman             -- Meela Dawnstrider, the shaman trainer in camp
+  turnin 3094 only Druid              -- Gart Mistrunner, the druid trainer beside him
   train class
 
 step Greatmother Hawkwind
@@ -433,7 +447,7 @@ step Yaw Sharpmane
   turnin 6087
   accept 6088
   kill 2970 quest 6088.1              -- Tame it with the Taming Rod
-  turnin 6088
+  turnin 6088                         -- Tame Beast
   accept 6089
 
 step The Moonkin Stone

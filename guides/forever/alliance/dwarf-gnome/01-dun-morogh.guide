@@ -60,20 +60,40 @@ next forever/alliance/02-westfall
 # - Shaman (Dwarf): Call of Earth (94373-94375) in Coldridge Valley; Call of
 #   Fire (94449, 94465-94468) from Kharanos through Bruegs Kindleborn's cave
 #   by the South Gate and Braldir Ashmantle in Loch Modan, at about 11-12.
-# - Hunter (Dwarf): Grif Wildheart's taming quests (6064, 6084, 6085) at
+# - Hunter (Dwarf): Etched Rune (3108) to Thorgas Grimson at Anvilmar;
+#   Grif Wildheart's taming quests (6064, 6084, 6085: Tame Beast) at
 #   Kharanos after the hearth; Training the Beast (6086) in Ironforge.
 # - Paladin (Dwarf): the Tome of Divinity quests (2999 to 1785, Redemption)
 #   at the end: Ironforge, Narm Faulk by Helm's Bed Lake, Ironforge.
 # - Priest: Desperate Prayer (5637, Dwarf; handed in at the Cathedral of Light
 #   on arrival in Stormwind) and Confounding Flash (94824, Gnome; Ironforge) from
 #   Maxan Anvol in Kharanos.
+#   Forever rewords Desperate Prayer to name High Priest Rohan in Ironforge;
+#   the quest data still has Laurena in Stormwind take it, so the route keeps
+#   her.
+# - Priest: In Favor of the Light / Garments of the Light (5626, 5625) reward
+#   a robe, not a spell: not taken.
 # - Warrior: the Defensive Stance quests (1638, 1639, 1640, 1665) on arrival
 #   in Stormwind by the tram, instead of the Vejrek detour from Ironforge.
-# - Mage and Rogue: their level 10 quests reward items, not spells: not taken.
-# - Shaman, not taken: Call of Water (94494 onwards) runs from Ironforge to
+# - Mage (Gnome): Glyphic Memorandum (3114) in Anvilmar; Mirror Lake (1861)
+#   from Jennea Cannon on arrival in Stormwind, its water taken on the ride to
+#   Westfall and handed in at the 02-westfall Stormwind stop. Speak with Bink
+#   and the Mage-tastic Gizmonitor (1879, 1880) are not taken: Bink is in
+#   Ironforge at the end and the toolbox lies back by Gnomeregan.
+# - Rogue: their level 10 quests reward items, not spells: not taken.
+#   Rogues: see the Class guide Blade of Cunning (Alliance).
+# - Shaman (Dwarf): Archaic Rune (98581) from Sten Stoutarm to Teo
+#   Hammerstorm in Anvilmar.
+# - Shaman, not taken: Call of Water (94494-94505) runs from Ironforge to
 #   Loch Modan, the Wetlands, Redridge, Ashenvale and Westfall, places the
-#   route reaches years apart in levels; Call of Air is not in the reference
-#   data.
+#   route reaches years apart in levels; Call of Air (94789, Arathi) and the
+#   33-40 chain are Class guides too: forever/class/shaman/call-of-water-alliance
+#   and call-of-air-alliance. Earth Sapta (94472), Fire Sapta (94473) and Call
+#   of Earth from Eldrun Stormbreaker (96243, a level 10 pointer to Teo for
+#   Shamans who skipped 94373) are not needed on the route.
+# - Level 1 class letters are taken: every class's letter from Sten Stoutarm
+#   (Dwarf 3106-3110 and 98581, Gnome 3112-3115 and 98574) goes to its
+#   trainer inside Anvilmar once Dwarven Outfitters is handed in.
 
 # ---------------------------------------------------------------- Coldridge Valley
 
@@ -87,6 +107,28 @@ step Young wolves
 
 step Anvilmar
   turnin 179                                  -- Sten Stoutarm
+  accept 3106 only Dwarf,Warrior              -- Sten Stoutarm: Simple Rune
+  accept 3112 only Gnome,Warrior              -- Sten Stoutarm: Simple Memorandum
+  turnin 3106 only Dwarf,Warrior              -- Thran Khorman, the warrior trainer
+  turnin 3112 only Gnome,Warrior              -- Thran Khorman, the warrior trainer
+  accept 3107 only Paladin                    -- Sten Stoutarm: Consecrated Rune
+  turnin 3107 only Paladin                    -- Bromos Grummner, the paladin trainer
+  accept 3108 only Hunter                     -- Sten Stoutarm: a rune for Thorgas Grimson
+  turnin 3108 only Hunter                     -- Thorgas Grimson, the hunter trainer
+  accept 3109 only Dwarf,Rogue                -- Sten Stoutarm: Encrypted Rune
+  accept 3113 only Gnome,Rogue                -- Sten Stoutarm: Encrypted Memorandum
+  turnin 3109 only Dwarf,Rogue                -- Solm Hargrin, the rogue trainer
+  turnin 3113 only Gnome,Rogue                -- Solm Hargrin, the rogue trainer
+  accept 3110 only Dwarf,Priest               -- Sten Stoutarm: Hallowed Rune
+  accept 98574 only Gnome,Priest              -- Sten Stoutarm: Hallowed Memorandum
+  turnin 3110 only Dwarf,Priest               -- Branstock Khalder, the priest trainer
+  turnin 98574 only Gnome,Priest              -- Branstock Khalder, the priest trainer
+  accept 98581 only Shaman                    -- Sten Stoutarm: read the Archaic Rune
+  turnin 98581 only Shaman                    -- Teo Hammerstorm, inside Anvilmar
+  accept 3114 only Mage                       -- Sten Stoutarm: Glyphic Memorandum
+  turnin 3114 only Mage                       -- Marryk Nurribit, the mage trainer, inside Anvilmar
+  accept 3115 only Warlock                    -- Sten Stoutarm: Tainted Memorandum
+  turnin 3115 only Warlock                    -- Alamar Grimm, inside Anvilmar
   accept 233
   accept 170                                  -- Balir Frosthammer, next to Sten
   train class                                 -- Level 2 spells, inside Anvilmar
@@ -451,7 +493,7 @@ step Back to Bruegs Kindleborn
   only Shaman
   zone Dun Morogh
   tip Back through the tunnel to Bruegs' cave above the farm.
-  turnin 94468                                -- Bruegs Kindleborn: Searing Totem and your Fire Totem
+  turnin 94468 reward 5176 263412             -- Bruegs Kindleborn: Searing Totem, your Fire Totem and the Totem of Charged Flames
 
 step Earthseer Farsen
   tip Farsen camps on the ridge overlooking the Gol'Bolar Quarry from the west. Talk to him for his farsight.
@@ -579,3 +621,15 @@ step The Binding
   accept 1689
   complete 1689                               -- Subdue the voidwalker
   turnin 1689                                 -- Summon Voidwalker
+
+step Jennea Cannon
+  only Mage
+  zone Stormwind City
+  tip Jennea Cannon stands in the Wizard's Sanctum, the tower of the Mage Quarter; she gives you a flask for the Mirror Lake waterfall.
+  accept 1861                                 -- Jennea Cannon
+
+step Mirror Lake
+  only Mage
+  zone Elwynn Forest
+  tip Leave Stormwind by the main gate. The Mirror Lake waterfall is south-west of the gates, on the way west to Westfall: fill Jennea's Flask at its base.
+  collect 7206 quest 1861.1                   -- Mirror Lake Water Sample

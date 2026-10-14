@@ -52,7 +52,9 @@
 # Duthorian Rall in Stormwind; Warlocks take Summon Felsteed (4488) from
 # Demisette Cloyce and hand it in at Ratchet at the end of the next guide.
 # Warriors finish The Islander and The Affray (1718, 1719, Berserker Stance)
-# on Fray Island on the ride to Ratchet.
+# on Fray Island on the ride to Ratchet; Klannoc's follow-up, The Windwatcher
+# (1791) and the Whirlwind weapon chain with its elite, is left to the Class
+# guide forever/class/warrior/whirlwind-weapon (a note at The Affray says so).
 # Class training: Stormwind; Shamans at the Ironforge stop at the end.
 # Riding: the Stormwind stop at about 42 is the first city after 40. Each race
 # is pointed to its own riding trainer and mount vendor: Humans to Randal
@@ -189,6 +191,7 @@ step The Affray
   accept 1719
   complete 1719                           -- Defeat the challengers and Big Will
   turnin 1719                             -- Klannoc Macleod: Berserker Stance
+  note Klannoc offers The Windwatcher next (1791): the Whirlwind weapon chain, with an elite at the end, is in the Warrior class guide Whirlwind Weapon.
 
 step Ratchet
   zone The Barrens

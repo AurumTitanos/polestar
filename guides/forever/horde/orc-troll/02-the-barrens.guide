@@ -136,7 +136,7 @@ step Telf Joolam
 step Kranal Fiss
   only Shaman
   zone The Barrens
-  turnin 1527
+  turnin 1527 reward 5176 263412      -- Kranal Fiss: Searing Totem, your Fire Totem and the Totem of Charged Flames
 
 step Thun'grim Firegaze
   only Warrior

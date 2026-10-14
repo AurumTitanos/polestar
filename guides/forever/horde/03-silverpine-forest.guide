@@ -69,17 +69,23 @@ next forever/horde/04-the-barrens
 # Dalaran casters in the middle of the town at about level 18.5.
 #
 # Carried on: Journey to Hillsbrad Foothills (493, Tarren Mill, later guide).
-# Class quests: Hunters from Durotar hand Training the Beast (6081) to Ormak
-# Grimshot and Troll Priests Hex of Weakness (5654) to Ur'kyo on the first
-# Orgrimmar stop. Tauren Druids start Aquatic Form on their Thunder Bluff
-# training stop (A Lesson to Learn 27, Trial of the Lake 28 in Moonglade) and
-# open the Strange Lockbox on the coast west of the Dead Field for Trial of
-# the Sea Lion (30); the chain ends at their Thunder Bluff training at about
-# 23 (forever/horde/04-the-barrens).
+# Class quests: Troll Priests hand Hex of Weakness (5654) to Ur'kyo on the first
+# Orgrimmar stop. Orc and Troll Hunters hand in Training the Beast (6081:
+# Beast Training) at the end of forever/horde/orc-troll/01-durotar now, so
+# they have the spell from 10. Tauren Druids start Aquatic Form on their
+# Thunder Bluff training stop (A Lesson to Learn 27, Trial of the Lake 28 in
+# Moonglade) and open the Strange Lockbox on the coast west of the Dead Field
+# for Trial of the Sea Lion (30); the chain ends at their Thunder Bluff
+# training at about 23 (forever/horde/04-the-barrens). Tauren Druids also take
+# Lessons Anew (6126) from Turak and The Principal Source (6127) from Dendrite
+# on the same trip: Cure Poison, finished in the next guide.
 #
 # Class training: Orgrimmar at 16 and 19 for everyone but Druids and
 # Paladins (no trainer of theirs there). Druids fly to Thunder Bluff at 16;
 # Paladins train in Brill on both zeppelin landings in Tirisfal Glades.
+# Undead Paladins from 18: Danitha Morr at Bandarion Keep (Tirisfal) starts
+# their Silverpine chain (91858-91862, 96204, 95034: the Sepulcher, Fenris
+# Isle, Lumina Windsinger), the Class guide forever/class/paladin/lumina-windsinger.
 
 # ---------------------------------------------------------------- Orgrimmar and the zeppelin
 
@@ -90,10 +96,9 @@ step To Orgrimmar
   train class only Warrior,Hunter,Rogue,Priest,Shaman,Mage,Warlock
 
 step Orgrimmar class quests
-  only Hunter,Priest
+  only Priest
   zone Orgrimmar
-  tip Ormak Grimshot stands in the Valley of Honor, Ur'kyo in the Valley of Spirits on the city's west side.
-  turnin 6081 only Hunter,Orc,Troll   -- Ormak Grimshot: Beast Training
+  tip Ur'kyo stands in the Valley of Spirits on the city's west side.
   turnin 5654 only Troll,Priest       -- Ur'kyo: Hex of Weakness
 
 step Thunder Bluff
@@ -103,12 +108,15 @@ step Thunder Bluff
   fly "Thunder Bluff"
   train class
   accept 27 only Tauren               -- Turak Runetotem
+  accept 6126 only Tauren             -- Turak Runetotem: Lessons Anew
 
 step Trial of the Lake
   only Tauren,Druid
   zone Moonglade
   tip Cast Teleport: Moonglade; Dendrite Starblaze is in Nighthaven. The Shrine Baubles lie on the bed of Lake Elune'ara and fade within minutes: swim one straight to the Shrine of Remulos on the north-west shore, use it there and speak to Tajarri.
   turnin 27                           -- Dendrite Starblaze
+  turnin 6126
+  accept 6127                         -- The Principal Source: Dreadmist Peak, next guide
   accept 28
   complete 28
   turnin 28                           -- Tajarri, at the Shrine of Remulos

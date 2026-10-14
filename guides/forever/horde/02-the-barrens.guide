@@ -51,7 +51,8 @@ next forever/horde/03-silverpine-forest
 # Call of Fire (1523) from forever/horde/tauren/01-mulgore: Path of Defense,
 # Thun'grim Firegaze and Forged Steel (1498, 1502, 1503); Call of Fire (1524-
 # 1527) with Telf Joolam on the Durotar bank of the river. Orcs and Trolls do
-# these in their own Barrens guide.
+# these in their own Barrens guide. Forever's Call of Fire (1527) also gives
+# the Totem of Charged Flames (Wowhead Forever's Shaman page).
 # Path of Defense stays Tauren-only here: Undead and Skyborne Warriors learn
 # Defensive Stance from their own start guides' class quests.
 #
@@ -219,7 +220,7 @@ step Telf Joolam
 step Kranal Fiss
   only Tauren,Shaman
   zone The Barrens
-  turnin 1527
+  turnin 1527 reward 5176 263412      -- Kranal Fiss: Searing Totem, your Fire Totem and the Totem of Charged Flames
 
 step Echeyakee
   zone The Barrens

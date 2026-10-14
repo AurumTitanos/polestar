@@ -64,10 +64,8 @@
 # Class quests: Warriors take The Islander (1718) from Wu Shen in Stormwind;
 # Fray Island lies on the ride to Ratchet in 40-50/01-stranglethorn-vale,
 # where Big Will (level 33) is no longer a risk. Warlocks: Seeking Strahad
-# and the Felhunter's Tome of the Cabal (1798 onwards) are not taken: the
-# chain runs Stormwind, Ratchet, Ironforge, Hillsbrad, Thousand Needles or
-# the southern Barrens, the Wetlands and Ratchet again, and with this route's
-# own stops it would finish near level 50.
+# and the Felhunter's Tome of the Cabal (1798 onwards) are not taken here:
+# forever/class/warlock/felhunter-alliance has the chain.
 # Left out: A Noble Brew (335, 336): a cellar stop and a walk to the Keep's
 # far side for little XP; dropped for flow.
 # Not here: Return to Milton (542), Dark Council (537) and Stormpike's
