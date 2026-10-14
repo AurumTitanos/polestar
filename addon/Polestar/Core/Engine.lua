@@ -3194,13 +3194,13 @@ ns.RegisterEvent("TAXIMAP_OPENED", function()
 end)
 
 -- True when an applicable `verb` goal ("accept"/"turnin") for questID sits
--- in the current step or the next `span` (default 2) applicable steps of any
--- open tab. Automation's gate: never act on quests the route does not want now.
-local function wantsLoaded(verb, questID, span)
-	if not (guide and current) then return false end
+-- in the live step or the next `span` (default 2) applicable steps of any
+-- open tab, or in the step in view and the ones after it when Prev/Next moved
+-- the view. Automation's gate: never act on quests the route does not want now.
+local function wantsFrom(from, verb, questID, span)
 	local left = span + 1
 	local steps = guide.steps
-	for s = current, #steps do
+	for s = from, #steps do
 		local step = steps[s]
 		if stepApplies(step) then
 			for _, goal in ipairs(step.goals) do
@@ -3211,6 +3211,12 @@ local function wantsLoaded(verb, questID, span)
 		end
 	end
 	return false
+end
+
+local function wantsLoaded(verb, questID, span)
+	if not guide then return false end
+	if computed and wantsFrom(computed, verb, questID, span) then return true end
+	return current ~= nil and current ~= computed and wantsFrom(current, verb, questID, span)
 end
 
 function Engine.WantsQuest(verb, questID, span)

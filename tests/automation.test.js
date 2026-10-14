@@ -66,6 +66,20 @@ test('accepts within the current and next two steps only', () => {
 	assert.deepEqual(out, ['AcceptQuest 33 nil']);
 });
 
+test('reading ahead with Next still accepts the quests of the step the player is on', () => {
+	const [out] = run({
+		script: `
+			Polestar.Engine.Next(); Polestar.Engine.Next()
+			local viewed, live = Polestar.Engine.GetStepIndex(), Polestar.Engine.GetLiveStep()
+			w.questDetail(823, 783)   -- step 1: the live step, behind the view
+			flush()
+			${calls}
+			emit({ calls = c, viewed = viewed, live = live })
+		`,
+	});
+	assert.deepEqual(out, { calls: ['AcceptQuest 783 nil'], viewed: 3, live: 1 });
+});
+
 test('holding Shift, or turning the settings off, suppresses automation', () => {
 	const [out] = run({
 		before: 'w.complete({ 783 })',

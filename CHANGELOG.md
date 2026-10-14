@@ -18,6 +18,9 @@
   Raan's campfire again: their ids changed in Forever's data.
 - The world map's zone level ranges are rebuilt from Questie 12.1.0's
   Forever creatures (Mulgore reads 3-11, no longer 3-27).
+- Reading ahead with Next no longer stops quest automation for the step you
+  are on: its quests are still accepted and handed in while the window shows
+  a later step.
 
 ### For guide authors
 
