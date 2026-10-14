@@ -333,6 +333,37 @@ emit({ search = search, title = LK.detail.title, query = LK.Query(), sources = L
 	}
 });
 
+test('changing the suggestion source ranks a cached search again', () => {
+	const pack = writeCodexPack(sampleCodex());
+	try {
+		const [before, after] = runAddon({
+			stubs: ['stub_ui.lua'],
+			before: pack.stubLua,
+			addons: [{ name: 'Polestar', files: ['Core/Core.xml', 'Theme/Theme.xml', 'Lookup/Lookup.xml', 'UI/UI.xml'] }],
+			// The real registry: the ranking follows its suggestion source.
+			script: `uistub.install()\nPolestar.Guides = uistub.realGuides\nstub.login()
+local LK = Polestar.UI.Lookup
+${HELPERS}
+Polestar.RegisterPack({ addon = "Polestar_Other", id = "other", format = 1, title = "Other", author = "O", version = "1", license = "MIT" })
+local function g(id, extra)
+	local def = { id = id, pack = "other", title = id, steps = { { goals = { { t = "note", text = "x" } } } } }
+	for k, v in pairs(extra) do def[k] = v end
+	assert(Polestar.RegisterGuide(def))
+end
+g("other/sabers", { category = "Collectibles", collects = { 13086 } })
+g("other/route", { category = "Leveling", minLevel = 1, maxLevel = 60 })
+Polestar.Lookup.Show("frostsaber")
+emit(rowTexts(LK.results.Child)[1])
+Polestar.Set("behavior.suggestFrom", "other")
+emit(rowTexts(LK.results.Child)[1])`,
+		}).emitted;
+		assert.notEqual(before, 'Reins of the Winterspring Frostsaber');
+		assert.equal(after, 'Reins of the Winterspring Frostsaber', 'the source\'s guide collects it: first');
+	} finally {
+		pack.cleanup();
+	}
+});
+
 test('a dungeon also opens in the Dungeons section: beside the guide to its entrance, or alone', () => {
 	const [out] = run(`
 		local opened = {}

@@ -6,6 +6,9 @@
 
 - Guide packs page: the problem report box grows to fit long problem
   messages.
+- Search ranks an item first as covered by a guide only when a guide Lookup
+  would open for it collects it: one of Polestar's own, or one from the pack
+  chosen under Suggest guides from.
 
 ### For guide authors
 

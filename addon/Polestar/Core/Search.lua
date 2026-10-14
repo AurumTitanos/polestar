@@ -7,7 +7,8 @@
 --              offset = n (per kind, for paging), subtitles = false (leave them to Search.Subtitle) }
 --     result = { kind, id, title, subtitle|nil, quality|nil, score, status|nil, curated|nil }
 --       status: Codex item status ("retired" = no longer obtainable, "nosource");
---       curated: a registered guide `collects` the item
+--       curated: a guide of the suggestion source or Polestar's own `collects`
+--       the item, as Lookup's curated guide looks
 --     Order: items a curated guide collects first, then everything else,
 --     then retired or sourceless items; then exact > prefix > word prefix >
 --     substring (> every word somewhere), then Search.KINDS order, then
@@ -150,8 +151,9 @@ end
 -- Indexes
 ---------------------------------------------------------------------------
 
-local guideIndex, guideCount
-local curated = {} -- item id -> true when a registered guide `collects` it
+local guideIndex, guideCount, guideSource
+-- item id -> true when a guide of the suggestion source or ours `collects` it
+local curated = {}
 
 -- The Lookup module's switch; nil (no Lookup module) counts as on.
 local function codexOn()
@@ -171,13 +173,15 @@ end
 
 local function guideList()
 	local list = ns.Guides and ns.Guides.List and ns.Guides.List() or {}
-	if guideIndex and guideCount == #list then return guideIndex end
-	guideCount = #list
+	local source = ns.Guides and ns.Guides.SuggestSource and ns.Guides.SuggestSource() or "guides"
+	if guideIndex and guideCount == #list and guideSource == source then return guideIndex end
+	guideCount, guideSource = #list, source
 	guideIndex = {}
 	curated = {}
 	for _, h in ipairs(list) do
 		local id = h.id
-		if type(id) == "string" and sub(id, 1, 7) ~= "lookup/" and type(h.collects) == "table" then
+		if type(id) == "string" and sub(id, 1, 7) ~= "lookup/" and type(h.collects) == "table"
+			and (h.pack == source or h.pack == "guides") then
 			for i = 1, #h.collects do curated[h.collects[i]] = true end
 		end
 		if type(id) == "string" and sub(id, 1, 7) ~= "lookup/" and type(h.title) == "string" then

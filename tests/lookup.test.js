@@ -403,6 +403,40 @@ ${TEST_SOURCE}
 	}
 });
 
+test('search: an item only a third pack collects ranks as curated only while that pack is the suggestion source', () => {
+	const extra = JSON.parse(JSON.stringify(codex));
+	const vendor = extra.items[8000].sources[0];
+	extra.items[8102] = { id: 8102, name: 'Reins of the Striped Saber', quality: 3, kind: 'mount', spell: null, reqLevel: null, sources: [{ ...vendor }] };
+	const own = writeCodexPack(extra);
+	try {
+		const [before, after] = run(`
+			${TEST_PACK}
+${TEST_SOURCE}
+			Polestar.RegisterPack({ addon = "Polestar_Other", id = "other", format = 1, title = "Other", author = "O", version = "1", license = "MIT" })
+			local function g(id, extra)
+				local def = { id = id, pack = "other", title = id, steps = { { goals = { { t = "note", text = "x" } } } } }
+				for k, v in pairs(extra) do def[k] = v end
+				assert(Polestar.RegisterGuide(def))
+			end
+			g("other/sabers", { category = "Collectibles", collects = { 8102 } })
+			g("other/route", { category = "Leveling", minLevel = 1, maxLevel = 60 })
+			local function flag()
+				for _, r in ipairs(Polestar.Search.Query("striped saber")) do
+					if r.kind == "mount" and r.id == 8102 then return r.curated or false end
+				end
+				return "missing"
+			end
+			emit(flag())
+			Polestar.Set("behavior.suggestFrom", "other")
+			emit(flag())
+		`, { withPack: false, setup: own.stubLua });
+		assert.equal(before, false, 'no curated guide opens for it from another pack');
+		assert.equal(after, true);
+	} finally {
+		own.cleanup();
+	}
+});
+
 test('search: one-letter queries read name prefixes only, capped; paging with offset; lazy subtitles', () => {
 	const [one, page1, page2, lazy] = run(`
 		local names = {}

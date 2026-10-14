@@ -1617,6 +1617,10 @@ local function guidesChanged()
 end
 ns.On("GUIDES_REGISTERED", guidesChanged)
 ns.On("PACKS_CHANGED", guidesChanged)
+-- Search ranks by the suggestion source's guides: a new source ranks anew.
+ns.On("SETTING_CHANGED", function(path)
+	if path == "behavior.suggestFrom" or path == "behavior" or path == "" then guidesChanged() end
+end)
 -- Quality colours are lifted against the ground and the icon's hairline is
 -- set by hand: a scheme change paints them again.
 Theme.OnChanged(function() LK.Render() end)
