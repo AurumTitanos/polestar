@@ -10,7 +10,7 @@ const usage = `usage: node tools/polestar.js data build [options]
 
 Builds data/forever/*.json (quests, npcs, objects, items, zones, map-frames,
 factions, meta) from pfQuest (MIT), QuestieDB's Forever store (installed with
-Questie for the Forever client; read locally, never redistributed), Blizzard
+Questie for the Forever client; read locally, facts only ship), Blizzard
 Classic Era and Forever client tables (wago.tools CSV) and
 data/recordings/*.json. Precedence: recordings > questie-forever > pfQuest.
 Downloads are cached under data/sources/.

@@ -129,7 +129,7 @@ function instanceAreas(areaRows, mapRows, mapped) {
 }
 
 const QUESTIE_LICENSE =
-	'No license file in Questie/Questie or Questie/QuestieDB; CurseForge lists GPL-3.0, and the maintainers ask that it be treated as all rights reserved (https://github.com/Questie/Questie/issues/4447). Read from the local install for personal use; never redistributed.';
+	'No license file in Questie/Questie or Questie/QuestieDB; CurseForge lists GPL-3.0, and the maintainers ask that it be treated as all rights reserved (https://github.com/Questie/Questie/issues/4447). Read from the local install; facts only (quest, NPC, object and item facts, no code or text) ship in Polestar\'s packs, credited here, and come out if the maintainers ask (data build --no-questie).';
 
 async function buildData(options = {}) {
 	const root = options.root || ROOT;
