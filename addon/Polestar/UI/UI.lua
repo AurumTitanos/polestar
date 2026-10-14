@@ -316,6 +316,25 @@ function UI.SourceLine(goal)
 	return format(src.enemy and L["Kill %s"] or L["From %s"], sourceName(src))
 end
 
+-- Group content (the goal's `party`, the compiled `group`): "Elite: group
+-- advised", "Rare elite: group advised", "Boss: group advised", "Dungeon:
+-- Dire Maul", "Raid: Molten Core", "Group of 3 advised" or "Group advised",
+-- in the dungeon colour. Nil once the goal is done or skipped.
+local ELITE_LINE = { [1] = "Elite: group advised", [2] = "Rare elite: group advised", [3] = "Boss: group advised" }
+function UI.GroupLine(goal)
+	local p = goal.party
+	if type(p) ~= "table" or goal.status == "done" or goal.status == "skipped" then return nil end
+	local text
+	if p.kind == "elite" then
+		text = L[ELITE_LINE[p.rank] or ELITE_LINE[1]]
+	elseif (p.kind == "dungeon" or p.kind == "raid") and type(p.name) == "string" then
+		text = format(p.kind == "raid" and L["Raid: %s"] or L["Dungeon: %s"], p.name)
+	elseif p.kind == "group" then
+		text = type(p.size) == "number" and format(L["Group of %d advised"], p.size) or L["Group advised"]
+	end
+	return text and ("|c" .. Theme.Hex("dungeon") .. text .. "|r") or nil
+end
+
 -- How to get the item a quest starts from, on the quest's one line (the
 -- goal's `starter`): "Runed Scroll: kill Aean Swiftriver (rare elite)", then
 -- "Runed Scroll: in your bags, right-click it". An item lying there as an
@@ -348,20 +367,24 @@ function UI.ReadingGoal(view, goal)
 	if not a then return goal end
 	return setmetatable({
 		t = a.t, text = a.text, verb = a.verb, subject = a.subject, subjectKind = a.subjectKind,
-		quest = a.quest, note = a.note or false, optional = a.optional, progress = false, source = false,
+		quest = a.quest, note = a.note or false, optional = a.optional, progress = false, source = false, party = a.party,
 	}, { __index = goal })
 end
 
 -- The one line under a goal in the reading flow, only when it changes what
--- the player does: why a quest is unavailable, how to get the item a quest
--- starts from, whom an item is got from, that an area objective's mobs are
--- all over its area, which mobs a farm spot is, where a chosen
--- trainer/vendor is, the goal's own note, and an open turn-in's rewards. The
--- rest of the detail ("for Kobold Camp Cleanup") lives in the tooltip.
+-- the player does: why a quest is unavailable, that the goal needs a group,
+-- how to get the item a quest starts from, whom an item is got from, that an
+-- area objective's mobs are all over its area, which mobs a farm spot is,
+-- where a chosen trainer/vendor is, the goal's own note, and an open
+-- turn-in's rewards. The rest of the detail ("for Kobold Camp Cleanup")
+-- lives in the tooltip.
 -- `shownMap`: a zone the window already names above (the person's), not repeated.
-function UI.GoalSubline(goal, shownMap)
+-- `noParty`: the group line already shows on a goal above (said once per card).
+function UI.GoalSubline(goal, shownMap, noParty)
 	if goal.unavailable then return UI.GoalDetail(goal) end
 	local parts = {}
+	local party = not noParty and UI.GroupLine(goal)
+	if party then parts[#parts + 1] = party end
 	local starter = UI.StarterLine(goal)
 	if starter then parts[#parts + 1] = starter end
 	local source = UI.SourceLine(goal)

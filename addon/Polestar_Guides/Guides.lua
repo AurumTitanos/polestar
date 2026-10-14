@@ -9086,7 +9086,7 @@ do
 					note = "Kobold Laborers work the tunnels inside the mine. Shinyfinder Narf waits down the second turn on the right.",
 					goals = {
 						{ t = "kill", quest = 21, title = "Skirmish at Echo Ridge", target = "Kobold Laborer", npc = 80, count = 12, oi = 1, map = 1429, x = 47.79, y = 31.64, f = "e", spots = { { x = 48.3, y = 29.7, r = 49, n = 11 }, { x = 49.5, y = 26.8, r = 35, n = 10 } }, note = "Kobold Laborer" },
-						{ t = "collect", quest = 91752, title = "The Big Picture", item = 247886, itemName = "Sack of \"Picture\" Books", count = 1, oi = 1, map = 1429, x = 49.22, y = 28.01, f = "e", optional = true, note = "Shinyfinder Narf" },
+						{ t = "collect", quest = 91752, title = "The Big Picture", item = 247886, itemName = "Sack of \"Picture\" Books", count = 1, oi = 1, map = 1429, x = 49.22, y = 28.01, f = "e", optional = true, note = "Shinyfinder Narf", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -9191,7 +9191,7 @@ do
 						{ t = "collect", quest = 47, title = "Gold Dust Exchange", item = 773, itemName = "Gold Dust", count = 10, oi = 1, map = 1429, x = 40.34, y = 82.53, f = "e", spots = { { x = 38.7, y = 82.5, r = 93, n = 18 }, { x = 37.8, y = 85.2, r = 47, n = 4 }, { x = 37.4, y = 79.3, r = 49, n = 4 }, { x = 40.8, y = 79.5, r = 57, n = 29 }, { x = 58, y = 59.8, r = 40, n = 1 }, { x = 61.3, y = 57.1, r = 62, n = 7 }, { x = 64.1, y = 56.3, r = 73, n = 9 }, { x = 63.7, y = 59.5, r = 40, n = 5 }, { x = 61.1, y = 50.8, r = 59, n = 13 } }, spread = true, note = "Gold Dust" },
 						{ t = "collect", quest = 60, title = "Kobold Candles", item = 772, itemName = "Large Candle", count = 8, oi = 1, map = 1429, x = 40.34, y = 82.53, f = "e", spots = { { x = 38.7, y = 82.5, r = 93, n = 18 }, { x = 37.8, y = 85.2, r = 47, n = 4 }, { x = 37.4, y = 79.3, r = 49, n = 4 }, { x = 40.8, y = 79.5, r = 57, n = 29 }, { x = 58, y = 59.8, r = 40, n = 1 }, { x = 61.3, y = 57.1, r = 62, n = 7 }, { x = 64.1, y = 56.3, r = 73, n = 9 }, { x = 63.7, y = 59.5, r = 40, n = 5 }, { x = 61.1, y = 50.8, r = 59, n = 13 } }, spread = true, note = "Large Candles" },
 						{ t = "collect", quest = 91775, title = "Book Return", item = 248001, itemName = "Lost Book", count = 6, oi = 2, map = 1429, x = 40.34, y = 82.53, f = "e", spots = { { x = 38.7, y = 82.5, r = 93, n = 18 }, { x = 37.8, y = 85.2, r = 47, n = 4 }, { x = 37.4, y = 79.3, r = 49, n = 4 }, { x = 40.8, y = 79.5, r = 57, n = 28 }, { x = 58, y = 59.8, r = 40, n = 1 }, { x = 61, y = 57.9, r = 43, n = 4 }, { x = 63.7, y = 56.1, r = 61, n = 8 }, { x = 63.8, y = 59.8, r = 40, n = 4 }, { x = 61.1, y = 50.9, r = 57, n = 11 } }, spread = true, optional = true, note = "Lost Books: Kobold Miners and Tunnelers" },
-						{ t = "collect", quest = 91775, title = "Book Return", item = 248002, itemName = "Picture Book: Fun with Elementals", oi = 1, map = 1429, x = 41.62, y = 79.9, f = "e", optional = true, note = "Fun with Elementals: Nimsy" },
+						{ t = "collect", quest = 91775, title = "Book Return", item = 248002, itemName = "Picture Book: Fun with Elementals", oi = 1, map = 1429, x = 41.62, y = 79.9, f = "e", optional = true, note = "Fun with Elementals: Nimsy", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -10419,7 +10419,7 @@ do
 					title = "Vulgara the Insatiable",
 					note = "Vulgara lurks in the hills south-west of the village, on the way back. Vulgara the Insatiable is elite: grouping up is advised.",
 					goals = {
-						{ t = "collect", quest = 93318, title = "WANTED: Vulgara the Insatiable", item = 257942, itemName = "Vulgara's Head", oi = 1, map = 2521, x = 42.66, y = 52.8, optional = true, note = "Vulgara's Head" },
+						{ t = "collect", quest = 93318, title = "WANTED: Vulgara the Insatiable", item = 257942, itemName = "Vulgara's Head", oi = 1, map = 2521, x = 42.66, y = 52.8, optional = true, note = "Vulgara's Head", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -11553,6 +11553,7 @@ do
 			zoneName = "Un'Goro Crater",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "Loganaar",
@@ -11589,7 +11590,7 @@ do
 					title = "Toxic Test",
 					note = "Use the Devilsaur Barb on a Devilsaur. Devilsaurs are elite (level 54-55) and roam the crater: grouping up is advised.",
 					goals = {
-						{ t = "kill", quest = 9051, title = "Toxic Test", target = "Devilsaur", npc = 6498, count = 1, oi = 1, map = 1449, x = 57.26, y = 23.68, f = "e", spots = { { x = 57.3, y = 23.7, r = 15, n = 1 }, { x = 34.6, y = 22.4, r = 15, n = 1 }, { x = 31.2, y = 36.4, r = 15, n = 1 } }, spread = true, note = "Devilsaur: stab it with the Devilsaur Barb" },
+						{ t = "kill", quest = 9051, title = "Toxic Test", target = "Devilsaur", npc = 6498, count = 1, oi = 1, map = 1449, x = 57.26, y = 23.68, f = "e", spots = { { x = 57.3, y = 23.7, r = 15, n = 1 }, { x = 34.6, y = 22.4, r = 15, n = 1 }, { x = 31.2, y = 36.4, r = 15, n = 1 } }, spread = true, note = "Devilsaur: stab it with the Devilsaur Barb", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -11604,7 +11605,7 @@ do
 					note = "The Temple of Atal'Hakkar lies in the Pool of Tears in the Swamp of Sorrows. Atal'alarion guards the bottom of the temple: a dungeon boss, so bring a group.",
 					goals = {
 						{ t = "goto", text = "The Temple of Atal'Hakkar", map = 1435, x = 69.9, y = 53.6, f = "e" },
-						{ t = "collect", quest = 9053, title = "A Better Ingredient", item = 22444, itemName = "Putrid Vine", count = 1, oi = 1, map = 1435, x = 69.9, y = 53.6, f = "e", note = "Putrid Vine: Atal'alarion" },
+						{ t = "collect", quest = 9053, title = "A Better Ingredient", item = 22444, itemName = "Putrid Vine", count = 1, oi = 1, map = 1435, x = 69.9, y = 53.6, f = "e", note = "Putrid Vine: Atal'alarion", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -11638,6 +11639,7 @@ do
 			zoneName = "Felwood",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "The Ancient Petrified Leaf",
@@ -11663,7 +11665,7 @@ do
 					note = "Artorius the Amiable, a tauren, waits in the north-east of Winterspring. Talk to him and he becomes Artorius the Doombringer. Fight every demon alone and without your pet: help of any kind makes it vanish. Loot the head.",
 					goals = {
 						{ t = "talk", npc = 14531, npcName = "Artorius the Amiable", map = 1452, x = 60.31, y = 13.18, f = "e", note = "Artorius the Amiable" },
-						{ t = "collect", quest = 7636, title = "Stave of the Ancients", item = 18955, itemName = "Artorius's Head", oi = 4, map = 1452, x = 60.31, y = 13.18, f = "e", note = "Artorius's Head" },
+						{ t = "collect", quest = 7636, title = "Stave of the Ancients", item = 18955, itemName = "Artorius's Head", oi = 4, map = 1452, x = 60.31, y = 13.18, f = "e", note = "Artorius's Head", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -11671,7 +11673,7 @@ do
 					note = "Simone the Inconspicuous, a troll, stands in the west of Un'Goro Crater. Talk to her and she becomes Simone the Seductress, with a pet of her own. Alone, without your pet.",
 					goals = {
 						{ t = "talk", npc = 14527, npcName = "Simone the Inconspicuous", map = 1449, x = 34.32, y = 40.79, f = "e", note = "Simone the Inconspicuous" },
-						{ t = "collect", quest = 7636, title = "Stave of the Ancients", item = 18952, itemName = "Simone's Head", oi = 1, map = 1449, x = 34.32, y = 40.79, f = "e", note = "Simone's Head" },
+						{ t = "collect", quest = 7636, title = "Stave of the Ancients", item = 18952, itemName = "Simone's Head", oi = 1, map = 1449, x = 34.32, y = 40.79, f = "e", note = "Simone's Head", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -11679,7 +11681,7 @@ do
 					note = "Nelson the Nice, a gnome, stands in the south-west of Silithus. Talk to him and he becomes Solenor the Slayer. Alone, without your pet; keep away from the beetles he calls.",
 					goals = {
 						{ t = "talk", npc = 14536, npcName = "Nelson the Nice", map = 1451, x = 24.72, y = 76.02, f = "e", note = "Nelson the Nice" },
-						{ t = "collect", quest = 7636, title = "Stave of the Ancients", item = 18954, itemName = "Solenor's Head", oi = 3, map = 1451, x = 24.72, y = 76.02, f = "e", note = "Solenor's Head" },
+						{ t = "collect", quest = 7636, title = "Stave of the Ancients", item = 18954, itemName = "Solenor's Head", oi = 3, map = 1451, x = 24.72, y = 76.02, f = "e", note = "Solenor's Head", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -11687,14 +11689,14 @@ do
 					note = "Franklin the Friendly, a human, stands in the west of the Burning Steppes. Talk to him and he becomes Klinfran the Crazed. Alone, without your pet.",
 					goals = {
 						{ t = "talk", npc = 14529, npcName = "Franklin the Friendly", map = 1428, x = 24.82, y = 65.93, f = "e", note = "Franklin the Friendly" },
-						{ t = "collect", quest = 7636, title = "Stave of the Ancients", item = 18953, itemName = "Klinfran's Head", oi = 2, map = 1428, x = 24.82, y = 65.93, f = "e", note = "Klinfran's Head" },
+						{ t = "collect", quest = 7636, title = "Stave of the Ancients", item = 18953, itemName = "Klinfran's Head", oi = 2, map = 1428, x = 24.82, y = 65.93, f = "e", note = "Klinfran's Head", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
 					title = "Onyxia",
 					note = "Onyxia drops the Mature Black Dragon Sinew; she is the 40-player raid boss of Onyxia's Lair, a cave in the Wyrmbog of southern Dustwallow Marsh.",
 					goals = {
-						{ t = "collect", quest = 7635, title = "A Proper String", item = 18705, itemName = "Mature Black Dragon Sinew", count = 1, oi = 1, map = 1445, x = 52.1, y = 75.8, f = "e", note = "Mature Black Dragon Sinew, from Onyxia" },
+						{ t = "collect", quest = 7635, title = "A Proper String", item = 18705, itemName = "Mature Black Dragon Sinew", count = 1, oi = 1, map = 1445, x = 52.1, y = 75.8, f = "e", note = "Mature Black Dragon Sinew, from Onyxia", group = { kind = "elite", rank = 3 } },
 					},
 				},
 				{
@@ -11716,7 +11718,7 @@ do
 					title = "Azuregos",
 					note = "Hastat's quiver needs the Mature Blue Dragon Sinew. Azuregos, a world boss for a raid, roams the south of Azshara and drops it most of the time; the Cobalt dragonkin of Winterspring drop it very rarely. Skip the rest of this guide if you do not want the quiver.",
 					goals = {
-						{ t = "collect", quest = 7634, title = "Ancient Sinew Wrapped Lamina", item = 18704, itemName = "Mature Blue Dragon Sinew", count = 1, oi = 1, map = 1447, x = 53.3, y = 80.4, f = "e", note = "Mature Blue Dragon Sinew, from Azuregos" },
+						{ t = "collect", quest = 7634, title = "Ancient Sinew Wrapped Lamina", item = 18704, itemName = "Mature Blue Dragon Sinew", count = 1, oi = 1, map = 1447, x = 53.3, y = 80.4, f = "e", note = "Mature Blue Dragon Sinew, from Azuregos", group = { kind = "elite", rank = 3 } },
 					},
 				},
 				{
@@ -11748,6 +11750,7 @@ do
 			zoneName = "Azshara",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "The Hunter's Charm (Alliance)",
@@ -11809,7 +11812,7 @@ do
 					title = "Morphaz in the Sunken Temple",
 					note = "Morphaz is an elite dragon boss inside the Sunken Temple, a five-player dungeon: bring a group. The temple stands in the middle of the Pool of Tears; swim down into it to reach the entrance. Horde: fly to Stonard; Alliance: fly to Darkshire or Nethergarde Keep and ride on.",
 					goals = {
-						{ t = "collect", quest = 8232, title = "The Green Drake", item = 20019, itemName = "Tooth of Morphaz", count = 1, oi = 1, map = 1435, x = 69, y = 54, f = "e", note = "Tooth of Morphaz, inside the Sunken Temple" },
+						{ t = "collect", quest = 8232, title = "The Green Drake", item = 20019, itemName = "Tooth of Morphaz", count = 1, oi = 1, map = 1435, x = 69, y = 54, f = "e", note = "Tooth of Morphaz, inside the Sunken Temple", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -11841,6 +11844,7 @@ do
 			zoneName = "Feralas",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "Lorekeeper Lydros",
@@ -11854,7 +11858,7 @@ do
 					title = "Hydrospawn",
 					note = "Hydrospawn, a water elemental, lives in the Warpwood Quarter (Dire Maul East): chase the imp Pusillin until he turns to fight, clear the satyr room, then take the spiral ramp down to the pool.",
 					goals = {
-						{ t = "collect", quest = 7463, title = "Arcane Refreshment", item = 18299, itemName = "Hydrospawn Essence", count = 1, oi = 1, map = 1444, x = 58, y = 44.5, f = "e", note = "Hydrospawn Essence: Hydrospawn" },
+						{ t = "collect", quest = 7463, title = "Arcane Refreshment", item = 18299, itemName = "Hydrospawn Essence", count = 1, oi = 1, map = 1444, x = 58, y = 44.5, f = "e", note = "Hydrospawn Essence: Hydrospawn", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -11968,6 +11972,7 @@ do
 			zoneName = "Dustwallow Marsh",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "Return to the Marsh (Stormwind)",
@@ -12008,7 +12013,7 @@ do
 					goals = {
 						{ t = "turnin", quest = 1954, title = "The Infernal Orb", npc = 6546, npcName = "Tabetha", map = 1445, x = 46.06, y = 57.09, f = "e", note = "Tabetha" },
 						{ t = "accept", quest = 1955, title = "The Exorcism", npc = 6546, npcName = "Tabetha", minLevel = 35, qlvl = 40, pre = { 1954 }, preTitles = { [1954] = "The Infernal Orb" }, map = 1445, x = 46.06, y = 57.09, f = "e" },
-						{ t = "kill", quest = 1955, title = "The Exorcism", target = "Demon of the Orb", npc = 6549, oi = 1, map = 1445, x = 45.79, y = 56.97, f = "e", note = "Demon of the Orb" },
+						{ t = "kill", quest = 1955, title = "The Exorcism", target = "Demon of the Orb", npc = 6549, oi = 1, map = 1445, x = 45.79, y = 56.97, f = "e", note = "Demon of the Orb", group = { kind = "elite", rank = 1 } },
 						{ t = "turnin", quest = 1955, title = "The Exorcism", npc = 6546, npcName = "Tabetha", map = 1445, x = 46.06, y = 57.09, f = "e", note = "Tabetha" },
 						{ t = "accept", quest = 1956, title = "Power in Uldaman", npc = 6546, npcName = "Tabetha", minLevel = 35, qlvl = 40, pre = { 1955 }, preTitles = { [1955] = "The Exorcism" }, map = 1445, x = 46.06, y = 57.09, f = "e" },
 					},
@@ -12017,7 +12022,7 @@ do
 					title = "Power in Uldaman",
 					note = "Uldaman is a dungeon in the northern Badlands, by the Meeting Stone: a group of five. Defeat the Obsidian Sentinel inside for its power source.",
 					goals = {
-						{ t = "collect", quest = 1956, title = "Power in Uldaman", item = 8053, itemName = "Obsidian Power Source", count = 1, oi = 1, map = 1418, x = 49.1, y = 13.7, f = "e", note = "Obsidian Power Source: Obsidian Sentinel" },
+						{ t = "collect", quest = 1956, title = "Power in Uldaman", item = 8053, itemName = "Obsidian Power Source", count = 1, oi = 1, map = 1418, x = 49.1, y = 13.7, f = "e", note = "Obsidian Power Source: Obsidian Sentinel", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -12055,6 +12060,7 @@ do
 			zoneName = "Azshara",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "Magecraft (Stormwind)",
@@ -12116,7 +12122,7 @@ do
 					title = "Morphaz",
 					note = "Morphaz, a green drake, waits deep in the Temple of Atal'Hakkar, the Sunken Temple in the Pool of Tears: a group of five, level 50-54. Kill him for the Arcane Shard.",
 					goals = {
-						{ t = "collect", quest = 8253, title = "Destroy Morphaz", item = 20085, itemName = "Arcane Shard", count = 1, oi = 1, map = 1435, x = 69.9, y = 53.6, f = "e", note = "Arcane Shard: Morphaz" },
+						{ t = "collect", quest = 8253, title = "Destroy Morphaz", item = 20085, itemName = "Arcane Shard", count = 1, oi = 1, map = 1435, x = 69.9, y = 53.6, f = "e", note = "Arcane Shard: Morphaz", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -13021,6 +13027,7 @@ do
 			zoneName = "Stormwind City",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "The Tome of Valor (Ironforge)",
@@ -13097,7 +13104,7 @@ do
 					note = "The Deadmines is a group of five under Moonbrook; the instance portal is inside the Moonbrook mine. The Goblin Woodcarvers in the Mast Room, with Sneed, drop the lumber.",
 					goals = {
 						{ t = "goto", text = "The Deadmines, in the Moonbrook mine", map = 1436, x = 42.5, y = 71.7 },
-						{ t = "collect", quest = 1654, title = "The Test of Righteousness", item = 6994, itemName = "Whitestone Oak Lumber", oi = 1, map = 1436, x = 42.5, y = 71.7, note = "Goblin Woodcarvers, inside" },
+						{ t = "collect", quest = 1654, title = "The Test of Righteousness", item = 6994, itemName = "Whitestone Oak Lumber", oi = 1, map = 1436, x = 42.5, y = 71.7, note = "Goblin Woodcarvers, inside", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -13119,7 +13126,7 @@ do
 					title = "The Corrupted Kor Gem",
 					note = "The Blackfathom naga by the entrance of Blackfathom Deeps on Ashenvale's north-west coast drop the Corrupted Kor Gem. They are elite: grouping up is advised.",
 					goals = {
-						{ t = "collect", quest = 1442, title = "Seeking the Kor Gem", item = 6995, itemName = "Corrupted Kor Gem", oi = 1, map = 1440, x = 13.55, y = 12.06, f = "e", spots = { { x = 13.8, y = 9.3, r = 80, n = 10 }, { x = 16.2, y = 11.3, r = 58, n = 5 }, { x = 13.6, y = 12.1, r = 15, n = 1, alt = true }, { x = 17.7, y = 11.1, r = 15, n = 1, alt = true } } },
+						{ t = "collect", quest = 1442, title = "Seeking the Kor Gem", item = 6995, itemName = "Corrupted Kor Gem", oi = 1, map = 1440, x = 13.55, y = 12.06, f = "e", spots = { { x = 13.8, y = 9.3, r = 80, n = 10 }, { x = 16.2, y = 11.3, r = 58, n = 5 }, { x = 13.6, y = 12.1, r = 15, n = 1, alt = true }, { x = 17.7, y = 11.1, r = 15, n = 1, alt = true } }, group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -13163,12 +13170,13 @@ do
 			zoneName = "Eastern Plaguelands",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "The Eye of Shadow",
 					note = "You need The Eye of Divinity first: it comes from the Cache of the Firelord after Majordomo Executus in Molten Core. The Eye of Shadow drops from elite demons (Lord Kazzak, a world boss, always; Doomguard Commanders and Manahounds rarely); it binds when equipped, so buying one works too.",
 					goals = {
-						{ t = "collect", item = 18665, itemName = "The Eye of Shadow", count = 1, map = 1419, x = 35.54, y = 74.98, f = "e", note = "The Eye of Shadow", from = "Lord Kazzak", fromKind = "npc", fromRank = 3 },
+						{ t = "collect", item = 18665, itemName = "The Eye of Shadow", count = 1, map = 1419, x = 35.54, y = 74.98, f = "e", note = "The Eye of Shadow", from = "Lord Kazzak", fromKind = "npc", fromRank = 3, group = { kind = "elite", rank = 3 } },
 					},
 				},
 				{
@@ -13218,6 +13226,7 @@ do
 			zoneName = "Azshara",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "Cenarion Aid (Alliance)",
@@ -13279,7 +13288,7 @@ do
 					title = "Morphaz in the Sunken Temple",
 					note = "Morphaz is an elite dragon boss inside the Sunken Temple, a level 50 dungeon: bring a group of five. The temple stands in the middle of the Pool of Tears; swim down into it to reach the entrance. Horde: fly to Stonard; Alliance: fly to Darkshire or Nethergarde Keep and ride on.",
 					goals = {
-						{ t = "collect", quest = 8257, title = "Blood of Morphaz", item = 20025, itemName = "Blood of Morphaz", oi = 1, map = 1435, x = 69, y = 54, f = "e", note = "Blood of Morphaz: the Sunken Temple entrance" },
+						{ t = "collect", quest = 8257, title = "Blood of Morphaz", item = 20025, itemName = "Blood of Morphaz", oi = 1, map = 1435, x = 69, y = 54, f = "e", note = "Blood of Morphaz: the Sunken Temple entrance", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -14121,6 +14130,7 @@ do
 			zoneName = "Orgrimmar",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "The Shattered Salute",
@@ -14150,7 +14160,7 @@ do
 						{ t = "kill", quest = 2478, title = "Mission: Possible But Not Probable", target = "Mutated Venture Co. Drone", npc = 7310, count = 2, oi = 1, map = 1413, x = 54.7, y = 5.7, f = "e", note = "Mutated Venture Co. Drone" },
 						{ t = "kill", quest = 2478, title = "Mission: Possible But Not Probable", target = "Venture Co. Patroller", npc = 7308, count = 2, oi = 3, map = 1413, x = 54.66, y = 5.68, f = "e", note = "Venture Co. Patroller" },
 						{ t = "kill", quest = 2478, title = "Mission: Possible But Not Probable", target = "Venture Co. Lookout", npc = 7307, count = 2, oi = 2, map = 1413, x = 54.64, y = 5.77, f = "e", note = "Venture Co. Lookout" },
-						{ t = "collect", quest = 2478, title = "Mission: Possible But Not Probable", item = 8074, itemName = "Gallywix's Head", oi = 4, map = 1413, x = 54.75, y = 5.59, f = "e", note = "Gallywix's Head: Grand Foreman Puzik Gallywix (elite)" },
+						{ t = "collect", quest = 2478, title = "Mission: Possible But Not Probable", item = 8074, itemName = "Gallywix's Head", oi = 4, map = 1413, x = 54.75, y = 5.59, f = "e", note = "Gallywix's Head: Grand Foreman Puzik Gallywix (elite)", group = { kind = "elite", rank = 1 } },
 						{ t = "collect", quest = 2478, title = "Mission: Possible But Not Probable", item = 8073, itemName = "Cache of Zanzil's Altered Mixture", count = 1, oi = 6, map = 1413, x = 54.76, y = 5.56, f = "e", note = "Cache of Zanzil's Altered Mixture: Gallywix's Lockbox" },
 					},
 				},
@@ -14266,6 +14276,7 @@ do
 			zoneName = "Alterac Mountains",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "A Simple Request (Alliance)",
@@ -14327,7 +14338,7 @@ do
 					title = "Morphaz in the Sunken Temple",
 					note = "Morphaz, a green drake, is an elite boss deep in the Sunken Temple, a level 50 dungeon: bring a group of five. The temple stands in the Pool of Tears; swim down to the entrance. Horde: fly to Stonard; Alliance: fly to Nethergarde Keep and ride on.",
 					goals = {
-						{ t = "collect", quest = 8236, title = "The Azure Key", item = 20022, itemName = "Azure Key", count = 1, oi = 1, map = 1435, x = 69.9, y = 53.6, f = "e", note = "Azure Key: Morphaz, inside the temple" },
+						{ t = "collect", quest = 8236, title = "The Azure Key", item = 20022, itemName = "Azure Key", count = 1, oi = 1, map = 1435, x = 69.9, y = 53.6, f = "e", note = "Azure Key: Morphaz, inside the temple", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -14467,6 +14478,7 @@ do
 			zoneName = "Ironforge",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "Eldrun Stormbreaker",
@@ -14487,7 +14499,7 @@ do
 					title = "Charlga Razorflank",
 					note = "Razorfen Kraul is a dungeon at the southern edge of the Barrens (the arrow points at its entrance); Charlga Razorflank is its last boss. Bring a group.",
 					goals = {
-						{ t = "collect", quest = 96264, title = "Elemental Aid", item = 274463, itemName = "Tattered Note", oi = 1, map = 1413, x = 42.9, y = 90.2, note = "Tattered Note, from Charlga Razorflank" },
+						{ t = "collect", quest = 96264, title = "Elemental Aid", item = 274463, itemName = "Tattered Note", oi = 1, map = 1413, x = 42.9, y = 90.2, note = "Tattered Note, from Charlga Razorflank", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -14577,6 +14589,7 @@ do
 			zoneName = "Orgrimmar",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "Searn Firewarder",
@@ -14607,7 +14620,7 @@ do
 					title = "Charlga Razorflank",
 					note = "Razorfen Kraul is a dungeon at the southern edge of the Barrens (the arrow points at its entrance); Charlga Razorflank is its last boss. Bring a group.",
 					goals = {
-						{ t = "collect", quest = 79360, title = "Elemental Aid", item = 274463, itemName = "Tattered Note", oi = 1, map = 1413, x = 42.9, y = 90.2, note = "Tattered Note, from Charlga Razorflank" },
+						{ t = "collect", quest = 79360, title = "Elemental Aid", item = 274463, itemName = "Tattered Note", oi = 1, map = 1413, x = 42.9, y = 90.2, note = "Tattered Note, from Charlga Razorflank", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -14934,6 +14947,7 @@ do
 			zoneName = "Orgrimmar",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "Sagorne Creststrider",
@@ -14963,7 +14977,7 @@ do
 					title = "The Great Ossuary",
 					note = "Scholomance lies under Caer Darrow, the island town in the south-east of the Western Plaguelands. Use the Divination Scryer in the heart of the Great Ossuary's basement, beat the spirits it calls, then Death Knight Darkreaver. All are elite: bring a group.",
 					goals = {
-						{ t = "collect", quest = 8258, title = "The Darkreaver Menace", item = 18880, itemName = "Darkreaver's Head", oi = 1, map = 1422, x = 68.9, y = 75.2, f = "e", note = "Darkreaver's Head" },
+						{ t = "collect", quest = 8258, title = "The Darkreaver Menace", item = 18880, itemName = "Darkreaver's Head", oi = 1, map = 1422, x = 68.9, y = 75.2, f = "e", note = "Darkreaver's Head", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -15084,6 +15098,7 @@ do
 			zoneName = "Blasted Lands",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "Daio the Decrepit",
@@ -15098,14 +15113,14 @@ do
 					title = "Satyr Blood",
 					note = "The Wildspawn satyrs of the Warpwood Quarter, Dire Maul's eastern wing, carry the blood. The back door at Lariss Pavilion, north of Camp Mojache, needs the Crescent Key; otherwise go in by Dire Maul's main entrance. Bring a group.",
 					goals = {
-						{ t = "collect", quest = 7581, title = "The Prison's Bindings", item = 18603, itemName = "Satyr Blood", count = 15, oi = 1, map = 1444, x = 76.9, y = 37.4, f = "e", note = "Satyr Blood, inside the Warpwood Quarter" },
+						{ t = "collect", quest = 7581, title = "The Prison's Bindings", item = 18603, itemName = "Satyr Blood", count = 15, oi = 1, map = 1444, x = 76.9, y = 37.4, f = "e", note = "Satyr Blood, inside the Warpwood Quarter", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
 					title = "Tears of the Hederine",
 					note = "The Hederine demons hold Darkwhisper Gorge, in southern Winterspring. They are elite: grouping up is advised.",
 					goals = {
-						{ t = "collect", quest = 7582, title = "The Prison's Casing", item = 18604, itemName = "Tears of the Hederine", count = 5, oi = 1, map = 1452, x = 58.3, y = 82.25, f = "e", spots = { { x = 58.7, y = 83.6, r = 40, n = 2 }, { x = 59.2, y = 87.6, r = 40, n = 2 }, { x = 57.5, y = 88.4, r = 70, n = 4 }, { x = 55.5, y = 84.2, r = 40, n = 1 }, { x = 52.8, y = 84.9, r = 46, n = 6 }, { x = 50.9, y = 88.2, r = 40, n = 1 }, { x = 55.8, y = 79.4, r = 69, n = 7 }, { x = 57.7, y = 79.8, r = 40, n = 1 }, { x = 61, y = 79.8, r = 40, n = 1 }, { x = 61.8, y = 83.9, r = 41, n = 3 }, { x = 64.3, y = 79.5, r = 51, n = 4 }, { x = 59.6, y = 75.1, r = 40, n = 2 }, { x = 60.5, y = 83.1, r = 40, n = 4, alt = true }, { x = 56.6, y = 85.6, r = 40, n = 2, alt = true }, { x = 60.3, y = 78.3, r = 40, n = 2, alt = true }, { x = 57.9, y = 87.3, r = 47, n = 4, alt = true }, { x = 59.3, y = 77, r = 40, n = 2, alt = true }, { x = 52.3, y = 89.8, r = 42, n = 5, alt = true } }, spread = true, note = "Tears of the Hederine" },
+						{ t = "collect", quest = 7582, title = "The Prison's Casing", item = 18604, itemName = "Tears of the Hederine", count = 5, oi = 1, map = 1452, x = 58.3, y = 82.25, f = "e", spots = { { x = 58.7, y = 83.6, r = 40, n = 2 }, { x = 59.2, y = 87.6, r = 40, n = 2 }, { x = 57.5, y = 88.4, r = 70, n = 4 }, { x = 55.5, y = 84.2, r = 40, n = 1 }, { x = 52.8, y = 84.9, r = 46, n = 6 }, { x = 50.9, y = 88.2, r = 40, n = 1 }, { x = 55.8, y = 79.4, r = 69, n = 7 }, { x = 57.7, y = 79.8, r = 40, n = 1 }, { x = 61, y = 79.8, r = 40, n = 1 }, { x = 61.8, y = 83.9, r = 41, n = 3 }, { x = 64.3, y = 79.5, r = 51, n = 4 }, { x = 59.6, y = 75.1, r = 40, n = 2 }, { x = 60.5, y = 83.1, r = 40, n = 4, alt = true }, { x = 56.6, y = 85.6, r = 40, n = 2, alt = true }, { x = 60.3, y = 78.3, r = 40, n = 2, alt = true }, { x = 57.9, y = 87.3, r = 47, n = 4, alt = true }, { x = 59.3, y = 77, r = 40, n = 2, alt = true }, { x = 52.3, y = 89.8, r = 42, n = 5, alt = true } }, spread = true, note = "Tears of the Hederine", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -15761,6 +15776,7 @@ do
 			zoneName = "Felwood",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "Niby the Almighty",
@@ -15805,8 +15821,8 @@ do
 					note = "Kroshius' remains lie in Shatter Scar Vale, north of Niby. Use the Fel Fire beside them and kill the infernal when he wakes. Kroshius is elite: grouping up is advised.",
 					goals = {
 						{ t = "use", item = 18626, itemName = "Fel Fire", map = 1448, x = 45.7, y = 34.8, f = "e", note = "Fel Fire, at Kroshius' Remains" },
-						{ t = "kill", quest = 7603, title = "Kroshius' Infernal Core", target = "Kroshius", npc = 14467, oi = 1, map = 1448, x = 45.7, y = 34.76, f = "e", note = "Kroshius" },
-						{ t = "collect", quest = 7603, title = "Kroshius' Infernal Core", item = 18625, itemName = "Kroshius' Infernal Core", oi = 2, map = 1448, x = 45.7, y = 34.76, f = "e", note = "Kroshius' Infernal Core" },
+						{ t = "kill", quest = 7603, title = "Kroshius' Infernal Core", target = "Kroshius", npc = 14467, oi = 1, map = 1448, x = 45.7, y = 34.76, f = "e", note = "Kroshius", group = { kind = "elite", rank = 1 } },
+						{ t = "collect", quest = 7603, title = "Kroshius' Infernal Core", item = 18625, itemName = "Kroshius' Infernal Core", oi = 2, map = 1448, x = 45.7, y = 34.76, f = "e", note = "Kroshius' Infernal Core", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -15840,6 +15856,7 @@ do
 			pros = { "Ends with your choice of an off-hand orb or a staff" },
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "Acolyte Wytula",
@@ -15869,7 +15886,7 @@ do
 					goals = {
 						{ t = "turnin", quest = 1799, title = "Fragments of the Orb of Orahil", npc = 6546, npcName = "Tabetha", map = 1445, x = 46.06, y = 57.09, f = "e", note = "Tabetha" },
 						{ t = "accept", quest = 4961, title = "Cleansing of the Orb of Orahil", npc = 6546, npcName = "Tabetha", minLevel = 35, qlvl = 40, preAll = { 1799, 4962 }, preTitles = { [1799] = "Fragments of the Orb of Orahil", [4962] = "Shard of a Felhound" }, map = 1445, x = 46.06, y = 57.09, f = "e" },
-						{ t = "kill", quest = 4961, title = "Cleansing of the Orb of Orahil", target = "Demon of the Orb", npc = 6549, oi = 1, map = 1445, x = 45.79, y = 56.97, f = "e", note = "Demon of the Orb" },
+						{ t = "kill", quest = 4961, title = "Cleansing of the Orb of Orahil", target = "Demon of the Orb", npc = 6549, oi = 1, map = 1445, x = 45.79, y = 56.97, f = "e", note = "Demon of the Orb", group = { kind = "elite", rank = 1 } },
 						{ t = "turnin", quest = 4961, title = "Cleansing of the Orb of Orahil", npc = 6546, npcName = "Tabetha", map = 1445, x = 46.06, y = 57.09, f = "e", note = "Tabetha" },
 						{ t = "accept", quest = 4976, title = "Returning the Cleansed Orb", npc = 6546, npcName = "Tabetha", minLevel = 35, qlvl = 40, pre = { 4961 }, preTitles = { [4961] = "Cleansing of the Orb of Orahil" }, map = 1445, x = 46.06, y = 57.09, f = "e" },
 					},
@@ -15909,6 +15926,7 @@ do
 			pros = { "Ends with your choice of an off-hand orb or a staff" },
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "Acolyte Magaz",
@@ -15938,7 +15956,7 @@ do
 					goals = {
 						{ t = "turnin", quest = 1799, title = "Fragments of the Orb of Orahil", npc = 6546, npcName = "Tabetha", map = 1445, x = 46.06, y = 57.09, f = "e", note = "Tabetha" },
 						{ t = "accept", quest = 4961, title = "Cleansing of the Orb of Orahil", npc = 6546, npcName = "Tabetha", minLevel = 35, qlvl = 40, preAll = { 1799, 4962 }, preTitles = { [1799] = "Fragments of the Orb of Orahil", [4962] = "Shard of a Felhound" }, map = 1445, x = 46.06, y = 57.09, f = "e" },
-						{ t = "kill", quest = 4961, title = "Cleansing of the Orb of Orahil", target = "Demon of the Orb", npc = 6549, oi = 1, map = 1445, x = 45.79, y = 56.97, f = "e", note = "Demon of the Orb" },
+						{ t = "kill", quest = 4961, title = "Cleansing of the Orb of Orahil", target = "Demon of the Orb", npc = 6549, oi = 1, map = 1445, x = 45.79, y = 56.97, f = "e", note = "Demon of the Orb", group = { kind = "elite", rank = 1 } },
 						{ t = "turnin", quest = 4961, title = "Cleansing of the Orb of Orahil", npc = 6546, npcName = "Tabetha", map = 1445, x = 46.06, y = 57.09, f = "e", note = "Tabetha" },
 						{ t = "accept", quest = 4976, title = "Returning the Cleansed Orb", npc = 6546, npcName = "Tabetha", minLevel = 35, qlvl = 40, pre = { 4961 }, preTitles = { [4961] = "Cleansing of the Orb of Orahil" }, map = 1445, x = 46.06, y = 57.09, f = "e" },
 					},
@@ -16049,6 +16067,7 @@ do
 			zoneName = "The Barrens",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "Doan Karhan",
@@ -16062,14 +16081,14 @@ do
 					title = "Blackfathom Deeps",
 					note = "The Twilight Acolytes inside Blackfathom Deeps, a level 24-32 dungeon, each drop a Soran'ruk Fragment: bring a group. The entrance is in the ruins on the north-west coast of Ashenvale.",
 					goals = {
-						{ t = "collect", quest = 1740, title = "The Orb of Soran'ruk", item = 6914, itemName = "Soran'ruk Fragment", count = 3, oi = 1, map = 1440, x = 14.5, y = 14.2, note = "Soran'ruk Fragment, from the Twilight Acolytes" },
+						{ t = "collect", quest = 1740, title = "The Orb of Soran'ruk", item = 6914, itemName = "Soran'ruk Fragment", count = 3, oi = 1, map = 1440, x = 14.5, y = 14.2, note = "Soran'ruk Fragment, from the Twilight Acolytes", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
 					title = "Shadowfang Keep",
 					note = "The Shadowfang Darksouls inside Shadowfang Keep, a level 20-30 dungeon, drop the Large Fragment about one time in five: bring a group. The keep stands south of the Sepulcher.",
 					goals = {
-						{ t = "collect", quest = 1740, title = "The Orb of Soran'ruk", item = 6915, itemName = "Large Soran'ruk Fragment", count = 1, oi = 2, map = 1421, x = 44.8, y = 67.8, note = "Large Soran'ruk Fragment, from the Shadowfang Darksouls" },
+						{ t = "collect", quest = 1740, title = "The Orb of Soran'ruk", item = 6915, itemName = "Large Soran'ruk Fragment", count = 1, oi = 2, map = 1421, x = 44.8, y = 67.8, note = "Large Soran'ruk Fragment, from the Shadowfang Darksouls", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -16102,6 +16121,7 @@ do
 			zoneName = "The Barrens",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "Speak with Ruga (Orgrimmar)",
@@ -16153,7 +16173,7 @@ do
 					title = "Roogug in Razorfen Kraul",
 					note = "Roogug is an elite quilboar inside Razorfen Kraul, the dungeon at the south end of the Barrens; he drops the Vial of Phlogiston. Razorfen Kraul is a dungeon: grouping up is advised.",
 					goals = {
-						{ t = "collect", quest = 1838, title = "Brutal Armor", item = 6841, itemName = "Vial of Phlogiston", count = 1, oi = 4, map = 1413, x = 42.9, y = 90.2, note = "Vial of Phlogiston, from Roogug" },
+						{ t = "collect", quest = 1838, title = "Brutal Armor", item = 6841, itemName = "Vial of Phlogiston", count = 1, oi = 4, map = 1413, x = 42.9, y = 90.2, note = "Vial of Phlogiston, from Roogug", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -16281,6 +16301,7 @@ do
 			zoneName = "Redridge Mountains",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "Yorus Barleybrew (Stormwind)",
@@ -16347,7 +16368,7 @@ do
 					title = "Roogug in Razorfen Kraul",
 					note = "Roogug is an elite quilboar inside Razorfen Kraul, the dungeon at the south end of the Barrens; he drops the Vial of Phlogiston. Razorfen Kraul is a dungeon: grouping up is advised.",
 					goals = {
-						{ t = "collect", quest = 1701, title = "Fire Hardened Mail", item = 6841, itemName = "Vial of Phlogiston", oi = 4, map = 1413, x = 42.9, y = 90.2, note = "Vial of Phlogiston, from Roogug" },
+						{ t = "collect", quest = 1701, title = "Fire Hardened Mail", item = 6841, itemName = "Vial of Phlogiston", oi = 4, map = 1413, x = 42.9, y = 90.2, note = "Vial of Phlogiston, from Roogug", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -16720,6 +16741,7 @@ do
 			zoneName = "The Barrens",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "The Islander (Stormwind)",
@@ -16815,7 +16837,7 @@ do
 					goals = {
 						{ t = "turnin", quest = 1712, title = "Cyclonian", npc = 6176, npcName = "Bath'rah the Windwatcher", map = 1416, x = 80.5, y = 66.92, f = "e", note = "Bath'rah the Windwatcher" },
 						{ t = "accept", quest = 1713, title = "The Summoning", npc = 6176, npcName = "Bath'rah the Windwatcher", minLevel = 30, qlvl = 40, pre = { 1712 }, preTitles = { [1712] = "Cyclonian" }, map = 1416, x = 80.5, y = 66.92, f = "e" },
-						{ t = "collect", quest = 1713, title = "The Summoning", item = 6894, itemName = "Whirlwind Heart", count = 1, oi = 1, map = 1416, x = 80.32, y = 62.14, f = "e", note = "Whirlwind Heart from Cyclonian" },
+						{ t = "collect", quest = 1713, title = "The Summoning", item = 6894, itemName = "Whirlwind Heart", count = 1, oi = 1, map = 1416, x = 80.32, y = 62.14, f = "e", note = "Whirlwind Heart from Cyclonian", group = { kind = "elite", rank = 1 } },
 						{ t = "turnin", quest = 1713, title = "The Summoning", npc = 6176, npcName = "Bath'rah the Windwatcher", map = 1416, x = 80.5, y = 66.92, f = "e" },
 						{ t = "accept", quest = 1792, title = "Whirlwind Weapon", npc = 6176, npcName = "Bath'rah the Windwatcher", minLevel = 30, qlvl = 40, pre = { 1713 }, preTitles = { [1713] = "The Summoning" }, map = 1416, x = 80.5, y = 66.92, f = "e" },
 						{ t = "turnin", quest = 1792, title = "Whirlwind Weapon", npc = 6176, npcName = "Bath'rah the Windwatcher", map = 1416, x = 80.5, y = 66.92, f = "e", note = "Bath'rah the Windwatcher", rewards = { choices = { { item = 6975, itemName = "Whirlwind Axe" }, { item = 6977, itemName = "Whirlwind Sword" }, { item = 6976, itemName = "Whirlwind Warhammer" } } } },
@@ -17934,6 +17956,7 @@ do
 			zoneName = "Eastern Plaguelands",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "Journeyman Riding",
@@ -17948,7 +17971,7 @@ do
 					note = "Stratholme is a group of five, level 58-60. The Service Entrance at Elders' Square, in north-western Eastern Plaguelands, leads to the undead side; Baron Rivendare waits in the Slaughter House at its end. Our data gives the reins a 0.02% drop chance (pfQuest, Era): one in about five thousand kills. Nothing shows Forever changing it.",
 					goals = {
 						{ t = "goto", text = "Stratholme Service Entrance", map = 1423, x = 47.9, y = 23.8, f = "e" },
-						{ t = "collect", item = 13335, itemName = "Deathcharger's Reins", map = 1423, x = 47.9, y = 23.8, f = "e", note = "Baron Rivendare" },
+						{ t = "collect", item = 13335, itemName = "Deathcharger's Reins", map = 1423, x = 47.9, y = 23.8, f = "e", note = "Baron Rivendare", group = { kind = "elite", rank = 1 } },
 					},
 				},
 			},
@@ -18610,13 +18633,14 @@ do
 			zoneName = "Westfall",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "The Deadmines: Defias Pirates",
 					note = "The Deadmines is a group of five under Moonbrook; the instance portal is inside the Moonbrook mine. The Defias Pirates on and around the ship drop the macaw about 3.5% of the time in our data.",
 					goals = {
 						{ t = "goto", text = "The Deadmines portal, inside the Moonbrook mine", map = 1436, x = 38, y = 77.5, f = "e" },
-						{ t = "collect", item = 8492, itemName = "Parrot Cage (Green Wing Macaw)", map = 1436, x = 38, y = 77.5, f = "e", note = "Defias Pirates" },
+						{ t = "collect", item = 8492, itemName = "Parrot Cage (Green Wing Macaw)", map = 1436, x = 38, y = 77.5, f = "e", note = "Defias Pirates", group = { kind = "elite", rank = 1 } },
 					},
 				},
 			},
@@ -19135,13 +19159,14 @@ do
 			zoneName = "Westfall",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "The Deadmines: Cookie",
 					note = "The Deadmines is a group of five under Moonbrook; the instance portal is inside the Moonbrook mine. Cookie, the murloc cook near the ship at the end, drops the Siamese about 15% of the time in our data.",
 					goals = {
 						{ t = "goto", text = "The Deadmines portal, inside the Moonbrook mine", map = 1436, x = 38, y = 77.5, f = "e" },
-						{ t = "collect", item = 8490, itemName = "Cat Carrier (Siamese)", map = 1436, x = 38, y = 77.5, f = "e", note = "Cookie" },
+						{ t = "collect", item = 8490, itemName = "Cat Carrier (Siamese)", map = 1436, x = 38, y = 77.5, f = "e", note = "Cookie", group = { kind = "elite", rank = 1 } },
 					},
 				},
 			},
@@ -19167,25 +19192,26 @@ do
 			zoneName = "Burning Steppes",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "Kibler at Flame Crest",
 					note = "Kibler stands at Flame Crest in northern Burning Steppes, near the Blackrock Mountain path.",
 					goals = {
-						{ t = "accept", quest = 4862, title = "En-Ay-Es-Tee-Why", npc = 10260, npcName = "Kibler", minLevel = 55, qlvl = 59, map = 1428, x = 65.89, y = 21.92, f = "e" },
+						{ t = "accept", quest = 4862, title = "En-Ay-Es-Tee-Why", npc = 10260, npcName = "Kibler", minLevel = 55, qlvl = 59, map = 1428, x = 65.89, y = 21.92, f = "e", group = { kind = "dungeon", name = "Blackrock Spire" } },
 					},
 				},
 				{
 					title = "Lower Blackrock Spire",
 					note = "Lower Blackrock Spire is a group of five, level 55-60. Collect 15 Spire Spider Eggs from the nests near Mother Smolderweb.",
 					goals = {
-						{ t = "collect", quest = 4862, title = "En-Ay-Es-Tee-Why", item = 12530, itemName = "Spire Spider Egg", count = 15, oi = 1, map = 1428, x = 33.2, y = 24.9, f = "e", note = "Lower Blackrock Spire" },
+						{ t = "collect", quest = 4862, title = "En-Ay-Es-Tee-Why", item = 12530, itemName = "Spire Spider Egg", count = 15, oi = 1, map = 1428, x = 33.2, y = 24.9, f = "e", note = "Lower Blackrock Spire", group = { kind = "dungeon", name = "Blackrock Spire" } },
 					},
 				},
 				{
 					title = "Back to Kibler",
 					goals = {
-						{ t = "turnin", quest = 4862, title = "En-Ay-Es-Tee-Why", npc = 10260, npcName = "Kibler", map = 1428, x = 65.89, y = 21.92, f = "e" },
+						{ t = "turnin", quest = 4862, title = "En-Ay-Es-Tee-Why", npc = 10260, npcName = "Kibler", map = 1428, x = 65.89, y = 21.92, f = "e", group = { kind = "dungeon", name = "Blackrock Spire" } },
 						{ t = "collect", item = 12529, itemName = "Smolderweb Carrier", map = 1428, x = 65.9, y = 21.9, f = "e", note = "Smolderweb Carrier" },
 					},
 				},
@@ -19370,25 +19396,26 @@ do
 			zoneName = "Burning Steppes",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "Kibler at Flame Crest",
 					note = "Kibler stands at Flame Crest in northern Burning Steppes, near the Blackrock Mountain path.",
 					goals = {
-						{ t = "accept", quest = 4729, title = "Kibler's Exotic Pets", npc = 10260, npcName = "Kibler", minLevel = 55, qlvl = 59, map = 1428, x = 65.89, y = 21.92, f = "e" },
+						{ t = "accept", quest = 4729, title = "Kibler's Exotic Pets", npc = 10260, npcName = "Kibler", minLevel = 55, qlvl = 59, map = 1428, x = 65.89, y = 21.92, f = "e", group = { kind = "dungeon", name = "Blackrock Spire" } },
 					},
 				},
 				{
 					title = "Upper Blackrock Spire",
 					note = "Upper Blackrock Spire is a raid group of up to ten, level 58-60. Use Kibler's cage on a Bloodaxe Worg Pup (Halycon's den) to get the Caged Worg Pup.",
 					goals = {
-						{ t = "collect", quest = 4729, title = "Kibler's Exotic Pets", item = 12263, itemName = "Caged Worg Pup", count = 1, oi = 1, map = 1428, x = 33.2, y = 24.9, f = "e", note = "Upper Blackrock Spire" },
+						{ t = "collect", quest = 4729, title = "Kibler's Exotic Pets", item = 12263, itemName = "Caged Worg Pup", count = 1, oi = 1, map = 1428, x = 33.2, y = 24.9, f = "e", note = "Upper Blackrock Spire", group = { kind = "dungeon", name = "Blackrock Spire" } },
 					},
 				},
 				{
 					title = "Back to Kibler",
 					goals = {
-						{ t = "turnin", quest = 4729, title = "Kibler's Exotic Pets", npc = 10260, npcName = "Kibler", map = 1428, x = 65.89, y = 21.92, f = "e" },
+						{ t = "turnin", quest = 4729, title = "Kibler's Exotic Pets", npc = 10260, npcName = "Kibler", map = 1428, x = 65.89, y = 21.92, f = "e", group = { kind = "dungeon", name = "Blackrock Spire" } },
 						{ t = "collect", item = 12264, itemName = "Worg Carrier", map = 1428, x = 65.9, y = 21.9, f = "e", note = "Worg Carrier" },
 					},
 				},
@@ -22181,7 +22208,7 @@ do
 					title = "Bruuz",
 					note = "Bruuz swims in the harbour just off Ratchet's docks. Bruuz is elite: grouping up is advised.",
 					goals = {
-						{ t = "collect", quest = 92706, title = "WANTED: Bruuz", item = 253710, itemName = "Bruuz's Dorsal Fin", oi = 1, map = 1413, x = 63.7, y = 38.7, f = "e", optional = true },
+						{ t = "collect", quest = 92706, title = "WANTED: Bruuz", item = 253710, itemName = "Bruuz's Dorsal Fin", oi = 1, map = 1413, x = 63.7, y = 38.7, f = "e", optional = true, group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -22427,7 +22454,7 @@ do
 						{ t = "kill", quest = 2478, title = "Mission: Possible But Not Probable", target = "Venture Co. Patroller", npc = 7308, count = 2, oi = 3, map = 1413, x = 54.66, y = 5.68, f = "e", optional = true },
 						{ t = "kill", quest = 2478, title = "Mission: Possible But Not Probable", target = "Venture Co. Lookout", npc = 7307, count = 2, oi = 2, map = 1413, x = 54.64, y = 5.77, f = "e", optional = true },
 						{ t = "collect", quest = 2478, title = "Mission: Possible But Not Probable", item = 8073, itemName = "Cache of Zanzil's Altered Mixture", count = 1, oi = 6, map = 1413, x = 54.76, y = 5.56, f = "e", optional = true },
-						{ t = "collect", quest = 2478, title = "Mission: Possible But Not Probable", item = 8074, itemName = "Gallywix's Head", oi = 4, map = 1413, x = 54.75, y = 5.59, f = "e", optional = true },
+						{ t = "collect", quest = 2478, title = "Mission: Possible But Not Probable", item = 8074, itemName = "Gallywix's Head", oi = 4, map = 1413, x = 54.75, y = 5.59, f = "e", optional = true, group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -23796,7 +23823,7 @@ do
 					title = "Rok'Alim the Pounder",
 					note = "Rok'Alim, a hard-hitting rock elemental, walks the cliffs of Highperch. Rok'Alim the Pounder is elite: grouping up is advised.",
 					goals = {
-						{ t = "collect", quest = 1151, title = "Test of Strength", item = 5844, itemName = "Fragments of Rok'Alim", oi = 1, map = 1441, x = 17.1, y = 38.1, f = "e", spots = { { x = 17.1, y = 38.1, r = 15, n = 1 }, { x = 10.6, y = 23.1, r = 15, n = 1 } }, spread = true, optional = true },
+						{ t = "collect", quest = 1151, title = "Test of Strength", item = 5844, itemName = "Fragments of Rok'Alim", oi = 1, map = 1441, x = 17.1, y = 38.1, f = "e", spots = { { x = 17.1, y = 38.1, r = 15, n = 1 }, { x = 10.6, y = 23.1, r = 15, n = 1 } }, spread = true, optional = true, group = { kind = "elite", rank = 1 } },
 						{ t = "turnin", quest = 1151, title = "Test of Strength", npc = 2986, npcName = "Dorn Plainstalker", map = 1441, x = 53.95, y = 41.49, f = "e", optional = true, note = "Dorn Plainstalker" },
 					},
 				},
@@ -30287,7 +30314,7 @@ do
 					title = "Aggor the Young",
 					note = "Aggor the Young, a young sea giant, walks Durotar's north coast, north of the naga beach. Aggor the Young is elite: grouping up is advised.",
 					goals = {
-						{ t = "collect", quest = 99052, title = "Threat from Below", item = 286009, itemName = "Aggor's Belt", oi = 1, map = 1411, x = 59.22, y = 17.6, f = "e", optional = true, note = "Aggor's Belt" },
+						{ t = "collect", quest = 99052, title = "Threat from Below", item = 286009, itemName = "Aggor's Belt", oi = 1, map = 1411, x = 59.22, y = 17.6, f = "e", optional = true, note = "Aggor's Belt", group = { kind = "elite", rank = 1 } },
 						{ t = "turnin", quest = 99052, title = "Threat from Below", npc = 3142, npcName = "Orgnil Soulscar", map = 1411, x = 52.24, y = 43.15, f = "e", optional = true, note = "Orgnil Soulscar, back in Razor Hill" },
 					},
 				},
@@ -30976,7 +31003,7 @@ do
 					title = "Vulgara the Insatiable",
 					note = "Vulgara lurks south of the village, among the Prideclaws. Vulgara is elite: grouping up is advised.",
 					goals = {
-						{ t = "collect", quest = 93318, title = "WANTED: Vulgara the Insatiable", item = 257942, itemName = "Vulgara's Head", oi = 1, map = 2521, x = 42.66, y = 52.8, optional = true },
+						{ t = "collect", quest = 93318, title = "WANTED: Vulgara the Insatiable", item = 257942, itemName = "Vulgara's Head", oi = 1, map = 2521, x = 42.66, y = 52.8, optional = true, group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -32702,7 +32729,7 @@ do
 					note = "The spiders lurk in the woods at the far east end of the glades. Riptear, a rogue abomination, wanders just north-west of them. Riptear is elite: grouping up is advised.",
 					goals = {
 						{ t = "collect", quest = 369, title = "A New Plague", item = 2872, itemName = "Vicious Night Web Spider Venom", count = 4, oi = 1, map = 1420, x = 82.43, y = 54.77, f = "e", spots = { { x = 83.2, y = 55.2, r = 38, n = 3 }, { x = 84.9, y = 51.8, r = 59, n = 7 }, { x = 86.8, y = 54.9, r = 84, n = 10 }, { x = 85.6, y = 48.3, r = 59, n = 4 }, { x = 87.7, y = 50.3, r = 64, n = 5 }, { x = 89.5, y = 52.1, r = 57, n = 4 }, { x = 91, y = 49.8, r = 35, n = 3, alt = true } } },
-						{ t = "collect", quest = 99156, title = "Rear Guard Patrol", item = 286326, itemName = "Riptear's Heart", oi = 1, map = 1420, x = 83.87, y = 53.24, f = "e", spots = { { x = 84, y = 47.8, r = 47, n = 4 }, { x = 85.8, y = 48.6, r = 28, n = 3 }, { x = 83.8, y = 45.1, r = 52, n = 15 }, { x = 85.5, y = 44.9, r = 19, n = 3 }, { x = 81.7, y = 44.9, r = 66, n = 15 }, { x = 84.8, y = 43.2, r = 34, n = 5 }, { x = 83.9, y = 53.2, r = 15, n = 1, alt = true }, { x = 86.5, y = 53.4, r = 15, n = 1, alt = true }, { x = 83, y = 42.3, r = 91, n = 12, alt = true }, { x = 86, y = 40, r = 15, n = 1, alt = true }, { x = 84.1, y = 39.5, r = 15, n = 1, alt = true } }, optional = true, note = "Riptear's Heart, from Riptear" },
+						{ t = "collect", quest = 99156, title = "Rear Guard Patrol", item = 286326, itemName = "Riptear's Heart", oi = 1, map = 1420, x = 83.87, y = 53.24, f = "e", spots = { { x = 84, y = 47.8, r = 47, n = 4 }, { x = 85.8, y = 48.6, r = 28, n = 3 }, { x = 83.8, y = 45.1, r = 52, n = 15 }, { x = 85.5, y = 44.9, r = 19, n = 3 }, { x = 81.7, y = 44.9, r = 66, n = 15 }, { x = 84.8, y = 43.2, r = 34, n = 5 }, { x = 83.9, y = 53.2, r = 15, n = 1, alt = true }, { x = 86.5, y = 53.4, r = 15, n = 1, alt = true }, { x = 83, y = 42.3, r = 91, n = 12, alt = true }, { x = 86, y = 40, r = 15, n = 1, alt = true }, { x = 84.1, y = 39.5, r = 15, n = 1, alt = true } }, optional = true, note = "Riptear's Heart, from Riptear", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -32816,6 +32843,7 @@ do
 			zoneName = "Burning Steppes",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "Classes: level 25",
@@ -32971,12 +32999,12 @@ do
 					title = "Dungeons: level 15-25",
 					note = "The final boss of every level 15-25 dungeon earns one point together. Tick each boss off when you kill it; the grouping follows the usual Classic level ranges, so check the in-game Legacy panel for the exact list.",
 					goals = {
-						{ t = "kill", target = "Taragaman the Hungerer", npc = 11520, note = "Ragefire Chasm" },
-						{ t = "kill", target = "Mutanus the Devourer", npc = 3654, note = "Wailing Caverns (appears after the Disciple of Naralex's event)" },
-						{ t = "kill", target = "Edwin VanCleef", npc = 639, note = "The Deadmines" },
-						{ t = "kill", target = "Archmage Arugal", npc = 4275, note = "Shadowfang Keep" },
-						{ t = "kill", target = "Aku'mai", npc = 4829, note = "Blackfathom Deeps" },
-						{ t = "kill", target = "Bazil Thredd", npc = 1716, note = "The Stockade: the usual last kill; the Stockade has no fixed final boss" },
+						{ t = "kill", target = "Taragaman the Hungerer", npc = 11520, note = "Ragefire Chasm", group = { kind = "elite", rank = 1 } },
+						{ t = "kill", target = "Mutanus the Devourer", npc = 3654, note = "Wailing Caverns (appears after the Disciple of Naralex's event)", group = { kind = "elite", rank = 1 } },
+						{ t = "kill", target = "Edwin VanCleef", npc = 639, note = "The Deadmines", group = { kind = "elite", rank = 1 } },
+						{ t = "kill", target = "Archmage Arugal", npc = 4275, note = "Shadowfang Keep", group = { kind = "elite", rank = 1 } },
+						{ t = "kill", target = "Aku'mai", npc = 4829, note = "Blackfathom Deeps", group = { kind = "elite", rank = 1 } },
+						{ t = "kill", target = "Bazil Thredd", npc = 1716, note = "The Stockade: the usual last kill; the Stockade has no fixed final boss", group = { kind = "elite", rank = 1 } },
 						{ t = "note", text = "Forever adds the dungeons Hall of Thanes and Ruins of Lordaeron; their bosses and brackets are not in our data yet." },
 					},
 				},
@@ -32984,32 +33012,32 @@ do
 					title = "Dungeons: level 26-45",
 					note = "The final boss of every level 26-45 dungeon earns one point together.",
 					goals = {
-						{ t = "kill", target = "Mekgineer Thermaplugg", npc = 7800, note = "Gnomeregan" },
-						{ t = "kill", target = "Charlga Razorflank", npc = 4421, note = "Razorfen Kraul" },
-						{ t = "kill", target = "Bloodmage Thalnos", npc = 4543, note = "Scarlet Monastery: Graveyard" },
-						{ t = "kill", target = "Arcanist Doan", npc = 6487, note = "Scarlet Monastery: Library" },
-						{ t = "kill", target = "Herod", npc = 3975, note = "Scarlet Monastery: Armory" },
-						{ t = "kill", target = "High Inquisitor Whitemane", npc = 3977, note = "Scarlet Monastery: Cathedral" },
-						{ t = "kill", target = "Amnennar the Coldbringer", npc = 7358, note = "Razorfen Downs" },
-						{ t = "kill", target = "Archaedas", npc = 2748, note = "Uldaman (level 41-51; may count in the 46-60 bracket)" },
+						{ t = "kill", target = "Mekgineer Thermaplugg", npc = 7800, note = "Gnomeregan", group = { kind = "elite", rank = 1 } },
+						{ t = "kill", target = "Charlga Razorflank", npc = 4421, note = "Razorfen Kraul", group = { kind = "elite", rank = 1 } },
+						{ t = "kill", target = "Bloodmage Thalnos", npc = 4543, note = "Scarlet Monastery: Graveyard", group = { kind = "elite", rank = 1 } },
+						{ t = "kill", target = "Arcanist Doan", npc = 6487, note = "Scarlet Monastery: Library", group = { kind = "elite", rank = 1 } },
+						{ t = "kill", target = "Herod", npc = 3975, note = "Scarlet Monastery: Armory", group = { kind = "elite", rank = 1 } },
+						{ t = "kill", target = "High Inquisitor Whitemane", npc = 3977, note = "Scarlet Monastery: Cathedral", group = { kind = "elite", rank = 1 } },
+						{ t = "kill", target = "Amnennar the Coldbringer", npc = 7358, note = "Razorfen Downs", group = { kind = "elite", rank = 1 } },
+						{ t = "kill", target = "Archaedas", npc = 2748, note = "Uldaman (level 41-51; may count in the 46-60 bracket)", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
 					title = "Dungeons: level 46-60",
 					note = "The final boss of every level 46-60 dungeon earns one point together.",
 					goals = {
-						{ t = "kill", target = "Chief Ukorz Sandscalp", npc = 7267, note = "Zul'Farrak" },
-						{ t = "kill", target = "Princess Theradras", npc = 12201, note = "Maraudon" },
-						{ t = "kill", target = "Shade of Eranikus", npc = 5709, note = "Sunken Temple" },
-						{ t = "kill", target = "Emperor Dagran Thaurissan", npc = 9019, note = "Blackrock Depths" },
-						{ t = "kill", target = "Overlord Wyrmthalak", npc = 9568, note = "Lower Blackrock Spire" },
-						{ t = "kill", target = "General Drakkisath", npc = 10363, note = "Upper Blackrock Spire" },
-						{ t = "kill", target = "Alzzin the Wildshaper", npc = 11492, note = "Dire Maul East" },
-						{ t = "kill", target = "Prince Tortheldrin", npc = 11486, note = "Dire Maul West" },
-						{ t = "kill", target = "King Gordok", npc = 11501, note = "Dire Maul North" },
-						{ t = "kill", target = "Darkmaster Gandling", npc = 1853, note = "Scholomance" },
-						{ t = "kill", target = "Balnazzar", npc = 10813, note = "Stratholme, Live side" },
-						{ t = "kill", target = "Baron Rivendare", npc = 10440, note = "Stratholme, Undead side" },
+						{ t = "kill", target = "Chief Ukorz Sandscalp", npc = 7267, note = "Zul'Farrak", group = { kind = "elite", rank = 1 } },
+						{ t = "kill", target = "Princess Theradras", npc = 12201, note = "Maraudon", group = { kind = "elite", rank = 1 } },
+						{ t = "kill", target = "Shade of Eranikus", npc = 5709, note = "Sunken Temple", group = { kind = "elite", rank = 1 } },
+						{ t = "kill", target = "Emperor Dagran Thaurissan", npc = 9019, note = "Blackrock Depths", group = { kind = "elite", rank = 1 } },
+						{ t = "kill", target = "Overlord Wyrmthalak", npc = 9568, note = "Lower Blackrock Spire", group = { kind = "elite", rank = 1 } },
+						{ t = "kill", target = "General Drakkisath", npc = 10363, note = "Upper Blackrock Spire", group = { kind = "elite", rank = 3 } },
+						{ t = "kill", target = "Alzzin the Wildshaper", npc = 11492, note = "Dire Maul East", group = { kind = "elite", rank = 1 } },
+						{ t = "kill", target = "Prince Tortheldrin", npc = 11486, note = "Dire Maul West", group = { kind = "elite", rank = 1 } },
+						{ t = "kill", target = "King Gordok", npc = 11501, note = "Dire Maul North", group = { kind = "elite", rank = 1 } },
+						{ t = "kill", target = "Darkmaster Gandling", npc = 1853, note = "Scholomance", group = { kind = "elite", rank = 1 } },
+						{ t = "kill", target = "Balnazzar", npc = 10813, note = "Stratholme, Live side", group = { kind = "elite", rank = 1 } },
+						{ t = "kill", target = "Baron Rivendare", npc = 10440, note = "Stratholme, Undead side", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
@@ -33024,7 +33052,7 @@ do
 					title = "Raids: Onyxia",
 					note = "Killing Onyxia is a point. In Classic her lair needs an attunement: Drakefire Amulet for the Alliance, Blood of the Black Dragon Champion for the Horde.",
 					goals = {
-						{ t = "kill", target = "Onyxia", npc = 10184, note = "Onyxia's Lair, Dustwallow Marsh" },
+						{ t = "kill", target = "Onyxia", npc = 10184, note = "Onyxia's Lair, Dustwallow Marsh", group = { kind = "elite", rank = 3 } },
 					},
 				},
 				{

@@ -22,7 +22,8 @@ const HEADER_KEYS = ['guide', 'title', 'levels', 'zone', 'faction', 'race', 'cla
 // Lines inside a step that are not goals.
 const STEP_KEYS = ['zone', 'only', 'tip'];
 
-const COMMON = ['text', 'optional', 'only'];
+// `group [N]`: the goal needs a group (of N players), shown in the guide window.
+const COMMON = ['text', 'optional', 'only', 'group'];
 // `frame` = the `era` / `live` modifiers: which map frame explicit coordinates are in.
 const COORDS = ['at', 'map', 'r', 'frame'];
 const MODS = {
@@ -53,8 +54,11 @@ const MODS = {
 	achieve: [...COMMON, ...COORDS, 'criteria'],
 };
 const VERBS = Object.keys(MODS);
-const MOD_LABEL = { at: '@x,y', count: 'xN', text: '"text"', until: 'until <N>', criteria: 'criteria <n>', frame: 'era`/`live', xp: 'xp <N>', money: 'money <amount>' };
-const MOD_WORDS = ['map', 'npc', 'object', 'item', 'quest', 'r', 'lvl', 'optional', 'only', 'until', 'criteria', 'era', 'live', 'nearest', 'reward', 'choose', 'xp', 'money'];
+const MOD_LABEL = { at: '@x,y', count: 'xN', text: '"text"', until: 'until <N>', criteria: 'criteria <n>', frame: 'era`/`live', xp: 'xp <N>', money: 'money <amount>', group: 'group [N]' };
+const MOD_WORDS = ['map', 'npc', 'object', 'item', 'quest', 'r', 'lvl', 'optional', 'only', 'until', 'criteria', 'era', 'live', 'nearest', 'reward', 'choose', 'xp', 'money', 'group'];
+// A party or raid: 2 to 40 players.
+const GROUP_MIN = 2;
+const GROUP_MAX = 40;
 
 // Item qualities as the client numbers them (Enum.ItemQuality).
 const QUALITIES = ['poor', 'common', 'uncommon', 'rare', 'epic', 'legendary', 'artifact', 'heirloom'];
@@ -800,6 +804,23 @@ function parseGoal(verb, line, lex, ln, err, warn) {
 				goal.optional = true;
 				i++;
 				continue;
+			case 'group': {
+				if (!use('group')) return null;
+				// The size is optional: a next token that starts like a number is one.
+				const tk = toks[i + 1];
+				if (tk && !tk.quoted && /^[-+.\d]/.test(tk.text)) {
+					const n = INT_RE.test(tk.text) ? Number(tk.text) : NaN;
+					if (!(n >= GROUP_MIN && n <= GROUP_MAX)) {
+						return err(ln, `malformed group size "${tk.text}" (${GROUP_MIN} to ${GROUP_MAX} players)`), null;
+					}
+					goal.group = { size: n };
+					i += 2;
+				} else {
+					goal.group = {};
+					i++;
+				}
+				continue;
+			}
 			case 'only': {
 				if (!use('only')) return null;
 				let list = '';

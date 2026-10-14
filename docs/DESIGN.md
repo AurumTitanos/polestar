@@ -217,6 +217,9 @@ components:
   chip-warning:
     backgroundColor: "rgba(250, 191, 77, 0.14)"
     textColor: "{colors.warning}"
+  chip-dungeon:
+    backgroundColor: "rgba(163, 133, 255, 0.14)"
+    textColor: "{colors.dungeon}"
   input-search:
     backgroundColor: "rgba(0, 0, 5, 0.35)"
     textColor: "{colors.text}"
@@ -359,7 +362,7 @@ The subject colours. A thing's name wears its kind's colour, the same in every s
 - **Place Peach** (#f5ad85, `place`): places and zones; interact and event markers.
 - **Object Parchment** (#dbc9a8, `object`): objects and treasures.
 - **Level White** (#f5f7fc, `level`), **Skill Leaf** (#99e075, `skill`), **Spell Cyan** (#78dbed, `spell`), **Faction Rose** (#f799c9, `faction`), **Area Sand** (#edbf99, `area`), **Achievement Orange** (#ffa352, `achievement`): their kinds in goal lines and tooltips.
-- **Portal Violet** (#a385ff, `dungeon`): dungeon and raid entrances.
+- **Portal Violet** (#a385ff, `dungeon`): dungeon and raid entrances, and group content: a goal's group line in the guide window ("Elite: group advised", "Dungeon: Dire Maul", "Group of 3 advised") and the guide menu's "Group" chip.
 - **Rare Ember** (#ff8052, `rare`): rare NPCs.
 - **Unexplored Periwinkle** (#99a8e6, `mapUnexplored`): a tint multiplied onto the game's own unexplored map art; it never carries text, so it sits outside the legibility guard.
 

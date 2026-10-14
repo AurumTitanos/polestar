@@ -12,15 +12,17 @@
 -- Middle: tabs (Home: Continue cards for the open tabs and the suggested
 -- guides; Browse: the last category or the search; Current: the open tabs;
 -- Recent: the last guides loaded), one always active, over one line per
--- guide, "Title (min-max)", a check on finished guides and a muted "Tab N"
+-- guide, "Title (min-max)", a "Group" chip on a guide with group content
+-- (elites, dungeons, raids: the compiled `group`; on the Continue cards
+-- too), a check on finished guides and a muted "Tab N"
 -- on open ones, under small folder headers (leveling by faction and band:
 -- "Horde 30-40"; the rest by category). The faction filter sits at the
 -- right of the tab row. The header says what the list holds ("Horde · 65
 -- guides · 1 open", or the search's result count). The list runs to the
 -- window's bottom.
 -- Right: the selected guide's details: its zone's art from the client (the
--- night band without it) with the title on it, chips (levels, faction,
--- races, classes), progress, the facts (steps, the quests this character
+-- night band without it) with the title on it, chips (levels, group,
+-- faction, races, classes), progress, the facts (steps, the quests this character
 -- takes, the zones in route order, what comes next), pitch, pros and cons,
 -- the favourite star, "Load guide" (into the current tab) and "Open in new
 -- tab"; on an open guide Load reads "Continue" and the new-tab button goes.
@@ -514,6 +516,10 @@ local function guideRow(i)
 	r.Title:SetPoint("LEFT", r, "LEFT", TEXT_X, 0)
 	r.Range = W.Text(r, "body", "textMuted")
 	r.Range:SetPoint("LEFT", r.Title, "RIGHT", 5, 0)
+	-- A guide with group content (compiled `group`): "Group" after the range.
+	r.Group = W.Chip(r)
+	r.Group:SetPoint("LEFT", r.Range, "RIGHT", 6, 0)
+	r.Group:Hide()
 	-- An open guide's tab ("Tab 2", "Tab 2 · 25%").
 	r.Note = W.Text(r, "small", "textMuted")
 	r.Note:SetJustifyH("RIGHT")
@@ -540,6 +546,8 @@ local function paintRow(r, g, note, width)
 	W.Color(r.Title, sel and "text" or (done and "textDim" or "text"))
 	local lv = UI.LevelRange(g.minLevel, g.maxLevel)
 	r.Range:SetText(lv and ("(" .. lv .. ")") or "")
+	local groupW = g.group == true and (W.SetChip(r.Group, L["Group"], "dungeon") + 6) or 0
+	r.Group:SetShown(groupW > 0)
 	-- A pack's guide carries its pack's title, except in that pack's own list.
 	local pack = packOf(g)
 	if pack and not (view == "browse" and category == PACK .. pack.id) then
@@ -552,7 +560,7 @@ local function paintRow(r, g, note, width)
 	-- The note never takes more than 45% of the row: a long pack title is cut.
 	local noteW = note and min(floor(r.Note:GetStringWidth() + 1), floor(width * 0.45)) or 0
 	r.Note:SetWidth(noteW)
-	local room = width - TEXT_X * 2 - (note and (noteW + 12) or 0) - (lv and (r.Range:GetStringWidth() + 5) or 0)
+	local room = width - TEXT_X * 2 - (note and (noteW + 12) or 0) - (lv and (r.Range:GetStringWidth() + 5) or 0) - groupW
 	r.Title:SetWidth(max(40, min(room, floor(r.Title:GetStringWidth() + 1))))
 	r:SetWidth(width)
 end
@@ -576,6 +584,10 @@ local function card(i)
 	c.Note = W.Text(c, "small", "textMuted")
 	c.Note:SetJustifyH("RIGHT")
 	c.Note:SetPoint("RIGHT", c, "TOPRIGHT", -TEXT_X, -20)
+	-- A guide with group content: "Group" left of the tab.
+	c.Group = W.Chip(c)
+	c.Group:SetPoint("RIGHT", c.Note, "LEFT", -8, 0)
+	c.Group:Hide()
 	c.Step = W.Text(c, "small", "textDim")
 	c.Step:SetPoint("TOPLEFT", c, "TOPLEFT", TEXT_X, -38)
 	c.Pct = W.Text(c, "number", "textDim")
@@ -619,7 +631,9 @@ local function layoutCards(tabs, active, byId, y)
 		c:SetWidth(cw)
 		W.SetProgress(c.Line, frac, cw - TEXT_X * 2)
 		c.Note:SetText(string.format(L["Tab %d"], i))
-		local room = cw - TEXT_X * 2 - 14 - 8 - c.Note:GetStringWidth() - 8
+		local groupW = c.psGuide.group == true and (W.SetChip(c.Group, L["Group"], "dungeon") + 8) or 0
+		c.Group:SetShown(groupW > 0)
+		local room = cw - TEXT_X * 2 - 14 - 8 - c.Note:GetStringWidth() - 8 - groupW
 		c.Title:SetWidth(max(40, floor(room)))
 		local col, line = (i - 1) % per, floor((i - 1) / per)
 		c:ClearAllPoints()
@@ -850,7 +864,7 @@ local function renderDetails(byId, tabs, active)
 	d.Star.psTip = fav and L["Remove from favourites"] or L["Add to favourites"]
 	d.Title:SetText(g.title or g.id)
 
-	-- Chips: levels, faction, races, classes; on two lines at most.
+	-- Chips: levels, group content, faction, races, classes; on two lines at most.
 	local y = ART_H + 16
 	local n, x, line, full = 0, DPAD, 0, false
 	local function addChip(text, kind)
@@ -872,6 +886,7 @@ local function renderDetails(byId, tabs, active)
 	end
 	local lv = UI.LevelRange(g.minLevel, g.maxLevel)
 	if lv then addChip(L["Levels"] .. " " .. lv, "accent") end
+	if g.group == true then addChip(L["Group"], "dungeon") end
 	addChip(g.faction and L[g.faction] or L["Both factions"])
 	if type(g.races) == "table" then for _, race in ipairs(g.races) do addChip(UI.RaceName(race)) end end
 	if type(g.classes) == "table" then for _, cl in ipairs(g.classes) do addChip(UI.ClassName(cl)) end end

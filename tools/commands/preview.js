@@ -355,7 +355,7 @@ stub.addonMeta.Polestar = { ["X-Website"] = "https://github.com/polestar-wow/pol
 stub.addonMeta.Polestar_Guides = { ["X-Polestar-Pack"] = "guides", ["X-Polestar-Format"] = "1" }
 stub.addonMeta.JoeRoutes = { ["X-Polestar-Pack"] = "joe", ["X-Polestar-Format"] = "1" }
 stub.addonMeta.AnnDungeons = { ["X-Polestar-Pack"] = "ann", ["X-Polestar-Format"] = "1" }
-stub.addonMeta.SamProfessions = { ["X-Polestar-Pack"] = "sam", ["X-Polestar-Format"] = "2", ["X-Polestar-Needs"] = "0.3.0", Title = "Sam's Professions", Author = "Sam", Version = "0.9.0", ["X-License"] = "MIT" }
+stub.addonMeta.SamProfessions = { ["X-Polestar-Pack"] = "sam", ["X-Polestar-Format"] = "3", ["X-Polestar-Needs"] = "0.3.0", Title = "Sam's Professions", Author = "Sam", Version = "0.9.0", ["X-License"] = "MIT" }
 stub.addonMeta.KimQuests = { ["X-Polestar-Pack"] = "kim", ["X-Polestar-Format"] = "1", Title = "Kim's Quests", Author = "Kim", Version = "2.1.0", ["X-License"] = "CC0-1.0", ["X-Website"] = "https://github.com/kim/quests" }`;
 const PACKS_SCENE = `local realGuides = uistub.realGuides
 Polestar.Guides = realGuides
@@ -593,6 +593,33 @@ function questScene(roots, script) {
 	// `before` is read when the panel runs, so the database is only built for these scenes.
 	return { roots, stubs: QUEST_STUBS, files: QUEST_FILES, get before() { return questWorld(); }, script };
 }
+// Group content (the compiled `group`, the goal view's `party`): a class
+// guide whose route needs a group, its Felwood step (elites; the author's
+// "group 3" on the boss) and its Dire Maul step (two goals of one run, said
+// once), next to one that needs none. Names from the shipped warlock mount
+// guides; the steps are written for the preview.
+const GROUP_GUIDES = `local function G(t, f) f.t = t; return f end
+local DM = { kind = "dungeon", name = "Dire Maul" }
+local function class(id, title, group, steps)
+	uistub.guides[id] = { id = id, pack = "guides", title = title, classes = { "WARLOCK" }, minLevel = 60, maxLevel = 60, category = "Class", folder = "Warlock",
+		zone = 1428, zoneName = "Burning Steppes", author = "Polestar", version = 1, group = group, steps = steps }
+	table.insert(uistub.order, id)
+end
+class("forever/collectibles/mounts/neutral/warlock-dreadsteed", "Warlock Dreadsteed", true, {
+	{ title = "Shadow Hold", goals = {
+		G("kill", { verb = "Kill", subject = "Jaedenar Legionnaires", subjectKind = "npc", npc = 9862, progress = { cur = 2, max = 6 }, party = { kind = "elite", rank = 1 }, status = "active" }),
+		G("kill", { verb = "Kill", subject = "Prince Xavalis", subjectKind = "npc", npc = 9876, party = { kind = "group", size = 3 }, status = "active" }),
+	} },
+	{ title = "Dire Maul", goals = {
+		G("kill", { verb = "Kill", subject = "Xorothian Dreadsteed", subjectKind = "npc", npc = 14502, progress = { cur = 0, max = 1 }, party = DM, status = "active" }),
+		G("complete", { verb = "Complete", subject = "Dreadsteed of Xoroth", subjectKind = "quest", quest = 7631, party = DM, status = "active" }),
+	} },
+})
+class("forever/collectibles/mounts/neutral/warlock-felsteed", "Warlock Felsteed", nil, {
+	{ title = "Gorzeeki Wildeyes", goals = { G("note", { text = "Step 1", status = "pending" }) } },
+})
+local DREADSTEED = "forever/collectibles/mounts/neutral/warlock-dreadsteed"
+uistub.player.class, uistub.player.level = "WARLOCK", 60`;
 const SCENES = [
 	{
 		file: 'guide.svg',
@@ -676,6 +703,19 @@ uistub.setStep(4)`,
 				script: `${TABS}; local f = uistub.goal(3, 4); f.npcName, f.lvl, f.alternatives, f.detail = "Young Wolf", { min = 2, max = 4 }, 2, nil
 f.candidates = { { npcName = "Young Wolf", map = 1429, x = 46, y = 38.5 } }
 uistub.update()`,
+			},
+		],
+	},
+	{
+		file: 'guide-group.svg',
+		title: 'Group content: elites and an author\'s group size; a dungeon run said once; the guide menu\'s Group chip',
+		panels: [
+			{ roots: GUIDE, script: `${GROUP_GUIDES}; uistub.openTabs({ { DREADSTEED, 1 } }, 1)` },
+			{ roots: GUIDE, script: `${GROUP_GUIDES}; uistub.openTabs({ { DREADSTEED, 2 } }, 1)` },
+			{
+				roots: PICKER,
+				script: pickerScene(`${GROUP_GUIDES}; uistub.openTabs({ { DREADSTEED, 2 } }, 1); Polestar.UI.ShowPicker(); Polestar.UI.Picker.SetCategory("Class")
+Polestar.UI.Picker.Select(DREADSTEED)`),
 			},
 		],
 	},

@@ -175,6 +175,7 @@ Modifiers, in any order after the positional arguments:
 | `r <yards>` | Arrival radius (`goto`, default 8). |
 | `lvl <N>` | Minimum level shown on an `accept`. |
 | `optional` | Never blocks the step. |
+| `group [N]` | Needs a group, of `N` players (2–40) when given (`kill 1234 group 3`, `accept 7583 group 5`). The guide window says "Group of 3 advised" (or "Group advised") under the goal. Overrides what the compiler derives: see "Group content". |
 | `only <cond>[,<cond>...]` | Goal applies only to matching characters. |
 | `era` / `live` | Map frame of this goal's typed coordinates, overriding `coords`. |
 | `choose <item> ["Name"] [quality] ...` | `turnin` only: the reward choices, shown under the turn-in and in its tooltip. Each entry is an item id, optionally its quoted name and a quality word (`poor` `common` `uncommon` `rare` `epic` `legendary` `artifact` `heirloom`); entries follow one another (`choose 6480 918 "Deviate Hide Pack" common`). Names and qualities default to `items.json`; an id missing there needs its name. Display only: a named unknown id is not a warning. |
@@ -214,6 +215,7 @@ AND. `only Warrior,Paladin,Dwarf` = (Warrior or Paladin) and Dwarf.
 | count | the linked objective's count |
 | Era frame flag `f = "e"` | when coordinates come from Era-frame data, or were typed in an `era` guide/goal |
 | spawn areas `spots` | every goal placed at an NPC or object that spawns at more than one place, and hand-placed `@x,y` goals whose target the data also knows: see "Spawn areas" below |
+| group content `group` | elite work, dungeon and raid quests and goals on an instance map: see "Group content" below |
 
 **Spawn areas.** Mobs, quest objects and some NPCs spawn at more than one
 place, and a player who finds nothing where the arrow led must be able to try
@@ -265,6 +267,35 @@ gets no `spots`.
 
 See docs/ARCHITECTURE.md, Smart logic, "Spawn areas".
 
+## Group content
+
+Every goal that needs a group says so in the guide window, under the goal
+(once per card when several goals share it), and a guide with such a goal on
+its route (not `optional`) carries a "Group" chip in the guide menu. The
+compiler writes `group` on the goal, first match wins:
+
+1. the author's `group [N]`: `{ kind = "group", size = N }` ("Group of N
+   advised"; "Group advised" without `N`);
+2. a dungeon or raid: a goal with a quest (`accept`, `turnin`, `complete`, or
+   an objective goal with `quest`) that the simulator's solo filter counts as
+   a dungeon or raid quest (tools/lib/sim/solo.js): the quest's area in
+   `quests.json` lies in an instance, and its giver, its ender or one of its
+   objectives has no open-world spawn (a breadcrumb into the instance stays an
+   open-world quest); or a goal placed on a map drawn only on an instance:
+   `{ kind = "dungeon" | "raid", name = "Dire Maul" }` ("Dungeon: Dire Maul",
+   "Raid: Molten Core");
+3. elite work, the same test as the Leveling-guide elite rule (Validation): a
+   `kill` of an npc of rank 1–3 hostile to a side the goal applies to, or a
+   `collect` whose every located dropper is one: `{ kind = "elite", rank }`
+   ("Elite: group advised", "Rare elite: group advised", "Boss: group
+   advised").
+
+The instances come from the Forever client's `Map.csv`, `AreaTable.csv` and
+`UiMapAssignment.csv` in the `sources` folder beside the data folder
+(`data/sources/wago/<build>/` for `data/forever`; `data build` and `codex
+build` cache them). Without them only `group [N]` and elite work apply. The
+guide's `group = true` is set when any goal that is not `optional` has `group`.
+
 ## Validation
 
 Errors fail `compile` and `lint`; warnings print.
@@ -286,7 +317,7 @@ Errors:
 - `rep` standing outside 1–8 / Hated–Exalted; `craft` with both `xN` and `until`
 - empty quoted strings (names, titles, labels, notes)
 - `era`/`live` on a goal without typed coordinates
-- `choose`/`reward` without item ids, an item listed twice, a reward item missing from `items.json` without a name; malformed `money` or `xp`
+- `choose`/`reward` without item ids, an item listed twice, a reward item missing from `items.json` without a name; malformed `money` or `xp`; a `group` size that is not a whole number from 2 to 40
 - a smart target (`nearest`, `train <Profession>`, `train class`, `collect … nearest`) with no candidate
   in the data or with coordinates; `collect … nearest` without `xN` or with `quest`;
   `nearest`/`train class` with an `npc` (`train <Profession> npc <id>` keeps that

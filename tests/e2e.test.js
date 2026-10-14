@@ -13,7 +13,7 @@ const { runAddon, ROOT } = require('./helpers/lua');
 const { compileSources } = require('../tools/lib/dsl/project');
 const { loadData } = require('../tools/lib/dsl/data');
 const { format } = require('../tools/lib/dsl/diag');
-const { writeTestPack } = require('./helpers/dsl');
+const { writeTestPack, groupData } = require('./helpers/dsl');
 
 const DATA = path.join(ROOT, 'tests', 'fixtures', 'dsl', 'data');
 
@@ -143,6 +143,91 @@ test('a compiled guide drives the real engine, guide window and arrow through a 
 
 		// Turning in the last quest completes the guide; the window says so.
 		assert.equal(done.emptyTitle, 'Guide complete');
+	} finally {
+		fs.rmSync(dir, { recursive: true, force: true });
+	}
+});
+
+// Group content: the compiler derives `group` from the data (dungeon and raid
+// quests, elites) or takes the author's `group 3`; the guide window says it
+// under the goal, once per run, and the guide menu tags the guide "Group".
+const GROUP_GUIDE = `guide forever/class/hollow
+title The Hollow Deeps
+category Class
+faction Alliance
+levels 1-60
+zone Elwynn Forest
+
+step Marshal McBride
+  accept 9600
+  accept 9603
+  accept 9601
+  accept 9602
+
+step Kobolds
+  kill 95003 group 3
+  kill 95003 "Kill the Elite Kobold again"
+`;
+
+test('a compiled guide with group content shows the group line once per run and the menu\'s Group chip', () => {
+	const data = groupData();
+	const { guides, diag } = compileSources([{ file: 'e2e.guide', text: GUIDE }, { file: 'hollow.guide', text: GROUP_GUIDE }], data);
+	assert.deepEqual(diag.errors.map(format), []);
+	const { dir, scripts } = writeTestPack(guides, data);
+	try {
+		const loads = `do local ns = {}\n${scripts.map((f) => `assert(loadfile(${JSON.stringify(f)}))("Polestar_Guides", ns)`).join('\n')}\nend`;
+		const { emitted } = runAddon({
+			stubs: ['stub_world.lua'],
+			before: `
+				local w = stub.world
+				w.addMap(1429, { name = "Elwynn Forest", c = 1415, left = 1535.4166, right = -1941.6666, top = 1300.0, bottom = -1060.4166 })
+				w.moveTo(1429, 48.5, 42.5)`,
+			addons: ['Polestar'],
+			script: `
+				${loads}
+				stub.login()
+				stub.advance(0.5)
+				local w, GF = stub.world, Polestar.UI.GuideFrame
+				local DUNGEON = "|c" .. Polestar.Theme.Hex("dungeon")
+				local function subs()
+					local out = {}
+					for _, r in ipairs(GF.rows) do
+						if r:IsShown() then
+							local sub = r.Sub:IsShown() and r.Sub:GetText() or ""
+							out[#out + 1] = { sub = sub:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", ""), coloured = sub:find(DUNGEON, 1, true) == 1 }
+						end
+					end
+					return out
+				end
+				Polestar.Engine.SetGuide("forever/class/hollow")
+				stub.advance(0.5)
+				local accepts = subs()
+				for _, q in ipairs({ 9600, 9603, 9601, 9602 }) do w.accept(q, {}) end
+				stub.advance(0.5)
+				local kills = subs()
+				Polestar.UI.ShowPicker()
+				Polestar.UI.Picker.SetCategory("All")
+				local chips = {}
+				for _, f in ipairs(stub.frames) do
+					if f.psGuide and rawget(f, "Range") and f:IsShown() then
+						chips[f.psGuide.id] = f.Group:IsShown() and f.Group.Text:GetText() or false
+					end
+				end
+				Polestar.UI.Picker.Select("forever/class/hollow")
+				local details = {}
+				for _, c in ipairs(Polestar.UI.Picker.details.Chips) do if c:IsShown() then details[#details + 1] = c.Text:GetText() end end
+				emit({ accepts = accepts, kills = kills, chips = chips, details = details })`,
+		});
+		const [out] = emitted;
+		const dungeon = { sub: 'Dungeon: Hollow Deeps', coloured: true };
+		const none = { sub: '', coloured: false };
+		// Two quests in the Hollow Deeps say it once; the raid quest names its
+		// raid; the breadcrumb with the dungeon's area is done outside.
+		assert.deepEqual(out.accepts, [dungeon, none, { sub: 'Raid: Molten Core', coloured: true }, none]);
+		// The author's group size wins over the elite the data names.
+		assert.deepEqual(out.kills, [{ sub: 'Group of 3 advised', coloured: true }, { sub: 'Elite: group advised', coloured: true }]);
+		assert.deepEqual(out.chips, { 'forever/class/hollow': 'Group', 'forever/alliance/human/01-northshire': false });
+		assert.deepEqual(out.details.slice(0, 2), ['Levels 1\u201360', 'Group']);
 	} finally {
 		fs.rmSync(dir, { recursive: true, force: true });
 	}

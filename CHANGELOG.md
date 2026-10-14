@@ -41,6 +41,12 @@
   Warlock felhunter chain left the Horde 30-40 guides for its Class guide,
   and the leveling guides point at the Class guides for the long chains they
   leave out.
+- The guide window says when a goal needs a group, under the goal in violet:
+  "Elite: group advised" (also rare elite and boss), "Dungeon: Dire Maul",
+  "Raid: Molten Core" or the guide's own "Group of 3 advised"; once per card
+  when several goals share it. The guide menu tags guides with group content
+  on their route "Group" in the list, on the Continue cards and in the
+  details.
 
 ### For guide authors
 
@@ -51,6 +57,19 @@
   whose title is still Y takes Forever's name (its `source` gains
   `wowhead:title`). It also reads Wowhead Forever's class quest pages, so
   Forever's XP and level changes reach class quests that no zone list shows.
+- Goals carry `group` (format 2 of the pack format; Polestar 0.2.4 reads it,
+  older versions show such a pack as needing 0.2.4): the compiler derives it
+  from elite kills and elite-only drops, from the solo filter's dungeon and
+  raid quests and from instance maps, and the new `group [N]` modifier
+  (`kill 1234 group 3`) says it outright. A guide with group content on its
+  route carries `group = true`. `compile` now writes format 2 for every pack.
+
+### For contributors
+
+- The solo filter's dungeon and raid rule (`instanceQuest` in
+  `tools/lib/sim/solo.js`) is shared with the compiler's group content
+  (`tools/lib/dsl/group.js`), and `preview` renders the group line
+  (`docs/preview/guide-group.svg`).
 
 ## 0.2.3 (2026-10-14)
 

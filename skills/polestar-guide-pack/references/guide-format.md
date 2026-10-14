@@ -53,7 +53,7 @@ every goal in it that is not `optional` is; its goals are open together.
 ## Goals
 
 `<verb> <arguments> <modifiers> [-- note]`. Every goal also takes
-`optional`, `only`, `"text"` and, except where the last column says
+`optional`, `only`, `"text"`, `group` and, except where the last column says
 otherwise, the place modifiers `@x,y`, `map`, `r`, `era` / `live`.
 
 | Line | What it does | Also takes |
@@ -75,7 +75,7 @@ otherwise, the place modifiers `@x,y`, `map`, `r`, `era` / `live`.
 | `buy <item> ["Name"]` | Buy an item; `nearest` picks the closest vendor selling it | `npc`, `xN`, `nearest` |
 | `vendor nearest` / `vendor <npc>` | Sell and repair | `npc` |
 | `level <N>` | Reach level N, grinding if need be | no place modifiers |
-| `note <text>` | A line of information; never holds the step. With `only`, quote the text | no `"text"` |
+| `note <text>` | A line of information; never holds the step. With `only`, quote the text | no `"text"`, no `group` |
 | `skill <Profession> <N>` | Reach skill N (`"First Aid"` quoted) | |
 | `learn <spell> ["Name"]` | Learn a recipe or spell | `npc`, `item`, `nearest` |
 | `craft <spell> ["Name"]` | Craft a recipe | `xN`, `until` |
@@ -104,6 +104,7 @@ After the arguments, in any order.
 | `"text"` | Right after an id: the name or title, for content missing from the data; later: the text players see |
 | `lvl <N>` | On `accept`: the level the quest needs |
 | `optional` | Never holds the step |
+| `group [N]` | Needs a group (of N players, 2-40); the guide window says so. Elites, dungeon and raid quests are found from the data without it |
 | `only <condition>, ...` | The goal is only for matching characters |
 | `nearest` | The closest vendor, trainer or drop place, picked in game |
 | `until <N>` | On `craft`: until the profession reaches N |

@@ -1391,6 +1391,9 @@ local function goalView(s, g, goal, stepStatus, group)
 		standing = goal.standing, standingName = goal.standing and standingName(goal.standing) or nil,
 		achievement = goal.achievement, criteria = goal.criteria,
 		rewards = goal.rewards,
+		-- Group content (compiled `group`: elite, dungeon, raid or an author's
+		-- group size); `group` above is the goal's field group.
+		party = type(goal.group) == "table" and type(goal.group.kind) == "string" and goal.group or nil,
 		-- A collect's dominant source (compiled `from`): an NPC of a faction
 		-- that is not the character's own is one to kill.
 		source = goal.from and {

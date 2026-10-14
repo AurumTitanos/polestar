@@ -139,7 +139,10 @@ an excluded quest goes with it (the Mau'ari E'ko chain after 969). The
 Forever client's QuestInfo table (1 Elite, 41 PvP, 62 Raid, 81 Dungeon)
 only names the types; which quest has which type, and suggested group
 sizes, are server data that neither the client tables nor QuestieDB carry,
-so the types are derived from areas and objectives as above.
+so the types are derived from areas and objectives as above. The compiler
+applies the same dungeon/raid rule from the data (`instanceQuest`, without
+dungeons.json) to tell players which goals are a dungeon or raid run
+(GUIDE_FORMAT.md, "Group content").
 
 `OVERRIDES` in solo.js is the explicit hook for what the data cannot
 express: `exclude` (Naxxramas-era Argent Dawn turn-ins 9124-9142 and

@@ -350,7 +350,7 @@ full contract for pack authors' tools is `docs/PACK_FORMAT.md`.
 
 ```lua
 local ADDON = ...
-Polestar.RegisterPack({ addon = ADDON, id = "guides", format = 1, title = "Polestar Guides",
+Polestar.RegisterPack({ addon = ADDON, id = "guides", format = 2, title = "Polestar Guides",
   author = "Polestar", version = "0.2.0", license = "GPL-3.0-only" })   -- optional: website, source, notes
 
 Polestar.RegisterGuide({
@@ -365,6 +365,7 @@ Polestar.RegisterGuide({
   zone = 1429, zoneName = "Elwynn Forest",
   next = "forever/alliance/02-westfall",   -- or nil
   author = "Polestar", version = 1,
+  group = true,                    -- or nil: a goal of the route (not optional) needs a group
   steps = {
     {
       title = "Deputy Willem",     -- optional
@@ -379,7 +380,8 @@ Polestar.RegisterGuide({
 Goal fields. Common: `t` (verb), `text` (display override), `note`,
 `optional` (true = never blocks the step), `only` (same shape as step `only`),
 `map`, `x`, `y` (0–100), `f` (`"e"` = Era frame, absent = live), `r` (arrival
-radius in yards). A goal placed at an NPC or object that spawns at several
+radius in yards), `group` (group content, below). A goal placed at an NPC or
+object that spawns at several
 places carries spawn areas, `spots = { { x, y, r, n, alt }, ... }`: cluster
 centre in the goal's `map` and frame, radius in yards, spawn count; together
 they cover every spawn of the target on that map. Camps nearest to the goal's
@@ -389,6 +391,17 @@ apart) up to 12 spread over the whole area, as a walk from `x`/`y`. The other
 places follow with `alt = true`; a hand-placed point is the first spot, the
 data's places its alternatives (GUIDE_FORMAT, "Spawn areas"). `x`/`y` stay the
 default point.
+
+Group content (format 2; GUIDE_FORMAT, "Group content"): `group = { kind =
+"elite", rank = 1|2|3 }`, `{ kind = "dungeon"|"raid", name = "Dire Maul" }` or
+`{ kind = "group", size = 3 }` (`size` optional), derived by
+`tools/lib/dsl/group.js` (elite work; the solo filter's instance rule,
+`tools/lib/sim/solo.js`) unless the author wrote `group [N]`. Display only:
+the Engine carries it into the goal view as `party` (the view's `group` is
+the goal's field group) and the guide window says it under the goal
+(`UI.GroupLine`: "Elite: group advised", "Dungeon: Dire Maul", "Group of 3
+advised"), once per card. The guide's `group = true` (some non-optional goal
+has `group`) is the guide menu's "Group" chip.
 
 | `t` | Required | Optional | Done when (Engine) |
 |---|---|---|---|
@@ -442,7 +455,7 @@ implements them:
 - Clashes: guides and map frames a refused pack's files register are dropped
   until that addon's `ADDON_LOADED`; guides registered before their pack wait
   in a per-pack list until it comes.
-- Format: `Guides.FORMATS` (the formats this Polestar reads, `1`);
+- Format: `Guides.FORMATS` (the formats this Polestar reads, `1` and `2`);
   `Guides.Validate` checks each guide against the `REQUIRED` verb table
   (`Guides.VERBS`).
 - Problems: each refusal goes on the pack's record,
@@ -760,6 +773,8 @@ Step view (render-ready; the UI never re-derives status):
       -- A collect's compiled source (GUIDE_FORMAT "What the compiler fills
       -- in"): enemy = an NPC not of the character's faction.
       source = { name, kind = "npc" | "object", rank, enemy } | nil,
+      -- The compiled `group` (group content), shown as the goal's group line.
+      party = { kind = "elite" | "dungeon" | "raid" | "group", rank, name, size } | nil,
       -- The reading flow (below): starterOf, starter, folded, header.
     },
   },

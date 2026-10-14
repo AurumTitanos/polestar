@@ -22,6 +22,7 @@ const { applicable, maskExcludes, raceSides, characterKeys, whoLabel } = require
 const { raceLabel, classLabel, RACE_BY_FILE } = require('../game/races');
 const { blockingPrereqs } = require('../data/prereqs');
 const SOLO = require('../sim/solo');
+const { eliteWork } = require('./group');
 const { PIPE_HINT } = require('../pack/manifest');
 const { MAX_LEVEL, CUM_XP } = require('../game/xp');
 
@@ -62,18 +63,10 @@ function followProblem(g, other, data) {
 	};
 }
 
-// Elite work: Leveling guides route solo characters, so it may appear only as
-// an `optional` extra. An elite is an npcs.json rank 1-3 (elite, rare elite,
-// boss) hostile to a side the goal applies to; a friendly one is a talk credit
-// (Questie encodes "listen to X" as a kill).
-const ELITE_RANKS = new Set([1, 2, 3]);
-const FRIENDLY_TO = { Alliance: ['A', 'AH'], Horde: ['H', 'AH'] };
+// Elite work (group.js `eliteWork`): Leveling guides route solo characters,
+// so it may appear only as an `optional` extra.
 // Goals already reported as elite errors, so the lint solo policy skips them.
 const eliteReported = new WeakSet();
-
-function isElite(rank, faction, sides) {
-	return ELITE_RANKS.has(Number(rank)) && sides.some((s) => !FRIENDLY_TO[s].includes(faction));
-}
 
 function eliteTip(target) {
 	return `in a Leveling guide make the goal \`optional\` with the tip "${target} is elite: grouping up is advised."`;
@@ -176,28 +169,14 @@ function validatePackFrames(guides, data, ours, ourData, diag) {
 	});
 }
 
-// The message for a `kill` of an elite, or a `collect` of an item whose every
-// located dropper in data is an elite (the compiler's `from` names one source
-// of the same data; one normal dropper keeps the item soloable). Null when
-// the goal is not elite work.
+// The message for elite work (group.js `eliteWork`): a `kill` of an elite, or
+// a `collect` of an item only elites drop. Null when the goal is not elite work.
 function eliteGoal(goal, sides, data) {
-	if (goal.t === 'kill' && goal.npc !== undefined) {
-		const n = data.npc(goal.npc);
-		return n && isElite(n.rank, n.faction, sides) ? `\`kill\` npc ${goal.npc} (${n.name}) is elite; ${eliteTip(n.name)}` : null;
-	}
-	if (goal.t !== 'collect' || goal.candidates) return null;
+	const elite = eliteWork(goal, sides, data);
+	if (!elite) return null;
+	if (goal.t === 'kill') return `\`kill\` npc ${goal.npc} (${elite.names[0]}) is elite; ${eliteTip(elite.names[0])}`;
 	const item = `\`collect\` item ${goal.item}${goal.itemName ? ` (${goal.itemName})` : ''}`;
-	const it = data.item(goal.item);
-	const sources = [];
-	for (const kind of ['npc', 'object']) {
-		for (const [id, chance] of Object.entries((it && it.drops && it.drops[kind]) || {})) sources.push({ kind, id: Number(id), chance: Number(chance) || 0 });
-	}
-	const located = sources.filter((s) => data.spawns(s.kind, s.id).length);
-	const list = (located.length ? located : sources).sort((a, b) => b.chance - a.chance);
-	if (!list.length) return null;
-	const recs = list.map((s) => (s.kind === 'npc' ? data.npc(s.id) : null));
-	if (!recs.every((r) => r && isElite(r.rank, r.faction, sides))) return null;
-	return `${item} drops only from elites (${[...new Set(recs.map((r) => r.name))].join(', ')}); ${eliteTip(recs[0].name)}`;
+	return `${item} drops only from elites (${elite.names.join(', ')}); ${eliteTip(elite.names[0])}`;
 }
 
 // The characters a goal applies to, as "side|race|class" keys, narrowed by the

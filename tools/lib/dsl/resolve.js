@@ -19,6 +19,7 @@ const { objectiveLabel } = require('./data');
 const { checkLocation } = require('./places');
 const { blockingPrereqs } = require('../data/prereqs');
 const { clusterPoints, scaleOf } = require('../questdb/cluster');
+const { groupOf } = require('./group');
 
 // Standard rank caps and the skill each rank can first be trained at (Classic).
 const RANK_CAPS = [75, 150, 225, 300];
@@ -456,6 +457,8 @@ function resolveGuide(ast, data, diag, opts = {}) {
 		}
 		guide.steps.push(step);
 	}
+	// The guide menu's "Group" chip: some goal of the route needs a group.
+	if (guide.steps.some((s) => s.goals.some((goal) => goal.group && !goal.optional))) guide.group = true;
 	return guide;
 }
 
@@ -1098,6 +1101,8 @@ function resolveGoal(g, zoneMap, prev, data, err, warn, ctx = { sides: ['Allianc
 	}
 	if (g.r !== undefined) goal.r = g.r;
 	if (g.optional) goal.optional = true;
+	// Group content (group.js): the author's `group [N]`, else derived.
+	setIf(goal, 'group', groupOf(goal, g.group, ctx.sides, data));
 	setIf(goal, 'only', onlyOf(g.only));
 	setIf(goal, 'note', g.note);
 

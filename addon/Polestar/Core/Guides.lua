@@ -312,7 +312,8 @@ Guides.Validate = validate
 -- recorded on the pack's record (problems) and printed by ns.Debug.
 ---------------------------------------------------------------------------
 
-Guides.FORMATS = { [1] = true }
+-- Every format Polestar has shipped (docs/PACK_FORMAT.md, "Versioning").
+Guides.FORMATS = { [1] = true, [2] = true }
 Guides.RESERVED = { guides = true, forever = true, lookup = true, draft = true, polestar = true }
 local OFFICIAL_ADDON = "Polestar_Guides"
 local REQUIRED_META = { "addon", "title", "author", "version", "license" }
