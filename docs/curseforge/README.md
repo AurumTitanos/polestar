@@ -67,7 +67,7 @@ indicator.
 - **Release type:** Release. CurseForge lists a project in its app only once
   it has a Release file, and offers Beta files only to players who opt in;
   the version number (0.x) and the description's "Beta" section say it is a
-  beta. The GitHub release stays a pre-release until 1.0.0.
+  beta. The GitHub release is a full release too, marked Latest.
 - **Game version:** Forever 1.60.1
 - **Changelog:** the version's "For players" section of CHANGELOG.md, in
   Markdown, each list item joined onto one line

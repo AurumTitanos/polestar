@@ -124,11 +124,13 @@ Replace `0.2.0` with the new version throughout.
 
    ```sh
    gh release create v0.2.0 --verify-tag --title "Polestar 0.2.0" \
-     --notes-file dist/notes-0.2.0.md --prerelease \
+     --notes-file dist/notes-0.2.0.md --latest \
      dist/Polestar-0.2.0.zip dist/Polestar_Recorder-0.2.0.zip dist/SHA256SUMS
    ```
 
-   Drop `--prerelease` from 1.0.0 on.
+   A release is a full release, marked Latest, from 0.2.1 on, so the
+   repository's Releases box and `releases/latest` point at it; the 0.x
+   version and the notes say it is a beta.
 
 10. Upload `dist/Polestar-0.2.0.zip` to CurseForge (Forever 1.60.1, release
     type Release: CurseForge's app lists a project only once it has one) and
