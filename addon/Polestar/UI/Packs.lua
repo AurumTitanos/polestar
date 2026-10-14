@@ -4,7 +4,7 @@
 -- copy, its source and its state: a switch while it can be shown or hidden,
 -- otherwise why it is not running, and its problems with a report to copy
 -- for the author. Below: where suggestions come from (behavior.suggestFrom),
--- what guide packs are, and where to read how to write one (ns.DocsURL).
+-- what guide packs are, and where to read more (guidePacksURL).
 --
 -- While any pack has problems the page's navigation entry carries a dot
 -- (P.HasProblems); nothing goes to chat.
@@ -47,6 +47,14 @@ end
 
 local function count(n, one, many)
 	return n == 1 and one or many:format(n)
+end
+
+-- docs/GUIDE_PACKS.md online (what packs are, for players and authors): the
+-- address ns.DocsURL gives for the pack handbook, on the page beside it. nil
+-- without the TOC's X-Website.
+local function guidePacksURL()
+	local url = ns.DocsURL and ns.DocsURL()
+	return url and (url:gsub("/PACKS%.md$", "/GUIDE_PACKS.md")) or nil
 end
 
 -- "Author · version · licence", from what the pack gives.
@@ -359,7 +367,12 @@ function P.Build(view)
 	about:SetSpacing(3)
 	about:SetJustifyH("LEFT")
 	about:SetJustifyV("TOP")
-	about:SetText(L["Guide packs are addons made by other players. Install one like any addon, then restart the game. Each pack is made and supported by its author."])
+	about:SetText(table.concat({
+		L["A guide pack is a separate addon with someone else's guides for Polestar. It is not part of Polestar, and its guides are not Polestar's own routes."],
+		L["Get a pack from wherever its author publishes it and install it like any addon, then restart the game. Its guides appear in the guide menu under Guide packs, with the author's name. The switch on its row above turns it on or off."],
+		L["Each pack is made and supported by its author: report its problems to them, not to Polestar. A pack is an addon like any other, so install packs from authors you trust."],
+		L["Anyone can write a pack with Polestar's own tools."],
+	}, "\n\n"))
 	local docsLabel = oneLine(W.Text(view, "note", "text"))
 	local docs = W.CopyBox(view)
 	view.Docs, view.DocsLabel = docs, docsLabel
@@ -411,11 +424,11 @@ function P.Build(view)
 		about:ClearAllPoints()
 		about:SetPoint("TOPLEFT", view, "TOPLEFT", SH.pad, -y)
 		y = y + about:GetStringHeight() + 14
-		local url = ns.DocsURL and ns.DocsURL()
+		local url = guidePacksURL()
 		docsLabel:ClearAllPoints()
 		docsLabel:SetPoint("TOPLEFT", view, "TOPLEFT", SH.pad, -(y + 8))
 		if url then
-			docsLabel:SetText(L["Write your own:"])
+			docsLabel:SetText(L["Read more:"])
 			docsLabel:SetWidth(0)
 			local lw = min(floor(width / 3), docsLabel:GetStringWidth() + 2)
 			docsLabel:SetWidth(lw)
@@ -425,7 +438,7 @@ function P.Build(view)
 			docs:SetWidth(max(120, width - lw - 10))
 			docs:Show()
 		else
-			docsLabel:SetText(L["Write your own:"] .. " " .. L["docs/PACKS.md in Polestar's source"])
+			docsLabel:SetText(L["Read more: docs/GUIDE_PACKS.md in Polestar's source"])
 			docsLabel:SetWidth(width)
 			docs:Hide()
 		end

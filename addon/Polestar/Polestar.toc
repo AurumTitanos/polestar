@@ -3,6 +3,7 @@
 ## Notes: Leveling guides for World of Warcraft: Forever.
 ## Author: Polestar
 ## X-License: GPL-3.0-only
+## X-Website: https://github.com/fitzforge/polestar
 ## Version: 0.2.0
 ## Category: Quests
 ## IconTexture: Interface\AddOns\Polestar\Media\UI\logo

@@ -1589,9 +1589,10 @@ Reading flow: `docs/DESIGN.md` ("Intent" and "The Guide Window").
   no guides", "refused: <reason>"); with problems a warning chip, **Show**
   (the list) and **Copy report** (`P.Report`: pack, versions, client build,
   every problem). Then **Suggest guides from** (`behavior.suggestFrom`,
-  `Guides.SuggestSources()`) and the docs link (`ns.DocsURL()`: the TOC's
-  `X-Website` + `/blob/HEAD/docs/PACKS.md`, else "docs/PACKS.md in Polestar's
-  source"). While `Guides.ProblemCount() > 0` the page's sidebar row carries
+  `Guides.SuggestSources()`), what a guide pack is, and the link to
+  docs/GUIDE_PACKS.md (`ns.DocsURL()` with `GUIDE_PACKS.md` for `PACKS.md`:
+  the TOC's `X-Website` + `/blob/HEAD/docs/GUIDE_PACKS.md`, else
+  "docs/GUIDE_PACKS.md in Polestar's source"). While `Guides.ProblemCount() > 0` the page's sidebar row carries
   the warning dot (a page spec's `dot`). Nothing goes to chat.
 - **Welcome** (`UI/Welcome.lua`, `SHOW_WELCOME`): centred, three pages under
   a starlit hero, with step dots, Skip, Back and Next in the footer: Hello,

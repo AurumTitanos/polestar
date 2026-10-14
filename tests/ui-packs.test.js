@@ -317,16 +317,16 @@ test('/polestar packs opens the page', () => {
 	assert.deepEqual(out, { shown: true, title: 'Guide packs' });
 });
 
-test('the docs line: the URL in a box with X-Website, the source path without it', () => {
+test('the docs line: the guide packs page in a box with X-Website, the source path without it', () => {
 	const [withSite] = run(`
 		local view = openPage()
 		emit({ label = view.DocsLabel:GetText(), box = view.Docs:IsShown() and view.Docs:GetText() or false })`,
 	{ before: 'stub.addonMeta.Polestar = { ["X-Website"] = "https://github.com/polestar/polestar/" }' });
-	assert.deepEqual(withSite, { label: 'Write your own:', box: 'https://github.com/polestar/polestar/blob/HEAD/docs/PACKS.md' });
+	assert.deepEqual(withSite, { label: 'Read more:', box: 'https://github.com/polestar/polestar/blob/HEAD/docs/GUIDE_PACKS.md' });
 	const [without] = run(`
 		local view = openPage()
 		emit({ label = view.DocsLabel:GetText(), box = view.Docs:IsShown() })`);
-	assert.deepEqual(without, { label: "Write your own: docs/PACKS.md in Polestar's source", box: false });
+	assert.deepEqual(without, { label: "Read more: docs/GUIDE_PACKS.md in Polestar's source", box: false });
 });
 
 test('a 64-character title is cut to its column, inside the row', () => {
