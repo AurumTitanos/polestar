@@ -1,5 +1,5 @@
 'use strict';
-// node tools/polestar.js profession build|draft ...
+// node tools/polestar.js profession build|draft|gathering ...
 
 const fs = require('node:fs');
 const path = require('node:path');
@@ -9,6 +9,7 @@ const ROOT = path.resolve(__dirname, '..', '..');
 
 const usage = `usage: node tools/polestar.js profession build [options]
        node tools/polestar.js profession draft <Profession> [options]
+       node tools/polestar.js profession gathering build|check [options]
 
 build: writes data/forever/professions.json from Blizzard Classic Era client
 tables (wago.tools CSV: SkillLine, SkillLineAbility, SpellName, SpellEffect,
@@ -30,7 +31,17 @@ checkpoints at 75/150/225/300.
 
   --data <dir>         reference data (default data/forever)
   --out [file]         write the guide (default guides/forever/professions/<name>.guide)
-  --quiet              no plan summary on stderr`;
+  --quiet              no plan summary on stderr
+
+gathering build: rewrites the six generated guides in guides/forever/professions
+(mining, herbalism, skinning, fishing, cooking, first-aid) from their specs in
+tools/lib/professions/gathering/specs.js and data/forever (node spawns,
+professions, items, npcs, objects). Run \`compile\` afterwards.
+gathering check: builds them in memory and exits 1 when a committed guide
+differs (writes nothing).
+
+  --data <dir>         reference data (default data/forever)
+  --stdout             print the guides instead of writing them (build only)`;
 
 function fail(msg) {
 	console.error(`${msg}\n\n${usage}`);
@@ -137,11 +148,35 @@ async function runDraft(rest) {
 	return 0;
 }
 
+function runGathering(rest) {
+	let values;
+	let positionals;
+	try {
+		({ values, positionals } = parseArgs({ args: rest, options: { data: { type: 'string' }, stdout: { type: 'boolean' } }, allowPositionals: true, strict: true }));
+	} catch (err) {
+		return fail(err.message);
+	}
+	const [mode, ...extra] = positionals;
+	if (mode !== 'build' && mode !== 'check') return fail(mode ? `unknown gathering subcommand "${mode}"` : 'gathering needs build or check');
+	if (extra.length) return fail(`unexpected argument "${extra[0]}"`);
+	if (values.stdout && mode === 'check') return fail('--stdout goes with gathering build');
+	const { buildAll, OUT_DIR } = require('../lib/professions/gathering/build');
+	const { context } = require('../lib/professions/gathering/common');
+	const files = buildAll(context(values.data ? path.resolve(values.data) : undefined));
+	if (values.stdout) {
+		for (const [name, text] of Object.entries(files)) process.stdout.write(`==> ${name}\n${text}\n`);
+		return 0;
+	}
+	const { reportSync } = require('../lib/generated');
+	return reportSync(files, OUT_DIR, { check: mode === 'check', command: 'profession gathering build' });
+}
+
 async function run(argv) {
 	const [sub, ...rest] = argv;
 	if (sub === 'build') return runBuild(rest);
 	if (sub === 'draft') return runDraft(rest);
+	if (sub === 'gathering') return runGathering(rest);
 	return fail(sub ? `unknown subcommand "${sub}"` : 'missing subcommand');
 }
 
-module.exports = { name: 'profession', summary: 'Build professions.json from client tables; draft a 1-300 profession guide', usage, run };
+module.exports = { name: 'profession', summary: 'Build professions.json; draft a crafting guide; build or check the generated gathering guides', usage, run };

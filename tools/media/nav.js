@@ -3,7 +3,7 @@
 // minimap edge pointer. Drawn from signed distance functions so they stay
 // anti-aliased at any display scale and carry no third-party artwork.
 //
-//   node tools/media/nav.js [addonRoot]     (default: addon/Polestar)
+//   node tools/polestar.js media nav
 //
 // Tintable layers are white; the addon colours them with SetVertexColor. Dark
 // rims are baked in (black stays black under a tint), so the arrow reads on
@@ -167,8 +167,3 @@ function generate(addonRoot) {
 }
 
 module.exports = { name: 'nav', generate, textures: TEXTURES.map(([name]) => name), arrow3dLayout: arrow3d.LAYOUT };
-
-if (require.main === module) {
-	const root = path.resolve(process.argv[2] || path.join(__dirname, '..', '..', 'addon', 'Polestar'));
-	for (const file of generate(root)) console.log(path.relative(process.cwd(), file));
-}

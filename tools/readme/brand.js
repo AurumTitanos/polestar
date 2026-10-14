@@ -10,7 +10,7 @@
 //   logo.svg          the addon icon: the gold emblem on a night tile
 //   download.svg      the README's download button
 //
-//   node tools/readme/brand.js
+//   node tools/polestar.js readme brand
 
 const fs = require('node:fs');
 const path = require('node:path');
@@ -199,7 +199,7 @@ ${content}
 `;
 }
 
-function main() {
+function write() {
 	fs.mkdirSync(OUT, { recursive: true });
 	const files = {
 		'banner-dark.svg': banner('dark'),
@@ -214,6 +214,4 @@ function main() {
 	}
 }
 
-if (require.main === module) main();
-
-module.exports = { emblemPath, prng, C };
+module.exports = { emblemPath, prng, C, write };

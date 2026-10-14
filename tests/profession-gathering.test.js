@@ -112,7 +112,7 @@ test('generated profession guides are up to date and compile', { skip: hasData ?
 	const stale = Object.entries(files)
 		.filter(([name, text]) => !fs.existsSync(path.join(OUT_DIR, name)) || fs.readFileSync(path.join(OUT_DIR, name), 'utf8') !== text)
 		.map(([name]) => name);
-	assert.deepEqual(stale, [], 'run node tools/lib/professions/gathering/build.js --write');
+	assert.deepEqual(stale, [], 'run node tools/polestar.js profession gathering build');
 	const sources = Object.entries(files).map(([name, text]) => ({ file: `guides/forever/professions/${name}`, source: `forever/professions/${name}`, text }));
 	const { diag } = compileSources(sources, ctx.data);
 	assert.deepEqual(diag.errors.map(format), []);

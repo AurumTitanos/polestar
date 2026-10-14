@@ -11,7 +11,7 @@
 //   qol-coin     quest reward badge: sells for most, a coin with a dark rim
 //   qol-ring     flight map destination marker: a ring with four ticks
 //
-//   node tools/media/qol.js [addonRoot]     (default: addon/Polestar)
+//   node tools/polestar.js media qol
 
 const path = require('node:path');
 const { Canvas, sdf } = require('../lib/tga');
@@ -96,8 +96,3 @@ function generate(addonRoot) {
 }
 
 module.exports = { name: 'qol', generate, textures: [...Object.keys(GLYPHS), ...Object.keys(BADGES)] };
-
-if (require.main === module) {
-	const root = path.resolve(process.argv[2] || path.join(__dirname, '..', '..', 'addon', 'Polestar'));
-	for (const file of generate(root)) console.log(path.relative(process.cwd(), file));
-}

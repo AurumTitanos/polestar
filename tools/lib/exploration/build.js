@@ -3,17 +3,12 @@
 // Forever client's map tables (areas.js), data/forever (zones, map frames,
 // flight masters) and the zone order in spec.js:
 //
-//   node tools/lib/exploration/build.js            # print to stdout
-//   node tools/lib/exploration/build.js --write    # rewrite guides/forever/exploration/*.guide
-//   node tools/lib/exploration/build.js --check    # exit 1 when a guide is out of date
-//
-// Options: --offline (cached tables only), --build <version>, --sources <dir>
-// (default data/sources), --data <dir> (default data/forever).
+//   node tools/polestar.js exploration build    # rewrite guides/forever/exploration/*.guide
+//   node tools/polestar.js exploration check    # exit 1 when a guide is out of date
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { parseArgs } = require('node:util');
-const { loadAreas, TABLES } = require('./areas');
+const { loadAreas } = require('./areas');
 const { GUIDES, TOWNS, CAUTIONS, ISLANDS, LEGACY_NOTE } = require('./spec');
 const P = require('./plan');
 
@@ -191,62 +186,6 @@ async function buildAll({ dataDir = path.join(ROOT, 'data', 'forever'), sourcesD
 		files[`${g.id}.guide`] = renderGuide(ctx, { ...g, zonesSummary: zones.join(', ') }, blocks);
 	}
 	return { files, counts: continentCounts(ctx), build: loaded.build, warnings: loaded.warnings };
-}
-
-async function main(argv) {
-	let values;
-	try {
-		({ values } = parseArgs({
-			args: argv,
-			options: {
-				write: { type: 'boolean' },
-				check: { type: 'boolean' },
-				offline: { type: 'boolean' },
-				build: { type: 'string' },
-				sources: { type: 'string' },
-				data: { type: 'string' },
-			},
-			strict: true,
-		}));
-	} catch (err) {
-		console.error(`${err.message}\nusage: node tools/lib/exploration/build.js [--write|--check] [--offline] [--build <v>] [--sources <dir>] [--data <dir>]\nTables: ${TABLES.join(', ')}`);
-		return 2;
-	}
-	const abs = (p) => (p ? path.resolve(p) : undefined);
-	const res = await buildAll({ dataDir: abs(values.data), sourcesDir: abs(values.sources), offline: values.offline, build: values.build, log: (m) => console.error(m) });
-	for (const w of res.warnings) console.error(`warning: ${w}`);
-	console.error(`Forever build ${res.build}: ${Object.entries(res.counts).map(([c, n]) => `${c} ${n} areas`).join(', ')}`);
-	if (values.write) {
-		fs.mkdirSync(OUT_DIR, { recursive: true });
-		for (const [name, text] of Object.entries(res.files)) fs.writeFileSync(path.join(OUT_DIR, name), text);
-		console.log(`wrote ${Object.keys(res.files).join(', ')}`);
-		return 0;
-	}
-	if (values.check) {
-		let bad = 0;
-		for (const [name, text] of Object.entries(res.files)) {
-			const file = path.join(OUT_DIR, name);
-			if (!fs.existsSync(file) || fs.readFileSync(file, 'utf8') !== text) {
-				console.error(`${name} is out of date`);
-				bad++;
-			}
-		}
-		return bad ? 1 : 0;
-	}
-	for (const [name, text] of Object.entries(res.files)) process.stdout.write(`==> ${name}\n${text}\n`);
-	return 0;
-}
-
-if (require.main === module) {
-	main(process.argv.slice(2)).then(
-		(code) => {
-			process.exitCode = code;
-		},
-		(err) => {
-			console.error(err.message);
-			process.exitCode = 1;
-		},
-	);
 }
 
 module.exports = { buildAll, renderGuide, checkSpec, continentCounts, OUT_DIR };

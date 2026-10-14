@@ -4,7 +4,6 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
 const media = require('../tools/media/nav');
@@ -135,18 +134,6 @@ test('the arrow points up, centred, and stays inside the rotation circle', () =>
 				if (Math.hypot(x + 0.5 - c, y + 0.5 - c) > c) assert.equal(t.alpha(x, y), 0, `pixel ${x},${y}`);
 			}
 		}
-	} finally {
-		fs.rmSync(root, { recursive: true, force: true });
-	}
-});
-
-test('running the script writes the same set', () => {
-	const root = tmpRoot();
-	try {
-		const r = spawnSync(process.execPath, [path.join(ROOT, 'tools', 'media', 'nav.js'), root], { encoding: 'utf8' });
-		assert.equal(r.status, 0, r.stderr);
-		const written = fs.readdirSync(path.join(root, 'Media', 'Nav')).sort();
-		assert.deepEqual(written, media.textures.map((n) => `${n}.tga`).sort());
 	} finally {
 		fs.rmSync(root, { recursive: true, force: true });
 	}

@@ -96,7 +96,7 @@ CI, they skip; everything else runs.
 | Local input | Built by | Tests that use it |
 |---|---|---|
 | `data/forever/*.json` (reference data) | `data build` and the other data commands | `guides.test.js`, `engine-placement.test.js`, `perf.test.js`, `acceptance-packs.test.js`, `playtest.test.js`, `play.test.js`, `play-pack.test.js`, `new.test.js`, `dev.test.js`, `dsl.test.js`, `maps-zonelevels.test.js`, `profession-gathering.test.js`, `questdb.test.js` |
-| Client map tables cached in `data/sources/wago` | `node tools/lib/exploration/build.js` | `exploration.test.js` |
+| Client map tables cached in `data/sources/wago` | `exploration build` | `exploration.test.js` |
 | `addon/Polestar_QuestDB` | `questdb build` | `questdb.test.js`, `quests.test.js` |
 | `addon/Polestar_Codex` | `codex build` | `lookup-codex.test.js` |
 | `addon/Polestar_ItemDB/Items.lua` | `itemdb build` (committed, so present on a clone) | `itemdb.test.js` |

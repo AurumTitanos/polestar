@@ -11,12 +11,10 @@
 // (compare() refuses stale results; consensus is checked here), so every
 // number in a chart comes from one world.
 //
-//   node tools/readme/charts.js --draft <dir|git rev> [--sim <dir>] [--guides <dir>]
+//   node tools/polestar.js readme charts --draft <dir|git rev> [--sim <dir>] [--guides <dir>]
 //
-//   --draft      the earlier draft to compare against: a guides folder, or a
-//                git revision whose guides/ is extracted to a temporary folder
-//   --sim        simulator outputs: world, params, results, consensus (default data/sim)
-//   --guides     the guides to score (default guides/)
+// o.draft is the earlier draft to compare against: a guides folder, or a git
+// revision whose guides/ is extracted to a temporary folder.
 
 const fs = require('node:fs');
 const os = require('node:os');
@@ -40,19 +38,6 @@ const C = {
 const f1 = (v) => (Math.round(v * 10) / 10).toFixed(1);
 const f2 = (v) => String(Math.round(v * 100) / 100);
 const H = 3600;
-
-const USAGE = 'usage: node tools/readme/charts.js --draft <dir|git rev> [--sim <dir>] [--guides <dir>]';
-
-function args(argv) {
-	const o = {};
-	for (let i = 0; i < argv.length; i++) {
-		const m = /^--(sim|guides|draft)$/.exec(argv[i]);
-		if (!m || argv[i + 1] == null) throw new Error(USAGE);
-		o[m[1]] = argv[++i];
-	}
-	if (!o.draft) throw new Error(USAGE);
-	return o;
-}
 
 function draftGuides(spec) {
 	if (fs.existsSync(spec) && fs.statSync(spec).isDirectory()) return { dir: path.resolve(spec), label: spec, cleanup() {} };
@@ -318,8 +303,7 @@ function startsChart(o, data) {
 	});
 }
 
-async function main() {
-	const o = args(process.argv.slice(2));
+async function write(o) {
 	const data = await score(o);
 	fs.mkdirSync(OUT, { recursive: true });
 	const files = { 'levels.svg': levelsChart(new Outliner('l'), data), 'starts.svg': startsChart(new Outliner('s'), data) };
@@ -337,11 +321,4 @@ async function main() {
 	console.log(`world ${data.worldHash.slice(0, 12)}, earlier draft from ${data.draft}`);
 }
 
-if (require.main === module) {
-	main().catch((err) => {
-		console.error(err.message);
-		process.exitCode = 1;
-	});
-}
-
-module.exports = { score, levelsChart, startsChart };
+module.exports = { score, levelsChart, startsChart, write };

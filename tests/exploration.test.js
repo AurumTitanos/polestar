@@ -24,7 +24,7 @@ const WAGO = path.join(SOURCES, 'wago');
 const hasTables =
 	fs.existsSync(WAGO) && fs.readdirSync(WAGO).some((b) => A.TABLES.every((t) => fs.existsSync(path.join(WAGO, b, `${t}.csv`))));
 const hasData = ['zones', 'map-frames', 'travel', 'quests'].every((n) => fs.existsSync(path.join(DATA, `${n}.json`)));
-const skipReal = !hasTables ? 'Era map tables not cached (node tools/lib/exploration/build.js)' : !hasData ? 'data/forever not built' : false;
+const skipReal = !hasTables ? 'Era map tables not cached (node tools/polestar.js exploration build)' : !hasData ? 'data/forever not built' : false;
 
 // Synthetic client tables: Azeroth > Kalimdor > Durotar, plus a battleground
 // parented to Azeroth (no continent) whose overlays must drop out.
@@ -176,7 +176,7 @@ test('generated exploration guides cover every zone area for both factions, are 
 	const stale = Object.entries(files)
 		.filter(([name, text]) => !fs.existsSync(path.join(OUT_DIR, name)) || fs.readFileSync(path.join(OUT_DIR, name), 'utf8') !== text)
 		.map(([name]) => name);
-	assert.deepEqual(stale, [], 'run node tools/lib/exploration/build.js --write');
+	assert.deepEqual(stale, [], 'run node tools/polestar.js exploration build');
 
 	const sources = Object.entries(files).map(([name, text]) => ({ file: `guides/forever/exploration/${name}`, source: `forever/exploration/${name}`, text }));
 	const { guides, diag } = compileSources(sources, loadData(DATA));

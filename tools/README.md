@@ -54,7 +54,8 @@ sources, so they run on a maintainer's machine, never in CI.
 |---|---|
 | `data build` | Builds the reference data, `data/forever/*.json` |
 | `dungeons build` | Imports dungeon data into `data/forever/dungeons.json` |
-| `profession build` | Builds `data/forever/professions.json`; `profession draft <Profession>` drafts a 1-300 crafting guide |
+| `profession build` | Builds `data/forever/professions.json`; `profession draft <Profession>` drafts a 1-300 crafting guide; `profession gathering build` / `check` writes or checks the six generated gathering and secondary guides |
+| `exploration build` / `exploration check` | Writes or checks the exploration guides in `guides/forever/exploration` |
 | `trainers build` | Builds `data/forever/trainers.json` and `Core/ClassTrainers.lua` |
 | `travel build` | Builds the travel network: `data/forever/travel.json`, `Nav/TravelData.lua`, `Polestar_Travel`; `travel route` runs the in-game planner between two points |
 | `maps build` / `maps overlays` | Zone level ranges (`Maps/ZoneLevels.lua`) / zone art overlays (`UI/ZoneArtOverlays.lua`) |
@@ -64,6 +65,7 @@ sources, so they run on a maintainer's machine, never in CI.
 | `questdb build` | The `Polestar_QuestDB` data addon |
 | `codex build` | Lookup's Codex: `data/forever/codex/*.json` and the `Polestar_Codex` data addon |
 | `media` | Regenerates the addon's textures from `tools/media/*.js` |
+| `readme brand` / `readme charts` | Redraws the README's art: the banners, emblem, logo and download button / the route charts (needs `data/sim`) |
 
 ### Releasing
 
@@ -84,7 +86,7 @@ The release steps are in [docs/RELEASING.md](../docs/RELEASING.md).
 | `media/` | Texture generators run by `media`: `nav.js`, `qol.js`, `ui.js`; the wordmark fonts in `media/fonts` |
 | `preview/` | `preview`'s renderer: a geometry-recording client stub (`stub.lua`), font outlines, SVG drawing, and a zlib encoder of its own for the textures (`deflate.js`), so the renders are byte-identical on any Node |
 | `play/` | The playground: server, Lua session, driver and the page in `play/public` |
-| `readme/` | Scripts for the README's art: `brand.js` (banners, emblem, logo, download button) and `charts.js` (route charts) |
+| `readme/` | The README's art, drawn by `readme`: `brand.js` (banners, emblem, logo, download button) and `charts.js` (route charts) |
 | `templates/pack/` | What `new` copies into a new guide pack |
 
 ### tools/lib
@@ -96,15 +98,16 @@ The release steps are in [docs/RELEASING.md](../docs/RELEASING.md).
 | `consume/` | Readers for installed addons' data, all through one Lua reader, and for the sims' stat weights |
 | `data/` | `data build`: sources, merging, spawns, races, the dungeon import; also the shared CSV and wago.tools loaders |
 | `dsl/` | The guide compiler: lexer, parser, resolver, validation, emitter; project and pack layout; the shared argument parser `cli.js` |
-| `exploration/` | The exploration guide generator (`build.js`, run directly, see below) |
+| `exploration/` | `exploration build`: the exploration guide generator |
 | `find.js` | `find`'s search |
+| `generated.js` | Writes or checks a command's generated files |
 | `gear/` | `gear build`: Forever item stats, reward choices, weight bands |
 | `itemdb/` | `itemdb build`: item stats from the client tables |
 | `lua.js` | Runs Lua 5.1 for the tools (reading SavedVariables and other addons' data) |
 | `maps/` | `maps build` (zone levels) and `maps overlays` |
 | `pack/` | The pack contract: which pack a command works on, `pack.json`, building a pack and the format constants |
 | `playtest.js` | The guide simulator behind `playtest` and `tests/guides.test.js` |
-| `professions/` | `profession build` and `draft`; `gathering/` is the gathering and secondary profession guide generator (run directly, see below) |
+| `professions/` | `profession build` and `draft`; `gathering/` is the gathering and secondary profession guide generator behind `profession gathering` |
 | `questdb/` | `questdb build`, and the spawn clustering the compiler also uses |
 | `recording/` | `record`: import, watch, draft, report |
 | `route/` | `draft`: the first-draft route planner and its geometry, tour and XP helpers |
@@ -138,14 +141,14 @@ where they exist.
 | `addon/Polestar_ItemDB/Forever.lua` and `LICENSE-DATA.txt`, `addon/Polestar/Gear/SpecData.lua` and `LICENSE-DATA.txt`; `data/forever/gear/report.json` | `gear build`, after `itemdb build` | the installed ForeverLevelingBiS, the sims cached in `data/sources/wowsims` (`gear fetch`) | yes; the report is local | rerun |
 | `addon/Polestar_QuestDB/` | `questdb build` | `data/forever` quests, npcs, objects, items, map-frames | local; ships in the release zip when built | `tests/questdb.test.js` loads it within its budget |
 | `data/forever/codex/*.json`, `addon/Polestar_Codex/` | `codex build` | installed AtlasLoot, RareScanner and ForeverLevelingBiS; `data/forever` including dungeons, trainers and professions; Forever client tables | local; never packaged | none |
-| `guides/forever/exploration/*.guide` (7) | `node tools/lib/exploration/build.js --write` | client map tables, `data/forever` zones, map-frames, travel | yes | `node tools/lib/exploration/build.js --check`; `tests/exploration.test.js` |
-| `guides/forever/professions/` mining, herbalism, skinning, cooking, first-aid, fishing | `node tools/lib/professions/gathering/build.js --write` | `data/forever` professions, items, npcs, objects | yes | `node tools/lib/professions/gathering/build.js --check`; `tests/profession-gathering.test.js` |
+| `guides/forever/exploration/*.guide` (7) | `exploration build` | client map tables, `data/forever` zones, map-frames, travel | yes | `exploration check`; `tests/exploration.test.js` |
+| `guides/forever/professions/` mining, herbalism, skinning, cooking, first-aid, fishing | `profession gathering build` | `data/forever` professions, items, npcs, objects | yes | `profession gathering check`; `tests/profession-gathering.test.js` |
 | `guides/forever/professions/` alchemy, blacksmithing, enchanting, engineering, leatherworking, tailoring | `profession draft <Profession> --out` | `data/forever` including professions | yes | rerun |
 | `addon/Polestar_Guides/` | `compile` | `guides/**/*.guide`, `guides/pack.json`, `data/forever` (including trainers, travel, professions, dungeons) | yes | rerun; `tests/guides-parse.test.js` fails when a guide is added, renamed or removed without `compile` |
 | `addon/Polestar/Media/Nav/*.tga`, `addon/Polestar/Media/UI/*.tga` | `media` | `tools/media/*.js`, `tools/lib/tga.js`, `tools/media/fonts` (no data) | yes | rerun: the output is byte-identical, and CI fails when it differs from the committed files; `tests/media-refs.test.js` checks the addon names every texture |
 | `docs/preview/*.svg` | `preview` | the addon's Lua (Core, Theme, Nav, Quests, Gear, Maps, QoL, Lookup, Dungeons, Rares, UI), its generated files included; `tests/lua` (the client stubs, `stub_ui.lua`'s sample guides), `tests/fixtures`, among them six compiled Horde guides frozen in `tests/fixtures/preview/guides.lua`; no reference data and not the shipped `addon/Polestar_Guides`, so a guide recompile never changes the renders. `POLESTAR_CLIENT_ART` (with `POLESTAR_DUNGEONS_PACK`) renders local art and data into its own folder, never here | yes | rerun: the output is byte-identical, and CI fails when it differs from the committed files or a render is missing; a full run removes the renders of scenes that are gone |
-| `docs/assets/{banner-dark,banner-light,emblem,logo,download}.svg` | `node tools/readme/brand.js` | the emblem geometry, the wordmark fonts | yes | rerun |
-| `docs/assets/charts/{levels,starts}.svg` | `node tools/readme/charts.js --draft <dir or git rev>` | `data/sim`, `guides/` | yes | rerun |
+| `docs/assets/{banner-dark,banner-light,emblem,logo,download}.svg` | `readme brand` | the emblem geometry, the wordmark fonts | yes | rerun |
+| `docs/assets/charts/{levels,starts}.svg` | `readme charts --draft 773e3d4^` | `data/sim`, `guides/`, the earlier draft of the guides | yes | rerun |
 | `data/sim/` | `sim world`, `sim run` and the other `sim` commands | `data/forever` | local | `lint` notes a cached world built from other data and skips its check |
 | `data/recordings/*.json` | `record import` / `record watch` | the Recorder's SavedVariables | local | none |
 | `dist/` | `pack` | `addon/`, `guides/` | local | none |
@@ -165,7 +168,7 @@ build, new recordings or a change to an installed source addon:
 8. `node tools/polestar.js itemdb build`, then `node tools/polestar.js gear build`
 9. `node tools/polestar.js questdb build`
 10. `node tools/polestar.js codex build` (reads `dungeons.json`, `professions.json` and `trainers.json`)
-11. The generated guides: `node tools/lib/exploration/build.js --write` (reads `travel.json`), `node tools/lib/professions/gathering/build.js --write` and `node tools/polestar.js profession draft <Profession> --out` for each crafting profession (read `professions.json`)
+11. The generated guides: `node tools/polestar.js exploration build` (reads `travel.json`), `node tools/polestar.js profession gathering build` and `node tools/polestar.js profession draft <Profession> --out` for each crafting profession (read `professions.json`)
 12. `node tools/polestar.js lint`, then `node tools/polestar.js compile`
 13. `node tools/polestar.js preview`: it reads no reference data and no compiled guides, but the addon Lua that steps 4 to 8 write is part of what it draws
 

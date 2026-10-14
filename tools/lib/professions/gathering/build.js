@@ -1,10 +1,10 @@
 'use strict';
-// Builds the gathering-profession guides (Mining, Herbalism, Skinning) from a
-// band spec (specs.js) and the reference data:
+// Builds the six generated profession guides (Mining, Herbalism, Skinning,
+// Fishing, Cooking, First Aid) from their specs (specs.js) and the reference
+// data:
 //
-//   node tools/lib/professions/gathering/build.js            # print to stdout
-//   node tools/lib/professions/gathering/build.js --write    # rewrite guides/forever/professions/*.guide
-//   node tools/lib/professions/gathering/build.js --check    # exit 1 when a guide is out of date
+//   node tools/polestar.js profession gathering build    # rewrite guides/forever/professions/<those>.guide
+//   node tools/polestar.js profession gathering check    # exit 1 when a guide is out of date
 //
 // For each band and each group of characters (starting area, continent, or
 // faction) the zones a group can use are ranked by expected skill-ups per
@@ -13,8 +13,6 @@
 // smart targets (`train <Profession> <Rank>`, `buy … nearest`): the engine
 // picks the nearest one of the player's faction at runtime.
 
-const fs = require('node:fs');
-const path = require('node:path');
 const { ZONES, RANKS, color } = require('./tables');
 const { RACE_GROUPS, REGIONS, SIDE, maxZoneLevel } = require('./groups');
 const R = require('./route');
@@ -195,8 +193,6 @@ function render(ctx, prof) {
 	return `${L.join('\n').replace(/\n+$/, '')}\n`;
 }
 
-// ------------------------------------------------------------------ CLI
-
 // Every generated profession guide: { 'mining.guide': text, ... }.
 function buildAll(ctx) {
 	const { SPECS } = require('./specs');
@@ -205,30 +201,4 @@ function buildAll(ctx) {
 	return out;
 }
 
-function main(argv) {
-	const ctx = context();
-	const files = buildAll(ctx);
-	if (argv.includes('--write')) {
-		fs.mkdirSync(OUT_DIR, { recursive: true });
-		for (const [name, text] of Object.entries(files)) fs.writeFileSync(path.join(OUT_DIR, name), text);
-		console.log(`wrote ${Object.keys(files).join(', ')}`);
-		return 0;
-	}
-	if (argv.includes('--check')) {
-		let bad = 0;
-		for (const [name, text] of Object.entries(files)) {
-			const file = path.join(OUT_DIR, name);
-			if (!fs.existsSync(file) || fs.readFileSync(file, 'utf8') !== text) {
-				console.error(`${name} is out of date`);
-				bad++;
-			}
-		}
-		return bad ? 1 : 0;
-	}
-	for (const [name, text] of Object.entries(files)) process.stdout.write(`==> ${name}\n${text}\n`);
-	return 0;
-}
-
-if (require.main === module) process.exitCode = main(process.argv.slice(2));
-
-module.exports = { plan, render, buildAll };
+module.exports = { plan, render, buildAll, OUT_DIR };
