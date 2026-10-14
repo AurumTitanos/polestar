@@ -25,12 +25,23 @@ next forever/alliance/02-westfall
 #   the depot on the way east after Brewnall instead of from the quarry.
 # - The Shimmerweed for "The Perfect Stout" is gathered around Brewnall after
 #   the hearth, where the simulator also did it.
+# - Quest chains now follow their prerequisites (QuestieDB 1.0.6): each
+#   follow-up is taken after the prerequisite's turn-in.
+#   - "Secure the Mountain" 98323 after 98319 (Cornelius), at Gretchen.
+#   - Father Gavin: 99160 and 99162 after "Finding Warmth" (99159), 99161
+#     after 99160.
+#   - "Stolen Blasting Powder" 95214 after the Empty Powder Keg (95213), at
+#     Thesten.
+#   - "Nip 'Em in the Bud" (96390) after "Farsen's Watch" (96392).
 #
 # Left out: "The Reports" (291) and "Stout to Kadrell" (414) are accepted by
 # the route but never turned in (the route goes to Westfall, not Ironforge's
 # senator or Loch Modan).
 # "The Adventurer" (96628) is kept as the export has it, taken from Thalos after
 # "The Great Outdoors": skip it if Thalos no longer offers it.
+# "The Quarry's Smith" (95217) is optional: Frast Dokner offers it to
+# blacksmiths (QuestieDB lists Blacksmithing), and its Copper Bars come from
+# smelting Copper Ore or the trade vendors.
 # Class quests, as class-only steps:
 # - Warlock (Gnome): Beginnings (1599, Summon Imp) in Coldridge Valley; The
 #   Slaughtered Lamb (1715) from Lago Blackwrench in Ironforge; on arrival in
@@ -198,7 +209,6 @@ step The Grizzled Den
 
 step Mountaineer Gretchen
   turnin 98322                                -- Mountaineer Gretchen
-  accept 98323
   accept 98319
 
 step Mountaineer Cornelius
@@ -208,6 +218,7 @@ step Mountaineer Cornelius
 
 step Mountaineer Gretchen
   turnin 98319
+  accept 98323
 
 step Kharanos and the depot
   turnin 98321                                -- Tognus Flintfire
@@ -279,22 +290,32 @@ step Misty Pine Refuge
   tip Follow the road east past the depot to Misty Pine Refuge.
   turnin 99158                                -- Father Gavin
   accept 99159
-  accept 99160
-  accept 99161
-  accept 99162
 
-step The cold
-  tip Minor Ice Elementals drift around the frozen lake by the refuge. Avala's Core, the three rifles and the firewood are in the snow around it.
-  complete 99161
-  kill 276003 quest 99160                     -- Minor Ice Elemental
-  complete 99162
+step Firewood
+  tip The firewood lies in the snow around the frozen lake by the refuge.
   complete 99159
 
 step Father Gavin
   turnin 99159
+  accept 99160
+  accept 99162
+
+step The cold
+  tip Minor Ice Elementals drift around the frozen lake by the refuge. The three rifles are in the snow around it.
+  kill 276003 quest 99160                     -- Minor Ice Elemental
+  complete 99162
+
+step Father Gavin
   turnin 99162
-  turnin 99161
   turnin 99160
+  accept 99161
+
+step Avala's Core
+  tip Avala's Core is by the frozen lake, among the ice elementals.
+  complete 99161
+
+step Father Gavin
+  turnin 99161
 
 # ---------------------------------------------------------------- Amberstill Ranch and the quarry
 
@@ -303,8 +324,7 @@ step Amberstill Ranch
 
 step Gol'Bolar Quarry
   tip The quarry lies south-east of the ranch.
-  accept 95214                                -- Quarrymaster Thesten
-  accept 95217                                -- Frast Dokner
+  accept 95217 optional                       -- Frast Dokner: blacksmiths only
   accept 432                                  -- Foreman Stonebrow
 
 step The quarry troggs
@@ -312,20 +332,24 @@ step The quarry troggs
   kill 1115 quest 432                         -- Rockjaw Skullthumper
   collect 268548                              -- Empty Powder Keg
   accept 95213
+
+step Foreman Stonebrow and Quarrymaster Thesten
+  turnin 432                                  -- Foreman Stonebrow
+  turnin 95213                                -- Quarrymaster Thesten
+  accept 95214
+
+step Stolen Blasting Powder
+  tip Rockjaw Ambushers by Helm's Bed Lake, north of the quarry, and Rockjaw Backbreakers further east drop the Stolen Blasting Powder.
   complete 95214
 
-step Foreman Stonebrow
-  turnin 432
-
 step Leopards and boars
-  tip Snow Leopards and boars roam the snow between the ranch and the quarry. Copper Bars come from smelting Copper Ore or the trade vendors.
+  tip Snow Leopards and boars roam the snow between the ranch and the quarry. Blacksmiths: Copper Bars come from smelting Copper Ore or the trade vendors.
   complete 95212
-  complete 95217
+  complete 95217 optional
 
 step Gol'Bolar Quarry
-  turnin 95217                                -- Frast Dokner
-  turnin 95213                                -- Quarrymaster Thesten
-  turnin 95214
+  turnin 95217 optional                       -- Frast Dokner
+  turnin 95214                                -- Quarrymaster Thesten
 
 step Amberstill Ranch
   turnin 95212                                -- Rudra Amberstill
@@ -422,9 +446,9 @@ step Back to Bruegs Kindleborn
 step Earthseer Farsen
   tip Farsen camps on the ridge overlooking the Gol'Bolar Quarry from the west. Talk to him for his farsight.
   turnin 96408
-  accept 96390
   accept 96392
   turnin 96392
+  accept 96390
   accept 433                                  -- Senator Mehr Stonehallow, in the quarry
 
 step Spies and Bonesnappers

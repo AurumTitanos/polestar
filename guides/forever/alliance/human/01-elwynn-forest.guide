@@ -18,7 +18,12 @@ next forever/alliance/02-westfall
 # road west to Sentinel Hill in Westfall (flight path).
 #
 # Optional extras: The Big Picture (91752, Shinyfinder Narf is elite) and
-# Book Return (91775, Nimsy is elite). Furlbrow's Deed (184) is optional: the
+# what follows it: Follow That Kobold! (91758), Shhh! We're Hunting Kobolds
+# (91772) and Book Return (91775, Nimsy is elite). The Northshire book chain
+# runs Nibbled-On Book (91741, a Kobold Vermin drop) -> Book Inventory (92124)
+# -> Rascally Rodents (91743) -> Mining Consultant (91745) -> The Big Picture,
+# each offered once the one before is done. Rough Wolf Pelts (91751) is for
+# skinners: the pelts are skinned. Furlbrow's Deed (184) is optional: the
 # Westfall Deed is a rare drop from the Defias; it is turned in in Westfall.
 #
 # Changes to the simulator's order:
@@ -26,9 +31,16 @@ next forever/alliance/02-westfall
 #   Goldshire and handed to Sam Sarsaparilla before The Great Outdoors: the
 #   simulator walked back to Northshire at 10 for it, and the game does not
 #   offer the breadcrumb once The Great Outdoors is done.
-# - Slimy Menace (99128) and Bottles and Baubles (99143) are finished with
-#   A Net Disaster at Crystal Lake at 6 and handed in at once; Baited for
-#   Success (99131) waits for the next pass by Jason Mathers.
+# - Slimy Menace (99128) is taken from Jason Mathers after A Net Disaster
+#   (99127) is handed in, and A Man About a Murloc (99129) after Slimy
+#   Menace; Bottles and Baubles (99143) is finished in the murloc camp with
+#   Slimy Menace at 6. Baited for Success (99131) is taken from Remy after
+#   An Enticing Offer (99130) is handed in, and goes to Jason on the next
+#   pass by the lake.
+# - The second Delicate Instruments (91724) is taken from Hamish Bergwort
+#   after the first (91723) is handed in; its Defias Rogue Wizards are killed
+#   at Stone Cairn Lake on the last east pass and it is handed in on the way
+#   back to Goldshire.
 # - The level 7 walk east to take Hamish Bergwort's quests and hearth back is
 #   folded into the east loop at 9: his quests, Blixie Fitzwink's and the
 #   Rough Wolf Pelts are done there, and Hamish's and Blixie's are handed in
@@ -67,13 +79,8 @@ next forever/alliance/02-westfall
 step Northshire Abbey
   tip You start in front of the Abbey. Deputy Willem stands at the foot of the steps, Marshal McBride inside the hall, Brother Paxton and Daniel in the library to the right, Eagan Peltskinner outside the north-west corner.
   accept 33                                   -- Eagan Peltskinner
-  accept 91743                                -- Brother Paxton
-  accept 91745
-  accept 92124
-  turnin 92124                                -- Daniel, in the library
   accept 783                                  -- Deputy Willem
   turnin 783                                  -- Marshal McBride
-  accept 91758
   accept 7
   accept 5261                                 -- Deputy Willem
   accept 1598 only Warlock                    -- Drusilla La Salle, outside the Abbey
@@ -89,37 +96,29 @@ step Eagan Peltskinner
   train class
 
 step The kobold camp
-  tip Kobold Vermin dig in the vineyards north-east of the Abbey. They also drop the Stolen Books and, now and then, a Nibbled-On Book: right-click it.
+  tip Kobold Vermin dig in the vineyards north-east of the Abbey. Now and then one drops a Nibbled-On Book: right-click it.
   kill 6 quest 7                              -- Kobold Vermin
-  collect 247839 quest 91743                  -- Stolen Books
   collect 247834 x1                           -- Nibbled-On Book
   accept 91741
 
-step Tordrin Sternblade
-  tip He hides by the vineyard fence east of the kobolds.
-  turnin 91758
-  accept 91772
-
 step Northshire Abbey
   turnin 91741                                -- Brother Paxton
-  turnin 91743
+  accept 92124
+  turnin 92124                                -- Daniel, in the library
+  accept 91743                                -- Brother Paxton
   turnin 7                                    -- Marshal McBride
   accept 15
 
 step Echo Ridge Mine
-  tip Follow the path north to the mine. Kobold Workers swarm outside it.
+  tip Follow the path north to the mine. Kobold Workers swarm outside it; every kobold in the valley can drop the Stolen Books.
   kill 257 quest 15                           -- Kobold Worker
-
-step Kelsey Fargo
-  tip She stands outside the mine entrance. Shinyfinder Narf is elite: grouping up is advised.
-  turnin 91745
-  accept 91752 optional
-  collect 247886 quest 91752 optional         -- Shinyfinder Narf, on the slope north of the mine
+  collect 247839 quest 91743                  -- Stolen Books
 
 step Northshire Abbey
   turnin 15                                   -- Marshal McBride
-  turnin 91752 optional
-  accept 21
+  turnin 91743                                -- Brother Paxton
+  accept 91745
+  accept 21                                   -- Marshal McBride
   train class
 
 step The Defias camp
@@ -147,15 +146,26 @@ step Milly Osworth
   turnin 3904
   accept 3905
 
+step Kelsey Fargo
+  tip She stands outside the mine entrance. Shinyfinder Narf, inside, is elite: grouping up is advised.
+  turnin 91745
+  accept 91752 optional
+
 step Inside Echo Ridge Mine
-  tip Kobold Laborers work the tunnels inside the mine.
+  tip Kobold Laborers work the tunnels inside the mine. Shinyfinder Narf waits down the second turn on the right.
   kill 80 quest 21                            -- Kobold Laborer
+  collect 247886 quest 91752 optional         -- Shinyfinder Narf
 
 step Northshire Abbey
+  tip Tordrin Sternblade stands behind the Abbey, by the stables.
   turnin 3905                                 -- Brother Neals, upstairs
   turnin 6                                    -- Deputy Willem
   turnin 21                                   -- Marshal McBride
-  accept 54
+  turnin 91752 optional
+  accept 91758 optional
+  turnin 91758 optional                       -- Tordrin Sternblade
+  accept 91772 optional                       -- his kobold tracker shows the kobolds to click on the road to Goldshire
+  accept 54                                   -- Marshal McBride
   accept 96627
   accept 2158                                 -- Falkhaan Isenstrider, by the stables south of the Abbey
   train class
@@ -166,7 +176,7 @@ step Goldshire
   tip Follow the road south out of the valley to Goldshire. Innkeeper Farley is in the Lion's Pride Inn; Marshal Dughan stands outside the smithy across the road, William Pestle at the inn's front and Remy "Two Times" by the road south of it.
   turnin 2158                                 -- Innkeeper Farley
   sethome "Goldshire" npc 295
-  turnin 91772                                -- Marshal Dughan
+  turnin 91772 optional                       -- Marshal Dughan
   turnin 54
   accept 62
   accept 91775 optional
@@ -180,22 +190,27 @@ step The lake shore
   complete 95998 @44.9,63.2                   -- Sit (/sit) by his campfire until you have Boosted Rest
   turnin 95998
   accept 96626
-  accept 91751                                -- Helene Peltskinner
+  accept 91751 optional                       -- Helene Peltskinner: skinners only, the pelts are skinned
   accept 99127                                -- Jason Mathers
-  accept 99128
-  accept 99129
   accept 99143                                -- Lee Brown
 
 step Crystal Lake
-  tip The Fishing Traps sit along the west shore of the lake. Murlocs and Murloc Streamrunners hold the east shore; the Junk Piles lie in their camp.
+  tip The Fishing Traps sit along the west shore of the lake.
   collect 286205 quest 99127                  -- Half-Eaten Fish
+
+step Jason Mathers
+  turnin 99127
+  accept 99128
+
+step The murloc camp
+  tip Murlocs and Murloc Streamrunners hold the east shore; the Junk Piles lie in their camp.
   kill 285 quest 99128                        -- Murloc
   kill 735 quest 99128                        -- Murloc Streamrunner
   collect 286209 quest 99143                  -- Shiny Junk
 
 step Jason Mathers
-  turnin 99127
   turnin 99128
+  accept 99129
   turnin 99143                                -- Lee Brown
 
 step Goldshire
@@ -204,7 +219,6 @@ step Goldshire
   turnin 96626                                -- Tomas
   turnin 99129                                -- Remy "Two Times"
   accept 99130
-  accept 99131
   train class
 
 # ---------------------------------------------------------------- The south: Fargodeep and the farms
@@ -267,6 +281,7 @@ step Goldtooth
 step Goldshire
   turnin 47                                   -- Remy "Two Times"
   turnin 99130
+  accept 99131
   accept 40
   turnin 40                                   -- Marshal Dughan
   accept 35
@@ -280,18 +295,14 @@ step Goldshire
 
 # ---------------------------------------------------------------- The east
 
-step Crystal Lake
-  tip The murlocs on the east shore drop the kelp.
+step Crystal Lake and the wolves
+  tip The murlocs on the east shore drop the kelp. Skinners: Gray Forest Wolves roam the woods between the lake and the Tower of Azora; Prowlers further east give pelts too.
   collect 1256 quest 112                      -- Crystal Kelp Fronds
-
-step Gray Forest Wolves
-  tip Gray Forest Wolves roam the woods between Crystal Lake and the Tower of Azora; Prowlers further east drop pelts too.
-  collect 247877 quest 91751                  -- Rough Wolf Pelts
+  collect 247877 quest 91751 optional         -- Rough Wolf Pelts
 
 step The Tower of Azora
   tip Hamish Bergwort and Blixie Fitzwink stand at the foot of the tower.
   accept 91723                                -- Hamish Bergwort
-  accept 91724
   accept 91725                                -- Blixie Fitzwink
 
 step The bridge
@@ -328,7 +339,6 @@ step A half-eaten body
 
 step Stone Cairn Lake
   tip Defias Rogue Wizards camp on the shores of Stone Cairn Lake; they drop the Red Linen Bandanas too. Rolf's corpse lies in the murloc village on the north-east shore.
-  kill 474 quest 91724                        -- Defias Rogue Wizard
   collect 1019 quest 83                       -- Red Linen Bandanas
   turnin 45                                   -- Rolf's corpse
   accept 71
@@ -347,8 +357,8 @@ step The Jasperlode Mine
 
 step The Tower of Azora
   tip Follow the hills south to the tower.
-  turnin 91724                                -- Hamish Bergwort
-  turnin 91723
+  turnin 91723                                -- Hamish Bergwort
+  accept 91724
   turnin 91725                                -- Blixie Fitzwink
 
 step Guard Thomas
@@ -359,7 +369,7 @@ step Guard Thomas
 
 step Goldshire
   tip Follow the road west back to Goldshire; Helene and Jason stand on the lake shore before town.
-  turnin 91751                                -- Helene Peltskinner
+  turnin 91751 optional                       -- Helene Peltskinner
   turnin 99131                                -- Jason Mathers
   turnin 112                                  -- William Pestle
   accept 114
@@ -417,6 +427,14 @@ step The Eastvale Logging Camp
   turnin 91732                                -- Hagar Lowe
   turnin 59                                   -- Sara Timberlain
   turnin 83
+
+step Stone Cairn Lake
+  tip North-east of the logging camp. Defias Rogue Wizards camp on the shores of the lake.
+  kill 474 quest 91724                        -- Defias Rogue Wizard
+
+step The Tower of Azora
+  tip Follow the hills south to the tower, on the road west.
+  turnin 91724                                -- Hamish Bergwort
 
 step Goldshire
   tip Follow the road west back to Goldshire.

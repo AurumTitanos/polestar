@@ -33,10 +33,12 @@ next forever/horde/02-the-barrens
 #   so the export's first mine visit is folded into the second.
 # - A Sacred Burial (833) and Rite of Wisdom (773) are done on one visit to
 #   Red Rocks instead of two.
-# - Durotar: both Threat from Below quests (99049, 99051) are done on one
-#   loop along the coast and handed in together after the hearth; Skull Rock
-#   is visited from Drygulch Ravine before Rezlak, so nothing is walked twice.
+# - Durotar: the first Threat from Below (99049) is done on the coast loop
+#   and handed in after Thunder Ridge; Skull Rock is visited from Drygulch
+#   Ravine before Rezlak, so nothing is walked twice.
 #   The Crossroads flight path is picked up on the walk to Razor Hill.
+# - Threat from Below (99051) is now taken from Orgnil after 99049's turn-in,
+#   with a short second trip to the naga coast east of Razor Hill.
 #
 # - Thunder Bluff stop after Red Rocks (added at the integrator's request;
 #   class quests are not simulated): flight path, training, and the turn-ins
@@ -441,7 +443,6 @@ step Razor Hill
   tip Cross the bridge into Durotar and follow the road east to Razor Hill.
   accept 840                          -- Takrin Pathseeker
   accept 99048                        -- Orgnil Soulscar
-  accept 99051
 
 step Heglan Shadeeye
   tip Heglan stands east of Razor Hill, towards the coast.
@@ -451,7 +452,6 @@ step Heglan Shadeeye
 step Threat from Below
   tip The naga raid the coast east of Razor Hill: their weapons, banners and spinefins come from them.
   complete 99049
-  complete 99051
 
 step Drygulch Ravine
   tip The Dustwind harpies nest in Drygulch Ravine to the north; the storm witches drop the Dull Storm Orb.
@@ -479,7 +479,15 @@ step Lost But Not Forgotten
 step Back to Razor Hill
   tip Walk south-east from Thunder Ridge back to Razor Hill.
   turnin 99049                        -- Orgnil Soulscar
-  turnin 99051
+  accept 99051
+
+step Threat from Below
+  tip Back east to the naga on the coast: Naga Spinefins drop from them.
+  complete 99051
+
+step Razor Hill
+  tip Back west to Razor Hill.
+  turnin 99051                        -- Orgnil Soulscar
 
 step The Crossroads
   zone The Barrens

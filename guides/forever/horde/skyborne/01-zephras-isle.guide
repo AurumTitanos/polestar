@@ -117,7 +117,7 @@ step The standing stones
   accept 92465
   kill 251143 quest 92465.2
   kill 251160 quest 92465.1
-  interact 450001 quest 92598.1
+  interact 460001 quest 92598.1
   turnin 92465
   accept 92469
 
@@ -193,7 +193,7 @@ step Shen'dar Village
 
 step Raan's campfire
   tip Light the campfire next to Raan, then take the meal to Zerril Softbreeze at the cook fire.
-  interact 450003 quest 96101.1
+  interact 460003 quest 96101.1
   turnin 96101                        -- Raan Wildwind
   accept 96646
   complete 96646 @43.85,43.9          -- talk to Zerril Softbreeze

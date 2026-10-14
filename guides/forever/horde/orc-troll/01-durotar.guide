@@ -24,14 +24,17 @@ next forever/horde/orc-troll/02-the-barrens
 #   Lost But Not Forgotten (816) are done on the first Thunder Ridge visit at
 #   about 8.5 instead of a second trip there at 11: the orb drops from the
 #   Storm Witches you already kill, and the lizards and Misha are next door.
-# - A Missing Hand / Threat from Below (99048, 99049, 99051) and Conscript of
-#   the Horde (840) are taken at Razor Hill at 10.5, when Orgnil and Takrin
+# - A Missing Hand / Threat from Below (99048, 99049) and Conscript of the
+#   Horde (840) are taken at Razor Hill at 10.5, when Orgnil and Takrin
 #   first offer them; the naga coast is done on the way to Margoz.
+# - Threat from Below (99051) is now taken from Orgnil after 99049's turn-in,
+#   with a second short loop to the naga beach before leaving Razor Hill.
 # - Conscript of the Horde (840) is turned in at Far Watch Post on the way to
 #   the Crossroads (the export turns it in on a later pass); Crossroads
 #   Conscription (842) goes to Sergra in the Barrens guide.
-# - Pa'zula's residue (96873) is collected on the Echo Isles, where the trolls
-#   drop the Hexed Pendants, and handed in on the way back.
+# - A Pain in the Neck (96873) is for enchanters: Pa'zula's Luminous Residue
+#   comes from disenchanting the Hexed Pendants the Echo Isles trolls drop.
+#   Taken at Sen'jin, done on the isles and handed in on the way back.
 #
 # Class quests: Warlocks do Ruzan's Vile Familiars (1485, 1499) instead of
 # Zureetha's. Shamans take Call of Earth (1516-1518) from Canaga Earthcaller
@@ -271,7 +274,7 @@ step The wreckage
   collect 4863 quest 825.1
 
 step Sen'jin Village
-  accept 96873                        -- Pa'zula
+  accept 96873 optional               -- Pa'zula: enchanters only, the residue is disenchanted from Hexed Pendants
   accept 817                          -- Vel'rin Fang
   accept 818                          -- Master Vornal
   accept 97225
@@ -295,7 +298,7 @@ step Echo Isles
   collect 277135 quest 97225.1
   kill 3206 quest 826.2
   kill 3207 quest 826.1
-  complete 96873
+  complete 96873 optional
   collect 4866 quest 826.3
   collect 4864 quest 808.1 @67.4,87.8
 
@@ -305,7 +308,7 @@ step South-east shore
   collect 4890 quest 815.1
 
 step Sen'jin Village
-  turnin 96873                        -- Pa'zula
+  turnin 96873 optional               -- Pa'zula
   turnin 817                          -- Vel'rin Fang
   turnin 818                          -- Master Vornal
   turnin 97225                        -- Master Gadrin
@@ -334,7 +337,6 @@ step Razor Hill
   turnin 823                          -- Orgnil Soulscar
   accept 806
   accept 99048
-  accept 99051
   accept 840                          -- Takrin Pathseeker
   train class
   accept 1505 only Warrior            -- Tarshaw Jaggedscar
@@ -361,11 +363,6 @@ step Heglan Shadeeye
   collect 286010 quest 99049.3 @60.1,44.8
   collect 286011 quest 99049.2 @60.1,42.4
   collect 286012 quest 99049.1 @58.9,44.4
-
-step Spitelash naga
-  tip Follow the shore north. Spitelash Scouts and Attendants hold the beach below Drygulch Ravine. Hunters: tame a Surf Crawler on the beach.
-  collect 286008 quest 99051.1
-  kill 3107 quest 6083.1 only Hunter  -- Tame it with the Taming Rod
 
 step Margoz
   tip Margoz camps on the hill west of the naga beach, south of Skull Rock.
@@ -408,10 +405,19 @@ step Margoz
 step Razor Hill
   tip Back south to Razor Hill.
   turnin 99049                        -- Orgnil Soulscar
-  turnin 99051
+  accept 99051
+  train class
+
+step Spitelash naga
+  tip Back east to the shore north of Heglan. Spitelash Scouts and Attendants hold the beach below Drygulch Ravine. Hunters: tame a Surf Crawler on the beach.
+  collect 286008 quest 99051.1
+  kill 3107 quest 6083.1 only Hunter  -- Tame it with the Taming Rod
+
+step Razor Hill
+  tip Back to Razor Hill.
+  turnin 99051                        -- Orgnil Soulscar
   turnin 6083 only Hunter             -- Thotar
   accept 6082 only Hunter
-  train class
 
 step Armored Scorpid
   only Hunter

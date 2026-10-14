@@ -89,7 +89,7 @@ step Yala Windwatcher
   accept 92465
   kill 251143 quest 92465.2
   kill 251160 quest 92465.1
-  interact 450002 quest 92597.1 @46.29,17.87  -- The Ley Line
+  interact 460002 quest 92597.1 @46.29,17.87  -- The Ley Line
   turnin 92465                                -- Yala Windwatcher
   accept 92469
 

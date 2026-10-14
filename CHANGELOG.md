@@ -5,6 +5,19 @@
 ### For players
 
 - Distances can read in metres: Options, Arrow & routes, Distances.
+- The starting zones follow Forever's new quest chains: a follow-up is taken
+  once the quest before it is handed in, where the guides offered several
+  links of a chain at once (Northshire's book chain and Jason Mathers'
+  murloc quests in Elwynn Forest, Dun Morogh, Teldrassil, Durotar and
+  Mulgore). The Big Picture and what follows it stay optional extras, as
+  Shinyfinder Narf is elite.
+- Profession quests are optional and say who they are for: Rough Wolf Pelts
+  (skinners), A Pain in the Neck (enchanters) and The Quarry's Smith
+  (blacksmiths). Other characters could not take or finish them.
+- The Skyborne start points at the Ley Line, the Elemental Convergence and
+  Raan's campfire again: their ids changed in Forever's data.
+- The world map's zone level ranges are rebuilt from Questie 12.1.0's
+  Forever creatures (Mulgore reads 3-11, no longer 3-27).
 
 ### For guide authors
 
@@ -13,6 +26,12 @@
   both pass) and the guide format on one page. `new` copies it into the pack's
   `.agents/skills/` and `.claude/skills/`, and the pack's AGENTS.md points to
   it.
+- `data build` reads Wowhead's Forever zone quest lists (cached a day in
+  `data/sources/wowhead/`) and applies Forever's change notes: "Experience X
+  instead of Y", "Level X instead of Y" and "Requires level X instead of Y"
+  set X where the data still holds the old value (Scaring Shaky now gives
+  3300 XP, not 820). Quests still without XP take Wowhead's. `--no-wowhead`
+  skips it; guide pack workflows and Codespaces build with it.
 
 ## 0.2.1 (2026-10-14)
 

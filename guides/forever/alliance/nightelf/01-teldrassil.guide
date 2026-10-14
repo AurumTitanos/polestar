@@ -13,9 +13,9 @@ next forever/alliance/02-westfall
 # (hearth) -> Zenn and the Starbreeze moonwell -> Dolanaar -> east loop:
 # Starbreeze Village, Lake Al'Ameth -> Dolanaar -> west loop: Fel Rock, the
 # road ambushers, Ban'ethil Barrow Den, the Pools of Arlithrien, Gnarlpine
-# Hold -> hearth -> Ferocitas -> Dolanaar -> the Oracle Glade (Arynia's
-# harpies) -> Ursal ->
-# Lake Al'Ameth -> Dolanaar -> Darnassus -> Rut'theran Village (flight path)
+# Hold -> hearth -> Ferocitas -> Dolanaar -> Sentinel Eralya -> the Oracle
+# Glade (Arynia's harpies) -> Ursal -> Dolanaar -> Lake Al'Ameth -> Dolanaar
+# -> Sentinel Eralya -> Darnassus -> Rut'theran Village (flight path)
 # -> boat to Auberdine -> boat to Stormwind -> Westfall.
 #
 # Deviations from the export, each a shorter walk with the same quests:
@@ -38,6 +38,18 @@ next forever/alliance/02-westfall
 #   Oracle Tree (98398) from Sentinel Arynia Cloudsbreak at the Oracle Glade
 #   moonwell: every harpy lives around it. The chain's last steps go to
 #   Fandral at the far north of Darnassus and are not taken.
+#
+# Order changes for the hand-made quest chains (a follow-up is offered only
+# after its prerequisite is turned in):
+# - The Goddess Provides (97979) is now taken after The Balance of Nature
+#   (456) is turned in.
+# - The Oracle Tree (98398) is now taken after Darkness in the Glade (98392)
+#   is turned in.
+# - The Great Tree Provides (99050) is now taken after Not Dead Yet (99047)
+#   is turned in, on the last Dolanaar stop; its fronds come from the last
+#   lake visit.
+# - Easing Suffering (99073) is now taken after The Great Tree Provides
+#   (99050) is turned in, and handed to Eralya on the way to Darnassus.
 #
 # Left out: Rellian Greenspyre (922) and Crown of the Earth (934, 935), which
 # the export accepts but never turns in (Rellian and Fandral are at the far
@@ -65,8 +77,6 @@ next forever/alliance/02-westfall
 step Aldrassil
   tip You start at the foot of Aldrassil, the great tree of Shadowglen.
   accept 458                                  -- Melithar Staghelm, by the path
-  accept 97979                                -- Shanda, inside the tree
-  turnin 97979
   accept 456                                  -- Conservator Ilthalaine
   turnin 458                                  -- Tarindrella, south of the tree
   accept 459
@@ -83,6 +93,8 @@ step Back at Aldrassil
   turnin 459                                  -- Tarindrella
   turnin 97977
   turnin 456                                  -- Conservator Ilthalaine
+  accept 97979                                -- Shanda, inside the tree
+  turnin 97979
   accept 457
   accept 4495                                 -- Dirania Silvershine, east of the tree
   accept 916                                  -- Gilshalan Windwalker, on the tree's ramp
@@ -165,13 +177,10 @@ step Dolanaar quests
   accept 4161                                 -- Zarrin
   accept 475                                  -- Athridas Bearmantle
   accept 87288                                -- Aldia
-  accept 99050                                -- Byancie
-  accept 99073
   accept 932                                  -- Tallonkai Swiftroot
   accept 2438
   accept 98391                                -- Laurna Morninglight
   accept 96606                                -- Lyreena Duskblade
-  buy 159 x1 npc 6736                         -- Refreshing Spring Water from Innkeeper Keldamyr, for Byancie
 
 step The Great Outdoors
   complete 96606 @57.7,56.7                   -- /sit by Lyreena's campfire until you get Boosted Rest
@@ -199,7 +208,6 @@ step Lake Al'Ameth
   turnin 997                                  -- Denalan
   accept 918
   accept 919
-  collect 286017 quest 99050.1                -- Dewy Lasher Frond
   collect 5168 quest 918.1
   collect 5169 quest 919.1
   turnin 918
@@ -207,7 +215,6 @@ step Lake Al'Ameth
 
 step Dolanaar
   turnin 87288                                -- Aldia
-  turnin 99050                                -- Byancie
   turnin 4161                                 -- Zarrin
   turnin 476                                  -- Athridas Bearmantle
   accept 483
@@ -275,7 +282,6 @@ step Ferocitas the Dream Eater
 step Sentinel Eralya Leafshadow
   tip Take the road north-west from Dolanaar towards the Oracle Glade; she lies hurt beside it.
   turnin 99046
-  turnin 99073
   accept 99047
 
 step The Oracle Glade
@@ -289,11 +295,9 @@ step Bloodfeather harpies
   collect 5204 quest 937.1                    -- Bloodfeather Belt
 
 step Sentinel Arynia Cloudsbreak
-  tip Back to the moonwell. The Oracle Tree Bark lies just west of it.
+  tip Back to the moonwell.
   turnin 937
   accept 98392
-  accept 98398
-  turnin 98398                                -- Oracle Tree Bark
 
 step The named harpies
   tip Hatescreech and Windmistress Gaedress fly just west of the moonwell, Witchmother Arysa further north.
@@ -303,26 +307,36 @@ step The named harpies
 
 step Sentinel Arynia again
   turnin 98392
+  accept 98398
+  turnin 98398                                -- Oracle Tree Bark, just west of the moonwell
 
 step Ursal the Mauler
   tip Walk south along the west side of the island. Ursal prowls the far south, below the Pools of Arlithrien.
   kill 2039 quest 486.1
 
-step Lake Al'Ameth
-  tip East along the south of the island to Denalan.
-  turnin 930                                  -- Denalan
-  turnin 931
-  accept 2399                                 -- Sprouted Frond, beside him
-  turnin 2399
-
 step Dolanaar
+  tip North-east from Ursal's den, back to Dolanaar.
   turnin 99047                                -- Byancie
+  accept 99050
+  buy 159 x1 npc 6736                         -- Refreshing Spring Water from Innkeeper Keldamyr, for Byancie
   turnin 486                                  -- Athridas Bearmantle
   turnin 7383                                 -- Corithras Moonrage
   accept 6063 only Hunter                     -- Dazalar
   accept 5925 only Druid                      -- Kal: Mathrengyl Bearwalker in Darnassus takes it
   accept 5629 only Priest                     -- Laurna Morninglight: Priestess Alathea in Darnassus takes it
   train class
+
+step Lake Al'Ameth
+  tip South-east of Dolanaar, to Denalan. Lasher Sproutlings wander around him on the shore.
+  turnin 930                                  -- Denalan
+  turnin 931
+  accept 2399                                 -- Sprouted Frond, beside him
+  turnin 2399
+  collect 286017 quest 99050.1                -- Dewy Lasher Frond
+
+step Dolanaar again
+  turnin 99050                                -- Byancie
+  accept 99073
 
 step Taming the Beast
   only Hunter
@@ -336,6 +350,10 @@ step Taming the Beast
   kill 1996 quest 6102.1                      -- Strigid Screecher: tame it with the Taming Rod
   turnin 6102                                 -- Tame Beast
   accept 6103                                 -- Jocaste in Darnassus takes it
+
+step Sentinel Eralya Leafshadow
+  tip Take the road north-west from Dolanaar again; she still lies beside it, on the way to Darnassus.
+  turnin 99073
 
 # ---------------------------------------------------------------- Darnassus and Rut'theran
 
