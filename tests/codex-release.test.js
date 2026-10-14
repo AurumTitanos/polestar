@@ -98,7 +98,7 @@ test('instanceFacts + buildInstances: dungeons and raids from the client tables,
 	assert.equal(dm.map, 36);
 	assert.equal(dm.areaId, 1581);
 	assert.deepEqual(dm.levels, [10, 16, 21], 'entry from MapDifficulty, min from ContentTuning, max from the bosses');
-	assert.deepEqual(dm.entrance, { map: 1436, x: 30, y: 50, f: null }, 'the Corpse point on the zone holding it');
+	assert.deepEqual(dm.entrance, { map: 1436, x: 30, y: 50, f: null, approx: true }, 'the Corpse point on the zone holding it, approximate');
 	assert.deepEqual(
 		dm.bosses.map((b) => [b.name, b.npc, b.items]),
 		[

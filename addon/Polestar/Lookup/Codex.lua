@@ -296,7 +296,8 @@ local function decodeInstance(group, id, s)
 	}
 	if t[5] and t[5] ~= "" then
 		local e = split(t[5], ",")
-		rec.entrance = { map = tonumber(e[1]), x = tonumber(e[2]) / 10, y = tonumber(e[3]) / 10, f = e[4] ~= "" and e[4] or nil }
+		-- approx: the client's corpse point (where a ghost returns), not the way in.
+		rec.entrance = { map = tonumber(e[1]), x = tonumber(e[2]) / 10, y = tonumber(e[3]) / 10, f = e[4] ~= "" and e[4] or nil, approx = e[5] == "a" or nil }
 	end
 	if t[6] and t[6] ~= "" then rec.levels = numbers(t[6]) end
 	for i = 7, n do

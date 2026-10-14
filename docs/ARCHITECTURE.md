@@ -1861,11 +1861,21 @@ built.
   without open-world spawns at the instance's level, else one spawnless NPC
   whose name starts with it or is within two letters of it; "A and B"
   encounters name both). A boss's loot is its `items.json` drops at 1% or
-  more, best chance first. The entrance: a recorded one (Recorder `enter`,
-  `data/forever/instances.json`), else a guide's `goto x,y "<instance
-  name> ..."`, else the `Map` Corpse point (where a ghost comes back: near
-  the portal, not at it) on the zone holding it. `AreaTrigger` rows name no instance and the trigger nearest a
-  Corpse point is as often an inn or city trigger, so they are not used. Every
+  more, best chance first. The entrance (`chooseEntrance`): a recorded one
+  (Recorder `enter`, `data/forever/instances.json`), else the curated table
+  `tools/lib/codex/entrances.json` (per instance key: the point on the zone
+  map where one walks in, `{ key, instance, map, x, y, source, note }`, each
+  with its public source, checked against the corpse point and our guides'
+  gotos; every dungeon and raid in the Codex, Forever's own included, from
+  QuestieDB's Forever dungeon table, warcraft.wiki.gg and Wowhead Forever),
+  else a guide's `goto x,y "<instance name> ..."`, else the `Map` Corpse
+  point (where a ghost comes back: near the way in, not at it; the
+  Deadmines' is the portal deep in the Moonbrook mine, 200 yd from the
+  Defias Hideout one walks in at) on the zone holding it, marked
+  `approx: true` (packed as a fifth entrance field `a`, read as
+  `Codex.Instance(key).entrance.approx`). `AreaTrigger` rows name no instance
+  and the trigger nearest a Corpse point is as often an inn or city trigger,
+  so they are not used. Every
   NPC placed in an instance (`npcs.json` `instances`, from QuestieDB and
   recordings) belongs to it: its drops carry the instance. An instance's
   boss or mob the data ranks rare is not a rare unless RareScanner lists it.
@@ -1916,8 +1926,8 @@ built.
   `data/local/codex-extras` (when there is one), writes
   `data/local/codex-parity.json` and `.md` (per kind: total, matching,
   missing and different rows; a difference whose value comes from a
-  better-evidenced input, such as the client's corpse point for an entrance,
-  says so and counts as a match) and records the match per kind in its
+  better-evidenced input says so and counts as a match; a corpse point is
+  never taken for an entrance) and records the match per kind in its
   `meta.parity`; without the internal build it claims none. `codex parity
   [--ours <dir>] [--against <dir>]` reruns the comparison. The report also
   lists what only play can fill and the Recorder event that fills it
@@ -1930,7 +1940,7 @@ built.
   |---|---:|---:|---:|
   | instances | 44 | 37 | 84.1% |
   | instance levels | 29 | 29 | 100.0% |
-  | instance entrances | 14 | 10 | 71.4% |
+  | instance entrances | 14 | 13 | 92.9% |
   | bosses | 373 | 272 | 72.9% |
   | bosses with loot | 265 | 262 | 98.9% |
   | boss loot items | 2066 | 1671 | 80.9% |
@@ -1963,8 +1973,10 @@ built.
   | quest chains | 489 | 469 | 95.9% |
 
   The gaps: seven Forever instances AtlasLoot lists ahead of release are not
-  in the client (no `Map` row); Forever instances have no corpse point, so
-  their entrances wait for a recording; AtlasLoot's extra bosses (the Ring of
+  in the client (no `Map` row); the Hall of Thanes' entrance stays
+  different (QuestieDB's Ironforge 27.6,47.8, where Wowhead Forever's
+  comments put the quest givers "near the entrance", against 43.5,52) until
+  a recording settles it; AtlasLoot's extra bosses (the Ring of
   Law's fighters, rare spawns, chests) are not `DungeonEncounter` rows;
   reputation standings that vendors gate in gossip, and battleground rewards
   AtlasLoot files as PvP, are in no client table (`ItemSparse` carries no

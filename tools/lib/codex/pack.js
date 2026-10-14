@@ -44,7 +44,8 @@
 //   quest    level;minLevel;faction;races;classes;zone;startNpc;startObject;startItem;
 //            endNpc;endObject;pre;rewards;choices;preAny;<objective>...
 //            objective = <k|i|o|e><id>,<count>,<text>
-//   instance kind;forever(1|empty);areaId;map;entrance(map,x,y,f);levels;<boss>...
+//   instance kind;forever(1|empty);areaId;map;entrance(map,x,y,f[,a]);levels;<boss>...
+//            a: approximate (the client's corpse point, not the way in)
 //            boss = name,npc,item,item...
 //   faction  side            spell  kind;item;class            zone, skill: names only
 
@@ -252,7 +253,7 @@ function encodeInstance(rec) {
 		rec.forever ? '1' : '',
 		num(rec.areaId),
 		num(rec.map),
-		e ? [num(e.map), coord(e.x), coord(e.y), e.f || ''].join(',') : '',
+		e ? [num(e.map), coord(e.x), coord(e.y), e.f || '', ...(e.approx ? ['a'] : [])].join(',') : '',
 		list(rec.levels),
 	];
 	const bosses = (rec.bosses || []).map((b) => [esc(b.name), num(b.npc), ...(b.items || []).map(num)].join(','));

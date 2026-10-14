@@ -11,6 +11,9 @@
 //   buildInstances(facts, ctx)          -> { instances: { key: Instance }, bossInstance: { npc: key },
 //                                          npcInstance: { npc: key } (bosses and every NPC placed inside) }
 //   curatedEntrances(guidesDir)         -> [ { label, map|null, zone|null, x, y } ] (goto lines with a label)
+//   loadEntranceTable(file?)            entrances.json -> { key: { key, instance, map, x, y, source, note } }
+//   chooseEntrance({ name, recorded, table, guides, corpse, zones, frames, prefer })
+//                                       -> { map, x, y, f, approx? } | null (the `entrance` rule below)
 //
 // facts = { maps: instanceMapsOf rows (journal.js), encounters: { mapId: [ { id, name, order } ] },
 //   recMin: { mapId: level }, entry: { mapId: level }, era: Set(mapId)|null, lfgNames: [normalised names] }
@@ -35,10 +38,14 @@
 //   levels       entry: MapDifficulty's "at least level N" message; min:
 //                ContentTuning MinLevelSquish of the map's LFGDungeons entries
 //                (or MapDifficulty's); max: the highest boss level, at most 60.
-//   entrance     a recorded entrance (Recorder `enter`), else a guide's
-//                `goto x,y "<instance name> ..."` line, else the map's Corpse
-//                point (where a ghost comes back, near but not at the portal)
-//                on the zone holding it.
+//   entrance     best evidence first: a recorded entrance (Recorder `enter`,
+//                the most-seen one), else the curated table
+//                (tools/lib/codex/entrances.json: the point on the zone map
+//                where one walks in, each with its public source), else a
+//                guide's `goto x,y "<instance name> ..."` line, else the map's
+//                Corpse point (where a ghost comes back: near, not at, the way
+//                in; the Deadmines' is the portal deep in the Moonbrook mine)
+//                on the zone holding it, marked `approx: true`.
 //                AreaTrigger rows name no instance, and the trigger nearest
 //                the Corpse point is as often a city or inn trigger, so they
 //                are not used.
@@ -177,17 +184,47 @@ function curatedEntrances(dir) {
 	return out;
 }
 
+// The curated entrance table (entrances.json), by instance key.
+function loadEntranceTable(file = path.join(__dirname, 'entrances.json')) {
+	if (!fs.existsSync(file)) return {};
+	const out = {};
+	for (const e of JSON.parse(fs.readFileSync(file, 'utf8')).entrances || []) out[e.key] = e;
+	return out;
+}
+
+// An instance's entrance (the `entrance` rule in the header). recorded:
+// Recorder entrances [ { map, x, y, f?, n } ]; table: its entrances.json entry
+// or null; guides: curatedEntrances(); corpse: the Map row's { c, x, y } |
+// null; prefer: uiMap ids of the zones holding it (for the corpse point).
+function chooseEntrance({ name, recorded = [], table = null, guides = [], corpse = null, zones = {}, frames = {}, prefer = [] }) {
+	const rec = recorded.slice().sort((a, b) => num(b.n) - num(a.n))[0];
+	if (rec && rec.map) return { map: Number(rec.map), x: round1(rec.x), y: round1(rec.y), f: rec.f === 'e' ? 'e' : null };
+	if (table && table.map) return { map: Number(table.map), x: round1(table.x), y: round1(table.y), f: null };
+	const n = norm(name);
+	const zoneId = (zname) => {
+		const z = Object.values(zones).find((x) => norm(x.name) === norm(zname));
+		return z ? z.id : null;
+	};
+	const g = guides.find((c) => n.length >= 5 && norm(c.label).includes(n) && (c.map || (c.zone && zoneId(c.zone))));
+	if (g) return { map: g.map || zoneId(g.zone), x: round1(g.x), y: round1(g.y), f: null };
+	if (!corpse) return null;
+	const p = zonePoint(frames, corpse.c, corpse.x, corpse.y, prefer);
+	return p ? { ...p, approx: true } : null;
+}
+
 // ---------------------------------------------------------------------------
 // Instances
 // ---------------------------------------------------------------------------
 
 // ctx = { npcs: npcs.json, items: items.json, zones: zones.json, frames: map-frames.json
-//   forever frames, recorded: instances.json (Recorder), curated: curatedEntrances() }
+//   forever frames, recorded: instances.json (Recorder), entranceTable: loadEntranceTable(),
+//   curated: curatedEntrances() }
 function buildInstances(facts, ctx = {}) {
 	const npcsIn = ctx.npcs || {};
 	const itemsIn = ctx.items || {};
 	const zonesIn = ctx.zones || {};
 	const recorded = ctx.recorded || {};
+	const entranceTable = ctx.entranceTable || {};
 	const lfg = new Set(facts.lfgNames || []);
 
 	// Name -> npcs.json ids.
@@ -303,22 +340,16 @@ function buildInstances(facts, ctx = {}) {
 		if (max !== null && min !== null && max < min) max = min;
 		const levels = min || entry || max ? [entry, min ?? max, max ?? min] : null;
 		// Entrance.
-		let entrance = null;
-		const recE = (rec.entrances || []).slice().sort((a, b) => num(b.n) - num(a.n))[0];
-		if (recE && recE.map) entrance = { map: Number(recE.map), x: round1(recE.x), y: round1(recE.y), f: recE.f === 'e' ? 'e' : null };
-		if (!entrance) {
-			const n = norm(m.name);
-			const zoneId = (name) => {
-				const z = Object.values(zonesIn).find((x) => norm(x.name) === norm(name));
-				return z ? z.id : null;
-			};
-			const c = (ctx.curated || []).find((g) => n.length >= 5 && norm(g.label).includes(n) && (g.map || (g.zone && zoneId(g.zone))));
-			if (c) entrance = { map: c.map || zoneId(c.zone), x: round1(c.x), y: round1(c.y), f: null };
-		}
-		if (!entrance && m.corpse) {
-			const prefer = Object.values(zonesIn).filter((z) => z.areaId && m.zones.includes(z.areaId)).map((z) => z.id);
-			entrance = zonePoint(ctx.frames || {}, m.corpse.c, m.corpse.x, m.corpse.y, prefer);
-		}
+		const entrance = chooseEntrance({
+			name: m.name,
+			recorded: rec.entrances || [],
+			table: entranceTable[key] || null,
+			guides: ctx.curated || [],
+			corpse: m.corpse || null,
+			zones: zonesIn,
+			frames: ctx.frames || {},
+			prefer: Object.values(zonesIn).filter((z) => z.areaId && (m.zones || []).includes(z.areaId)).map((z) => z.id),
+		});
 		instances[key] = {
 			key,
 			name: m.name,
@@ -343,4 +374,4 @@ function buildInstances(facts, ctx = {}) {
 	return { instances, bossInstance, npcInstance };
 }
 
-module.exports = { instanceFacts, buildInstances, curatedEntrances, MIN_LOOT };
+module.exports = { instanceFacts, buildInstances, curatedEntrances, loadEntranceTable, chooseEntrance, MIN_LOOT };

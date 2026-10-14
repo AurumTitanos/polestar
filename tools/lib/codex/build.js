@@ -14,7 +14,8 @@
 //   flbis|null,                                           (tools/lib/consume/foreverlevelingbis.js)
 //   atlasloot|null, rarescanner|null                      (--local-extras only)
 //   client: clientFacts(tables) + { instanceMaps, instances: instanceFacts() }|null,
-//   curated: [item ids guides collect], entrances: curatedEntrances(), localExtras,
+//   curated: [item ids guides collect], entrances: curatedEntrances(),
+//   entranceTable: loadEntranceTable() (tools/lib/codex/entrances.json), localExtras,
 // }
 // Without AtlasLoot and dungeons.json the instances come from the client
 // tables (tools/lib/codex/instances.js).
@@ -31,7 +32,7 @@ const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const { emitPack, packOrder, ADDON, SCHEMA } = require('./pack');
-const { instanceFacts, buildInstances, curatedEntrances } = require('./instances');
+const { instanceFacts, buildInstances, curatedEntrances, loadEntranceTable } = require('./instances');
 const { loadWowhead, chanceOf } = require('./wowhead');
 const { blockingPrereqs } = require('../data/prereqs');
 
@@ -573,6 +574,7 @@ function mergeCodex(inputs) {
 			zones: zonesIn,
 			frames: (fv.mapFrames && fv.mapFrames.forever) || {},
 			recorded: fv.instances || {},
+			entranceTable: inputs.entranceTable || {},
 			curated: inputs.entrances || [],
 			quality: (id) => (cl.items[id] ? cl.items[id].quality : null),
 			wowhead: wh,
@@ -1215,7 +1217,7 @@ async function loadInputs({ addons, offline = false, dataDir, sourcesDir, build 
 		warnings.push(`Era client tables ${ERA_BUILD}: ${err.message}`);
 	}
 	client.instances = instanceFacts(loaded.tables, eraMaps);
-	return { forever, atlasloot, rarescanner, flbis, client, wowhead, curated: curatedCollects(guidesDir), entrances: curatedEntrances(guidesDir), localExtras: !!localExtras, warnings };
+	return { forever, atlasloot, rarescanner, flbis, client, wowhead, curated: curatedCollects(guidesDir), entrances: curatedEntrances(guidesDir), entranceTable: loadEntranceTable(), localExtras: !!localExtras, warnings };
 }
 
 // Item ids that Polestar's own guides obtain (`collects` headers under guides/).
@@ -1253,6 +1255,8 @@ function sourcesMeta(inputs) {
 		const n = Object.keys(wh.npc).length + Object.keys(wh.object).length + Object.keys(wh.item).length;
 		if (n) out.push({ name: 'Wowhead Forever database (wowhead.com/forever): NPC and object pages, item tooltips', version: `${n} entities; cache data/sources/wowhead/codex`, licence: 'Public web pages; facts only (levels, classification, positions, drop counts, requirements)' });
 	}
+	const ne = Object.keys(inputs.entranceTable || {}).length;
+	if (ne && !inputs.atlasloot) out.push({ name: 'Curated instance entrances (tools/lib/codex/entrances.json): QuestieDB Forever dungeon table, warcraft.wiki.gg, Wowhead Forever', version: `${ne} entrances`, licence: 'Facts only (coordinates), each entry with its source' });
 	if (inputs.client) out.push({ name: 'World of Warcraft: Forever client tables via wago.tools', version: inputs.client.build, licence: 'Blizzard Entertainment game data, facts only' });
 	if (inputs.client && inputs.client.eraBuild) out.push({ name: 'World of Warcraft Classic Era client item tables via wago.tools (items missing from the Forever tables)', version: inputs.client.eraBuild, licence: 'Blizzard Entertainment game data, facts only' });
 	return out;
