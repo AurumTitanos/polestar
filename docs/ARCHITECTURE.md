@@ -1962,7 +1962,19 @@ exclusive group: pfQuest `close` united with QuestieDB `exclusiveTo`.
    licence file (CurseForge says GPL-3.0; the maintainers say to treat them as
    all rights reserved, Questie issue #4447). The data stays in `data/`, and
    only the importer is in this repository.
-3. **Polestar corrections** (`tools/lib/data/corrections.json`, committed):
+3. **Wowhead Forever's change notes** (`tools/lib/data/wowhead.js`,
+   `--no-wowhead` skips them): the quest list of every zone and city page on
+   wowhead.com/forever (cached a day in `data/sources/wowhead/zones.json`;
+   `--offline` reads the cache). A quest Wowhead marks updated with "Experience
+   X instead of Y", "Level X instead of Y" or "Requires level X instead of Y"
+   gets X where its value is still the old Y (for XP, also where it has none);
+   any other value is left alone, and the quest's `source` gains `wowhead:xp`,
+   `wowhead:level` or `wowhead:minLevel`. Only rows whose category is the
+   zone's area count: Wowhead answers an unknown zone path with a generic list.
+   Its Forever database also lists datamined quests that are not live (`<NYI>`
+   placeholders, Season of Discovery leftovers), so presence there is not
+   evidence that a quest is in the game.
+4. **Polestar corrections** (`tools/lib/data/corrections.json`, committed):
    facts QuestieDB or pfQuest get wrong or lack, each with its source in a `note`:
    quest fields (`set`), item sources to drop (`removeDrops`, `removeVendors`),
    npc/object fields (`set`: the Forever elite and rare ranks QuestieDB's
@@ -1972,10 +1984,10 @@ exclusive group: pfQuest `close` united with QuestieDB `exclusiveTo`.
    cleanup is general rather than per quest: `pre`, `preAll` and `preAny`
    never contain the quest itself or an id from its `excl`. QuestieDB
    preQuestSingle sometimes lists the whole exclusive group.
-4. **Recordings** (`data/recordings`), which win over all of the above.
+5. **Recordings** (`data/recordings`), which win over all of the above.
 
 `source` on every quest, npc, object and item lists its contributors in
-that order: `pfquest`, `questie-forever`, `polestar-correction`, `recorder`, plus the XP source tag.
+that order: `pfquest`, `questie-forever`, `wowhead:*`, `polestar-correction`, `recorder`, plus the XP source tag.
 Blizzard map tables come from wago.tools: Classic Era (`wow_classic_era`) for
 the Era frames pfQuest's coordinates use, and the Forever client
 (`wow_classic_beta` builds 1.60+, `--forever-build`, `--no-forever`) for
@@ -2009,12 +2021,16 @@ Quest `xp`: recordings first (`rewardXpBase` wins; otherwise the largest
 `rewardXp` or turn-in `xpReward` observed while the player was at most 5 levels
 above the quest, since Classic reduces XP beyond that, so an over-levelled
 observation never overwrites a full one; `source` names `recorder:xp-base`,
-`recorder:xp-log` or `recorder:xp-turnin`). Then QuestieDB's QuestXP. Then, for
-quests neither has, the Forever web databases (`--no-web-xp` skips them;
-results are cached in `data/sources/webxp/quest-xp.json`): wowforevertalents.com
-(Forever beta client cache, tag `wowforevertalents:xp`), else foreverchanges.pro
-(Wowhead's Forever database: the quest's reward, `foreverchanges:xp`, or its
-quest-chain list, `foreverchanges:xp-chain`).
+`recorder:xp-log` or `recorder:xp-turnin`). Then QuestieDB's QuestXP, with
+Wowhead's "Experience X instead of Y" notes applied where it still has the old
+value (above). Then, for quests still without XP, the Forever web databases
+(`--no-web-xp` skips them; results are cached in
+`data/sources/webxp/quest-xp.json`): wowforevertalents.com (Forever beta client
+cache, tag `wowforevertalents:xp`), else foreverchanges.pro (Wowhead's Forever
+database: the quest's reward, `foreverchanges:xp`, or its quest-chain list,
+`foreverchanges:xp-chain`), else the XP on Wowhead's zone quest list
+(`wowhead:xp`). `meta.counts` gives `questXpFromWeb`, `questXpFromWowhead` and
+`wowheadChanged` ({ xp, level, minLevel }).
 
 ### Recordings (`data/recordings/<session>.json`)
 

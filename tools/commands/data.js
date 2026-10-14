@@ -26,6 +26,8 @@ options:
   --no-forever         skip the Forever client tables (zones and frames from Era only)
   --no-web-xp          skip quest XP lookups on wowforevertalents.com / foreverchanges.pro
                        for quests QuestieDB has no XP for (results cached in data/sources/webxp/)
+  --no-wowhead         skip Wowhead Forever's change notes (XP, levels) and its XP for quests
+                       still without any (zone lists cached a day in data/sources/wowhead/)
   --recordings <dir>   recordings folder (default: data/recordings)
   --out <dir>          output folder (default: data/forever)
   --sources <dir>      source cache folder (default: data/sources)
@@ -51,6 +53,7 @@ async function run(argv) {
 				'forever-build': { type: 'string' },
 				'no-forever': { type: 'boolean' },
 				'no-web-xp': { type: 'boolean' },
+				'no-wowhead': { type: 'boolean' },
 				recordings: { type: 'string' },
 				out: { type: 'string' },
 				sources: { type: 'string' },
@@ -88,6 +91,7 @@ async function run(argv) {
 		forever: !values['no-forever'],
 		foreverBuild: values['forever-build'],
 		webXp: !values['no-web-xp'],
+		wowhead: !values['no-wowhead'],
 		recordingsDir: abs(values.recordings),
 		outDir: abs(values.out),
 		sourcesDir: abs(values.sources),

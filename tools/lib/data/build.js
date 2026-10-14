@@ -1,7 +1,9 @@
 'use strict';
 // `data build`: pfQuest + QuestieDB (Forever) + Blizzard map tables +
 // recordings -> data/forever/*.json (schema: docs/ARCHITECTURE.md, Toolchain ->
-// Reference data). Precedence: recordings > questie-forever > pfQuest.
+// Reference data). Precedence: recordings > questie-forever > pfQuest; Wowhead
+// Forever's change notes update values we still hold from before Forever
+// (tools/lib/data/wowhead.js).
 
 const crypto = require('node:crypto');
 const fs = require('node:fs');
@@ -17,6 +19,7 @@ const { DEFAULTS: SPAWN_DEFAULTS } = require('./spawns');
 const { readQuestie, REPO: QUESTIEDB_REPO, QUESTIE_REPO } = require('./questie');
 const { applyQuestie } = require('./questie-merge');
 const { loadWebXp, WFT, FC } = require('./webxp');
+const { loadZoneQuests, applyChangeNotes, fillWowheadXp, BASE: WOWHEAD } = require('./wowhead');
 const CORRECTIONS = require('./corrections.json');
 
 // tools/lib/data/corrections.json: quests `set` fields; items `removeDrops`/`removeVendors`; npcs/objects `set`
@@ -175,8 +178,16 @@ async function buildData(options = {}) {
 			return fr ? { c: fr.c, wx: fr.top + ((fr.bottom - fr.top) * y) / 100, wy: fr.left + ((fr.right - fr.left) * x) / 100 } : null;
 		};
 		qstats = applyQuestie(norm, qz, { areaToUiMap, liveMaps: live, spawnOptions, toWorld });
-		qstats.corrections = applyCorrections(norm);
 	}
+
+	// Wowhead Forever's change notes, before our own corrections.
+	let wh = null;
+	if (qz && options.wowhead) {
+		const zl = await loadZoneQuests({ sourcesDir, zones, offline, fetchImpl: options.fetchImpl, log });
+		warnings.push(...zl.warnings);
+		wh = { zl, changed: applyChangeNotes(norm.quests, zl.rows), xpFilled: 0 };
+	}
+	if (qz) qstats.corrections = applyCorrections(norm);
 
 	// Quest XP still missing after QuestieDB, from the Forever web databases.
 	let webxp = null;
@@ -190,6 +201,7 @@ async function buildData(options = {}) {
 			if (!q.source.includes(source)) q.source.push(source);
 		}
 	}
+	if (wh) wh.xpFilled = fillWowheadXp(norm.quests, wh.zl.rows);
 
 	// Forever's Faction rows win by id; Era rows fill the rest (Forever-only reputations: 2740 Kirin Tor, ...).
 	const factionRows = new Map(wago.tables.Faction.map((r) => [Number(r.ID), r]));
@@ -239,9 +251,18 @@ async function buildData(options = {}) {
 			copyright: null,
 		});
 	}
+	if (wh) {
+		sources.push({
+			name: 'Wowhead Forever database: zone quest lists (XP, levels, Forever change notes)',
+			url: WOWHEAD,
+			revision: `${wh.zl.rows.size} listed quests${wh.zl.fetchedAt ? ` read ${wh.zl.fetchedAt}` : ''}; cache ${path.relative(root, wh.zl.file)}`,
+			license: 'Public web pages; facts (ids, XP, levels) only, used locally',
+			copyright: null,
+		});
+	}
 	if (fwago) {
 		sources.push({
-			name: `World of Warcraft: Forever client tables (UiMap, UiMapAssignment, AreaTable${races ? ', ChrRaces, ChrClasses, CharBaseInfo' : ''}${fwago.tables.Faction ? ', Faction' : ''}) via wago.tools`,
+			name: `World of Warcraft: Forever client tables (UiMap, UiMapAssignment, AreaTable${races ? ', ChrRaces, ChrClasses, CharBaseInfo' : ''}${fwago.tables.Faction ? ', Faction' : ''}${fwago.tables.QuestV2 ? ', QuestV2' : ''}) via wago.tools`,
 			url: `https://wago.tools/db2?build=${fwago.build}`,
 			revision: `${fwago.product} ${fwago.build}`,
 			license: 'Blizzard Entertainment game client data; factual map geometry, names and race/class combinations only',
@@ -312,6 +333,8 @@ async function buildData(options = {}) {
 						questsWithXp: Object.values(norm.quests).filter((q) => Number.isFinite(q.xp)).length,
 						questXpFromQuestie: qstats.questXp,
 						questXpFromWeb: webxp ? webxp.xp.size : 0,
+						questXpFromWowhead: wh ? wh.xpFilled : 0,
+						wowheadChanged: wh ? wh.changed : null,
 						prereqsCleaned: qstats.prereqsCleaned,
 						reverseLinks: qstats.reverseLinks,
 						itemsRegainedEntries: qstats.itemsRegainedEntries,

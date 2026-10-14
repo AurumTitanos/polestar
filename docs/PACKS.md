@@ -102,9 +102,10 @@ polestar dev --play               # lint and build on every save, with the playg
      same job builds the zip, and a second job, run only once that passes,
      attaches it to a GitHub release: the only job allowed to write) and
      `.devcontainer/` (Codespaces). Both clone Polestar and build its
-     reference data with `polestar data build --no-web-xp`: that skips the
-     quest XP lookups on community web sites, but the build still clones
-     pfQuest and downloads the client tables from wago.tools. So they need
+     reference data with `polestar data build --no-web-xp --no-wowhead`: that
+     skips the quest lookups on community web sites (Forever XP databases,
+     Wowhead), but the build still clones pfQuest and downloads the client
+     tables from wago.tools. So they need
      the address of Polestar's public repository. `new` reads it from your
      clone's `git remote get-url origin` and writes it as https, quoted: an
      SSH address (`git@host:owner/repo.git`, `ssh://`) or an `http://` one

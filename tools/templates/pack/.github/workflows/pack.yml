@@ -24,7 +24,7 @@ jobs:
           git clone --depth 1 "{{repo}}" "$RUNNER_TEMP/polestar"
           cd "$RUNNER_TEMP/polestar"
           npm link
-          polestar data build --no-web-xp
+          polestar data build --no-web-xp --no-wowhead
       - name: Lint
         run: polestar lint --format github
       - name: Playtest
