@@ -8277,7 +8277,6 @@ do
 						{ t = "turnin", quest = 234, title = "Coldridge Valley Mail Delivery", npc = 786, npcName = "Grelin Whitebeard", map = 1426, x = 25.08, y = 75.71, f = "e", note = "Grelin Whitebeard" },
 						{ t = "accept", quest = 182, title = "The Troll Cave", npc = 786, npcName = "Grelin Whitebeard", minLevel = 1, qlvl = 4, map = 1426, x = 25.08, y = 75.71, f = "e" },
 						{ t = "level", level = 4, note = "A few Frostmane Troll Whelps if you are short" },
-						{ t = "accept", quest = 3364, title = "Scalding Mornbrew Delivery", npc = 12738, npcName = "Nori Pridedrift", minLevel = 4, qlvl = 5, map = 1426, x = 24.98, y = 75.96, f = "e", note = "Nori Pridedrift, next to him" },
 					},
 				},
 				{
@@ -8295,6 +8294,17 @@ do
 					goals = {
 						{ t = "turnin", quest = 182, title = "The Troll Cave", npc = 786, npcName = "Grelin Whitebeard", map = 1426, x = 25.08, y = 75.71, f = "e" },
 						{ t = "accept", quest = 218, title = "The Stolen Journal", npc = 786, npcName = "Grelin Whitebeard", minLevel = 1, qlvl = 5, pre = { 182 }, preTitles = { [182] = "The Troll Cave" }, map = 1426, x = 25.08, y = 75.71, f = "e" },
+						{ t = "accept", quest = 3364, title = "Scalding Mornbrew Delivery", npc = 12738, npcName = "Nori Pridedrift", minLevel = 4, qlvl = 5, map = 1426, x = 24.98, y = 75.96, f = "e", note = "Nori Pridedrift: timed, five minutes to reach Durnan in Anvilmar" },
+					},
+				},
+				{
+					title = "Anvilmar",
+					goals = {
+						{ t = "turnin", quest = 3361, title = "A Refugee's Quandary", npc = 8416, npcName = "Felix Whindlebolt", map = 1426, x = 28.55, y = 67.64, f = "e", note = "Felix Whindlebolt" },
+						{ t = "turnin", quest = 3364, title = "Scalding Mornbrew Delivery", npc = 836, npcName = "Durnan Furcutter", map = 1426, x = 28.77, y = 66.37, f = "e", note = "Durnan Furcutter, inside Anvilmar" },
+						{ t = "accept", quest = 3365, title = "Bring Back the Mug", npc = 836, npcName = "Durnan Furcutter", minLevel = 4, qlvl = 5, pre = { 3364 }, preTitles = { [3364] = "Scalding Mornbrew Delivery" }, map = 1426, x = 28.77, y = 66.37, f = "e" },
+						{ t = "turnin", quest = 1599, title = "Beginnings", npc = 460, npcName = "Alamar Grimm", map = 1426, x = 28.65, y = 66.14, f = "e", only = { classes = { "WARLOCK" } }, note = "Alamar Grimm: Summon Imp" },
+						{ t = "accept", quest = 94373, title = "Call of Earth", npc = 257446, npcName = "Teo Hammerstorm", minLevel = 4, qlvl = 4, map = 1426, x = 28.79, y = 66.18, f = "e", only = { classes = { "SHAMAN" } }, note = "Teo Hammerstorm, inside Anvilmar" },
 					},
 				},
 				{
@@ -8309,22 +8319,7 @@ do
 					goals = {
 						{ t = "turnin", quest = 218, title = "The Stolen Journal", npc = 786, npcName = "Grelin Whitebeard", map = 1426, x = 25.08, y = 75.71, f = "e" },
 						{ t = "accept", quest = 282, title = "Senir's Observations", npc = 786, npcName = "Grelin Whitebeard", minLevel = 1, qlvl = 5, pre = { 218 }, closedBy = { 287 }, preTitles = { [218] = "The Stolen Journal", [287] = "Frostmane Hold" }, map = 1426, x = 25.08, y = 75.71, f = "e" },
-					},
-				},
-				{
-					title = "Anvilmar",
-					goals = {
-						{ t = "turnin", quest = 3361, title = "A Refugee's Quandary", npc = 8416, npcName = "Felix Whindlebolt", map = 1426, x = 28.55, y = 67.64, f = "e", note = "Felix Whindlebolt" },
-						{ t = "turnin", quest = 3364, title = "Scalding Mornbrew Delivery", npc = 836, npcName = "Durnan Furcutter", map = 1426, x = 28.77, y = 66.37, f = "e", note = "Durnan Furcutter, inside Anvilmar" },
-						{ t = "accept", quest = 3365, title = "Bring Back the Mug", npc = 836, npcName = "Durnan Furcutter", minLevel = 4, qlvl = 5, pre = { 3364 }, preTitles = { [3364] = "Scalding Mornbrew Delivery" }, map = 1426, x = 28.77, y = 66.37, f = "e" },
-						{ t = "turnin", quest = 1599, title = "Beginnings", npc = 460, npcName = "Alamar Grimm", map = 1426, x = 28.65, y = 66.14, f = "e", only = { classes = { "WARLOCK" } }, note = "Alamar Grimm: Summon Imp" },
-						{ t = "accept", quest = 94373, title = "Call of Earth", npc = 257446, npcName = "Teo Hammerstorm", minLevel = 4, qlvl = 4, map = 1426, x = 28.79, y = 66.18, f = "e", only = { classes = { "SHAMAN" } }, note = "Teo Hammerstorm, inside Anvilmar" },
-					},
-				},
-				{
-					title = "Nori Pridedrift",
-					goals = {
-						{ t = "turnin", quest = 3365, title = "Bring Back the Mug", npc = 12738, npcName = "Nori Pridedrift", map = 1426, x = 24.98, y = 75.96, f = "e", note = "Back at Grelin's camp" },
+						{ t = "turnin", quest = 3365, title = "Bring Back the Mug", npc = 12738, npcName = "Nori Pridedrift", map = 1426, x = 24.98, y = 75.96, f = "e", note = "Nori Pridedrift, next to him" },
 						{ t = "collect", quest = 94373, title = "Call of Earth", item = 264356, itemName = "Iceclaw Bear Pendant", oi = 1, map = 1426, x = 25.86, y = 78.26, f = "e", spots = { { x = 26.7, y = 79.4, r = 57, n = 11 }, { x = 28.6, y = 80.5, r = 60, n = 15 }, { x = 29, y = 82.5, r = 55, n = 6 }, { x = 30.2, y = 80.4, r = 53, n = 11 }, { x = 22.8, y = 79.5, r = 55, n = 9 }, { x = 20.9, y = 76.5, r = 54, n = 9 } }, spread = true, only = { classes = { "SHAMAN" } }, note = "Iceclaw Bear Pendants, from the Frostmane Troll Whelps on the slopes above the camp" },
 					},
 				},
