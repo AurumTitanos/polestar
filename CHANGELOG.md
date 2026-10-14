@@ -70,6 +70,8 @@
 - `record import --anonymize` for a file a player sent in: character names and
   realms are dropped, a short hash keys the character (its sessions still
   group together) and no raw copy is archived.
+- `npm test` passes on Windows: AtlasLoot's missing-file warnings and the
+  install test's file names use `/` there too (thanks @CDVolvik).
 
 ## 0.2.1 (2026-10-14)
 
