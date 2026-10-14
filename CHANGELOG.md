@@ -2,6 +2,10 @@
 
 ## 0.2.2 (unreleased)
 
+### For players
+
+- Distances can read in metres: Options, Arrow & routes, Distances.
+
 ### For guide authors
 
 - A skill for coding agents, `skills/polestar-guide-pack/`: the workflow from

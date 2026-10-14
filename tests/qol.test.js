@@ -855,6 +855,21 @@ test('death: as a ghost the arrow points at the faster choice; resurrection rele
 	assert.equal(out[4], true, 'no more targets after resurrection');
 });
 
+test('death: in metres the advice gives the distances in metres', () => {
+	const [note] = run(`
+		Polestar.Set("nav.distanceUnit", "metres")
+		QoL.SetData({ spiritHealers = { { 0, 20, 0, 9000, 50, 49 } }, flightMasters = {} })
+		q.player = { c = 0, wx = 0, wy = 0 }
+		local _, cx, cy = q.mapPoint(0, -400)
+		q.corpse = { cx, cy }
+		q.level = 8
+		q.ghost = true
+		stub.fire("PLAYER_ALIVE")
+		emit(QoL.GetDeathAdvice().note)
+	`);
+	assert.equal(note, 'Resurrect at the Spirit Healer (18 m): no resurrection sickness at your level.');
+});
+
 test('death: helper off does nothing', () => {
 	const [sets, pins] = run(`
 		set("deathHelper", false)

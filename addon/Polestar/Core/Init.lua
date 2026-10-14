@@ -47,6 +47,23 @@ function ns.EscapeText(s)
 	return (s:gsub("|", "||"))
 end
 
+-- A distance in yards (the game's unit) as the player reads it, in the unit
+-- of the nav.distanceUnit setting: "120 yd", or "110 m" and "1.2 km" from
+-- 1000 m. opts.round = 5 rounds to the nearest 5 (the rares' toasts);
+-- opts.compact = true writes yards from 1000 as "1.2k yd".
+local YARD_METRES = 0.9144
+function ns.FormatDistance(yards, opts)
+	local round = opts and opts.round or 1
+	if ns.Get("nav.distanceUnit") == "metres" then
+		local m = yards * YARD_METRES
+		local n = math.floor(m / round + 0.5) * round
+		if n >= 1000 then return L["%.1f km"]:format(m / 1000) end
+		return L["%d m"]:format(n)
+	end
+	if opts and opts.compact and yards >= 1000 then return L["%.1fk yd"]:format(yards / 1000) end
+	return L["%d yd"]:format(math.floor(yards / round + 0.5) * round)
+end
+
 -- The errors Polestar caught this session, for the report a player copies
 -- (UI/Report.lua): each message's first line with how often it came, oldest
 -- first, the last few kept.

@@ -38,6 +38,8 @@ ns.RegisterDefaults("nav", {
 	useTomTomArrow = false,
 	blizzardWaypoint = false,
 	arrivalSound = true,
+	-- How distances read: "yards" (the game's unit) or "metres" (ns.FormatDistance).
+	distanceUnit = "yards",
 	-- The arrow's colours (Theme tokens "arrow" and "arrowNear"): false = the
 	-- accent far away and success near; { r, g, b } = your own.
 	arrowColor = false,

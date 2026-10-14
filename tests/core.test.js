@@ -174,3 +174,20 @@ test('every slash command is registered by exactly one module (a second registra
 	const dupes = [...seen].filter(([, files]) => files.length > 1).map(([name, files]) => `${name}: ${files.join(', ')}`);
 	assert.deepEqual(dupes, []);
 });
+
+test('FormatDistance: yards or metres, rounding, kilometres from 1000 m, and the rares form', () => {
+	const [out] = runAddon({
+		addons: [CORE],
+		script: `
+			local F = Polestar.FormatDistance
+			Polestar.RegisterDefaults("nav", { distanceUnit = "yards" })
+			local rares = { round = 5, compact = true }
+			local yd = { F(120.4), F(0.6), F(1500), F(83, rares), F(998, rares), F(1500, rares) }
+			Polestar.Set("nav.distanceUnit", "metres")
+			local m = { F(120.4), F(0.6), F(1093), F(1094), F(1500), F(83, rares), F(1092, rares), F(1500, rares) }
+			emit({ yd = yd, m = m })`,
+	}).emitted;
+	assert.deepEqual(out.yd, ['120 yd', '1 yd', '1500 yd', '85 yd', '1000 yd', '1.5k yd']);
+	// 0.9144 m to the yard: 1093 yd = 999.4 m, 1094 yd = 1000.4 m; with rares' rounding 1092 yd = 998.5 m reads 1000 m, so 1.0 km.
+	assert.deepEqual(out.m, ['110 m', '1 m', '999 m', '1.0 km', '1.4 km', '75 m', '1.0 km', '1.4 km']);
+});

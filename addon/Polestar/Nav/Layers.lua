@@ -32,7 +32,7 @@ local function targetTooltip(tip)
 	if not target then return end
 	tip:SetText(target.label or "")
 	local dist = Nav.GetDistance()
-	if dist then tip:AddLine(format(L["%d yd"], dist + 0.5), 1, 1, 1) end
+	if dist then tip:AddLine(ns.FormatDistance(dist), 1, 1, 1) end
 end
 
 local function updateTarget(world, minimap)

@@ -553,3 +553,18 @@ test('a shell subtitle wraps to two lines within the main column and cuts the re
 	assert.match(out.cut.text, /^A long subtitle that runs on\. .*\S\u2026$/);
 	assert.equal(out.hub.width, out.hub.bodyWidth);
 });
+
+test('Distances: the arrow row picks yards or metres; right-click restores yards', () => {
+	const [out] = run(`
+		UI.ShowOptions("guide")
+		O.Select("guide", "Arrow & routes")
+		local row = O.Controls("guide", "Arrow & routes")["nav.distanceUnit"]
+		local before = row.Button.Label:GetText()
+		row.Button:Click()
+		for _, r in ipairs(PolestarMenu.rows) do if r:IsShown() and r.Text:GetText() == "Metres" then r:Click() end end
+		local picked, label = Polestar.Get("nav.distanceUnit"), row.Button.Label:GetText()
+		row:Click("RightButton")
+		emit({ before = before, picked = picked, label = label, reset = Polestar.Get("nav.distanceUnit") })`,
+		{ between: 'Polestar.RegisterDefaults("nav", { distanceUnit = "yards" })' });
+	assert.deepEqual(out, { before: "Yards (the game's unit)", picked: 'metres', label: 'Metres', reset: 'yards' });
+});

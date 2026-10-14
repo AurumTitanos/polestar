@@ -146,7 +146,15 @@ Polestar.Get("ui.scale")                 -- dotted path; falls back to defaults
 Polestar.Set("ui.scale", 1.1)            -- writes PolestarDB.settings, fires SETTING_CHANGED
 Polestar.CharState()                      -- PolestarCharDB, always a table
 Polestar.IsNewCharacter()                 -- true when there was no saved PolestarCharDB as the addon loaded
+Polestar.FormatDistance(yards, opts)      -- "120 yd", or "110 m" / "1.2 km" under nav.distanceUnit = "metres"
 ```
+
+Every distance a player reads goes through `FormatDistance` (the arrow, the
+map target's tooltip, the death helper, the rares' toasts and view); text
+that embeds one takes the formatted string (`%s`). `opts.round = 5` rounds to
+the nearest 5, `opts.compact` writes yards from 1000 as "1.2k yd"
+(`Rares.YardsText`); metres turn to kilometres from 1000 m. The bug report
+keeps yards for whoever reads it.
 
 `PolestarDB = { schema = 1, settings = { [section] = { ... } }, packs = { [packId] = { off = true } }, welcomeSeen = 1 }`
 `PolestarCharDB = { schema = 1, guide = id|nil, tabs = { guideId, ... }, activeTab = n, absentAt = { [guideId] = place }, manual = { [guideId] = { ["s:g"] = true|"tick" } }, skipped = { [guideId] = { [stepIndex] = true, ["s:g"] = true } }, pins = { [guideId] = { step, done } }, offers = { [questID] = level }, shapes = { [guideId] = shape }, stepKeys = { [guideId] = { hash, ... } }, flags = { fp = { [name] = true }, ... }, welcomeSeen = 0|1 }`
@@ -928,7 +936,9 @@ Polestar.Nav.GetTarget() -> waypoint | nil
 Polestar.Nav.GetDistance() -> yards | nil      -- to an area target's edge, 0 inside it
 ```
 
-Settings live under `nav.*`. Nav hides itself in instances, on taxis, and when
+Settings live under `nav.*`; `nav.distanceUnit` (`"yards"`, the default, or
+`"metres"`) sets how distances read, and the arrow redraws its distance as
+soon as it changes. Nav hides itself in instances, on taxis, and when
 the target is on another continent (shows the zone name instead).
 
 An area target (a waypoint with `area`, yards: a spawn area) is reached

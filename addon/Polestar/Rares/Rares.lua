@@ -279,8 +279,7 @@ end
 
 function Rares.YardsText(yd)
 	if not yd then return nil end
-	if yd < 1000 then return format(L["%d yd"], floor(yd / 5 + 0.5) * 5) end
-	return format(L["%.1fk yd"], yd / 1000)
+	return ns.FormatDistance(yd, { round = 5, compact = true })
 end
 
 -- "just now", "12 min ago", "3 h ago", "2 days ago"

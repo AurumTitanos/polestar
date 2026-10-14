@@ -209,6 +209,16 @@ test('distance is in yards, and the colour shifts from accent to success as you 
 	assert.ok(out.near[2] > out.far[2], `blue channel moved toward success (${out.near[2]})`);
 });
 
+test('in metres the arrow redraws its distance at once, without waiting for it to change', () => {
+	const [out] = run(`
+		target(300, 400)                   -- 500 yd
+		stub.advance(0.2)
+		local yards = A.distText:GetText()
+		Polestar.Set("nav.distanceUnit", "metres")
+		emit({ yards = yards, metres = A.distText:GetText() })`);
+	assert.deepEqual(out, { yards: '500 yd', metres: '457 m' });
+});
+
 test('Era-frame targets convert through the registered Era bounds', () => {
 	const [out] = run(`
 		-- Era frame of map 9000 is offset from the live one: era (50, 50) is world (30, -40).

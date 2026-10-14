@@ -122,21 +122,22 @@ function Death.Decide(corpseYards, healerYards, speed, level, previous)
 end
 
 local function noteFor(a)
+	local D = ns.FormatDistance
 	if a.choice == "corpse" then
 		if a.healerYards and a.sickness > 0 then
-			return format(L["Run back to your corpse: %d yd (~%s). The Spirit Healer costs %s of resurrection sickness."],
-				floor(a.corpseYards + 0.5), QoL.Duration(a.corpseSeconds), QoL.Duration(a.sickness))
+			return format(L["Run back to your corpse: %s (~%s). The Spirit Healer costs %s of resurrection sickness."],
+				D(a.corpseYards), QoL.Duration(a.corpseSeconds), QoL.Duration(a.sickness))
 		end
-		return format(L["Run back to your corpse: %d yd (~%s)."], floor(a.corpseYards + 0.5), QoL.Duration(a.corpseSeconds))
+		return format(L["Run back to your corpse: %s (~%s)."], D(a.corpseYards), QoL.Duration(a.corpseSeconds))
 	end
 	if a.sickness == 0 then
-		return format(L["Resurrect at the Spirit Healer (%d yd): no resurrection sickness at your level."], floor(a.healerYards + 0.5))
+		return format(L["Resurrect at the Spirit Healer (%s): no resurrection sickness at your level."], D(a.healerYards))
 	end
 	if a.corpseYards then
-		return format(L["Resurrect at the Spirit Healer (%d yd): your corpse is %d yd away, longer than %s of sickness."],
-			floor(a.healerYards + 0.5), floor(a.corpseYards + 0.5), QoL.Duration(a.sickness))
+		return format(L["Resurrect at the Spirit Healer (%s): your corpse is %s away, longer than %s of sickness."],
+			D(a.healerYards), D(a.corpseYards), QoL.Duration(a.sickness))
 	end
-	return format(L["Resurrect at the Spirit Healer (%d yd)."], floor(a.healerYards + 0.5))
+	return format(L["Resurrect at the Spirit Healer (%s)."], D(a.healerYards))
 end
 
 local function point(a)

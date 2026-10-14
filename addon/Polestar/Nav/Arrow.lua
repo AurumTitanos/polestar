@@ -339,7 +339,7 @@ local function sample(elapsed)
 	local yards = floor(dist + 0.5)
 	if yards ~= lastYards then
 		lastYards = yards
-		distText:SetFormattedText(L["%d yd"], yards)
+		distText:SetText(ns.FormatDistance(yards))
 	end
 	local target = Nav.GetTarget()
 	applyColor(dist, target and target.r or Nav.DEFAULT_RADIUS)
@@ -460,6 +460,7 @@ end
 function Arrow:OnSettings()
 	frame:SetScale(clamp(ns.Get("nav.arrowScale"), 0.5, 2, 1))
 	frame:SetAlpha(clamp(ns.Get("nav.arrowAlpha"), 0.1, 1, 1))
+	lastYards = nil -- nav.distanceUnit: redraw the distance on the next sample
 	showEta = ns.Get("nav.arrowEta") and true or false
 	if not showEta and mode == "travel" then etaText:Hide() end
 	applyStyle(ns.Get("nav.arrowStyle") == "flat" and "flat" or "3d")

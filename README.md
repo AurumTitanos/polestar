@@ -210,7 +210,8 @@ map. Renders of every window and state, drawn without the game, are in
 ### Navigation
 
 - **A 3D waypoint arrow** points at the current goal, shifting from the
-  accent to jade as you arrive, with distance and ETA.
+  accent to jade as you arrive, with distance and ETA. Distances read in
+  yards, the game's unit, or in metres (Options, Arrow & routes).
 - **The travel planner** uses known flight paths, boats, zeppelins and your
   Hearthstone when they are faster. Each leg has its own caption on the arrow
   ("Fly to Crossroads", "Take the boat to Menethil Harbor", "Hearth to Razor

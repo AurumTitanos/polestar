@@ -147,6 +147,8 @@ local function arrowLine()
 	if not t then return L["Arrow: none"] end
 	local line = (L["Arrow: %s"]):format(plain(t.label or "?"))
 	local d = N.GetDistance and N.GetDistance()
+	-- Always yards, whatever nav.distanceUnit says: the report is read by
+	-- whoever fixes the bug, in the game's own unit.
 	if d then line = line .. SEP .. ("%d yd"):format(floor(d + 0.5)) end
 	if N.IsOverride and N.IsOverride() then
 		line = line .. SEP .. L["your own waypoint"]
