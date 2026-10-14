@@ -69,6 +69,10 @@
   raid quests and from instance maps, and the new `group [N]` modifier
   (`kill 1234 group 3`) says it outright. A guide with group content on its
   route carries `group = true`. `compile` now writes format 2 for every pack.
+- `travel chain --to <map,x,y>` drafts an approach chain (a cave, a climb)
+  from recorded walks to that spot: where the walks leave the straight line
+  to it, and the walked path from there as nodes with radii and captions,
+  ready for the local crossings file once checked in game.
 
 ### For contributors
 
