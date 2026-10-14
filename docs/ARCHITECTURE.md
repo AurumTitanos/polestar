@@ -1903,10 +1903,13 @@ built.
 ```
 quests.json   { "<id>": { id, title, level, minLevel, races, classes, start: { npc: [], object: [], item: [] },
                           end: { npc: [], object: [] }, pre: [ids], excl: [ids], next, objectives: [
-                          { type: "kill"|"item"|"object"|"event", id, count, text } ], objectiveText, zone, xp, source: [] } }
-npcs.json     { "<id>": { id, name, level, faction, spawns: { "<uiMapID>": { f: "e"|"l", pts: [[x, y], ...], more?: [[x, y], ...] } }, source: [] } }
-objects.json  { "<id>": { id, name, spawns: { ... same ... }, source: [] } }
-items.json    { "<id>": { id, name, drops: { npc: { "<id>": chance }, object: { "<id>": chance } }, vendors: [ids], source: [] } }
+                          { type: "kill"|"item"|"object"|"event", id, count, text } ], objectiveText, zone, xp,
+                          rewards?: { items: [ids], choices: [ids], money }, source: [] } }   (rewards: recorded only)
+npcs.json     { "<id>": { id, name, level, levelMax?, rank?, faction, roles?, spawns: { "<uiMapID>": { f: "e"|"l", pts: [[x, y], ...],
+                          more?: [[x, y], ...] } }, instances?: [instance map ids], encounter?: DungeonEncounter id, source: [] } }
+objects.json  { "<id>": { id, name, roles?, spawns: { ... same ... }, instances?: [instance map ids], source: [] } }
+items.json    { "<id>": { id, name, drops: { npc: { "<id>": chance }, object: { "<id>": chance } }, vendors: [ids], source: [],
+                          seen?: { npc|object: { "<id>": { n, of } } } } }   (chance in percent; seen: recorded loot counts)
 zones.json    { "<uiMapID>": { id, name, areaId, parent, type } }
 map-frames.json { era: { "<uiMapID>": { c, left, right, top, bottom } }, forever: { ... same, Forever client bounds ... } }
 professions.json { "<skillLineID>": { id, name, kind: "primary"|"gathering"|"secondary", ranks: [ { name, max, minLevel } ],
@@ -1968,6 +1971,8 @@ Forever's Skyborne bits 2^32 (High Order, Alliance) and 2^33 (Windshapers,
 Horde), past 32-bit `bit.band`: split them arithmetically (`races % 2^32`,
 `floor(races / 2^32)`). `Polestar_QuestDB` keeps the low 32 bits. Spawn `f` is the frame of
 those points (`"e"` Era, `"l"` live Forever). A frame's `c` is the instance map id (0 Eastern
+instances.json { "<instance map id>": { id, name, type: "party"|"raid", entrances: [ { map, x, y, n } ],
+                 encounters: { "<DungeonEncounter id>": { name, npcs: [ids], kills } }, source: ["recorder"] } }   (recorded only; {} without)
 Kingdoms, 1 Kalimdor; 2991, 2997 for Forever's new islands): the `continentID`
 `C_Map.GetWorldPosFromMapPos` returns.
 
@@ -2043,7 +2048,9 @@ exclusive group: pfQuest `close` united with QuestieDB `exclusiveTo`.
    cleanup is general rather than per quest: `pre`, `preAll` and `preAny`
    never contain the quest itself or an id from its `excl`. QuestieDB
    preQuestSingle sometimes lists the whole exclusive group.
-5. **Recordings** (`data/recordings`), which win over all of the above.
+5. **Recordings** (`data/recordings`), which win over all of the above;
+   finds (rares, kills, loot, treasures, instances; "Recordings" below) follow
+   the rules of their own paragraph there.
 
 `source` on every quest, npc, object and item lists its contributors in
 that order: `pfquest`, `questie-forever`, `wowhead:*`, `polestar-correction`, `recorder`, plus the XP source tag.
@@ -2151,6 +2158,13 @@ character:
   AFK counts zero; time between sessions counts nothing. A `/reload` costs its
   few seconds and continues the step.
 - Per character and guide, a frontier step: a later step closes its pass and
+**Instances.** npcs and objects inside a dungeon or raid get `instances`
+(instance map ids). QuestieDB gives them no coordinates, only their areas
+(`{ [areaId] = { { -1, -1 } } }`): an area's instance is its Forever
+`AreaTable` ContinentID when that `Map` row is InstanceType 1 (party) or 2
+(raid); without the `Map` table (an optional Forever table), an area no UiMap
+shows on a continent other than 0 and 1. Recorded `inst` fields add to them.
+
   opens the next; returning to it (tab switch, reload, new session) continues
   the pass; an earlier step (Prev, Goto back, a step un-done) is a revisit,
   reported apart. Completion closes the last pass; passes still open are
@@ -2179,6 +2193,60 @@ pieces every module shares. Keep tests deterministic and behavioural.
 Performance is tested, not assumed. `tests/perf.test.js` loads the whole addon
 with every module on and the local data packs, and holds these budgets of addon
 CPU time (event handlers, message listeners, OnUpdate scripts, timers): a
+`accept`/`turnin` also carry the quest frame's rewards when it shows any:
+`items` and `choices` (item ids, `GetQuestItemInfo`) and `rewardMoney`.
+
+Finds (`Finds.lua`), for what the client tables cannot give the Codex:
+
+- `rare {npc, npcName, cls, npcLvl, src, map, x, y, inst}`: a unit whose
+  `UnitClassification` is `rare`, `rareelite` or `worldboss` (`src`
+  `nameplate`, `target` or `mouseover`, the player's position), or the
+  creature behind a vignette (`src` `vignette`, the vignette's position, `cls`
+  only when the unit was seen). Once per npc per 50 yards per session.
+- `treasure {object, objName, src, map, x, y}`: the game object behind a
+  vignette, de-duplicated the same way.
+- `slain {npc, npcName, cls, npcLvl, map, x, y, inst, diff, denied?}`: a
+  creature the player or pet killed (`PARTY_KILL`), or whose corpse the
+  player looted; `denied` when `CanLootUnit` a second later says it has loot
+  the player may not take (tapped, round-robin).
+- `drop {npc|object, npcName, items: [ { item, n, q? } ], gather?, inst,
+  diff, map, x, y}`: one loot window per source (`GetLootSourceInfo`, else
+  the dead target), each corpse or object once per session; `q` marks quest
+  items, `gather` (`herb`, `mine`, `skin`) a window a gathering cast opened.
+  Fishing is left out.
+- `enter {inst, instName, instType, diff, map, x, y}`: zoning into a dungeon
+  or raid (`GetInstanceInfo`), with the last outdoor position (taken at
+  `PLAYER_LEAVING_WORLD`) as the entrance.
+- `encounter {enc, encName, diff, size, ok, inst, npcs, map, x, y}`:
+  `ENCOUNTER_END`; `npcs` are the bosses its `encounterUnitStatus` lists,
+  else the creatures that died since `ENCOUNTER_START`.
+
+`data build` reads every session's finds together, so counts merge across
+sessions (`tools/lib/data/recordings.js`, `createFinds`):
+
+- npc `rank` from the latest classification (`rare` 4, `rareelite` 2,
+  `elite` 1, `worldboss` 3, `normal` 0); levels widen `level`/`levelMax` to
+  what was seen; rares and vignette creatures get the `rare` role.
+- Drop chance (items `drops`, percent, two decimals) = windows holding the
+  item / kills of the npc (`slain` without `denied`, never fewer than its
+  windows); for objects, windows holding it / windows opened. From 10 kills
+  or opens up it replaces pfQuest's or QuestieDB's chance, below that it only
+  fills a missing or unknown (`null`) one; `seen` keeps `{ n, of }` either way. Skinning windows
+  are no drops.
+- An object whose window held a non-quest item, or seen behind a vignette,
+  gets the `chest` role; gathering windows give `herb` or `mine`.
+- Sighting and opening positions join the entity's spawns: a map without
+  spawns gets them as `"l"`, a live-frame map takes them in, and so does an
+  Era map whose frame Forever kept (`meta.liveFrameMaps`). Kill positions
+  only fill a map without spawns.
+- `inst` adds to `instances`; encounter bosses get `encounter`; entries and
+  encounters fill `instances.json` (entrances clustered within 1.5 map
+  percent, the most used first; encounters with their bosses and wins).
+- Quest `rewards` from the frames, a turn-in's over an accept's.
+
+`meta.counts` gives `recordedKills`, `recordedLoots`, `recordedSightings`,
+`recordedDropChances`, `recordedTreasures`, `recordedInstances` and
+`recordedEncounters`.
 burst of 50 `QUEST_LOG_UPDATE` and 50 `BAG_UPDATE` in one frame under 4 ms, a
 walking frame under 1 ms, `SetGuide` and every step change of a leveling
 guide under 8 ms (with what they schedule), and a gathering guide played to

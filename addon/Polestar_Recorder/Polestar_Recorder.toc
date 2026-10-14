@@ -9,6 +9,7 @@
 Recorder.lua
 Quests.lua
 World.lua
+Finds.lua
 Progress.lua
 Route.lua
 Commands.lua

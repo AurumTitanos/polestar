@@ -29,6 +29,11 @@
 - Reading ahead with Next no longer stops quest automation for the step you
   are on: its quests are still accepted and handed in while the window shows
   a later step.
+- The optional Recorder also notes what the Codex learns only in play, while
+  it is on: rares you see (on nameplates, as target or mouseover, or on the
+  minimap), treasures, what each corpse or chest drops and how often, the
+  dungeons you enter and where, and boss encounters, plus the rewards quest
+  windows offer.
 
 ### For guide authors
 
@@ -57,6 +62,17 @@
 ### For players
 
 - Quests with several objectives check off the right one: a goal counted the
+- The Recorder records finds (`rare`, `treasure`, `slain`, `drop`, `enter`,
+  `encounter` events; docs/ARCHITECTURE.md, "Recordings") and the quest
+  frames' `items`, `choices` and `rewardMoney`. `record import` and `data
+  build` turn them into npc ranks, levels, the `rare` role and spawns; drop
+  chances from loot windows over kills, merged across sessions, with their
+  counts in items' `seen` (10 kills or more replace the existing chance);
+  `chest`/`herb`/`mine` objects with their spawns; quest `rewards`; and the
+  new `instances.json` (entrances, encounters and their bosses).
+- npcs and objects inside dungeons and raids carry `instances` (instance map
+  ids), from QuestieDB's areas and the Forever `AreaTable` and `Map` tables
+  (`Map` is now read with the Forever tables) plus recordings.
   objective at its place in the quest's text instead of its place in the quest
   log, so in The Guns of Northwatch "Kill Cannoneer Smythe" showed the 10/10
   medals and Captain Fairmount never ticked. 135 goals in 46 quests of the

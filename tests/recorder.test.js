@@ -69,7 +69,7 @@ test('accept, objective progress and turn-in are recorded with the NPCs and plac
 		accept.t, turnin.t = nil, nil
 		emit({ kinds = kinds(NOISE), accept = accept, turnin = turnin, progress = progress, kills = kills, complete = events("complete")[1].q })`);
 
-	assert.deepEqual(out.kinds, ['accept', 'kill', 'progress', 'kill', 'progress', 'kill', 'progress', 'complete', 'turnin']);
+	assert.deepEqual(out.kinds, ['accept', 'kill', 'slain', 'progress', 'kill', 'slain', 'progress', 'kill', 'slain', 'progress', 'complete', 'turnin']);
 	assert.deepEqual(out.accept, {
 		e: 'accept', q: 7, title: 'Kobold Camp Cleanup', qlvl: 2, lvl: 1, xp: 40,
 		npc: 823, npcName: 'Deputy Willem', map: 1429, x: 48.2, y: 41.9,

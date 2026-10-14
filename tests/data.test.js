@@ -394,7 +394,7 @@ describe('fixture build', () => {
 		for (const f of fs.readdirSync(a.outDir).sort()) {
 			assert.equal(fs.readFileSync(path.join(a.outDir, f), 'utf8'), fs.readFileSync(path.join(b.outDir, f), 'utf8'), f);
 		}
-		assert.deepEqual(fs.readdirSync(a.outDir).sort(), ['factions.json', 'items.json', 'map-frames.json', 'meta.json', 'npcs.json', 'objects.json', 'quests.json', 'zones.json']);
+		assert.deepEqual(fs.readdirSync(a.outDir).sort(), ['factions.json', 'instances.json', 'items.json', 'map-frames.json', 'meta.json', 'npcs.json', 'objects.json', 'quests.json', 'zones.json']);
 	});
 
 	test('refuses a pfQuest checkout that is not MIT licensed', () => {

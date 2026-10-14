@@ -62,7 +62,7 @@ function applyCorrections(tables) {
 
 const { ROOT } = require('../paths');
 // Always written; races.json too when the Forever client tables include ChrRaces, ChrClasses and CharBaseInfo.
-const FILES = ['quests', 'npcs', 'objects', 'items', 'zones', 'map-frames', 'factions', 'meta'];
+const FILES = ['quests', 'npcs', 'objects', 'items', 'zones', 'map-frames', 'factions', 'instances', 'meta'];
 
 // Id-keyed table, one entry per line. Integer keys enumerate in ascending
 // order in JS, and every record is built with a fixed field order, so the
@@ -110,6 +110,22 @@ function liveMapsFrom(eraFrames, foreverFrames, qz) {
 		for (const id of qz.eraToForever.uiMapToArea.keys()) changed.add(id);
 	}
 	return { changed, has: (map) => changed.has(map) || !eraFrames[map] };
+}
+
+// Area id -> the dungeon or raid map id it lies in: the AreaTable row's
+// ContinentID when its Map row is InstanceType 1 (party) or 2 (raid); null
+// for the open world. Without the Map table, an area no UiMap shows
+// (`mapped(area)` falsy) on a continent other than 0 (Eastern Kingdoms) and 1
+// (Kalimdor) counts.
+function instanceAreas(areaRows, mapRows, mapped) {
+	const continent = new Map((areaRows || []).map((r) => [Number(r.ID), Number(r.ContinentID)]));
+	const instanceMaps = mapRows ? new Set(mapRows.filter((r) => [1, 2].includes(Number(r.InstanceType))).map((r) => Number(r.ID))) : null;
+	return (area) => {
+		const c = continent.get(area);
+		if (!Number.isInteger(c)) return null;
+		if (instanceMaps) return instanceMaps.has(c) ? c : null;
+		return c > 1 && !mapped(area) ? c : null;
+	};
 }
 
 const QUESTIE_LICENSE =
@@ -177,7 +193,8 @@ async function buildData(options = {}) {
 			const fr = (f === 'l' && fmaps && fmaps.frames[map]) || maps.frames[map] || (fmaps && fmaps.frames[map]);
 			return fr ? { c: fr.c, wx: fr.top + ((fr.bottom - fr.top) * y) / 100, wy: fr.left + ((fr.right - fr.left) * x) / 100 } : null;
 		};
-		qstats = applyQuestie(norm, qz, { areaToUiMap, liveMaps: live, spawnOptions, toWorld });
+		const instanceOfArea = instanceAreas((fwago && fwago.tables.AreaTable) || wago.tables.AreaTable, fwago && fwago.tables.Map, areaToUiMap);
+		qstats = applyQuestie(norm, qz, { areaToUiMap, liveMaps: live, spawnOptions, toWorld, instanceOfArea });
 	}
 
 	// Wowhead Forever's change notes, before our own corrections.
@@ -210,10 +227,12 @@ async function buildData(options = {}) {
 	const ft = fwago && fwago.tables;
 	const races = ft && ft.ChrRaces && ft.ChrClasses && ft.CharBaseInfo ? buildRaces(ft) : null;
 	const recordings = readRecordings(recordingsDir);
+	// Instances (dungeon/raid map id -> entrances, encounters) are recorded facts only.
+	const instances = {};
 	const rec = applyRecordings(
-		{ quests: norm.quests, npcs: norm.npcs, objects: norm.objects, items: norm.items, zones, factions },
+		{ quests: norm.quests, npcs: norm.npcs, objects: norm.objects, items: norm.items, zones, factions, instances },
 		recordings,
-		{ spawnOptions },
+		{ spawnOptions, liveMaps: live },
 	);
 
 	const sources = [
@@ -262,7 +281,7 @@ async function buildData(options = {}) {
 	}
 	if (fwago) {
 		sources.push({
-			name: `World of Warcraft: Forever client tables (UiMap, UiMapAssignment, AreaTable${races ? ', ChrRaces, ChrClasses, CharBaseInfo' : ''}${fwago.tables.Faction ? ', Faction' : ''}${fwago.tables.QuestV2 ? ', QuestV2' : ''}) via wago.tools`,
+			name: `World of Warcraft: Forever client tables (UiMap, UiMapAssignment, AreaTable${races ? ', ChrRaces, ChrClasses, CharBaseInfo' : ''}${fwago.tables.Faction ? ', Faction' : ''}${fwago.tables.Map ? ', Map' : ''}${fwago.tables.QuestV2 ? ', QuestV2' : ''}) via wago.tools`,
 			url: `https://wago.tools/db2?build=${fwago.build}`,
 			revision: `${fwago.product} ${fwago.build}`,
 			license: 'Blizzard Entertainment game client data; factual map geometry, names and race/class combinations only',
@@ -291,6 +310,7 @@ async function buildData(options = {}) {
 		zones: serializeTable(zones),
 		'map-frames': serializePretty(fmaps ? { era: maps.frames, forever: fmaps.frames } : { era: maps.frames }),
 		factions: serializeTable(factions),
+		instances: serializeTable(instances),
 		...(races ? { races: serializeTable(races) } : {}),
 	};
 	const files = {};
@@ -318,6 +338,13 @@ async function buildData(options = {}) {
 			recordingEvents: rec.events,
 			recordedQuests: rec.touchedQuests,
 			recorderOnlyQuests: rec.recorderOnlyQuests,
+			recordedKills: rec.recordedKills,
+			recordedLoots: rec.recordedLoots,
+			recordedSightings: rec.recordedSightings,
+			recordedDropChances: rec.recordedDropChances,
+			recordedTreasures: rec.recordedTreasures,
+			recordedInstances: rec.recordedInstances,
+			recordedEncounters: rec.recordedEncounters,
 			spawnCap: spawnOptions.cap,
 			...(qstats
 				? {

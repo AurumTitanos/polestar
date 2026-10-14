@@ -56,7 +56,7 @@ client loads them.
 | `stub_rares.lua` | Units and vignettes for rare detection |
 | `stub_packs.lua` | Load-on-demand data addons from real files: `LoadAddOn` runs a pack's files once and fires `ADDON_LOADED` |
 | `stub_ui.lua` | A stand-in for the Engine, the guide registry, Nav and Compat, with sample guides, for the UI tests and for `preview` (global `uistub`) |
-| `stub_recorder.lua` | The Recorder's slice of the world: player, maps, quest log, NPCs, deaths, loot, flight masters, talents |
+| `stub_recorder.lua` | The Recorder's slice of the world: player, maps, quest log, NPCs (classification, level), deaths, loot windows and their sources, instances, flight masters, talents |
 | `profile.lua` | Not a stub: per-handler timing and a stack sampler for `helpers/profile.js` |
 
 A module's tests fake its neighbours; `e2e.test.js` is where the real

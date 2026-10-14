@@ -177,7 +177,7 @@ const ITEMS = {
 	252665: { name: "Head of Urs'anah", npcDrops: [251361] },
 };
 
-// store: { quests (added to QUESTS), files ({ path in QuestieDB: text }) }
+// store: { quests, npcs, objects (added to QUESTS, NPCS, OBJECTS), files ({ path in QuestieDB: text }) }
 function writeQuestie(dir, store = {}) {
 	const q = path.join(dir, 'QuestieDB');
 	const w = (rel, text) => {
@@ -188,8 +188,8 @@ function writeQuestie(dir, store = {}) {
 		'## Interface: 16001', '## Title: QuestieDB', '## Author: Fixture Authors', '## Version: 9.9.9',
 		'## X-Contract-Version: 3', '## X-Flavor: Forever', '## X-Mode: baked', '## X-BUILD-COMMIT: abc123', '## X-BUILD-TIME: 2026-01-01T00:00:00Z', '',
 		...storeLines('Quest', { ...QUESTS, ...(store.quests || {}) }, { chunk: [92460], hidden: [[92460, 'breadcrumbs', [7]]] }),
-		...storeLines('Npc', NPCS),
-		...storeLines('Object', OBJECTS),
+		...storeLines('Npc', { ...NPCS, ...(store.npcs || {}) }),
+		...storeLines('Object', { ...OBJECTS, ...(store.objects || {}) }),
 		...storeLines('Item', ITEMS),
 		'', 'src\\config.lua', '',
 	];
@@ -472,5 +472,34 @@ describe('QuestieDB frames', () => {
 		assert.equal(npcs[2].spawns[1429].f, 'l');
 		assert.equal(npcs[2].spawns[1453].f, 'e');
 		assert.match(result.meta.sources.find((s) => /Forever client tables/.test(s.name)).revision, /wow_classic_beta 1\.60\.1\.1/);
+	});
+
+	test('instance npcs and objects (QuestieDB spawns without coordinates) get the instance map ids of their areas', async () => {
+		const sourcesDir = tmpdir('polestar-questie-');
+		fs.cpSync(path.join(FIX, 'sources', 'wago'), path.join(sourcesDir, 'wago'), { recursive: true });
+		const era = path.join(sourcesDir, 'wago', '1.15.9.11111');
+		// The Deadmines (1581) and Blackfathom Deeps (719) lie on their instance maps 36 and 48; Zephras Isle on the open-world continent 2991.
+		const areas = `${fs.readFileSync(path.join(era, 'AreaTable.csv'), 'utf8').trimEnd()}\n1581,TheDeadmines,"The Deadmines",36,0\n719,BlackfathomDeeps,"Blackfathom Deeps",48,0\n16593,ZephrasIsle,"Zephras Isle",2991,0\n`;
+		fs.writeFileSync(path.join(era, 'AreaTable.csv'), areas);
+		const store = {
+			npcs: { 639: { name: 'Edwin VanCleef', minLevel: 21, maxLevel: 21, spawns: { 1581: [[-1, -1]] }, friendlyToFaction: '', npcFlags: 0 } },
+			objects: { 1700: { name: 'Fathom Stone', spawns: { 719: [[-1, -1]] } } },
+		};
+		// Without the Forever Map table: unmapped areas off the two old continents.
+		const plain = await build({ sourcesDir }, store);
+		assert.deepEqual(plain.read('npcs')[639].instances, [36]);
+		assert.deepEqual(plain.read('objects')[1700].instances, [48]);
+		assert.equal(plain.read('npcs')[251362].instances, undefined, 'Zephras Isle is open world');
+
+		// With it: Map InstanceType decides (48 is a battleground here, so not a dungeon).
+		const fv = path.join(sourcesDir, 'wago', '1.60.1.1');
+		fs.mkdirSync(fv);
+		for (const t of ['UiMap', 'UiMapAssignment']) fs.copyFileSync(path.join(era, `${t}.csv`), path.join(fv, `${t}.csv`));
+		fs.writeFileSync(path.join(fv, 'AreaTable.csv'), areas);
+		fs.writeFileSync(path.join(fv, 'Map.csv'), 'ID,Directory,MapName_lang,InstanceType\n0,Azeroth,"Eastern Kingdoms",0\n36,DeadminesInstance,"Deadmines",1\n48,Blackfathom,"Blackfathom Deeps",3\n');
+		const forever = await build({ sourcesDir, forever: true }, store);
+		assert.deepEqual(forever.read('npcs')[639].instances, [36]);
+		assert.equal(forever.read('objects')[1700].instances, undefined);
+		assert.match(forever.result.meta.sources.find((s) => /Forever client tables/.test(s.name)).name, /, Map\)/);
 	});
 });

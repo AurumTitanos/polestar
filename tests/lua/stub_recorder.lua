@@ -90,7 +90,20 @@ function UnitExists(unit)
 	local u = W.units[unit]
 	return u ~= nil and not u.guid:find("^GameObject%-")
 end
-function UnitLevel(unit) if unit == "player" then return W.level end return 1 end
+-- Units may carry cls (UnitClassification), lvl and dead: stub.world.units.target.cls = "rare".
+function UnitLevel(unit)
+	if unit == "player" then return W.level end
+	local u = W.units[unit]
+	return u and u.lvl or 1
+end
+function UnitClassification(unit)
+	local u = W.units[unit]
+	return u and u.cls or "normal"
+end
+function UnitIsDead(unit)
+	local u = W.units[unit]
+	return u ~= nil and u.dead == true
+end
 function UnitXP() return W.xp end
 function UnitXPMax() return W.xpMax or 400 end
 function GetXPExhaustion() return W.rested end -- nil when not rested, as in the client
@@ -301,6 +314,7 @@ function C_GossipInfo.GetActiveQuests()
 	return out
 end
 
+-- Loot slots: { name, count, item, quest, questID, src = { guid, n, guid, n, ... } }.
 function GetNumLootItems() return #W.loot end
 function GetLootSlotInfo(slot)
 	local l = W.loot[slot]
@@ -311,6 +325,24 @@ function GetLootSlotLink(slot)
 	local l = W.loot[slot]
 	if not l or not l.item then return nil end
 	return ("|cffffffff|Hitem:%d::::::::1:::::|h[%s]|h|r"):format(l.item, l.name)
+end
+function GetLootSourceInfo(slot)
+	local l = W.loot[slot]
+	if not (l and l.src) then return end
+	return unpack(l.src)
+end
+-- W.lootable[guid] = { hasLoot, canLoot } (absent: nothing to loot, and free to)
+function CanLootUnit(guid)
+	local l = W.lootable and W.lootable[guid]
+	if not l then return false, true end
+	return l[1], l[2]
+end
+
+-- W.instance = { id, name, kind = "party" | "raid", diff } while inside one.
+function GetInstanceInfo()
+	local i = W.instance
+	if not i then return W.zone, "none", 0, "", 0, 0, false, 0, 0, nil end
+	return i.name, i.kind or "party", i.diff or 1, "Normal", 5, 0, false, i.id, 5, nil
 end
 
 C_TaxiMap = {}

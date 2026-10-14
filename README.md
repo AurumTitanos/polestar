@@ -306,7 +306,9 @@ flight helper once, or to answer a request yourself.
 sessions to improve the routes. It is off until you turn it on (`/psrec on`,
 or Options > Recorder > Start recording) and writes nothing while off.
 Recordings replace the Classic Era estimates with Forever facts (quest XP,
-NPC and object positions, trainers, flight paths and times), and
+NPC and object positions, trainers, flight paths and times), feed the Codex
+what only play shows (rares and treasures, drops and how often they fall,
+dungeon entrances and bosses), and
 `record report` turns them into per-step timings: passes, median and p75
 time, XP per hour, time in combat, deaths and travel, then the slowest
 steps and detours, the steps to fix first.

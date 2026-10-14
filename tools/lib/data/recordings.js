@@ -18,6 +18,13 @@
 // - factions from the session's `factions` dump and `rep` events: live names
 //   win, factions seen only in Forever are added, every one seen gets source
 //   "recorder"; recorded parents/sides only fill gaps (resolveFactions).
+// - quest rewards seen on the quest frames (items, choices, money) become
+//   the quest's `rewards` (a turn-in wins over an accept);
+// - finds (addon/Polestar_Recorder/Finds.lua), see applyFinds: rare
+//   sightings and kills give npc rank, levels, the "rare" role, instances and
+//   spawns; loot windows give drop chances (loots / kills) with their counts
+//   (`seen`), objects opened give treasure roles and spawns; instance entries
+//   and encounters fill `instances` (instances.json).
 
 const fs = require('node:fs');
 const path = require('node:path');
@@ -26,6 +33,18 @@ const { parseProgressText } = require('./objectives');
 
 const INTERACTIONS = { gossip: null, trainer: 'trainer', vendor: 'vendor', fp: 'flightmaster' };
 const OBJECTIVE_TYPES = { monster: 'kill', item: 'item', object: 'object' };
+
+// UnitClassification -> npc rank as pfQuest stores it (normalize.js).
+const RANKS = { normal: 0, trivial: 0, minus: 0, elite: 1, rareelite: 2, worldboss: 3, rare: 4 };
+const RARE_CLASSES = new Set(['rare', 'rareelite']);
+// A recorded drop chance from fewer kills (or opens) only fills a gap (no
+// chance, or null: unknown); from
+// this many it replaces the chance pfQuest or QuestieDB gives.
+const MIN_KILLS = 10;
+// Gathering loot of a game object: its role. Skinning loot is no npc drop.
+const GATHER_ROLES = { herb: 'herb', mine: 'mine' };
+// Entrance points closer than this (map percent) are one entrance.
+const ENTRANCE_RADIUS = 1.5;
 
 function readRecordings(dir) {
 	if (!dir || !fs.existsSync(dir)) return [];
@@ -74,7 +93,303 @@ function front(list, id) {
 	if (!list.includes(id)) list.unshift(id);
 }
 
-function applyRecordings(db, recordings, { spawnOptions } = {}) {
+function ids(v) {
+	return Array.isArray(v) ? [...new Set(v.map(posInt).filter(Boolean))] : [];
+}
+
+function bump(map, key, n = 1) {
+	map.set(key, (map.get(key) || 0) + n);
+}
+
+function getOr(map, key, make) {
+	if (!map.has(key)) map.set(key, make());
+	return map.get(key);
+}
+
+function round2(v) {
+	return Math.round(v * 100) / 100;
+}
+
+// Quest rewards from the quest frames (items, choices, rewardMoney; a
+// turn-in's own money fills the money): { items, choices, money } of the
+// best observation (turn-in 2 over accept 1, later over earlier).
+function createRewards() {
+	const seen = new Map();
+	return {
+		observe(qid, ev, weight) {
+			const items = ids(ev.items);
+			const choices = ids(ev.choices);
+			const frameMoney = posInt(ev.rewardMoney);
+			if (!items.length && !choices.length && !frameMoney) return;
+			const money = frameMoney || (weight === 2 ? posInt(ev.money) : null);
+			const cur = seen.get(qid);
+			if (cur && cur.weight > weight) return;
+			seen.set(qid, { weight, rewards: { items, choices, money } });
+		},
+		apply(q) {
+			const r = seen.get(q.id);
+			if (r) q.rewards = r.rewards;
+		},
+	};
+}
+
+// Greedy clusters of [x, y] points within `radius` -> [{ x, y, n }], the
+// biggest first (then by x, y).
+function clusters(points, radius) {
+	const out = [];
+	for (const [x, y] of points) {
+		const c = out.find((k) => Math.hypot(k.sx / k.n - x, k.sy / k.n - y) <= radius);
+		if (c) {
+			c.sx += x;
+			c.sy += y;
+			c.n++;
+		} else {
+			out.push({ sx: x, sy: y, n: 1 });
+		}
+	}
+	return out
+		.map((c) => ({ x: round2(c.sx / c.n), y: round2(c.sy / c.n), n: c.n }))
+		.sort((a, b) => b.n - a.n || a.x - b.x || a.y - b.y);
+}
+
+// Finds.lua events -> npc, object, item and instance facts. handle(ev) takes
+// one event (true when it was a find); apply(stats) writes the facts once
+// every session has been read, so counts merge across sessions:
+// - rank from the latest classification seen (rare 4, rareelite 2, elite 1,
+//   worldboss 3, normal 0); levels widen the npc's range to cover what was
+//   seen; rare / rareelite (and any vignette rare) get the "rare" role;
+// - drop chance = 100 * windows with the item / kills (2 decimals), kills
+//   being `slain` events not `denied` (never fewer than the npc's loot
+//   windows); objects: windows with the item / windows opened. A chance from
+//   MIN_KILLS or more replaces the existing one, a smaller sample only fills
+//   a missing or null one; `seen: { npc|object: { <id>: { n, of } } }` keeps the
+//   counts. Skinning windows are left out;
+// - an object whose window held a non-quest item, or seen behind a
+//   vignette, is a "chest"; herb / mine gathering give those roles;
+// - sightings and opened objects are spawn points: a map without spawns
+//   gets them, live-frame spawns and Era spawns on unchanged frames take
+//   them in; kill positions only fill a map without spawns;
+// - `inst` adds the instance map id to the entity's `instances`; encounters
+//   give their bosses `encounter` and fill instances.json with entrances.
+function createFinds({ db, entity, itemEntry, spawnOptions, liveMaps }) {
+	const { items, instances } = db;
+	const kills = new Map(); // npc -> kills
+	const windows = { npc: new Map(), object: new Map() }; // id -> loot windows
+	const loots = { npc: new Map(), object: new Map() }; // id -> Map(item -> windows with it)
+	const found = { npc: new Map(), object: new Map() }; // id -> Map(map -> [[x, y]]) joined into spawns
+	const killed = new Map(); // npc -> Map(map -> [[x, y]]) filling empty maps only
+	const rank = new Map();
+	const levels = new Map(); // npc -> [min, max]
+	const roles = { npc: new Map(), object: new Map() }; // id -> Set
+	const inside = { npc: new Map(), object: new Map() }; // id -> Set(instance)
+	const encounterOf = new Map(); // npc -> encounter id
+	const entrances = new Map(); // instance -> Map(map -> [[x, y]])
+	const inst = new Map(); // instance -> { name, type, encounters: Map(enc -> { name, npcs: Set, kills }) }
+	const counts = { recordedKills: 0, recordedLoots: 0, recordedSightings: 0 };
+
+	const point = (byId, id, ev) => {
+		const c = coord(ev);
+		if (c) getOr(getOr(byId, id, () => new Map()), c.map, () => []).push([c.x, c.y]);
+	};
+	const instance = (id, ev) => {
+		const i = getOr(inst, id, () => ({ name: null, type: null, encounters: new Map() }));
+		if (typeof ev.instName === 'string' && ev.instName !== '') i.name = ev.instName;
+		if (ev.instType === 'party' || ev.instType === 'raid') i.type = ev.instType;
+		return i;
+	};
+	const where = (kind, id, ev) => {
+		const i = posInt(ev.inst);
+		if (i) getOr(inside[kind], id, () => new Set()).add(i);
+	};
+	const unit = (id, ev) => {
+		entity('npc', id, ev.npcName);
+		if (ev.cls in RANKS) rank.set(id, RANKS[ev.cls]);
+		if (RARE_CLASSES.has(ev.cls)) getOr(roles.npc, id, () => new Set()).add('rare');
+		const lvl = posInt(ev.npcLvl);
+		if (lvl) {
+			const r = levels.get(id);
+			levels.set(id, r ? [Math.min(r[0], lvl), Math.max(r[1], lvl)] : [lvl, lvl]);
+		}
+		where('npc', id, ev);
+	};
+	const lootList = (ev) => (Array.isArray(ev.items) ? ev.items : []).filter((i) => i && posInt(i.item));
+
+	function handle(ev) {
+		const npc = posInt(ev.npc);
+		const obj = posInt(ev.object);
+		switch (ev.e) {
+			case 'rare':
+				if (!npc) return true;
+				unit(npc, ev);
+				getOr(roles.npc, npc, () => new Set()).add('rare');
+				point(found.npc, npc, ev);
+				counts.recordedSightings++;
+				return true;
+			case 'treasure':
+				if (!obj) return true;
+				entity('object', obj, ev.objName);
+				getOr(roles.object, obj, () => new Set()).add('chest');
+				point(found.object, obj, ev);
+				where('object', obj, ev);
+				counts.recordedSightings++;
+				return true;
+			case 'slain':
+				if (!npc) return true;
+				unit(npc, ev);
+				point(killed, npc, ev);
+				if (!ev.denied) bump(kills, npc);
+				counts.recordedKills++;
+				return true;
+			case 'drop': {
+				const list = lootList(ev);
+				const kind = npc ? 'npc' : obj ? 'object' : null;
+				if (!kind || (kind === 'npc' && ev.gather)) {
+					if (npc) unit(npc, ev);
+					return true;
+				}
+				const id = npc || obj;
+				if (kind === 'npc') unit(npc, ev);
+				else {
+					entity('object', obj, ev.objName);
+					where('object', obj, ev);
+					point(found.object, obj, ev);
+					const role = GATHER_ROLES[ev.gather] || (!ev.gather && list.some((i) => !i.q) ? 'chest' : null);
+					if (role) getOr(roles.object, obj, () => new Set()).add(role);
+				}
+				bump(windows[kind], id);
+				const m = getOr(loots[kind], id, () => new Map());
+				for (const item of new Set(list.map((i) => posInt(i.item)))) {
+					bump(m, item);
+					itemEntry(item);
+				}
+				counts.recordedLoots++;
+				return true;
+			}
+			case 'enter': {
+				const id = posInt(ev.inst);
+				if (!id) return true;
+				instance(id, ev);
+				point(entrances, id, ev);
+				return true;
+			}
+			case 'encounter': {
+				const id = posInt(ev.inst);
+				const enc = posInt(ev.enc);
+				if (!enc) return true;
+				const bosses = ids(ev.npcs);
+				for (const b of bosses) {
+					entity('npc', b, null);
+					encounterOf.set(b, enc);
+					if (id) getOr(inside.npc, b, () => new Set()).add(id);
+				}
+				if (!id) return true;
+				const e = getOr(instance(id, ev).encounters, enc, () => ({ name: null, npcs: new Set(), kills: 0 }));
+				if (typeof ev.encName === 'string' && ev.encName !== '') e.name = ev.encName;
+				for (const b of bosses) e.npcs.add(b);
+				if (ev.ok) e.kills++;
+				return true;
+			}
+			default:
+				return false;
+		}
+	}
+
+	// Recorded points into e.spawns[map] (see createFinds).
+	function join(e, byMap, fillOnly) {
+		for (const [map, pts] of byMap) {
+			const cur = e.spawns[map];
+			if (cur && (fillOnly || (cur.f !== 'l' && (!liveMaps || liveMaps.has(map))))) continue;
+			const all = cur ? [...cur.pts, ...(cur.more || []), ...pts] : pts;
+			const reduced = reduceSpawns(all, spawnOptions);
+			if (reduced.pts.length) e.spawns[map] = spawnRecord(cur ? cur.f : 'l', reduced);
+		}
+	}
+
+	function apply(stats) {
+		const tables = { npc: db.npcs, object: db.objects };
+		let chances = 0;
+		for (const kind of ['npc', 'object']) {
+			for (const [id, m] of loots[kind]) {
+				const of = kind === 'npc' ? Math.max(kills.get(id) || 0, windows.npc.get(id) || 0) : windows.object.get(id);
+				for (const [item, n] of m) {
+					const it = items && items[item];
+					if (!it) continue;
+					if (!it.drops) it.drops = { npc: {}, object: {} };
+					if (!it.drops[kind]) it.drops[kind] = {};
+					// null: a known dropper whose chance no source gives
+					if (of >= MIN_KILLS || it.drops[kind][id] == null) {
+						it.drops[kind][id] = round2((100 * n) / of);
+						chances++;
+					}
+					if (!it.seen) it.seen = {};
+					if (!it.seen[kind]) it.seen[kind] = {};
+					it.seen[kind][id] = { n, of };
+					if (Array.isArray(it.source) && !it.source.includes('recorder')) it.source.push('recorder');
+					else if (!it.source) it.source = ['recorder'];
+				}
+			}
+		}
+		for (const [id, r] of rank) tables.npc[id].rank = r;
+		for (const [id, [lo, hi]] of levels) {
+			const e = tables.npc[id];
+			const min = Number.isInteger(e.level) ? Math.min(e.level, lo) : lo;
+			const max = Math.max(Number.isInteger(e.levelMax) ? e.levelMax : Number.isInteger(e.level) ? e.level : hi, hi);
+			e.level = min;
+			if (max > min) e.levelMax = max;
+			else delete e.levelMax;
+		}
+		let treasures = 0;
+		for (const kind of ['npc', 'object']) {
+			for (const [id, set] of roles[kind]) {
+				const e = tables[kind][id];
+				e.roles = [...new Set([...(e.roles || []), ...set])].sort();
+				if (kind === 'object' && set.has('chest')) treasures++;
+			}
+			for (const [id, set] of inside[kind]) {
+				const e = tables[kind][id];
+				e.instances = [...new Set([...(e.instances || []), ...set])].sort((a, b) => a - b);
+			}
+			for (const [id, byMap] of found[kind]) join(tables[kind][id], byMap, false);
+		}
+		for (const [id, byMap] of killed) join(tables.npc[id], byMap, true);
+		for (const [id, enc] of encounterOf) tables.npc[id].encounter = enc;
+
+		let encounters = 0;
+		if (instances) {
+			for (const [id, i] of [...inst].sort((a, b) => a[0] - b[0])) {
+				const out = instances[id] || { id, name: null, type: null, entrances: [], encounters: {}, source: [] };
+				if (i.name) out.name = i.name;
+				if (i.type) out.type = i.type;
+				const pts = entrances.get(id);
+				if (pts) {
+					out.entrances = [...pts]
+						.sort((a, b) => a[0] - b[0])
+						.flatMap(([map, list]) => clusters(list, ENTRANCE_RADIUS).map((c) => ({ map, ...c })))
+						.sort((a, b) => b.n - a.n || a.map - b.map);
+				}
+				for (const [enc, e] of [...i.encounters].sort((a, b) => a[0] - b[0])) {
+					out.encounters[enc] = { name: e.name, npcs: [...e.npcs].sort((a, b) => a - b), kills: e.kills };
+					encounters++;
+				}
+				if (!out.source.includes('recorder')) out.source.push('recorder');
+				instances[id] = out;
+			}
+		}
+		Object.assign(stats, counts, {
+			recordedDropChances: chances,
+			recordedTreasures: treasures,
+			recordedInstances: inst.size,
+			recordedEncounters: encounters,
+		});
+	}
+
+	return { handle, apply };
+}
+
+// db: { quests, npcs, objects, items, zones, factions, instances? } (mutated).
+// liveMaps: { has(map) } maps whose Forever frame differs from the Era one
+// (build.js liveMapsFrom); recorded points join Era spawns only elsewhere.
+function applyRecordings(db, recordings, { spawnOptions, liveMaps } = {}) {
 	const { quests, npcs, objects, items, zones, factions } = db;
 	const stats = { recordings: recordings.length, events: 0, recorderOnlyQuests: 0, touchedQuests: 0, liveSpawnMaps: 0, recorderOnlyFactions: 0 };
 	const live = { npc: new Map(), object: new Map() };
@@ -161,6 +476,9 @@ function applyRecordings(db, recordings, { spawnOptions } = {}) {
 		}
 	}
 
+	const finds = createFinds({ db, entity, itemEntry, spawnOptions, liveMaps });
+	const rewardsSeen = createRewards();
+
 	for (const { rec } of recordings) {
 		for (const [mapId, m] of Object.entries(rec.maps || {})) {
 			const id = posInt(mapId);
@@ -195,6 +513,7 @@ function applyRecordings(db, recordings, { spawnOptions } = {}) {
 				if (item) front(q.start.item, item);
 				const c = coord(ev);
 				if (!q.zone && c) q.zone = c.map;
+				rewardsSeen.observe(qid, ev, 1);
 			} else if (ev.e === 'turnin' && qid) {
 				const q = quest(qid);
 				xpObservation(qid, 'turnin', ev.xpReward, ev.lvl);
@@ -207,6 +526,7 @@ function applyRecordings(db, recordings, { spawnOptions } = {}) {
 					front(q.end.object, obj);
 					livePoint('object', obj, ev.objName, ev);
 				}
+				rewardsSeen.observe(qid, ev, 2);
 			} else if (ev.e === 'reward' && qid) {
 				quest(qid);
 				xpObservation(qid, 'base', ev.rewardXpBase, ev.lvl);
@@ -231,6 +551,8 @@ function applyRecordings(db, recordings, { spawnOptions } = {}) {
 					slot.id = id;
 					slot.type = slot.type || (ev.e === 'kill' ? 'kill' : 'item');
 				}
+			} else if (finds.handle(ev)) {
+				// rare, treasure, slain, drop, enter, encounter
 			} else if (ev.e in INTERACTIONS && npc) {
 				addRole(livePoint('npc', npc, ev.npcName, ev), INTERACTIONS[ev.e]);
 			} else if (ev.e === 'rep') {
@@ -259,6 +581,7 @@ function applyRecordings(db, recordings, { spawnOptions } = {}) {
 			}
 		}
 	}
+	finds.apply(stats);
 	for (const [kind, id] of touchedEntities.values()) {
 		const table = kind === 'npc' ? npcs : objects;
 		table[id] = canonical(table[id], kind === 'npc' ? NPC_KEYS : OBJECT_KEYS);
@@ -268,6 +591,7 @@ function applyRecordings(db, recordings, { spawnOptions } = {}) {
 		const q = quests[id];
 		if (!q.source.includes('recorder')) q.source.push('recorder');
 		if (xpSeen.has(id)) resolveXp(q, xpSeen.get(id));
+		rewardsSeen.apply(q);
 		quests[id] = canonical(q, QUEST_KEYS);
 	}
 	stats.touchedQuests = touched.size;
@@ -276,11 +600,11 @@ function applyRecordings(db, recordings, { spawnOptions } = {}) {
 }
 
 // Same field order as normalize.js builds, whatever the overlay added.
-const NPC_KEYS = ['id', 'name', 'level', 'levelMax', 'rank', 'faction', 'roles', 'spawns'];
-const OBJECT_KEYS = ['id', 'name', 'roles', 'spawns'];
+const NPC_KEYS = ['id', 'name', 'level', 'levelMax', 'rank', 'faction', 'roles', 'spawns', 'instances', 'encounter'];
+const OBJECT_KEYS = ['id', 'name', 'roles', 'spawns', 'instances'];
 const QUEST_KEYS = [
 	'id', 'title', 'level', 'minLevel', 'races', 'classes', 'start', 'end', 'pre', 'excl', 'next',
-	'objectives', 'objectiveText', 'zone', 'xp', 'xpSamples', 'skill', 'event', 'source',
+	'objectives', 'objectiveText', 'zone', 'xp', 'xpSamples', 'rewards', 'skill', 'event', 'source',
 ];
 const FACTION_KEYS = ['id', 'name', 'side', 'parent', 'source'];
 

@@ -191,6 +191,31 @@ end
 local function copyContext(ev, ctx)
 	ev.npc, ev.npcName, ev.object, ev.objName = ctx.npc, ctx.npcName, ctx.object, ctx.objName
 	ev.map, ev.x, ev.y = ctx.map, ctx.x, ctx.y
+	ev.items, ev.choices, ev.rewardMoney = ctx.items, ctx.choices, ctx.rewardMoney
+end
+
+-- Item ids of the open quest frame's rewards ("reward") or choices ("choice").
+local function frameItems(kind, n)
+	if not (ns.Usable(n) and type(n) == "number") then return nil end
+	local out = {}
+	for i = 1, n do
+		local id = select(6, GetQuestItemInfo(kind, i))
+		if not (ns.Usable(id) and type(id) == "number" and id > 0) then
+			local link = GetQuestItemLink and GetQuestItemLink(kind, i)
+			id = ns.Usable(link) and type(link) == "string" and tonumber(link:match("item:(%d+)")) or nil
+		end
+		if id then out[#out + 1] = id end
+	end
+	return #out > 0 and out or nil
+end
+
+-- The rewards the quest frame shows (QUEST_DETAIL, QUEST_COMPLETE).
+local function frameRewards(ctx)
+	if type(GetQuestItemInfo) ~= "function" then return end
+	if GetNumQuestRewards then ctx.items = frameItems("reward", GetNumQuestRewards()) end
+	if GetNumQuestChoices then ctx.choices = frameItems("choice", GetNumQuestChoices()) end
+	local money = GetRewardMoney and GetRewardMoney()
+	if ns.Usable(money) and type(money) == "number" and money > 0 then ctx.rewardMoney = money end
 end
 
 -- An item-started quest fires QUEST_DETAIL twice: once with the item id when
@@ -209,6 +234,7 @@ ns.On("QUEST_DETAIL", function(_, questStartItemID)
 		end
 	end
 	detail.title = GetTitleText and GetTitleText() or nil
+	frameRewards(detail)
 end)
 
 ns.On("QUEST_ACCEPTED", function(_, q)
@@ -240,8 +266,10 @@ ns.On("QUEST_ACCEPTED", function(_, q)
 	end
 end)
 
-local function onCompletionFrame()
+local function onCompletionFrame(event)
 	completion = context(questID())
+	-- the reward frame; QUEST_PROGRESS shows only what the quest asks for
+	if event == "QUEST_COMPLETE" then frameRewards(completion) end
 end
 ns.On("QUEST_PROGRESS", onCompletionFrame)
 ns.On("QUEST_COMPLETE", onCompletionFrame)

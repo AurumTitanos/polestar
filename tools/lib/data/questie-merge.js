@@ -433,6 +433,15 @@ function applyQuestie(tables, qz, ctx) {
 	};
 	const mains = { npc: new Map(), object: new Map() };
 	const rolesAdded = { n: 0 };
+	// Instance npcs and objects have no coordinates in QuestieDB ({ [area] =
+	// { { -1, -1 } } }): the areas of their spawns and zoneID give the
+	// dungeon or raid map ids (ctx.instanceOfArea) they belong to.
+	const instancesOf = (r) => {
+		if (!ctx.instanceOfArea) return [];
+		const areas = luaPairs(r.spawns).map(([area]) => Number(area));
+		if (Number(r.zoneID) > 0) areas.push(Number(r.zoneID));
+		return [...new Set(areas.map(ctx.instanceOfArea).filter(Boolean))].sort((a, b) => a - b);
+	};
 	const merge = (kind, table, source, build, mergeFn, key) => {
 		for (const [id, r] of source) {
 			const { spawns, counts, unmapped } = questieSpawns(r.spawns, ctx);
@@ -442,6 +451,8 @@ function applyQuestie(tables, qz, ctx) {
 			const pf = table[id];
 			if (!pf) stats[`questieOnly${key}`]++;
 			table[id] = mergeFn(pf, build(r, spawns), ctx.toWorld, rolesAdded);
+			const instances = instancesOf(r);
+			if (instances.length) table[id].instances = instances;
 			stats[`questie${key}`]++;
 		}
 	};

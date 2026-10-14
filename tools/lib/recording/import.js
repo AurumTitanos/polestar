@@ -136,7 +136,8 @@ function toObject(v) {
 	return v && typeof v === 'object' ? v : {};
 }
 
-const LIST_FIELDS = new Set(['available', 'active']);
+// drop items, quest reward items/choices and encounter npcs are lists too.
+const LIST_FIELDS = new Set(['available', 'active', 'items', 'choices', 'npcs']);
 
 function normalizeEvent(ev) {
 	const out = { t: typeof ev.t === 'number' ? ev.t : 0, e: ev.e };
