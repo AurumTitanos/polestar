@@ -24,6 +24,7 @@ const { execFileSync } = require('node:child_process');
 const { Outliner } = require('./outline');
 const { C: BRAND } = require('./brand');
 const { header } = require('../lib/generated');
+const { CHARTS, exportPngs } = require('./png');
 
 const { ROOT } = require('../lib/paths');
 const OUT = path.join(ROOT, 'docs', 'assets', 'charts');
@@ -316,6 +317,7 @@ async function write(o) {
 		fs.writeFileSync(path.join(OUT, name), `${header('svg', 'readme charts', source)}\n${text}`);
 		console.log(`docs/assets/charts/${name} (${(Buffer.byteLength(text) / 1024).toFixed(1)} KB)`);
 	}
+	exportPngs(CHARTS);
 	for (const f of data.factions) {
 		for (const s of f.starts) {
 			const h = (x) => (x ? `${f1(x.seconds / H)} h` : '-');

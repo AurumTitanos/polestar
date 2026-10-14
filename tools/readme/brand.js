@@ -9,6 +9,10 @@
 //   emblem.svg        the emblem in Polestar gold, transparent
 //   logo.svg          the addon icon: the gold emblem on a night tile
 //   download.svg      the README's download button
+//   avatar.svg        the project avatar for the CurseForge listing: the
+//                     emblem, cut heavier, in its glow on a square night tile
+// and, with rsvg-convert, the listing's PNGs in docs/curseforge/images
+// (tools/readme/png.js): the avatar, the banner and the route charts.
 //
 //   node tools/polestar.js readme brand
 
@@ -16,6 +20,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Outliner } = require('./outline');
 const { header } = require('../lib/generated');
+const { BRAND, CHARTS, exportPngs } = require('./png');
 
 const { ROOT } = require('../lib/paths');
 const OUT = path.join(ROOT, 'docs', 'assets');
@@ -43,10 +48,11 @@ function prng(seed) {
 // The emblem on a 128 grid, centred at (64, 64): a fine ring (radius 44,
 // 2.6 wide) cut where the long rays pass (|x| < 7), and the four-point star
 // (tips at 30 and 60, waist 7.5). Returns path data scaled by k about the
-// origin of the 128 grid.
-function emblemPath(k = 1, ox = 0, oy = 0) {
+// origin of the 128 grid. A heavier cut for small sizes widens the ring and
+// the waist (the cut follows the waist, half a unit inside it).
+function emblemPath(k = 1, ox = 0, oy = 0, { ring = 2.6, waist = 7.5 } = {}) {
 	const P = (x, y) => `${f2(ox + x * k)} ${f2(oy + y * k)}`;
-	const c = 64, ro = 45.3, ri = 42.7, cut = 7;
+	const c = 64, ro = 44 + ring / 2, ri = 44 - ring / 2, cut = waist - 0.5;
 	const yo = Math.sqrt(ro * ro - cut * cut), yi = Math.sqrt(ri * ri - cut * cut);
 	const R = (r) => f2(r * k);
 	let d = '';
@@ -56,7 +62,7 @@ function emblemPath(k = 1, ox = 0, oy = 0) {
 		d += `M${P(c + s * cut, c - yo)}A${R(ro)} ${R(ro)} 0 0 ${sweepOut} ${P(c + s * cut, c + yo)}`;
 		d += `L${P(c + s * cut, c + yi)}A${R(ri)} ${R(ri)} 0 0 ${sweepIn} ${P(c + s * cut, c - yi)}Z`;
 	}
-	const w = 7.5, rx = 30, ry = 60;
+	const w = waist, rx = 30, ry = 60;
 	const star = [[c, c - ry], [c + w, c - w], [c + rx, c], [c + w, c + w], [c, c + ry], [c - w, c + w], [c - rx, c], [c - w, c - w]];
 	d += `M${star.map(([x, y]) => P(x, y)).join('L')}Z`;
 	return d;
@@ -85,6 +91,45 @@ function logoSvg() {
 <path fill="${C.accent}" d="${emblemPath(k)}"/>
 <path fill="${C.accentLight}" d="M${inner.map(([x, y]) => `${x} ${y}`).join('L')}Z"/>
 <circle cx="32" cy="32" r="29.5" fill="none" stroke="#fff" stroke-opacity="0.07" stroke-width="1"/>
+</svg>
+`;
+}
+
+// The project avatar (docs/curseforge): the gold emblem in its glow on a
+// square night tile, with a few faint stars, no text. The tile fills the
+// square (sites round or circle-crop it themselves) and the star's tips stay
+// 180 from the centre of the 512 square, well inside a circular crop's 256.
+// Shown down to 64px or so, so the emblem is cut heavier than the README's
+// (ring 5 against 2.6, waist 9 against 7.5) and the stars stay too faint to
+// read as specks when it is small.
+function avatarSvg() {
+	const S = 512, c = S / 2, k = 3;
+	const o = c - 64 * k;
+	// logoSvg()'s light inner star, on the 128 grid about the centre.
+	const inner = [[0, -18], [2.8, -2.8], [10, 0], [2.8, 2.8], [0, 18], [-2.8, 2.8], [-10, 0], [-2.8, -2.8]];
+	const stars = [];
+	const rnd = prng(0x9a7a);
+	for (let n = 0; n < 80 && stars.length < 34; n++) {
+		const x = rnd() * S, y = rnd() * S, b = rnd();
+		if (Math.hypot(x - c, y - c) < 196) continue;
+		const r = 0.8 + b * b * 1.6;
+		const a = (0.16 + b * 0.5) * (1 - (y / S) * 0.55);
+		stars.push(`<circle cx="${f2(x)}" cy="${f2(y)}" r="${f2(r)}" fill-opacity="${f2(a)}"/>`);
+		if (b > 0.9) stars.push(`<circle cx="${f2(x)}" cy="${f2(y)}" r="11" fill="url(#halo)" opacity="${f2(a)}"/>`);
+	}
+	return `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 ${S} ${S}" role="img" aria-label="Polestar">
+<title>Polestar</title>
+<defs>
+<linearGradient id="ground" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C.sky}"/><stop offset="0.55" stop-color="${C.bg}"/><stop offset="1" stop-color="${C.sidebar}"/></linearGradient>
+<radialGradient id="glow" cx="${c}" cy="${c}" r="${f2(c * 0.92)}" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="${C.accent}" stop-opacity="0.24"/><stop offset="0.45" stop-color="${C.accent}" stop-opacity="0.1"/><stop offset="1" stop-color="${C.accent}" stop-opacity="0"/></radialGradient>
+<radialGradient id="halo"><stop offset="0" stop-color="${C.star}" stop-opacity="0.35"/><stop offset="1" stop-color="${C.star}" stop-opacity="0"/></radialGradient>
+<linearGradient id="gold" x1="0" y1="${f2(o + 4 * k)}" x2="0" y2="${f2(o + 124 * k)}" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#f5d898"/><stop offset="0.5" stop-color="${C.accent}"/><stop offset="1" stop-color="#d6a24f"/></linearGradient>
+</defs>
+<rect width="${S}" height="${S}" fill="url(#ground)"/>
+<g fill="${C.star}">${stars.join('')}</g>
+<rect width="${S}" height="${S}" fill="url(#glow)"/>
+<path fill="url(#gold)" d="${emblemPath(k, o, o, { ring: 5, waist: 9 })}"/>
+<path fill="${C.accentLight}" d="M${inner.map(([x, y]) => `${f2(c + x * k)} ${f2(c + y * k)}`).join('L')}Z"/>
 </svg>
 `;
 }
@@ -208,11 +253,14 @@ function write() {
 		'emblem.svg': emblemSvg(),
 		'logo.svg': logoSvg(),
 		'download.svg': downloadSvg(),
+		'avatar.svg': avatarSvg(),
 	};
 	for (const [name, text] of Object.entries(files)) {
 		fs.writeFileSync(path.join(OUT, name), `${header('svg', 'readme brand', 'tools/readme/brand.js')}\n${text}`);
 		console.log(`docs/assets/${name} (${(Buffer.byteLength(text) / 1024).toFixed(1)} KB)`);
 	}
+	// The listing's PNGs, the charts' from their committed SVGs too.
+	exportPngs([...BRAND, ...CHARTS]);
 }
 
 module.exports = { emblemPath, prng, C, write };

@@ -65,7 +65,7 @@ sources, so they run on a maintainer's machine, never in CI.
 | `questdb build` | The `Polestar_QuestDB` data addon |
 | `codex build` | Lookup's Codex: `data/forever/codex/*.json` and the `Polestar_Codex` data addon |
 | `media` | Regenerates the addon's textures from `tools/media/*.js` |
-| `readme brand` / `readme charts` | Redraws the README's art: the banners, emblem, logo and download button / the route charts (needs `data/sim`) |
+| `readme brand` / `readme charts` | Redraws the README's art: the banners, emblem, logo, download button and the CurseForge avatar / the route charts (needs `data/sim`); both also export the CurseForge listing's PNGs when `rsvg-convert` is installed |
 
 ### Releasing
 
@@ -86,7 +86,7 @@ The release steps are in [docs/RELEASING.md](../docs/RELEASING.md).
 | `media/` | Texture generators run by `media`: `nav.js`, `qol.js`, `ui.js`; the wordmark fonts in `media/fonts` |
 | `preview/` | `preview`'s renderer: a geometry-recording client stub (`stub.lua`), font outlines, SVG drawing, and a zlib encoder of its own for the textures (`deflate.js`), so the renders are byte-identical on any Node |
 | `play/` | The playground: server, Lua session, driver and the page in `play/public` |
-| `readme/` | The README's art, drawn by `readme`: `brand.js` (banners, emblem, logo, download button) and `charts.js` (route charts) |
+| `readme/` | The README's art, drawn by `readme`: `brand.js` (banners, emblem, logo, download button, CurseForge avatar), `charts.js` (route charts) and `png.js` (the listing's PNG copies, through `rsvg-convert`) |
 | `templates/pack/` | What `new` copies into a new guide pack |
 
 ### tools/lib
@@ -154,7 +154,8 @@ file's language written by `header()` in `lib/generated.js`:
 | `addon/Polestar_Guides/` | `compile` | `guides/**/*.guide`, `guides/pack.json`, `data/forever` (including trainers, travel, professions, dungeons) | yes | rerun; `tests/guides-parse.test.js` fails when a guide is added, renamed or removed without `compile` |
 | `addon/Polestar/Media/Nav/*.tga`, `addon/Polestar/Media/UI/*.tga` | `media` | `tools/media/*.js`, `tools/lib/tga.js`, `tools/media/fonts` (no data) | yes | rerun: the output is byte-identical, and CI fails when it differs from the committed files; `tests/media-refs.test.js` checks the addon names every texture |
 | `docs/preview/*.svg` | `preview` | the addon's Lua (Core, Theme, Nav, Quests, Gear, Maps, QoL, Lookup, Dungeons, Rares, UI), its generated files included; `tests/lua` (the client stubs, `stub_ui.lua`'s sample guides), `tests/fixtures`, among them six compiled Horde guides frozen in `tests/fixtures/preview/guides.lua`; no reference data and not the shipped `addon/Polestar_Guides`, so a guide recompile never changes the renders. `POLESTAR_CLIENT_ART` (with `POLESTAR_DUNGEONS_PACK`) renders local art and data into its own folder, never here | yes | rerun: the output is byte-identical, and CI fails when it differs from the committed files or a render is missing; a full run removes the renders of scenes that are gone |
-| `docs/assets/{banner-dark,banner-light,emblem,logo,download}.svg` | `readme brand` | the emblem geometry, the wordmark fonts | yes | rerun |
+| `docs/assets/{banner-dark,banner-light,emblem,logo,download,avatar}.svg` | `readme brand` | the emblem geometry, the wordmark fonts | yes | rerun |
+| `docs/curseforge/images/{logo-1024,logo-400,banner,starts,levels}.png` | `readme brand` (all five), `readme charts` (the charts), with `rsvg-convert` (librsvg) installed; without it they print the `rsvg-convert` commands to run | `docs/assets/avatar.svg`, `banner-dark.svg`, `charts/{starts,levels}.svg` | yes | rerun |
 | `docs/assets/charts/{levels,starts}.svg` | `readme charts --draft v0.1.0` | `data/sim`, `guides/`, the guides of the first release (tag `v0.1.0`) | yes | rerun |
 | `data/sim/` | `sim world`, `sim run` and the other `sim` commands | `data/forever` | local | `lint` notes a cached world built from other data and skips its check |
 | `data/recordings/*.json` | `record import` / `record watch` | the Recorder's SavedVariables | local | none |

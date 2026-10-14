@@ -6,8 +6,11 @@ const { parseArgs } = require('node:util');
 const usage = `usage: node tools/polestar.js readme brand
        node tools/polestar.js readme charts --draft <dir|git rev> [options]
 
-brand: rewrites docs/assets/{banner-dark,banner-light,emblem,logo,download}.svg,
-drawn in code from the emblem geometry and the wordmark fonts.
+brand: rewrites docs/assets/{banner-dark,banner-light,emblem,logo,download,avatar}.svg,
+drawn in code from the emblem geometry and the wordmark fonts, and with
+rsvg-convert (librsvg) installed the CurseForge listing's PNGs in
+docs/curseforge/images (the avatar, the banner and the charts); without it,
+prints the rsvg-convert commands to run. charts re-exports its two PNGs.
 
 charts: rewrites docs/assets/charts/{levels,starts}.svg. Scores the guides
 under the simulator's model (as \`sim compare\` does) against an earlier set
