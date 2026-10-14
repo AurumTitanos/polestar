@@ -1,4 +1,4 @@
--- Polestar.Maps (docs/ARCHITECTURE.md, "World map (Maps module)"): the world
+-- Polestar.Maps (docs/ARCHITECTURE.md, "Maps"): the world
 -- map without fog of war, coordinates, zone level ranges, dungeon entrance and
 -- travel icons, the flight timer and the instance tracker. This file holds the
 -- namespace, the settings and their options page, and helpers the feature

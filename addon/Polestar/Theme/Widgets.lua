@@ -1876,7 +1876,7 @@ function W.SetSection(h, text, count)
 end
 
 ---------------------------------------------------------------------------
--- Options registry (docs/ARCHITECTURE.md, Theme -> "Options registry").
+-- Options registry (docs/ARCHITECTURE.md, UI -> "Options registry").
 -- Lives here, not in UI, because modules loading before UI.xml register at
 -- file load: entries are kept in order and handed to the options window
 -- whenever it exists (now or later).

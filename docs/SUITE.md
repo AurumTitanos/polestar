@@ -75,7 +75,7 @@ their versions in its `meta`.
 
 Local packs are generated into gitignored folders and installed by
 `node tools/polestar.js install` like the rest. Without them the core still
-works: Lookup and Dungeons say what is missing instead of failing.
+works: Lookup and Dungeons say what is missing instead of failing. Every addon, what it holds and how it is built: [ARCHITECTURE, "Overview"](ARCHITECTURE.md#overview).
 
 Guide packs (ours and the community's) register through one registry
 (`Core/Guides.lua`, ARCHITECTURE "The guide registry"; the rules in

@@ -4,7 +4,7 @@
 -- settings search, and a footer with Reset page, Reload UI and Close.
 --
 -- Built-in pages come first; other modules add theirs with
--- Polestar.RegisterOptions (docs/ARCHITECTURE.md, Theme -> "Options
+-- Polestar.RegisterOptions (docs/ARCHITECTURE.md, UI -> "Options
 -- registry"), which may run before this file loads: the registry replays
 -- every registration to us. A control whose settings key has no registered
 -- default is left out rather than shown dead.

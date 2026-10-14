@@ -20,15 +20,16 @@ Reference material, checked out locally (gitignored):
 Polestar is a set of addons, a folder of guides and the Node tools that turn
 one into the other. The addons:
 
-| Addon | What it holds | Built by | In git | Ships |
+| Addon | What it holds | Built by (`node tools/polestar.js …`) | In git | Ships |
 |---|---|---|---|---|
-| `Polestar` | The addon: engine, navigation, quests, gear, maps, quality of life, Lookup, Dungeons, Rares and every window | hand-written, plus a few generated data files | yes | yes |
-| `Polestar_Guides` | Polestar's own guide pack (pack id `guides`) | `compile`, from `guides/` | yes (generated) | yes |
-| `Polestar_ItemDB` | Item stats and Forever reward choices for the gear advice; loaded on demand | `itemdb build`, then `gear build` | yes (generated) | yes |
-| `Polestar_QuestDB` | The quest database behind quest markers and tooltips; loaded on demand | `questdb build` | no (local) | yes, when built |
-| `Polestar_Codex` | Lookup's Codex, and the Dungeons and Rares data; loaded on demand | `codex build` | no (local) | no |
-| `Polestar_Travel` | Zone crossings for the travel planner, from an optional local file | `travel build` | no (local) | no |
-| `Polestar_Recorder` | The optional recorder of play sessions, for authoring | hand-written | yes | yes, as its own zip |
+| `Polestar` (`addon/Polestar/`) | The addon: engine, navigation, quests, gear, maps, quality of life, Lookup, Dungeons, Rares and every window | hand-written, plus a few generated data files | yes | yes |
+| `Polestar_Guides` (`addon/Polestar_Guides/`) | Polestar's own guide pack (pack id `guides`) | `compile`, from `guides/` | yes (generated) | yes |
+| community guide packs | Addons by other authors (`X-Polestar-Pack` in their TOC; `docs/PACKS.md`, `docs/PACK_FORMAT.md`) | the same compiler, from their own repositories | in their own repositories | by their authors |
+| `Polestar_ItemDB` (`addon/Polestar_ItemDB/`) | Item stats and Forever reward choices for the gear advice; loaded on demand | `itemdb build` (`Items.lua`), then `gear build` (`Forever.lua`) | yes (generated) | yes |
+| `Polestar_QuestDB` (`addon/Polestar_QuestDB/`) | The quest database behind quest markers and tooltips; loaded on demand | `questdb build` | no (local, gitignored) | yes, when built |
+| `Polestar_Codex` (`addon/Polestar_Codex/`) | Lookup's Codex, and the Dungeons and Rares data; loaded on demand | `codex build` | no (local, gitignored) | no |
+| `Polestar_Travel` (`addon/Polestar_Travel/`) | Zone crossings for the travel planner, from an optional local crossings file; loaded with Polestar | `travel build` | no (local, gitignored) | no, never packaged (Nav, "Travel planner and zone crossings") |
+| `Polestar_Recorder` (`addon/Polestar_Recorder/`) | The optional standalone recorder of play sessions, for authoring | hand-written | yes | yes, as its own zip |
 
 A guide goes from a `.guide` file to the game in four steps. An author
 writes it in a guide pack (`guides/` for Polestar's own). `lint` and
@@ -45,21 +46,9 @@ table; [tools/README.md](../tools/README.md) lists the commands, every
 generated file and the rebuild order; [tests/README.md](../tests/README.md)
 describes the test layers and the fake client.
 
-## Runtime pieces
-
-| Addon folder | Purpose |
-|---|---|
-| `addon/Polestar/` | Engine, navigation, UI. |
-| `addon/Polestar_Guides/` | Our guide pack (pack id `guides`). **Generated** by `tools/polestar.js compile`. |
-| community guide packs | Addons by other authors (`X-Polestar-Pack` in their TOC), built by the same compiler from their own repositories (`docs/PACKS.md`, `docs/PACK_FORMAT.md`). |
-| `addon/Polestar_ItemDB/` | Item stats for gear advice, load-on-demand. **Generated** by `tools/polestar.js itemdb build` (`Items.lua`) and `tools/polestar.js gear build` (`Forever.lua`). |
-| `addon/Polestar_Recorder/` | Standalone data recorder for authoring. |
-| `addon/Polestar_QuestDB/` | Quest database, load-on-demand. **Generated** locally by `tools/polestar.js questdb build` (gitignored). |
-| `addon/Polestar_Codex/` | Lookup, Dungeons and Rares data, load-on-demand. **Generated** locally by `tools/polestar.js codex build` (gitignored). |
-| `addon/Polestar_Travel/` | Zone crossings for the travel planner, loaded with Polestar. **Generated** locally by `tools/polestar.js travel build` from an optional local crossings file (gitignored, never packaged; Nav, "Travel planner and zone crossings"). |
-
 `addon/Polestar/Polestar.toc` loads eleven XML manifests in this order. Each
 module's manifest lists that module's files.
+The module sections below follow this order.
 
 ```
 Core\Core.xml           Core: namespace, lifecycle, events, settings, Compat, guide registry, Engine, automation, commands
@@ -204,11 +193,11 @@ marked `live` because typed coordinates are read in the Era frame), then "For
 another goal, add @x,y live", and fires `SHOW_COPY` with the two lines. In an
 instance or on a map without a position it prints why instead.
 
-### Localization
+### Localisation
 
 `Polestar.L[key]` (enUS only for now; missing keys return the key).
 
-## Compat — every client API call goes through here
+### Compat — every client API call goes through here
 
 UI, Nav and Engine never call quest/map/unit client APIs directly; they call
 `Polestar.Compat`. That keeps Forever specifics in one file and lets other
@@ -247,7 +236,7 @@ Compat.IsAreaExploredAt(uiMapID, x, y) -> bool | nil   (C_MapExplorationInfo)
 Compat.GetAchievement(id)              -> { completed, name, criteria = { { text, completed, cur, max }, ... } } | nil
 ```
 
-### Map frames
+#### Map frames
 
 Guide coordinates from Era-sourced data are in the **Era map frame**. Four
 Forever maps changed frame versus Era (QuestieDB evidence: Mulgore, Eastern
@@ -269,7 +258,47 @@ arrow, pins) works in world coordinates and converts back to live map percent
 with `Compat.WorldToMap`. Coordinates without `f` are live-frame (recorded in
 Forever) and use `C_Map.GetWorldPosFromMapPos` directly.
 
-## Guide data (compiled Lua) — the toolchain/Engine contract
+### Core services: Data, Hooks, Search
+
+Shared by every module (summarised in `docs/SUITE.md`, "Runtime services");
+each file's header lists its full API.
+
+```lua
+Polestar.Data.Pack(name) -> loaded, reason|nil   -- C_AddOns.LoadAddOn once per session; never in combat ("combat", retried later)
+Polestar.Data.Info(name) -> { loaded, reason, memoryKB }
+
+Polestar.Hooks.ItemLines(owner, fn(tooltip, link, itemID))       -- GameTooltip, ItemRefTooltip
+Polestar.Hooks.UnitLines(owner, fn(tooltip, unit))               -- GameTooltip
+Polestar.Hooks.ObjectLines(owner, fn(tooltip, objectID, name))   -- GameTooltip; either may be nil
+Polestar.Hooks.ItemClick(owner, fn(link, itemID))                -- modified clicks on chat links, bag and loot items
+Polestar.Hooks.AddLine(tooltip, left, right?, r, g, b, rr, rg, rb)
+
+Polestar.Search.Query(text, opts) -> results, counts, more   -- opts = { kinds, limit = 60, perKind, offset, subtitles = false }
+   -- result = { kind, id, title, subtitle, quality, score, status, curated }; exact > prefix > word prefix > substring
+Polestar.Search.Subtitle(result) ; Search.KINDS ; Search.Status() -> codexLoaded, reason
+```
+
+`Hooks` owns the client hooks: `TooltipDataProcessor.AddTooltipPostCall`
+(Item, Unit, Object) and a `hooksecurefunc` post-hook of
+`HandleModifiedItemClick`, which bag buttons, loot buttons and chat links
+(`SetItemRef`) all reach. One entry per owner, callbacks in registration order,
+each in its own `pcall`; forbidden tooltips and secret values are skipped.
+`Search` matches guides (titles, `keywords`, folded once per guide list) and
+the Codex kinds through the pack's prebuilt index (`Codex.Index(kind)`: one
+string of folded names per kind), so a keystroke is a few plain `string.find`
+calls and never decodes a record. Each kind reads at most 200 candidates per
+query, best tiers first (`more[kind]` says there were more); a one-letter
+query matches name prefixes only. Only the results returned are named, and
+subtitles are filled per shown row (`Search.Subtitle`). Generated `lookup/`
+guides are not listed.
+
+Measured with the real pack (lua5.1, `tests/lookup-codex.test.js` setup):
+the pack loads in about 20 ms (4.4 MB; it never loads at login), the first
+query costs 7 ms (guide headers), a keystroke 1.5–4 ms (1 to 8 letters), a
+detail page (`Lookup.Sources`) 0.1 ms for a mount up to 10 ms for an item
+with 40 drop sources.
+
+### Guide data (compiled Lua) — the toolchain/Engine contract
 
 Generated by `tools/polestar.js compile` from `.guide` sources
 (`docs/GUIDE_FORMAT.md`) into the pack's addon folder: the generated TOC,
@@ -409,7 +438,7 @@ Only guides of shown packs (`on`, plus the internal `lookup`) are visible to
 `Lookup.CuratedGuide`. `PACKS_CHANGED` refreshes the picker, search, the guide
 window, Lookup and the Engine's tabs ("Tabs", absent guides).
 
-## Engine
+### Engine
 
 ```lua
 Polestar.Guides.Get(id) -> guide | nil
@@ -433,7 +462,7 @@ Polestar.Engine.GetWaypoint() -> waypoint | nil
 Polestar.Engine.GetProgress() -> doneSteps, totalSteps
 ```
 
-### Smart logic
+#### Smart logic
 
 - **Candidate goals.** A compiled goal may carry `candidates = { { npc, npcName, map, x, y, f, faction = "A"|"H"|"AH", races?, classes? }, ... }`
   (from `train <Profession>`, `train class`, `buy … nearest`, `vendor nearest`, `sethome nearest`; see GUIDE_FORMAT).
@@ -536,7 +565,7 @@ Polestar.Engine.GetProgress() -> doneSteps, totalSteps
   view carries the chosen spot's `map`, `x`, `y`, `f`, `npcName`, `lvl` and
   `alternatives`, and `CycleCandidate` walks the ranking.
 
-### Focus: one person at a time
+#### Focus: one person at a time
 
 A step's goals form **groups**, walked in authored order: a goal joins the
 current group when it has the same "who", else starts a new one. "Who" is the
@@ -573,7 +602,7 @@ never splits that person's group.
 - Out-of-order play still counts: finishing a later person's goals marks that
   group done; the focus stays on the first open group.
 
-### Route choice ("Choose your path")
+#### Route choice ("Choose your path")
 
 A guide whose `next` lists several guides compiles to `next` (the author's
 default, the first) plus `nextChoices` (all of them, in order); each option may
@@ -634,7 +663,7 @@ Polestar.Engine.GuideFocus(id) -> x, y | nil       -- live-frame percent of wher
   cache of decoded client tiles (base and overlay tiles, `maps.json` with each
   map's `artID`); those renders go to `<folder>/preview/`, never into `docs/`.
 
-### Tabs (several guides at once)
+#### Tabs (several guides at once)
 
 ```lua
 Polestar.Engine.GetTabs() -> { { guideId, title, category, stepIndex, stepCount, done, total, complete }, ... }, activeIndex
@@ -857,6 +886,448 @@ EllesmereUI is read only through its documented skinning API
 from tokens (`W.Color`, `W.Painter`, `Theme.Skin`, `Theme.Band`), so a scheme or
 colour change repaints live without a reload.
 
+## Nav
+
+```lua
+Polestar.Nav.SetTarget(map, x, y, label, f)   -- user picked a goal; overrides the engine waypoint until the step changes
+Polestar.Nav.ClearTarget()
+Polestar.Nav.GetTarget() -> waypoint | nil
+Polestar.Nav.GetDistance() -> yards | nil      -- to an area target's edge, 0 inside it
+```
+
+Settings live under `nav.*`. Nav hides itself in instances, on taxis, and when
+the target is on another continent (shows the zone name instead).
+
+An area target (a waypoint with `area`, yards: a spawn area) is reached
+anywhere within `area + r` of its centre; outside, the distance shown is to
+the area's edge. A camp then shows the arrived state with the goal label. An
+area objective (`search`) never says arrived: `Nav.Sample` returns "search"
+and the arrow says "Search here", the goal label, and "Click the arrow for the
+next spot". A left click on the arrow (not a drag) calls
+`Nav.NextSpot([index])`, which asks the Engine (`CycleSpot`) for the next spot
+while the target is the Engine's waypoint with `spots`. The `nav.target` pin
+carries the `area`, so the world map draws the area's soft disc under the
+target pin; the `nav.spots` layer (world map, under `nav.worldPins`) marks
+every other spot of the target as a small pin (an `alt` spot smaller and
+fainter, its tooltip "It also spawns here"); clicking one searches there next
+(`Nav.NextSpot(i)`). TomTom's arrival distance is `area + r`.
+
+While a `SetTarget` override is active the Engine keeps announcing its own
+waypoint; `Nav.GetTarget()` is the point actually being guided to. Nav fires
+`WAYPOINT_CHANGED` when it sets or drops an override. `ClearTarget` hides the
+Engine's waypoint until the Engine announces a different one or the step changes.
+
+### Pins — map and minimap icons for every module
+
+```lua
+Polestar.Pins.SetLayer(layer, pins, opts)   -- replace a layer; opts = { world = true, minimap = true, edge = false, scale = 1 }
+Polestar.Pins.ClearLayer(layer)
+Polestar.Pins.SetLayerVisible(layer, visible)
+-- pin = { map, x, y, f, icon (Theme.Media name or texture path), size, minimapSize, color = { r, g, b, a },
+--         tooltip = string | function(tooltip), onClick = function(button), priority,
+--         glow (soft halo), ring = { r, g, b } (ring round the disc), backdrop (scrim disc), area (yards) }
+```
+
+Pins are drawn on the world map for the map being viewed (converted through Compat
+for other maps) and projected on the minimap; `edge = true` clamps that layer's
+out-of-range pins to the minimap rim. Pooled frames, distance-filtered, minimap
+updates throttled; layers with hundreds of pins must cost nothing per frame when
+the player stands still. Each layer indexes its pins by continent and 500-yard
+grid square when it is set, so a minimap redraw visits only the pins around the
+player; layer changes made in one frame share one minimap redraw on the next
+(`GetMinimapFrames` runs a pending one first). Nav's own target pins are one layer. A pin's `area`
+draws a soft disc of that radius (`Media/Nav/area`, the pin's colour at 0.32
+alpha) under every pin on the world map (`PIN_FRAME_LEVEL_QUEST_BLOB`, own
+pool, no mouse, sized in canvas units so it scales with the terrain); the
+minimap shows the pin only.
+
+```lua
+Polestar.Pins.SetTrail(runs, opts)   -- runs = { { live = true?, { c, wx, wy }, ... }, ... }; opts = { world, minimap, color }
+Polestar.Pins.ClearTrail()
+Polestar.Pins.TrailDots(points, spacing, phase, rect, cap) -> count, positions   -- pure placement (tests)
+```
+
+The trail: animated dots along straight lines between consecutive points
+(Nav publishes the travel route: the player, then each leg's start where the
+mode changes and its end, a new run after a Hearthstone; without a route,
+player -> target). A live run starts at the player's current position. Runs
+break where the continent changes. Dots are anchored to each run's end, so
+they stay put as the player walks and crawl toward the destination (one
+spacing per 1.5 s; still with `ui.reduceMotion`). Minimap: every 40 yd, only
+inside the visible disc or square, 5 px, at most 40. World map: every max(15,
+map width / 60) yd, clipped to the map, 6 px under the pins in their own
+no-mouse pool, at most 300. One 20 Hz driver runs only while dots show.
+`nav.trailDots` (default on) with `nav.worldPins` / `nav.minimapPins` per surface.
+
+### Travel planner and zone crossings
+
+```lua
+Polestar.Nav.PlanRoute(p) -> legs | nil, reason   -- pure; Nav/Travel.lua
+Polestar.Nav.GetRoute() -> legs, ci               -- the live route and its current leg
+Polestar.Nav.EstimateTravel(from, to) -> seconds   -- same planner, cached briefly
+Polestar.Nav.RegisterTravelData(d, replace)        -- TravelData.lua: flight masters, flights, transports, inns
+Polestar.Nav.AddTravelPaths(chunk)                 -- learned walking paths (nodes: c, wx, wy, gateway, uiMap)
+Polestar.Nav.RegisterCrossings(d)                  -- zone crossings (merges; ids seen before are skipped)
+-- leg = { kind = "walk"|"fly"|"boat"|"zeppelin"|"tram"|"hearth", from, to, label, seconds, rest,
+--         radius (arrival yards at `to`), waypoint (true: `to` is a crossing or chain node) }
+```
+
+The planner is Dijkstra over the player, the target, known flight masters,
+docks, the bound inn, learned path nodes and crossing waypoints. It orders by
+a cost (the Hearthstone carries a 120 s margin on top of its time) and keeps
+the real seconds of every leg apart, so `seconds`/`rest` (the arrow's ETA)
+stay honest. Caps: 20000 pops, 40 ms, 1500 path nodes.
+
+**Zone crossings.** Without crossing data a continent walks as it always
+did: straight lines between any two points on it (x1.25 detour) plus learned
+paths. With full crossing data for a continent (`complete = true`), a straight
+walk stays inside one zone; between zones it goes only through
+
+- a crossing: two waypoints, one in each zone, at a tunnel, pass, bridge, gate
+  or lift, each with an arrival radius, joined by an explicit walk link, with a
+  caption per direction (`ab`, `ba`; else "Go to <zone>"), optionally one way;
+- an open-ground pair: two zones whose shared border is walkable anywhere
+  (optionally one way);
+- an approach chain: ordered nodes with radius and caption (a cave, a climb, a
+  dungeon approach). Only the mouth (and with `open = "both"` the last node)
+  links to its zone; the other nodes link only to their chain neighbours. A
+  start or target within max(2 x radius, 30) yd of such a node is inside the
+  chain and attaches only to the nearest node and its neighbours, so routes
+  enter at the mouth and leave the way they came ("Follow the path out", or the
+  node's `back` caption).
+
+A point's zone is its uiMap when the crossing data knows that zone; a zone
+the data lists as `wild` (no crossing data, e.g. maps Forever added) walks as
+before; any other map (a continent map, an instance) is placed in the
+smallest known zone frame holding the point. Walk legs end at every crossing
+or chain waypoint and carry its caption and radius; the arrow shows the
+current leg's caption and points at its waypoint ("Enter Orgrimmar" at the
+gate, then the target's own label).
+
+**Re-planning.** On target, zone and subzone changes, landing, the
+Hearthstone coming off cooldown, binding, the flight map opening, a flight
+path learned (`UI_INFO_MESSAGE` `ERR_NEWTAXIPATH`: the flight master within
+60 yd is marked known), and, with crossing data, on arriving at a crossing or
+chain waypoint and on moving more than 50 yd from where a plan at least 30 s
+old was made (checked at most once a second). `ROUTE_CHANGED` (legs) fires on
+every plan, `ROUTE_ADVANCED` (legs, ci) when the current leg moves on.
+
+**Data.** `node tools/polestar.js travel build` writes TravelData.lua
+(committed: flight masters and flight times, boats, zeppelins, the tram and
+inns from the client tables, learned paths, and crossings learned from zone
+changes in recordings, `tools/lib/travel/crossings.js` `recordedCrossings`,
+registered with `complete = false`: they refine a continent that has full
+crossing data and change nothing elsewhere). Full crossing data comes from an
+optional local crossings file, `data/local/crossings.json` (gitignored),
+which the build validates and writes into the local data addon
+`addon/Polestar_Travel` (gitignored; `## Dependencies: Polestar`, registers
+with `RegisterCrossings` at load; installed when built, never packaged).
+Without the file nothing is written and TravelData.lua never holds it.
+
+The crossings file (schema 1, Era map percent):
+
+```json
+{ "schema": 1, "frame": "e",
+  "crossings": [ { "id": "durotar--orgrimmar",
+                   "a": { "map": 1411, "x": 45.5, "y": 12.1, "radius": 15 },
+                   "b": { "map": 1454, "x": 52.5, "y": 84.8, "radius": 15 },
+                   "ab": "Enter Orgrimmar", "ba": "Leave Orgrimmar", "oneWay": false } ],
+  "open": [ { "a": 1429, "b": 1431, "oneWay": false } ],
+  "chains": [ { "id": "a-cave", "name": "A Cave", "open": "mouth",
+                "nodes": [ { "map": 1413, "x": 45.9, "y": 36.2, "radius": 20, "caption": "Enter the cave" },
+                           { "map": 1413, "x": 46.2, "y": 34.9, "radius": 15, "caption": "Follow the path", "back": "Climb out" } ] } ] }
+```
+
+Validation (every error names its entry, e.g. `crossings[3] (id).a: radius
+500 outside 3-100 yd`): no unknown keys; ids lower-case, unique across
+crossings and chains; maps with an Era frame; x, y in 0-100 unless the point
+says `"offMap": true` (then -50-150); radius 3-100 yd; a crossing's ends on one
+continent, in different zones, at most 1000 yd apart; open pairs distinct,
+on one continent, not repeated; chains of 2+ nodes on one continent with hops
+of at most 600 yd; captions plain text of at most 160 characters (no `|`
+escape codes). `travel route` runs the addon planner and includes
+Polestar_Travel when it is built (`--crossings-lua none` leaves it out).
+
+## Quests — quest database, markers, tooltips, quest levels
+
+`addon/Polestar/Quests/` loads the load-on-demand data addon
+`Polestar_QuestDB` through `Data.Pack` (≈ 1.3 MB of Lua, ≈ 6.4 MB resident)
+at login, and only while `qol.questDB` is on and at least one feature that
+needs it is (`QuestDB.IsWanted()`: map/minimap objectives, available quests,
+turn-ins, tooltips, nameplates); turning the first one on later loads it then,
+and a load refused in combat is retried when combat ends. It fires
+`QUESTDB_LOADED`, then `QUESTDB_STARTED`; `QUESTDB_UPDATED` follows every
+change to the tracked quest log. Record layouts: `tools/lib/questdb/build.js`.
+An entity's spawn clusters (70 yd) cover every known spawn on each map (the
+reference data's `pts` and `more`), with no cap on how many.
+
+```lua
+Polestar.QuestDB.IsLoaded() / IsEnabled() / IsRunning() / IsWanted()
+Polestar.QuestDB.GetQuest(id)  -> { id, title, level, minLevel, races, classes, faction, start = { npc, object, item },
+                                    finish = { npc, object }, pre (any-of), preAll, excl, zone, skill, holiday,
+                                    objectives = { { kind = "kill"|"item"|"object"|"event", id, count, map, x, y, f } } } | nil
+Polestar.QuestDB.GetNpc(id) / GetObject(id) -> { id, name, spawns = { { map, x, y, r (yd), f } } } | nil
+Polestar.QuestDB.GetItem(id)   -> { id, name, droppers = { { id, name, chance } }, objects = { ... }, vendors = { { id, name } } } | nil
+Polestar.QuestDB.GetItemDroppers(itemID) -> { { id, name, chance }, ... } | nil   -- best chance first
+Polestar.QuestDB.GetObjectiveMobs(questID, oi) -> { name, ... } | nil            -- kill target or item droppers
+Polestar.QuestDB.CheckAvailable(id, ctx, isDone, isOn, opts) -> ok, reason      -- opts: lowLevel, levelAbove, skillRank
+Polestar.QuestDB.EachAvailabilityRef(id, fn) -> needsSkill                       -- fn(q) per quest whose done/in-log state CheckAvailable reads
+Polestar.QuestDB.GetAvailableQuests() -> { questID, ... } ; IsAvailable(q) ; WhyUnavailable(q) -> reason | nil
+   -- reasons: "eligibility" (faction, race incl. Skyborne high bits, class, holiday), "done", "active", "level"
+   -- (minLevel), "grey", "high" (beyond qol.questLevelWindow), "prerequisite", "exclusive", "skill"
+Polestar.QuestDB.ObjectivesForNpc(id) / ObjectivesForItem(id) / ObjectivesForObject(id)
+                               -> { { q, kind, id, name, cur, max, done, entry = { q, title, ready } }, ... } | nil  -- quests in the log
+Polestar.QuestDB.GetMarkers(map [, "objectives"|"turnin"|"available"]) -> { pin, ... }
+Polestar.QuestDB.IsGuideQuest(q) -> bool                                         -- in the active guide's current step
+```
+
+"Done" comes from `C_QuestLog.GetAllCompletedQuestIDs` (one call per available
+scan), else `C_QuestLog.IsQuestFlaggedCompleted` per quest. A scan rechecks every
+candidate only after a level-up, a skill change, a filter setting or without the
+bulk call; otherwise only the candidates that read a quest whose done or in-log
+state moved since the last scan (`EachAvailabilityRef`), plus those needing a
+profession skill.
+
+Pins layers: `quests.objectives`, `quests.turnin`, `quests.available`, one pin
+per entity spawn cluster and layer (a mob two objectives need carries both
+under the higher-ranked glyph: kill > interact > collect > vendor). Objective
+clusters at least `MIN_AREA` (12 yd) wide carry their radius as `area`. Markers
+and the tooltip/nameplate indexes are rebuilt only when what they show
+changed (a quest came or went, got ready or changed title, an objective was
+done or undone); a progress count alone only fires `QUESTDB_UPDATED`, since
+tooltips and nameplates read counts live. A rebuild reuses the pin tables
+the last one kept for the same cluster, with their world position (`c`,
+`wx`, `wy`) worked out once, so `Pins.SetLayer` converts only new pins. Look is
+applied at publish: while a Polestar guide runs, pins of quests in its current
+step (`Engine.GetGuide().steps[Engine.GetStepIndex()].goals[*].quest`, re-read on
+`STEP_CHANGED`/`GUIDE_CHANGED`) are 1.3× inside an accent ring and on top;
+with `qol.guideDim` every other quest pin drops to 0.6 alpha (`Q.DIM_ALPHA`).
+
+Tooltips go through `Polestar.Hooks` (owner `"quests"`: UnitLines, ItemLines,
+ObjectLines, registered only while running) with the suite's quest line,
+`Hooks.AddLine(tt, "<Quest>:", "<what> cur/max", quest, textDim | success)`:
+"Kill Kobold Vermin 3/10" on the target, "Large Candle 3/8" on a dropper, "3/8"
+on the item; quest-starting items get "Starts a quest: <title>".
+`Quests/QuestLevels.lua` prefixes "[12]" (and "+" for elite) to quest titles
+the client lists without one (gossip, greeting, details; camelot's own log and
+tracker already show it, so it adds there only when missing).
+(camelot is Forever's game type in Blizzard's UI source: the files the Forever client loads carry `AllowLoadGameType camelot`, and its own overrides sit in `Camelot/` folders.)
+
+Nameplate icons (`qol.nameplateIcons`): a mob an open objective still needs
+gets a 16px objective icon (14–20) 3px left of the health bar the player
+sees: EllesmereUI Nameplates' unit frame, Plater/ElvUI/oUF, KuiNameplates or
+Threat Plates when present, else the shown child of the base plate holding
+the largest status bar, else Blizzard's health bar, else the plate itself;
+parented to that frame so it follows its fading and scaling. Every access is
+guarded; `Quests.NameplateIcon(unit)` returns the icon (tests).
+
+Settings (`qol.*`, Questing → Quests; the markers under Map → Guide & quests →
+Quest markers): `questDB`, `availableQuests`,
+`questLevelWindow` (0–10, 10 = any; default 5), `lowLevelQuests`,
+`mapObjectives`, `objectiveAreas`, `turnInMarkers`, `minimapObjectives`,
+`guideHighlight`, `guideDim`, `questTooltips`, `nameplateIcons`, `questLevels`.
+The four marker layers (`availableQuests`, `mapObjectives`, `turnInMarkers`,
+`minimapObjectives`) and `objectiveAreas` default to off (Map → Guide & quests →
+Quest markers); `guideHighlight` only restyles markers those layers draw.
+
+## Gear — item stats, stat weights, upgrade tooltips, reward picks
+
+Gear's part in quest reward choices: QoL, "Quest reward marks".
+
+## Maps — the world map
+
+Each feature is a setting on the Map page (Rares & travel, Zones), and none of
+them makes a frame or loads data until it's on. The icon layers (dungeon
+entrances, flight masters `maps.taxiPins`, docks `maps.dockPins`, inns
+`maps.innPins`, and `maps.travelMinimap` for the minimap) default to off. The
+flight timer and the instance tracker are set under Quality of Life.
+
+- Unexplored areas (`maps.reveal`: `off` | `on` | `tint`, `Maps/Reveal.lua`):
+  one `MapCanvasDataProviderMixin` provider per map frame (the world map, and
+  the battlefield map once Blizzard loads it) added with `AddDataProvider`.
+  `ZoneArt.FullOverlays` returns the overlay table only when it was built for
+  the art the client shows (art ID and tile size). `Maps.UnexploredOverlays`
+  subtracts the client's explored list (`GetExploredMapTextures`, matched on
+  offset and size, since it returns no overlay IDs). An explored overlay is
+  always left to Blizzard, so `isShownByMouseOver` overlays stay hover-only.
+  The tiles are split by `ZoneArt.EachOverlayTile`, as
+  `MapExplorationDataProvider` splits them, onto one frame at the exploration
+  pin frame level. `tint` multiplies them by the Theme token `mapUnexplored`.
+  The provider repaints on `MAP_EXPLORATION_UPDATED` and on theme changes.
+- Coordinates: the world map's info bar shows the player and the cursor
+  (`maps.coords`, `Maps/WorldMap.lua`). `maps.minimapCoords` adds a readout at
+  the bottom of the minimap (`Maps/Coords.lua`, 5 Hz, repainted only when the
+  tenth changes). Both use `Maps.FormatCoords`.
+- Zone level ranges (`maps.zoneLevels`): labels on continent maps, and the
+  hovered zone's range in the info bar. The ranges come from `maps build`
+  (`tools/lib/maps/zonelevels.js`). Forever-only zones (maps with Forever
+  frames and no Era frames in `map-frames.json`) are held to the sparse
+  thresholds, because every source records them thinly.
+- Dungeon entrances (`maps.dungeonPins`, `Maps/Dungeons.lua`): a Pins layer
+  `maps.dungeons` built from the Codex pack's instances, since `dungeons.json`
+  isn't licence-clean and the core ships no entrances. The Codex is loaded the
+  first time the world map opens with the setting on, or the layer is built
+  on `CODEX_LOADED`. A click opens the dungeon's page in the hub
+  (`Polestar.Dungeons.Open(key)`); with the Dungeons module off, or on
+  Shift-click, it sets a Nav waypoint.
+
+## QoL — quality-of-life helpers
+
+### Quest reward marks — QoL, reads Gear
+
+One system marks the client's reward choices: `QoL/Rewards.lua`. Gear only
+judges items (`Gear.IsUpgrade(link) -> upgrade, delta, pct`) and ranks
+choices for the guide's own reward pick (`Gear.RankChoices`, used by
+`Gear/Picks.lua`); it draws nothing on the reward panel.
+
+```lua
+Polestar.QoL.Rewards.ReadChoices(fromLog) -> { { index, link, itemID, count, value, upgrade, delta } }, complete
+Polestar.QoL.Rewards.Rank(choices) -> { index, ... } (best first), "upgrade" | "value"
+Polestar.QoL.Rewards.Mark() -> true | false | nil   -- draw the marks; whether the best was marked (nil: no best)
+Polestar.QoL.Rewards.best, .reason                -- auto-pick's settled answer on QUEST_COMPLETE
+```
+
+- **Best** = the largest Gear upgrade (delta > 0, Gear enabled); with none,
+  the highest vendor value (sell price × stack). Auto-pick
+  (`qol.rewardAutoPick`, Shift suppresses, never when the quest costs money)
+  takes it; the marks frame it.
+- **Marks** (`qol.rewardHighlight`), on each `type == "choice"` button of
+  `QuestInfoFrame.rewardsFrame.RewardButtons`, anchored to its `Icon`:
+  `qol-upgrade` (success) on every upgrade, `qol-coin` (accent) on the best
+  when nothing is an upgrade, a 2px accent frame with a shade keyline around
+  the best of two or more. Drawn after `QuestInfo_Display` (detail, reward and
+  quest-log pages), and redrawn on `GET_ITEM_INFO_RECEIVED`, `GEAR_UPDATED`
+  and the setting; cleared on `QUEST_FINISHED`. An uncached choice is judged
+  from its item ID; the best waits for complete data (or auto-pick's answer).
+- **Tooltips**: the client's `SetQuestItem` / `SetQuestLogItem` run the item
+  post-calls, so Gear's comparison line ("+12% upgrade · Head") shows on a
+  hovered choice through `Polestar.Hooks`. Gear's "Best pick" line
+  (`gear.pickTooltip`) appears only when its pick is an upgrade, so it never
+  contradicts the coin. `gear.rewards` is the guide window's pick line only.
+
+## Lookup — Codex, sources, generated guides, mount spotting
+
+`addon/Polestar/Lookup/` (`Lookup.xml`: Codex, Sources, Guide, Spotter,
+Options). Everything is off with `lookup.enabled`; `lookup.tooltip`,
+`lookup.altClick` and `lookup.mounts` switch the parts (Discovery → Lookup).
+
+```lua
+Polestar.Codex.Load() / IsLoaded() / Meta()       -- the local Polestar_Codex pack through Data.Pack; CODEX_LOADED(meta)
+Polestar.Codex.Item(id) / Npc(id) / Object(id) / Quest(id) / Instance(key) / Zone(id) / Faction(id) / Spell(spellId)
+Polestar.Codex.Name(kind, id) ; Codex.WithRole(role) ; Codex.Loot(kind, id) ; Codex.Each(kind, fn(id, name, quality, status))
+
+Polestar.Lookup.Sources(kind, id) -> rows, entity     -- ranked for this character
+   -- row = { type, src, label, detail, zone, map, x, y, f, travel, effort, cost, available, why, whyText,
+   --         chance, price, standing, guideable }
+Polestar.Lookup.CuratedGuide(kind, id) -> guideId | nil
+Polestar.Lookup.BuildGuide(kind, id, ranked) -> def | nil, reason
+Polestar.Lookup.Guide(kind, id, index) -> guideId | nil, reason
+Polestar.Lookup.UnitMount(unit) -> { spell, item, name, icon, class } | nil
+Polestar.Lookup.Show(query, kind, id)                 -- SHOW_LOOKUP(query, kind, id) for UI/Lookup.lua
+Polestar.Lookup.RegisterPlanner(kind, build)          -- build(id) -> { title, steps, ... } | nil, reason: another module's guide kind
+Polestar.Lookup.QuestChain(questId, player) -> { quest, ... }, truncated  -- open prerequisites first, the quest last
+Polestar.Lookup.QuestStep(quest, from) -> step         -- accept, objectives, turn-in
+```
+
+- **Codex records** use the field names of `data/forever/codex/*.json` (see
+  Toolchain, "Codex"); the pack holds one compact string per record plus an
+  id → name table per group, so search never decodes records, and decoded
+  records are cached weakly.
+- **Ranking.** A row is unavailable (kept, dimmed, `why` = `faction`, `race`,
+  `class`, `level`, `profession`, `reputation`, `done` or `retired`) when the character
+  cannot use it now; available rows come first, then by `cost` = travel
+  (`ns.TravelCost` from the player to the nearest spawn, giver or dungeon
+  entrance; Nav's planner when present) + effort (expected kills from the drop
+  chance and the mob's level, a dungeon run per boss kill, a rare's respawn,
+  quest objectives and prerequisites, reagents and missing skill, hours for
+  reputation and PvP). Race and class masks are Era masks: a race without a
+  bit is never excluded.
+- **Obtainability.** An item's `status` is `retired` (no longer obtainable:
+  shown for reference, its rows unavailable, never guided; its tooltip says so)
+  or `nosource`. Search ranks, within a kind, items a curated guide `collects`
+  first, then the rest, then retired and source-less ones, each by name match;
+  results carry `status` and `curated`, and the UI shows a muted chip and no
+  "Guide me" for the unobtainable.
+- **Guides.** `Lookup.Guide` opens the curated guide whose `collects` holds the
+  item (for a class mount's spell, a guide with the spell's name among its
+  `keywords`). Otherwise `BuildGuide` writes the same guide table compiled
+  guides use from the chosen source: vendor (goto, buy), drop (goto, kill,
+  collect; a dungeon's entrance first), object (goto, interact, collect),
+  quest reward (every blocking prerequisite, one of the any-of ones, then
+  accept, objectives and turn-in, each with coordinates), craft (train, skill,
+  learn, craft at the profession's trainer), reputation (rep, then buy from
+  the quartermaster). It is registered in pack `lookup`, category `Lookup`, id
+  `lookup/<kind>/<id>`, never saved, and opened in a new tab
+  (`Engine.OpenTab`); a saved tab holding one is rebuilt at `ADDON_LOADED`.
+  A planner kind (`RegisterPlanner`, letters only; Dungeons' `pickup`) is
+  built by its module's `build(id)` through the same `BuildGuide`/`Guide`
+  path (no curated guide, not gated by `lookup.enabled`), registered and
+  reopened the same way.
+- **Tooltips and clicks.** Item tooltips get the best one or two sources and
+  "Alt-click: guide me"; Alt-clicking an item link, bag item or loot item opens
+  its guide (Lookup when no source can be guided). The Codex loads
+  on the first tooltip that needs it out of combat.
+- **Mounts.** `Lookup.UnitMount` reads a player unit's helpful auras with
+  `C_UnitAuras.GetAuraDataByIndex` (in `pcall`: `RequiresUnitAuraAccess`; any
+  secret value stops the scan, as `SecretWhenUnitAuraRestricted` makes them in
+  combat, encounters and PvP matches) and matches the spell against the
+  Codex's mount spells (the client's `ItemEffect`: aura spell → item, class
+  mounts with their class), else `C_MountJournal.GetMountFromSpell`. The unit
+  tooltip gets "Mount: <name>" and its best source; `MOUNT_SPOTTED(unit, info)`
+  fires on target change and mouseover; `/polestar mount` opens Lookup at the
+  target's (else the mouseover's) mount, `/polestar lookup [text]` searches.
+
+## Dungeons — dungeon quest journal and pick-up guide
+
+The dungeon data comes from `dungeons.json` (Toolchain, "Reference data").
+
+The Dungeons section of the hub reads it through the Codex: `codex build` always runs
+`tools/lib/codex/journal.js`, which writes one page per Codex instance into the
+pack as `Dungeons1.lua` (a summary table per dungeon for the list, and the page
+as Lua source compiled only when opened): quests from `dungeons.json`, plus
+quests QuestieDB files under the instance's areas or whose objectives point
+into it, each with giver and ender, our own objective line, chain, rewards
+(items with quality and choice, XP, money, reputation) and DungeonJournal's
+audited shareability; bosses in kill order with the quests tied to them;
+entrances from the Codex, else the client's Map table (the corpse point, placed
+on its zone). No loot tables. Runtime: `addon/Polestar/Dungeons/Dungeons.lua`
+(`Polestar.Dungeons`: List, Get, Entrance, Quests, Quest, Bosses, Open,
+GuideTo, GuideToPoint, ShowOnMap; `SHOW_DUNGEON`). `dungeons build` writes no
+guides.
+
+The pick-up guide is built in game (`addon/Polestar/Dungeons/Pickup.lua`):
+`Dungeons.PickupPlan(key)` takes the page's quests that apply to the character
+(faction, race and class masks through `Lookup.QuestBlock`, the page's class
+list), not done, not in the log (those are `carried`), open by
+max(level, the dungeon's lowest level), picked up outside from an NPC or object
+(not from an item, not inside), and not a follow-up of another quest of the
+page; each with its open prerequisites (`Lookup.QuestChain`: all of `pre`, one
+of `preAny` this character can take, in the order they are done).
+`Dungeons.PickupGuide(key)` orders them as the cheapest path by
+`ns.TravelCost` from where the player stands, through every stop, to the
+entrance (`Dungeons.PlanStops(stops, from, finish, travel) -> order, cost`:
+an exact search over the stops done and the last one, up to 12 stops; above
+that nearest-next, then single stops moved while the path gets shorter). A
+nearest-next walk with the entrance only appended left a city and came back
+to it (Thunder Bluff, Orgrimmar, the Undercity, back to Orgrimmar for
+Ragefire Chasm); the planned path goes Thunder Bluff, the Undercity,
+Orgrimmar and in. Stops: each prerequisite once, after the one before it in
+its chain (a full quest step, `Lookup.QuestStep`, from its giver nearest the
+player; the player then stands at its turn-in), and a giver once per set of
+prerequisites its quests wait on (one step with an accept per quest; the
+giver comes up again for a quest still waiting, and visits to the same giver
+in a row are one step). The last step lists the carried quests as notes and
+goes to the entrance. Nothing to take: nil, "nothing". The route is kept per
+character (`CharState().dungeonPickup[key]`, the stop keys in order) and used
+when the guide is rebuilt without a position. It is a Lookup planner kind
+(`Lookup.RegisterPlanner("pickup", build)`): `Dungeons.PickUp(key)` ->
+`Lookup.Guide("pickup", key)` registers it as `lookup/pickup/<key>` (pack
+"lookup") and opens it in a new tab, and a saved tab of it is rebuilt at
+ADDON_LOADED like Lookup's own; it is gated by `dungeons.enabled`, not
+`lookup.enabled`.
+
+## UI — guide window, hub and options
+
 ### Options registry
 
 Any module adds settings to the options window without touching UI files:
@@ -867,12 +1338,12 @@ Polestar.RegisterOptions({
   tab = "Map", section = "Markers",                         -- tab row entry and section header
   controls = {
     { kind = "toggle",   key = "qol.mapObjectives", label = "Objective markers", help = "One line." },
-    { kind = "slider",   key = "qol.markerScale", label = "Marker size", min = 0.5, max = 2, step = 0.05, format = "%.2f\195\151",
+    { kind = "slider",   key = "qol.markerScale", label = "Marker size", min = 0.5, max = 2, step = 0.05, format = "%.2f\195\151", -- example key
       release = true },                                                 -- optional: write when the drag ends
-    { kind = "dropdown", key = "gear.spec", label = "Weights", choices = { { value = "auto", label = "Automatic" }, ... } },
+    { kind = "dropdown", key = "gear.spec", label = "Weights", choices = { { value = "auto", label = "Automatic" }, ... } }, -- example key (the real one is gear.spec.<CLASS>)
       -- choices may be a function (choices that come and go); get()/set(v) may stand in for the path
-    { kind = "color",    key = "qol.markerColor", label = "Marker colour",
-      shown = function() return r, g, b end, source = function() return "Scheme" end, linked = { "other.key" } },
+    { kind = "color",    key = "qol.markerColor", label = "Marker colour", -- example key
+      shown = function() return r, g, b end, source = function() return "Scheme" end, linked = { "other.key" } }, -- example key
       -- shown: the colour in effect while the key holds none; source: where it comes from;
       -- linked: paths a cancelled pick restores too. Right-click resets (sliders too).
     { kind = "button",   label = "Reset lockouts", help = "One line.", onClick = function() end },
@@ -1108,393 +1579,6 @@ Reading flow: `docs/DESIGN.md` ("Intent" and "The Guide Window").
 - **Per-character UI state** in `CharState().ui`: `recentGuides` (ids, newest
   first, at most 10), `favoriteGuides` (id -> true), `pickerSelected` (id).
 
-## Quest reward marks — QoL, reads Gear
-
-One system marks the client's reward choices: `QoL/Rewards.lua`. Gear only
-judges items (`Gear.IsUpgrade(link) -> upgrade, delta, pct`) and ranks
-choices for the guide's own reward pick (`Gear.RankChoices`, used by
-`Gear/Picks.lua`); it draws nothing on the reward panel.
-
-```lua
-Polestar.QoL.Rewards.ReadChoices(fromLog) -> { { index, link, itemID, count, value, upgrade, delta } }, complete
-Polestar.QoL.Rewards.Rank(choices) -> { index, ... } (best first), "upgrade" | "value"
-Polestar.QoL.Rewards.Mark() -> true | false | nil   -- draw the marks; whether the best was marked (nil: no best)
-Polestar.QoL.Rewards.best, .reason                -- auto-pick's settled answer on QUEST_COMPLETE
-```
-
-- **Best** = the largest Gear upgrade (delta > 0, Gear enabled); with none,
-  the highest vendor value (sell price × stack). Auto-pick
-  (`qol.rewardAutoPick`, Shift suppresses, never when the quest costs money)
-  takes it; the marks frame it.
-- **Marks** (`qol.rewardHighlight`), on each `type == "choice"` button of
-  `QuestInfoFrame.rewardsFrame.RewardButtons`, anchored to its `Icon`:
-  `qol-upgrade` (success) on every upgrade, `qol-coin` (accent) on the best
-  when nothing is an upgrade, a 2px accent frame with a shade keyline around
-  the best of two or more. Drawn after `QuestInfo_Display` (detail, reward and
-  quest-log pages), and redrawn on `GET_ITEM_INFO_RECEIVED`, `GEAR_UPDATED`
-  and the setting; cleared on `QUEST_FINISHED`. An uncached choice is judged
-  from its item ID; the best waits for complete data (or auto-pick's answer).
-- **Tooltips**: the client's `SetQuestItem` / `SetQuestLogItem` run the item
-  post-calls, so Gear's comparison line ("+12% upgrade · Head") shows on a
-  hovered choice through `Polestar.Hooks`. Gear's "Best pick" line
-  (`gear.pickTooltip`) appears only when its pick is an upgrade, so it never
-  contradicts the coin. `gear.rewards` is the guide window's pick line only.
-
-## Pins — map and minimap icons for every module
-
-```lua
-Polestar.Pins.SetLayer(layer, pins, opts)   -- replace a layer; opts = { world = true, minimap = true, edge = false, scale = 1 }
-Polestar.Pins.ClearLayer(layer)
-Polestar.Pins.SetLayerVisible(layer, visible)
--- pin = { map, x, y, f, icon (Theme.Media name or texture path), size, minimapSize, color = { r, g, b, a },
---         tooltip = string | function(tooltip), onClick = function(button), priority,
---         glow (soft halo), ring = { r, g, b } (ring round the disc), backdrop (scrim disc), area (yards) }
-```
-
-Pins are drawn on the world map for the map being viewed (converted through Compat
-for other maps) and projected on the minimap; `edge = true` clamps that layer's
-out-of-range pins to the minimap rim. Pooled frames, distance-filtered, minimap
-updates throttled; layers with hundreds of pins must cost nothing per frame when
-the player stands still. Each layer indexes its pins by continent and 500-yard
-grid square when it is set, so a minimap redraw visits only the pins around the
-player; layer changes made in one frame share one minimap redraw on the next
-(`GetMinimapFrames` runs a pending one first). Nav's own target pins are one layer. A pin's `area`
-draws a soft disc of that radius (`Media/Nav/area`, the pin's colour at 0.32
-alpha) under every pin on the world map (`PIN_FRAME_LEVEL_QUEST_BLOB`, own
-pool, no mouse, sized in canvas units so it scales with the terrain); the
-minimap shows the pin only.
-
-```lua
-Polestar.Pins.SetTrail(runs, opts)   -- runs = { { live = true?, { c, wx, wy }, ... }, ... }; opts = { world, minimap, color }
-Polestar.Pins.ClearTrail()
-Polestar.Pins.TrailDots(points, spacing, phase, rect, cap) -> count, positions   -- pure placement (tests)
-```
-
-The trail: animated dots along straight lines between consecutive points
-(Nav publishes the travel route: the player, then each leg's start where the
-mode changes and its end, a new run after a Hearthstone; without a route,
-player -> target). A live run starts at the player's current position. Runs
-break where the continent changes. Dots are anchored to each run's end, so
-they stay put as the player walks and crawl toward the destination (one
-spacing per 1.5 s; still with `ui.reduceMotion`). Minimap: every 40 yd, only
-inside the visible disc or square, 5 px, at most 40. World map: every max(15,
-map width / 60) yd, clipped to the map, 6 px under the pins in their own
-no-mouse pool, at most 300. One 20 Hz driver runs only while dots show.
-`nav.trailDots` (default on) with `nav.worldPins` / `nav.minimapPins` per surface.
-
-## Nav
-
-```lua
-Polestar.Nav.SetTarget(map, x, y, label, f)   -- user picked a goal; overrides the engine waypoint until the step changes
-Polestar.Nav.ClearTarget()
-Polestar.Nav.GetTarget() -> waypoint | nil
-Polestar.Nav.GetDistance() -> yards | nil      -- to an area target's edge, 0 inside it
-```
-
-Settings live under `nav.*`. Nav hides itself in instances, on taxis, and when
-the target is on another continent (shows the zone name instead).
-
-An area target (a waypoint with `area`, yards: a spawn area) is reached
-anywhere within `area + r` of its centre; outside, the distance shown is to
-the area's edge. A camp then shows the arrived state with the goal label. An
-area objective (`search`) never says arrived: `Nav.Sample` returns "search"
-and the arrow says "Search here", the goal label, and "Click the arrow for the
-next spot". A left click on the arrow (not a drag) calls
-`Nav.NextSpot([index])`, which asks the Engine (`CycleSpot`) for the next spot
-while the target is the Engine's waypoint with `spots`. The `nav.target` pin
-carries the `area`, so the world map draws the area's soft disc under the
-target pin; the `nav.spots` layer (world map, under `nav.worldPins`) marks
-every other spot of the target as a small pin (an `alt` spot smaller and
-fainter, its tooltip "It also spawns here"); clicking one searches there next
-(`Nav.NextSpot(i)`). TomTom's arrival distance is `area + r`.
-
-While a `SetTarget` override is active the Engine keeps announcing its own
-waypoint; `Nav.GetTarget()` is the point actually being guided to. Nav fires
-`WAYPOINT_CHANGED` when it sets or drops an override. `ClearTarget` hides the
-Engine's waypoint until the Engine announces a different one or the step changes.
-
-### Travel planner and zone crossings
-
-```lua
-Polestar.Nav.PlanRoute(p) -> legs | nil, reason   -- pure; Nav/Travel.lua
-Polestar.Nav.GetRoute() -> legs, ci               -- the live route and its current leg
-Polestar.Nav.EstimateTravel(from, to) -> seconds   -- same planner, cached briefly
-Polestar.Nav.RegisterTravelData(d, replace)        -- TravelData.lua: flight masters, flights, transports, inns
-Polestar.Nav.AddTravelPaths(chunk)                 -- learned walking paths (nodes: c, wx, wy, gateway, uiMap)
-Polestar.Nav.RegisterCrossings(d)                  -- zone crossings (merges; ids seen before are skipped)
--- leg = { kind = "walk"|"fly"|"boat"|"zeppelin"|"tram"|"hearth", from, to, label, seconds, rest,
---         radius (arrival yards at `to`), waypoint (true: `to` is a crossing or chain node) }
-```
-
-The planner is Dijkstra over the player, the target, known flight masters,
-docks, the bound inn, learned path nodes and crossing waypoints. It orders by
-a cost (the Hearthstone carries a 120 s margin on top of its time) and keeps
-the real seconds of every leg apart, so `seconds`/`rest` (the arrow's ETA)
-stay honest. Caps: 20000 pops, 40 ms, 1500 path nodes.
-
-**Zone crossings.** Without crossing data a continent walks as it always
-did: straight lines between any two points on it (x1.25 detour) plus learned
-paths. With full crossing data for a continent (`complete = true`), a straight
-walk stays inside one zone; between zones it goes only through
-
-- a crossing: two waypoints, one in each zone, at a tunnel, pass, bridge, gate
-  or lift, each with an arrival radius, joined by an explicit walk link, with a
-  caption per direction (`ab`, `ba`; else "Go to <zone>"), optionally one way;
-- an open-ground pair: two zones whose shared border is walkable anywhere
-  (optionally one way);
-- an approach chain: ordered nodes with radius and caption (a cave, a climb, a
-  dungeon approach). Only the mouth (and with `open = "both"` the last node)
-  links to its zone; the other nodes link only to their chain neighbours. A
-  start or target within max(2 x radius, 30) yd of such a node is inside the
-  chain and attaches only to the nearest node and its neighbours, so routes
-  enter at the mouth and leave the way they came ("Follow the path out", or the
-  node's `back` caption).
-
-A point's zone is its uiMap when the crossing data knows that zone; a zone
-the data lists as `wild` (no crossing data, e.g. maps Forever added) walks as
-before; any other map (a continent map, an instance) is placed in the
-smallest known zone frame holding the point. Walk legs end at every crossing
-or chain waypoint and carry its caption and radius; the arrow shows the
-current leg's caption and points at its waypoint ("Enter Orgrimmar" at the
-gate, then the target's own label).
-
-**Re-planning.** On target, zone and subzone changes, landing, the
-Hearthstone coming off cooldown, binding, the flight map opening, a flight
-path learned (`UI_INFO_MESSAGE` `ERR_NEWTAXIPATH`: the flight master within
-60 yd is marked known), and, with crossing data, on arriving at a crossing or
-chain waypoint and on moving more than 50 yd from where a plan at least 30 s
-old was made (checked at most once a second). `ROUTE_CHANGED` (legs) fires on
-every plan, `ROUTE_ADVANCED` (legs, ci) when the current leg moves on.
-
-**Data.** `node tools/polestar.js travel build` writes TravelData.lua
-(committed: flight masters and flight times, boats, zeppelins, the tram and
-inns from the client tables, learned paths, and crossings learned from zone
-changes in recordings, `tools/lib/travel/crossings.js` `recordedCrossings`,
-registered with `complete = false`: they refine a continent that has full
-crossing data and change nothing elsewhere). Full crossing data comes from an
-optional local crossings file, `data/local/crossings.json` (gitignored),
-which the build validates and writes into the local data addon
-`addon/Polestar_Travel` (gitignored; `## Dependencies: Polestar`, registers
-with `RegisterCrossings` at load; installed when built, never packaged).
-Without the file nothing is written and TravelData.lua never holds it.
-
-The crossings file (schema 1, Era map percent):
-
-```json
-{ "schema": 1, "frame": "e",
-  "crossings": [ { "id": "durotar--orgrimmar",
-                   "a": { "map": 1411, "x": 45.5, "y": 12.1, "radius": 15 },
-                   "b": { "map": 1454, "x": 52.5, "y": 84.8, "radius": 15 },
-                   "ab": "Enter Orgrimmar", "ba": "Leave Orgrimmar", "oneWay": false } ],
-  "open": [ { "a": 1429, "b": 1431, "oneWay": false } ],
-  "chains": [ { "id": "a-cave", "name": "A Cave", "open": "mouth",
-                "nodes": [ { "map": 1413, "x": 45.9, "y": 36.2, "radius": 20, "caption": "Enter the cave" },
-                           { "map": 1413, "x": 46.2, "y": 34.9, "radius": 15, "caption": "Follow the path", "back": "Climb out" } ] } ] }
-```
-
-Validation (every error names its entry, e.g. `crossings[3] (id).a: radius
-500 outside 3-100 yd`): no unknown keys; ids lower-case, unique across
-crossings and chains; maps with an Era frame; x, y in 0-100 unless the point
-says `"offMap": true` (then -50-150); radius 3-100 yd; a crossing's ends on one
-continent, in different zones, at most 1000 yd apart; open pairs distinct,
-on one continent, not repeated; chains of 2+ nodes on one continent with hops
-of at most 600 yd; captions plain text of at most 160 characters (no `|`
-escape codes). `travel route` runs the addon planner and includes
-Polestar_Travel when it is built (`--crossings-lua none` leaves it out).
-
-## Quests — quest database, markers, tooltips, quest levels
-
-`addon/Polestar/Quests/` loads the load-on-demand data addon
-`Polestar_QuestDB` through `Data.Pack` (≈ 1.3 MB of Lua, ≈ 6.4 MB resident)
-at login, and only while `qol.questDB` is on and at least one feature that
-needs it is (`QuestDB.IsWanted()`: map/minimap objectives, available quests,
-turn-ins, tooltips, nameplates); turning the first one on later loads it then,
-and a load refused in combat is retried when combat ends. It fires
-`QUESTDB_LOADED`, then `QUESTDB_STARTED`; `QUESTDB_UPDATED` follows every
-change to the tracked quest log. Record layouts: `tools/lib/questdb/build.js`.
-An entity's spawn clusters (70 yd) cover every known spawn on each map (the
-reference data's `pts` and `more`), with no cap on how many.
-
-```lua
-Polestar.QuestDB.IsLoaded() / IsEnabled() / IsRunning() / IsWanted()
-Polestar.QuestDB.GetQuest(id)  -> { id, title, level, minLevel, races, classes, faction, start = { npc, object, item },
-                                    finish = { npc, object }, pre (any-of), preAll, excl, zone, skill, holiday,
-                                    objectives = { { kind = "kill"|"item"|"object"|"event", id, count, map, x, y, f } } } | nil
-Polestar.QuestDB.GetNpc(id) / GetObject(id) -> { id, name, spawns = { { map, x, y, r (yd), f } } } | nil
-Polestar.QuestDB.GetItem(id)   -> { id, name, droppers = { { id, name, chance } }, objects = { ... }, vendors = { { id, name } } } | nil
-Polestar.QuestDB.GetItemDroppers(itemID) -> { { id, name, chance }, ... } | nil   -- best chance first
-Polestar.QuestDB.GetObjectiveMobs(questID, oi) -> { name, ... } | nil            -- kill target or item droppers
-Polestar.QuestDB.CheckAvailable(id, ctx, isDone, isOn, opts) -> ok, reason      -- opts: lowLevel, levelAbove, skillRank
-Polestar.QuestDB.EachAvailabilityRef(id, fn) -> needsSkill                       -- fn(q) per quest whose done/in-log state CheckAvailable reads
-Polestar.QuestDB.GetAvailableQuests() -> { questID, ... } ; IsAvailable(q) ; WhyUnavailable(q) -> reason | nil
-   -- reasons: "eligibility" (faction, race incl. Skyborne high bits, class, holiday), "done", "active", "level"
-   -- (minLevel), "grey", "high" (beyond qol.questLevelWindow), "prerequisite", "exclusive", "skill"
-Polestar.QuestDB.ObjectivesForNpc(id) / ObjectivesForItem(id) / ObjectivesForObject(id)
-                               -> { { q, kind, id, name, cur, max, done, entry = { q, title, ready } }, ... } | nil  -- quests in the log
-Polestar.QuestDB.GetMarkers(map [, "objectives"|"turnin"|"available"]) -> { pin, ... }
-Polestar.QuestDB.IsGuideQuest(q) -> bool                                         -- in the active guide's current step
-```
-
-"Done" comes from `C_QuestLog.GetAllCompletedQuestIDs` (one call per available
-scan), else `C_QuestLog.IsQuestFlaggedCompleted` per quest. A scan rechecks every
-candidate only after a level-up, a skill change, a filter setting or without the
-bulk call; otherwise only the candidates that read a quest whose done or in-log
-state moved since the last scan (`EachAvailabilityRef`), plus those needing a
-profession skill.
-
-Pins layers: `quests.objectives`, `quests.turnin`, `quests.available`, one pin
-per entity spawn cluster and layer (a mob two objectives need carries both
-under the higher-ranked glyph: kill > interact > collect > vendor). Objective
-clusters at least `MIN_AREA` (12 yd) wide carry their radius as `area`. Markers
-and the tooltip/nameplate indexes are rebuilt only when what they show
-changed (a quest came or went, got ready or changed title, an objective was
-done or undone); a progress count alone only fires `QUESTDB_UPDATED`, since
-tooltips and nameplates read counts live. A rebuild reuses the pin tables
-the last one kept for the same cluster, with their world position (`c`,
-`wx`, `wy`) worked out once, so `Pins.SetLayer` converts only new pins. Look is
-applied at publish: while a Polestar guide runs, pins of quests in its current
-step (`Engine.GetGuide().steps[Engine.GetStepIndex()].goals[*].quest`, re-read on
-`STEP_CHANGED`/`GUIDE_CHANGED`) are 1.3× inside an accent ring and on top;
-with `qol.guideDim` every other quest pin drops to 0.6 alpha (`Q.DIM_ALPHA`).
-
-Tooltips go through `Polestar.Hooks` (owner `"quests"`: UnitLines, ItemLines,
-ObjectLines, registered only while running) with the suite's quest line,
-`Hooks.AddLine(tt, "<Quest>:", "<what> cur/max", quest, textDim | success)`:
-"Kill Kobold Vermin 3/10" on the target, "Large Candle 3/8" on a dropper, "3/8"
-on the item; quest-starting items get "Starts a quest: <title>".
-`Quests/QuestLevels.lua` prefixes "[12]" (and "+" for elite) to quest titles
-the client lists without one (gossip, greeting, details; camelot's own log and
-tracker already show it, so it adds there only when missing).
-
-Nameplate icons (`qol.nameplateIcons`): a mob an open objective still needs
-gets a 16px objective icon (14–20) 3px left of the health bar the player
-sees: EllesmereUI Nameplates' unit frame, Plater/ElvUI/oUF, KuiNameplates or
-Threat Plates when present, else the shown child of the base plate holding
-the largest status bar, else Blizzard's health bar, else the plate itself;
-parented to that frame so it follows its fading and scaling. Every access is
-guarded; `Quests.NameplateIcon(unit)` returns the icon (tests).
-
-Settings (`qol.*`, Questing → Quests; the markers under Map → Guide & quests →
-Quest markers): `questDB`, `availableQuests`,
-`questLevelWindow` (0–10, 10 = any; default 5), `lowLevelQuests`,
-`mapObjectives`, `objectiveAreas`, `turnInMarkers`, `minimapObjectives`,
-`guideHighlight`, `guideDim`, `questTooltips`, `nameplateIcons`, `questLevels`.
-The four marker layers (`availableQuests`, `mapObjectives`, `turnInMarkers`,
-`minimapObjectives`) and `objectiveAreas` default to off (Map → Guide & quests →
-Quest markers); `guideHighlight` only restyles markers those layers draw.
-
-## Core services: Data, Hooks, Search
-
-Shared by every module (summarised in `docs/SUITE.md`, "Runtime services");
-each file's header lists its full API.
-
-```lua
-Polestar.Data.Pack(name) -> loaded, reason|nil   -- C_AddOns.LoadAddOn once per session; never in combat ("combat", retried later)
-Polestar.Data.Info(name) -> { loaded, reason, memoryKB }
-
-Polestar.Hooks.ItemLines(owner, fn(tooltip, link, itemID))       -- GameTooltip, ItemRefTooltip
-Polestar.Hooks.UnitLines(owner, fn(tooltip, unit))               -- GameTooltip
-Polestar.Hooks.ObjectLines(owner, fn(tooltip, objectID, name))   -- GameTooltip; either may be nil
-Polestar.Hooks.ItemClick(owner, fn(link, itemID))                -- modified clicks on chat links, bag and loot items
-Polestar.Hooks.AddLine(tooltip, left, right?, r, g, b, rr, rg, rb)
-
-Polestar.Search.Query(text, opts) -> results, counts, more   -- opts = { kinds, limit = 60, perKind, offset, subtitles = false }
-   -- result = { kind, id, title, subtitle, quality, score, status, curated }; exact > prefix > word prefix > substring
-Polestar.Search.Subtitle(result) ; Search.KINDS ; Search.Status() -> codexLoaded, reason
-```
-
-`Hooks` owns the client hooks: `TooltipDataProcessor.AddTooltipPostCall`
-(Item, Unit, Object) and a `hooksecurefunc` post-hook of
-`HandleModifiedItemClick`, which bag buttons, loot buttons and chat links
-(`SetItemRef`) all reach. One entry per owner, callbacks in registration order,
-each in its own `pcall`; forbidden tooltips and secret values are skipped.
-`Search` matches guides (titles, `keywords`, folded once per guide list) and
-the Codex kinds through the pack's prebuilt index (`Codex.Index(kind)`: one
-string of folded names per kind), so a keystroke is a few plain `string.find`
-calls and never decodes a record. Each kind reads at most 200 candidates per
-query, best tiers first (`more[kind]` says there were more); a one-letter
-query matches name prefixes only. Only the results returned are named, and
-subtitles are filled per shown row (`Search.Subtitle`). Generated `lookup/`
-guides are not listed.
-
-Measured with the real pack (lua5.1, `tests/lookup-codex.test.js` setup):
-the pack loads in about 20 ms (4.4 MB; it never loads at login), the first
-query costs 7 ms (guide headers), a keystroke 1.5–4 ms (1 to 8 letters), a
-detail page (`Lookup.Sources`) 0.1 ms for a mount up to 10 ms for an item
-with 40 drop sources.
-
-## Lookup — Codex, sources, generated guides, mount spotting
-
-`addon/Polestar/Lookup/` (`Lookup.xml`: Codex, Sources, Guide, Spotter,
-Options). Everything is off with `lookup.enabled`; `lookup.tooltip`,
-`lookup.altClick` and `lookup.mounts` switch the parts (Discovery → Lookup).
-
-```lua
-Polestar.Codex.Load() / IsLoaded() / Meta()       -- the local Polestar_Codex pack through Data.Pack; CODEX_LOADED(meta)
-Polestar.Codex.Item(id) / Npc(id) / Object(id) / Quest(id) / Instance(key) / Zone(id) / Faction(id) / Spell(spellId)
-Polestar.Codex.Name(kind, id) ; Codex.WithRole(role) ; Codex.Loot(kind, id) ; Codex.Each(kind, fn(id, name, quality, status))
-
-Polestar.Lookup.Sources(kind, id) -> rows, entity     -- ranked for this character
-   -- row = { type, src, label, detail, zone, map, x, y, f, travel, effort, cost, available, why, whyText,
-   --         chance, price, standing, guideable }
-Polestar.Lookup.CuratedGuide(kind, id) -> guideId | nil
-Polestar.Lookup.BuildGuide(kind, id, ranked) -> def | nil, reason
-Polestar.Lookup.Guide(kind, id, index) -> guideId | nil, reason
-Polestar.Lookup.UnitMount(unit) -> { spell, item, name, icon, class } | nil
-Polestar.Lookup.Show(query, kind, id)                 -- SHOW_LOOKUP(query, kind, id) for UI/Lookup.lua
-Polestar.Lookup.RegisterPlanner(kind, build)          -- build(id) -> { title, steps, ... } | nil, reason: another module's guide kind
-Polestar.Lookup.QuestChain(questId, player) -> { quest, ... }, truncated  -- open prerequisites first, the quest last
-Polestar.Lookup.QuestStep(quest, from) -> step         -- accept, objectives, turn-in
-```
-
-- **Codex records** use the field names of `data/forever/codex/*.json` (see
-  Toolchain, "Codex"); the pack holds one compact string per record plus an
-  id → name table per group, so search never decodes records, and decoded
-  records are cached weakly.
-- **Ranking.** A row is unavailable (kept, dimmed, `why` = `faction`, `race`,
-  `class`, `level`, `profession`, `reputation`, `done` or `retired`) when the character
-  cannot use it now; available rows come first, then by `cost` = travel
-  (`ns.TravelCost` from the player to the nearest spawn, giver or dungeon
-  entrance; Nav's planner when present) + effort (expected kills from the drop
-  chance and the mob's level, a dungeon run per boss kill, a rare's respawn,
-  quest objectives and prerequisites, reagents and missing skill, hours for
-  reputation and PvP). Race and class masks are Era masks: a race without a
-  bit is never excluded.
-- **Obtainability.** An item's `status` is `retired` (no longer obtainable:
-  shown for reference, its rows unavailable, never guided; its tooltip says so)
-  or `nosource`. Search ranks, within a kind, items a curated guide `collects`
-  first, then the rest, then retired and source-less ones, each by name match;
-  results carry `status` and `curated`, and the UI shows a muted chip and no
-  "Guide me" for the unobtainable.
-- **Guides.** `Lookup.Guide` opens the curated guide whose `collects` holds the
-  item (for a class mount's spell, a guide with the spell's name among its
-  `keywords`). Otherwise `BuildGuide` writes the same guide table compiled
-  guides use from the chosen source: vendor (goto, buy), drop (goto, kill,
-  collect; a dungeon's entrance first), object (goto, interact, collect),
-  quest reward (every blocking prerequisite, one of the any-of ones, then
-  accept, objectives and turn-in, each with coordinates), craft (train, skill,
-  learn, craft at the profession's trainer), reputation (rep, then buy from
-  the quartermaster). It is registered in pack `lookup`, category `Lookup`, id
-  `lookup/<kind>/<id>`, never saved, and opened in a new tab
-  (`Engine.OpenTab`); a saved tab holding one is rebuilt at `ADDON_LOADED`.
-  A planner kind (`RegisterPlanner`, letters only; Dungeons' `pickup`) is
-  built by its module's `build(id)` through the same `BuildGuide`/`Guide`
-  path (no curated guide, not gated by `lookup.enabled`), registered and
-  reopened the same way.
-- **Tooltips and clicks.** Item tooltips get the best one or two sources and
-  "Alt-click: guide me"; Alt-clicking an item link, bag item or loot item opens
-  its guide (Lookup when no source can be guided). The Codex loads
-  on the first tooltip that needs it out of combat.
-- **Mounts.** `Lookup.UnitMount` reads a player unit's helpful auras with
-  `C_UnitAuras.GetAuraDataByIndex` (in `pcall`: `RequiresUnitAuraAccess`; any
-  secret value stops the scan, as `SecretWhenUnitAuraRestricted` makes them in
-  combat, encounters and PvP matches) and matches the spell against the
-  Codex's mount spells (the client's `ItemEffect`: aura spell → item, class
-  mounts with their class), else `C_MountJournal.GetMountFromSpell`. The unit
-  tooltip gets "Mount: <name>" and its best source; `MOUNT_SPOTTED(unit, info)`
-  fires on target change and mouseover; `/polestar mount` opens Lookup at the
-  target's (else the mouseover's) mount, `/polestar lookup [text]` searches.
-
 ## Rares — rare NPCs and treasures
 
 `addon/Polestar/Rares/` (`Rares\Rares.xml`, loaded after `UI\UI.xml`):
@@ -1589,6 +1673,8 @@ checks `pack.json`; `tools/lib/pack/format.js` holds the contract constants
 loads a pack with our guides as context (their `next` targets and chains seen,
 their own diagnostics not reported).
 
+What `compile` writes into a pack's folder: Core, "Guide data (compiled Lua)".
+
 | Command | In a pack |
 |---|---|
 | `new [dir]` | writes a pack from `tools/templates/pack/` (the CI workflow and devcontainer only when the clone has an `origin`) |
@@ -1667,43 +1753,6 @@ products (gitignored); `install` ships the pack when it has been built.
   names: the stock the pre-1.4 epic mounts were retired from. Forever-only rows
   are trusted.
 
-### World map (Maps module)
-
-Each feature is a setting on the Map page (Rares & travel, Zones), and none of
-them makes a frame or loads data until it's on. The icon layers (dungeon
-entrances, flight masters `maps.taxiPins`, docks `maps.dockPins`, inns
-`maps.innPins`, and `maps.travelMinimap` for the minimap) default to off. The
-flight timer and the instance tracker are set under Quality of Life.
-
-- Unexplored areas (`maps.reveal`: `off` | `on` | `tint`, `Maps/Reveal.lua`):
-  one `MapCanvasDataProviderMixin` provider per map frame (the world map, and
-  the battlefield map once Blizzard loads it) added with `AddDataProvider`.
-  `ZoneArt.FullOverlays` returns the overlay table only when it was built for
-  the art the client shows (art ID and tile size). `Maps.UnexploredOverlays`
-  subtracts the client's explored list (`GetExploredMapTextures`, matched on
-  offset and size, since it returns no overlay IDs). An explored overlay is
-  always left to Blizzard, so `isShownByMouseOver` overlays stay hover-only.
-  The tiles are split by `ZoneArt.EachOverlayTile`, as
-  `MapExplorationDataProvider` splits them, onto one frame at the exploration
-  pin frame level. `tint` multiplies them by the Theme token `mapUnexplored`.
-  The provider repaints on `MAP_EXPLORATION_UPDATED` and on theme changes.
-- Coordinates: the world map's info bar shows the player and the cursor
-  (`maps.coords`, `Maps/WorldMap.lua`). `maps.minimapCoords` adds a readout at
-  the bottom of the minimap (`Maps/Coords.lua`, 5 Hz, repainted only when the
-  tenth changes). Both use `Maps.FormatCoords`.
-- Zone level ranges (`maps.zoneLevels`): labels on continent maps, and the
-  hovered zone's range in the info bar. The ranges come from `maps build`
-  (`tools/lib/maps/zonelevels.js`). Forever-only zones (maps with Forever
-  frames and no Era frames in `map-frames.json`) are held to the sparse
-  thresholds, because every source records them thinly.
-- Dungeon entrances (`maps.dungeonPins`, `Maps/Dungeons.lua`): a Pins layer
-  `maps.dungeons` built from the Codex pack's instances, since `dungeons.json`
-  isn't licence-clean and the core ships no entrances. The Codex is loaded the
-  first time the world map opens with the setting on, or the layer is built
-  on `CODEX_LOADED`. A click opens the dungeon's page in the hub
-  (`Polestar.Dungeons.Open(key)`); with the Dungeons module off, or on
-  Shift-click, it sets a Nav waypoint.
-
 ### Reference data (`data/forever/`, built by `data build`, gitignored)
 
 ```
@@ -1752,50 +1801,7 @@ data's, else DungeonJournal's observed Forever XP. The compiler's data loader
 adds the quests only `dungeons.json` knows (titles, levels, XP) so guides name
 them without warnings; the importer ignores those copies.
 
-The Dungeons section of the hub reads it through the Codex: `codex build` always runs
-`tools/lib/codex/journal.js`, which writes one page per Codex instance into the
-pack as `Dungeons1.lua` (a summary table per dungeon for the list, and the page
-as Lua source compiled only when opened): quests from `dungeons.json`, plus
-quests QuestieDB files under the instance's areas or whose objectives point
-into it, each with giver and ender, our own objective line, chain, rewards
-(items with quality and choice, XP, money, reputation) and DungeonJournal's
-audited shareability; bosses in kill order with the quests tied to them;
-entrances from the Codex, else the client's Map table (the corpse point, placed
-on its zone). No loot tables. Runtime: `addon/Polestar/Dungeons/Dungeons.lua`
-(`Polestar.Dungeons`: List, Get, Entrance, Quests, Quest, Bosses, Open,
-GuideTo, GuideToPoint, ShowOnMap; `SHOW_DUNGEON`). `dungeons build` writes no
-guides.
-
-The pick-up guide is built in game (`addon/Polestar/Dungeons/Pickup.lua`):
-`Dungeons.PickupPlan(key)` takes the page's quests that apply to the character
-(faction, race and class masks through `Lookup.QuestBlock`, the page's class
-list), not done, not in the log (those are `carried`), open by
-max(level, the dungeon's lowest level), picked up outside from an NPC or object
-(not from an item, not inside), and not a follow-up of another quest of the
-page; each with its open prerequisites (`Lookup.QuestChain`: all of `pre`, one
-of `preAny` this character can take, in the order they are done).
-`Dungeons.PickupGuide(key)` orders them as the cheapest path by
-`ns.TravelCost` from where the player stands, through every stop, to the
-entrance (`Dungeons.PlanStops(stops, from, finish, travel) -> order, cost`:
-an exact search over the stops done and the last one, up to 12 stops; above
-that nearest-next, then single stops moved while the path gets shorter). A
-nearest-next walk with the entrance only appended left a city and came back
-to it (Thunder Bluff, Orgrimmar, the Undercity, back to Orgrimmar for
-Ragefire Chasm); the planned path goes Thunder Bluff, the Undercity,
-Orgrimmar and in. Stops: each prerequisite once, after the one before it in
-its chain (a full quest step, `Lookup.QuestStep`, from its giver nearest the
-player; the player then stands at its turn-in), and a giver once per set of
-prerequisites its quests wait on (one step with an accept per quest; the
-giver comes up again for a quest still waiting, and visits to the same giver
-in a row are one step). The last step lists the carried quests as notes and
-goes to the entrance. Nothing to take: nil, "nothing". The route is kept per
-character (`CharState().dungeonPickup[key]`, the stop keys in order) and used
-when the guide is rebuilt without a position. It is a Lookup planner kind
-(`Lookup.RegisterPlanner("pickup", build)`): `Dungeons.PickUp(key)` ->
-`Lookup.Guide("pickup", key)` registers it as `lookup/pickup/<key>` (pack
-"lookup") and opens it in a new tab, and a saved tab of it is rebuilt at
-ADDON_LOADED like Lookup's own; it is gated by `dungeons.enabled`, not
-`lookup.enabled`.
+The hub's Dungeons section and the pick-up guide built from it: "Dungeons" above.
 
 `professions.json` is built by `profession build` from Blizzard's Era DB2
 (SkillLine, SkillLineAbility, SpellName, SpellEffect, SpellReagents, ItemSparse,
@@ -1804,7 +1810,7 @@ Horde }` and `materials { itemId: { name, buy, buyCount, sell, quality,
 vendors { A, H }, limitedVendors { A, H }, madeBy, gather { herb, mine, fishing },
 drops, dropCount } }`; ranks carry `minSkill`, `spell`, `trainers { A, H }` and,
 for secondary skills, `book`/`quest`; recipes may carry `enchant`,
-`learnedAtEstimated`, `requires` (specialization), `reputation { faction,
+`learnedAtEstimated`, `requires` (specialisation), `reputation { faction,
 standing }`, `tools`, `focus`, `races`, `classes`, `skillUps`. Season of
 Discovery recipes (spell id ≥ 400000) are excluded.
 
@@ -1867,7 +1873,7 @@ exclusive group: pfQuest `close` united with QuestieDB `exclusiveTo`.
    city and its zone) are kept when they lie within 30 yards of a QuestieDB
    spawn. QuestieDB's Static Corrections are folded into the store. Its Dynamic
    (per-character) Corrections are not applied. Questie and QuestieDB ship no
-   license file (CurseForge says GPL-3.0; the maintainers say to treat them as
+   licence file (CurseForge says GPL-3.0; the maintainers say to treat them as
    all rights reserved, Questie issue #4447). The data stays in `data/`, and
    only the importer is in this repository.
 3. **Polestar corrections** (`tools/lib/data/corrections.json`, committed):
@@ -1926,7 +1932,7 @@ quest-chain list, `foreverchanges:xp-chain`).
 
 ### Recordings (`data/recordings/<session>.json`)
 
-Normalized from `PolestarRecorderDB` by `record import`:
+Normalised from `PolestarRecorderDB` by `record import`:
 
 ```
 { schema: 1, build, session, char: { name, realm, race, class, faction }, started, ended,
@@ -2007,7 +2013,7 @@ Layers, stubs, helpers and the tests that need local data: [tests/README.md](../
 `tests/helpers/lua.js`, which loads `tests/lua/wow_stub.lua` and then the
 addon files listed by the TOC/XML manifests. Extend the stub per module in
 `tests/lua/stub_<module>.lua`; `wow_stub.lua` holds only the generic client
-pieces every module shares. Keep tests deterministic and behavioral.
+pieces every module shares. Keep tests deterministic and behavioural.
 
 Performance is tested, not assumed. `tests/perf.test.js` loads the whole addon
 with every module on and the local data packs, and holds these budgets of addon

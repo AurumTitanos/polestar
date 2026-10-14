@@ -340,7 +340,7 @@ function UI.StarterLine(goal)
 end
 
 -- The goal a row paints. The collect that stands for a quest started by its
--- item (`starterOf`, docs/ARCHITECTURE.md "Step view") is worded as that
+-- item (`starterOf`, docs/ARCHITECTURE.md "Tabs", the step view) is worded as that
 -- quest's accept: its verb, title and note, no counter; everything else
 -- (status, index, waypoint, spots) stays the collect's.
 function UI.ReadingGoal(view, goal)
