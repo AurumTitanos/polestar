@@ -7,7 +7,9 @@ zone Tirisfal Glades
 next forever/horde/02-the-barrens
 
 # Route: the simulator's consensus Undead route (data/sim/export/
-# consensus-horde-undead, visit 1, levels 1-12.9).
+# consensus-horde-undead, visit 1, levels 1-11.9). Checked against the
+# 2026-10-14 export: same Tirisfal quests, same order apart from turn-ins
+# swapped within one Brill visit.
 #
 # Flow: Deathknell -> the road east past Calvin Montague and Gordo -> Brill
 # (bind) -> Doom Weed north of town -> west fields, Gordo, Calvin's duel ->
@@ -22,7 +24,10 @@ next forever/horde/02-the-barrens
 #
 # Optional: A Letter Undelivered (361). A Letter to Yvette drops from the
 # Agamand Mills undead about one kill in 25-30, so its accept and turn-in never
-# block.
+# block. Rear Guard Patrol (99156, Forever): Riptear, a level 13 elite
+# abomination, wanders the woods next to the Vicious Night Web Spiders of the
+# east loop; the quest is taken and handed in at Linnea's camp, which the route
+# visits before and after that loop.
 #
 # Deviations from the export (same quest set apart from "Left out"):
 # - Patience (99141): the export accepts and turns it in on the spot; here the
@@ -68,11 +73,19 @@ next forever/horde/02-the-barrens
 # a resurrection spell that solo leveling does not need. The Bandarion Keep
 # story quests (91208 onwards) teach no spell.
 #
-# Left out (accepted by the export but never turned in on its route): The
-# Prodigal Lich (405, Bethor Iceshard in the Undercity), Delivery to
-# Silverpine Forest (445, the Sepulcher) and Leonid's Letter (98545, Glix
-# Xizzix in the Undercity). With them go the Prodigal Lich chain and the
-# Undercity flight path of the older Tirisfal guide; the export has neither.
+# Left out: The Prodigal Lich (405, Bethor Iceshard in the Undercity): the
+# export accepts it and never turns it in. With it go the Prodigal Lich chain
+# and the Undercity flight path of the older Tirisfal guide. Leonid's Letter
+# (98545, Glix Xizzix in the Undercity, 90 XP) is not on the new export's
+# route at all.
+# Left out: the export's Sepulcher stop at 11.9-12.2 (Delivery to Silverpine
+# Forest 445, Supplying the Sepulcher 6321, Ride to the Undercity 6323,
+# Michael Garrett 6322, Prove Your Worth 421, Arugal's Folly 422). The new
+# export goes on into Silverpine from there, while this route goes to the
+# Barrens first; tried as a detour from Brill to the Sepulcher and a bat to
+# the Undercity before the zeppelin, it cost 0.03 h to level 20 under the
+# simulator. Arugal's Folly (422) could not have been added anyway: nothing in
+# the data places its Remedy of Arugal.
 
 # ---------------------------------------------------------------- Deathknell
 
@@ -288,6 +301,7 @@ step Deathguard Linnea
   accept 360
   accept 356
   accept 97558                        -- Shelene Rhobart
+  accept 99156 optional               -- Deathguard Linnea: Riptear, an elite abomination in the east
   collect 286201 quest 99141.2 @65.2,60.3 -- Ask Deathguard Kristof for his report
 
 step Magistrate Sevren
@@ -424,8 +438,9 @@ step Captain Vachon
   kill 1538 quest 371.2
 
 step Vicious Night Web Spiders
-  tip The spiders lurk in the woods at the far east end of the glades.
+  tip The spiders lurk in the woods at the far east end of the glades. Riptear, a rogue abomination, wanders just north-west of them. Riptear is elite: grouping up is advised.
   collect 2872 quest 369.1
+  collect 286326 quest 99156.1 optional -- Riptear's Heart, from Riptear
 
 step Hides for the Forsaken
   tip Duskbats and Darkhounds roam all along the road back west; finish the wings and hides on the way.
@@ -435,6 +450,7 @@ step Hides for the Forsaken
 step Deathguard Linnea's camp
   turnin 356                          -- Deathguard Linnea
   turnin 97558                        -- Shelene Rhobart
+  turnin 99156 optional               -- Deathguard Linnea
   turnin 96897                        -- Hadric Harlson
   turnin 96898
 

@@ -41,7 +41,17 @@ next forever/alliance/02-westfall
 # "The Great Outdoors": skip it if Thalos no longer offers it.
 # "The Quarry's Smith" (95217) is optional: Frast Dokner offers it to
 # blacksmiths (QuestieDB lists Blacksmithing), and its Copper Bars come from
-# smelting Copper Ore or the trade vendors.
+# smelting Copper Ore or the trade vendors. The new export drops it.
+# Your Package Has Arrived (97263, level 2) is an optional errand in
+# Ironforge before the tram: a misplaced package by the Tinker Town mailbox
+# goes to Eldrun Stormbreaker, the shaman trainer, north of the Great Forge.
+# Not taken: Old Ironforge Incursion (96393), Farsen's follow-up to the Dark
+# Iron Map (96391), is a level 16 group quest in the Hall of Thanes dungeon,
+# and so are The Restless Dead (96394) and Important Heirlooms (96403) from
+# Ironforge; come back with a group. Data Hoarders (95041) starts from Jemma
+# Quikswitch in Ironforge and wants punch cards from the snowdrifts by
+# Gnomeregan, at the far west end of the route: the route reaches Ironforge
+# only on the way out.
 # Class quests, as class-only steps:
 # - Warlock (Gnome): Beginnings (1599, Summon Imp) in Coldridge Valley; The
 #   Slaughtered Lamb (1715) from Lago Blackwrench in Ironforge; on arrival in
@@ -522,6 +532,8 @@ step The Deeprun Tram
   zone Ironforge
   tip Follow the road up to Ironforge and train with your class trainer. The Deeprun Tram leaves from Tinker Town, in the east of the city. Ride it to Stormwind.
   train class
+  accept 97263 optional                       -- Misplaced Packages, by the mailbox in Tinker Town
+  turnin 97263 optional                       -- Eldrun Stormbreaker, the shaman trainer, north of the Great Forge
   goto 78.0,51.4 "Deeprun Tram"
 
 # ---------------------------------------------------------------- Class quests in Stormwind

@@ -20,8 +20,9 @@ next forever/alliance/30-40/01-hillsbrad-foothills
 # the Bluegill Raiders and the north coast -> Menethil -> the wreck ->
 # Menethil -> east: the dig, Sarltooth, the Dragonmaw ->
 # Menethil -> the Dragonmaw catapult -> hearth -> boat to Theramore -> the
-# Great Lift -> the Shimmering Flats -> hearth to Menethil -> boat to
-# Southshore.
+# Great Lift -> the Shimmering Flats -> hearth to Menethil, where
+# 30-40/01-hillsbrad-foothills picks up (the Forever Wetlands quests, then
+# the boat to Southshore).
 #
 # Deviations from the export:
 # - Look To The Stars (174-177) is turned in on arrival in Darkshire instead
@@ -35,6 +36,16 @@ next forever/alliance/30-40/01-hillsbrad-foothills
 #   flats finishes them all.
 # - The Legend of Stalvan (67) is not taken: the export never turns it in
 #   (the Old Footlocker is in Westfall).
+# - Refresh (2026): Merrick's Bow (96138, Forever, in the new consensus)
+#   is optional at the Vul'Gol mound: it starts from Merrick's Bow, which
+#   the Lost Watchers of Duskwood drop (rate unknown), asks for 8 Splinter
+#   Fist Warriors and 4 Taskmasters and ends at Sirra Von'Indi in Darkshire.
+# - Refresh: the guide ends on the hearth to Menethil Harbor; the Southshore
+#   boat, flight path, bind and The Shamed Lieutenant (98219) moved to
+#   30-40/01-hillsbrad-foothills, which first runs the Forever Wetlands
+#   quests of the new consensus's 30-31 visit. The new consensus visits
+#   Thousand Needles later (32.6, after Hillsbrad); the Shimmering Flats stay
+#   here, between the Wetlands and the hearth, as before.
 #
 # Dropped for flow: A Noble Brew (335, 2450 XP): the Musquash Root sits in
 # the far south-east of the Wetlands, a long detour off the route, and the
@@ -133,6 +144,9 @@ step Defias Strongbox
 step Vul'Gol Ogre Mound
   tip Ride east to the ogre mound. Abercrombie's Crate sits in the camp at its entrance; Splinter Fist ogres guard it.
   collect 1349 quest 134 @33.4,76.3       -- Abercrombie's Crate
+  accept 96138 optional                   -- Only if a Lost Watcher dropped Merrick's Bow: right-click it
+  kill 212 x8 quest 96138.1 optional      -- Splinter Fist Warrior
+  kill 892 x4 quest 96138.2 optional      -- Splinter Fist Taskmaster
 
 step Abercrombie
   turnin 134
@@ -150,6 +164,7 @@ step Back to Darkshire
   turnin 401                              -- Wait a moment, then speak with her again
   accept 252
   turnin 252                              -- Lord Ello Ebonlocke
+  turnin 96138 optional                   -- Sirra Von'Indi
 
 # ---------------------------------------------------------------- Menethil Harbor
 
@@ -272,16 +287,8 @@ step Mirage Raceway
   turnin 1176                             -- Pozzik
   turnin 1175                             -- Trackmaster Zherin
 
-# ---------------------------------------------------------------- Southshore
+# ---------------------------------------------------------------- Back to Menethil
 
-step To Southshore
+step Back to Menethil
   zone Wetlands
-  tip Hearth to Menethil and take the boat from the pier to Southshore.
   hearth "Deepwater Tavern"
-  goto 4.5,56.7 "Boat to Southshore"
-
-step Southshore
-  zone Hillsbrad Foothills
-  getfp "Southshore" npc 2432             -- Darla Harris
-  sethome "Southshore" npc 2352           -- Innkeeper Anderson
-  turnin 98219 npc 2228                   -- Lieutenant Farren Orinelle

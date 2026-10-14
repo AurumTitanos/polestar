@@ -9,6 +9,19 @@
 # Bloodtooth -> Astranaar -> the western posts -> hearth, boat to Menethil ->
 # Menethil turn-ins. Next guide: Stranglethorn Vale.
 #
+# Forever above level 30 cannot be checked in game until launch on 4
+# November: the Forever additions here come from the data, not from play.
+# Added from the consensus Ashenvale visit (12, 28.9-30.0), all Forever:
+# - Seeking Caitlin (95737): Llana in Astranaar, handed to Caitlin Grassman
+#   at the Menethil stop that closes this guide.
+# - Shared Fury (98418): Maseara Autumnmoon in Forest Song; the satyrs are
+#   killed in Xavian between the second and third Forest Song stops, which
+#   the loop already makes.
+# - Gleaming Crescent Necklace (98027): the pendant lies north of Fallen Sky
+#   Lake, on the way to the Oracle; Maliynn takes it in Astranaar.
+# - Left out: Slowing the Orc Advance (86757): Shandrina sits at Mystral Lake,
+#   which this loop reaches only at its end, while the Horde grunts and
+#   scouts stand in the far east: a second crossing of the zone.
 # Deviations from the simulator route (consensus, Alliance Human):
 # - Ashenvale runs as one west-to-east loop and back: the western quests are
 #   all taken on the first pass, Satyrnaar's soul and Geltharis are done
@@ -45,6 +58,7 @@ step Astranaar
   sethome "Astranaar"
   accept 1035                         -- Pelturas Whitemoon
   accept 4581                         -- Shindrell Swiftfire
+  accept 95737                        -- Llana: for Caitlin Grassman in Menethil, at the end of this guide
 
 # ---------------------------------------------------------------- The western posts
 
@@ -91,10 +105,11 @@ step Satyrnaar
   tip The Circle of Imprisonment stands in the satyr camp of Satyrnaar, further east along the road.
   interact 20352 quest 1140.2         -- Circle of Imprisonment
 
-step Kayneth Stillwind
-  tip Forest Song, the Night Elf outpost at the eastern end of the road.
-  turnin 4581
+step Forest Song
+  tip Forest Song, the Night Elf outpost at the eastern end of the road: Kayneth Stillwind and Maseara Autumnmoon stand there.
+  turnin 4581                         -- Kayneth Stillwind
   accept 1011
+  accept 98418                        -- Maseara Autumnmoon
 
 # ---------------------------------------------------------------- The south-east
 
@@ -107,19 +122,27 @@ step Iron Pommel
   collect 5519 quest 1027             -- Iron Pommel
 
 step Fallen Sky Lake
-  tip The Shadethicket Oracle walks the shore of Fallen Sky Lake, south-west of the chests.
+  tip The Shadethicket Oracle walks the shore of Fallen Sky Lake, south-west of the chests; the Gleaming Crescent Pendant lies north of the lake, on the way.
   collect 5508 quest 1035             -- Fallen Moonstone
+  accept 98027 object 669176          -- Gleaming Crescent Pendant: for Maliynn in Astranaar
 
 step Kayneth Stillwind
   turnin 1011
   accept 1012
 
+step Xavian satyrs
+  tip Back west along the road to the satyr camps of Xavian.
+  kill 3755 quest 98418.1             -- Xavian Felsworn
+  kill 3757 quest 98418.2             -- Xavian Hellcaller
+  kill 3752 quest 98418.3             -- Xavian Rogue
+
 step Insane druids
   tip The three druids stand together at the Forsaken camp south of Forest Song.
   complete 1012
 
-step Kayneth Stillwind
-  turnin 1012
+step Forest Song
+  turnin 1012                         -- Kayneth Stillwind
+  turnin 98418                        -- Maseara Autumnmoon
 
 # ---------------------------------------------------------------- Night Run and the shrine
 
@@ -142,6 +165,7 @@ step Shael'dryn
 
 step Astranaar
   turnin 1035                         -- Pelturas Whitemoon
+  turnin 98027                        -- Maliynn
   turnin 1029                         -- Raene Wolfrunner
   accept 1030
 
@@ -201,7 +225,8 @@ step Glorin Steelbrow
   turnin 324
 
 step Deepwater Tavern
-  tip Vincent Hyal, Mikhail and Tapoke Jahn are all at Menethil's inn; Tapoke fights you when you talk to Mikhail, but gives up once beaten.
+  tip Vincent Hyal, Mikhail and Tapoke Jahn are all at Menethil's inn; Tapoke fights you when you talk to Mikhail, but gives up once beaten. Caitlin Grassman stands a short walk north-east of the inn.
+  turnin 95737                        -- Caitlin Grassman
   turnin 1301                         -- Vincent Hyal
   accept 1302
   turnin 1248                         -- Mikhail

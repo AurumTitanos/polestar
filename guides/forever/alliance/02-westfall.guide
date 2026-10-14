@@ -6,14 +6,16 @@ zone Westfall
 next forever/alliance/03-darkshore
 
 # Visit 2 of the simulator's consensus Alliance route (Human export,
-# 12.3 to 16.4): Elwynn ends at the Sentinel Hill flight master, Westfall runs
-# to 16, then Stormwind and the boat to Auberdine.
+# 12.3 to 16.4; the 2026 refresh's consensus stays to 17.9): Elwynn ends at
+# the Sentinel Hill flight master, Westfall runs to about 17, then Stormwind
+# and the boat to Auberdine.
 #
 # Flow: Sentinel Hill (hearth, every quest giver) -> Saldean's Farm -> the
 # Jansen Stead -> Saldean's -> one loop north: Molsen Farm, the Gold Coast
 # Quarry, Jangolode Mine, the north coast, the gnoll hills -> the Jansen
 # Stead -> Saldean's -> Sentinel Hill -> the western farms -> Sentinel Hill ->
-# Moonbrook and the Defias hills -> hearth -> Stormwind (training) -> boat.
+# Moonbrook and the Defias hills -> hearth -> Stormwind (training, Fishin'
+# Time at the harbor) -> boat.
 #
 # Deviations from the export:
 # - The simulator took Sentinel Hill's quests (102, 12, 153, 92742, 92744,
@@ -21,8 +23,27 @@ next forever/alliance/03-darkshore
 #   second time; here they are taken on arrival and the north is one loop.
 # - Harvesting the Harvesters (92910) starts from an item the Golems and
 #   Watchers drop: it is picked up on the farms rather than at Alexston.
-# - Left out: Continue to Stormwind (6281) and Of Mice and Milk (93928): the
-#   route accepts them but never turns them in.
+# - Left out: Continue to Stormwind (6281): the route accepts it but never
+#   turns it in. Of Mice and Milk (93928, re-checked on the 2026 refresh):
+#   the new route still accepts it and never turns it in; it ends at Hemet
+#   Nesingwary in Stranglethorn (30-40), pays 105 XP and the data has no
+#   source for the mouse's cookie.
+# - Refresh (new consensus, Westfall to 17.9), checked and left out after
+#   measuring each on its own (sim compare, Human / Night Elf, hours to 60
+#   with the quest vs without): Keeper of the Flame (103, +0.23 / +0.21: the
+#   flasks drop only once the quest is held, so the farms are walked
+#   again), The Coastal Menace (104, +0.02 / +0.04 for the walk to the
+#   lighthouse), Detonation at a Distance (92750, 92751, +0.04 / +0.02 for
+#   the Old Town walk). The Coast Isn't Clear (152) stays out: it needs the
+#   Coastrunners of the north coast after the lighthouse, a second crossing
+#   of the zone. Destruction in Deadmines (92753, 92819) stays out: the
+#   explosives go to the forge inside the Deadmines, a group dungeon (the
+#   simulator counts it as a walk).
+# - Refresh: Fishin' Time (95065, Forever's Stormwind fishing introduction,
+#   900 XP, for everyone; +0.04 / +0.05 h to 60, kept as a teaching quest)
+#   on the way to the boat: Catherine Leland sells the Shiny Bauble and
+#   Nightcrawlers, Gilbert Gray stands at the harbor. Human characters also
+#   hand in Shipment to Stormwind (61, from Elwynn) there.
 # - The Auberdine flight path and hearth the export lists at the end of this
 #   visit are taken on arrival in Darkshore (next guide).
 #
@@ -36,10 +57,9 @@ next forever/alliance/03-darkshore
 # theirs in their start guides. Train in Stormwind before the boat; Stormwind
 # has no shaman trainer, so Shamans take the Deeprun Tram to Ironforge.
 #
-# Not taken: The Coast Isn't Clear and The Coastal Menace (152, 104, level 19-20
-# lighthouse murlocs), Captain Sander's treasure (136-140, a rare map drop),
-# The Defias Brotherhood's later steps (132-155, 166: the Stormwind trip
-# for 135/141, the Deadmines), Thunderbrew (117, no XP). Its first step (65)
+# Not taken: The Defias Brotherhood's later steps (132-155, 166: the
+# Stormwind trip for 135/141, the Deadmines), Captain Sander's treasure
+# (136-140, a rare map drop), Thunderbrew (117, no XP). Its first step (65)
 # is restored: taken at the last Sentinel Hill stop, turned in to Wiley the
 # Black on arrival in Lakeshire. 142 and 155 need 132-141 first (a trip back
 # from Redridge to Westfall and to Stormwind): skipped.
@@ -47,7 +67,10 @@ next forever/alliance/03-darkshore
 # Alba Fairmoon's chain runs on into Moonbrook Espionage (92747, crates in
 # Moonbrook, the next stop) and Explosive Consultation (92748, Sprite
 # Jumpsprocket at the Stormwind stop). A Dynamite Plan, which needs crafted
-# dynamite, is not taken. Skyborne turn in Journey to Sentinel Hill (98021).
+# dynamite, is not taken; nor is Detonation at a Distance (92750, 92751,
+# see above) and its follow-up Explosive Consultation (92752), which only
+# leads back to Alba and the Deadmines.
+# Skyborne turn in Journey to Sentinel Hill (98021).
 
 # ---------------------------------------------------------------- Sentinel Hill
 
@@ -210,7 +233,15 @@ step Shaman training
 
 step Stormwind
   zone Stormwind City
-  tip Fly or ride to Stormwind. Trainers: Old Town (Warriors, Rogues), the Cathedral (Paladins, Priests), the Mage Quarter (Mages, Warlocks), the Park (Druids). Sprite Jumpsprocket works in the Dwarven District.
+  tip Fly or ride to Stormwind. Trainers: Old Town (Warriors, Rogues), the Cathedral (Paladins, Priests), the Mage Quarter (Mages, Warlocks), the Park (Druids). Sprite Jumpsprocket works in the Dwarven District, Morgan Pestle in the Trade District.
   train class only Warrior,Paladin,Hunter,Rogue,Priest,Mage,Warlock,Druid -- Level 12, 14 and 16 spells
   turnin 92748                                -- Sprite Jumpsprocket, Dwarven District
+  turnin 61 only Human                        -- Morgan Pestle, Trade District
+
+step Fishin' Time
+  tip Catherine Leland sells fishing supplies along the canal just west of the Trade District; Gilbert Gray fishes at the harbor, on the way to the boat.
+  buy 6529 x1 npc 5494                        -- Shiny Bauble, from Catherine Leland
+  buy 6530 x3 npc 5494                        -- Nightcrawlers
+  accept 95065                                -- Gilbert Gray
+  turnin 95065
   goto 21.8,56.9 "Boat to Auberdine" live

@@ -9,6 +9,10 @@ next forever/horde/02-the-barrens
 
 # Route: the simulator's consensus route for Horde Skyborne
 # (data/sim/export/consensus-horde-skyborne, visit 1, levels 1-14.6).
+# Checked against the 2026-10-14 export: same isle quests. Its order differs
+# mostly at the end (Windsong Lake and Shadowgale Forest before the Valanaar
+# and Shrine of Akir finale), but its isle visit is slower than the one this
+# guide was built from (4.61 h against 4.56 h), so the order below stays.
 #
 # Flow: Thendal Village -> Thendal Grove and the standing stones -> the Ursera
 # den and the Al'Aketh camp -> Shen'dar Village -> the highland bandits ->
@@ -42,8 +46,9 @@ next forever/horde/02-the-barrens
 # - Shaman: Call of Earth (92466-92468) from Windshaper Boro at 4; the Signet
 #   of Akir drops from the Al'Aketh by Hanaa's camp, the Minor Manifestation
 #   of Earth is at the Rise of Spirits east of the village. Call of Fire
-#   (97243-97257, Searing Totem and the Fire Totem) at about 12: Sessaria
-#   Skystride in Valanaar, Olariaan Swiftburn at the Shrine of Flames,
+#   (97243-97257, Searing Totem, the Fire Totem and the Totem of Charged
+#   Flames) at about 12: Sessaria Skystride in Valanaar, Olariaan Swiftburn
+#   at the Shrine of Flames,
 #   Skypriest Faladiel west of the falls, Kuramaa in the Shen'dar Highlands,
 #   then the Eternal Flame run back to Valanaar. The Barrens Call of Fire
 #   (1524-1527) is not taken.
@@ -70,6 +75,17 @@ next forever/horde/02-the-barrens
 # Crossroads (98024), goes to Thork in forever/horde/04-the-barrens.
 # The Thunder Bluff flight path is learned on the way past the bluff: later
 # guides fly there.
+# Added: Traditions of the Bluff (97485, Forever orientation quest, also in
+# the Tauren export's Thunder Bluff stop): buy four incense parts from the
+# city's vendors near Tal and spread the incense on Hunter Rise, while you
+# are in the city for the flight path. Simulator: +0.04 h to level 20 (the
+# hours to 30 and 60 came out lower, 24.53 h and 122.09 h against 24.70 h and
+# 122.71 h without it).
+# Left out: Exploring the Horde (93739, Forever, Skyborne only): the capital
+# tour (Nazgrel, Vol'jin, Cairne, Sylvanas) starts from Thrall only once
+# Welcome to Azeroth is turned in, which happens in
+# forever/horde/03-silverpine-forest. More Al'Aketh Ears (93459, Forever): a
+# repeatable reputation hand-in for Vayn Moongaze with no XP.
 
 # ---------------------------------------------------------------- Thendal Village
 
@@ -640,8 +656,26 @@ step Northern Mulgore
 
 step Thunder Bluff
   zone Thunder Bluff
-  tip Thunder Bluff is beside the landing: ride up a lift and learn the flight path from Tal, the wind rider master. Then follow the road south past Bloodhoof Village and through the eastern pass into the Barrens.
+  tip Thunder Bluff is beside the landing: ride up a lift and learn the flight path from Tal, the wind rider master.
   getfp "Thunder Bluff" npc 2995      -- Tal
+
+step Traditions of the Bluff
+  zone Thunder Bluff
+  tip Eylah Sunhorn wants tauren incense: buy its four parts from Nida the herbalist, Nata the enchanting supplier, Mahu the leatherworking supplier and Naal the cooking supplier, then combine them into Prepared Incense.
+  accept 97485                        -- Eylah Sunhorn
+  buy 278079 x1 npc 3014              -- Bundle of Herbs, from Nida Winterhoof
+  buy 278080 x1 npc 3012              -- Bundle of Dried Cedar Twigs, from Nata Dawnstrider
+  buy 278081 x1 npc 3005              -- Sinew Thread, from Mahu
+  buy 278083 x1 npc 3027              -- Ceremonial Flint and Tinder, from Naal Mistrunner
+
+step Hunter Rise
+  zone Thunder Bluff
+  tip Spread the incense at the ceremonial mat and burner on the south-facing cliff of Hunter Rise.
+  interact 665373 quest 97485.2       -- Incense Burner
+
+step Eylah Sunhorn
+  zone Thunder Bluff
+  turnin 97485
 
 step Turak Runetotem
   only Druid
@@ -653,6 +687,6 @@ step Turak Runetotem
 
 step The Crossroads
   zone The Barrens
-  tip From the pass, take the Gold Road north to the Crossroads, the Horde town in the middle of the Barrens.
+  tip Leave Thunder Bluff by a lift and follow the road south past Bloodhoof Village and through the eastern pass into the Barrens; from the pass, take the Gold Road north to the Crossroads, the Horde town in the middle of the Barrens.
   getfp "Crossroads" npc 3615         -- Devrak, the wind rider master
   sethome "The Crossroads" npc 3934   -- Innkeeper Boorand Plainswind

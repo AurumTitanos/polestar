@@ -45,8 +45,15 @@ next forever/alliance/06-ashenvale
 #
 # Left out (not in the export): Jitters' Growling Gut and Dusky Crab Cakes
 # (163, 5, 93), Seasoned Wolf Kabobs (90: Cooking), The Weathered Grave chain
-# (225: ends at the elite Mor'Ladim), Ira's Dagger and Merrick's Bow (96137,
-# 96138: their starting items have no known source).
+# (225: ends at the elite Mor'Ladim), Ira's Dagger (96137: it starts from a
+# drop of the Lost Stalkers, Forever's new Duskwood mobs, at an unknown rate,
+# and is not in the new consensus either).
+# Refresh (2026): Merrick's Bow (96138) now has a known start, a drop of the
+# Lost Watchers; the new consensus does it at 28 with the ogres of Vul'Gol,
+# so it is an optional extra in 07-thousand-needles' Duskwood return. The
+# Valor Family (98447, a Forever quest Wowhead lists for Duskwood, level 27)
+# is not in our data: no giver, objective or ender we can place, so it is
+# not added. The Valor Family 96139 (Sirra Von'Indi) stays as it is.
 # Checked and skipped: The Legend of Stalvan (98) needs 97 (the Stalvan
 # chain through Westfall and Elwynn, not on this route) and ends at Stalvan
 # Mistmantle, an elite.

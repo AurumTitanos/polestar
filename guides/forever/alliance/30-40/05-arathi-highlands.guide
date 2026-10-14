@@ -7,6 +7,24 @@
 # (Strahnbrad, the Crushridge ogres, Dalaran) > Southshore > Ironforge
 # (training) > Loch Modan, ready for the Badlands.
 #
+# Forever above level 30 cannot be checked in game until launch on 4
+# November: the Forever additions here come from the data, not from play.
+# Added (Forever):
+# - My Little Friends (93176): the consensus takes and hands it in on its
+#   Swamp of Sorrows visit at 42.7, but its three critters live in Arathi,
+#   Desolace and Stranglethorn (data spawns). It is taken here from Amaryllis
+#   Webb, beside Watcher Biggs; the Hay Weevil is caught at Northfold Manor,
+#   the Flesh Picker by the Kodo Graveyard (06-badlands), the Arbor Tarantula
+#   in northern Stranglethorn, and it is handed in on the Swamp stop of
+#   40-50/01-stranglethorn-vale. The data has no objectives for it, so each
+#   catch is a check-off the player ticks.
+# - Friend of the Kirin Tor (92459): optional; the Image of Archmage Modera
+#   offers it on the An Alarming Request turn-in, and Archmage Celindra stands
+#   in the City of Dalaran a short walk east (data). Not on the consensus
+#   route; optional because the way into the city is unchecked.
+# - The Image of Archmage Modera stands just inside Silverpine Forest in the
+#   data: the turn-in now uses the data's position instead of typed Alterac
+#   coordinates.
 # Deviations from the export:
 # - The Lost Supplies (1423, a crate in the Swamp) and The Thandol Span part 2
 #   (632) are never turned in on the route: left out.
@@ -56,8 +74,9 @@ step Fly to Darkshire
 
 step Watcher Biggs
   zone Swamp of Sorrows
-  tip From Darkshire follow the road east through Deadwind Pass into the Swamp of Sorrows; Biggs guards the road junction just inside it.
+  tip From Darkshire follow the road east through Deadwind Pass into the Swamp of Sorrows; Biggs guards the road junction just inside it. Amaryllis Webb stands a short way north of him.
   accept 1396                         -- Watcher Biggs
+  accept 93176                        -- Amaryllis Webb: three critters to catch in Arathi, Desolace and Stranglethorn
 
 step The western swamp
   tip Young crocolisks, Sorrow Spinners and Swamp Jaguars all roam the swamp around the road.
@@ -159,9 +178,10 @@ step Refuge Pointe
   accept 691                          -- Apprentice Kryten
 
 step Northfold Manor
-  tip The Syndicate hold the farm north-west of Refuge Pointe.
+  tip The Syndicate hold the farm north-west of Refuge Pointe. A Hay Weevil crawls about the farm: catch one with Amaryllis Webb's Entomology Starter Kit, then tick it off.
   kill 2586 quest 681.1               -- Syndicate Highwayman
   kill 2589 quest 681.2               -- Syndicate Mercenary
+  kill 217589                         -- Hay Weevil: catch it, for My Little Friends
 
 step Refuge Pointe
   turnin 681                          -- Captain Nials
@@ -298,10 +318,14 @@ step Ruins of Alterac
   kill 2318 quest 537.1               -- Argus Shadow Mage
 
 step Dalaran
-  tip South-west to the Kirin Tor camp on the lake shore west of Dalaran: the Image of Archmage Modera stands there. Archmage Ansirem stands south-east of it, by the dome.
-  turnin 92432 "An Alarming Request" @7.4,59.2 -- Image of Archmage Modera
+  tip South-west to the Kirin Tor camp on the lake shore west of Dalaran, just over the border into Silverpine Forest: the Image of Archmage Modera stands there. Archmage Ansirem stands south-east of it, by the dome.
+  zone Silverpine Forest
+  turnin 92432 "An Alarming Request"  -- Image of Archmage Modera
+  accept 92459 optional               -- Image of Archmage Modera: Friend of the Kirin Tor
+  zone Alterac Mountains
   turnin 602                          -- Archmage Ansirem Runeweaver
   accept 603                          -- For Catelyn the Blade in Booty Bay: keep it
+  turnin 92459 optional               -- Archmage Celindra, in the City of Dalaran
 
 # ---------------------------------------------------------------- Southshore
 

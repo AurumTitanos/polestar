@@ -12,6 +12,12 @@
 # hearth to Booty Bay (Water Elementals). Then on to the Swamp of Sorrows
 # (05-arathi-highlands).
 #
+# Forever above level 30 cannot be checked in game until launch on 4
+# November: the Forever addition here comes from the data, not from play.
+# Added: Talk of the Town (98463, Forever), Barkeep Kelly's breadcrumb from
+# Southshore (30-40/01-hillsbrad-foothills), handed to Nixxrax Fillamug in
+# the Salty Sailor Tavern on arrival in Booty Bay, as the consensus does.
+#
 # Optional: Crystal in the Mountains starts from the Pendant of Myzrael, a
 # drop of Gluggle, a rare murloc: take it if he drops it.
 # Deviations: none in the quest set. Hemet Nesingwary (5762) is carried from
@@ -134,6 +140,7 @@ step Down to Booty Bay
   tip Follow the main road south the length of the jungle, past the Grom'gol turn-off, to Booty Bay on the southern cape.
   getfp "Booty Bay"                   -- Gyll, on the top floor by the docks
   sethome "Booty Bay"                 -- Innkeeper Skindle, The Salty Sailor Tavern
+  turnin 98463                        -- Nixxrax Fillamug, in the Salty Sailor Tavern
   accept 575                          -- Drizzlik, by the bank
   accept 605                          -- Crank Fizzlebub
   accept 198                          -- Krazek, in the tavern

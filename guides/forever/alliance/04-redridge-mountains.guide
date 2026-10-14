@@ -27,6 +27,12 @@ next forever/alliance/05-duskwood
 # - Left out, accepted but never turned in on the route: The Price of Shoes
 #   (118, Smith Argus in Goldshire) and Theocritus' Retrieval (178, a pendant
 #   drop for the Tower of Azora).
+# - Refresh (2026): Expanding Horizons (97914, from 03-darkshore) is handed
+#   to Baros Alexston at the Stormwind stop; his reply, Making Do (97926),
+#   goes back to Auberdine in 06-ashenvale. The new consensus visits
+#   Redridge later (25-26, after the Wetlands); this guide keeps the old
+#   place at 21-23, where its quests are not grey, and the zone order of
+#   the guides it chains with.
 #
 # Class quests at the Stormwind stop (about level 21): Rogues take Mathias and
 # the Defias (2360, Poisons; finished at the end of 05-duskwood), Warlocks
@@ -51,8 +57,10 @@ next forever/alliance/05-duskwood
 
 step Stormwind
   zone Stormwind City
-  tip The Auberdine boat docks at Stormwind Harbor. Walk up into the city for training, then leave by the main gate and follow the road east through Elwynn Forest.
+  tip The Auberdine boat docks at Stormwind Harbor. Walk up into the city for training and Baros Alexston, then leave by the main gate and follow the road east through Elwynn Forest.
   train class only Warrior,Paladin,Hunter,Rogue,Priest,Mage,Warlock,Druid -- Level 18 and 20 spells
+  turnin 97914                                -- Baros Alexston: Thundris' letter from Auberdine
+  accept 97926                                -- For Thundris Windweaver, on the return to Auberdine (06-ashenvale)
   vendor nearest
 
 step Shaman training

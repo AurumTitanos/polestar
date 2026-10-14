@@ -7,7 +7,11 @@ zone Durotar
 next forever/horde/orc-troll/02-the-barrens
 
 # Route: the simulator's consensus Orc route (data/sim/export/consensus-horde-orc,
-# visit 1, Durotar 1-11.9). Trolls start in the same valley and share it.
+# visit 1, Durotar 1-11.8). Trolls start in the same valley and share it.
+# Checked against the 2026-10-14 export: same Durotar quests (it drops only
+# the enchanters' A Pain in the Neck, kept here as optional); its order goes
+# from Tiragarde Keep straight to Sen'jin, but its Durotar visit takes 3.26 h
+# against 3.27 h for the one this guide was built from, so the order stays.
 #
 # Flow: Valley of Trials -> Sen'jin Village (report) -> Razor Hill (bind) ->
 # Razormane Grounds -> Tiragarde Keep -> Razor Hill -> Rezlak, Drygulch Ravine
@@ -35,6 +39,9 @@ next forever/horde/orc-troll/02-the-barrens
 # - A Pain in the Neck (96873) is for enchanters: Pa'zula's Luminous Residue
 #   comes from disenchanting the Hexed Pendants the Echo Isles trolls drop.
 #   Taken at Sen'jin, done on the isles and handed in on the way back.
+# - Threat from Below (99052, Forever, optional): Orgnil's last naga quest,
+#   Aggor the Young on the north coast. Aggor is elite, so the simulator
+#   leaves it out; it is offered at the last Razor Hill stop for groups.
 #
 # Class quests: Warlocks do Ruzan's Vile Familiars (1485, 1499) instead of
 # Zureetha's. Shamans take Call of Earth (1516-1518) from Canaga Earthcaller
@@ -52,9 +59,17 @@ next forever/horde/orc-troll/02-the-barrens
 # Orgrimmar at about 16. The Shattered Hand (1963, Rogue) teaches no spell
 # and is left out.
 #
-# Left out: quests the route accepts and never turns in: The Admiral's Orders
-# (831, to Nazgrel), Need for a Cure (812), Neeru Fireblade (829).
-# Burning Shadows (832) is carried to Neeru Fireblade in Orgrimmar (about 19).
+# Left out: the export's Orgrimmar stop at 11.8-12.5: Neeru Fireblade (829),
+# The Admiral's Orders (831, Nazgrel), Burning Shadows (832) and Ak'Zeloth
+# (809, to Far Watch Post, then The Demon Seed 924), plus the city's Forever
+# cooking errands (97326, 97246, 97249, 97242, 97275). The export goes from
+# Orgrimmar to the zeppelin for Silverpine; this route goes west to the
+# Barrens, so the city is a detour. Tried after Skull Rock and again before
+# Far Watch Post: 0.07-0.10 h slower to level 20 under the simulator. The
+# cooking errands are done in Orgrimmar at about 19 in
+# forever/horde/03-silverpine-forest at full XP, and Burning Shadows (832) is
+# carried there too. Need for a Cure (812) and Finding the Antidote (813):
+# the export never finishes them.
 
 # ---------------------------------------------------------------- Valley of Trials
 
@@ -416,8 +431,14 @@ step Spitelash naga
 step Razor Hill
   tip Back to Razor Hill.
   turnin 99051                        -- Orgnil Soulscar
+  accept 99052 optional               -- Orgnil Soulscar: Aggor the Young, an elite sea giant
   turnin 6083 only Hunter             -- Thotar
   accept 6082 only Hunter
+
+step Aggor the Young
+  tip Aggor the Young, a young sea giant, walks Durotar's north coast, north of the naga beach. Aggor the Young is elite: grouping up is advised.
+  collect 286009 quest 99052.1 optional -- Aggor's Belt
+  turnin 99052 optional               -- Orgnil Soulscar, back in Razor Hill
 
 step Armored Scorpid
   only Hunter

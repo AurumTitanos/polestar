@@ -48,6 +48,20 @@ next forever/alliance/02-westfall
 #
 # Carried on: Journey to Sentinel Hill (98021), from Bolvar, is turned in to
 # Gryan Stoutmantle at the start of the Westfall guide.
+#
+# The refreshed consensus export leaves the isle at about 12.2, after the
+# Gustberry Lowlands, because it now runs every start on one shared route
+# from level 12. This guide keeps the isle to 14.6 (the turncoat, the Shrine
+# of Akir, Shadowgale Forest and the skycutter): the previous export, which
+# did, reached level 20 sooner (9.4 h against 9.8 h), and it is the
+# Skyborne's own story.
+# Not taken: Boughs in the Wind (93797), which the new export takes, follows
+# Speak with Belann (93791, Mage only) and is on Wowhead Forever's Mage page:
+# a Mage quest, not one for everyone. Exploring the Alliance (93963), from
+# Bolvar with Journey to Sentinel Hill, sends you to Magni and Mekkatorque in
+# Ironforge and Tyrande in Darnassus: the route reaches Ironforge only in
+# 06-ashenvale and Darnassus only for Druid class quests. More Al'Aketh Ears
+# (93459, Vayn Moongaze) is a repeatable reputation turn-in with no XP.
 
 # ---------------------------------------------------------------- Thendal Grove
 

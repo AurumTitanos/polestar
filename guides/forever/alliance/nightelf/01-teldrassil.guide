@@ -7,15 +7,16 @@ zone Teldrassil
 next forever/alliance/02-westfall
 
 # Route: the simulator's consensus route for the Night Elf start, visit 1
-# (Teldrassil, level 1 to about 10.7). The route goes on to Westfall.
+# (Teldrassil, level 1 to about 11). The route goes on to Westfall.
 #
 # Flow: Shadowglen (Aldrassil, Shadowthread Cave, the moonwell) -> Dolanaar
 # (hearth) -> Zenn and the Starbreeze moonwell -> Dolanaar -> east loop:
 # Starbreeze Village, Lake Al'Ameth -> Dolanaar -> west loop: Fel Rock, the
 # road ambushers, Ban'ethil Barrow Den, the Pools of Arlithrien, Gnarlpine
-# Hold -> hearth -> Ferocitas -> Dolanaar -> Sentinel Eralya -> the Oracle
-# Glade (Arynia's harpies) -> Ursal -> Dolanaar -> Lake Al'Ameth -> Dolanaar
-# -> Sentinel Eralya -> Darnassus -> Rut'theran Village (flight path)
+# Hold -> hearth -> Ferocitas -> Dolanaar ->
+# Sentinel Eralya -> the Oracle Glade (Arynia's harpies) -> Ursal ->
+# Dolanaar -> Lake Al'Ameth -> Dolanaar -> Sentinel Eralya -> Darnassus (the
+# Cenarion Enclave, the Temple of the Moon) -> Rut'theran Village (flight path)
 # -> boat to Auberdine -> boat to Stormwind -> Westfall.
 #
 # Deviations from the export, each a shorter walk with the same quests:
@@ -37,7 +38,15 @@ next forever/alliance/02-westfall
 # - Added: The Enchanted Glade (937), Darkness in the Glade (98392) and The
 #   Oracle Tree (98398) from Sentinel Arynia Cloudsbreak at the Oracle Glade
 #   moonwell: every harpy lives around it. The chain's last steps go to
-#   Fandral at the far north of Darnassus and are not taken.
+#   Fandral in Darnassus and are not taken (see "Left out").
+# - Crown of the Earth (935, 1100 XP) is taken from Corithras after the
+#   Amethyst Phial (7383) and handed to Fandral in the Cenarion Enclave on
+#   the way through Darnassus; his Drained Vessel (98046) goes to Lariia and
+#   her Moonwell Remnants (98065) to Tyrande, both in the Temple of the Moon.
+#   Rellian Greenspyre (922), which the export took from Denalan and never
+#   handed in, now goes to Rellian on that walk, just south of the Enclave.
+#   Measured with sim compare against this guide without them: 0.09 h
+#   sooner to 60 and to 30, 0.02 h later to 20.
 #
 # Order changes for the hand-made quest chains (a follow-up is offered only
 # after its prerequisite is turned in):
@@ -51,9 +60,19 @@ next forever/alliance/02-westfall
 # - Easing Suffering (99073) is now taken after The Great Tree Provides
 #   (99050) is turned in, and handed to Eralya on the way to Darnassus.
 #
-# Left out: Rellian Greenspyre (922) and Crown of the Earth (934, 935), which
-# the export accepts but never turns in (Rellian and Fandral are at the far
-# north end of Darnassus).
+# Left out: Crown of the Earth (934): its Vial of Blessed Water has no known
+# source, and 935 needs only the Amethyst Phial. Rellian's Tumors (923)
+# would send you back into Teldrassil from Darnassus.
+# Measured and left out (sim compare, each against the guide without it):
+# Bounty: Gnarlpine Furbolg (490, Sentinel Shayla, in the new export), 0.08 h
+# later to 60; Teldrassil (940, from the Oracle Tree Bark to Fandral), 0.01 h
+# later, and with Fandral's Grove of the Ancients (952, to Onu in Darkshore)
+# 0.18 h later.
+# Eyes of the Sentinels (98067, Sentinel Dalia Sunblade in the Temple of the
+# Moon) places owls at the city gate, the Craftsmen's Terrace inn, the bank
+# and Cenarion Hold: a full lap of Darnassus for 660 XP, so it is not taken;
+# do it if you want to learn the city. Twisted Hatred (98403, Tallonkai after
+# Lord Melenas) is a level 12 elite group quest in the Cleft: not taken.
 #
 # Class quests, as class-only steps from the last Dolanaar stop (about 10.5):
 # - Hunter: Dazalar's taming quests (6063, 6101, 6102) around Dolanaar;
@@ -321,6 +340,7 @@ step Dolanaar
   buy 159 x1 npc 6736                         -- Refreshing Spring Water from Innkeeper Keldamyr, for Byancie
   turnin 486                                  -- Athridas Bearmantle
   turnin 7383                                 -- Corithras Moonrage
+  accept 935                                  -- Fandral in Darnassus takes it
   accept 6063 only Hunter                     -- Dazalar
   accept 5925 only Druid                      -- Kal: Mathrengyl Bearwalker in Darnassus takes it
   accept 5629 only Priest                     -- Laurna Morninglight: Priestess Alathea in Darnassus takes it
@@ -330,6 +350,7 @@ step Lake Al'Ameth
   tip South-east of Dolanaar, to Denalan. Lasher Sproutlings wander around him on the shore.
   turnin 930                                  -- Denalan
   turnin 931
+  accept 922                                  -- Denalan: Rellian Greenspyre in Darnassus takes it
   accept 2399                                 -- Sprouted Frond, beside him
   turnin 2399
   collect 286017 quest 99050.1                -- Dewy Lasher Frond
@@ -359,13 +380,19 @@ step Sentinel Eralya Leafshadow
 
 step Darnassus
   zone Darnassus
-  tip Follow the road west into Darnassus. Mydrannul stands on the Craftsmen's Terrace just inside the city; Sister Aquinne is in the west of the city, on the way to the pink portal down to Rut'theran.
+  tip Follow the road west into Darnassus. Mydrannul stands on the Craftsmen's Terrace just inside the city. Arch Druid Fandral Staghelm is in the Cenarion Enclave at the north end of the city, Rellian Greenspyre just south of it; Lariia and Tyrande Whisperwind are in the Temple of the Moon at the south end. Sister Aquinne is in the west of the city, on the way to the pink portal down to Rut'theran.
   accept 6344                                 -- Mydrannul
-  turnin 98391                                -- Sister Aquinne
+  turnin 935                                  -- Arch Druid Fandral Staghelm, in the Cenarion Enclave
+  accept 98046
   turnin 6103 only Hunter                     -- Jocaste, in the Cenarion Enclave: Beast Training
   turnin 5629 only Priest                     -- Priestess Alathea, in the Temple of the Moon: Starshards
   turnin 5925 only Druid                      -- Mathrengyl Bearwalker, in the Cenarion Enclave
   accept 5921 only Druid
+  turnin 922                                  -- Rellian Greenspyre
+  turnin 98046                                -- Lariia, in the Temple of the Moon
+  accept 98065
+  turnin 98065                                -- Tyrande Whisperwind, above Lariia
+  turnin 98391                                -- Sister Aquinne
 
 step Rut'theran Village
   zone Teldrassil

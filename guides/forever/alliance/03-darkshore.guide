@@ -22,11 +22,20 @@ next forever/alliance/04-redridge-mountains
 # Deviations from the export:
 # - For Love Eternal (963) is taken on the first pass through Auberdine and
 #   done in Ameth'Aran on the first loop instead of a later return.
-# - Left out: The Absent Minded Prospector (729, 731, 741): it needs Trouble
-#   in Darkshore? (730) from Ironforge first, which the route never takes,
-#   and 741 ends in Ironforge.
+# - Refresh (new consensus): The Absent Minded Prospector (729, 731) is
+#   taken: Trouble In Darkshore? (730) is only its breadcrumb, Archaeologist
+#   Hollee gives 729 directly. Its third step (741) is left out: it ends in
+#   Darnassus, a detour off the route, and the chain's last step (943) needs
+#   the Stone of Relu, a 1.5% raptor drop in the Wetlands.
+# - Refresh: Expanding Horizons (97914, Forever) is taken at the end:
+#   Thundris Windweaver's letter goes to Baros Alexston at the Stormwind stop
+#   (04-redridge-mountains), his reply (Making Do, 97926, a Shipwright's
+#   Satchel) back to Thundris on the return to Auberdine (06-ashenvale).
 # - Left out, accepted but never turned in on the route: One Shot. One Kill.
-#   (5713), Expanding Horizons (97914), The Powers Below (968).
+#   (5713): it ends at Maestra's Post, which the route reaches at 25, when
+#   the level 15 quest pays a tenth of its XP. The Powers Below (968) starts
+#   from a 5% book drop of the Twilight Disciples and Thugs: optional, handed
+#   in at the Ironforge stop (06-ashenvale).
 # - The Lakeshire flight path and hearth the export lists at the end of this
 #   visit are taken on arrival in Redridge (next guide).
 #
@@ -257,6 +266,7 @@ step The cave and the Den Mother
 
 step Hearth to Auberdine
   hearth "Auberdine"
+  accept 729                                  -- Archaeologist Hollee
   turnin 2139                                 -- Tharnariun Treetender
   turnin 947                                  -- Barithras Moonshade
   accept 948
@@ -285,6 +295,7 @@ step The Master's Glaive
   accept 950
   accept 98042
   collect 279279 quest 98042                  -- Peerless Eye: Twilight Disciples and Thugs
+  accept 968 optional                         -- Only if a Disciple or Thug dropped Book: The Powers Below: right-click it
   accept 945                                  -- Therylune
   complete 945                                -- Escort her out of the glaive; Therysil takes the turn-in in Ashenvale
 
@@ -295,12 +306,19 @@ step Murkdeep's beach
   accept 4732                                 -- Beached Sea Turtle
   accept 4733                                 -- Beached Sea Creature
 
+step Prospector Remtravel
+  tip Remtravel's Excavation lies on the coast south of Murkdeep's beach. Protect the prospector while he searches for the fossil.
+  turnin 729                                  -- Prospector Remtravel
+  accept 731
+  complete 731
+
 step The Grove of the Ancients
   turnin 950                                  -- Onu
   accept 951
 
 step Auberdine
   tip Follow the road north.
+  turnin 731                                  -- Archaeologist Hollee
   turnin 4731                                 -- Gwennyth Bly'Leggonde
   turnin 4732
   turnin 4733
@@ -331,6 +349,7 @@ step Volcor
 step Auberdine
   turnin 994                                  -- Terenthis
   accept 990                                  -- Sentinel Selarin: for Raene Wolfrunner in Astranaar, on the later Ashenvale leg
+  accept 97914                                -- Thundris Windweaver: for Baros Alexston in Stormwind
   vendor nearest
   goto 32.4,43.8 "Boat to Stormwind"
 

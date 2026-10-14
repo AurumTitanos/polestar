@@ -7,6 +7,20 @@
 - Quests Forever renamed carry their Forever names in the guides: Chastise
   (once A Lack of Fear), Dark Sacrifice (once Devouring Plague), Look to the
   Stars, Onu is Meditating and the others Wowhead Forever lists as renamed.
+- The leveling guides follow the refreshed simulator route and take
+  Forever's new quests on it. Alliance: Shipment to Stormwind and An Apple
+  Treat in Elwynn Forest, Crown of the Earth and the Temple of the Moon in
+  Darnassus, Fishin' Time in Stormwind, Expanding Horizons and Making Do
+  between Darkshore and Stormwind, a Wetlands loop out of Menethil at 30
+  (From the Ashes, Crocs of the Sky, Stopping the Cycle and the rest),
+  Hillsbrad's Hoard, Seeking Caitlin, Shared Fury and the Gleaming Crescent
+  Necklace in Ashenvale, Carved Centaur Totems in Desolace and My Little
+  Friends across Arathi, Desolace and Stranglethorn. Horde: Beren's Peril and
+  the Offering Stone in Silverpine, Va'xug Firefure in Stonetalon, Gloomrise
+  north of Thunder Bluff, Stop the Screeching at Freewind Post, Traditions of
+  the Bluff, The Kolkar of Desolace and Draenethyst Crystals; the Tauren
+  start no longer walks to Durotar. Elite quests on the way (Aggor the Young,
+  Riptear, Carnage, The Offering of Blood) are optional.
 
 ### For guide authors
 

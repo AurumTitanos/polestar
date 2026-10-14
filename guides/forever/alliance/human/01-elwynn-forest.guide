@@ -7,7 +7,8 @@ zone Elwynn Forest
 next forever/alliance/02-westfall
 
 # Route: the simulator's consensus route for Human (consensus-alliance-human,
-# visit 1, levels 1 to 12.3).
+# visits 1 and 3, levels 1 to 12.3). Its visit 2, a Stormwind stop at 6, is
+# left out (see "Left out").
 #
 # Flow: Northshire Valley (Abbey, the kobold camp, Echo Ridge Mine, the
 # Defias and Milly's vineyard) -> Goldshire (bind) and Crystal Lake -> the
@@ -52,6 +53,13 @@ next forever/alliance/02-westfall
 #   Westbrook trip at 11 instead of at 8: he is level 12 and walks with the
 #   gnolls Riverpaw Gnoll Bounty sends you to. Manhunt (147) moves with it
 #   to the last east pass, where Morgan the Collector walks beside the murlocs.
+# - Shipment to Stormwind (61) is taken from William Pestle when Kobold
+#   Candles is handed in; Morgan Pestle takes it on the Stormwind stop of
+#   02-westfall (the simulator took it and never handed it in).
+# - An Apple Treat (91738) is done on the Westbrook trip: its Thunder Applejack
+#   comes from the Applejack Still (91736) north of the garrison, for four
+#   Shiny Red Apples (Wowhead Forever, quest=91736), bought from Homer
+#   Stonefield at the Stonefield farm. The still is a short walk off the road.
 #
 # Class quests, as class-only steps (the level 10-12 ones from the last
 # Goldshire stop, about level 12):
@@ -69,10 +77,16 @@ next forever/alliance/02-westfall
 # - Warrior: the Defensive Stance quests are taken in Stormwind (02-westfall).
 # - Mage and Rogue: their level 10 quests reward items, not spells: not taken.
 # Train at the Abbey and in Goldshire.
-# Left out: Shipment to Stormwind (61, the route never goes to Stormwind to
-# hand it in), An Enchanting Lesson (91753, it needs Enchanting to disenchant
-# the effigies) and An Apple Treat (91738, the Thunder Applejack it wants has
-# no known source).
+# Left out: An Enchanting Lesson (91753, it needs Enchanting to disenchant
+# the effigies). Rare Books (91777, after Book Return) wants two books from
+# the Jasperlode Mine taken to Brother Paxton in Northshire, off the route.
+# Elmpaw's Head (91746) and Croaky's Head (91740) start from the heads of
+# two named mobs that roam north-east and south-east Elwynn, off the route;
+# Croaky's goes to Ridgepoint Tower. The simulator's Stormwind stop at 6 is
+# for Jennea Cannon's book quests (84397, 84398, 84399, 84402: each needs a
+# book that has no known source, and Wowhead lists them at level 60) and
+# three level 2 deliveries (332, 333, 334): not worth the walk without the
+# books.
 
 # ---------------------------------------------------------------- Northshire Valley
 
@@ -289,6 +303,7 @@ step Goldshire
   turnin 91775 optional
   accept 76
   turnin 60                                   -- William Pestle
+  accept 61                                   -- Morgan Pestle in Stormwind takes it (02-westfall)
   turnin 107
   accept 112
   train class
@@ -386,11 +401,20 @@ step Maybell Maclure
 step The Stonefield Farm
   turnin 88                                   -- Ma Stonefield
   turnin 87                                   -- "Auntie" Bernice Stonefield
+  buy 4536 x4 npc 894                         -- Shiny Red Apples, from Homer Stonefield, for the Applejack Still
+
+step The Applejack Still
+  tip Head north-west across the fields to the Applejack Still, north of the Westbrook Garrison. Hand it four Shiny Red Apples for a Thunder Applejack.
+  accept 91736 optional                       -- Applejack Still
+  turnin 91736 optional
+  collect 247824 x1 @24.6,58.0                -- Thunder Applejack, from the still
 
 step Westbrook Garrison
-  tip Follow the river north-west to the Westbrook Garrison, by the road to Westfall. Deputy Rainer stands outside the barracks.
+  tip Back south to the Westbrook Garrison, by the road to Westfall. Deputy Rainer stands outside the barracks, Sergeant De Vries beside him.
   turnin 239
   accept 11
+  accept 91738                                -- Sergeant De Vries: he wants your Thunder Applejack
+  turnin 91738
 
 step Forest's Edge
   tip Riverpaw Runts and Outrunners hold the hills south of the garrison, along the Westfall border. Gruff Swiftbite, a level 12 gnoll, walks among them and carries the Gold Pickup Schedule: right-click it.
