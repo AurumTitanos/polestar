@@ -50,6 +50,9 @@
 - The Deathcharger guide's arrow points at Stratholme's Service Entrance
   (41.5,17.7), not at the spot its Era map position falls on Forever's
   redrawn Eastern Plaguelands map.
+- Without the Codex, Lookup and Dungeons say which case it is: not installed
+  (get the Polestar zip from CurseForge or the GitHub Releases page, not
+  GitHub's "Source code" download) or turned off in the AddOns list.
 
 ### For guide authors
 
@@ -158,6 +161,17 @@
   set X where the data still holds the old value (Scaring Shaky now gives
   3300 XP, not 820). Quests still without XP take Wowhead's. `--no-wowhead`
   skips it; guide pack workflows and Codespaces build with it.
+- The Recorder records finds (`rare`, `treasure`, `slain`, `drop`, `enter`,
+  `encounter` events; docs/ARCHITECTURE.md, "Recordings") and the quest
+  frames' `items`, `choices` and `rewardMoney`. `record import` and `data
+  build` turn them into npc ranks, levels, the `rare` role and spawns; drop
+  chances from loot windows over kills, merged across sessions, with their
+  counts in items' `seen` (10 kills or more replace the existing chance);
+  `chest`/`herb`/`mine` objects with their spawns; quest `rewards`; and the
+  new `instances.json` (entrances, encounters and their bosses).
+- npcs and objects inside dungeons and raids carry `instances` (instance map
+  ids), from QuestieDB's areas and the Forever `AreaTable` and `Map` tables
+  (`Map` is now read with the Forever tables) plus recordings.
 
 ### For contributors
 
@@ -172,17 +186,6 @@
 ### For players
 
 - Quests with several objectives check off the right one: a goal counted the
-- The Recorder records finds (`rare`, `treasure`, `slain`, `drop`, `enter`,
-  `encounter` events; docs/ARCHITECTURE.md, "Recordings") and the quest
-  frames' `items`, `choices` and `rewardMoney`. `record import` and `data
-  build` turn them into npc ranks, levels, the `rare` role and spawns; drop
-  chances from loot windows over kills, merged across sessions, with their
-  counts in items' `seen` (10 kills or more replace the existing chance);
-  `chest`/`herb`/`mine` objects with their spawns; quest `rewards`; and the
-  new `instances.json` (entrances, encounters and their bosses).
-- npcs and objects inside dungeons and raids carry `instances` (instance map
-  ids), from QuestieDB's areas and the Forever `AreaTable` and `Map` tables
-  (`Map` is now read with the Forever tables) plus recordings.
   objective at its place in the quest's text instead of its place in the quest
   log, so in The Guns of Northwatch "Kill Cannoneer Smythe" showed the 10/10
   medals and Captain Fairmount never ticked. 135 goals in 46 quests of the

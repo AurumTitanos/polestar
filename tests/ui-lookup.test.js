@@ -251,7 +251,7 @@ test('without the Codex pack the section says what is missing and still finds gu
 		Polestar.UI.Picker.SetQuery("west"); stub.advance(0.3)
 		emit({ idle = idle, none = none, rows = rowTexts(LK.results.Child), sel = LK.detail.primary })`);
 	assert.equal(out.idle.title, 'The Codex is not loaded');
-	assert.match(out.idle.note, /^The Polestar_Codex addon is missing or disabled: reinstall Polestar or enable it in the AddOns list, then \/reload\.\n/);
+	assert.match(out.idle.note, /^The Polestar_Codex addon is not installed\. .*Releases page.*not "Source code"/, 'a missing Codex points at the release download, not the source zip');
 	assert.doesNotMatch(out.idle.note, /tools\/polestar|codex build/, 'no developer command in a player message');
 	assert.match(out.idle.list, /search the guides/);
 	assert.match(out.idle.codex, /Codex not installed/);
@@ -259,6 +259,15 @@ test('without the Codex pack the section says what is missing and still finds gu
 	assert.match(out.none, /Nothing matches .saber.\. Items, mounts, NPCs and quests are searched once the Codex loads\./);
 	assert.deepEqual(out.rows, ['Westfall']);
 	assert.equal(out.sel, 'Open in new tab');
+});
+
+test('a Codex that is installed but turned off says to enable it, not to download Polestar again', () => {
+	const [out] = run(`
+		lookupstub.loaded, lookupstub.reason = false, "disabled"
+		UI.ShowLookup()
+		emit({ note = LK.detail.note })`);
+	assert.match(out.note, /turned off: enable it in the AddOns list/);
+	assert.doesNotMatch(out.note, /Releases page/);
 });
 
 test('a guide result opens in a new tab, or among the hub\'s guides', () => {

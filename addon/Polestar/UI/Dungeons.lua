@@ -1535,8 +1535,8 @@ end
 
 local REASON = {
 	nodata = "The Polestar_Codex addon is older than this Polestar: reinstall Polestar, then /reload.",
-	missing = "The Polestar_Codex addon is missing or disabled: reinstall Polestar or enable it in the AddOns list, then /reload.",
-	disabled = "The Polestar_Codex addon is missing or disabled: reinstall Polestar or enable it in the AddOns list, then /reload.",
+	missing = "The Polestar_Codex addon is not installed. Get Polestar from CurseForge or the GitHub Releases page (the Polestar zip under Assets, not \"Source code\"), install it and restart the game.",
+	disabled = "The Polestar_Codex addon is turned off: enable it in the AddOns list, then /reload.",
 }
 
 local function renderEmpty(reason)

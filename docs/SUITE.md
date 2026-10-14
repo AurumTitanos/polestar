@@ -79,8 +79,8 @@ their versions in its `meta`.
 
 Local packs are generated into gitignored folders and installed by
 `node tools/polestar.js install` like the rest. Without them the core still
-works: Lookup, Dungeons and Rares say the Codex is missing or disabled
-(reinstall Polestar or enable it) instead of failing. Every addon, what it holds and how it is built: [ARCHITECTURE, "Overview"](ARCHITECTURE.md#overview).
+works: Lookup, Dungeons and Rares say the Codex is not installed (get the
+release zip, not GitHub's "Source code") or turned off (enable it) instead of failing. Every addon, what it holds and how it is built: [ARCHITECTURE, "Overview"](ARCHITECTURE.md#overview).
 
 Guide packs (ours and the community's) register through one registry
 (`Core/Guides.lua`, ARCHITECTURE "The guide registry"; the rules in
