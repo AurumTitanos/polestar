@@ -211,6 +211,18 @@ test('Copy report keeps the report open and selects it again; Hide or Escape clo
 	assert.equal(out.escaped, false, 'Escape closes the report');
 });
 
+test('the report box grows to fit a long problem message as it wraps', () => {
+	const [out] = run(`
+		openPage()
+		local probs = G.Pack("probs").problems
+		probs[#probs + 1] = { message = string.rep("a step's target names a quest that no guide in the pack has ", 6) }
+		rowOf("Probs").CopyReport:Click()
+		local report = rowOf("Probs").Report
+		local _, newlines = report:GetText():gsub("\\n", "")
+		emit({ h = report:GetHeight(), byLines = (newlines + 1) * 16 + 16 })`);
+	assert.ok(out.h > out.byLines, `${out.h} > ${out.byLines}`);
+});
+
 test('a refused pack says why', () => {
 	const [out] = run(`
 		Polestar.RegisterPack({ addon = "JoeCopy", id = "joe", format = 1, title = "Joe Again", author = "X", version = "1", license = "MIT" })

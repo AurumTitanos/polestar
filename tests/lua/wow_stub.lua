@@ -247,11 +247,15 @@ function Methods.GetStringWidth(self)
 	if self.wordWrap == false and w > 0 and full > w then return w end
 	return full
 end
+-- Each line of the text (split at "\n") wraps on its own at the set width.
 function Methods.GetStringHeight(self)
 	local size = (self.font and self.font[2]) or 12
 	local w = self.width or 0
 	if w <= 0 then return size end
-	local lines = math.max(1, math.ceil(self:GetUnboundedStringWidth() / w))
+	local lines = 0
+	for line in (tostring(self.text or "") .. "\n"):gmatch("([^\n]*)\n") do
+		lines = lines + math.max(1, math.ceil(#line * size * 0.5 / w))
+	end
 	return lines * size
 end
 function Methods.GetLineHeight(self) return (self.font and self.font[2]) or 12 end

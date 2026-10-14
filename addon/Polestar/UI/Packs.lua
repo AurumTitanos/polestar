@@ -183,6 +183,11 @@ local function newRow(view)
 	row.List:SetJustifyH("LEFT")
 	row.List:SetJustifyV("TOP")
 	row.Report = W.CopyBox(row, { lines = 6 })
+	-- Measures the report wrapped at the box's text width (its insets are 10).
+	row.ReportMeasure = W.Text(row, "label", "text")
+	row.ReportMeasure:SetWordWrap(true)
+	row.ReportMeasure:SetJustifyH("LEFT")
+	row.ReportMeasure:Hide()
 	-- Escape closes it.
 	row.Report:HookScript("OnEscapePressed", function()
 		if not row.psRecord then return end
@@ -296,9 +301,11 @@ local function layoutRow(row, r, width)
 		if reported[k] then
 			local text = P.Report(r)
 			local _, lines = text:gsub("\n", "")
+			row.ReportMeasure:SetWidth(avail - 20)
+			row.ReportMeasure:SetText(text)
 			W.SetCopyText(row.Report, text)
 			row.Report:SetWidth(avail)
-			row.Report:SetHeight((lines + 1) * 16 + 16)
+			row.Report:SetHeight(max((lines + 1) * 16, row.ReportMeasure:GetStringHeight()) + 16)
 			row.Report:ClearAllPoints()
 			row.Report:SetPoint("TOPLEFT", row, "TOPLEFT", col, -y)
 			y = y + row.Report:GetHeight() + 10

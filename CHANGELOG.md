@@ -2,6 +2,11 @@
 
 ## 0.2.1 (unreleased)
 
+### For players
+
+- Guide packs page: the problem report box grows to fit long problem
+  messages.
+
 ### For guide authors
 
 - `playtest` plays a step for a class none of the guide's races can be, and a
