@@ -11,9 +11,10 @@ Reference material, checked out locally (gitignored):
   branch `forever`). `Interface/AddOns/Blizzard_APIDocumentationGenerated/*.lua`
   declares every C API function and event with argument types. **Verify every
   client API you call against it**; a retail or Era assumption is not evidence.
-- The live client's AddOns folder, as detected by `addonsDir()` in
-  `tools/lib/consume/lua.js` (`<client>/_classic_beta_/Interface/AddOns/`;
-  read-only for reference; EllesmereUI's `SKINNING_API.md` lives there).
+- The live client's AddOns folder, as found by `tools/lib/addons.js`
+  (`$WOW_FOREVER_ADDONS`, then the detected clients:
+  `<client>/_classic_beta_/Interface/AddOns/`; read-only for reference;
+  EllesmereUI's `SKINNING_API.md` lives there).
 
 ## Overview
 
@@ -227,6 +228,9 @@ Coordinates: map percent `x, y` in **0–100**. World coordinates follow
 `wy` is the east–west axis (larger is west), in yards.
 
 ```lua
+Compat.IsSecret(v)              -> bool   (a secret value: comparing, indexing or parsing it throws)
+Compat.Readable(v)              -> v | nil (a secret value reads as unknown)
+Compat.Now()                    -> seconds since the epoch, server clock
 Compat.GetPlayerInfo()          -> { name, realm, guid, level, xp, xpMax, race, class, faction }
                                    -- race = raceFile ("Human","Scourge",...), class = classFile ("WARRIOR"), faction = "Alliance"|"Horde"|"Neutral"
 Compat.GetPlayerMapPosition()   -> uiMapID, x, y | nil      (nil in instances / unknown)
@@ -235,6 +239,8 @@ Compat.MapToWorld(uiMapID, x, y, frame) -> continentID, wx, wy | nil
                                    -- frame "e": use registered Era frame for uiMapID (see Map frames); nil: live client
 Compat.WorldToMap(continentID, wx, wy, uiMapID) -> x, y | nil
 Compat.GetMapName(uiMapID)      -> string | nil
+Compat.MapName(uiMapID)         -> string | nil   (the client's name, else the Codex zone's)
+Compat.GetContinentMap(uiMapID) -> continent uiMapID | nil
 Compat.GetPlayerFacing()        -> radians | nil   (0 = north, counter-clockwise positive)
 Compat.GetZoneText()            -> zone, subzone
 Compat.IsQuestCompleted(questID)       -> bool   (flagged completed / turned in)
@@ -242,12 +248,19 @@ Compat.IsOnQuest(questID)              -> bool
 Compat.IsQuestReadyForTurnIn(questID)  -> bool
 Compat.GetQuestObjectives(questID)     -> { { text, type, finished, numFulfilled, numRequired }, ... } | nil
 Compat.GetQuestTitle(questID)          -> string | nil (client cache; may be nil)
+Compat.GetOfferedQuests(source)        -> { questID, ... } | nil   (source "gossip" | "greeting" | "detail")
+Compat.IsQuestTrivial(qlvl, level)     -> bool   (grey for that level)
 Compat.GetItemCount(itemID)            -> number
+Compat.GetItemQuality(itemID)          -> 0..7 | nil (nil while not cached)
+Compat.ItemQualityHex(quality)         -> "ffrrggbb" | nil
 Compat.GetBindLocation()               -> string | nil
 Compat.IsOnTaxi()                      -> bool
+Compat.GetCurrentTaxiNode()            -> name of the open taxi map's node | nil
 Compat.GetNpcID(unit)                  -> number | nil   (from UnitGUID)
 Compat.InCombat()                      -> bool
 Compat.IsInInstance()                  -> bool
+Compat.IsShiftKeyDown()                -> bool
+Compat.Supports(feature)               -> bool   ("skill" | "spell" | "faction" | "explore" | "achievement")
 Compat.GetSkillRank(skillLineOrName)   -> rank, maxRank | nil  (profession/secondary skill)
 Compat.IsSpellKnown(spellID)           -> bool
 Compat.GetFactionStanding(factionID)   -> standingID (1 Hated .. 8 Exalted), value, barMin, barMax, name | nil
@@ -330,7 +343,7 @@ full contract for pack authors' tools is `docs/PACK_FORMAT.md`.
 ```lua
 local ADDON = ...
 Polestar.RegisterPack({ addon = ADDON, id = "guides", format = 1, title = "Polestar Guides",
-  author = "Polestar", version = "0.1.0", license = "GPL-3.0-only" })   -- optional: website, source, notes
+  author = "Polestar", version = "0.2.0", license = "GPL-3.0-only" })   -- optional: website, source, notes
 
 Polestar.RegisterGuide({
   id = "forever/alliance/human/01-elwynn-forest",
@@ -885,7 +898,7 @@ scheme.
 - Font: EllesmereUI's when `ui.matchFont` (default off) and installed, else
   `ui.font` (`game` by default | `inter`; CJK clients always the game font).
 - Settings from before schemes: a stored accent equal to the old gold default
-  is dropped (`Theme.Migrate`); any other stays the user's own.
+  is dropped at load (Theme.lua's `migrate`); any other stays the user's own.
 - Window frame (the `window` skin of every top-level window, live):
   `ui.border` (default on) and its thickness `ui.borderSize` (1–4 physical
   pixels, growing outward; `Theme.WindowBorder()`), its colour the
@@ -1580,19 +1593,22 @@ Reading flow: `docs/DESIGN.md` ("Intent" and "The Guide Window").
   `X-Website` + `/blob/HEAD/docs/PACKS.md`, else "docs/PACKS.md in Polestar's
   source"). While `Guides.ProblemCount() > 0` the page's sidebar row carries
   the warning dot (a page spec's `dot`). Nothing goes to chat.
-- **Welcome** (`UI/Welcome.lua`, `SHOW_WELCOME`): centred, four pages with
-  Back, Next and Skip: Hello, <name> (the guide `Guides.Suggest()` picks, for
-  the character's level, race, class and zone, else that there is none;
-  then the guide window, the arrow and `/polestar guides`); Our
-  routes are still in beta (while `ns.routesBeta`); Set up (quest automation,
-  the guide at login, the colour scheme); Guide packs (with the docs link,
-  then Start <suggested guide> or Choose a guide, and Browse guides). Once
+- **Welcome** (`UI/Welcome.lua`, `SHOW_WELCOME`): centred, three pages under
+  a starlit hero, with step dots, Skip, Back and Next in the footer: Hello,
+  <name> (what Polestar does, then the guide window, the arrow and
+  `/polestar guides`); Set up (quest automation, the guide at login, the
+  colour scheme as cards that apply live); Start (the guide
+  `Guides.Suggest()` picks on its zone painting, with its level range and
+  pitch; the beta note while `ns.routesBeta`; the Discord invite in a copy
+  box; what guide packs are; then Start guide, or Choose a guide without
+  one, and Browse guides). Once
   per new character (`PolestarCharDB.welcomeSeen`: 0 for a character with no
   saved `PolestarCharDB` as Polestar loaded, `ns.IsNewCharacter()`; set seen
   silently for one with saved data and no flag), 2 s after login, never in
-  combat or over the route choice; a due welcome that never opened stays due
+  combat, during a cinematic or over the route choice; a due welcome that never opened stays due
   for the next login, and one that opened is marked on the character as it
-  opens (a /reload or logout with it up does not repeat it). Set up is in it only while the account has not had its
+  opens (a /reload or logout with it up does not repeat it); one the intro
+  cinematic closes comes back on its page when the cinematic ends. Set up is in it only while the account has not had its
   welcome (`PolestarDB.welcomeSeen`); the page set is fixed when a showing
   starts. Any close marks the account (and the character). About's "Show the
   welcome again" and `/polestar welcome` open it with every page.
@@ -1784,8 +1800,9 @@ runs the importers under `tools/lib/consume/` and merges them with
 products (gitignored); `install` ships the pack when it has been built.
 
 - Importers, one per input, all reading through `tools/lib/consume/lua.js`
-  (`addonsDir`, `addonVersion`, `readAddonLua`: the installed addon's files run
-  sandboxed in Lua 5.1 with the namespace the client passes them):
+  (`addonVersion`, `readAddonLua`: the installed addon's files, found with
+  `tools/lib/addons.js`, run sandboxed in Lua 5.1 with the namespace the
+  client passes them):
   `atlasloot.js` (DungeonsAndRaids incl. `forever.lua` and `droprate.lua`,
   Collections, Crafting, Factions, PvP), `foreverlevelingbis.js` (item
   sources: quest rewards, drops, crafts), `rarescanner.js` (rares, their loot,
@@ -1853,9 +1870,9 @@ spawning NPC of the named giver), then DungeonJournal's maps, then positions
 researched by hand (`WEB_POSITIONS`, with a reference); a giver inside the
 instance gets the entrance and `inDungeon`. `chain` is DungeonJournal's
 prerequisite list with our data's `pre` added in doing order; `xp` is our
-data's, else DungeonJournal's observed Forever XP. The compiler's data loader
-adds the quests only `dungeons.json` knows (titles, levels, XP) so guides name
-them without warnings; the importer ignores those copies.
+data's, else DungeonJournal's observed Forever XP. The guide compiler reads
+nothing from `dungeons.json` (its facts stay local, THIRD_PARTY.md): a quest
+only it knows needs its title (and level) written in the guide.
 
 The hub's Dungeons section and the pick-up guide built from it: "Dungeons" above.
 
