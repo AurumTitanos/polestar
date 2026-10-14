@@ -41,8 +41,9 @@
 -- left once the cinematic stops. About's "Show the welcome again" and
 -- /polestar welcome (SHOW_WELCOME) open it with every page.
 --
--- The window takes the height of its tallest page, so it never jumps. Motion:
--- the window fades in, the hero settles 8px up as it fades in (180ms); a page
+-- The window takes the height of its tallest page, so it never jumps; a
+-- shorter page sits a little above the middle of the room left. Motion: the
+-- window fades in, the hero settles 8px up as it fades in (180ms); a page
 -- change cross-fades the hero and the page (120ms). Built on first use;
 -- colours are Theme tokens only.
 
@@ -51,9 +52,6 @@ local UI, Theme, W, Anim = ns.UI, ns.Theme, ns.Widgets, ns.Anim
 local L = ns.L
 local floor, max, min, sqrt, cos, sin = math.floor, math.max, math.min, math.sqrt, math.cos, math.sin
 local atan2 = math.atan2 or math.atan
-
--- The community's invite: the game cannot open links, so the player copies it.
-local DISCORD_URL = "https://discord.gg/vMbee6F2e9"
 
 local WEL = {}
 UI.Welcome = WEL
@@ -601,13 +599,16 @@ PAGES[#PAGES + 1] = {
 		p.Beta = note(p, L["Our routes are still in beta"])
 		p.Beta.Chip = W.Chip(p)
 		p.Beta.Chip:SetPoint("LEFT", p.Beta.Head, "RIGHT", 8, 0)
-		p.Discord = note(p, L["Join us on Discord"], CW - COPY_W - 16)
+		p.Discord = note(p, L["Join us on Discord"], CW - COPY_W - 16 - 24)
+		p.Discord.Mark = W.Tex(p, "ARTWORK", "discord", "discord")
+		p.Discord.Mark:SetSize(16, 16)
 		p.Discord.Text:SetSpacing(3)
 		Theme.Font(p.Discord.Text, "small")
 		W.Color(p.Discord.Text, "textMuted")
+		-- The game cannot open links: the player copies the invite.
 		F.Discord = W.CopyBox(p)
 		F.Discord:SetWidth(COPY_W)
-		W.SetCopyText(F.Discord, DISCORD_URL)
+		W.SetCopyText(F.Discord, ns.DiscordURL)
 		p.Packs = note(p, L["Guide packs"])
 
 		F.Start = W.Button(F.Foot, L["Start guide"], startSuggested, { primary = true })
@@ -673,8 +674,14 @@ PAGES[#PAGES + 1] = {
 			else
 				n.Rule:Hide()
 			end
-			place(n.Head, 0, y)
-			place(n.Text, 0, y + 22)
+			-- A mark leads its heading: 8px before it, centred on its line.
+			local x = n.Mark and 24 or 0
+			place(n.Head, x, y)
+			if n.Mark then
+				n.Mark:ClearAllPoints()
+				n.Mark:SetPoint("RIGHT", n.Head, "LEFT", -8, 0)
+			end
+			place(n.Text, x, y + 22)
 			local hgt = max(22 + n.Text:GetStringHeight(), extra or 0)
 			n.psY, n.psH = y, hgt
 			y = y + hgt + 16
@@ -890,6 +897,13 @@ function render(from)
 		tallest = max(tallest, h)
 	end
 	F.Body:SetHeight(tallest)
+	-- A shorter page sits in the middle of the room the tallest makes, a
+	-- little above centre, so it reads composed rather than cut short.
+	for _, pg in ipairs(list) do
+		local p = F.pages[pg.key]
+		p:ClearAllPoints()
+		p:SetPoint("TOPLEFT", F.Body, "TOPLEFT", 0, -floor((tallest - p:GetHeight()) * 0.45))
+	end
 	F:SetHeight(1 + BODY_Y + tallest + 32 + FOOT_H + 1)
 
 	local animate = from ~= nil and F:IsShown()

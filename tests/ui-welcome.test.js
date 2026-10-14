@@ -318,13 +318,20 @@ test('the beta callout on the start page follows ns.routesBeta', () => {
 	assert.deepEqual(out.proven, { chip: false, head: false });
 });
 
-test('the start page invites the player to the Discord community, the invite ready to copy', () => {
+test('the start page invites the player to the Discord community, the invite ready to copy, led by its mark', () => {
 	const [out] = run(`
 		Wel.Show("start")
 		local F = PolestarWelcome
-		emit({ box = F.Discord:IsShown() and F.Discord:GetText(), head = uistub.findText(F, "Join us on Discord") ~= nil,
-			line = uistub.findText(F, "Feedback, bug reports and news") ~= nil })`);
-	assert.deepEqual(out, { box: 'https://discord.gg/vMbee6F2e9', head: true, line: true });
+		local mark = F.pages.start.Discord.Mark
+		local r, g, b = mark:GetVertexColor()
+		local dr, dg, db = Polestar.Theme.Color("discord")
+		emit({ box = F.Discord:IsShown() and F.Discord:GetText(), shared = Polestar.DiscordURL,
+			head = uistub.findText(F, "Join us on Discord") ~= nil, line = uistub.findText(F, "Feedback, bug reports and news") ~= nil,
+			mark = mark:IsVisible() and tostring(mark:GetTexture()):find("discord", 1, true) ~= nil,
+			own = r == dr and g == dg and b == db })`);
+	const { box, shared, ...rest } = out;
+	assert.ok(shared && box === shared, `the shared invite: ${box}`);
+	assert.deepEqual(rest, { head: true, line: true, mark: true, own: true });
 });
 
 test('the start page says what guide packs are and where to learn more', () => {
