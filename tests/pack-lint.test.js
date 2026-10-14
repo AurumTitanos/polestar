@@ -257,3 +257,14 @@ test("a pack's map frame that differs from ours is a warning naming the map", ()
 	assert.equal(hits.length, 1, r.stderr);
 	assert.doesNotMatch(packCmd('lint', JOE).stderr, /Era frame differs/);
 });
+
+test('--guides with a pack folder is a usage error that names the pack folder, given as the argument or --pack', () => {
+	const dir = joeCopy();
+	for (const name of ['lint', 'compile']) {
+		for (const args of [[dir], ['--pack', dir]]) {
+			const r = run([name, '--guides', dir, ...args, '--data', DATA_DIR], tmpdir());
+			assert.equal(r.status, 2, `${name}: ${r.stderr}`);
+			assert.match(r.stderr, /--guides and a pack folder cannot be used together/);
+		}
+	}
+});

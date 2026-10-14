@@ -74,7 +74,7 @@ function contextError(opts, cwd = process.cwd()) {
 // guides/) as context, with our data (--context-data, default data/forever/).
 // -> { dir, manifest, official, diags, contextDir, contextDataDir, error }
 function commandPack(opts, cwd = process.cwd()) {
-	if (opts.guides && opts.pack) return { error: '--guides and --pack cannot be used together' };
+	if (opts.guides && opts.pack) return { error: '--guides and a pack folder cannot be used together' };
 	const ctxError = contextError(opts, cwd);
 	if (ctxError) return { error: ctxError };
 	if (opts.guides) {
