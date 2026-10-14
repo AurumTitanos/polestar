@@ -98,13 +98,12 @@ test('money and NPC names read from reward and giver text', () => {
 	assert.equal(dj.saysInside('Thrall, Valley of Wisdom, Orgrimmar', 'Ragefire Chasm'), false);
 });
 
-test('dungeons.json fills quests.json gaps for the compiler, never overrides it, and rebuilds ignore its own copies', () => {
+test('the compiler reads nothing from dungeons.json (its facts stay local), and rebuilding with that data gives the same dataset', () => {
 	const { dataset } = build();
+	assert.ok(dataset.dungeons.some((d) => (d.quests || []).some((q) => q && q.id === 990001)), 'the fixture has a quest only DungeonJournal knows');
 	const data = dataWith(dataset);
-	assert.equal(data.quest(990001).title, 'A Ghostly Errand');
-	assert.deepEqual(data.quest(990001).source, ['dungeonjournal']);
-	assert.equal(data.quest(7).source[0], 'fixture', 'quests.json wins');
-	// Rebuilding with that data gives the same dataset.
+	assert.equal(data.quest(990001), null, 'a quest only DungeonJournal knows is not in the compiler\'s data');
+	assert.equal(data.quest(7).source[0], 'fixture');
 	const again = dj.buildDungeons(dj.loadDungeonJournal(DJ_DIR), data, { toc: dj.readToc(DJ_DIR) }).dataset;
 	assert.deepEqual(again, dataset);
 });

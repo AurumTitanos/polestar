@@ -3,32 +3,16 @@
 // the lookups the resolver needs. Missing files load as empty tables so a
 // guide made only of explicit names still compiles; the caller is told which
 // files were missing. The optional files (professions, factions, trainers,
-// dungeons, races, travel) are also treated as missing when they cannot be
-// parsed, so a half-built data folder never stops compilation.
+// races, travel) are also treated as missing when they cannot be parsed, so a
+// half-built data folder never stops compilation. dungeons.json is not read:
+// its DungeonJournal facts stay local (THIRD_PARTY.md), so a quest only it
+// knows needs its title (and `lvl`) in the guide.
 
 const fs = require('node:fs');
 const path = require('node:path');
 
 const FILES = ['quests', 'npcs', 'objects', 'items', 'zones', 'map-frames', 'meta'];
-const OPTIONAL = ['professions', 'factions', 'trainers', 'dungeons', 'races', 'travel'];
-
-// Quests only dungeons.json knows (new Forever dungeon quests DungeonJournal
-// records and quests.json lacks), as minimal quest records: title, levels and
-// XP; givers and enders stay empty, so guides give their coordinates.
-function dungeonQuests(dungeons, known) {
-	const out = {};
-	for (const d of (dungeons && dungeons.dungeons) || []) {
-		for (const q of [...(d.quests || []), ...Object.values(d.chainQuests || {})]) {
-			if (!q || !(q.id > 0) || known[q.id] || out[q.id] || !q.title) continue;
-			out[q.id] = {
-				id: q.id, title: q.title, level: q.level || null, minLevel: q.minLevel || null, races: null, classes: null,
-				start: { npc: [], object: [], item: [] }, end: { npc: [], object: [] }, pre: [], excl: [], next: null,
-				objectives: [], zone: null, xp: q.xp || null, source: ['dungeonjournal'],
-			};
-		}
-	}
-	return out;
-}
+const OPTIONAL = ['professions', 'factions', 'trainers', 'races', 'travel'];
 
 // Classic skill lines (game facts), so `skill <Profession> <N>` resolves even
 // without professions.json. Riding (762) is Forever's one riding skill: the
@@ -84,8 +68,7 @@ function lowerKey(s) {
 
 class Data {
 	constructor(raw, info = {}) {
-		const extra = dungeonQuests(raw.dungeons, raw.quests || {});
-		this.quests = Object.keys(extra).length ? { ...raw.quests, ...extra } : raw.quests || {};
+		this.quests = raw.quests || {};
 		this.npcs = raw.npcs || {};
 		this.objects = raw.objects || {};
 		this.items = raw.items || {};

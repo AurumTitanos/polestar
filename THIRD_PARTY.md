@@ -11,7 +11,7 @@
 | Blizzard client data tables (`ItemSparse`, `Item`, `ItemEffect`, `SpellEffect`) via [wago.tools](https://wago.tools) | Item stats for gear advice (`Polestar_ItemDB`) | Game data © Blizzard Entertainment; used as facts for interoperability | generated into `addon/Polestar_ItemDB/` |
 | Blizzard client data tables (`UiMapXMapArt`, `UiMapArt`, `UiMapArtStyleLayer`, `WorldMapOverlay`, `WorldMapOverlayTile`, `UiMap`; Forever build 1.60.1.70338) via [wago.tools](https://wago.tools) | Which world map overlay textures each zone map art has, so the zone art shows a zone without fog of war (file IDs and offsets only; no art is shipped) | Game data © Blizzard Entertainment; used as facts for interoperability | generated into `addon/Polestar/UI/ZoneArtOverlays.lua` |
 | [Blizzard UI source](https://github.com/Gethe/wow-ui-source) (`forever` branch) | API reference while developing; not copied or distributed | © Blizzard Entertainment | `.ref/` (gitignored) |
-| [QuestieDB](https://github.com/Questie/Questie) Forever store (Questie v12) | Forever quest, NPC, object and item facts (including Forever-only quests and zones) and quest XP for the data pipeline | No licence file published | Read from the installed copy at build time; the data lands in `data/forever/` (gitignored) and the locally generated `Polestar_QuestDB` |
+| [QuestieDB](https://github.com/Questie/QuestieDB) Forever store (Questie v12) | Forever quest, NPC, object and item facts (including Forever-only quests and zones) and quest XP for the data pipeline | No licence file published | Read from the installed copy at build time; the data lands in `data/forever/` (gitignored). Facts resolved from it ship in releases: in the compiled guide pack (quest titles, givers, positions, levels) and in `Polestar_QuestDB` (quest markers), which the release zip includes and git does not |
 | [ForeverLevelingBiS](https://www.curseforge.com/wow/addons/forever-leveling-bis) by Thunder (v0.5.1-beta, data 2026-10-06) | Forever item stats and where leveling gear comes from (quest rewards and choices, dungeon drops, crafts), racial gear traits; the same item sources feed the Codex's "where to get it" | MIT (Copyright (c) 2026 Thunder) | Read from the installed copy by `gear build` and `codex build` (`tools/lib/consume/foreverlevelingbis.js`); facts generated into `addon/Polestar_ItemDB/Forever.lua`, the `Gear.RACIALS` table of `addon/Polestar/Gear/SpecData.lua`, and the local `data/forever/codex/` and `Polestar_Codex` |
 | [wowsims](https://github.com/wowsims) (`classic` at 7779ebbf, `sod` at four phase commits) by the wowsims team | Simulated stat weights blended into the level bands that score upgrades | MIT (Copyright (c) 2024 wowsims team) | Cached under `data/sources/wowsims/` (`gear fetch`); numbers generated into `addon/Polestar/Gear/SpecData.lua` with each band's commit and file; notice in `addon/Polestar/Gear/LICENSE-DATA.txt` |
 | DungeonJournal (ForeverDungeonJournal addon) by Exehn | Dungeon facts for `dungeons build`: levels, entrances, bosses and loot, dungeon quests with chains, rewards, observed Forever XP and quest-giver positions; the Dungeons section shows them (facts only, our own wording) | No licence file published | Read from the installed copy at build time; the output stays local: `data/forever/dungeons.json` and the Codex pack's `Dungeons1.lua` (both gitignored) |
@@ -22,20 +22,23 @@
 
 ## Distributing Polestar
 
-Polestar's own code and guides are GPL-3.0 (see LICENSE). Some inputs above
-carry terms that do not allow redistribution, so their outputs stay local.
-Before publishing a build:
+Polestar's own code and guides are GPL-3.0 (see LICENSE). What a release
+(`node tools/polestar.js pack`) holds from the inputs above:
 
-- Rebuild the data without QuestieDB (`data build --no-questie`), then rebuild
-  `Polestar_QuestDB` and recompile the guides: the committed guide pack holds
-  facts (positions, titles) resolved from the local data build, which includes
-  QuestieDB's Forever store. `Polestar_QuestDB` itself is never committed.
-- Leave out `data/forever/dungeons.json` (DungeonJournal) and rebuild the guide
-  pack without it.
-- Leave out the Codex (`data/forever/codex/`, `addon/Polestar_Codex/`): it
-  holds AtlasLoot (GPL), RareScanner (All Rights Reserved), QuestieDB and
-  DungeonJournal facts. Lookup then says the Codex is missing and still
-  searches guides.
+- QuestieDB: facts only, credited in the table above, in the compiled guide
+  pack and in `Polestar_QuestDB`. QuestieDB publishes no licence; if its
+  maintainers ask, they come out: `data build --no-questie` builds without
+  them, after which `Polestar_QuestDB` is rebuilt and the guides that need
+  Forever-only facts give them themselves or are recompiled from other
+  sources.
+- DungeonJournal: nothing. The compiler does not read
+  `data/forever/dungeons.json`; a quest only it knows gets its title and
+  level in the guide, from a public source the guide names.
+- The Codex (`data/forever/codex/`, `addon/Polestar_Codex/`) and the zone
+  crossings pack (`Polestar_Travel`) never ship: they hold AtlasLoot (GPL),
+  RareScanner (All Rights Reserved), QuestieDB and DungeonJournal facts, and
+  crossings from a local file. Lookup then says the Codex is missing and
+  still searches guides.
 
 EllesmereUI is all rights reserved: nothing from it is copied; Polestar only
 calls its public skinning API at runtime.

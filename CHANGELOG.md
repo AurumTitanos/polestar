@@ -9,6 +9,8 @@
 - Search ranks an item first as covered by a guide only when a guide Lookup
   would open for it collects it: one of Polestar's own, or one from the pack
   chosen under Suggest guides from.
+- Polestar is open source: the code, the guides and the tools that build
+  them are on GitHub under the GPL-3.0.
 
 ### For guide authors
 
@@ -21,9 +23,15 @@
   pack's workflow and dev container.
 - `lint` reports a `|` in a second or later `pro` or `con` at that entry's own
   line, once for each entry that has one.
+- `compile` no longer reads `data/forever/dungeons.json`: a quest only
+  DungeonJournal knows gives its title and `lvl` in the guide, so nothing from
+  DungeonJournal reaches a guide pack.
 
 ### For contributors
 
+- THIRD_PARTY.md, docs/RELEASING.md and the README say what a release holds
+  from each data source: QuestieDB facts in the guides and the quest markers,
+  credited; never the Codex or the zone crossings pack.
 - Two more independent route searches (the fourth on the data 0.2.0 ships
   with) back the README's numbers and docs/SIMULATION.md; the charts compare
   the guides with those of 0.1.0.

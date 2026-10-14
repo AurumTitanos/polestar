@@ -49,7 +49,8 @@ step Southshore
   accept 555                          -- Chef Jessen
   buy 3713 x1 npc 2381                -- Soothing Spices, from Micha Yance
   accept 659                          -- Phin Odelic: his trail leads to Arathi
-  accept 92432 "An Alarming Request" npc 247264 -- Emissary Jacques
+  # An Alarming Request requires level 30 (Wowhead Forever quest=92432, checked 2026-10-14).
+  accept 92432 "An Alarming Request" npc 247264 lvl 30 -- Emissary Jacques
   accept 505                          -- Magistrate Henry Maleb
   accept 565                          -- Bartolo Ginsetti
   accept 564                          -- Darren Malvew: the lions come later

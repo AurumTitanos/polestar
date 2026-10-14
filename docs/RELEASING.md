@@ -38,14 +38,13 @@ node tools/polestar.js version 0.2.0      # set package.json, guides/pack.json a
 Data addons rebuilt later take the version from `package.json`. Versions
 follow `x.y.z`; `0.x` releases are betas.
 
-## Private builds and public releases
+## What a release holds
 
-A private build, for testing while the repository is private, may use the
-full local data build of the steps below. A public release follows
-[THIRD_PARTY.md](../THIRD_PARTY.md) ("Distributing Polestar"): the data
-rebuilt with `data build --no-questie`, then `Polestar_QuestDB` and the
-guides rebuilt from it, without `data/forever/dungeons.json` and without the
-Codex.
+Releases are built from the full local data build of the steps below.
+[THIRD_PARTY.md](../THIRD_PARTY.md) ("Distributing Polestar") lists what
+that puts in the zip: QuestieDB facts in the guide pack and
+`Polestar_QuestDB`, nothing from DungeonJournal, and never the Codex or the
+zone crossings pack (`pack` leaves both out).
 
 ## Steps
 
@@ -54,10 +53,7 @@ Replace `0.2.0` with the new version throughout.
 1. Start from a clean, up-to-date `main` with the game client installed
    (the data build reads its tables and installed addons).
 
-2. Set the version and rebuild the data, the data addons and the guides (for
-   a public release, build the data as
-   [Private builds and public releases](#private-builds-and-public-releases)
-   says):
+2. Set the version and rebuild the data, the data addons and the guides:
 
    ```sh
    node tools/polestar.js version 0.2.0

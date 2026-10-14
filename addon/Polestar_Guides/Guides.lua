@@ -2109,7 +2109,7 @@ do
 						{ t = "accept", quest = 555, title = "Soothing Turtle Bisque", npc = 2430, npcName = "Chef Jessen", minLevel = 28, qlvl = 31, map = 1424, x = 51.89, y = 58.68, f = "e", note = "Chef Jessen" },
 						{ t = "buy", npc = 2381, npcName = "Micha Yance", item = 3713, itemName = "Soothing Spices", count = 1, map = 1424, x = 48.94, y = 55.03, f = "e", note = "Soothing Spices, from Micha Yance" },
 						{ t = "accept", quest = 659, title = "Hints of a New Plague?", npc = 2711, npcName = "Phin Odelic", minLevel = 30, qlvl = 33, map = 1424, x = 50.35, y = 59.05, f = "e", note = "Phin Odelic: his trail leads to Arathi" },
-						{ t = "accept", quest = 92432, title = "An Alarming Request", npc = 247264, npcName = "Emissary Jacques", minLevel = 30, qlvl = 33, map = 1424, x = 48.2, y = 60, f = "e", note = "Emissary Jacques" },
+						{ t = "accept", quest = 92432, title = "An Alarming Request", npc = 247264, npcName = "Emissary Jacques", minLevel = 30, map = 1424, x = 48.2, y = 60, f = "e", note = "Emissary Jacques" },
 						{ t = "accept", quest = 505, title = "Syndicate Assassins", npc = 2276, npcName = "Magistrate Henry Maleb", minLevel = 26, qlvl = 33, map = 1424, x = 48.14, y = 59.11, f = "e", note = "Magistrate Henry Maleb" },
 						{ t = "accept", quest = 565, title = "Bartolo's Yeti Fur Cloak", npc = 2438, npcName = "Bartolo Ginsetti", minLevel = 29, qlvl = 34, map = 1424, x = 49.43, y = 55.53, f = "e", note = "Bartolo Ginsetti" },
 						{ t = "accept", quest = 564, title = "Costly Menace", npc = 2382, npcName = "Darren Malvew", minLevel = 30, qlvl = 34, map = 1424, x = 52.42, y = 55.96, f = "e", note = "Darren Malvew: the lions come later" },

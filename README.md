@@ -679,14 +679,15 @@ Polestar is free and open source under the
 [GNU General Public License, version 3](LICENSE).
 
 Its data comes from public sources, the game client's own tables and
-recordings, each used as its licence allows; [THIRD_PARTY.md](THIRD_PARTY.md)
-lists every input, its licence and what may enter the repository. Inputs whose
-terms do not allow redistribution are read from your installed copies at
-build time and their outputs stay local: `data/forever/`, the Codex pack and
-the zone crossings pack are gitignored and never packaged. No game art ships
-with Polestar: zone paintings are read from the player's own client, and
-every texture is drawn in code. The screenshots in this README show the game
-(© Blizzard Entertainment) and are not part of the release.
+recordings; [THIRD_PARTY.md](THIRD_PARTY.md) lists every input, its licence
+and what a release holds from it. The guides and the quest markers carry
+facts (titles, givers, positions, levels) from QuestieDB's Forever store,
+credited there. Inputs whose terms do not allow redistribution are read from
+your installed copies at build time and their outputs stay local: the Codex
+pack and the zone crossings pack are gitignored and never packaged. No game
+art ships with Polestar: zone paintings are read from the player's own
+client, and every texture is drawn in code. The screenshots in this README
+show the game (© Blizzard Entertainment) and are not part of the release.
 
 The Inter typeface (SIL Open Font License 1.1) ships with the addon; the
 POLESTAR wordmark is cut from Cinzel (SIL Open Font License 1.1) and ships
