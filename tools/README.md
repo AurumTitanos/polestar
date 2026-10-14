@@ -82,7 +82,7 @@ The release steps are in [docs/RELEASING.md](../docs/RELEASING.md).
 | `commands/` | One module per command: `{ name, summary, usage, run }` |
 | `lib/` | The library the commands share (below) |
 | `media/` | Texture generators run by `media`: `nav.js`, `qol.js`, `ui.js`; the wordmark fonts in `media/fonts` |
-| `preview/` | `preview`'s renderer: a geometry-recording client stub (`stub.lua`), font outlines, SVG drawing |
+| `preview/` | `preview`'s renderer: a geometry-recording client stub (`stub.lua`), font outlines, SVG drawing, and a zlib encoder of its own for the textures (`deflate.js`), so the renders are byte-identical on any Node |
 | `play/` | The playground: server, Lua session, driver and the page in `play/public` |
 | `readme/` | Scripts for the README's art: `brand.js` (banners, emblem, logo, download button) and `charts.js` (route charts) |
 | `templates/pack/` | What `new` copies into a new guide pack |
@@ -143,7 +143,7 @@ where they exist.
 | `guides/forever/professions/` alchemy, blacksmithing, enchanting, engineering, leatherworking, tailoring | `profession draft <Profession> --out` | `data/forever` including professions | yes | rerun |
 | `addon/Polestar_Guides/` | `compile` | `guides/**/*.guide`, `guides/pack.json`, `data/forever` (including trainers, travel, professions, dungeons) | yes | rerun; `tests/guides-parse.test.js` fails when a guide is added, renamed or removed without `compile` |
 | `addon/Polestar/Media/Nav/*.tga`, `addon/Polestar/Media/UI/*.tga` | `media` | `tools/media/*.js`, `tools/lib/tga.js`, `tools/media/fonts` (no data) | yes | rerun: the output is byte-identical, and CI fails when it differs from the committed files; `tests/media-refs.test.js` checks the addon names every texture |
-| `docs/preview/*.svg` | `preview` | the addon's Core, Theme, Gear, Lookup, Dungeons, UI and QoL Lua; `addon/Polestar_Guides/Guides.lua`; `tests/lua/stub_ui.lua`, `tests/fixtures`; optional `POLESTAR_CLIENT_ART` and `POLESTAR_DUNGEONS_PACK` | yes | rerun (local client art changes the output) |
+| `docs/preview/*.svg` | `preview` | the addon's Lua (Core, Theme, Nav, Quests, Gear, Maps, QoL, Lookup, Dungeons, Rares, UI), its generated files included; `tests/lua` (the client stubs, `stub_ui.lua`'s sample guides), `tests/fixtures`, among them six compiled Horde guides frozen in `tests/fixtures/preview/guides.lua`; no reference data and not the shipped `addon/Polestar_Guides`, so a guide recompile never changes the renders. `POLESTAR_CLIENT_ART` (with `POLESTAR_DUNGEONS_PACK`) renders local art and data into its own folder, never here | yes | rerun: the output is byte-identical, and CI fails when it differs from the committed files or a render is missing; a full run removes the renders of scenes that are gone |
 | `docs/assets/{banner-dark,banner-light,emblem,logo,download}.svg` | `node tools/readme/brand.js` | the emblem geometry, the wordmark fonts | yes | rerun |
 | `docs/assets/charts/{levels,starts}.svg` | `node tools/readme/charts.js --draft <dir or git rev>` | `data/sim`, `guides/` | yes | rerun |
 | `data/sim/` | `sim world`, `sim run` and the other `sim` commands | `data/forever` | local | `lint` notes a cached world built from other data and skips its check |
@@ -167,7 +167,7 @@ build, new recordings or a change to an installed source addon:
 10. `node tools/polestar.js codex build` (reads `dungeons.json`, `professions.json` and `trainers.json`)
 11. The generated guides: `node tools/lib/exploration/build.js --write` (reads `travel.json`), `node tools/lib/professions/gathering/build.js --write` and `node tools/polestar.js profession draft <Profession> --out` for each crafting profession (read `professions.json`)
 12. `node tools/polestar.js lint`, then `node tools/polestar.js compile`
-13. `node tools/polestar.js preview` (reads the compiled `Guides.lua`)
+13. `node tools/polestar.js preview`: it reads no reference data and no compiled guides, but the addon Lua that steps 4 to 8 write is part of what it draws
 
 `maps overlays`, `itemdb build` and `media` read no reference data: they
 only need rerunning when the client's tables or `tools/media` change. The

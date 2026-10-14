@@ -720,7 +720,13 @@ function IsModifierKeyDown() return stub.keys.shift or stub.keys.ctrl or stub.ke
 function GetTime() return stub.now end
 function GetServerTime() return stub.epoch + math.floor(stub.now) end
 function time() return stub.epoch + math.floor(stub.now) end
-function date(fmt) return os.date(fmt or "%c", stub.epoch + math.floor(stub.now)) end
+-- The client's date([fmt [, time]]), in UTC rather than the machine's time
+-- zone, so dates come out the same everywhere.
+function date(fmt, t)
+	fmt = fmt or "%c"
+	if fmt:sub(1, 1) ~= "!" then fmt = "!" .. fmt end
+	return os.date(fmt, t or (stub.epoch + math.floor(stub.now)))
+end
 function debugprofilestop() return stub.now * 1000 end
 function GetFramerate() return 60 end
 function GetBuildInfo() return "1.60.1", "70338", "Oct  1 2026", 16001 end

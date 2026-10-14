@@ -96,8 +96,12 @@ command.
   `addon/Polestar/Media` differ from what `node tools/polestar.js media`
   builds: after changing `tools/media`, run it and commit the textures.
 - For UI changes, `node tools/polestar.js preview` renders the guide window,
-  menu and options to `docs/preview/*.svg`; look at them before and after.
-  [DESIGN.md](DESIGN.md) describes the visual system.
+  menu and options to `docs/preview/*.svg`; look at them before and after,
+  and commit them with the change: CI renders them again and fails when they
+  differ. They change only with the addon's Lua, never with a guide
+  recompile: the guide menu scenes load frozen copies of six compiled guides
+  (`tests/fixtures/preview`). [DESIGN.md](DESIGN.md) describes the visual
+  system.
 
 ## Commits and pull requests
 

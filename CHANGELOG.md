@@ -77,6 +77,16 @@
   client helper in Core/Compat; every AddOns and WTF folder lookup goes
   through tools/lib/addons.js (`$WOW_FOREVER_ADDONS` first, then the detected
   clients); `.gitattributes` and `.editorconfig`.
+- The UI renders in docs/preview show this release's windows and come out
+  byte for byte the same from any checkout: their textures are compressed by
+  a zlib encoder of the preview's own (Node's zlib gives different bytes from
+  one Node to the next), quest markers are built in quest ID order (LuaJIT
+  walked the quest log in another order and stacked overlapping markers
+  differently), the test client's `date()` is UTC, and
+  `preview` refuses local inputs unless they render outside the repository.
+  The guide menu scenes load frozen copies of six compiled guides, so they
+  change only with the UI, never with a guide recompile. CI renders them
+  again and fails when they differ from the committed ones.
 
 ## 0.1.0 (2026-10-13)
 

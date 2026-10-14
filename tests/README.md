@@ -17,8 +17,9 @@ Node and Lua.
 
 CI (`.github/workflows/ci.yml`, on pushes to main and on pull requests)
 installs Lua 5.1 and runs `npm test`, then rebuilds the textures with
-`node tools/polestar.js media` and fails when they differ from the committed
-ones in `addon/Polestar/Media`.
+`node tools/polestar.js media` and the UI renders with
+`node tools/polestar.js preview`, and fails when either differs from the
+committed files in `addon/Polestar/Media` and `docs/preview`.
 
 ## Layers
 
@@ -82,7 +83,8 @@ reference data in the `data/forever` shape (`dsl/data`, `questdb`, `route`,
 `find/data`), guide packs good and bad (`packs`), cached source tables
 (`data/sources`, `professions/wago`, `travel/sources`), recordings,
 installed-addon samples (`codex/addons`, `dungeonjournal`,
-`consume/wowsims`) and simulator inputs (`sim`).
+`consume/wowsims`), simulator inputs (`sim`) and six compiled guides frozen
+for the guide menu scenes of `preview` and `text-fit.test.js` (`preview`).
 
 ## Tests that need local data
 

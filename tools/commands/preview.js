@@ -174,8 +174,8 @@ function codexStub() {
 // Caverns with its quests and bosses, the Deadmines, a Forever dungeon with
 // nothing known) as a Codex pack carrying Dungeons1.lua, loaded when the
 // section asks. POLESTAR_DUNGEONS_PACK: a Dungeons1.lua built by `codex build`
-// (local, never committed) used instead of the fixture's; render those with
-// POLESTAR_CLIENT_ART so they land outside the repository.
+// (local, never committed) used instead of the fixture's; it needs
+// POLESTAR_CLIENT_ART, so those renders land outside the repository.
 const DUNGEONS_PACK = process.env.POLESTAR_DUNGEONS_PACK || null;
 let dungeonsPack = null;
 function dungeonsStub() {
@@ -295,13 +295,14 @@ add("forever/alliance/30-40/02-desolace", "Desolace", "Alliance", 31, 34, "Desol
 add("forever/alliance/30-40/04-stranglethorn-vale", "Stranglethorn Vale", "Alliance", 34, 38, "Stranglethorn Vale", 1434)
 add("forever/alliance/40-50/04-tanaris", "Tanaris", "Alliance", 45, 47, "Tanaris", 1446)
 add("forever/horde/30-40/01-desolace", "Desolace & Hillsbrad Foothills", "Horde", 30, 33, "Desolace", 1443)
--- The Horde road from Durotar through the Barrens: the compiled guides
--- themselves (addon/Polestar_Guides), so the facts (quests, zones, the guide
--- after it) are the real ones. They replace the samples of the same id.
+-- The Horde road from Durotar through the Barrens: compiled guides frozen in
+-- tests/fixtures/preview/guides.lua, so the facts (quests, zones, the guide
+-- after it) are real ones and a recompile of the shipped guides leaves the
+-- renders alone. They replace the samples of the same id.
 do
 	local register, defs = Polestar.RegisterGuide, {}
 	Polestar.RegisterGuide = function(def) defs[def.id] = def end
-	dofile("addon/Polestar_Guides/Guides.lua")
+	dofile("tests/fixtures/preview/guides.lua")
 	Polestar.RegisterGuide = register
 	for _, rel in ipairs({ "orc-troll/01-durotar", "orc-troll/02-the-barrens", "02-the-barrens", "03-silverpine-forest", "04-the-barrens", "05-stonetalon-mountains" }) do
 		local def = defs["forever/horde/" .. rel]
@@ -995,6 +996,13 @@ function cleanupPacks() {
 
 async function run(argv) {
 	const only = new Set(argv.filter((a) => !a.startsWith('-')));
+	// docs/preview holds renders of the checkout alone: local inputs render
+	// into POLESTAR_CLIENT_ART's folder or not at all.
+	const local = ['POLESTAR_DUNGEONS_PACK', 'POLESTAR_ADDON_DIR'].filter((k) => process.env[k]);
+	if (local.length && !CLIENT_ART) {
+		console.error(`preview: ${local.join(' and ')} would put local data in docs/preview; unset it, or set POLESTAR_CLIENT_ART to render into its folder`);
+		return 2;
+	}
 	const fonts = loadFonts();
 	const textures = new TextureCache(path.join(ADDON, 'Media', 'UI'), CLIENT_ART);
 	const prelude = metricsLua(fonts);
@@ -1018,6 +1026,16 @@ async function run(argv) {
 	if (!written.length) {
 		console.error(`no preview scene named ${[...only].join(', ')}`);
 		return 2;
+	}
+	// A full run leaves exactly the scenes' renders in the folder.
+	if (!only.size) {
+		const scenes = new Set(SCENES.map((s) => s.file));
+		for (const f of fs.readdirSync(outDir)) {
+			if (f.endsWith('.svg') && !scenes.has(f)) {
+				fs.rmSync(path.join(outDir, f));
+				console.log(`removed ${path.relative(ROOT, path.join(outDir, f))}`);
+			}
+		}
 	}
 	return 0;
 }
