@@ -1,15 +1,19 @@
--- The welcome: a small Polestar window, centred, that greets a character
--- Polestar has not seen before, with Back, Next and Skip:
---   1. Hello, <name>: the guide Polestar suggests for this character (its
---      level, race, class and zone), then the guide window, the arrow and
---      /polestar guides;
---   2. Our routes are still in beta: shown while ns.routesBeta is true;
---   3. Set up: quest automation (behavior.autoAccept and autoTurnin as one
---      switch), the guide at login (behavior.autoSelectGuide), the colour
---      scheme (ui.scheme);
---   4. Guide packs: what they are, how to install one, where they appear,
---      who supports them and the pack docs (ns.DocsURL); Start the suggested
---      guide (Choose a guide without one) or Browse guides.
+-- The welcome: a Polestar window, centred, that greets a character Polestar
+-- has not seen before. Every page opens under a 176px hero (the starlit band
+-- with the Little Dipper drawn faintly in code, its handle leading to the
+-- page's emblem, or the suggested guide's zone painting); the page below on
+-- the 32 edge; a footer bar with the step dots, Skip, Back and Next.
+--   1. welcome: the lockup (emblem, wordmark, tagline) in the hero; Hello,
+--      <name>, one line on what Polestar does, then the guide window, the
+--      arrow and every guide (/polestar guides) as three columns;
+--   2. setup: quest automation (behavior.autoAccept and autoTurnin as one
+--      switch) and the guide at login (behavior.autoSelectGuide), each with
+--      its description inline, and the colour scheme (ui.scheme) as swatch
+--      cards that apply live;
+--   3. start: the suggested guide on its painting (its level range, who it
+--      is for), its pitch; the beta callout while ns.routesBeta is true; the
+--      Discord community (its invite in a copy box); what guide packs are.
+--      Start guide (Choose a guide without one) or Browse guides.
 --
 -- Per character: PolestarCharDB.welcomeSeen, the welcome's version (SEEN).
 -- A new character (ns.IsNewCharacter: no saved PolestarCharDB when Polestar
@@ -21,10 +25,10 @@
 -- under the route choice) stays due for the next login.
 --
 -- Per account: PolestarDB.welcomeSeen, the account has had its welcome. Its
--- settings are account-wide, so Set up is in a welcome shown at login only
+-- settings are account-wide, so setup is in a welcome shown at login only
 -- while the account's flag is below SEEN; a later character skips it. The
--- page set is fixed when a showing starts. Any close (Skip, Done, Start,
--- Browse guides, the header ✕, Escape) sets both flags. The beta notice's old
+-- page set is fixed when a showing starts. Any close (Skip, Start guide,
+-- Browse guides, the hero's ✕, Escape) sets both flags. The beta notice's old
 -- flag (betaNoticeSeen) is dropped.
 --
 -- It opens a moment after login, never in combat (it waits for the fight to
@@ -37,29 +41,40 @@
 -- left once the cinematic stops. About's "Show the welcome again" and
 -- /polestar welcome (SHOW_WELCOME) open it with every page.
 --
--- Built on first use; colours are Theme tokens only.
+-- The window takes the height of its tallest page, so it never jumps. Motion:
+-- the window fades in, the hero settles 8px up as it fades in (180ms); a page
+-- change cross-fades the hero and the page (120ms). Built on first use;
+-- colours are Theme tokens only.
 
 local ADDON, ns = ...
 local UI, Theme, W, Anim = ns.UI, ns.Theme, ns.Widgets, ns.Anim
 local L = ns.L
+local floor, max, min, sqrt, cos, sin = math.floor, math.max, math.min, math.sqrt, math.cos, math.sin
+local atan2 = math.atan2 or math.atan
+
+-- The community's invite: the game cannot open links, so the player copies it.
+local DISCORD_URL = "https://discord.gg/vMbee6F2e9"
 
 local WEL = {}
 UI.Welcome = WEL
 
 local SEEN = 1 -- the welcome's version; a later welcome raises it
-local WIDTH = 520
-local PAD = 24
+local WIDTH = 560
+local PAD = 32
 local CW = WIDTH - PAD * 2
-local HEAD_H = 88
+local HERO_W = WIDTH - 2 -- inside the window's 1px edge
+local HERO_H = 176
+local BAND_H = 128 -- the band at 1:1; its sky fades into the ground below
+local EDGE = PAD - 1 -- the 32 edge, in hero coordinates
+local BODY_Y = HERO_H + 24 -- the page's top, under the hero
 local FOOT_H = 56
-local GAP = 16
 local DELAY = 2 -- seconds after login, so the world and the other windows settle first
 
 local F -- the window
 local current = "welcome" -- the page shown (its key)
 local pending -- nil | "login" (due at login) | "asked" (opened on request, or coming back), waiting for combat or the route choice
 local stepping -- hidden to make way for the route choice, not closed
-local full = true -- this showing has every page (false: Set up left out); fixed when it starts
+local full = true -- this showing has every page (false: setup left out); fixed when it starts
 local hookedRC
 
 local function inCombat()
@@ -90,20 +105,30 @@ local function cmd(text)
 	return "|c" .. Theme.Hex("text") .. text .. "|r"
 end
 
--- A wrapped body paragraph block on the page's left edge.
-local function bodyText(page, role, color)
-	local fs = W.Text(page, role or "body", color or "textDim")
-	fs:SetWidth(CW)
+-- A wrapped block of text, `width` wide.
+local function para(parent, role, color, width, spacing)
+	local fs = W.Text(parent, role, color)
+	fs:SetWidth(width)
 	fs:SetWordWrap(true)
-	fs:SetSpacing(4)
+	fs:SetSpacing(spacing or 4)
 	fs:SetJustifyH("LEFT")
 	fs:SetJustifyV("TOP")
 	return fs
 end
 
-local function place(region, y)
+local function place(region, x, y)
 	region:ClearAllPoints()
-	region:SetPoint("TOPLEFT", region:GetParent(), "TOPLEFT", 0, -y)
+	region:SetPoint("TOPLEFT", region:GetParent(), "TOPLEFT", x, -y)
+end
+
+-- Text on a painting: the deeper shade under it.
+local function onArt(fs)
+	W.Painter(fs, function(t)
+		local r, g, b = Theme.Color("shade")
+		t:SetShadowOffset(0, -1)
+		t:SetShadowColor(r, g, b, 0.85)
+	end)
+	return fs
 end
 
 local function close()
@@ -111,7 +136,90 @@ local function close()
 end
 
 ---------------------------------------------------------------------------
--- Pages: build(page) once; layout(page) -> the page's height, on every show.
+-- The hero's art: the emblem in its glow, and the Little Dipper
+---------------------------------------------------------------------------
+
+-- The emblem, `size` px, centred on (x, y) in hero coordinates, in its glow.
+local function emblem(parent, size, x, y)
+	local e = W.Tex(parent, "ARTWORK", "emblem", "accent")
+	e:SetSize(size, size)
+	e:SetPoint("CENTER", parent, "TOPLEFT", x, -y)
+	local glow = W.Tex(parent, "BACKGROUND", "glow", nil, 2)
+	glow:SetSize(floor(size * 2.35 + 0.5), floor(size * 2.35 + 0.5))
+	glow:SetPoint("CENTER", e, "CENTER", 0, 0)
+	W.Painter(glow, function(t) local r, g, b = Theme.Accent(); t:SetVertexColor(r, g, b, 0.12) end)
+	return e
+end
+
+-- The Little Dipper, stylised, in px with Polaris at the origin (x right,
+-- y down): { x, y, size, ink }. Polaris first; the emblem stands on it.
+local DIPPER = {
+	{ 0, 0, 9, 0.8 }, -- Polaris
+	{ 70, 14, 4, 0.35 }, -- Yildun
+	{ 128, 38, 5, 0.45 }, -- Epsilon
+	{ 176, 70, 5, 0.45 }, -- Zeta
+	{ 236, 64, 4, 0.3 }, -- Eta
+	{ 250, 112, 7, 0.65 }, -- Pherkad
+	{ 190, 118, 9, 0.8 }, -- Kochab
+}
+-- Polaris-Yildun-Epsilon-Zeta-Eta-Pherkad-Kochab-Zeta.
+local LINKS = { { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 5 }, { 5, 6 }, { 6, 7 }, { 7, 4 } }
+local DIPPER_SCALE = 0.68
+local DIPPER_TURN = math.pi -- the sky turned half a night: the handle leads down-right to Polaris
+
+-- Draws the Dipper with Polaris at (px, py) in hero coordinates. polarisR:
+-- the emblem's radius when the emblem is Polaris (its own star then hides).
+local function dipper(parent, px, py, polarisR)
+	local c, s = cos(DIPPER_TURN), sin(DIPPER_TURN)
+	local pts = {}
+	for i, st in ipairs(DIPPER) do
+		local x, y = st[1] * DIPPER_SCALE, st[2] * DIPPER_SCALE
+		pts[i] = { px + x * c - y * s, py + x * s + y * c }
+		if not (i == 1 and polarisR) then
+			-- A star: a soft halo round a small bright core.
+			local ink, size = st[4], st[3]
+			local halo = W.Tex(parent, "BORDER", "glow", nil, 1)
+			halo:SetSize(size * 2.4, size * 2.4)
+			halo:SetPoint("CENTER", parent, "TOPLEFT", pts[i][1], -pts[i][2])
+			local core = W.Tex(parent, "BORDER", "circle", nil, 2)
+			core:SetSize(max(2, size * 0.45), max(2, size * 0.45))
+			core:SetPoint("CENTER", halo, "CENTER", 0, 0)
+			W.Painter(halo, function(t)
+				local r, g, b = Theme.Color("star")
+				t:SetVertexColor(r, g, b, ink * 0.55)
+				core:SetVertexColor(r, g, b, ink)
+			end)
+		end
+	end
+	-- Hairlines between the stars, stopping short of each so every star
+	-- stands clear, as on a star chart.
+	local function gap(i) return (i == 1 and polarisR) and (polarisR + 4) or (DIPPER[i][3] * 0.8 + 3) end
+	for _, link in ipairs(LINKS) do
+		local a, b = pts[link[1]], pts[link[2]]
+		local dx, dy = b[1] - a[1], b[2] - a[2]
+		local len = sqrt(dx * dx + dy * dy)
+		local ga, gb = gap(link[1]), gap(link[2])
+		local seg = len - ga - gb
+		if seg > 2 then
+			local mid = (ga + seg / 2) / len
+			local t = W.Tex(parent, "BORDER", "white", nil, 0)
+			t:SetTexCoord(0, 1, 0, 1) -- drawn as an image, so it turns
+			t:SetSize(seg, Theme.Pixel(parent))
+			t:SetPoint("CENTER", parent, "TOPLEFT", a[1] + dx * mid, -(a[2] + dy * mid))
+			t:SetRotation(-atan2(dy, dx))
+			W.Painter(t, function(tex) local r, g, bb = Theme.Color("ink"); tex:SetVertexColor(r, g, bb, 0.16) end)
+		end
+	end
+end
+
+-- Where the emblem stands when it sits at the hero's right (setup, start
+-- without a painting): Polaris low on the right, the Dipper above it.
+local SIDE_X, SIDE_Y, SIDE_EMBLEM = HERO_W - 64, 112, 36
+local SIDE_TEXT_W = 300 -- text beside it stays clear of the stars
+
+---------------------------------------------------------------------------
+-- Pages: build(p, hero) once; layout(p, hero) -> the page's height, on every
+-- show. p is the page under the hero, hero the page's content in the hero.
 ---------------------------------------------------------------------------
 
 local PAGES = {}
@@ -127,15 +235,18 @@ local function known(s)
 	return type(s) == "string" and s ~= "" and s or nil
 end
 
--- "Polestar suggests <guide> for your level 1 Human Warrior in Elwynn
--- Forest.", leaving out what is unknown.
-local function hello()
+-- The guide Polestar suggests, or nil.
+local function suggested()
 	local G = ns.Guides
 	local id = G and G.Suggest and G.Suggest()
 	local g = id and G.Get and G.Get(id)
-	if not (g and known(g.title)) then
-		return L["Polestar has no guide to suggest for where you are."]
-	end
+	if g and known(g.title) then return id, g end
+	return nil
+end
+
+-- "Your first guide, for your level 1 Human Warrior in Elwynn Forest",
+-- leaving out what is unknown.
+local function forWhom(g)
 	local info = playerInfo()
 	local race, class = known(UI.RaceName(info.race)), known(UI.ClassName(info.class))
 	local level = tonumber(info.level)
@@ -149,43 +260,85 @@ local function hello()
 	local zone = known((ns.Compat.GetZoneText()))
 	-- A guide named for the zone already says where.
 	if zone and g.title:lower():find(zone:lower(), 1, true) then zone = nil end
-	local guide = cmd(g.title)
-	if who and zone then return (L["Polestar suggests %s for your %s in %s."]):format(guide, who, zone) end
-	if who then return (L["Polestar suggests %s for your %s."]):format(guide, who) end
-	if zone then return (L["Polestar suggests %s for you in %s."]):format(guide, zone) end
-	return (L["Polestar suggests %s for you."]):format(guide)
+	if who and zone then return (L["Your first guide, for your %s in %s"]):format(who, zone) end
+	if who then return (L["Your first guide, for your %s"]):format(who) end
+	if zone then return (L["Your first guide, in %s"]):format(zone) end
+	return L["Your first guide"]
 end
+
+-- 1. Welcome --------------------------------------------------------------
+
+local FEATURES = {
+	{ "window", "The guide window", "The step you are on.", "Goals tick off as you play." },
+	{ "icon-goto", "The arrow", "Points the way.", "The map marks each place." },
+	{ "guides", "Every guide", "/polestar guides", "Leveling, professions, reputations, mounts and pets." },
+}
+local COL_GAP = 24
+local COL_W = floor((CW - COL_GAP * (#FEATURES - 1)) / #FEATURES)
+
+local LOCKUP_X, LOCKUP_Y, LOCKUP_EMBLEM = 204, 100, 56
 
 PAGES[#PAGES + 1] = {
 	key = "welcome",
-	title = function()
-		local name = known(playerInfo().name)
-		return name and (L["Hello, %s"]):format(name) or L["Welcome to Polestar"]
+	build = function(p, h)
+		-- The lockup: the emblem (Polaris), the wordmark and tagline stacked
+		-- and centred on it, 20px after its ink.
+		emblem(h, LOCKUP_EMBLEM, LOCKUP_X, LOCKUP_Y)
+		dipper(h, LOCKUP_X, LOCKUP_Y, LOCKUP_EMBLEM / 2 - 8)
+		local textX = LOCKUP_X + LOCKUP_EMBLEM / 2 - 8 + 20
+		h.Word = W.Tex(h, "ARTWORK", "wordmark", "text")
+		h.Word:SetSize(256, 32)
+		h.Word:SetPoint("TOPLEFT", h, "TOPLEFT", textX - 3, -(LOCKUP_Y - 28))
+		h.Tagline = para(h, "note", "textDim", HERO_W - EDGE - textX, 2)
+		h.Tagline:SetText(L["Leveling guides for World of Warcraft: Forever"])
+		h.Tagline:SetPoint("TOPLEFT", h, "TOPLEFT", textX, -(LOCKUP_Y + 8))
+
+		p.Title = para(p, "hero", "text", CW, 2)
+		p.Line = para(p, "body", "textDim", CW)
+		p.Cols = {}
+		for i, f in ipairs(FEATURES) do
+			local col = {}
+			col.Glyph = W.Tex(p, "ARTWORK", f[1], "accent")
+			col.Glyph:SetSize(20, 20)
+			col.Title = para(p, "title", "text", COL_W, 2)
+			col.Title:SetText(L[f[2]])
+			col.Text = para(p, "small", "textMuted", COL_W, 3)
+			local first = f[3]:sub(1, 1) == "/" and cmd(f[3]) or L[f[3]]
+			col.Text:SetText(first .. "\n" .. L[f[4]])
+			if i > 1 then col.Rule = W.Divider(p, true) end
+			p.Cols[i] = col
+		end
 	end,
-	build = function(p) p.Text = bodyText(p) end,
 	layout = function(p)
-		p.Text:SetText(table.concat({
-			hello(),
-			(L["%s shows the step you are on: who to talk to, what to kill or collect, and where to go. Goals tick themselves off as you do them."]):format(cmd(L["The guide window"])),
-			(L["%s points the way, and the map marks each place."]):format(cmd(L["The arrow"])),
-			(L["%s lets you pick another guide, open one in a new tab, or search them all."]):format(cmd("/polestar guides")),
-		}, "\n\n"))
-		place(p.Text, 0)
-		return p.Text:GetStringHeight()
+		local name = known(playerInfo().name)
+		p.Title:SetText(name and (L["Hello, %s"]):format(name) or L["Welcome to Polestar"])
+		p.Line:SetText(L["Polestar guides you step by step: who to talk to, what to kill or collect, and where to go."])
+		place(p.Title, 0, 0)
+		local y = p.Title:GetStringHeight() + 10
+		place(p.Line, 0, y)
+		y = y + p.Line:GetStringHeight() + 28
+		local colH = 0
+		for i, col in ipairs(p.Cols) do
+			local x = (i - 1) * (COL_W + COL_GAP)
+			place(col.Glyph, x, y)
+			place(col.Title, x, y + 32)
+			local ty = y + 32 + col.Title:GetStringHeight() + 8
+			place(col.Text, x, ty)
+			colH = max(colH, ty + col.Text:GetStringHeight() - y)
+		end
+		for _, col in ipairs(p.Cols) do
+			if col.Rule then
+				col.Rule:ClearAllPoints()
+				col.Rule:SetPoint("TOPRIGHT", col.Glyph, "TOPLEFT", -COL_GAP / 2, 0)
+				col.Rule:SetHeight(colH)
+			end
+		end
+		return y + colH
 	end,
+	title = function(p) return p.Title:GetText() end,
 }
 
-PAGES[#PAGES + 1] = {
-	key = "beta",
-	shown = function() return ns.routesBeta and true or false end,
-	title = function() return L["Our routes are still in beta"] end,
-	build = function(p) p.Text = bodyText(p) end,
-	layout = function(p)
-		p.Text:SetText(L["Polestar's leveling routes were planned and timed in a simulator and played to the end, for every class, in a test copy of the addon. Nobody has followed them through the live game yet, so expect the odd wrong step. Skip it (/polestar skip) and report it where you got Polestar."])
-		place(p.Text, 0)
-		return p.Text:GetStringHeight()
-	end,
-}
+-- 2. Setup ------------------------------------------------------------------
 
 -- Quest automation is one switch for two settings: on while both are.
 local function autoQuestGet()
@@ -197,34 +350,200 @@ local function autoQuestSet(v)
 	ns.Set("behavior.autoTurnin", v)
 end
 
+-- A toggle row with its description under the label, not only in the
+-- tooltip: the row reaches 12px past the 32 edge on both sides, so the
+-- label and the switch sit on the page's edges.
+local function toggleRow(p, label, path, desc, opts)
+	local row = W.Toggle(p, label, path, desc, nil, opts)
+	row:SetWidth(CW + 24)
+	row.Desc = para(row, "small", "textMuted", CW - 30 - 16, 3)
+	row.Desc:SetText(desc)
+	row.Track:ClearAllPoints()
+	row.Track:SetPoint("TOPRIGHT", row, "TOPRIGHT", -12, -14)
+	row.Label:ClearAllPoints()
+	row.Label:SetPoint("TOPLEFT", row, "TOPLEFT", 12, -14)
+	row.Label:SetPoint("RIGHT", row.Track, "LEFT", -16, 0)
+	row.Desc:SetPoint("TOPLEFT", row.Label, "BOTTOMLEFT", 0, -5)
+	return row
+end
+
+local function toggleRowHeight(row)
+	return 14 + row.Label:GetStringHeight() + 5 + row.Desc:GetStringHeight() + 14
+end
+
+-- Scheme cards: a small window in that scheme's grounds with the accent, the
+-- name under it. The scheme's own colours come from Theme.SCHEMES; EllesmereUI
+-- derives its grounds from its panel, shown as they are while it is in use.
+local CARD_GAP, PREVIEW_H, CARD_NAME_H = 12, 56, 30
+
+local function schemeColours(key)
+	if key == "ellesmere" then
+		if Theme.SchemeKey() == "ellesmere" then return Theme.Palette() end
+		return Theme.SCHEMES.graphite
+	end
+	return Theme.SCHEMES[key] or Theme.SCHEMES.dusk
+end
+
+local function paintCard(c)
+	local pal = schemeColours(c.psValue)
+	local function rgb(name) local v = pal[name]; return v[1], v[2], v[3] end
+	c.Ground:SetVertexColor(rgb("bg"))
+	c.Side:SetVertexColor(rgb("sidebar"))
+	local sr, sg, sb = rgb("sky")
+	local br, bg, bb = rgb("bg")
+	if c.Sky.SetGradient and CreateColor then
+		c.Sky:SetGradient("VERTICAL", CreateColor(br, bg, bb, 1), CreateColor(sr, sg, sb, 1))
+	else
+		c.Sky:SetVertexColor(sr, sg, sb)
+	end
+	c.Line1:SetVertexColor(rgb("text"))
+	c.Line2:SetVertexColor(rgb("textMuted"))
+	c.Control:SetVertexColor(rgb("panelAlt"))
+	local ar, ag, ab = Theme.Accent()
+	c.Button:SetVertexColor(ar, ag, ab, 1)
+	c.Bar:SetVertexColor(ar, ag, ab, 1)
+	local on = Theme.SchemeKey() == c.psValue
+	c.psSelected = on
+	local r, g, b, a
+	if on then
+		r, g, b, a = ar, ag, ab, 1
+	else
+		r, g, b, a = Theme.Wash("border")
+	end
+	for i = 1, 4 do c.psEdge[i]:SetVertexColor(r, g, b, a) end
+	W.Color(c.Name, on and "text" or "textDim")
+end
+
+local function schemeCard(p)
+	local c = CreateFrame("Button", nil, p)
+	W.Fill(c, "panelAlt", "BACKGROUND", -6)
+	W.Hover(c)
+	local px = Theme.Pixel(c)
+	c.psEdge = {}
+	for i, pts in ipairs({ { "TOPLEFT", "TOPRIGHT" }, { "BOTTOMLEFT", "BOTTOMRIGHT" }, { "TOPLEFT", "BOTTOMLEFT" }, { "TOPRIGHT", "BOTTOMRIGHT" } }) do
+		local e = c:CreateTexture(nil, "OVERLAY")
+		e:SetTexture(Theme.Media("white"))
+		e:SetPoint(pts[1], c, pts[1], 0, 0)
+		e:SetPoint(pts[2], c, pts[2], 0, 0)
+		if i <= 2 then e:SetHeight(px) else e:SetWidth(px) end
+		c.psEdge[i] = e
+	end
+	local function tex(layer, sub)
+		local t = c:CreateTexture(nil, layer, nil, sub)
+		t:SetTexture(Theme.Media("white"))
+		return t
+	end
+	-- The preview, inset 1px: the window ground, the sky along its top, the
+	-- sidebar with its selection bar, two lines of text, a control and the
+	-- primary button.
+	c.Ground = tex("BORDER", 0)
+	c.Ground:SetPoint("TOPLEFT", c, "TOPLEFT", 1, -1)
+	c.Ground:SetPoint("TOPRIGHT", c, "TOPRIGHT", -1, -1)
+	c.Ground:SetHeight(PREVIEW_H)
+	c.Sky = tex("BORDER", 1)
+	c.Sky:SetPoint("TOPLEFT", c.Ground, "TOPLEFT", 0, 0)
+	c.Sky:SetPoint("TOPRIGHT", c.Ground, "TOPRIGHT", 0, 0)
+	c.Sky:SetHeight(24)
+	c.Side = tex("BORDER", 2)
+	c.Side:SetPoint("TOPLEFT", c.Ground, "TOPLEFT", 0, 0)
+	c.Side:SetPoint("BOTTOMLEFT", c.Ground, "BOTTOMLEFT", 0, 0)
+	c.Side:SetWidth(20)
+	c.Bar = tex("ARTWORK", 0)
+	c.Bar:SetSize(2, 8)
+	c.Bar:SetPoint("TOPLEFT", c.Side, "TOPLEFT", 0, -16)
+	c.Line1 = tex("ARTWORK", 0)
+	c.Line1:SetSize(44, 3)
+	c.Line1:SetPoint("TOPLEFT", c.Side, "TOPRIGHT", 10, -14)
+	c.Line2 = tex("ARTWORK", 0)
+	c.Line2:SetSize(30, 3)
+	c.Line2:SetPoint("TOPLEFT", c.Line1, "BOTTOMLEFT", 0, -5)
+	c.Control = tex("ARTWORK", 0)
+	c.Control:SetSize(22, 8)
+	c.Control:SetPoint("BOTTOMRIGHT", c.Ground, "BOTTOMRIGHT", -36, 8)
+	c.Button = tex("ARTWORK", 0)
+	c.Button:SetSize(22, 8)
+	c.Button:SetPoint("LEFT", c.Control, "RIGHT", 4, 0)
+	c.Name = W.Text(c, "label", "textDim")
+	c.Name:SetPoint("TOPLEFT", c.Ground, "BOTTOMLEFT", 10, 0)
+	c.Name:SetPoint("TOPRIGHT", c.Ground, "BOTTOMRIGHT", -10, 0)
+	c.Name:SetHeight(CARD_NAME_H)
+	-- Click applies it live; right-click puts the default back.
+	c:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+	c:SetScript("OnClick", function(self, button)
+		if button == "RightButton" then ns.Set("ui.scheme", nil) else ns.Set("ui.scheme", self.psValue) end
+	end)
+	return c
+end
+
 PAGES[#PAGES + 1] = {
 	key = "setup",
 	shown = function() return full end,
-	title = function() return L["Set up"] end,
-	build = function(p)
-		p.Text = bodyText(p)
-		F.AutoQuest = W.Toggle(p, L["Accept and turn in guide quests for me"], "behavior.autoAccept",
-			L["Only quests in the next steps of your open guides. Never picks between rewards. Hold Shift to skip."], nil,
+	build = function(p, h)
+		emblem(h, SIDE_EMBLEM, SIDE_X, SIDE_Y)
+		dipper(h, SIDE_X, SIDE_Y, SIDE_EMBLEM / 2 - 5)
+		h.Title = para(h, "hero", "text", SIDE_TEXT_W, 2)
+		h.Title:SetText(L["Make it yours"])
+		h.Sub = para(h, "note", "textDim", SIDE_TEXT_W + 120, 3)
+		h.Sub:SetText((L["Three choices to start with. Everything else is in %s."]):format(cmd("/polestar options")))
+
+		F.AutoQuest = toggleRow(p, L["Accept and turn in guide quests for me"], "behavior.autoAccept",
+			L["Only quests in the next steps of your open guides. Never picks between rewards. Hold Shift to skip."],
 			{ get = autoQuestGet, set = autoQuestSet })
-		F.AutoGuide = W.Toggle(p, L["Load a guide for me when I log in"], "behavior.autoSelectGuide",
+		F.AutoGuide = toggleRow(p, L["Load a guide for me when I log in"], "behavior.autoSelectGuide",
 			L["Opens the suggested guide when no tab is open."])
-		F.Scheme = W.Dropdown(p, L["Colour scheme"], "ui.scheme", function() return Theme.SchemeChoices() end,
-			L["How deep the night runs. Dusk is the default, Night the darkest, Graphite a neutral grey; EllesmereUI takes its panel colour and accent."])
-		p.Rows = { F.AutoQuest, F.AutoGuide, F.Scheme }
+		p.SchemeTitle = W.Text(p, "heading", "text")
+		p.SchemeTitle:SetText(L["Colour scheme"])
+		p.SchemeNote = para(p, "small", "textMuted", CW, 3)
+		p.SchemeNote:SetText(L["How deep the night runs. Dusk is the default, Night the darkest, Graphite a neutral grey; EllesmereUI takes its panel colour and accent."])
+		F.Schemes = {}
 	end,
-	layout = function(p)
-		p.Text:SetText((L["Three choices to start with. Everything else is in %s."]):format(cmd("/polestar options")))
-		place(p.Text, 0)
-		local y = p.Text:GetStringHeight() + 8
-		for _, row in ipairs(p.Rows) do
-			place(row, y)
-			row:SetWidth(CW)
+	layout = function(p, h)
+		-- The hero's text sits low, its foot 24 above the hero's edge.
+		local subH = h.Sub:GetStringHeight()
+		local subY = HERO_H - 24 - subH
+		h.Sub:ClearAllPoints()
+		h.Sub:SetPoint("TOPLEFT", h, "TOPLEFT", EDGE, -subY)
+		h.Title:ClearAllPoints()
+		h.Title:SetPoint("TOPLEFT", h, "TOPLEFT", EDGE, -(subY - 8 - h.Title:GetStringHeight()))
+
+		local y = 0
+		for _, row in ipairs({ F.AutoQuest, F.AutoGuide }) do
+			place(row, -12, y)
 			row:Refresh()
-			y = y + W.ROW_H
+			local rh = toggleRowHeight(row)
+			row:SetHeight(rh)
+			y = y + rh
 		end
-		return y
+		y = y + 24
+		place(p.SchemeTitle, 0, y)
+		y = y + 20
+		place(p.SchemeNote, 0, y)
+		y = y + p.SchemeNote:GetStringHeight() + 12
+		local choices = Theme.SchemeChoices()
+		local n = #choices
+		local cw = floor((CW - CARD_GAP * (n - 1)) / n)
+		for i, ch in ipairs(choices) do
+			local c = F.Schemes[i] or schemeCard(p)
+			F.Schemes[i] = c
+			c.psValue = ch.value
+			c.Name:SetText(ch.text)
+			c:SetSize(cw, 1 + PREVIEW_H + CARD_NAME_H)
+			place(c, (i - 1) * (cw + CARD_GAP), y)
+			if not c.psPainted then
+				c.psPainted = true
+				W.Painter(c, paintCard)
+			else
+				paintCard(c)
+			end
+			c:Show()
+		end
+		for i = n + 1, #F.Schemes do F.Schemes[i]:Hide() end
+		return y + 1 + PREVIEW_H + CARD_NAME_H
 	end,
+	title = function(_, h) return h.Title:GetText() end,
 }
+
+-- 3. Start ------------------------------------------------------------------
 
 local function startSuggested()
 	local G, E = ns.Guides, ns.Engine
@@ -241,60 +560,139 @@ local function startSuggested()
 	ns.Fire("SHOW_FRAME")
 end
 
+-- A note under a hairline: a heading, then its lines.
+local function note(p, heading, width)
+	local n = {}
+	n.Rule = W.Divider(p)
+	n.Head = W.Text(p, "heading", "text")
+	n.Head:SetText(heading)
+	n.Text = para(p, "note", "textDim", width or CW)
+	return n
+end
+
+local COPY_W = 216
+
 PAGES[#PAGES + 1] = {
-	key = "packs",
-	title = function() return L["Guide packs"] end,
-	build = function(p)
-		p.Text = bodyText(p)
-		p.DocsLabel = bodyText(p, "note")
-		F.Docs = W.CopyBox(p)
-		F.Docs:SetWidth(CW)
-		F.Start = W.Button(p, "", startSuggested, { primary = true })
-		F.Browse = W.Button(p, L["Browse guides"], function()
+	key = "start",
+	build = function(p, h)
+		-- The suggested guide's painting fills the hero; without one the
+		-- band stands in and the emblem keeps its place on the right.
+		h.Art = UI.ZoneArt.Create(h, HERO_W, HERO_H, "bg")
+		h.Art.psZoom = 1.5 -- the wide hero shows more of the zone
+		h.Art:SetPoint("TOPLEFT", h, "TOPLEFT", 0, 0)
+		h.Art.Band:ClearAllPoints() -- the stand-in at its own 1:1 height
+		h.Art.Band:SetPoint("TOPLEFT", h.Art, "TOPLEFT", 0, 0)
+		h.Art.Band:SetPoint("TOPRIGHT", h.Art, "TOPRIGHT", 0, 0)
+		h.Art.Band:SetHeight(BAND_H)
+		h.Art.Rule:Hide()
+		h.Sky = CreateFrame("Frame", nil, h)
+		h.Sky:SetAllPoints(h)
+		h.Sky:SetFrameLevel(h.Art.Over:GetFrameLevel() + 1)
+		emblem(h.Sky, SIDE_EMBLEM, SIDE_X, SIDE_Y)
+		dipper(h.Sky, SIDE_X, SIDE_Y, SIDE_EMBLEM / 2 - 5)
+		h.Text = CreateFrame("Frame", nil, h)
+		h.Text:SetAllPoints(h)
+		h.Text:SetFrameLevel(h.Art.Over:GetFrameLevel() + 2)
+		h.Title = onArt(para(h.Text, "hero", "text", CW, 2))
+		h.Chip = W.Chip(h.Text)
+		h.For = onArt(W.Text(h.Text, "note", "textDim"))
+
+		p.Pitch = para(p, "body", "textDim", CW)
+		p.Beta = note(p, L["Our routes are still in beta"])
+		p.Beta.Chip = W.Chip(p)
+		p.Beta.Chip:SetPoint("LEFT", p.Beta.Head, "RIGHT", 8, 0)
+		p.Discord = note(p, L["Join us on Discord"], CW - COPY_W - 16)
+		p.Discord.Text:SetSpacing(3)
+		Theme.Font(p.Discord.Text, "small")
+		W.Color(p.Discord.Text, "textMuted")
+		F.Discord = W.CopyBox(p)
+		F.Discord:SetWidth(COPY_W)
+		W.SetCopyText(F.Discord, DISCORD_URL)
+		p.Packs = note(p, L["Guide packs"])
+
+		F.Start = W.Button(F.Foot, L["Start guide"], startSuggested, { primary = true })
+		F.Browse = W.Button(F.Foot, L["Browse guides"], function()
 			close()
 			UI.ShowPicker()
 		end)
 	end,
-	layout = function(p)
-		p.Text:SetText(table.concat({
-			L["Guide packs are addons made by other players that add their own guides to Polestar."],
-			(L["Install one like any other addon, then restart the game. Its guides appear in %s under Guide packs, and Options lists every pack you have."]):format(cmd("/polestar guides")),
-			L["Each pack is made and supported by its author."],
-		}, "\n\n"))
-		place(p.Text, 0)
-		local y = p.Text:GetStringHeight() + GAP
-		local url = ns.DocsURL()
-		p.DocsLabel:SetText(url and L["Write your own guide pack:"] or L["Write your own guide pack: see docs/PACKS.md in Polestar's source."])
-		place(p.DocsLabel, y)
-		y = y + p.DocsLabel:GetStringHeight() + 8
-		F.Docs:SetShown(url ~= nil)
-		if url then
-			W.SetCopyText(F.Docs, url)
-			place(F.Docs, y)
-			y = y + F.Docs:GetHeight() + 8
+	layout = function(p, h)
+		local id, g = suggested()
+		-- The hero: the painting, or the band with the emblem and the Dipper.
+		local painted = false
+		if g then
+			local fx, fy
+			local E = ns.Engine
+			if E and E.GuideFocus then fx, fy = E.GuideFocus(id) end
+			painted = UI.ZoneArt.Paint(h.Art, g.zone, fx, fy, 1) and true or false
+		else
+			UI.ZoneArt.Paint(h.Art, nil, nil, nil, 1)
 		end
-		y = y + GAP - 8
-		-- Start the suggested guide; the button's width keeps both on the line.
-		local G = ns.Guides
-		local id = G and G.Suggest and G.Suggest()
-		local g = id and G.Get and G.Get(id)
-		if F.Start.psFixedWidth then
-			F.Start.psFixedWidth = nil
-			F.Start.Label:SetWidth(0) -- unbounded again
+		h.psPainted = painted
+		h.Sky:SetShown(not painted)
+		F.CloseScrim:SetShown(painted and current == "start")
+		local textW = painted and CW or SIDE_TEXT_W
+		h.Title:SetWidth(textW)
+		h.Title:SetText(g and g.title or L["Choose your first guide"])
+		local lv = g and UI.LevelRange(g.minLevel, g.maxLevel)
+		local chipW = 0
+		if lv then
+			chipW = W.SetChip(h.Chip, L["Levels"] .. " " .. lv, "accent") + 8
+		else
+			h.Chip:Hide()
 		end
-		W.SetButtonText(F.Start, g and (L["Start %s"]):format(g.title) or L["Choose a guide"])
-		local room = CW - F.Browse:GetWidth() - 8
-		if F.Start:GetWidth() > room then
-			F.Start.psFixedWidth = room
-			F.Start:SetWidth(room)
-			F.Start.Label:SetWidth(room - 32)
-			F.Start.Label:SetWordWrap(false)
+		h.For:SetText(g and forWhom(g) or L["Polestar has no guide to suggest for where you are."])
+		h.For:SetWidth(min(h.For:GetStringWidth() + 1, (painted and CW or SIDE_TEXT_W + 120) - chipW))
+		local factY = HERO_H - 20 - W.CHIP_H
+		h.Chip:ClearAllPoints()
+		h.Chip:SetPoint("TOPLEFT", h.Text, "TOPLEFT", EDGE, -factY)
+		h.For:ClearAllPoints()
+		h.For:SetPoint("LEFT", h.Text, "TOPLEFT", EDGE + chipW, -(factY + W.CHIP_H / 2))
+		h.Title:ClearAllPoints()
+		h.Title:SetPoint("TOPLEFT", h.Text, "TOPLEFT", EDGE, -(factY - 10 - h.Title:GetStringHeight()))
+
+		-- The page: the pitch, then notes under hairlines.
+		local y = 0
+		local pitch = g and known(g.pitch)
+		p.Pitch:SetShown(pitch ~= nil)
+		if pitch then
+			p.Pitch:SetText(pitch)
+			place(p.Pitch, 0, 0)
+			y = p.Pitch:GetStringHeight() + 20
 		end
-		place(F.Start, y)
-		F.Browse:ClearAllPoints()
-		F.Browse:SetPoint("LEFT", F.Start, "RIGHT", 8, 0)
-		return y + F.Start:GetHeight()
+		local function lay(n, shown, extra)
+			n.Rule:SetShown(shown)
+			n.Head:SetShown(shown)
+			n.Text:SetShown(shown)
+			if not shown then return end
+			if y > 0 then
+				n.Rule:ClearAllPoints()
+				n.Rule:SetPoint("TOPLEFT", p, "TOPLEFT", 0, -y)
+				n.Rule:SetPoint("TOPRIGHT", p, "TOPRIGHT", 0, -y)
+				y = y + 16
+			else
+				n.Rule:Hide()
+			end
+			place(n.Head, 0, y)
+			place(n.Text, 0, y + 22)
+			local hgt = max(22 + n.Text:GetStringHeight(), extra or 0)
+			n.psY, n.psH = y, hgt
+			y = y + hgt + 16
+		end
+		local beta = ns.routesBeta and true or false
+		p.Beta.Text:SetText((L["Planned in a simulator and played to the end in tests, but nobody has followed them through the live game yet. Skip a wrong step with %s and tell us on Discord."]):format(cmd("/polestar skip")))
+		lay(p.Beta, beta)
+		if beta then W.SetChip(p.Beta.Chip, string.upper(L["Beta"]), "warning") else p.Beta.Chip:Hide() end
+		p.Discord.Text:SetText(L["Feedback, bug reports and news"])
+		lay(p.Discord, true, F.Discord:GetHeight())
+		F.Discord:ClearAllPoints()
+		F.Discord:SetPoint("TOPRIGHT", p, "TOPRIGHT", 0, -(p.Discord.psY + (p.Discord.psH - F.Discord:GetHeight()) / 2))
+		p.Packs.Text:SetText((L["Guides made by other players for Polestar, not our own routes: each pack is an addon of its own, installed like any other. Its guides appear in %s under Guide packs, credited to their author, who supports them. More in Options > Guide packs."]):format(cmd("/polestar guides")))
+		lay(p.Packs, true)
+		W.SetButtonText(F.Start, g and L["Start guide"] or L["Choose a guide"])
+		return y - 16
 	end,
+	title = function(_, h) return h.Title:GetText() end,
 }
 
 -- The pages shown now, in order.
@@ -312,6 +710,13 @@ end
 
 local render -- forward
 
+-- The hero settles 8px up as it fades in (on open).
+local function settle(h)
+	Anim.Anchor(h, "TOPLEFT", F.HeroArea, "TOPLEFT", 0, 0)
+	Anim.To(h, "alpha", 0, 1, Anim.BASE, "out")
+	Anim.To(h, "offset", -8, 0, Anim.BASE, "out")
+end
+
 local function go(delta)
 	local list = pageList()
 	local at = 1
@@ -319,10 +724,13 @@ local function go(delta)
 	local to = at + delta
 	if to > #list then return close() end
 	if to < 1 then to = 1 end
+	if list[to].key == current then return end
+	local from = current
 	current = list[to].key
-	render()
-	Anim.To(F.Body, "alpha", 0, 1, Anim.FAST, "out")
+	render(from)
 end
+
+local DOT, DOT_ON, DOT_GAP = 4, 16, 6
 
 local function build()
 	F = CreateFrame("Frame", "PolestarWelcome", UIParent)
@@ -336,47 +744,38 @@ local function build()
 	F:Hide()
 	Theme.Skin(F, "window")
 
-	-- Header: the night sky, the emblem, the page's title and place.
-	local head = CreateFrame("Frame", nil, F)
-	head:SetPoint("TOPLEFT", F, "TOPLEFT", 1, -1)
-	head:SetPoint("TOPRIGHT", F, "TOPRIGHT", -1, -1)
-	head:SetHeight(HEAD_H)
-	head:EnableMouse(true)
-	head:RegisterForDrag("LeftButton")
-	head:SetScript("OnDragStart", function() F:StartMoving() end)
-	head:SetScript("OnDragStop", function() F:StopMovingOrSizing() end)
-	F.Band = Theme.Band(head, "BACKGROUND", -5)
-	F.Band:SetAllPoints(head)
-	F.Band:SetTexCoord(Theme.BandCoords(WIDTH - 2, HEAD_H))
-	F.Emblem = W.Tex(head, "ARTWORK", "emblem", "accent")
-	F.Emblem:SetSize(34, 34)
-	F.Emblem:SetPoint("TOPLEFT", head, "TOPLEFT", PAD, -30)
-	F.Close = W.IconButton(head, "close", 28, L["Close"], close, 14)
-	F.Close:SetPoint("TOPRIGHT", head, "TOPRIGHT", -12, -12)
-	-- Longer titles truncate against the close button.
-	F.Title = W.Text(head, "hero", "text")
-	F.Title:SetPoint("TOPLEFT", F.Emblem, "TOPRIGHT", 14, 4)
-	F.Title:SetPoint("RIGHT", F.Close, "LEFT", -8, 0)
-	F.Title:SetJustifyH("LEFT")
-	F.Title:SetWordWrap(false)
-	F.Subtitle = W.Text(head, "note", "textDim")
-	F.Subtitle:SetPoint("TOPLEFT", F.Title, "BOTTOMLEFT", 0, -8)
+	-- The hero: the night sky, each page's content over it, the ✕; dragged
+	-- by it.
+	local hero = CreateFrame("Frame", nil, F)
+	hero:SetPoint("TOPLEFT", F, "TOPLEFT", 1, -1)
+	hero:SetSize(HERO_W, HERO_H)
+	if hero.SetClipsChildren then hero:SetClipsChildren(true) end
+	hero:EnableMouse(true)
+	hero:RegisterForDrag("LeftButton")
+	hero:SetScript("OnDragStart", function() F:StartMoving() end)
+	hero:SetScript("OnDragStop", function() F:StopMovingOrSizing() end)
+	F.HeroArea = hero
+	F.Band = Theme.Band(hero, "BACKGROUND", -5)
+	F.Band:SetPoint("TOPLEFT", hero, "TOPLEFT", 0, 0)
+	F.Band:SetPoint("TOPRIGHT", hero, "TOPRIGHT", 0, 0)
+	F.Band:SetHeight(BAND_H)
+	F.Band:SetTexCoord(Theme.BandCoords(HERO_W, BAND_H))
+	local top = CreateFrame("Frame", nil, hero)
+	top:SetAllPoints(hero)
+	top:SetFrameLevel(hero:GetFrameLevel() + 20)
+	F.Close = W.IconButton(top, "close", 28, L["Close"], close, 14)
+	F.Close:SetPoint("TOPRIGHT", hero, "TOPRIGHT", -12, -12)
+	-- On a bright painting the ✕ needs a dark ground of its own.
+	F.CloseScrim = W.Pill(top, 32, 32)
+	F.CloseScrim:SetPoint("CENTER", F.Close, "CENTER", 0, 0)
+	W.Painter(F.CloseScrim, function(s) local r, g, b = Theme.Color("scrim"); s:SetColor(r, g, b, 0.6) end)
+	F.CloseScrim:SetFrameLevel(top:GetFrameLevel())
+	F.Close:SetFrameLevel(top:GetFrameLevel() + 2)
+	F.CloseScrim:Hide()
 
-	-- Body: one page at a time, on the window's 24 edge.
-	F.Body = CreateFrame("Frame", nil, F)
-	F.Body:SetPoint("TOPLEFT", F, "TOPLEFT", PAD, -(HEAD_H + 20))
-	F.Body:SetWidth(CW)
-	F.pages = {}
-	for _, pg in ipairs(PAGES) do
-		local p = CreateFrame("Frame", nil, F.Body)
-		p:SetPoint("TOPLEFT", F.Body, "TOPLEFT", 0, 0)
-		p:SetWidth(CW)
-		p:Hide()
-		pg.build(p)
-		F.pages[pg.key] = p
-	end
-
-	-- Footer: Skip on the left; Back and Next (Done on the last page) on the right.
+	-- The footer: Skip (or Back on the last page) left, the step dots in the
+	-- middle, Back and Next (Browse guides and Start guide on the last page)
+	-- on the right.
 	local foot = CreateFrame("Frame", nil, F)
 	foot:SetPoint("BOTTOMLEFT", F, "BOTTOMLEFT", 1, 1)
 	foot:SetPoint("BOTTOMRIGHT", F, "BOTTOMRIGHT", -1, 1)
@@ -385,14 +784,43 @@ local function build()
 	local rule = W.Divider(foot)
 	rule:SetPoint("TOPLEFT", foot, "TOPLEFT", 0, 0)
 	rule:SetPoint("TOPRIGHT", foot, "TOPRIGHT", 0, 0)
+	F.Foot = foot
 	F.Skip = W.Button(foot, L["Skip"], close, { ghost = true })
-	F.Skip:SetPoint("LEFT", foot, "LEFT", PAD, 0)
+	F.Skip:SetPoint("LEFT", foot, "LEFT", PAD - 1, 0)
 	F.Next = W.Button(foot, L["Next"], function() go(1) end, { primary = true })
-	F.Next:SetPoint("RIGHT", foot, "RIGHT", -PAD, 0)
+	F.Next:SetPoint("RIGHT", foot, "RIGHT", -(PAD - 1), 0)
 	F.Back = W.Button(foot, L["Back"], function() go(-1) end)
-	F.Back:SetPoint("RIGHT", F.Next, "LEFT", -8, 0)
+	F.Dots = CreateFrame("Frame", nil, foot)
+	F.Dots:SetHeight(DOT)
+	F.Dots:SetPoint("CENTER", foot, "CENTER", 0, 0)
+	F.Dots.list = {}
 
-	F:SetScript("OnShow", function(self) Anim.To(self, "alpha", 0, 1, Anim.BASE, "out") end)
+	-- The pages: under the hero on the 32 edge, and their hero content.
+	F.Body = CreateFrame("Frame", nil, F)
+	F.Body:SetPoint("TOPLEFT", F, "TOPLEFT", PAD, -BODY_Y)
+	F.Body:SetWidth(CW)
+	F.pages = {}
+	for _, pg in ipairs(PAGES) do
+		local p = CreateFrame("Frame", nil, F.Body)
+		p:SetPoint("TOPLEFT", F.Body, "TOPLEFT", 0, 0)
+		p:SetWidth(CW)
+		p:Hide()
+		local h = CreateFrame("Frame", nil, hero)
+		h:SetSize(HERO_W, HERO_H)
+		Anim.Anchor(h, "TOPLEFT", hero, "TOPLEFT", 0, 0)
+		h:SetFrameLevel(hero:GetFrameLevel() + 2)
+		h:Hide()
+		p.Hero, p.psKey, h.psKey = h, pg.key, pg.key
+		pg.build(p, h)
+		F.pages[pg.key] = p
+	end
+	F.Start:SetPoint("RIGHT", foot, "RIGHT", -(PAD - 1), 0)
+	F.Browse:SetPoint("RIGHT", F.Start, "LEFT", -8, 0)
+
+	F:SetScript("OnShow", function(self)
+		Anim.To(self, "alpha", 0, 1, Anim.BASE, "out")
+		settle(F.pages[current].Hero)
+	end)
 	-- Any close marks it seen, for the character and the account; stepping
 	-- aside for the route choice does not, nor does a cinematic closing it
 	-- (it comes back after the cinematic, on the same page).
@@ -410,7 +838,43 @@ local function build()
 	WEL.frame = F
 end
 
-function render()
+-- The step dots: the current one a 16x4 accent capsule, the others 4px dots.
+local function paintDots(at, n, animate)
+	local list = F.Dots.list
+	for i = 1, max(n, #list) do
+		local d = list[i]
+		if i <= n then
+			if not d then
+				d = W.Pill(F.Dots, DOT, DOT)
+				list[i] = d
+			end
+			local on = i == at
+			if on then d:SetColor(Theme.Accent()) else d:SetColor(Theme.Color("textMuted")) end
+			local w = on and DOT_ON or DOT
+			if animate and d.psW and d.psW ~= w then
+				Anim.To(d, "width", d.psW, w, Anim.FAST, "out")
+			else
+				d:SetWidth(w)
+			end
+			d.psW, d.psOn = w, on
+			d:Show()
+		elseif d then
+			d:Hide()
+		end
+	end
+	local total, x = 0, 0
+	for i = 1, n do total = total + (i == at and DOT_ON or DOT) + (i > 1 and DOT_GAP or 0) end
+	F.Dots:SetWidth(total)
+	for i = 1, n do
+		list[i]:ClearAllPoints()
+		list[i]:SetPoint("LEFT", F.Dots, "LEFT", x, 0)
+		x = x + (i == at and DOT_ON or DOT) + DOT_GAP
+	end
+end
+
+-- Lays every page shown out (the window takes the tallest) and shows the
+-- current one; `from`: the page left, cross-faded out.
+function render(from)
 	local list = pageList()
 	local at
 	for i, pg in ipairs(list) do if pg.key == current then at = i end end
@@ -418,23 +882,67 @@ function render()
 		at = 1
 		current = list[1].key
 	end
-	local pg = list[at]
-	F.Title:SetText(pg.title())
-	F.Subtitle:SetText((L["%d of %d"]):format(at, #list))
-	for key, p in pairs(F.pages) do p:SetShown(key == current) end
-	local h = pg.layout(F.pages[current])
-	F.pages[current]:SetHeight(h)
-	F.Body:SetHeight(h)
-	F.Back:SetShown(at > 1)
-	-- One primary per view: on the last page the guide buttons hold it.
-	local last = at == #list
-	W.SetButtonText(F.Next, last and L["Done"] or L["Next"])
-	if F.Next.psPrimary ~= not last then
-		F.Next.psPrimary = not last
-		Theme.Repaint(F.Next)
-		W.RepaintButton(F.Next)
+	local tallest = 0
+	for _, pg in ipairs(list) do
+		local p = F.pages[pg.key]
+		local h = pg.layout(p, p.Hero)
+		p:SetHeight(h)
+		tallest = max(tallest, h)
 	end
-	F:SetHeight(HEAD_H + 20 + h + 24 + FOOT_H + 2)
+	F.Body:SetHeight(tallest)
+	F:SetHeight(1 + BODY_Y + tallest + 32 + FOOT_H + 1)
+
+	local animate = from ~= nil and F:IsShown()
+	for key, p in pairs(F.pages) do
+		local h = p.Hero
+		if key == current then
+			p:Show()
+			h:Show()
+			if animate then
+				Anim.To(p, "alpha", 0, 1, Anim.FAST, "out")
+				Anim.To(h, "alpha", 0, 1, Anim.FAST, "out")
+			else
+				p:SetAlpha(1)
+				h:SetAlpha(1)
+			end
+		elseif animate and key == from then
+			local function gone(o) if o.psKey ~= current then o:Hide() end end
+			Anim.To(p, "alpha", p:GetAlpha(), 0, Anim.FAST, "out", gone)
+			Anim.To(h, "alpha", h:GetAlpha(), 0, Anim.FAST, "out", gone)
+		else
+			p:Hide()
+			h:Hide()
+		end
+	end
+	F.CloseScrim:SetShown(current == "start" and F.pages.start.Hero.psPainted or false)
+
+	local last = at == #list
+	paintDots(at, #list, animate)
+	F.Skip:SetShown(not last)
+	F.Next:SetShown(not last)
+	F.Start:SetShown(last)
+	F.Browse:SetShown(last)
+	-- Back sits beside Next; on the last page it takes Skip's place, so the
+	-- two guide buttons keep the right.
+	F.Back:SetShown(at > 1)
+	F.Back:ClearAllPoints()
+	if last then
+		F.Back:SetPoint("LEFT", F.Foot, "LEFT", PAD - 1, 0)
+	else
+		F.Back:SetPoint("RIGHT", F.Next, "LEFT", -8, 0)
+	end
+	-- The dots stay centred unless the buttons come within 16px; then they
+	-- centre in the room between them.
+	local inset = PAD - 1
+	local leftW = (last and F.Back or F.Skip):GetWidth()
+	local rightW = last and (F.Start:GetWidth() + 8 + F.Browse:GetWidth())
+		or (F.Next:GetWidth() + (at > 1 and (8 + F.Back:GetWidth()) or 0))
+	local lo, hi = inset + leftW + 16, HERO_W - inset - rightW - 16
+	local dw, mid = F.Dots:GetWidth(), HERO_W / 2
+	if mid - dw / 2 < lo or mid + dw / 2 > hi then mid = (lo + hi) / 2 end
+	F.Dots:ClearAllPoints()
+	F.Dots:SetPoint("CENTER", F.Foot, "LEFT", mid, 0)
+	F.psAt, F.psCount = at, #list
 end
 
 local try -- forward; defined below
@@ -449,7 +957,7 @@ local function afterRouteChoice()
 end
 
 -- Open now on the current page, or as soon as combat and the route choice
--- allow. A showing at login starts on the first page, with Set up while the
+-- allow. A showing at login starts on the first page, with setup while the
 -- account has not had its welcome.
 local function open(why)
 	if inCombat() or inCinematic() then
@@ -473,10 +981,9 @@ local function open(why)
 	F:Raise()
 end
 
--- Open the welcome at `page` (a page key: "welcome", "beta", "setup",
--- "packs"; or its number among the pages shown), the first by default, with
--- every page. Opens even when already seen (About, /polestar welcome, the
--- preview).
+-- Open the welcome at `page` (a page key: "welcome", "setup", "start"; or its
+-- number among the pages shown), the first by default, with every page.
+-- Opens even when already seen (About, /polestar welcome, the preview).
 function WEL.Show(page)
 	full = true
 	local list = pageList()
@@ -496,6 +1003,19 @@ end
 
 function WEL.IsShown()
 	return F ~= nil and F:IsShown()
+end
+
+-- The page shown: its key, its place and the number of pages, its title.
+function WEL.Page()
+	if not F then return nil end
+	local title
+	for _, pg in ipairs(PAGES) do
+		if pg.key == current then
+			local p = F.pages[current]
+			title = pg.title(p, p.Hero)
+		end
+	end
+	return current, F.psAt, F.psCount, title
 end
 
 function try()
@@ -542,7 +1062,11 @@ ns.On("ROUTE_CHOICE", yieldToRouteChoice)
 ns.On("SHOW_WELCOME", function(page) WEL.Show(page) end)
 
 -- The quest switch stands for two settings; the widgets refresh it for the
--- one it is bound to (behavior.autoAccept), this for the other.
+-- one it is bound to (behavior.autoAccept), this for the other. A scheme
+-- change repaints the dots (the cards repaint with the theme).
 ns.On("SETTING_CHANGED", function(path)
 	if path == "behavior.autoTurnin" and F and F.AutoQuest then F.AutoQuest:Refresh() end
+end)
+Theme.OnChanged(function()
+	if F and F.psAt then paintDots(F.psAt, F.psCount, false) end
 end)

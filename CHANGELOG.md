@@ -12,6 +12,12 @@
 - A new character's welcome survives the intro cinematic: the cinematic
   closed it as it started and it never came back. It now waits for the
   cinematic to end, or comes back on the page it was on.
+- The welcome is redesigned: three pages under a starlit hero (two for a
+  later character), with step dots. It shows the guide window, the arrow and
+  every guide at a glance; setup shows each choice's description and the
+  colour schemes as cards that apply as you click; the last page shows your
+  first guide on its zone painting, the beta note, the Discord invite to
+  copy, and what guide packs are.
 - Guide packs page: the problem report box grows to fit long problem
   messages.
 - Search ranks an item first as covered by a guide only when a guide Lookup

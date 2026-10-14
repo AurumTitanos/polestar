@@ -642,12 +642,11 @@ const SCENES = [
 	},
 	{
 		file: 'welcome.svg',
-		title: 'The welcome, once per new character after login: Hello, Our routes are still in beta, Set up (on the account\'s first), Guide packs',
+		title: 'The welcome, once per new character after login: Hello, Make it yours (on the account\'s first), Your first guide',
 		panels: [
 			{ roots: ['PolestarWelcome'], script: 'Polestar.UI.Welcome.Show("welcome")' },
-			{ roots: ['PolestarWelcome'], script: 'Polestar.UI.Welcome.Show("beta")' },
 			{ roots: ['PolestarWelcome'], script: 'Polestar.UI.Welcome.Show("setup")' },
-			{ roots: ['PolestarWelcome'], script: 'Polestar.UI.Welcome.Show("packs")' },
+			{ roots: ['PolestarWelcome'], get script() { return `${clientArtLua()}Polestar.UI.Welcome.Show("start")`; } },
 		],
 	},
 	{
