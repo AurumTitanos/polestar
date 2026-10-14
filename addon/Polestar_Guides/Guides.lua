@@ -30174,7 +30174,7 @@ do
 					note = "Skin Cave Yeti, Ferocious Yeti, Giant Yeti, Hulking Mountain Lion, Mountain Lion, Mountain Yeti, Snapjaw here (beasts of level 28-40 yield it); the Skinning guide routes this. The Auction House works too.",
 					only = { factions = { "Alliance" } },
 					goals = {
-						{ t = "collect", item = 4234, itemName = "Heavy Leather", count = 375, map = 1416, x = 38.2, y = 92.1, f = "e", from = "Arados the Damned", fromKind = "npc" },
+						{ t = "collect", item = 4234, itemName = "Heavy Leather", count = 375, map = 1416, x = 38.2, y = 92.1, f = "e" },
 					},
 				},
 				{
@@ -30182,7 +30182,7 @@ do
 					note = "Skin Highperch Wyvern, Saltstone Basilisk, Scorpid Reaver, Scorpid Terror, Sparkleshell Snapper, Sparkleshell Tortoise here (beasts of level 28-40 yield it); the Skinning guide routes this. The Auction House works too.",
 					only = { factions = { "Horde" } },
 					goals = {
-						{ t = "collect", item = 4234, itemName = "Heavy Leather", count = 375, map = 1441, x = 78.5, y = 59, f = "e", from = "Arados the Damned", fromKind = "npc" },
+						{ t = "collect", item = 4234, itemName = "Heavy Leather", count = 375, map = 1441, x = 78.5, y = 59, f = "e" },
 					},
 				},
 				{

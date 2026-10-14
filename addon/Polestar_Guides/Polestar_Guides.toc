@@ -2,7 +2,7 @@
 ## Title: Polestar Guides
 ## Notes: Leveling, profession, reputation and collectible guides for Polestar.
 ## Author: Polestar
-## Version: 0.2.1
+## Version: 0.2.2
 ## Category: Quests
 ## Dependencies: Polestar
 ## X-Polestar-Pack: guides
