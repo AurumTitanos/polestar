@@ -280,3 +280,13 @@ test('a "|" in a later pro or con is reported at its own line, once per entry', 
 		'e.guide:10: warning: `con` contains "|", which prints literally in game',
 	]);
 });
+
+test('a pack quest turned in by one of our guides after `next` is not reported; one our next guide never turns in is', () => {
+	const handed = joeCopy({ 'c.guide': guide('joe/c', 'next forever/alliance/01-start', '', 'step Deputy', '  accept 783') });
+	const ok = packCmd('lint', handed);
+	assert.equal(ok.status, 0, ok.stderr);
+	assert.doesNotMatch(ok.stderr, /c\.guide.*never turned in/);
+	const dropped = joeCopy({ 'c.guide': guide('joe/c', 'next forever/alliance/02-next', '', 'step Deputy', '  accept 783') });
+	const r = packCmd('lint', dropped);
+	assert.match(r.stderr, /c\.guide:9: warning: quest 783 .*is accepted but never turned in later in this guide or a guide after it/);
+});

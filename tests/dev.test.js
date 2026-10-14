@@ -12,7 +12,7 @@ const path = require('node:path');
 const { spawn } = require('node:child_process');
 const { DATA_DIR } = require('./helpers/dsl');
 const { tmpdir } = require('./helpers/tmp');
-const { CLI, polestar } = require('./helpers/cli');
+const { CLI, polestar, quiet } = require('./helpers/cli');
 const { needs } = require('./helpers/data');
 const { TOC_MARKER } = require('../tools/lib/pack/format');
 
@@ -231,5 +231,33 @@ test('dev --play on a taken port exits 1 promptly and leaves no Lua session behi
 		}
 	} finally {
 		holder.close();
+	}
+});
+
+test('dev --no-game builds and rebuilds without writing anywhere, and never looks for the game', { timeout: 30000 }, async () => {
+	const pack = miniCopy();
+	const before = fs.readdirSync(pack).sort();
+	const d = dev(pack, null, '--no-game');
+	try {
+		await d.waitFor(/watching/);
+		assert.match(d.out(), /^dev: built 2 guides, \d+ warnings? \(not written: --no-game\)$/m);
+		assert.doesNotMatch(d.out(), /building into|New addon/);
+		fs.appendFileSync(path.join(pack, 'guides', 'b.guide'), '\nstep More\n  goto 47.0,35.0 "More"\n');
+		await d.waitFor(/\(not written: --no-game\)[\s\S]*\(not written: --no-game\)/);
+		assert.deepEqual(fs.readdirSync(pack).sort(), before, 'nothing written into the pack');
+	} finally {
+		await d.stop();
+	}
+});
+
+test('dev and play: a --port that is not a port number is a usage error', async () => {
+	const play = require('../tools/commands/play');
+	for (const port of ['abc', '-1', '65536', '1.5']) {
+		const r = polestar(['dev', miniCopy(), '--no-game', '--port', port], { cwd: tmpdir() });
+		assert.equal(r.status, 2, `dev --port ${port}: ${r.stderr}`);
+		assert.match(r.stderr, /^--port needs a port number$/m);
+		const p = await quiet(() => play.run(['--port', port]));
+		assert.equal(p.result, 2, `play --port ${port}: ${p.out}`);
+		assert.match(p.out, /--port needs a port number/);
 	}
 });

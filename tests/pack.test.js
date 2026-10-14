@@ -253,3 +253,12 @@ test('our release: a Polestar.toc without an `## Interface` line is a clear erro
 	assert.equal(r.result, 1, r.out);
 	assert.match(r.out, /^pack failed: .*Polestar\.toc has no ## Interface line$/m);
 });
+
+test('our release: guides/pack.json with another version than package.json is a warning, and the zips are still written', async () => {
+	const file = path.join(ROOT, 'guides', 'pack.json');
+	const manifest = JSON.parse(fs.readFileSync(file, 'utf8'));
+	const r = await packReading(file, JSON.stringify({ ...manifest, version: '0.0.1' }));
+	assert.equal(r.result, 0, r.out);
+	assert.match(r.out, new RegExp(`^warning: guides/pack\\.json says version 0\\.0\\.1, package\\.json says ${packageVersion().replace(/\./g, '\\.')}$`, 'm'));
+	assert.match(r.out, /wrote .*SHA256SUMS/);
+});

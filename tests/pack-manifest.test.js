@@ -78,6 +78,22 @@ test('control characters are refused in every string field', () => {
 			one(check({ ...GOOD, [key]: value }), 'error', 'control characters');
 		}
 	}
+	// id, version and folder: refused for the control character, not reported as malformed too.
+	for (const key of ['id', 'version', 'folder']) {
+		for (const ch of ['\n', '\t', '\u0000', '\u007f']) {
+			const d = one(check({ ...GOOD, [key]: `Joe${ch}` }), 'error', 'control characters');
+			assert.ok(d.message.startsWith(`\`${key}\``), d.message);
+		}
+	}
+});
+
+test('the default folder is PolestarPack_ and the title in CamelCase, cut to the 64 characters a folder may have', () => {
+	// 64 characters, one word: PolestarPack_ and it would be 77.
+	const title = `Long${'r'.repeat(60)}`;
+	const { manifest } = readManifest(writePack(JSON.stringify({ ...GOOD, title })));
+	assert.equal(manifest.folder, `PolestarPack_Long${'r'.repeat(47)}`);
+	assert.equal(manifest.folder.length, 64);
+	assert.deepEqual(check({ ...GOOD, folder: manifest.folder }), []);
 });
 
 test('versions are one plain token', () => {

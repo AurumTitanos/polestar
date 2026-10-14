@@ -176,3 +176,20 @@ test('coreInterface keeps a multi-version Interface line whole', () => {
 	fs.writeFileSync(toc, '## Interface:16001\r\n');
 	assert.equal(coreInterface(toc), '16001');
 });
+
+test('a pack compiles the guides under its folder, skipping dist/, drafts/, node_modules/ and hidden folders', () => {
+	const dir = tmpdir();
+	fs.cpSync(MINI, dir, { recursive: true });
+	const broken = 'this is not a guide\n';
+	for (const sub of ['dist', 'drafts', 'node_modules', '.git', path.join('guides', 'node_modules'), path.join('guides', '.cache')]) {
+		fs.mkdirSync(path.join(dir, sub), { recursive: true });
+		fs.writeFileSync(path.join(dir, sub, 'x.guide'), broken);
+	}
+	// Only the top-level dist/ and drafts/ are skipped: a nested one is the author's own folder.
+	fs.mkdirSync(path.join(dir, 'guides', 'dist'));
+	fs.writeFileSync(path.join(dir, 'guides', 'dist', 'c.guide'), ['guide mini/c', 'title Mini C', 'faction Alliance', 'levels 2-6', 'zone Elwynn Forest', '', 'step S', '  goto 47.6,35.1 "Camp"', ''].join('\n'));
+	const { manifest } = readManifest(dir);
+	const { guides, diag } = compileProject({ packDir: dir, manifest, dataDir: DATA_DIR });
+	assert.deepEqual(diag.errors, []);
+	assert.deepEqual(guides.map((g) => g.id).sort(), ['mini/a', 'mini/b', 'mini/c']);
+});

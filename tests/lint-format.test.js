@@ -126,3 +126,19 @@ test('pack.json hints show an example value for the key', () => {
 	assert.equal(hint({ id: 'joe', title: 'T', author: 'A', version: 1, license: 'MIT' }, /`version` must be a string/), 'write the value in quotes, like "version": "1.0.0"');
 	assert.equal(hint({ id: 'joe', title: 'T', author: 'A', version: '1' }, /missing `license`/), 'add "license": "CC-BY-4.0" (with your own value) to pack.json');
 });
+
+test('an unknown item or object gets the same find-the-id hint as an unknown quest', () => {
+	const fs = require('node:fs');
+	const { tmpdir } = require('./helpers/tmp');
+	const dir = tmpdir();
+	fs.cpSync(FORMAT, dir, { recursive: true });
+	fs.writeFileSync(path.join(dir, 'guides', 'a.guide'), ['guide fmt/a', 'title Format', 'faction Alliance', 'levels 1-6', 'zone Elwynn Forest', '', 'step Somewhere', '  collect 99999999', '  interact 99999999', '  use 99999998', ''].join('\n'));
+	const r = polestar(['lint', dir, '--data', DATA_DIR, '--context', CONTEXT, '--context-data', DATA_DIR, '--format', 'json']);
+	assert.equal(r.status, 1, r.stderr);
+	const errors = JSON.parse(r.stdout).diagnostics.filter((d) => d.severity === 'error');
+	assert.deepEqual(errors.map((d) => [d.line, d.message.replace(/;.*/, ''), d.hint]), [
+		[8, 'item 99999999 is not in data', HINT],
+		[9, 'object 99999999 is not in data', HINT],
+		[10, 'item 99999998 is not in data', HINT],
+	]);
+});

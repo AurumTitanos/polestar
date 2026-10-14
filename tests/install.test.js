@@ -336,3 +336,18 @@ test('auto-detect finds native Windows and macOS installs by .flavor.info (platf
 	assert.deepEqual(detectAddonsDirs(home, { platform: 'darwin', root: winRoot }), []);
 	assert.deepEqual(detectAddonsDirs(home, { platform: 'linux', root: macRoot }), []);
 });
+
+test('install --link of a pack links its built dist/ folder, so a later compile shows after /reload', async () => {
+	const pack = miniCopy();
+	const dest = liveAddOns();
+	const r = await quiet(() => install.run([...packArgs(pack), '--dest', dest, '--link'], {}));
+	assert.equal(r.result, 0, r.out);
+	const folder = path.join(dest, 'PolestarPack_MiniPack');
+	assert.ok(fs.lstatSync(folder).isSymbolicLink());
+	assert.equal(fs.realpathSync(folder), fs.realpathSync(path.join(pack, 'dist', 'PolestarPack_MiniPack')));
+	assert.deepEqual(fs.readdirSync(dest).sort(), ['Polestar', 'PolestarPack_MiniPack', 'OtherAddon'].sort());
+	// A copy later replaces the link and leaves the build alone.
+	assert.equal((await quiet(() => install.run([...packArgs(pack), '--dest', dest], {}))).result, 0);
+	assert.ok(fs.lstatSync(folder).isDirectory());
+	assert.ok(fs.existsSync(path.join(pack, 'dist', 'PolestarPack_MiniPack', 'Guides.lua')));
+});
