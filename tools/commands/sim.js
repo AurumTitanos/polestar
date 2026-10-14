@@ -35,7 +35,7 @@ options:
   --jobs <n>         run: search jobs per round (default 32)
   --anneal <n>       run: annealing evaluations per job (default 6000)
   --max-paths <n>    run: hard cap on evaluated routes (default 3x --paths)
-  --dungeons         run/robust: the dungeon-inclusive family (needs data/forever/dungeons.json)
+  --dungeons         run/robust/consensus: the dungeon-inclusive family (needs data/forever/dungeons.json)
   --offline          never download the QuestXP table
   --quiet            less output`;
 
