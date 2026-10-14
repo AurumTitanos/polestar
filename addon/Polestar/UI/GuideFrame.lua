@@ -1098,6 +1098,16 @@ end
 -- Render
 ---------------------------------------------------------------------------
 
+-- A finished dungeon pick-up guide whose dungeon has quests in the log ->
+-- the dungeon's key | nil.
+local function pickupKey(guide)
+	local lk, Dg = guide and guide.lookup, ns.Dungeons
+	if not (lk and lk.kind == "pickup" and Dg and Dg.HandinPlan and UI.DungeonsSection) then return nil end
+	local plan = Dg.HandinPlan(lk.id)
+	if not plan or #plan.hand + #plan.unfinished + #plan.inside + #plan.unplaced == 0 then return nil end
+	return lk.id
+end
+
 local function setEmpty(kind)
 	state = kind
 	local E, G = Engine(), ns.Guides
@@ -1139,6 +1149,7 @@ local function setEmpty(kind)
 		local guide = E and E.GetGuide and E.GetGuide()
 		local nextGuide = guide and guide.next and G and G.Get and G.Get(guide.next)
 		local choiceFrom = guide and E.PendingRouteChoice and E.PendingRouteChoice()
+		local afterRun = not choiceFrom and pickupKey(guide)
 		empty.Title:SetText(L["Guide complete"])
 		if choiceFrom then
 			-- Several zones to continue in: the player picks (UI.RouteChoice).
@@ -1147,6 +1158,16 @@ local function setEmpty(kind)
 			empty.Primary.psAction = function() UI.ShowRouteChoice(choiceFrom) end
 			empty.Primary:Show()
 			W.SetButtonText(empty.Secondary, L["Browse guides"])
+			empty.Secondary.psAction = function() UI.ShowPicker() end
+			empty.Secondary:Show()
+		elseif afterRun then
+			-- A dungeon's pick-up guide ends at the entrance; after the run
+			-- its quests are handed in (Dungeons/Handin.lua).
+			empty.Text:SetText(L["After the run: a guide to where this dungeon's quests are turned in, and the follow-ups there."])
+			W.SetButtonText(empty.Primary, L["Hand in the quests"])
+			empty.Primary.psAction = function() UI.DungeonsSection.HandIn(afterRun) end
+			empty.Primary:Show()
+			W.SetButtonText(empty.Secondary, L["Choose a guide"])
 			empty.Secondary.psAction = function() UI.ShowPicker() end
 			empty.Secondary:Show()
 		elseif nextGuide then

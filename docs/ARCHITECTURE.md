@@ -1318,7 +1318,7 @@ Polestar.Lookup.QuestStep(quest, from) -> step         -- accept, objectives, tu
   the quartermaster). It is registered in pack `lookup`, category `Lookup`, id
   `lookup/<kind>/<id>`, never saved, and opened in a new tab
   (`Engine.OpenTab`); a saved tab holding one is rebuilt at `ADDON_LOADED`.
-  A planner kind (`RegisterPlanner`, letters only; Dungeons' `pickup`) is
+  A planner kind (`RegisterPlanner`, letters only; Dungeons' `pickup` and `handin`) is
   built by its module's `build(id)` through the same `BuildGuide`/`Guide`
   path (no curated guide, not gated by `lookup.enabled`), registered and
   reopened the same way.
@@ -1336,7 +1336,7 @@ Polestar.Lookup.QuestStep(quest, from) -> step         -- accept, objectives, tu
   fires on target change and mouseover; `/polestar mount` opens Lookup at the
   target's (else the mouseover's) mount, `/polestar lookup [text]` searches.
 
-## Dungeons — dungeon quest journal and pick-up guide
+## Dungeons — dungeon quest journal, pick-up and hand-in guides
 
 The dungeon pages come from the Codex's instances (Toolchain, "Codex"): in a
 release build the Forever client's tables and `data/forever/*.json`; with
@@ -1381,15 +1381,43 @@ its chain (a full quest step, `Lookup.QuestStep`, from its giver nearest the
 player; the player then stands at its turn-in), and a giver once per set of
 prerequisites its quests wait on (one step with an accept per quest; the
 giver comes up again for a quest still waiting, and visits to the same giver
-in a row are one step). The last step lists the carried quests as notes and
-goes to the entrance. Nothing to take: nil, "nothing". The route is kept per
-character (`CharState().dungeonPickup[key]`, the stop keys in order) and used
-when the guide is rebuilt without a position. It is a Lookup planner kind
+in a row are one step). The last step lists the carried quests as notes,
+goes to the entrance and says where the hand-in guide is (a note naming
+`/polestar dungeons <name>`). Nothing to take: nil, "nothing". The route is
+kept per character (`CharState().dungeonPickup[key]`, the stop keys in
+order) and used when the guide is rebuilt without a position
+(`Dungeons.OrderStops(stops, from, finish, field, key)`, shared with the
+hand-in guide). It is a Lookup planner kind
 (`Lookup.RegisterPlanner("pickup", build)`): `Dungeons.PickUp(key)` ->
 `Lookup.Guide("pickup", key)` registers it as `lookup/pickup/<key>` (pack
 "lookup") and opens it in a new tab, and a saved tab of it is rebuilt at
 ADDON_LOADED like Lookup's own; it is gated by `dungeons.enabled`, not
 `lookup.enabled`.
+
+The hand-in guide is the run's other half (`addon/Polestar/Dungeons/Handin.lua`,
+planner kind `handin`, `lookup/handin/<key>`, `Dungeons.HandIn(key)`).
+`Dungeons.HandinPlan(key)` sorts the page's quests in the log: `hand`
+(objectives done, by `Compat.IsQuestReadyForTurnIn`, or a delivery with no
+objectives; turned in outside at the page's ender, else the Codex ender
+nearest the player), `unfinished`, `inside` (turned in inside the dungeon)
+and `unplaced`; it searches no follow-ups, so the page can ask for it on
+every render. `Dungeons.HandinFollowUps(plan)` adds the quests the `hand`
+quests open (`Codex.FollowUps(id)`: the quests whose `pre` or `preAny` name
+it, one scan of the quest records per id, kept until the quest chunks
+change): every `pre` done or handed in here and one of `preAny` likewise,
+takeable now (`Lookup.QuestBlock`: faction, race, class, level), not done or
+in the log, from the NPC or object a quest it waits on is turned in to or
+one within 60 seconds of it (`ns.TravelCost`). `Dungeons.HandinGuide(key)`
+makes a stop per turn-in place (its turn-ins, then the follow-ups that same
+NPC gives) and per other follow-up giver (after the turn-ins it waits on),
+ordered by `Dungeons.OrderStops` with no fixed end (`CharState().dungeonHandin[key]`);
+the last step lists the rest as notes ("Not finished yet: …", "Turned in
+inside the dungeon: …"). Nothing routable: nil, "nothing", and
+`Dungeons.HandinText(plan)` says why in one line. `Dungeons.HandIn` puts the
+guide in the tab of the dungeon's pick-up guide when that one is finished or
+at its last step (its job ends at the entrance), else in a new tab. A
+finished pick-up guide's "Guide complete" panel (UI/GuideFrame.lua) offers
+"Hand in the quests" while the dungeon has quests in the log.
 
 ## UI — guide window, hub and options
 
@@ -1551,13 +1579,19 @@ Reading flow: `docs/DESIGN.md` ("Intent" and "The Guide Window").
   the painting in the header band with the title drawn on it (the hub's own
   Title, Subtitle and Band are faded/hidden while a page shows and restored
   on Home and when the section hides), a back chevron and the actions, right
-  to left from the band's corner with the primary first: while
-  `Dungeons.PickupPlan` holds quests to take, "Pick up the quests"
+  to left from the band's corner with the primary first, three at most (by
+  priority; "Show on map" gives way first). The primary is "Hand in the
+  quests" while `Dungeons.HandinPlan` holds a finished quest (`DS.HandIn` ->
+  `Dungeons.HandIn`; the tooltip counts them and names what is not finished),
+  then "Pick up the quests" while `Dungeons.PickupPlan` holds quests to take
   (`DS.PickUp` -> `Dungeons.PickUp`: the guide opens in a new tab and the hub
-  steps aside; the tooltip counts the quests and those in the log), then
-  "Guide me to the entrance" (`Dungeons.GuideTo`) and "Show on map"
-  (`Dungeons.ShowOnMap`); with none left, "Guide me to the entrance" leads
-  and "Nothing to pick up" (shown while the page has quests for this side)
+  steps aside; the tooltip counts the quests and those in the log), else
+  "Guide me to the entrance" (`Dungeons.GuideTo`). After the primary: the
+  other of the two guides ("Hand in the quests" is shown while any of the
+  page's quests is in the log; with none finished its tooltip and, clicked,
+  chat say what is open, `Dungeons.HandinText`), "Guide me to the entrance"
+  and "Show on map" (`Dungeons.ShowOnMap`); with nothing to pick up or hand
+  in, "Nothing to pick up" (shown while the page has quests for this side)
   says why in its tooltip and, clicked, in chat (`DS.NothingText`); no guide
   is built. Tabs Quests n, Bosses n, Map. Quests: a block per quest planned from the
   data (the objective measured on one shared string) so only the blocks in

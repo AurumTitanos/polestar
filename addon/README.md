@@ -160,6 +160,7 @@ never in saved variables.
 |---|---|---|
 | `Dungeons.lua` | `Dungeons` | A journal page per dungeon and raid: quests, bosses in kill order, entrance |
 | `Pickup.lua` | `Dungeons` | Which of a dungeon's quests this character can take before the run, and a guide that collects them |
+| `Handin.lua` | `Dungeons` | After the run: a guide to where the dungeon's finished quests are turned in, and the follow-ups taken there |
 
 ### UI
 

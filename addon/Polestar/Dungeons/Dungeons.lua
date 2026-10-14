@@ -31,8 +31,10 @@
 --   Dungeons.ShowOnMap(key) -> ok   -- the world map on the entrance's zone
 --   Dungeons.Find(text) -> key | nil
 --   Dungeons.Register(group, a, b)  -- pack files only
---   Picking up a page's quests (PickupPlan, PickupGuide, PickUp, GiverTarget):
---   Dungeons/Pickup.lua.
+--   Picking up a page's quests (PickupPlan, PickupGuide, PickUp, GiverTarget,
+--   PlanStops, OrderStops): Dungeons/Pickup.lua. Handing them in after the
+--   run (HandinPlan, HandinFollowUps, HandinGuide, HandIn, HandinText):
+--   Dungeons/Handin.lua.
 -- Settings: dungeons.enabled. Command: /polestar dungeons [name].
 
 local ADDON, ns = ...

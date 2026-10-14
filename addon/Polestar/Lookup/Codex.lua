@@ -11,6 +11,7 @@
 --   Codex.Load() -> loaded, reason   -- Data.Pack("Polestar_Codex"); fires CODEX_LOADED(meta) once
 --   Codex.IsLoaded() ; Codex.Meta()
 --   Codex.Item(id) / Npc(id) / Object(id) / Quest(id) / Instance(key) / Zone(id) / Faction(id)
+--   Codex.FollowUps(questId) -> { quest, ... }   -- the quests whose pre or preAny names it
 --   Codex.Spell(spellId) -> { id, kind, item, name, class } | nil
 --   Codex.Name(kind, id) -> name | nil   -- no decoding; "item" spans every item kind,
 --                                           "npc" npc + rare, "object" object + treasure
@@ -47,6 +48,7 @@ local chunks = {}
 local indexes = {} -- kind -> search blob
 local cache = {} -- group -> { [id] = record | false } (weak values)
 local roleCache = {} -- role -> { npcId, ... }
+local followUps = {} -- questId -> { follow-up questId, ... }
 local meta
 local announced = false
 local WEAK = { __mode = "v" }
@@ -348,6 +350,7 @@ function Codex.Register(group, names, recs, lo, hi)
 	}
 	cache[group] = nil
 	if group == "role" then roleCache = {} end
+	if group == "quest" then followUps = {} end
 end
 
 function Codex.RegisterIndex(kind, blob)
@@ -440,6 +443,40 @@ function Codex.Quest(id)
 	id = tonumber(id)
 	if not (id and ready()) then return nil end
 	return get("quest", id)
+end
+
+-- questId -> { quest, ... }: the quests whose `pre` or `preAny` names it, in
+-- pack order. One pass over the quest records per quest asked (the ids found
+-- are kept until the quest chunks change).
+function Codex.FollowUps(id)
+	id = tonumber(id)
+	if not (id and ready()) then return {} end
+	local ids = followUps[id]
+	if not ids then
+		ids = {}
+		local needle = tostring(id)
+		for _, c in ipairs(chunks.quest or {}) do
+			if c.recs then
+				for qid, s in gmatch(c.recs, "\n([^\t\n]*)\t([^\n]*)") do
+					if find(s, needle, 1, true) then
+						local t = split(s, ";")
+						local hit = false
+						for _, f in ipairs({ t[12], t[15] }) do
+							for _, p in ipairs(numbers(f)) do hit = hit or p == id end
+						end
+						if hit then ids[#ids + 1] = key(qid) end
+					end
+				end
+			end
+		end
+		followUps[id] = ids
+	end
+	local out = {}
+	for _, qid in ipairs(ids) do
+		local q = get("quest", qid)
+		if q then out[#out + 1] = q end
+	end
+	return out
 end
 
 function Codex.Instance(key)

@@ -262,7 +262,8 @@ map. Renders of every window and state, drawn without the game, are in
   and ends, its objective, chain and rewards), the bosses and the entrance.
   "Pick up the quests" builds a guide that collects every quest of the
   dungeon you can take, earlier quests first, on the shortest path from where
-  you stand to the entrance.
+  you stand to the entrance; after the run, "Hand in the quests" guides you
+  to where they are turned in and takes the follow-ups there.
 - **Rares**: rares and treasures by zone with their spawns and signature
   drop, and an alert when one shows up on your minimap, nameplates or target.
 

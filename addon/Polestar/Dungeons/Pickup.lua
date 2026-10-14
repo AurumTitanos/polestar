@@ -27,12 +27,16 @@
 -- every quest whose prerequisites are behind; a giver comes up again for a
 -- quest still waiting), to the entrance (Dungeons.PlanStops: exact up to 12
 -- stops, else nearest-next improved by moving stops). The carried quests are
--- listed as notes at the entrance. Travel: ns.TravelCost. The order is kept
--- per character, so a guide rebuilt without a position (after /reload) keeps
--- its route.
+-- listed as notes at the entrance, with a note on the hand-in guide for
+-- after the run (Dungeons/Handin.lua). Travel: ns.TravelCost. The order is
+-- kept per character, so a guide rebuilt without a position (after /reload)
+-- keeps its route.
 --
 --   Dungeons.PlanStops(stops, from, finish, travel) -> order, cost
 --       stops = { { inP, outP, deps = { index, ... } }, ... }
+--   Dungeons.OrderStops(stops, from, finish, field, key) -> order
+--       PlanStops from where the player stands, the stop keys kept as
+--       CharState()[field][key]; without a position the kept order
 
 local ADDON, ns = ...
 local L = ns.L
@@ -145,16 +149,17 @@ end
 -- The route
 ---------------------------------------------------------------------------
 
-local function savedOrder(key)
+-- The stop keys of the order kept for the character: CharState()[field][key].
+local function savedOrder(field, key)
 	local s = ns.CharState()
-	local all = type(s.dungeonPickup) == "table" and s.dungeonPickup or nil
+	local all = type(s[field]) == "table" and s[field] or nil
 	return all and type(all[key]) == "table" and all[key] or nil
 end
 
-local function saveOrder(key, order)
+local function saveOrder(field, key, order)
 	local s = ns.CharState()
-	if type(s.dungeonPickup) ~= "table" then s.dungeonPickup = {} end
-	s.dungeonPickup[key] = order
+	if type(s[field]) ~= "table" then s[field] = {} end
+	s[field][key] = order
 end
 
 local function acceptGoal(pq, rec, g)
@@ -347,40 +352,48 @@ local function stopsOf(plan, from)
 	return stops
 end
 
--- plan -> steps (the givers and prerequisites in route order). With the
--- player's position the cheapest path to the entrance (PlanStops); without
--- one (a rebuild after /reload) the order kept for the character.
+-- stops (each with a unique `key`) -> order. With the player's position
+-- (`from`) the cheapest path (PlanStops, ending at `finish` when given),
+-- kept for the character as CharState()[field][key]; without one (a rebuild
+-- after /reload) the kept order, then the authored one, each stop after its
+-- dependencies.
+function Dungeons.OrderStops(stops, from, finish, field, key)
+	local order
+	if from then
+		order = Dungeons.PlanStops(stops, from, finish, LK().Travel)
+		local keys = {}
+		for i, s in ipairs(order) do keys[i] = stops[s].key end
+		saveOrder(field, key, keys)
+		return order
+	end
+	local rank = {}
+	for i, k in ipairs(savedOrder(field, key) or {}) do rank[k] = i end
+	local placed = {}
+	order = {}
+	for _ = 1, #stops do
+		local bi, br
+		for i, s in ipairs(stops) do
+			local ok = not placed[i]
+			for _, d in ipairs(s.deps) do ok = ok and placed[d] end
+			local r = rank[s.key] or (1000 + i)
+			if ok and (not br or r < br) then bi, br = i, r end
+		end
+		if not bi then break end
+		placed[bi] = true
+		order[#order + 1] = bi
+	end
+	return order
+end
+
+-- plan -> steps (the givers and prerequisites in route order): the
+-- cheapest path to the entrance, or the order kept for the character.
 local function route(key, plan)
 	local Lk = LK()
 	local from = ns.PlayerPoint()
 	local stops = stopsOf(plan, from)
-	local order
-	if from then
-		local e = plan.dungeon.entrance
-		local finish = located(e) and { map = e.map, x = e.x, y = e.y, f = e.f == "e" and "e" or nil } or nil
-		order = Dungeons.PlanStops(stops, from, finish, Lk.Travel)
-		local keys = {}
-		for i, s in ipairs(order) do keys[i] = stops[s].key end
-		saveOrder(key, keys)
-	else
-		-- The saved order, then the authored one, each stop after its dependencies.
-		local rank = {}
-		for i, k in ipairs(savedOrder(key) or {}) do rank[k] = i end
-		local placed = {}
-		order = {}
-		for _ = 1, #stops do
-			local bi, br
-			for i, s in ipairs(stops) do
-				local ok = not placed[i]
-				for _, d in ipairs(s.deps) do ok = ok and placed[d] end
-				local r = rank[s.key] or (1000 + i)
-				if ok and (not br or r < br) then bi, br = i, r end
-			end
-			if not bi then break end
-			placed[bi] = true
-			order[#order + 1] = bi
-		end
-	end
+	local e = plan.dungeon.entrance
+	local finish = located(e) and { map = e.map, x = e.x, y = e.y, f = e.f == "e" and "e" or nil } or nil
+	local order = Dungeons.OrderStops(stops, from, finish, "dungeonPickup", key)
 	local steps, pos, lastGiver = {}, from, nil
 	for _, i in ipairs(order) do
 		local s = stops[i]
@@ -421,7 +434,10 @@ function Dungeons.PickupGuide(key)
 	if located(e) then
 		last.goals[#last.goals + 1] = { t = "goto", text = L["Enter"] .. " " .. d.name, map = e.map, x = e.x, y = e.y, f = e.f == "e" and "e" or nil }
 	end
-	if #last.goals > 0 then steps[#steps + 1] = last end
+	-- The hand-in half (Dungeons/Handin.lua) is built after the run, from the
+	-- quests then finished; this guide's own end offers it too (UI/GuideFrame).
+	last.goals[#last.goals + 1] = { t = "note", text = format(L["After the run: open this dungeon's page (/polestar dungeons %s) and choose Hand in the quests."], d.name) }
+	steps[#steps + 1] = last
 	return { title = format(L["%s: pick up the quests"], d.name), steps = steps, dungeon = key }
 end
 

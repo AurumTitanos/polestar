@@ -13,11 +13,13 @@
 -- painting; the rest are painted as they scroll in.
 --
 -- A dungeon page: the zone painting fills the header band with the name,
--- the facts, a back chevron and the actions: "Pick up the quests" (primary
--- while there are quests to pick up: a guide built by Dungeons.PickUp, in a
--- new tab), "Guide me to the entrance" (primary otherwise, with "Nothing to
--- pick up" saying why) and "Show on map"; the tab row holds Quests, Bosses
--- and Map.
+-- the facts, a back chevron and the actions: "Hand in the quests" (shown
+-- while any of the page's quests is in the log, primary once one is
+-- finished: a guide built by Dungeons.HandIn), "Pick up the quests" (primary
+-- while there are quests to pick up and none to hand in: a guide built by
+-- Dungeons.PickUp), each in a new tab, "Guide me to the entrance" (primary
+-- otherwise, with "Nothing to pick up" saying why) and "Show on map"; the
+-- tab row holds Quests, Bosses and Map.
 --   Quests: one block per quest, hairlines between: the name in its
 --   difficulty colour (lifted to 4.5:1 on the ground), this character's
 --   state (done, in the log, ready, too low), level and requirement,
@@ -688,9 +690,13 @@ function DS.Build(parent, shell)
 	pg.Sub = textShadow(W.Text(over, "note", "textDim"))
 	pg.Sub:SetPoint("TOPLEFT", pg.Title, "BOTTOMLEFT", 0, -8)
 	-- The actions, right to left from the band's corner (pageHeader places
-	-- them): the primary one is "Pick up the quests" while there are quests
-	-- to pick up, else "Guide me to the entrance".
+	-- them): the primary one is "Hand in the quests" while quests here are
+	-- finished, else "Pick up the quests" while there are quests to pick up,
+	-- else "Guide me to the entrance".
+	pg.HandIn = W.Button(over, L["Hand in the quests"], function() DS.HandIn() end, { primary = true, height = 28, icon = "icon-turnin" })
+	pg.HandInQuiet = W.Button(over, L["Hand in the quests"], function() DS.HandIn() end, { height = 28, icon = "icon-turnin" })
 	pg.Pickup = W.Button(over, L["Pick up the quests"], function() DS.PickUp() end, { primary = true, height = 28, icon = "icon-accept" })
+	pg.PickupQuiet = W.Button(over, L["Pick up the quests"], function() DS.PickUp() end, { height = 28, icon = "icon-accept" })
 	pg.PickupNone = W.Button(over, L["Nothing to pick up"], function() DS.PickUp() end, { height = 28 })
 	pg.Go = W.Button(over, L["Guide me to the entrance"], function() DS.GuideThere() end, { primary = true, height = 28, icon = "icon-goto" })
 	pg.Go.psTip = L["Set the arrow to the entrance."]
@@ -972,29 +978,53 @@ local function pageHeader(d)
 	local go = e ~= nil and ns.Nav ~= nil
 	local Dg, LKm = D(), ns.Lookup
 	local plan = LKm and LKm.Guide and Dg.PickupPlan and Dg.PickupPlan(d.key) or nil
+	local hplan = LKm and LKm.Guide and Dg.HandinPlan and Dg.HandinPlan(d.key) or nil
 	local take = plan and #plan.take or 0
+	local hand = hplan and #hplan.hand or 0
+	local logged = hplan and hand + #hplan.unfinished + #hplan.inside + #hplan.unplaced or 0
+	local lead = hand > 0 and "handin" or take > 0 and "pickup" or "go"
 	local side = SIDE[UI.PlayerFaction() or ""]
-	local none = plan ~= nil and take == 0 and #Dg.Quests(d.key, side) > 0
+	local none = plan ~= nil and take == 0 and #Dg.Quests(d.key, side) > 0 and lead == "go"
 	if take > 0 then
-		pg.Pickup.psTip = L["Pick up the quests"]
 		local lines = { format(take == 1 and L["A guide to the 1 quest here you can take, with what comes before it, ending at the entrance."]
 			or L["A guide to the %d quests here you can take, with what comes before them, ending at the entrance."], take) }
 		local carried = #plan.carried
 		if carried > 0 then lines[#lines + 1] = carried == 1 and L["1 more is in your log already."] or format(L["%d more are in your log already."], carried) end
 		lines[#lines + 1] = L["It opens in a new tab."]
-		pg.Pickup.psTipLines = lines
+		for _, b in ipairs({ pg.Pickup, pg.PickupQuiet }) do b.psTip, b.psTipLines = L["Pick up the quests"], lines end
 	elseif none then
 		pg.PickupNone.psTip, pg.PickupNone.psTipLines = L["Nothing to pick up"], { DS.NothingText(plan) }
 	end
-	pg.Pickup:SetShown(take > 0)
+	if logged > 0 then
+		local lines
+		if hand > 0 then
+			lines = { format(hand == 1 and L["A guide to where the 1 finished quest here is turned in, and the follow-ups it opens there."]
+				or L["A guide to where the %d finished quests here are turned in, and the follow-ups they open there."], hand) }
+			if logged > hand then lines[#lines + 1] = Dg.HandinText(hplan) end
+			lines[#lines + 1] = L["It opens in a new tab."]
+		else
+			lines = { Dg.HandinText(hplan) }
+		end
+		for _, b in ipairs({ pg.HandIn, pg.HandInQuiet }) do b.psTip, b.psTipLines = L["Hand in the quests"], lines end
+	end
+	pg.HandIn:SetShown(lead == "handin")
+	pg.HandInQuiet:SetShown(lead ~= "handin" and logged > 0)
+	pg.Pickup:SetShown(lead == "pickup")
+	pg.PickupQuiet:SetShown(lead == "handin" and take > 0)
 	pg.PickupNone:SetShown(none)
-	pg.Go:SetShown(go and take == 0)
-	pg.GoQuiet:SetShown(go and take > 0)
+	pg.Go:SetShown(go and lead == "go")
+	pg.GoQuiet:SetShown(go and lead ~= "go")
 	pg.MapBtn:SetShown(e ~= nil and OpenWorldMap ~= nil)
-	local order = take > 0 and { pg.Pickup, pg.GoQuiet, pg.MapBtn } or { pg.Go, pg.PickupNone, pg.MapBtn }
-	local prev, used = nil, 0
+	-- In priority order; three at most, so the facts keep their room (the
+	-- Map tab shows the entrance too).
+	local order = lead == "handin" and { pg.HandIn, pg.PickupQuiet, pg.GoQuiet, pg.MapBtn }
+		or lead == "pickup" and { pg.Pickup, pg.HandInQuiet, pg.GoQuiet, pg.MapBtn }
+		or { pg.Go, pg.HandInQuiet, pg.PickupNone, pg.MapBtn }
+	local prev, used, n = nil, 0, 0
 	for _, b in ipairs(order) do
+		if b:IsShown() and n == 3 then b:Hide() end
 		if b:IsShown() then
+			n = n + 1
 			b:ClearAllPoints()
 			if prev then
 				b:SetPoint("RIGHT", prev, "LEFT", -8, 0)
@@ -1655,12 +1685,11 @@ function DS.GuideThere()
 	if page and Dg then Dg.GuideTo(page) end
 end
 
--- Build the page's pick-up guide and open it in a new tab (the hub steps
--- aside, as Lookup's guides do); nothing to pick up says so instead.
-function DS.PickUp()
-	local Dg = D()
-	if not (page and Dg and Dg.PickUp) then return nil end
-	local gid, reason = Dg.PickUp(page)
+-- Open a dungeon's planned guide (open: Dungeons.PickUp or HandIn) in a new
+-- tab; the hub steps aside, as Lookup's guides do. Nothing to plan says why
+-- in chat (nothing(): the sentence).
+local function openPlanned(open, key, nothing)
+	local gid, reason = open(key)
 	if gid then
 		ns.Set("ui.shown", true)
 		if hub then hub:Hide() end
@@ -1668,7 +1697,7 @@ function DS.PickUp()
 	end
 	local text
 	if reason == "nothing" then
-		text = DS.NothingText(Dg.PickupPlan(page))
+		text = nothing()
 	elseif reason == "tabs" then
 		text = L["Six tabs is the limit. Close one to open another."]
 	else
@@ -1677,6 +1706,23 @@ function DS.PickUp()
 	ns.Print(text)
 	refresh()
 	return nil, reason
+end
+
+-- The page's pick-up guide; nothing to pick up says so instead.
+function DS.PickUp()
+	local Dg = D()
+	if not (page and Dg and Dg.PickUp) then return nil end
+	local key = page
+	return openPlanned(Dg.PickUp, key, function() return DS.NothingText(Dg.PickupPlan(key)) end)
+end
+
+-- A dungeon's hand-in guide (the page's, or `key`'s from the finished
+-- pick-up guide); nothing finished says what is still open instead.
+function DS.HandIn(key)
+	local Dg = D()
+	key = key or page
+	if not (key and Dg and Dg.HandIn) then return nil end
+	return openPlanned(Dg.HandIn, key, function() return Dg.HandinText(Dg.HandinPlan(key)) end)
 end
 
 function DS.ShowOnMap()
