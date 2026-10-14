@@ -35,7 +35,7 @@ SOFTWARE.
 Quest XP for quests QuestieDB lacks: wowforevertalents.com (Forever beta client quest cache), else foreverchanges.pro (Wowhead Forever database)
 ------------------------------------------------------------------------------------------------------------------------------------------------
 URL: https://wowforevertalents.com ; https://foreverchanges.pro
-Revision: 569 quests; cache data/sources/webxp/quest-xp.json
+Revision: 563 quests; cache data/sources/webxp/quest-xp.json
 License: Public web pages; facts (XP numbers) only, used locally with permission
 
 QuestieDB (Questie-Forever), baked Forever store and support data
@@ -62,7 +62,7 @@ World of Warcraft (c) Blizzard Entertainment, Inc.
 Wowhead Forever database: zone quest lists (XP, levels, Forever change notes)
 -----------------------------------------------------------------------------
 URL: https://www.wowhead.com/forever
-Revision: 2936 listed quests read 2026-10-14T11:34:38.295Z; cache data/sources/wowhead/zones.json
+Revision: 3619 listed quests read 2026-10-14T13:33:14.734Z; cache data/sources/wowhead/zones.json
 License: Public web pages; facts (ids, XP, levels) only, used locally
 
 Guide pack permission

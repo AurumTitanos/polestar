@@ -66,6 +66,8 @@ describe('Wowhead change notes and XP', () => {
 		[700, { id: 700, status: 'updated', xp: 500, lines: ['Experience 500 instead of 400'] }],
 		[7738, { id: 7738, status: 'unchanged', xp: 440, lines: [] }],
 		[99, { id: 99, status: 'new', xp: 630, lines: [] }],
+		[5645, { id: 5645, name: 'Chastise', status: 'updated', lines: ['Renamed from A Lack of Fear', 'Rewards: adds Chastise'] }],
+		[5641, { id: 5641, name: 'Chastise', status: 'updated', lines: ['Renamed from A Lack of Fear'] }],
 	]);
 
 	test('a note replaces the value only while we still hold the old one', () => {
@@ -73,13 +75,18 @@ describe('Wowhead change notes and XP', () => {
 			606: quest(606, { xp: 820 }),
 			472: quest(472, { level: 25, minLevel: 20 }),
 			700: quest(700, { xp: 450 }),
+			5645: quest(5645, { title: 'A Lack of Fear' }),
+			5641: quest(5641, { title: 'Our Own Name' }),
 		};
-		assert.deepEqual(applyChangeNotes(quests, rows), { xp: 1, level: 1, minLevel: 0 });
+		assert.deepEqual(applyChangeNotes(quests, rows), { xp: 1, level: 1, minLevel: 0, title: 1 });
 		assert.equal(quests[606].xp, 3300);
 		assert.deepEqual(quests[606].source, ['pfquest', 'questie-forever', 'wowhead:xp']);
 		assert.equal(quests[472].level, 30);
 		assert.equal(quests[472].minLevel, 20, 'our 20 is not the noted old 28: left alone');
 		assert.equal(quests[700].xp, 450, 'a value that is neither old nor new is left alone');
+		assert.equal(quests[5645].title, 'Chastise', 'renamed in Forever, and we still had the old name');
+		assert.deepEqual(quests[5645].source, ['pfquest', 'questie-forever', 'wowhead:title']);
+		assert.equal(quests[5641].title, 'Our Own Name', 'a title that is not the noted old name is left alone');
 	});
 
 	test('XP fills quests without any, never overrides one', () => {

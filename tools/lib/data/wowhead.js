@@ -17,8 +17,10 @@
 // What the build does with it:
 // - applyChangeNotes: a note "Experience X instead of Y", "Level X instead of
 //   Y" or "Requires level X instead of Y" sets X where our value is still Y
-//   (or, for XP, missing): the note says Forever changed it, and we still hold
-//   the old value. A different value of ours is left alone.
+//   (or, for XP, missing), and "Renamed from Y" gives the quest Wowhead's
+//   Forever name where our title is still Y: the note says Forever changed
+//   it, and we still hold the old value. A different value of ours is left
+//   alone.
 // - fillWowheadXp: XP for quests still without any after QuestieDB and the web
 //   XP sources, from the zone list's xp.
 // Wowhead's Forever database also lists datamined quests that are not live
@@ -181,9 +183,9 @@ function tag(q, source) {
 }
 
 // quests: the merged table (mutated). rows: Map from loadZoneQuests.
-// -> { xp, level, minLevel } counts of values changed
+// -> { xp, level, minLevel, title } counts of values changed
 function applyChangeNotes(quests, rows) {
-	const changed = { xp: 0, level: 0, minLevel: 0 };
+	const changed = { xp: 0, level: 0, minLevel: 0, title: 0 };
 	for (const r of rows.values()) {
 		const q = quests[r.id];
 		if (!q || r.status !== 'updated') continue;
@@ -194,6 +196,13 @@ function applyChangeNotes(quests, rows) {
 			q[n.field] = n.value;
 			tag(q, `wowhead:${n.field}`);
 			changed[n.field]++;
+		}
+		for (const line of r.lines) {
+			const m = /^Renamed from (.+)$/.exec(line);
+			if (!m || typeof r.name !== 'string' || !r.name || q.title !== m[1] || q.title === r.name) continue;
+			q.title = r.name;
+			tag(q, 'wowhead:title');
+			changed.title++;
 		}
 	}
 	return changed;

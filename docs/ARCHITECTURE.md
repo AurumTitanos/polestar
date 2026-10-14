@@ -2117,9 +2117,11 @@ exclusive group: pfQuest `close` united with QuestieDB `exclusiveTo`.
    wowhead.com/forever (cached a day in `data/sources/wowhead/zones.json`;
    `--offline` reads the cache). A quest Wowhead marks updated with "Experience
    X instead of Y", "Level X instead of Y" or "Requires level X instead of Y"
-   gets X where its value is still the old Y (for XP, also where it has none);
-   any other value is left alone, and the quest's `source` gains `wowhead:xp`,
-   `wowhead:level` or `wowhead:minLevel`. Only rows whose category is the
+   gets X where its value is still the old Y (for XP, also where it has none),
+   and one marked "Renamed from Y" gets Wowhead's Forever name where its title
+   is still Y (Chastise, formerly A Lack of Fear); any other value is left
+   alone, and the quest's `source` gains `wowhead:xp`, `wowhead:level`,
+   `wowhead:minLevel` or `wowhead:title`. Only rows whose category is the
    zone's area count: Wowhead answers an unknown zone path with a generic list.
    Its Forever database also lists datamined quests that are not live (`<NYI>`
    placeholders, Season of Discovery leftovers), so presence there is not
@@ -2182,7 +2184,7 @@ cache, tag `wowforevertalents:xp`), else foreverchanges.pro (Wowhead's Forever
 database: the quest's reward, `foreverchanges:xp`, or its quest-chain list,
 `foreverchanges:xp-chain`), else the XP on Wowhead's zone quest list
 (`wowhead:xp`). `meta.counts` gives `questXpFromWeb`, `questXpFromWowhead` and
-`wowheadChanged` ({ xp, level, minLevel }).
+`wowheadChanged` ({ xp, level, minLevel, title }).
 
 ### Recordings (`data/recordings/<session>.json`)
 

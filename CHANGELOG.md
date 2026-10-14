@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.2.4 (unreleased)
+
+### For players
+
+- Quests Forever renamed carry their Forever names in the guides: Chastise
+  (once A Lack of Fear), Dark Sacrifice (once Devouring Plague), Look to the
+  Stars, Onu is Meditating and the others Wowhead Forever lists as renamed.
+
+### For guide authors
+
+- `data build` applies Wowhead Forever's "Renamed from Y" notes too: a quest
+  whose title is still Y takes Forever's name (its `source` gains
+  `wowhead:title`). It also reads Wowhead Forever's class quest pages, so
+  Forever's XP and level changes reach class quests that no zone list shows.
+
 ## 0.2.3 (2026-10-14)
 
 ### For players
