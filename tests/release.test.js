@@ -12,7 +12,8 @@ const { runAddon, ADDONS } = require('./helpers/lua');
 const { quiet, fakeAddons } = require('./helpers/cli');
 const { tmpdir } = require('./helpers/tmp');
 const version = require('../tools/commands/version');
-const { releaseAddons, packageVersion, ROOT } = require('../tools/lib/dsl/project');
+const { releaseAddons, packageVersion } = require('../tools/lib/dsl/project');
+const { ROOT } = require('../tools/lib/paths');
 
 function fakeRoot(pkgVersion = '0.1.0') {
 	const root = tmpdir();

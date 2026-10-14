@@ -14,7 +14,8 @@ const { parseGuide } = require('./dsl/parse');
 const { Diagnostics } = require('./dsl/diag');
 const { findGuideFiles } = require('./dsl/project');
 const { objectiveLabel } = require('./dsl/data');
-const { RACES, applicable, characterKeys, maskExcludes, raceSides, raceLabel, classLabel, whoLabel } = require('./dsl/conditions');
+const { applicable, characterKeys, maskExcludes, raceSides, whoLabel } = require('./dsl/conditions');
+const { RACES, raceLabel, classLabel } = require('./game/races');
 
 const KINDS = ['quest', 'npc', 'object', 'item', 'inn', 'flight', 'guide'];
 // The kinds `find` lists in full without a text.

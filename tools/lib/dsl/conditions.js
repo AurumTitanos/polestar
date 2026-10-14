@@ -1,53 +1,14 @@
 'use strict';
-// Character conditions: class/race/faction names, the client's file names,
-// and the Blizzard bitmasks used by quests.json (docs/ARCHITECTURE.md).
+// Character conditions in guides: parsing class, race and faction lists, and
+// matching them against the masks quests.json carries. The races and classes
+// themselves are in tools/lib/game/races.js.
 
-const CLASSES = {
-	warrior: { file: 'WARRIOR', bit: 1 },
-	paladin: { file: 'PALADIN', bit: 2 },
-	hunter: { file: 'HUNTER', bit: 4 },
-	rogue: { file: 'ROGUE', bit: 8 },
-	priest: { file: 'PRIEST', bit: 16 },
-	shaman: { file: 'SHAMAN', bit: 64 },
-	mage: { file: 'MAGE', bit: 128 },
-	warlock: { file: 'WARLOCK', bit: 256 },
-	druid: { file: 'DRUID', bit: 1024 },
-};
-const CLASS_FILES = Object.values(CLASSES).map((c) => c.file);
-const CLASS_BY_FILE = Object.fromEntries(Object.values(CLASSES).map((c) => [c.file, c]));
-
-// Race names -> the client's race file (UnitRace's second return, ChrRaces
-// ClientFileString) and, per side the race can be played on, its bit in quest
-// race masks (2^PlayableRaceBit). Skyborne is one race file on both sides
-// (ChrRaces 95 Alliance, 96 Horde) with bits past 32-bit bitwise operators.
-// Facts from the Forever client (1.60.1.70338); data/forever/races.json holds
-// the same, with each race's classes (tests/dsl.test.js keeps them in step).
-const RACES = {
-	human: { file: 'Human', sides: { Alliance: 1 } },
-	orc: { file: 'Orc', sides: { Horde: 2 } },
-	dwarf: { file: 'Dwarf', sides: { Alliance: 4 } },
-	nightelf: { file: 'NightElf', sides: { Alliance: 8 } },
-	undead: { file: 'Scourge', sides: { Horde: 16 } },
-	scourge: { file: 'Scourge', sides: { Horde: 16 } },
-	tauren: { file: 'Tauren', sides: { Horde: 32 } },
-	gnome: { file: 'Gnome', sides: { Alliance: 64 } },
-	troll: { file: 'Troll', sides: { Horde: 128 } },
-	skyborne: { file: 'Skyborne', sides: { Alliance: 2 ** 32, Horde: 2 ** 33 } },
-};
-const RACE_BY_FILE = {};
-for (const r of Object.values(RACES)) RACE_BY_FILE[r.file] = r;
-const RACE_FILES = Object.keys(RACE_BY_FILE);
-const SIDES = ['Alliance', 'Horde'];
+const { CLASSES, CLASS_FILES, CLASS_BY_FILE, RACES, RACE_BY_FILE, RACE_FILES, SIDES, hasBit, raceLabel, classLabel } = require('../game/races');
 
 // The factions a race file can be played on (both for an unknown race).
 function raceSides(file) {
 	const r = RACE_BY_FILE[file];
 	return r ? Object.keys(r.sides) : SIDES.slice();
-}
-
-// Is a single power-of-two bit set in a mask? Arithmetic, so bits past 2^31 work.
-function maskHas(mask, bit) {
-	return Math.floor(mask / bit) % 2 === 1;
 }
 
 const FACTIONS = { alliance: 'Alliance', horde: 'Horde' };
@@ -160,11 +121,11 @@ function maskExcludes(set, quest) {
 	if (raceMask != null && raceMask !== 0 && !set.unknownRace) {
 		const forever = Array.isArray(quest.source) && quest.source.some((s) => String(s).startsWith('questie'));
 		const admits = (r) =>
-			Object.entries(RACE_BY_FILE[r].sides).some(([side, bit]) => set.factions.includes(side) && (maskHas(raceMask, bit) || (bit >= 2 ** 32 && !forever)));
+			Object.entries(RACE_BY_FILE[r].sides).some(([side, bit]) => set.factions.includes(side) && (hasBit(raceMask, bit) || (bit >= 2 ** 32 && !forever)));
 		if (set.races.length && !set.races.some(admits)) return 'race';
 	}
 	if (classMask != null && classMask !== 0) {
-		if (set.classes.length && !set.classes.some((c) => maskHas(classMask, CLASS_BY_FILE[c].bit))) return 'class';
+		if (set.classes.length && !set.classes.some((c) => hasBit(classMask, CLASS_BY_FILE[c].bit))) return 'class';
 	}
 	return null;
 }
@@ -186,16 +147,6 @@ function characterKeys(layers, classesOf = null) {
 	return out;
 }
 
-// Names as guides write them: race files except Scourge (written Undead),
-// classes in title case.
-function raceLabel(file) {
-	return file === 'Scourge' ? 'Undead' : file;
-}
-
-function classLabel(file) {
-	return file.charAt(0) + file.slice(1).toLowerCase();
-}
-
 // Who a layer ({ faction, races, classes }) is for: "Dwarf/Gnome", "Human
 // Paladin", "Alliance Paladin", "Alliance" or "both factions".
 function whoLabel({ faction = null, races = null, classes = null }) {
@@ -205,11 +156,6 @@ function whoLabel({ faction = null, races = null, classes = null }) {
 }
 
 module.exports = {
-	CLASSES,
-	CLASS_FILES,
-	RACES,
-	RACE_FILES,
-	RACE_BY_FILE,
 	FACTIONS,
 	parseConditions,
 	intersect,
@@ -217,7 +163,5 @@ module.exports = {
 	raceSides,
 	maskExcludes,
 	characterKeys,
-	raceLabel,
-	classLabel,
 	whoLabel,
 };

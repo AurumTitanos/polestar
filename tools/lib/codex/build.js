@@ -29,7 +29,8 @@ const { spawnSync } = require('node:child_process');
 const { emitPack, packOrder, ADDON, SCHEMA } = require('./pack');
 const { blockingPrereqs } = require('../data/prereqs');
 
-const ROOT = path.resolve(__dirname, '..', '..', '..');
+const { ROOT, DATA, SOURCES } = require('../paths');
+const { CLASSES, FACTION_RACES } = require('../game/races');
 const BUILD = '1.60.1.70338';
 const TABLES = ['Item', 'ItemSparse', 'ItemEffect', 'ItemXItemEffect', 'SpellEffect', 'SpellName', 'SkillLine', 'SkillLineAbility', 'Map', 'AreaTable'];
 // The Forever client's ItemSparse lacks ~5k items Forever still has; their
@@ -61,16 +62,10 @@ const SPAWN = { radius: 3, perMap: 5, maps: 4 };
 // Loot listed on a rare NPC or treasure (Codex.Loot): best-known chance first.
 const LOOT_CAP = 40;
 
-const CLASS_BITS = [
-	[1, 'WARRIOR'], [2, 'PALADIN'], [4, 'HUNTER'], [8, 'ROGUE'], [16, 'PRIEST'],
-	[64, 'SHAMAN'], [128, 'MAGE'], [256, 'WARLOCK'], [1024, 'DRUID'],
-];
 // Class mount spells the client tables give no class for (SkillLineAbility
 // ClassMask 0 and no SpellClassOptions row on 1.60.1.70338).
 const CLASS_MOUNT_FALLBACK = { 5784: 'WARLOCK', 23161: 'WARLOCK' };
 
-const ALLIANCE_RACES = 1 | 4 | 8 | 64;
-const HORDE_RACES = 2 | 16 | 32 | 128;
 
 const SKILL_MOUNTS = 777;
 const SKILL_COMPANIONS = 778;
@@ -199,7 +194,7 @@ function clientFacts(tables, build = BUILD) {
 		if (line === SKILL_MOUNTS) mountSkill.push(spell);
 		if (line === SKILL_COMPANIONS) companionSkill.push(spell);
 		const mask = int(r.ClassMask) || 0;
-		const classes = CLASS_BITS.filter(([bit]) => mask & bit).map(([, c]) => c);
+		const classes = Object.values(CLASSES).filter((c) => mask & c.bit).map((c) => c.file);
 		if (classes.length === 1) spellClass[spell] = classes[0];
 	}
 	for (const [spell, cls] of Object.entries(CLASS_MOUNT_FALLBACK)) if (!spellClass[spell]) spellClass[spell] = cls;
@@ -284,8 +279,8 @@ function sideOf(side) {
 function factionOfRaces(races) {
 	const r = int(races);
 	if (!r) return null;
-	const a = (r & ALLIANCE_RACES) !== 0;
-	const h = (r & HORDE_RACES) !== 0;
+	const a = (r & FACTION_RACES.Alliance) !== 0;
+	const h = (r & FACTION_RACES.Horde) !== 0;
 	if (a && !h) return 'A';
 	if (h && !a) return 'H';
 	return null;
@@ -1014,8 +1009,8 @@ function writePackDir(dir, files) {
 }
 
 async function loadInputs({ addons, offline = false, dataDir, sourcesDir, build = BUILD, fetchImpl, log = () => {} } = {}) {
-	dataDir = dataDir || path.join(ROOT, 'data', 'forever');
-	sourcesDir = sourcesDir || path.join(ROOT, 'data', 'sources');
+	dataDir = dataDir || DATA;
+	sourcesDir = sourcesDir || SOURCES;
 	const j = (f, opt) => readJson(path.join(dataDir, f), opt);
 	const forever = {
 		items: j('items.json'),

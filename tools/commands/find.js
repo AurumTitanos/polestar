@@ -1,10 +1,10 @@
 'use strict';
 // find: look up quests, NPCs, objects, items, inns, flight points and our guides as guide lines.
 
-const { parseArgs, resolvePath } = require('../lib/dsl/cli');
-const { ROOT } = require('../lib/dsl/project');
+const { parseArgs, resolvePath } = require('../lib/cli');
+const { ROOT } = require('../lib/paths');
 const { loadData } = require('../lib/dsl/data');
-const { RACES, CLASSES, raceLabel, classLabel } = require('../lib/dsl/conditions');
+const { RACES, CLASSES, raceLabel, classLabel } = require('../lib/game/races');
 const { find, loadGuideHeaders, KINDS, LISTED, FACTIONS } = require('../lib/find');
 
 // The names --race and --class take.

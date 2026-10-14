@@ -106,6 +106,10 @@
   addon/README.md.
 - The design system is docs/DESIGN.md, which now also says who the windows
   are for and what they must do (formerly PRODUCT.md and docs/UI_BRIEF.md).
+- The tools share one copy of each foundation: the repository's folders
+  (tools/lib/paths.js), the argument parser (tools/lib/cli.js), the XP rules
+  (tools/lib/game/xp.js) and the races and classes with their mask bits
+  (tools/lib/game/races.js).
 
 ## 0.1.0 (2026-10-13)
 

@@ -9,11 +9,12 @@
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
-const { parseArgs, resolvePath, printDiagnostics, plural } = require('../lib/dsl/cli');
+const { parseArgs, resolvePath, printDiagnostics, plural } = require('../lib/cli');
 const project = require('../lib/dsl/project');
 const { commandPack, packArgument } = require('../lib/pack/locate');
 const { PACK_OPTIONS, PACK_USAGE, otherPack, noDataConflict, noDataCache, buildPack, folderIn } = require('../lib/pack/build');
 const { writeZip, directoryEntries } = require('../lib/zip');
+const { ROOT, DATA } = require('../lib/paths');
 
 const usage = `usage: node tools/polestar.js pack [<dir>] [options]
 
@@ -112,7 +113,7 @@ function pack(dirs, version) {
 	if (manifest.version !== version) console.warn(`warning: guides/pack.json says version ${manifest.version}, package.json says ${version}`);
 	const product = project.releaseAddons(dirs.addons);
 	for (const n of product.skipped) console.log(`note: ${n} not built (no ${n}/${n}.toc); leaving it out of the zip`);
-	const license = { name: 'LICENSE', data: fs.readFileSync(path.join(project.ROOT, 'LICENSE')) };
+	const license = { name: 'LICENSE', data: fs.readFileSync(path.join(ROOT, 'LICENSE')) };
 	const archives = [
 		{ file: `Polestar-${version}.zip`, names: product.names, extras: { Polestar: [license, { name: 'README.txt', data: readme(version, product.names) }] } },
 		{ file: `Polestar_Recorder-${version}.zip`, names: ['Polestar_Recorder'], extras: { Polestar_Recorder: [license] } },
@@ -152,7 +153,7 @@ function pack(dirs, version) {
 
 // Another pack: <dist>/<folder>-<version>.zip from the build, in memory.
 function packOther(other, opts) {
-	const built = buildPack(other, { dataDir: resolvePath(opts.data, 'data/forever', project.ROOT), cache: opts.noData ? noDataCache() : null, noDataFlag: true });
+	const built = buildPack(other, { dataDir: resolvePath(opts.data, 'data/forever', ROOT), cache: opts.noData ? noDataCache() : null, noDataFlag: true });
 	printDiagnostics(built.diag, { quiet: true });
 	if (!built.ok) {
 		console.error(`pack failed: ${built.noData ? 'no reference data' : `${plural(built.diag.errors.length, 'error')} (run lint for details)`}`);
@@ -196,10 +197,10 @@ async function run(argv) {
 		return 2;
 	}
 	const dirs = {
-		guides: resolvePath(opts.guides, 'guides', project.ROOT),
-		data: resolvePath(opts.data, 'data/forever', project.ROOT),
-		addons: resolvePath(opts.addons, 'addon', project.ROOT),
-		dist: resolvePath(opts.dist, 'dist', project.ROOT),
+		guides: resolvePath(opts.guides, 'guides', ROOT),
+		data: resolvePath(opts.data, 'data/forever', ROOT),
+		addons: resolvePath(opts.addons, 'addon', ROOT),
+		dist: resolvePath(opts.dist, 'dist', ROOT),
 	};
 	return pack(dirs, project.packageVersion());
 }

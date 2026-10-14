@@ -5,9 +5,9 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
-const { parseArgs } = require('../lib/dsl/cli');
+const { parseArgs } = require('../lib/cli');
 const { format } = require('../lib/dsl/diag');
-const { ROOT } = require('../lib/dsl/project');
+const { DATA } = require('../lib/paths');
 const { findLua } = require('../lib/lua');
 const { detectAddonsDirs, pickAddonsDir, isDir } = require('../lib/addons');
 const { findPackDir, resolvePack, packArgument } = require('../lib/pack/locate');
@@ -122,7 +122,7 @@ async function run(argv, env = {}) {
 		nodeVersion: process.versions.node,
 		findLua,
 		luaVersion: defaultLuaVersion,
-		dataDir: path.join(ROOT, 'data', 'forever'),
+		dataDir: DATA,
 		detectAddons: () => detectAddonsDirs(),
 		cwd: process.cwd(),
 		vars: process.env,

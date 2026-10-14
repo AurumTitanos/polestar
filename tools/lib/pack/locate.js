@@ -6,7 +6,8 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { ROOT, OFFICIAL_DIR } = require('../dsl/project');
+const { OFFICIAL_DIR } = require('../dsl/project');
+const { DATA } = require('../paths');
 const { readManifest } = require('./manifest');
 
 // The nearest folder holding pack.json, from startDir up to the filesystem root; null when none.
@@ -85,7 +86,7 @@ function commandPack(opts, cwd = process.cwd()) {
 	return {
 		...r,
 		contextDir: opts.context ? path.resolve(cwd, opts.context) : OFFICIAL_DIR,
-		contextDataDir: opts.contextData ? path.resolve(cwd, opts.contextData) : path.join(ROOT, 'data', 'forever'),
+		contextDataDir: opts.contextData ? path.resolve(cwd, opts.contextData) : DATA,
 		error: null,
 	};
 }

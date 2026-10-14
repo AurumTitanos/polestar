@@ -14,7 +14,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const sim = require('./index');
 const { K_ACCEPT, K_TASK, K_TURNIN, K_DUNGEON } = require('./run');
-const { LEVEL_XP } = require('./xp');
+const { LEVEL_XP } = require('../game/xp');
 const { ISLE_MAPS, ISLANDS, cluster } = require('./world');
 const { loadAreas } = require('../exploration/areas');
 

@@ -7,7 +7,7 @@ const path = require('node:path');
 const { luaToJson } = require('../lua');
 const { Frames } = require('./geo');
 
-const ROOT = path.join(__dirname, '..', '..', '..');
+const { ROOT, DATA } = require('../paths');
 const NAV = path.join(ROOT, 'addon', 'Polestar', 'Nav');
 
 function luaLiteral(v) {
@@ -57,7 +57,7 @@ function resolveKnown(travel, known, faction) {
 }
 
 // crossingsLua: Polestar_Travel's Crossings.lua (the local crossings), loaded after TravelData.lua.
-function planRoute({ from, to, faction = 'Alliance', known = [], speed, hearth, dataDir = path.join(ROOT, 'data', 'forever'), travelLua = path.join(NAV, 'TravelData.lua'), crossingsLua }) {
+function planRoute({ from, to, faction = 'Alliance', known = [], speed, hearth, dataDir = DATA, travelLua = path.join(NAV, 'TravelData.lua'), crossingsLua }) {
 	const read = (f) => JSON.parse(fs.readFileSync(path.join(dataDir, f), 'utf8'));
 	const frames = new Frames(read('map-frames.json').era, read('zones.json'));
 	const travel = read('travel.json');

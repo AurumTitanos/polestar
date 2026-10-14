@@ -12,7 +12,8 @@ const { quiet, fakeAddons, polestar } = require('./helpers/cli');
 const { tmpdir } = require('./helpers/tmp');
 const pack = require('../tools/commands/pack');
 const { buildZip, writeZip, readZip, directoryEntries, crc32 } = require('../tools/lib/zip');
-const { packageVersion, ROOT } = require('../tools/lib/dsl/project');
+const { packageVersion } = require('../tools/lib/dsl/project');
+const { ROOT } = require('../tools/lib/paths');
 
 const VERSION = packageVersion();
 

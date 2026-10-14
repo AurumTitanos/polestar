@@ -18,7 +18,7 @@ const { buildPaths, liveFramesOf } = require('./paths');
 const { readCrossingsFile, recordedCrossings, crossingsLua, emitTravelAddon, crossingCounts, TRAVEL_ADDON } = require('./crossings');
 const { readRecordings } = require('../data/recordings');
 
-const ROOT = path.join(__dirname, '..', '..', '..');
+const { ROOT, DATA, SOURCES } = require('../paths');
 const PATH_CHUNK = 1000; // records per Lua function (keeps each under Lua 5.1's constant limits)
 
 function readJson(file) {
@@ -109,9 +109,9 @@ function emitLua(t) {
 // crossingsFile: the optional local crossings file (default data/local/crossings.json
 // next to dataDir); absent -> no Polestar_Travel output.
 async function buildTravel({
-	dataDir = path.join(ROOT, 'data', 'forever'),
+	dataDir = DATA,
 	recordingsDir = path.join(ROOT, 'data', 'recordings'),
-	sourcesDir = path.join(ROOT, 'data', 'sources'),
+	sourcesDir = SOURCES,
 	crossingsFile = path.join(dataDir, '..', 'local', 'crossings.json'),
 	build,
 	foreverBuild,
@@ -199,4 +199,4 @@ function writeTravel({ travel, lua, travelAddon }, { jsonOut, luaOut, travelAddo
 	}
 }
 
-module.exports = { buildTravel, writeTravel, emitLua, ROOT, TRAVEL_ADDON };
+module.exports = { buildTravel, writeTravel, emitLua, TRAVEL_ADDON };

@@ -7,8 +7,9 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { parseArgs, resolvePath } = require('../lib/dsl/cli');
+const { parseArgs, resolvePath } = require('../lib/cli');
 const project = require('../lib/dsl/project');
+const { ROOT } = require('../lib/paths');
 
 const usage = `usage: node tools/polestar.js version [<x.y.z>] [options]
 
@@ -103,7 +104,7 @@ async function run(argv) {
 		console.error(`${error || 'one version at most'}\n\n${usage}`);
 		return 2;
 	}
-	const root = resolvePath(opts.root, '.', project.ROOT);
+	const root = resolvePath(opts.root, '.', ROOT);
 	const addonsDir = resolvePath(opts.addons, 'addon', root);
 	const pkgFile = path.join(root, 'package.json');
 	const manifest = manifestFile(root);

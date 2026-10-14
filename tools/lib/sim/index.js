@@ -7,18 +7,18 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { getWorld, worldFile } = require('./world');
-const { loadQuestXp } = require('./xp');
+const { loadQuestXp } = require('../game/xp');
 const { compileRun, makeTables } = require('./run');
 const { Evaluator } = require('./evaluate');
 const { runJob, search } = require('./search');
 const { Pool } = require('./pool');
 const { loadParamsFile, effective, means } = require('./params');
 
-const ROOT = path.resolve(__dirname, '..', '..', '..');
+const { ROOT, DATA, SOURCES } = require('../paths');
 const DEFAULTS = {
-	dataDir: path.join(ROOT, 'data', 'forever'),
+	dataDir: DATA,
 	simDir: path.join(ROOT, 'data', 'sim'),
-	sourcesDir: path.join(ROOT, 'data', 'sources'),
+	sourcesDir: SOURCES,
 	benchDir: path.join(ROOT, 'data', 'bench'),
 };
 
@@ -179,6 +179,6 @@ function assertFresh(res, world, file) {
 }
 
 module.exports = {
-	DEFAULTS, START_RACES, ROOT, normFaction, loadWorld, paramsFor, makeRun, className, resultFile, assertFresh,
+	DEFAULTS, START_RACES, normFaction, loadWorld, paramsFor, makeRun, className, resultFile, assertFresh,
 	prune, describe, benchEval, runCharacter, routeFromKeys, downsample,
 };

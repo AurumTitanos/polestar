@@ -9,14 +9,14 @@ const { SIDE } = require('./groups');
 const R = require('./route');
 const { header } = require('../../generated');
 
-const ROOT = path.join(__dirname, '..', '..', '..', '..');
+const { ROOT, DATA } = require('../../paths');
 const OUT_DIR = path.join(ROOT, 'guides', 'forever', 'professions');
 const FACTIONS = ['Alliance', 'Horde'];
 // Line 1 of every guide this folder writes.
 const GUIDE_HEADER = header('guide', 'profession gathering build', 'data/forever and tools/lib/professions/gathering');
 const CITY_MAPS = new Set([1453, 1454, 1455, 1456, 1457, 1458]);
 
-function context(dataDir = path.join(ROOT, 'data', 'forever')) {
+function context(dataDir = DATA) {
 	const data = loadData(dataDir);
 	return { data, project: R.projector(data) };
 }

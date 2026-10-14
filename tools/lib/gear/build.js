@@ -22,7 +22,7 @@ const { buildForeverPack } = require('./leveling');
 const { weightBands, racials, emitSpecData } = require('./specdata');
 const { emitToc, packFiles, packageVersion, ADDON: ITEMDB } = require('../itemdb/build');
 
-const ROOT = path.resolve(__dirname, '..', '..', '..');
+const { ROOT, DATA } = require('../paths');
 const WOWSIMS_LICENCE = path.join('classic', '7779ebbf79dc7f1341e6ab939b28a3402c9a730a', 'LICENSE');
 
 function writeAtomic(file, text) {

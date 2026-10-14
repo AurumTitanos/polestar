@@ -57,7 +57,7 @@ function applyCorrections(tables) {
 	return n;
 }
 
-const ROOT = path.resolve(__dirname, '..', '..', '..');
+const { ROOT } = require('../paths');
 // Always written; races.json too when the Forever client tables include ChrRaces, ChrClasses and CharBaseInfo.
 const FILES = ['quests', 'npcs', 'objects', 'items', 'zones', 'map-frames', 'factions', 'meta'];
 
@@ -339,4 +339,4 @@ async function buildData(options = {}) {
 	return { outDir, out, meta };
 }
 
-module.exports = { buildData, serializeTable, FILES, ROOT };
+module.exports = { buildData, serializeTable, FILES };

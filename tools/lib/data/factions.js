@@ -15,9 +15,10 @@
 //    side's classic races (Wintersaber Trainers: Horde locked -> Alliance);
 // otherwise null (neutral or not provable from the data).
 
-const ALLIANCE_RACES = 1 | 4 | 8 | 64; // Human, Dwarf, NightElf, Gnome
-const HORDE_RACES = 2 | 16 | 32 | 128; // Orc, Undead, Tauren, Troll
-const CLASSIC_RACES = ALLIANCE_RACES | HORDE_RACES;
+const { FACTION_RACES, ALL_RACES } = require('../game/races');
+
+const ALLIANCE_RACES = FACTION_RACES.Alliance; // Human, Dwarf, NightElf, Gnome
+const HORDE_RACES = FACTION_RACES.Horde; // Orc, Undead, Tauren, Troll
 const LOCKED = -42000;
 const SIDE_HEADERS = { 469: 'Alliance', 891: 'Alliance', 67: 'Horde', 892: 'Horde' };
 
@@ -30,7 +31,7 @@ function sideFromRaceLocks(row) {
 	let locked = 0;
 	let open = 0;
 	for (let i = 0; i < 4; i++) {
-		const mask = int(row[`ReputationRaceMasks${i}_0`]) & CLASSIC_RACES;
+		const mask = int(row[`ReputationRaceMasks${i}_0`]) & ALL_RACES;
 		if (!mask) continue;
 		if (int(row[`ReputationBase_${i}`]) <= LOCKED) locked |= mask;
 		else open |= mask;
@@ -85,4 +86,4 @@ function buildFactions(rows) {
 	return out;
 }
 
-module.exports = { buildFactions, ALLIANCE_RACES, HORDE_RACES };
+module.exports = { buildFactions };

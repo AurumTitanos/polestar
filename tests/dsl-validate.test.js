@@ -411,7 +411,7 @@ test('lint applies the solo policy from the cached world in --sim (built from th
 	const { GUIDES_DIR, DATA_DIR } = require('./helpers/dsl');
 	const { tmpdir } = require('./helpers/tmp');
 	const { dataHash } = require('../tools/lib/sim/world');
-	const { ROOT } = require('../tools/lib/dsl/project');
+	const { ROOT } = require('../tools/lib/paths');
 	const sim = tmpdir();
 	const hash = dataHash(DATA_DIR, path.join(ROOT, 'data', 'sources'));
 	fs.writeFileSync(path.join(sim, 'world-alliance.json'), JSON.stringify({ dataHash: hash, excluded: [{ id: 5261, title: 'Eagan Peltskinner', reason: 'dungeon quest', category: 'dungeon' }] }));

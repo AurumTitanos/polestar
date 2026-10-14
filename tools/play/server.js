@@ -24,7 +24,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Session, sharedData, CLASS_NAMES, RACE_NAMES, SCREEN } = require('./session');
 
-const ROOT = path.join(__dirname, '..', '..');
+const { ROOT } = require('../lib/paths');
 const PUBLIC = path.join(__dirname, 'public');
 const FONTS = path.join(ROOT, 'addon', 'Polestar', 'Media', 'Fonts');
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.ttf': 'font/ttf' };

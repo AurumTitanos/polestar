@@ -12,11 +12,12 @@ const { Evaluator } = require('./evaluate');
 const { K_TURNIN } = require('./run');
 const { compileSequence, routeSequence } = require('./sequence');
 const { fmtH, table, mdTable } = require('./report');
-const { LEVEL_XP } = require('./xp');
+const { LEVEL_XP } = require('../game/xp');
 const { loadPolestarRoutes } = require('./baselines/polestar');
 const { resolvePack, packArgument } = require('../pack/locate');
-const { printDiagnostics } = require('../dsl/cli');
+const { printDiagnostics } = require('../cli');
 const { isDir } = require('../addons');
+const { ROOT } = require('../paths');
 
 let LEVELS = [10, 20, 30, 40, 50, 60];
 
@@ -28,7 +29,7 @@ function sources(o, faction, race, run, runD) {
 	if (res) out.push({ id: 'best', label: 'Best found (solo)', source: 'sim', route: sim.routeFromKeys(run, res.best.route) });
 	const resD = loadResult(o, faction, race, 'dungeons', run.world, warn);
 	if (resD) out.push({ id: 'best-dungeons', label: 'Best found (dungeons)', source: 'sim', route: sim.routeFromKeys(runD, resD.best.route), family: 'dungeons' });
-	const guidesDir = o.guidesDir || path.join(sim.ROOT, 'guides');
+	const guidesDir = o.guidesDir || path.join(ROOT, 'guides');
 	try {
 		const L = loadPolestarRoutes({ guidesDir, dataDir: o.dataDir, faction, race, cls: null });
 		if (L) {

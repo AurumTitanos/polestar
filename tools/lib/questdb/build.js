@@ -37,11 +37,10 @@ const { clusterPoints } = require('./cluster');
 const { blockingPrereqs } = require('../data/prereqs');
 const { header } = require('../generated');
 
-const ROOT = path.join(__dirname, '..', '..', '..');
+const { ROOT, DATA } = require('../paths');
+const { FACTION_RACES } = require('../game/races');
 const SCHEMA = 1;
 const CHUNK = 1000; // records per AddData call
-const ALLIANCE = 1 | 4 | 8 | 64; // Human, Dwarf, NightElf, Gnome
-const HORDE = 2 | 16 | 32 | 128; // Orc, Undead, Tauren, Troll
 const OBJECTIVE_KIND = { kill: 1, item: 2, object: 3, event: 4 };
 
 const DEFAULTS = {
@@ -76,8 +75,8 @@ function raceParts(races) {
 function questFaction(q, npcs) {
 	if (q.races) {
 		const { low, high } = raceParts(q.races);
-		if ((low & ~ALLIANCE) === 0 && (high & ~1) === 0) return 1;
-		if ((low & ~HORDE) === 0 && (high & ~2) === 0) return 2;
+		if ((low & ~FACTION_RACES.Alliance) === 0 && (high & ~1) === 0) return 1;
+		if ((low & ~FACTION_RACES.Horde) === 0 && (high & ~2) === 0) return 2;
 		return null;
 	}
 	const givers = list(q.start && q.start.npc);
@@ -103,7 +102,7 @@ function topSources(drops, cap) {
 
 function buildQuestDB({ dataDir, options = {} } = {}) {
 	const opts = { ...DEFAULTS, ...options };
-	dataDir = dataDir || path.join(ROOT, 'data', 'forever');
+	dataDir = dataDir || DATA;
 	const quests = readJson(path.join(dataDir, 'quests.json'));
 	const npcs = readJson(path.join(dataDir, 'npcs.json'));
 	const objects = readJson(path.join(dataDir, 'objects.json'));
@@ -381,4 +380,4 @@ function writeQuestDB(result, outDir) {
 	for (const [name, text] of Object.entries(result.files)) fs.writeFileSync(path.join(outDir, name), text);
 }
 
-module.exports = { buildQuestDB, writeQuestDB, estimateMemory, questFaction, DEFAULTS, ROOT, SCHEMA };
+module.exports = { buildQuestDB, writeQuestDB, estimateMemory, questFaction, DEFAULTS, SCHEMA };

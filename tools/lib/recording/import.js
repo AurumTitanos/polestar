@@ -16,7 +16,7 @@ const path = require('node:path');
 const { luaToJson } = require('../lua');
 const { detectAddonsDirs, wowDirs } = require('../addons');
 
-const ROOT = path.join(__dirname, '..', '..', '..');
+const { ROOT } = require('../paths');
 const DEFAULT_OUT = path.join(ROOT, 'data', 'recordings');
 const SV_FILE = 'Polestar_Recorder.lua';
 

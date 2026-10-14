@@ -7,7 +7,7 @@ const { parseArgs } = require('node:util');
 const { findDungeonJournal, readToc, loadDungeonJournal, buildDungeons } = require('../lib/data/dungeonjournal');
 const { loadData } = require('../lib/dsl/data');
 
-const ROOT = path.join(__dirname, '..', '..');
+const { DATA } = require('../lib/paths');
 
 const usage = `usage: node tools/polestar.js dungeons build [options]
 
@@ -37,7 +37,7 @@ async function build(rest) {
 		console.error(`dungeons: ForeverDungeonJournal not found${values.source ? ` at ${values.source}` : ''}; pass --source <dir>`);
 		return 1;
 	}
-	const dataDir = path.resolve(values.data || path.join(ROOT, 'data', 'forever'));
+	const dataDir = path.resolve(values.data || DATA);
 	const toc = readToc(dir);
 	const raw = loadDungeonJournal(dir);
 	const { dataset, report } = buildDungeons(raw, loadData(dataDir), { toc });

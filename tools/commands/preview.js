@@ -15,7 +15,7 @@ const { Font } = require('../preview/font');
 const { svg, compose, TextureCache } = require('../preview/render');
 const { header } = require('../lib/generated');
 
-const ROOT = path.join(__dirname, '..', '..');
+const { ROOT } = require('../lib/paths');
 const ADDON = path.join(ROOT, 'addon', 'Polestar');
 const OUT = path.join(ROOT, 'docs', 'preview');
 const PREVIEW_HEADER = header('svg', 'preview', "the addon's Lua and the client stubs in tests/lua");

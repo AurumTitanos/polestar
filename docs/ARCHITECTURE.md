@@ -1570,7 +1570,9 @@ module.exports = { name, summary, usage, async run(argv) { return 0 /* exit code
 ```
 
 The dispatcher discovers them; adding a command never edits a shared file.
-Shared helpers: `tools/lib/lua.js` (run Lua 5.1, convert Lua data to JSON),
+Shared helpers: `tools/lib/paths.js` (the repository's folders), `tools/lib/cli.js`
+(argument parsing, diagnostics), `tools/lib/game/` (XP rules, races and
+classes), `tools/lib/lua.js` (run Lua 5.1, convert Lua data to JSON),
 `tools/lib/tga.js` (anti-aliased TGA textures).
 
 Every command, every generated file and the rebuild order: [tools/README.md](../tools/README.md).

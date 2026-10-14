@@ -3,6 +3,7 @@
 
 const path = require('node:path');
 const { parseArgs } = require('node:util');
+const { SOURCES } = require('../lib/paths');
 
 const usage = `usage: node tools/polestar.js gear build [--addons <dir>]
        node tools/polestar.js gear fetch
@@ -46,8 +47,7 @@ async function runBuild(rest) {
 }
 
 async function runFetch() {
-	const root = path.resolve(__dirname, '..', '..');
-	await require('../lib/consume/wowsims').readWowsims({ cacheDir: path.join(root, 'data', 'sources', 'wowsims'), fetch: true, log: (m) => console.error(m) });
+	await require('../lib/consume/wowsims').readWowsims({ cacheDir: path.join(SOURCES, 'wowsims'), fetch: true, log: (m) => console.error(m) });
 	return 0;
 }
 

@@ -24,7 +24,7 @@ const { parseCsv } = require('../data/csv');
 const { tableUrl } = require('../data/wago');
 const { header } = require('../generated');
 
-const ROOT = path.join(__dirname, '..', '..', '..');
+const { ROOT } = require('../paths');
 // The Forever client (1.60.1, product wow_classic_beta on wago.tools).
 const BUILD = '1.60.1.70338';
 const TABLES = ['UiMapXMapArt', 'UiMapArt', 'UiMapArtStyleLayer', 'WorldMapOverlay', 'WorldMapOverlayTile', 'UiMap'];
@@ -153,4 +153,4 @@ function emitLua(result, build = BUILD) {
 	return lines.join('\n');
 }
 
-module.exports = { buildOverlays, emitLua, loadTables, BUILD, TABLES, ROOT };
+module.exports = { buildOverlays, emitLua, loadTables, BUILD, TABLES };

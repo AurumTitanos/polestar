@@ -8,7 +8,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const xp = require('../tools/lib/sim/xp');
+const xp = require('../tools/lib/game/xp');
 const { buildWorld } = require('../tools/lib/sim/world');
 const { compileRun, makeTables, K_ACCEPT } = require('../tools/lib/sim/run');
 const { Evaluator, MAX_VISITS } = require('../tools/lib/sim/evaluate');

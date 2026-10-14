@@ -15,17 +15,11 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { makeProjector, clusters, dist } = require('./geo');
-const { baseQuestXp } = require('./xp');
+const { baseQuestXp } = require('../game/xp');
+const { CLASSES, ALL_CLASSES, RACES, FACTION_RACES, SKYBORNE_BIT, hasBit, raceLabel, classLabel } = require('../game/races');
 
-const CLASSES = [
-	['Warrior', 1], ['Paladin', 2], ['Hunter', 4], ['Rogue', 8], ['Priest', 16],
-	['Shaman', 64], ['Mage', 128], ['Warlock', 256], ['Druid', 1024],
-];
-const ALL_CLASSES = CLASSES.reduce((m, [, b]) => m | b, 0);
-// Races (and their quest-mask bits per faction) come from the DSL's single
-// table, built from the Forever client: Skyborne has a bit on each side.
-const { RACES } = require('../dsl/conditions');
-const FACTION_MASK = { Alliance: 1 | 4 | 8 | 64, Horde: 2 | 16 | 32 | 128 };
+// Class names as drafts write them, with their mask bits.
+const CLASS_NAMES = Object.values(CLASSES).map((c) => [classLabel(c.file), c.bit]);
 // QuestSort ids of professions (quests.json `zone` < 0 is a sort, not a map).
 const PROFESSION_SORTS = new Set([24, 101, 121, 181, 182, 201, 264, 304, 324]);
 
@@ -55,13 +49,13 @@ function normName(s) {
 }
 
 function className(input) {
-	const hit = CLASSES.find(([n]) => normName(n) === normName(input));
+	const hit = CLASS_NAMES.find(([n]) => normName(n) === normName(input));
 	return hit ? hit[0] : null;
 }
 
 function classList(mask) {
 	if (mask == null || (mask & ALL_CLASSES) === ALL_CLASSES || (mask & ALL_CLASSES) === 0) return null;
-	return CLASSES.filter(([, b]) => mask & b).map(([n]) => n);
+	return CLASS_NAMES.filter(([, b]) => mask & b).map(([n]) => n);
 }
 
 // { name, bits: { Alliance?, Horde? }, faction } for a race: a known name,
@@ -75,20 +69,11 @@ function raceInfo(input) {
 		const bit = Number(bitStr);
 		if (!Number.isInteger(bit) || bit < 0) throw new Error(`bad race bit in "${input}"`);
 		const sides = known ? Object.keys(known.sides) : ['Alliance', 'Horde'];
-		return { name: known ? displayName(known.file) : nm, bits: Object.fromEntries(sides.map((f) => [f, bit])), faction: known && sides.length === 1 ? sides[0] : null };
+		return { name: known ? raceLabel(known.file) : nm, bits: Object.fromEntries(sides.map((f) => [f, bit])), faction: known && sides.length === 1 ? sides[0] : null };
 	}
 	if (!known) return { name: nm, bits: {}, faction: null };
 	const sides = Object.keys(known.sides);
-	return { name: displayName(known.file), bits: { ...known.sides }, faction: sides.length === 1 ? sides[0] : null };
-}
-
-function displayName(file) {
-	return file === 'Scourge' ? 'Undead' : file;
-}
-
-// Does mask contain bit (powers of two past 32 bits included)?
-function hasBit(mask, bit) {
-	return bit > 0 && Math.floor(mask / bit) % 2 === 1;
+	return { name: raceLabel(known.file), bits: { ...known.sides }, faction: sides.length === 1 ? sides[0] : null };
 }
 
 function zonesByName(zones) {
@@ -292,11 +277,11 @@ function buildModel(data, opts, warn = () => {}) {
 		}
 		const races = raw.races;
 		if (races != null && races !== 0) {
-			const fm = FACTION_MASK[faction];
+			const fm = FACTION_RACES[faction];
 			const low = races % 2 ** 32;
 			const ok = race.bit ? hasBit(races, race.bit) : (low & fm) === fm;
 			if (!ok) {
-				exclude(q, (low & fm) === 0 && !hasBit(races, (RACES.skyborne.sides || {})[faction] || 0) ? 'other faction' : 'other race');
+				exclude(q, (low & fm) === 0 && !hasBit(races, SKYBORNE_BIT[faction] || 0) ? 'other faction' : 'other race');
 				continue;
 			}
 		}

@@ -7,8 +7,9 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { Diagnostics } = require('../dsl/diag');
-const { parseArgs, resolvePath, printDiagnostics, formatError, plural } = require('../dsl/cli');
-const { ROOT, compileProject, buildPackFiles } = require('../dsl/project');
+const { parseArgs, resolvePath, printDiagnostics, formatError, plural } = require('../cli');
+const { compileProject, buildPackFiles } = require('../dsl/project');
+const { ROOT, DATA } = require('../paths');
 const { hasCoreData, emptyData, CORE_FILES } = require('../dsl/data');
 const { commandPack, packArgument } = require('./locate');
 const { FOLDER_RE, LICENSE_PLACEHOLDER } = require('./format');
@@ -140,7 +141,7 @@ function readLicense(pack, diag) {
 // it has one, goes into the addon folder as LICENSE.txt.
 // -> { ok, diag, manifest, guides, sources, data, files, noData }: files
 // (folder name -> content) only when there are no errors.
-function buildPack(pack, { dataDir = path.join(ROOT, 'data', 'forever'), cache = null, includeDrafts = false, files = true, noDataFlag = false } = {}) {
+function buildPack(pack, { dataDir = DATA, cache = null, includeDrafts = false, files = true, noDataFlag = false } = {}) {
 	if (!pack.manifest) {
 		const diag = new Diagnostics();
 		diag.list.push(...pack.diags);

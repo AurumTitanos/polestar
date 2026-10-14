@@ -8,11 +8,11 @@
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const { parseArgs, printDiagnostics, resolvePath, plural } = require('../lib/dsl/cli');
+const { parseArgs, printDiagnostics, resolvePath, plural } = require('../lib/cli');
 const { writePackDir } = require('../lib/dsl/project');
 const { PACK_OPTIONS, PACK_USAGE, otherPack, buildPack, folderIn } = require('../lib/pack/build');
 
-const ROOT = path.join(__dirname, '..', '..');
+const { ROOT } = require('../lib/paths');
 const DEFAULT_ART = '/tmp/polestar-art';
 
 // Client art when none is named: $POLESTAR_CLIENT_ART, else /tmp/polestar-art

@@ -15,7 +15,7 @@
 
 const { dist, segDist } = require('./geo');
 const { planTour } = require('./tour');
-const xp = require('./xp');
+const xp = require('../game/xp');
 
 const HUB_R = 40;
 const PASS_R = 60;

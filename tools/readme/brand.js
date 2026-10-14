@@ -17,7 +17,7 @@ const path = require('node:path');
 const { Outliner } = require('./outline');
 const { header } = require('../lib/generated');
 
-const ROOT = path.join(__dirname, '..', '..');
+const { ROOT } = require('../lib/paths');
 const OUT = path.join(ROOT, 'docs', 'assets');
 
 // docs/DESIGN.md tokens (Dusk).

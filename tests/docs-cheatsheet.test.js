@@ -8,7 +8,8 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { VERBS, MOD_WORDS, HEADER_KEYS, STEP_KEYS } = require('../tools/lib/dsl/parse');
-const { CLASSES, RACES, FACTIONS } = require('../tools/lib/dsl/conditions');
+const { FACTIONS } = require('../tools/lib/dsl/conditions');
+const { CLASSES, RACES } = require('../tools/lib/game/races');
 const { compile } = require('./helpers/dsl');
 
 const DOC = fs.readFileSync(path.join(__dirname, '..', 'docs', 'GUIDE_CHEATSHEET.md'), 'utf8');

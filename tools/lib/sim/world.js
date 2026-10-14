@@ -51,10 +51,10 @@ const { planOrder } = require('./tour');
 const { zoneLevels } = require('../maps/zonelevels');
 const SOLO = require('./solo');
 const { blockingPrereqs } = require('../data/prereqs');
+const { CLASS_BY_FILE, FACTION_RACES, SKYBORNE_BIT, hasBit } = require('../game/races');
 
 const BUILDER_VERSION = 18;
 
-const FACTION_MASK = { Alliance: 1 | 4 | 8 | 64, Horde: 2 | 16 | 32 | 128 };
 const FACTION_BIT = { Alliance: 1, Horde: 2 };
 const PROFESSION_SORTS = new Set([24, 101, 121, 181, 182, 201, 264, 304, 324]);
 const BATTLEGROUNDS = new Set([1459, 1460, 1461]);
@@ -64,15 +64,10 @@ const ISLANDS = { 1438: 1, 1457: 1, 2521: 2, 2665: 2 };
 const ISLE_MAPS = [2521, 2665];
 const DANGER_CELL = 200; // yards per travel-safety grid cell
 
-// Race mask bits. Era bits 0-7; Forever's Skyborne has one bit per faction
-// (bit 32 Alliance, bit 33 Horde), beyond 32-bit integer operators.
-const SKYBORNE_BIT = { Alliance: 2 ** 32, Horde: 2 ** 33 };
-function hasBit(mask, bit) {
-	return Math.floor(mask / bit) % 2 === 1;
-}
-// Is a race mask open to some race of the faction?
+// Is a race mask open to some race of the faction? Era bits 0-7, and Forever's
+// Skyborne bit on each side past 32 bits.
 function maskForFaction(races, faction) {
-	return ((races % 2 ** 32) & FACTION_MASK[faction]) !== 0 || hasBit(races, SKYBORNE_BIT[faction]);
+	return ((races % 2 ** 32) & FACTION_RACES[faction]) !== 0 || hasBit(races, SKYBORNE_BIT[faction]);
 }
 
 // Zephras Isle exits (Forever, in-game transports; positions from the live
@@ -274,7 +269,7 @@ function spacingOf(pts, members) {
 
 function buildWorld(data, opts = {}) {
 	const faction = opts.faction;
-	if (!FACTION_MASK[faction]) throw new Error(`faction must be Alliance or Horde (got ${faction})`);
+	if (!FACTION_RACES[faction]) throw new Error(`faction must be Alliance or Horde (got ${faction})`);
 	const bandWidth = opts.bandWidth || 5;
 	const warnings = [];
 	const frames = (data['map-frames'] && data['map-frames'].era) || {};
@@ -905,14 +900,13 @@ function buildWorld(data, opts = {}) {
 	// in the open world stay as they are. Chain quests missing from the world
 	// are added as talk-to quests at their recorded positions.
 	const dungeons = [];
-	const CLASS_BIT = { WARRIOR: 1, PALADIN: 2, HUNTER: 4, ROGUE: 8, PRIEST: 16, SHAMAN: 64, MAGE: 128, WARLOCK: 256, DRUID: 1024 };
 	const djPoint = (pos, fallback) => {
 		if (!pos || pos.inDungeon || pos.map == null || !Number.isFinite(pos.x) || !Number.isFinite(pos.y) || !frameOf(pos.map, pos.f)) return fallback;
 		const w = toWorld(pos.map, pos.x, pos.y, pos.f);
 		return addPoint(w.c, w.wx, w.wy, pos.map);
 	};
 	const djFaction = (f) => f == null || f === faction;
-	const djClasses = (list) => (Array.isArray(list) && list.length ? list.reduce((m, c) => m | (CLASS_BIT[String(c).toUpperCase()] || 0), 0) || null : null);
+	const djClasses = (list) => (Array.isArray(list) && list.length ? list.reduce((m, c) => m | ((CLASS_BY_FILE[String(c).toUpperCase()] || {}).bit || 0), 0) || null : null);
 	for (const d of (data.dungeons && data.dungeons.dungeons) || []) {
 		const ent = d.entrance;
 		if (!ent || ent.map == null || !frameOf(ent.map, ent.f)) {
@@ -1398,4 +1392,4 @@ function getWorld(opts) {
 	return w;
 }
 
-module.exports = { hasBit, SKYBORNE_BIT, buildWorld, getWorld, worldFile, dataHash, cluster, FACTION_MASK, ISLANDS, ISLE_MAPS };
+module.exports = { buildWorld, getWorld, worldFile, dataHash, cluster, ISLANDS, ISLE_MAPS };

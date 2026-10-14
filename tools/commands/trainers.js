@@ -6,8 +6,8 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { parseArgs, resolvePath } = require('../lib/dsl/cli');
-const { ROOT } = require('../lib/dsl/project');
+const { parseArgs, resolvePath } = require('../lib/cli');
+const { ROOT } = require('../lib/paths');
 const { loadData } = require('../lib/dsl/data');
 const { buildTrainers } = require('../lib/dsl/trainers');
 const { buildCandidates } = require('../lib/dsl/candidates');

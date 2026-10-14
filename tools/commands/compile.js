@@ -3,8 +3,9 @@
 // folder: ours (guides/) -> addon/Polestar_Guides, another pack -> <pack>/dist/<folder>.
 
 const path = require('node:path');
-const { printDiagnostics, plural } = require('../lib/dsl/cli');
-const { ROOT, writePackDir } = require('../lib/dsl/project');
+const { printDiagnostics, plural } = require('../lib/cli');
+const { writePackDir } = require('../lib/dsl/project');
+const { ROOT, DATA } = require('../lib/paths');
 const { packCommand, buildPack } = require('../lib/pack/build');
 
 const usage = `usage: node tools/polestar.js compile [<dir>] [options]

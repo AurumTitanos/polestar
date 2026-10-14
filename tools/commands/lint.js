@@ -3,9 +3,8 @@
 // guides against the simulator's cached worlds (data/sim, when built).
 
 const fs = require('node:fs');
-const path = require('node:path');
-const { resolvePath, printDiagnostics, plural } = require('../lib/dsl/cli');
-const { ROOT } = require('../lib/dsl/project');
+const { resolvePath, printDiagnostics, plural } = require('../lib/cli');
+const { ROOT, SOURCES } = require('../lib/paths');
 const { validateSoloPolicy } = require('../lib/dsl/validate');
 const { packCommand, buildPack } = require('../lib/pack/build');
 const { worldFile, dataHash } = require('../lib/sim/world');
@@ -46,7 +45,7 @@ function soloExclusions(simDir, dataDir) {
 	const excluded = {};
 	const stale = [];
 	if (!simDir) return { excluded, stale };
-	const hash = dataHash(dataDir, path.join(ROOT, 'data', 'sources'));
+	const hash = dataHash(dataDir, SOURCES);
 	for (const faction of ['Alliance', 'Horde']) {
 		const file = worldFile(simDir, faction);
 		if (!fs.existsSync(file)) continue;

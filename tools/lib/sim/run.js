@@ -6,14 +6,18 @@
 //   const run = compileRun(world, { race: 'Orc', cls: null });
 //   const tables = makeTables(run, params);
 
-const { LEVEL_XP, questXpShare, mobXp } = require('./xp');
+const { mobXp } = require('../game/xp');
+const { CLASSES, ALL_CLASSES, RACE_BY_FILE, FACTION_RACES, SKYBORNE_BIT, hasBit, raceLabel, classLabel } = require('../game/races');
 const { planOrder } = require('./tour');
 const { ISLE_MAPS, ISLANDS } = require('./world');
 
-const RACE_BITS = { Human: 1, Orc: 2, Dwarf: 4, NightElf: 8, Undead: 16, Tauren: 32, Gnome: 64, Troll: 128 };
-const CLASS_BITS = { Warrior: 1, Paladin: 2, Hunter: 4, Rogue: 8, Priest: 16, Shaman: 64, Mage: 128, Warlock: 256, Druid: 1024 };
-const FACTION_MASK = { Alliance: 1 | 4 | 8 | 64, Horde: 2 | 16 | 32 | 128 };
-const ALL_CLASSES = Object.values(CLASS_BITS).reduce((a, b) => a | b, 0);
+// Mask bits by the names runs use ("Undead", "Warrior"): the Era races, every class.
+const RACE_BITS = {};
+for (const r of Object.values(RACE_BY_FILE)) {
+	const bits = Object.values(r.sides);
+	if (bits.length === 1 && bits[0] < 2 ** 32) RACE_BITS[raceLabel(r.file)] = bits[0];
+}
+const CLASS_BITS = Object.fromEntries(Object.values(CLASSES).map((c) => [classLabel(c.file), c.bit]));
 
 const K_ACCEPT = 0;
 const K_TASK = 1;
@@ -34,18 +38,11 @@ const NEAR_HUB = 200; // a flight master / inn this close is learned / bound
 
 const MOBL = 64; // mob level stride in the kill tables
 
-// Skyborne (Forever) has one race bit per faction beyond 32 bits.
-const SKYBORNE_BIT = { Alliance: 2 ** 32, Horde: 2 ** 33 };
-
 function raceBit(race, raceBits = {}, faction = null) {
 	if (race == null) return 0;
 	if (raceBits[race] != null) return raceBits[race];
 	if (race === 'Skyborne' && faction) return SKYBORNE_BIT[faction];
 	return RACE_BITS[race] || 0;
-}
-
-function hasBit(mask, bit) {
-	return Math.floor(mask / bit) % 2 === 1;
 }
 
 // Is a quest open to this character? Masks are Era masks: a race without an
@@ -55,7 +52,7 @@ function hasBit(mask, bit) {
 // (1-4 classes) are not.
 function questOpen(q, faction, rbit, cls) {
 	if (q.races) {
-		const fm = FACTION_MASK[faction];
+		const fm = FACTION_RACES[faction];
 		if (rbit) {
 			if (!hasBit(q.races, rbit)) return false;
 		} else if (((q.races % 2 ** 32) & fm) === 0 && !hasBit(q.races, SKYBORNE_BIT[faction])) return false;
@@ -446,6 +443,5 @@ function makeTables(run, p) {
 }
 
 module.exports = {
-	compileRun, makeTables, hasBit, SKYBORNE_BIT,
-	CLASS_BITS, K_ACCEPT, K_TASK, K_TURNIN, K_GRIND, K_DUNGEON, W_KILL, W_USE, W_ESCORT, W_BUY, NEAR_K, MOBL, LEVEL_XP, questXpShare,
+	compileRun, makeTables, K_ACCEPT, K_TASK, K_TURNIN, K_GRIND, K_DUNGEON, W_KILL, W_USE, W_ESCORT, W_BUY, NEAR_K, MOBL,
 };

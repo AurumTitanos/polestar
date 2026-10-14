@@ -38,8 +38,8 @@
 // After the last package the character grinds to 60 at the best site for its level.
 
 const { Travel } = require('./travel');
-const { LEVEL_XP, MOBL, K_ACCEPT, K_TASK, K_TURNIN, K_GRIND, K_DUNGEON, W_KILL, W_USE, W_ESCORT, W_BUY } = require('./run');
-const { mobXp } = require('./xp');
+const { MOBL, K_ACCEPT, K_TASK, K_TURNIN, K_GRIND, K_DUNGEON, W_KILL, W_USE, W_ESCORT, W_BUY } = require('./run');
+const { LEVEL_XP, mobXp } = require('../game/xp');
 
 const SHARE = new Float64Array(64);
 for (let d = 0; d < 64; d++) SHARE[d] = d <= 5 ? 1 : d >= 10 ? 0.1 : [0.8, 0.6, 0.4, 0.2][d - 6];

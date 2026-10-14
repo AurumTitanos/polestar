@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { parseArgs } = require('node:util');
 
-const ROOT = path.resolve(__dirname, '..', '..');
+const { ROOT, DATA } = require('../lib/paths');
 
 const usage = `usage: node tools/polestar.js profession build [options]
        node tools/polestar.js profession draft <Profession> [options]
@@ -107,7 +107,7 @@ async function runDraft(rest) {
 	}
 	if (positionals.length !== 1) return fail('draft needs one profession name');
 	const { draftGuide } = require('../lib/professions/guide');
-	const dataDir = path.resolve(values.data || path.join(ROOT, 'data', 'forever'));
+	const dataDir = path.resolve(values.data || DATA);
 	const data = {
 		professions: loadJson(dataDir, 'professions'),
 		npcs: loadJson(dataDir, 'npcs'),

@@ -9,8 +9,9 @@
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const { parseArgs, printDiagnostics, resolvePath, plural } = require('../lib/dsl/cli');
-const { ROOT, writePackDir, loadProjectData } = require('../lib/dsl/project');
+const { parseArgs, printDiagnostics, resolvePath, plural } = require('../lib/cli');
+const { writePackDir, loadProjectData } = require('../lib/dsl/project');
+const { ROOT } = require('../lib/paths');
 const { Diagnostics } = require('../lib/dsl/diag');
 const { loadData } = require('../lib/dsl/data');
 const { isDir } = require('../lib/addons');

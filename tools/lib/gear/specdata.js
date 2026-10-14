@@ -15,7 +15,7 @@ const { luaToJson } = require('../lua');
 const path = require('node:path');
 const { header } = require('../generated');
 
-const ROOT = path.resolve(__dirname, '..', '..', '..');
+const { ROOT } = require('../paths');
 const WEIGHTS_LUA = path.join(ROOT, 'addon', 'Polestar', 'Gear', 'Weights.lua');
 
 // Level bands and the sim level each one blends with. `alpha` is the share

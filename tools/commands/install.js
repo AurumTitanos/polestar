@@ -8,8 +8,9 @@
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const { parseArgs, resolvePath, printDiagnostics, plural } = require('../lib/dsl/cli');
-const { ROOT, releaseAddons, packDirRefusal, writePackDir } = require('../lib/dsl/project');
+const { parseArgs, resolvePath, printDiagnostics, plural } = require('../lib/cli');
+const { releaseAddons, packDirRefusal, writePackDir } = require('../lib/dsl/project');
+const { ROOT } = require('../lib/paths');
 const { detectAddonsDirs, pickAddonsDir, isDir } = require('../lib/addons');
 const { PACK_OPTIONS, PACK_USAGE, otherPack, noDataConflict, noDataCache, buildPack, folderIn } = require('../lib/pack/build');
 

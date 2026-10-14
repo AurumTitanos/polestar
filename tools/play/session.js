@@ -32,10 +32,10 @@ const { SIMULATE, HOME, luaValue } = require('../lib/playtest');
 const { Font } = require('../preview/font');
 const { svg, TextureCache, readTGA, png } = require('../preview/render');
 
-const ROOT = path.join(__dirname, '..', '..');
+const { ROOT, DATA } = require('../lib/paths');
 const STUBS = path.join(ROOT, 'tests', 'lua');
 const MEDIA = path.join(ROOT, 'addon', 'Polestar', 'Media');
-const FOREVER = path.join(ROOT, 'data', 'forever');
+const FOREVER = DATA;
 const SCREEN = { x: 0, y: 0, w: 1920, h: 1080 };
 
 const FONT_FILES = ['Inter-Regular.ttf', 'Inter-Medium.ttf', 'Inter-SemiBold.ttf'];

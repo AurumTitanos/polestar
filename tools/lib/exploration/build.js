@@ -13,7 +13,7 @@ const { GUIDES, TOWNS, CAUTIONS, ISLANDS, LEGACY_NOTE } = require('./spec');
 const P = require('./plan');
 const { header } = require('../generated');
 
-const ROOT = path.join(__dirname, '..', '..', '..');
+const { ROOT, DATA, SOURCES } = require('../paths');
 const OUT_DIR = path.join(ROOT, 'guides', 'forever', 'exploration');
 const ID_PREFIX = 'forever/exploration/';
 const FACTIONS = ['Alliance', 'Horde'];
@@ -165,7 +165,7 @@ function continentCounts(ctx) {
 }
 
 // -> { files: { 'name.guide': text }, counts, build, warnings }
-async function buildAll({ dataDir = path.join(ROOT, 'data', 'forever'), sourcesDir = path.join(ROOT, 'data', 'sources'), offline = false, build, log } = {}) {
+async function buildAll({ dataDir = DATA, sourcesDir = SOURCES, offline = false, build, log } = {}) {
 	const zones = readJson(dataDir, 'zones');
 	const islands = Object.values(zones).filter((z) => z.type === 3 && ISLANDS.includes(z.name) && z.parent).map((z) => z.id);
 	const loaded = await loadAreas({ sourcesDir, offline, build, log, islands });

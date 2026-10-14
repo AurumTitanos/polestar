@@ -16,7 +16,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { parseGuide } = require('./parse');
 const { Diagnostics } = require('./diag');
-const { CLASS_FILES } = require('./conditions');
+const { CLASS_FILES } = require('../game/races');
 
 const SW = 1453;
 const IF = 1455;

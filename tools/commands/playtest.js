@@ -1,8 +1,8 @@
 'use strict';
 // playtest: the guide simulator as a command (tools/lib/playtest.js).
 
-const { parseArgs, resolvePath, printDiagnostics, plural } = require('../lib/dsl/cli');
-const { ROOT } = require('../lib/dsl/project');
+const { parseArgs, resolvePath, printDiagnostics, plural } = require('../lib/cli');
+const { ROOT } = require('../lib/paths');
 const { commandPack, packArgument } = require('../lib/pack/locate');
 const { playtest, resultLines, CLASSES } = require('../lib/playtest');
 const { findLua } = require('../lib/lua');

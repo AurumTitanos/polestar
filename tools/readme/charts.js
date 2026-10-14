@@ -24,7 +24,7 @@ const { Outliner } = require('./outline');
 const { C: BRAND } = require('./brand');
 const { header } = require('../lib/generated');
 
-const ROOT = path.join(__dirname, '..', '..');
+const { ROOT } = require('../lib/paths');
 const OUT = path.join(ROOT, 'docs', 'assets', 'charts');
 
 const C = {

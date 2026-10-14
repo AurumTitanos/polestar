@@ -14,11 +14,9 @@
 const { parseCount } = require('./objectives');
 const { reduceSpawns, spawnRecord, round2 } = require('./spawns');
 const { luaGet, luaPairs, luaList, dropRate } = require('./questie');
+const { ALL_RACES, ALL_CLASSES } = require('../game/races');
 
 const SOURCE = 'questie-forever';
-// Classic race and class bits.
-const CLASSIC_RACES = 1 | 2 | 4 | 8 | 16 | 32 | 64 | 128;
-const ALL_CLASSES = 1 | 2 | 4 | 8 | 16 | 64 | 128 | 256 | 1024;
 // Questie npcFlags (Classic values) -> npcs.json roles.
 const NPC_FLAG_ROLES = [
 	[4, 'vendor'], [8, 'flightmaster'], [16, 'trainer'], [32, 'spirithealer'], [128, 'innkeeper'], [256, 'banker'],
@@ -47,7 +45,7 @@ function raceMask(v) {
 	if (!Number.isSafeInteger(n) || n <= 0) return null;
 	const low = n % 2 ** 32;
 	const high = Math.floor(n / 2 ** 32);
-	if ((low & CLASSIC_RACES) === CLASSIC_RACES && (high & 3) === 3) return null;
+	if ((low & ALL_RACES) === ALL_RACES && (high & 3) === 3) return null;
 	return n;
 }
 

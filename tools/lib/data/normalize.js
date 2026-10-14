@@ -15,8 +15,7 @@
 const { parseCount } = require('./objectives');
 const { eraSpawns, round2 } = require('./spawns');
 
-const ALL_RACES = 1 | 2 | 4 | 8 | 16 | 32 | 64 | 128;
-const ALL_CLASSES = 1 | 2 | 4 | 8 | 16 | 64 | 128 | 256 | 1024;
+const { ALL_RACES, ALL_CLASSES } = require('../game/races');
 
 const NPC_ROLES = {
 	auctioneer: 'auctioneer', banker: 'banker', battlemaster: 'battlemaster', flight: 'flightmaster',
@@ -252,4 +251,4 @@ function normalizePfQuest(raw, { resolveArea, spawnOptions } = {}) {
 	return { quests, npcs: npcs.table, objects: objects.table, items: normalizeItems(raw), stats };
 }
 
-module.exports = { normalizePfQuest, parseLevel, mask, ALL_RACES, ALL_CLASSES };
+module.exports = { normalizePfQuest, parseLevel, mask };

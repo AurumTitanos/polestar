@@ -4,11 +4,11 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
-const { parseArgs } = require('../lib/dsl/cli');
+const { parseArgs } = require('../lib/cli');
 const { validateManifest } = require('../lib/pack/manifest');
 const { defaultFolder, placeholderLicense } = require('../lib/pack/format');
 
-const ROOT = path.join(__dirname, '..', '..');
+const { ROOT } = require('../lib/paths');
 const TEMPLATE = path.join(ROOT, 'tools', 'templates', 'pack');
 // Files that need Polestar's repository URL; skipped without one.
 const NEEDS_REPO = [path.join('.github', 'workflows', 'pack.yml'), path.join('.devcontainer', 'devcontainer.json')];

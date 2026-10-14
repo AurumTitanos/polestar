@@ -6,7 +6,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const ROOT = path.join(__dirname, '..', '..');
+const { ROOT } = require('../lib/paths');
 const MEDIA = path.join(ROOT, 'tools', 'media');
 const ADDON = path.join(ROOT, 'addon', 'Polestar');
 

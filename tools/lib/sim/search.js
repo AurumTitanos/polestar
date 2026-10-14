@@ -16,9 +16,8 @@
 // gives the same result as one.
 
 const { Rng, hashSeed } = require('./rng');
-const { LEVEL_XP } = require('./run');
 const { MAX_VISITS } = require('./evaluate');
-const { CUM_XP } = require('./xp');
+const { CUM_XP } = require('../game/xp');
 
 function cumXp(ev) {
 	return CUM_XP[ev.level] + ev.xp;
@@ -286,4 +285,4 @@ function converged(curve, share, tol) {
 	return (before - now) / before < tol;
 }
 
-module.exports = { construct, anneal, runJob, search, mergeElite, converged, routeKey, LEVEL_XP };
+module.exports = { construct, anneal, runJob, search, mergeElite, converged, routeKey };

@@ -7,7 +7,7 @@ const { loadTables } = require('./tables');
 const { extractProfessions } = require('./extract');
 const { resolveTrainers } = require('./trainers');
 
-const ROOT = path.resolve(__dirname, '..', '..', '..');
+const { DATA, SOURCES } = require('../paths');
 
 // Vendor stock limits from pfQuest's vanilla item database (db/items.lua):
 // item -> ["V"] = { [npc] = limit }, 0 = unlimited. items.json keeps only the
@@ -47,8 +47,8 @@ function readJson(file) {
 }
 
 async function buildProfessions({ dataDir, sourcesDir, pfquestDir, build, offline, outFile, fetchImpl, log = () => {} } = {}) {
-	dataDir = dataDir || path.join(ROOT, 'data', 'forever');
-	sourcesDir = sourcesDir || path.join(ROOT, 'data', 'sources');
+	dataDir = dataDir || DATA;
+	sourcesDir = sourcesDir || SOURCES;
 	pfquestDir = pfquestDir || path.join(sourcesDir, 'pfQuest');
 	outFile = outFile || path.join(dataDir, 'professions.json');
 	const items = readJson(path.join(dataDir, 'items.json'));

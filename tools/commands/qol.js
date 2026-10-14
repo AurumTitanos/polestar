@@ -12,7 +12,7 @@ const path = require('node:path');
 const { parseArgs } = require('node:util');
 const { header } = require('../lib/generated');
 
-const ROOT = path.join(__dirname, '..', '..');
+const { ROOT, DATA } = require('../lib/paths');
 const HEALER_NAME = 'Spirit Healer';
 const MERGE_YARDS = 25; // two spawn points this close are one healer
 
@@ -103,7 +103,7 @@ module.exports = {
 			return 2;
 		}
 		const { values } = parseArgs({ args: rest, options: { data: { type: 'string' }, lua: { type: 'string' } } });
-		const dataDir = path.resolve(values.data || path.join(ROOT, 'data', 'forever'));
+		const dataDir = path.resolve(values.data || DATA);
 		const npcs = JSON.parse(fs.readFileSync(path.join(dataDir, 'npcs.json'), 'utf8'));
 		const frames = JSON.parse(fs.readFileSync(path.join(dataDir, 'map-frames.json'), 'utf8'));
 		const data = buildQolData({ npcs, frames });

@@ -247,7 +247,7 @@ test('Skyborne plays on both sides: the faction picks its quest-mask bit, Era-on
 });
 
 test('the race table agrees with the Forever client (data/forever/races.json)', { skip: needs('races.json') }, () => {
-	const { RACE_BY_FILE } = require('../tools/lib/dsl/conditions');
+	const { RACE_BY_FILE } = require('../tools/lib/game/races');
 	const races = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'forever', 'races.json'), 'utf8'));
 	const fromData = Object.fromEntries(Object.entries(races).map(([file, sides]) => [file, Object.fromEntries(Object.entries(sides).map(([s, v]) => [s, v.bit]))]));
 	const fromTable = Object.fromEntries(Object.values(RACE_BY_FILE).map((r) => [r.file, r.sides]));

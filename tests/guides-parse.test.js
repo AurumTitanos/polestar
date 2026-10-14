@@ -7,7 +7,8 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { findGuideFiles, OFFICIAL_DIR, ROOT } = require('../tools/lib/dsl/project');
+const { findGuideFiles, OFFICIAL_DIR } = require('../tools/lib/dsl/project');
+const { ROOT } = require('../tools/lib/paths');
 const { parseGuide } = require('../tools/lib/dsl/parse');
 const { Diagnostics, format } = require('../tools/lib/dsl/diag');
 

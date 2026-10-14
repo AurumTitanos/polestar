@@ -2,7 +2,7 @@
 // Argument parsing and diagnostics printing shared by the toolchain commands.
 
 const path = require('node:path');
-const { FORMATS, format, formatDiagnostics } = require('./diag');
+const { FORMATS, format, formatDiagnostics } = require('./dsl/diag');
 
 // parseArgs(argv, { flags: ['--link'], options: ['--dest'] })
 // -> { opts: { link: true, dest: '...' }, positional: [], error }

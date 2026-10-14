@@ -3,7 +3,8 @@
 
 const path = require('node:path');
 const { parseArgs } = require('node:util');
-const { buildQuestDB, writeQuestDB, DEFAULTS, ROOT } = require('../lib/questdb/build');
+const { buildQuestDB, writeQuestDB, DEFAULTS } = require('../lib/questdb/build');
+const { ROOT } = require('../lib/paths');
 
 const usage = `usage: node tools/polestar.js questdb build [options]
 

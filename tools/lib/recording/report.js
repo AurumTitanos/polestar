@@ -29,7 +29,7 @@
 //   the recorded XP-per-level (falling back to the 1.12 table), so level-ups
 //   inside a step are counted in full.
 
-const { LEVEL_XP } = require('../route/xp');
+const { LEVEL_XP } = require('../game/xp');
 
 const IDLE_CAP = 300; // seconds of no events counted at most
 const TELEPORT_SPEED = 40; // yd/s: faster jumps between positions are hearths/ports, not travel

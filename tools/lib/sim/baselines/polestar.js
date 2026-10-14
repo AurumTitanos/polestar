@@ -6,7 +6,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { compileProject } = require('../../dsl/project');
-const { CLASSES, RACES } = require('../../dsl/conditions');
+const { CLASSES, RACES } = require('../../game/races');
 
 const MAX_ENUMERATED = 2000;
 const ANY_CLASS_MIN = 8; // a class list this long came from a negation (`!Druid`)

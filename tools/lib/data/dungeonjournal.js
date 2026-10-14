@@ -36,15 +36,13 @@ const path = require('node:path');
 const { luaToJson } = require('../lua');
 const { findInstalledAddon } = require('../addons');
 const { pickSpawn } = require('../dsl/resolve');
+const { CLASS_FILES, CLASS_BY_FILE, FACTION_RACES } = require('../game/races');
 
 const FOLDER = 'ForeverDungeonJournal';
 const DATA_FILES = ['Dungeons', 'DungeonEntrances', 'DungeonRoutes', 'Bosses', 'QuestMaps', 'QuestChains', 'QuestRewards', 'QuestShareability', 'QuestUpdates'];
 // Constants Core/Bootstrap.lua defines before the data files run.
 const CONSTANTS = { ALBA_FAIRMOON_LOCATION: 'Alba Fairmoon, Sentinel Hill inn, Westfall' };
 
-const ALLIANCE_RACES = 1 | 4 | 8 | 64;
-const HORDE_RACES = 2 | 16 | 32 | 128;
-const CLASS_BITS = { WARRIOR: 1, PALADIN: 2, HUNTER: 4, ROGUE: 8, PRIEST: 16, SHAMAN: 64, MAGE: 128, WARLOCK: 256, DRUID: 1024 };
 
 // Positions found by hand where neither our data nor DungeonJournal has one:
 // `<questId>:start|end` -> { map, x, y, f, npc (name), note, ref (where it was read) }.
@@ -425,16 +423,14 @@ function withDataPre(data, djChain, id, side) {
 
 function raceOk(q, side) {
 	if (!q || q.races === null || q.races === undefined) return true;
-	const mask = side === 'Alliance' ? ALLIANCE_RACES : HORDE_RACES;
+	const mask = FACTION_RACES[side === 'Alliance' ? 'Alliance' : 'Horde'];
 	return (Number(q.races) & mask) !== 0;
 }
 
 function classesOf(mask) {
 	if (!(Number(mask) > 0)) return null;
-	const out = Object.entries(CLASS_BITS)
-		.filter(([, bit]) => (Number(mask) & bit) !== 0)
-		.map(([c]) => c);
-	return out.length && out.length < Object.keys(CLASS_BITS).length ? out : null;
+	const out = CLASS_FILES.filter((c) => (Number(mask) & CLASS_BY_FILE[c].bit) !== 0);
+	return out.length && out.length < CLASS_FILES.length ? out : null;
 }
 
 function factionOf(v) {
@@ -653,6 +649,4 @@ module.exports = {
 	npcNameOf,
 	saysInside,
 	slug,
-	ALLIANCE_RACES,
-	HORDE_RACES,
 };

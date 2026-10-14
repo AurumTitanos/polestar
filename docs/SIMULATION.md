@@ -187,7 +187,7 @@ packages.
 
 ## 2. Character and XP/time model (parameters with priors in data/sim/params.json)
 
-- XP to level: the Classic table (same as tools/lib/dsl/validate.js).
+- XP to level: the Classic table (tools/lib/game/xp.js, shared by every tool).
 - Quest XP: the client's QuestXP table (wago.tools DB2 `QuestXP`, cached under
   data/sources/wago) at the quest's level and an estimated difficulty tier:
   breadcrumbs (no objectives, talk to someone) low, normal kill/collect quests

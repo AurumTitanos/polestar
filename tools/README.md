@@ -94,23 +94,26 @@ The release steps are in [docs/RELEASING.md](../docs/RELEASING.md).
 | Path | What it is |
 |---|---|
 | `addons.js` | Finds World of Warcraft: Forever installs and their AddOns and WTF folders; every command that reads or writes them goes through it (`$WOW_FOREVER_ADDONS` first, then the detected clients, live first) |
+| `cli.js` | The shared argument parser and diagnostics printer of the commands |
 | `codex/` | `codex build`: the Codex JSON, the Dungeons journal and the `Polestar_Codex` writer |
 | `consume/` | Readers for installed addons' data, all through one Lua reader, and for the sims' stat weights |
 | `data/` | `data build`: sources, merging, spawns, races, the dungeon import; also the shared CSV and wago.tools loaders |
-| `dsl/` | The guide compiler: lexer, parser, resolver, validation, emitter; project and pack layout; the shared argument parser `cli.js` |
+| `dsl/` | The guide compiler: lexer, parser, resolver, validation, emitter; project and pack layout; parsing a guide's class, race and faction conditions |
 | `exploration/` | `exploration build`: the exploration guide generator |
 | `find.js` | `find`'s search |
 | `generated.js` | Writes or checks a command's generated files |
+| `game/` | The game's rules, once for every tool: `xp.js` (XP to level, quest and kill XP, the client's QuestXP table) and `races.js` (races, classes and their mask bits) |
 | `gear/` | `gear build`: Forever item stats, reward choices, weight bands |
 | `itemdb/` | `itemdb build`: item stats from the client tables |
 | `lua.js` | Runs Lua 5.1 for the tools (reading SavedVariables and other addons' data) |
 | `maps/` | `maps build` (zone levels) and `maps overlays` |
 | `pack/` | The pack contract: which pack a command works on, `pack.json`, building a pack and the format constants |
+| `paths.js` | The repository's folders (`ROOT`, `DATA` for `data/forever`, `SOURCES` for `data/sources`); every tool resolves paths from them |
 | `playtest.js` | The guide simulator behind `playtest` and `tests/guides.test.js` |
 | `professions/` | `profession build` and `draft`; `gathering/` is the gathering and secondary profession guide generator behind `profession gathering` |
 | `questdb/` | `questdb build`, and the spawn clustering the compiler also uses |
 | `recording/` | `record`: import, watch, draft, report |
-| `route/` | `draft`: the first-draft route planner and its geometry, tour and XP helpers |
+| `route/` | `draft`: the first-draft route planner and its geometry and tour helpers |
 | `sim/` | The route simulator: world model, evaluation, search, calibration, export, baselines |
 | `tga.js` | Draws textures in code and writes TGA files |
 | `travel/` | `travel build` and `travel route`: flights, transports, inns, paths, crossings |

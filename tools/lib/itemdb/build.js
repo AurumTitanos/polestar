@@ -9,7 +9,7 @@ const { loadTables } = require('../professions/tables');
 const { header } = require('../generated');
 const { extractItems, encode } = require('./stats');
 
-const ROOT = path.resolve(__dirname, '..', '..', '..');
+const { ROOT, SOURCES } = require('../paths');
 const TABLES = ['ItemSparse', 'Item', 'ItemEffect', 'SpellEffect'];
 const ADDON = 'Polestar_ItemDB';
 const SCHEMA = 1;
@@ -72,7 +72,7 @@ function packageVersion() {
 
 // -> { build, outDir, count, bytes, skipped, warnings }
 async function buildItemDb({ sourcesDir, build, offline, outDir, fetchImpl, log = () => {} } = {}) {
-	sourcesDir = sourcesDir || path.join(ROOT, 'data', 'sources');
+	sourcesDir = sourcesDir || SOURCES;
 	outDir = outDir || path.join(ROOT, 'addon', ADDON);
 	const loaded = await loadTables({ sourcesDir, build, offline, fetchImpl, log, tables: TABLES });
 	const { items, skipped } = extractItems(loaded.tables);

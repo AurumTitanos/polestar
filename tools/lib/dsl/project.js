@@ -13,7 +13,7 @@ const { loadData } = require('./data');
 const { emitGuides, emitPack, emitToc, emitMapFrames, emitLicense } = require('./emit');
 const { ownsGuideId, GENERATED_MARKER } = require('../pack/format');
 
-const ROOT = path.join(__dirname, '..', '..', '..');
+const { ROOT, DATA } = require('../paths');
 // Our own pack: guides/pack.json and the guides beside it.
 const OFFICIAL_DIR = path.join(ROOT, 'guides');
 
@@ -248,7 +248,6 @@ function releaseAddons(addonsDir) {
 }
 
 module.exports = {
-	ROOT,
 	OFFICIAL_DIR,
 	packageVersion,
 	coreInterface,

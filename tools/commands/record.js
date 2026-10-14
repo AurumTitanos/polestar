@@ -14,7 +14,7 @@ const { watchSavedVariables } = require('../lib/recording/watch');
 const { draftGuide } = require('../lib/recording/draft');
 const { buildReport, formatReport } = require('../lib/recording/report');
 const { resolvePack } = require('../lib/pack/locate');
-const { printDiagnostics } = require('../lib/dsl/cli');
+const { printDiagnostics } = require('../lib/cli');
 
 const usage = `usage: node tools/polestar.js record <subcommand> [options]
 

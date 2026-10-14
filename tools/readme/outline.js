@@ -9,7 +9,7 @@
 const path = require('node:path');
 const { Font } = require('../preview/font');
 
-const ROOT = path.join(__dirname, '..', '..');
+const { ROOT } = require('../lib/paths');
 const FILES = {
 	regular: path.join(ROOT, 'addon', 'Polestar', 'Media', 'Fonts', 'Inter-Regular.ttf'),
 	medium: path.join(ROOT, 'addon', 'Polestar', 'Media', 'Fonts', 'Inter-Medium.ttf'),

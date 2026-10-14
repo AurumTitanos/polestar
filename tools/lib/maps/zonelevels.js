@@ -26,7 +26,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { header } = require('../generated');
 
-const ROOT = path.join(__dirname, '..', '..', '..');
+const { ROOT, DATA } = require('../paths');
 
 const DEFAULTS = {
 	low: 0.1,
@@ -163,7 +163,7 @@ function foreverOnly(frames) {
 	return Object.keys((frames && frames.forever) || {}).filter((id) => !(id in era)).map(Number).sort((a, b) => a - b);
 }
 
-function buildZoneLevels({ dataDir = path.join(ROOT, 'data', 'forever'), ...opts } = {}) {
+function buildZoneLevels({ dataDir = DATA, ...opts } = {}) {
 	const npcs = readJson(path.join(dataDir, 'npcs.json'));
 	const zones = readJson(path.join(dataDir, 'zones.json'));
 	const framesFile = path.join(dataDir, 'map-frames.json');
@@ -172,4 +172,4 @@ function buildZoneLevels({ dataDir = path.join(ROOT, 'data', 'forever'), ...opts
 	return { levels, lua: emitLua(levels) };
 }
 
-module.exports = { zoneLevels, percentile, emitLua, buildZoneLevels, foreverOnly, DEFAULTS, ROOT };
+module.exports = { zoneLevels, percentile, emitLua, buildZoneLevels, foreverOnly, DEFAULTS };

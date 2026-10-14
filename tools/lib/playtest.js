@@ -31,13 +31,14 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { runAddon, tocEntries } = require('../../tests/helpers/lua');
-const { ROOT, OFFICIAL_DIR, findGuideFiles, compileSources, buildPackFiles, writePackDir } = require('./dsl/project');
+const { OFFICIAL_DIR, findGuideFiles, compileSources, buildPackFiles, writePackDir } = require('./dsl/project');
+const { DATA } = require('./paths');
+const { RACE_BY_FILE } = require('./game/races');
 const { buildPack } = require('./pack/build');
 const { readManifest } = require('./pack/manifest');
 const { loadData } = require('./dsl/data');
 const { Diagnostics } = require('./dsl/diag');
 
-const DATA = path.join(ROOT, 'data', 'forever');
 const CLASSES = ['WARRIOR', 'PALADIN', 'HUNTER', 'ROGUE', 'PRIEST', 'SHAMAN', 'MAGE', 'WARLOCK', 'DRUID'];
 
 function luaValue(v) {
@@ -196,9 +197,11 @@ function classesFor(data, guide, race, faction, only = null) {
 	return [...[...named].filter((c) => can.includes(c)), ...(plain ? [plain] : [])];
 }
 
-const ALLIANCE = ['Human', 'Dwarf', 'Gnome', 'NightElf'];
-const HORDE = ['Orc', 'Troll', 'Tauren', 'Scourge'];
-const sideOf = (race) => (HORDE.includes(race) ? 'Horde' : ALLIANCE.includes(race) ? 'Alliance' : null);
+// The one side a race file is played on; null for Skyborne (both) or an unknown race.
+function sideOf(race) {
+	const sides = Object.keys((RACE_BY_FILE[race] || {}).sides || {});
+	return sides.length === 1 ? sides[0] : null;
+}
 
 // Races the guide can be played as: those it names (header or any `only`)
 // and those arriving from a previous guide (any route option: an Undead may

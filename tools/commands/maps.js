@@ -4,7 +4,8 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { parseArgs } = require('node:util');
-const { buildZoneLevels, ROOT } = require('../lib/maps/zonelevels');
+const { buildZoneLevels } = require('../lib/maps/zonelevels');
+const { ROOT, DATA, SOURCES } = require('../lib/paths');
 const overlays = require('../lib/maps/overlays');
 
 const usage = `usage: node tools/polestar.js maps <build|overlays> [options]
@@ -30,7 +31,7 @@ function build(rest) {
 		args: rest,
 		options: { data: { type: 'string' }, lua: { type: 'string' } },
 	});
-	const dataDir = path.resolve(values.data || path.join(ROOT, 'data', 'forever'));
+	const dataDir = path.resolve(values.data || DATA);
 	const out = path.resolve(values.lua || path.join(ROOT, 'addon', 'Polestar', 'Maps', 'ZoneLevels.lua'));
 	const { levels, lua } = buildZoneLevels({ dataDir });
 	fs.writeFileSync(out, lua);
@@ -45,7 +46,7 @@ async function buildOverlays(rest) {
 		options: { build: { type: 'string' }, sources: { type: 'string' }, offline: { type: 'boolean' }, lua: { type: 'string' } },
 	});
 	const build = values.build || overlays.BUILD;
-	const sourcesDir = path.resolve(values.sources || path.join(ROOT, 'data', 'sources'));
+	const sourcesDir = path.resolve(values.sources || SOURCES);
 	const out = path.resolve(values.lua || path.join(ROOT, 'addon', 'Polestar', 'UI', 'ZoneArtOverlays.lua'));
 	const tables = await overlays.loadTables({ sourcesDir, build, offline: values.offline, log: (m) => console.log(m) });
 	const result = overlays.buildOverlays(tables);

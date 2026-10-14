@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { draft, loadData } = require('../lib/route');
 
-const ROOT = path.resolve(__dirname, '..', '..');
+const { DATA } = require('../lib/paths');
 
 const usage = `usage: node tools/polestar.js draft --faction <Alliance|Horde> --race <Race> --zone <name> [--zone <name>...] --levels <min>-<max> [options]
 
@@ -123,7 +123,7 @@ async function run(argv) {
 	}
 	let result;
 	try {
-		const data = loadData(path.resolve(args.data || path.join(ROOT, 'data', 'forever')));
+		const data = loadData(path.resolve(args.data || DATA));
 		result = draft(data, opts);
 	} catch (e) {
 		console.error(`draft: ${e.message}`);

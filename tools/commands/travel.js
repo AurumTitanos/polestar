@@ -4,7 +4,8 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { parseArgs } = require('node:util');
-const { buildTravel, writeTravel, ROOT, TRAVEL_ADDON } = require('../lib/travel/build');
+const { buildTravel, writeTravel, TRAVEL_ADDON } = require('../lib/travel/build');
+const { ROOT, DATA, SOURCES } = require('../lib/paths');
 const { planRoute } = require('../lib/travel/route');
 
 const usage = `usage: node tools/polestar.js travel build [options]
@@ -61,11 +62,11 @@ async function build(rest) {
 			lua: { type: 'string' },
 		},
 	});
-	const dataDir = path.resolve(values.data || path.join(ROOT, 'data', 'forever'));
+	const dataDir = path.resolve(values.data || DATA);
 	const result = await buildTravel({
 		dataDir,
 		recordingsDir: path.resolve(values.recordings || path.join(ROOT, 'data', 'recordings')),
-		sourcesDir: path.resolve(values.sources || path.join(ROOT, 'data', 'sources')),
+		sourcesDir: path.resolve(values.sources || SOURCES),
 		...(values.crossings ? { crossingsFile: path.resolve(values.crossings) } : {}),
 		build: values.build,
 		foreverBuild: values['forever-build'],

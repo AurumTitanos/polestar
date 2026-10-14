@@ -6,7 +6,8 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { zoneLevels, emitLua, buildZoneLevels, foreverOnly, ROOT } = require('../tools/lib/maps/zonelevels');
+const { zoneLevels, emitLua, buildZoneLevels, foreverOnly } = require('../tools/lib/maps/zonelevels');
+const { ROOT } = require('../tools/lib/paths');
 const { runAddon } = require('./helpers/lua');
 const { DATA, needs } = require('./helpers/data');
 
