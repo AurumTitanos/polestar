@@ -10,6 +10,7 @@ const assert = require('node:assert/strict');
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
+const { spawnSync } = require('node:child_process');
 
 const ROOT = path.join(__dirname, '..');
 const PATHS = ['addon', 'guides', 'docs', 'tools/templates', 'README.md', 'CONTRIBUTING.md', 'CHANGELOG.md', 'THIRD_PARTY.md', 'LICENSE-EXCEPTION.md'];
@@ -36,24 +37,30 @@ function namedTokens(text, hashes) {
 	return out;
 }
 
-// Every file under p (p itself when it is a file), skipping binary ones (a NUL byte).
-function textFiles(p) {
-	const st = fs.statSync(p);
-	if (st.isFile()) {
-		const buf = fs.readFileSync(p);
-		return buf.includes(0) ? [] : [{ file: p, text: buf.toString('utf8') }];
-	}
-	return fs.readdirSync(p).sort().flatMap((name) => textFiles(path.join(p, name)));
+// A text file's entry, or null for a binary one (a NUL byte).
+function textFile(file) {
+	const buf = fs.readFileSync(file);
+	return buf.includes(0) ? null : { file, text: buf.toString('utf8') };
+}
+
+// Every file under p (p itself when it is a file).
+function walk(p) {
+	if (fs.statSync(p).isFile()) return [p];
+	return fs.readdirSync(p).sort().flatMap((name) => walk(path.join(p, name)));
+}
+
+// The files the repository holds under the listed paths: tracked ones and new
+// ones git would add, never ignored local files (a maintainer's notes, local
+// data packs). Outside a git checkout, every file under them.
+function repoFiles() {
+	const git = spawnSync('git', ['ls-files', '-z', '--cached', '--others', '--exclude-standard', '--', ...PATHS], { cwd: ROOT, encoding: 'utf8' });
+	if (git.status === 0) return git.stdout.split('\0').filter(Boolean).sort().map((rel) => path.join(ROOT, rel)).filter((f) => fs.existsSync(f));
+	return PATHS.flatMap((rel) => walk(path.join(ROOT, rel)));
 }
 
 function scan() {
-	const files = [];
-	for (const rel of PATHS) {
-		const abs = path.join(ROOT, rel);
-		assert.ok(fs.existsSync(abs), `${rel} is listed for the wording rule but does not exist`);
-		files.push(...textFiles(abs));
-	}
-	return files;
+	for (const rel of PATHS) assert.ok(fs.existsSync(path.join(ROOT, rel)), `${rel} is listed for the wording rule but does not exist`);
+	return repoFiles().map(textFile).filter(Boolean);
 }
 
 const where = (file, text, index) => `${path.relative(ROOT, file)}:${text.slice(0, index).split('\n').length}`;
