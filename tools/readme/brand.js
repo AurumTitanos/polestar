@@ -9,6 +9,7 @@
 //   emblem.svg        the emblem in Polestar gold, transparent
 //   logo.svg          the addon icon: the gold emblem on a night tile
 //   download.svg      the README's download button
+//   curseforge.svg    the README's CurseForge button, beside it
 //   avatar.svg        the project avatar for the CurseForge listing: the
 //                     emblem, cut heavier, in its glow on a square night tile
 // and, with rsvg-convert, the listing's PNGs in docs/curseforge/images
@@ -156,6 +157,38 @@ ${text}
 `;
 }
 
+// CurseForge's mark, the anvil, on a 24 grid (x 0 to 24, y 4.4 to 19.6): the
+// path of simple-icons' "curseforge" icon (github.com/simple-icons/
+// simple-icons, icons/curseforge.svg), CC0 1.0. CurseForge is a trademark of
+// Overwolf; the mark only links to Polestar's CurseForge page.
+const CURSEFORGE_MARK = 'M18.326 9.2145S23.2261 8.4418 24 6.1882h-7.5066V4.4H0l2.0318 2.3576V9.173s5.1267-.2665 7.1098 1.2372c2.7146 2.516-3.053 5.917-3.053 5.917L5.0995 19.6c1.5465-1.4726 4.494-3.3775 9.8983-3.2857-2.0565.65-4.1245 1.6651-5.7344 3.2857h10.9248l-1.0288-3.2726s-7.918-4.6688-.8336-7.1127z';
+const CURSEFORGE = '#f16436';
+
+// The README's CurseForge button, beside the download button and cut the same:
+// the same height, corners and Marcellus, on a night face (the sky of the
+// banner) so the two read as a pair and not as two golds, with CurseForge's
+// anvil in its own orange and "Get it on CurseForge" in the page's light text.
+function curseforgeSvg() {
+	const o = new Outliner('f');
+	const H = 56, pad = 24, mark = 28, gap = 12, size = 23;
+	const label = 'Get it on CurseForge';
+	const tw = o.width(label, { font: 'marcellus', size });
+	const W = Math.ceil(pad + mark + gap + tw + pad);
+	const k = mark / 24;
+	const text = o.text(label, { font: 'marcellus', size, x: pad + mark + gap, y: H / 2 + size * 0.34, fill: C.text, stroke: 0.2 });
+	return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${label}">
+<title>${label}</title>
+<defs>
+<linearGradient id="face" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C.sky}"/><stop offset="1" stop-color="${C.bg}"/></linearGradient>
+${o.defs()}
+</defs>
+<rect x="0.5" y="0.5" width="${W - 1}" height="${H - 1}" rx="10" fill="url(#face)" stroke="${C.accent}" stroke-opacity="0.55"/>
+<path fill="${CURSEFORGE}" transform="translate(${pad} ${f2(H / 2 - 12 * k)}) scale(${f2(k)})" d="${CURSEFORGE_MARK}"/>
+${text}
+</svg>
+`;
+}
+
 // The band's sky mask (tools/media/ui.js band()): opaque at the top, a
 // quarter left halfway, gone at the foot. As gradient stops.
 function skyStops(color) {
@@ -253,6 +286,7 @@ function write() {
 		'emblem.svg': emblemSvg(),
 		'logo.svg': logoSvg(),
 		'download.svg': downloadSvg(),
+		'curseforge.svg': curseforgeSvg(),
 		'avatar.svg': avatarSvg(),
 	};
 	for (const [name, text] of Object.entries(files)) {

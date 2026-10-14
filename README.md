@@ -12,6 +12,7 @@
 
 <p align="center">
   <a href="https://github.com/fitzforge/polestar/releases"><img src="docs/assets/download.svg" height="48" alt="Download Polestar"></a>
+  <a href="https://www.curseforge.com/wow/addons/polestar-guides"><img src="docs/assets/curseforge.svg" height="48" alt="Get it on CurseForge"></a>
 </p>
 
 <p align="center">
@@ -728,9 +729,10 @@ show the game (© Blizzard Entertainment) and are not part of the release.
 
 The Inter typeface (SIL Open Font License 1.1) ships with the addon; the
 POLESTAR wordmark is cut from Cinzel (SIL Open Font License 1.1) and ships
-only as images. The README's banner, download button, logo, charts and the
+only as images. The README's banner, buttons, logo, charts and the
 CurseForge avatar are drawn by [`tools/readme`](tools/readme) from the same sources, with
-Marcellus (SIL Open Font License 1.1) for the banner's lines.
+Marcellus (SIL Open Font License 1.1) for the banner's lines; the CurseForge
+button's anvil is the CurseForge mark from simple-icons (CC0 1.0).
 
 [LICENSE-EXCEPTION.md](LICENSE-EXCEPTION.md) adds a permission under section
 7: guide packs produced by Polestar's compiler, including the reference data
