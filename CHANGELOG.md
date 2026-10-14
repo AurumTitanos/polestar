@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.3 (2026-10-14)
+
+### For players
+
+- Clearing the guide menu's search takes its Codex matches away: they no
+  longer stay drawn over the guide list (they did after searching for an
+  item or mount, then clearing the search or changing tabs).
+
 ## 0.2.2 (2026-10-14)
 
 ### For players

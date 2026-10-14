@@ -3,7 +3,7 @@
 ## Notes: Records quests, routes and world data while you play, for authoring Polestar guides. /psrec
 ## Author: Polestar
 ## X-License: GPL-3.0-only
-## Version: 0.2.2
+## Version: 0.2.3
 ## SavedVariables: PolestarRecorderDB
 
 Recorder.lua
