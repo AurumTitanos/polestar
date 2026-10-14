@@ -16,8 +16,10 @@
 --   * the best of two or more choices (the one auto-pick takes): a 2px accent
 --     frame around the icon, on a 1px shade keyline so it holds on the
 --     parchment and on dark skins, clear of the client's quality border;
---   * the best when no choice is an upgrade: the coin (qol-coin, accent) in
---     the arrow's corner, with the same frame.
+--   * the most valuable of two or more choices (sell price times the stack,
+--     every price known): the coin (qol-coin, accent) in the icon's top-right
+--     corner, whether or not some choice is an upgrade, so the best seller
+--     shows beside the upgrade arrows; ties all get it, no price no coin.
 -- Hovering a choice shows Gear's comparison line ("+12% upgrade · Head")
 -- through Polestar.Hooks (the client's SetQuestItem / SetQuestLogItem run the
 -- item tooltip post-calls).
@@ -175,9 +177,10 @@ end
 local function paint(m)
 	local T = ns.Theme
 	if not (T and T.Accent and T.Color) then return end
-	local r, g, b = color(m.kind == "upgrade" and "success" or "accent")
+	local r, g, b = color("success")
 	m.Badge:SetVertexColor(r, g, b, 1)
 	r, g, b = color("accent")
+	m.Coin:SetVertexColor(r, g, b, 1)
 	for k = 1, 4 do m.Ring[k]:SetVertexColor(r, g, b, 1) end
 	r, g, b = color("shade")
 	for k = 1, 4 do m.Key[k]:SetVertexColor(r, g, b, 0.85) end
@@ -209,19 +212,22 @@ local function markFor(button)
 	m.Badge = m:CreateTexture(nil, "OVERLAY", nil, 2)
 	m.Badge:SetSize(BADGE, BADGE)
 	m.Badge:SetPoint("TOPLEFT", m, "TOPLEFT", 0, 0)
+	m.Badge:SetTexture(ns.Theme and ns.Theme.Media and ns.Theme.Media("qol-upgrade") or nil)
+	-- The coin takes the opposite corner, so it sits beside an upgrade arrow.
+	m.Coin = m:CreateTexture(nil, "OVERLAY", nil, 2)
+	m.Coin:SetSize(BADGE, BADGE)
+	m.Coin:SetPoint("TOPRIGHT", m, "TOPRIGHT", 0, 0)
+	m.Coin:SetTexture(ns.Theme and ns.Theme.Media and ns.Theme.Media("qol-coin") or nil)
 	marks[button] = m
 	return m
 end
 
--- kind: "upgrade" | "coin" | nil (no badge); best: the frame.
-local function show(button, kind, best)
-	local T = ns.Theme
+-- up: the upgrade arrow; coin: the most valuable; best: the frame.
+local function show(button, up, coin, best)
 	local m = markFor(button)
-	m.kind, m.best = kind, best
-	if kind then
-		m.Badge:SetTexture(T and T.Media and T.Media(kind == "upgrade" and "qol-upgrade" or "qol-coin") or nil)
-	end
-	m.Badge:SetShown(kind ~= nil)
+	m.up, m.coin, m.best = up, coin, best
+	m.Badge:SetShown(up and true or false)
+	m.Coin:SetShown(coin and true or false)
 	for k = 1, 4 do
 		m.Ring[k]:SetShown(best)
 		m.Key[k]:SetShown(best)
@@ -275,15 +281,22 @@ function Rewards.Mark()
 			best, reason = Rewards.best, Rewards.reason
 		end
 	end
+	-- The coin: the highest vendor value, once every price is known.
+	local top = 0
+	if #choices >= 2 and complete then
+		for _, c in pairs(choices) do
+			if c.value > top then top = c.value end
+		end
+	end
 	local buttons = choiceButtons(frame)
 	local marked
 	if best then marked = false end
 	for i, c in pairs(choices) do
 		local b = buttons[i]
 		if b then
-			local up, isBest = isUpgrade(c), i == best
-			if up or isBest then
-				show(b, up and "upgrade" or (reason == "value" and "coin") or nil, isBest)
+			local up, isBest, coin = isUpgrade(c), i == best, top > 0 and c.value == top
+			if up or isBest or coin then
+				show(b, up, coin, isBest)
 				if isBest then marked = true end
 			end
 		end

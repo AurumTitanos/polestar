@@ -248,8 +248,8 @@ map. Renders of every window and state, drawn without the game, are in
   for your spec at your level, from stat weights per spec (detected from your
   talent points) and level band.
 - **On the game's reward panel** every choice that is an upgrade gets a green
-  arrow and the one to take is framed; with no upgrade, a coin marks the one
-  that sells for most. Turn-in goals name the best reward.
+  arrow, the one to take is framed, and a coin marks the one that sells for
+  most. Turn-in goals name the best reward.
 
 ### Lookup, Dungeons and Rares
 

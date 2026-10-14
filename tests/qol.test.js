@@ -568,9 +568,10 @@ test('rewards: ranking by gear upgrade, else vendor value (stack included)', () 
 	assert.deepEqual(out[2], [[2, 1], 'value'], 'a zero-delta "upgrade" is no upgrade');
 });
 
-// The marks on the reward panel, per choice: the corner badge ("qol-upgrade",
-// "qol-coin" or false) and its tint, whether the best's hairline is drawn, and
-// whether the mark hangs off the item icon (never over the name).
+// The marks on the reward panel, per choice: the upgrade badge ("qol-upgrade"
+// or false) and its tint, the coin on the most valuable (true or false),
+// whether the best's hairline is drawn, and whether the mark hangs off the
+// item icon (never over the name).
 const MARKS = `
 local T = Polestar.Theme
 local function tint(t)
@@ -585,13 +586,14 @@ local function marks()
 	local out = {}
 	for _, b in ipairs(QuestInfoRewardsFrame.RewardButtons) do
 		if b:IsShown() then
-			local seen = { badge = false, best = false }
+			local seen = { badge = false, coin = false, best = false }
 			for _, c in ipairs(b.children) do
 				if c.Badge and c:IsShown() then
 					if c.Badge:IsShown() then
 						seen.badge = c.Badge:GetTexture():match("([%w-]+)$")
 						seen.tint = tint(c.Badge)
 					end
+					seen.coin = c.Coin:IsShown()
 					seen.best = c.Ring[1]:IsShown()
 					seen.onIcon = select(2, c:GetPoint(1)) == b.Icon
 				end
@@ -602,7 +604,7 @@ local function marks()
 	return out
 end`;
 
-test('rewards: a green arrow on every upgrade, the best framed, on the icon; no upgrade: the coin on the most valuable; no pick by default', () => {
+test('rewards: a green arrow on every upgrade, the best framed, on the icon; the coin always on the most valuable; no pick by default', () => {
 	const [vendor, vendorMarks, upgrades, upgradeMarks, finished] = run(`${MARKS}
 		q.items[11] = { name = "Cloak", price = 120 }
 		q.items[12] = { name = "Potion", price = 50 }
@@ -630,17 +632,17 @@ test('rewards: a green arrow on every upgrade, the best framed, on the icon; no 
 	`);
 	assert.deepEqual(vendor, { best: 2, reason: 'value', picks: 0 }, 'five potions sell for most');
 	assert.deepEqual(vendorMarks, [
-		{ badge: false, best: false },
-		{ badge: 'qol-coin', tint: 'accent', best: true, onIcon: true },
-		{ badge: false, best: false },
+		{ badge: false, coin: false, best: false },
+		{ badge: false, coin: true, best: true, onIcon: true },
+		{ badge: false, coin: false, best: false },
 	]);
 	assert.deepEqual(upgrades, { best: 3, reason: 'upgrade' });
 	assert.deepEqual(upgradeMarks, [
-		{ badge: 'qol-upgrade', tint: 'success', best: false, onIcon: true },
-		{ badge: false, best: false },
-		{ badge: 'qol-upgrade', tint: 'success', best: true, onIcon: true },
-	], 'both upgrades get the arrow; the bigger one is framed; no coin');
-	assert.deepEqual(finished, [{ badge: false, best: false }, { badge: false, best: false }, { badge: false, best: false }]);
+		{ badge: 'qol-upgrade', tint: 'success', coin: false, best: false, onIcon: true },
+		{ badge: false, coin: true, best: false, onIcon: true },
+		{ badge: 'qol-upgrade', tint: 'success', coin: false, best: true, onIcon: true },
+	], 'both upgrades get the arrow; the bigger one is framed; the five potions still show the coin');
+	assert.deepEqual(finished, [{ badge: false, coin: false, best: false }, { badge: false, coin: false, best: false }, { badge: false, coin: false, best: false }]);
 });
 
 test('rewards: a disabled Gear module marks no upgrades; a single choice gets its arrow but no frame', () => {
@@ -657,8 +659,8 @@ test('rewards: a disabled Gear module marks no upgrades; a single choice gets it
 		q.questComplete(); stub.runTimers()
 		emit(marks())
 	`);
-	assert.deepEqual(disabled, [{ badge: false, best: false }, { badge: 'qol-coin', tint: 'accent', best: true, onIcon: true }]);
-	assert.deepEqual(single, [{ badge: 'qol-upgrade', tint: 'success', best: false, onIcon: true }]);
+	assert.deepEqual(disabled, [{ badge: false, coin: false, best: false }, { badge: false, coin: true, best: true, onIcon: true }]);
+	assert.deepEqual(single, [{ badge: 'qol-upgrade', tint: 'success', coin: false, best: false, onIcon: true }]);
 });
 
 test('rewards: auto-pick takes the best when on; Shift, quest cost and a disabled Gear module are respected', () => {
@@ -700,9 +702,9 @@ test('rewards: waits for uncached item data before ranking; an upgrade is marked
 		emit(marks())
 	`);
 	assert.equal(out[0], 'pending');
-	assert.deepEqual(out[1], [{ badge: false, best: false }, { badge: 'qol-upgrade', tint: 'success', best: false, onIcon: true }]);
+	assert.deepEqual(out[1], [{ badge: false, coin: false, best: false }, { badge: 'qol-upgrade', tint: 'success', coin: false, best: false, onIcon: true }], 'no coin until every price is known');
 	assert.equal(out[2], 2);
-	assert.deepEqual(out[3][1], { badge: 'qol-upgrade', tint: 'success', best: true, onIcon: true });
+	assert.deepEqual(out[3][1], { badge: 'qol-upgrade', tint: 'success', coin: true, best: true, onIcon: true }, 'the ring is both the upgrade and the best seller');
 });
 
 test('rewards: marking off clears an open panel; both settings off do nothing', () => {
@@ -720,8 +722,8 @@ test('rewards: marking off clears an open panel; both settings off do nothing', 
 		emit(marks())
 		emit(#stub.messages - n0)
 	`);
-	assert.deepEqual(before[1], { badge: 'qol-coin', tint: 'accent', best: true, onIcon: true });
-	assert.deepEqual(cleared, [{ badge: false, best: false }, { badge: false, best: false }]);
+	assert.deepEqual(before[1], { badge: false, coin: true, best: true, onIcon: true });
+	assert.deepEqual(cleared, [{ badge: false, coin: false, best: false }, { badge: false, coin: false, best: false }]);
 	assert.equal(best, 'none');
 	assert.deepEqual(after, cleared);
 	assert.equal(msgs, 0);

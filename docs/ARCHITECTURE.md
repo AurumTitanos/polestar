@@ -1251,8 +1251,9 @@ Polestar.QoL.Rewards.best, .reason                -- auto-pick's settled answer 
   takes it; the marks frame it.
 - **Marks** (`qol.rewardHighlight`), on each `type == "choice"` button of
   `QuestInfoFrame.rewardsFrame.RewardButtons`, anchored to its `Icon`:
-  `qol-upgrade` (success) on every upgrade, `qol-coin` (accent) on the best
-  when nothing is an upgrade, a 2px accent frame with a shade keyline around
+  `qol-upgrade` (success) on every upgrade in the icon's top-left corner,
+  `qol-coin` (accent) in its top-right corner on the most valuable of two or
+  more choices (every price known; ties all), a 2px accent frame with a shade keyline around
   the best of two or more. Drawn after `QuestInfo_Display` (detail, reward and
   quest-log pages), and redrawn on `GET_ITEM_INFO_RECEIVED`, `GEAR_UPDATED`
   and the setting; cleared on `QUEST_FINISHED`. An uncached choice is judged

@@ -39,7 +39,7 @@ register(QUESTING, L["Buttons"], L["Action buttons"], {
 
 register(QUESTING, L["Rewards & gear"], L["Quest rewards"], {
 	{ kind = "toggle", key = "qol.rewardHighlight", label = L["Mark quest rewards"],
-		help = L["On the reward choices, a green arrow marks each upgrade for your spec (with Gear advice on), a thin frame in your accent colour the one to take, and a coin the one that sells for most when none is an upgrade."] },
+		help = L["On the reward choices, a green arrow marks each upgrade for your spec (with Gear advice on), a thin frame in your accent colour the one to take, and a coin the one that sells for most."] },
 	{ kind = "toggle", key = "qol.rewardAutoPick", label = L["Take the best reward"],
 		help = L["Chooses that reward for you when you complete the quest. Hold Shift to choose yourself."] },
 })
