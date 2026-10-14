@@ -645,7 +645,7 @@ the new zones ([docs/SIMULATION.md](docs/SIMULATION.md), "Refresh").
 [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) describes the modules and their
 contracts, [docs/SUITE.md](docs/SUITE.md) the suite and what is out of
 scope (best-in-slot lists, loot browsing, talent builds), and
-[DESIGN.md](DESIGN.md) the visual system.
+[docs/DESIGN.md](docs/DESIGN.md) the visual system.
 
 ## Contributing
 
@@ -661,7 +661,7 @@ saved you a minute.
 - **Code** follows the existing modules; read
   [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) first and keep
   `node --test "tests/**/*.test.js"` green.
-- **UI** changes stay in the visual system of [DESIGN.md](DESIGN.md);
+- **UI** changes stay in the visual system of [docs/DESIGN.md](docs/DESIGN.md);
   `node tools/polestar.js preview` renders them for review.
 - **Recordings** are the most useful contribution of all: play a guide with
   the Recorder on and attach `record report` for the steps that felt slow.

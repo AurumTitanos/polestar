@@ -1,5 +1,5 @@
 -- The guide window, a compact instrument that reads one thing at a time
--- (docs/UI_BRIEF.md, READING FLOW). From the top:
+-- (docs/DESIGN.md, "Intent" and "The Guide Window"). From the top:
 --
 --   tab strip      one tab per open guide, + opens another
 --   navigator      prev, "8 / 29", next, menu

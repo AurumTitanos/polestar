@@ -921,7 +921,7 @@ rail does not move.
 
 ### Guide window, guide menu and zone art
 
-Reading flow: `docs/UI_BRIEF.md` (READING FLOW).
+Reading flow: `docs/DESIGN.md` ("Intent" and "The Guide Window").
 
 - **Guide window** (`UI/GuideFrame.lua`): tab strip, a slim navigator (prev,
   step number, next, Skip, menu), one focus block from the step view's
@@ -1000,7 +1000,7 @@ Reading flow: `docs/UI_BRIEF.md` (READING FLOW).
 - **Dungeons** (`UI/Dungeons.lua`, the hub section "Dungeons", order 30;
   `SHOW_DUNGEON(key)` from `Polestar.Dungeons.Open(key)` opens the hub at a
   page, nil at Home). A dungeon quest journal: dungeons grouped by level, a
-  page per dungeon (UI brief, DUNGEONS). Sidebar (`nav`): For your
+  page per dungeon (`docs/DESIGN.md`, "Intent"). Sidebar (`nav`): For your
   level, All dungeons, 10–20 … 50–60, Raids, with counts; the faction filter
   (`CharState().ui.dungeonsFaction`, default this character's) as segments at
   the right of the tab row. Home: two cards per line in level order, the zone

@@ -314,7 +314,23 @@ Density is measured rather than compact: 40px setting rows, 28px list rows, a gu
 - An authored glyph family (24-unit grid, 2.25 stroke) drawn in code and tinted at runtime; no Unicode stand-ins.
 - Short ease-out motion, 120–200ms, that honours reduced motion.
 
-## Colors
+## Intent
+
+This section says what the tokens and components below are for. A surface is finished when it has been reviewed against this whole document.
+
+**Who it is for.** Forever players levelling characters, many of them alts, who want a quick, smooth path without alt-tabbing to a website. They play in long sessions with the game world behind every surface, often beside full UI suites such as EllesmereUI or ElvUI, or the game's own frames. They set Polestar up once in Options, pick or switch guides in the guide menu, then read the guide window at a glance for hours.
+
+**What success looks like.** The guide window and the arrow sit on screen for hours without tiring the eye: legible over any terrain, out of the way in combat, readable at a glance mid-pull. The player knows where they are (guide, step, progress) without reading, trusts the windows because every control looks deliberate, and acts with one click: switch tab, pick a guide, change a setting. Menus feel like a crafted options window, with a clear sidebar, a titled header, tabbed pages and every control on one grid and explained, never like a utility panel. Several guides run side by side in tabs, such as a class quest guide next to the leveling route.
+
+**The guide window: one thing at a time.** The window shows one focus: the person to talk to now, with only that person's goals under it, or a field step's few objectives. Each goal is one line with its counter right after the text ("Kill Zhevra Chargers 3/8"); done goals are checked and dimmed. A single dim "Then:" line names the next person, and "Person 2 of 8" counts them. Tips collapse to one line and open on demand; Up next is off by default. The progress bar at the foot stays faintly visible in transparent mode.
+
+**The guide menu: selecting is not loading.** Choosing a row shows that guide's details: its zone art with the title on the painting, chips, progress, a facts block of real guide data (steps, quests, the zones in order, the guide after it), then the pitch, pros and cons. Loading is explicit, through "Load guide" ("Continue" when it is open) or "Open in new tab", pinned at the bottom. The list is one line per guide, its title with the level range, grouped under folder headers; the load hint is the row's tooltip, not a hint bar. A category with no guide for any faction is left out, and one empty only for this faction fades. On the route choice, each card leads with the zone art, the name and one stat row (levels, travel time, quests) at the same height on every card, then the pitch and at most three pros and two cons, one line each.
+
+**Dungeons: a quest journal, not a loot browser.** The Dungeons section covers quests, bosses and entrances, with no loot tables or gear browsing. Dungeons are grouped by level, with For your level as the default (a dungeon whose quests are all the other faction's is not yours). A dungeon's page has tabs for its quests, bosses and map. Every quest block shows everything at once: its state, level, requirements, objective, where it starts and ends, its chain, and its rewards as item tiles whose hover is the game's tooltip. Only "Guide me to the entrance" wears the accent. Speed is part of the design: cards paint their art only in view, quest blocks are planned from data and drawn only in view, and every row is pooled.
+
+**Constraints.** A WoW addon draws with Lua frames, textures and FontStrings only, and its textures are power-of-two sizes. Polestar is free and open source under the GPL-3.0, and its code stays readable, as Blizzard's add-on policy asks. No third-party assets, code or text ship beyond the credited data sources in [THIRD_PARTY.md](../THIRD_PARTY.md), and EllesmereUI is read only through its public skinning API (accent, panel colour, font). English comes first, and the layout must survive longer localised strings later.
+
+## Colours
 
 A night palette: navy grounds lifted in small OKLab steps, a cool-white text ladder, one warm gold accent, and a fixed family of bright subject colours that names things by kind.
 
@@ -408,7 +424,7 @@ Every hub and options window lays out on one grid. The options window is 960×68
 - **Dungeon journal:** two-column cards (a 72px painting over a 40px stats line, 16px apart); quest blocks between hairlines with an 88px label column; reward tiles 200×32, 8px apart.
 - **Route choice:** cards 272 wide with an 18px inset and 12px between, under a 112px header and over a 56px footer; stat rows, chips, rules and bullets align across cards.
 - **Guide window:** 340 wide by default (260–560 by its grip), 14px inset; a 28px tab strip, a 34px navigator, goal rows from 24px with 15px glyphs at x 14 and text at 39, a 26px progress footer.
-- **Scale, not breakpoints:** windows are fixed sizes that scale with the UI scale and the Menu scale setting; labels truncate against their control, so longer localized strings never push the grid.
+- **Scale, not breakpoints:** windows are fixed sizes that scale with the UI scale and the Menu scale setting; labels truncate against their control, so longer localised strings never push the grid.
 
 ### Named Rules
 **The Shared Line Rule.** Every pane of a shell meets the same lines: the 112 band edge, the 152 hairline, the 24 and 32 left edges. A new section lays out on them, never beside them.

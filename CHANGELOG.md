@@ -104,6 +104,8 @@
   again and fails when they differ from the committed ones.
 - Fields the addon sets on game frames share one prefix, `ps`, explained in
   addon/README.md.
+- The design system is docs/DESIGN.md, which now also says who the windows
+  are for and what they must do (formerly PRODUCT.md and docs/UI_BRIEF.md).
 
 ## 0.1.0 (2026-10-13)
 

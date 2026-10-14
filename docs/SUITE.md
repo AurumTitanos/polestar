@@ -105,8 +105,8 @@ The tools treat every pack alike (`new`, `doctor`, `lint`, `compile`,
 ## UI
 
 One hub, grown from the guide menu: Guides, Lookup, Dungeons and Rares as
-top-level sections, Options at the rail's foot, all in Polestar's world (the UI brief
-[`docs/UI_BRIEF.md`](UI_BRIEF.md)). New surfaces extend that world;
+top-level sections, Options at the rail's foot, all in Polestar's world
+([`docs/DESIGN.md`](DESIGN.md)). New surfaces extend that world;
 they never introduce another look.
 
 Small windows outside the hub share its look: the guide window, the route

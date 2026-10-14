@@ -5,7 +5,7 @@
 // the lines under it in Marcellus, as outlines. Writes docs/assets/:
 //   banner-dark.svg   the band dissolving into a dark page (GitHub dark)
 //   banner-light.svg  the band as a night tile with square edges (light pages;
-//                     the band has no daylight form, DESIGN.md)
+//                     the band has no daylight form, docs/DESIGN.md)
 //   emblem.svg        the emblem in Polestar gold, transparent
 //   logo.svg          the addon icon: the gold emblem on a night tile
 //   download.svg      the README's download button
@@ -20,7 +20,7 @@ const { header } = require('../lib/generated');
 const ROOT = path.join(__dirname, '..', '..');
 const OUT = path.join(ROOT, 'docs', 'assets');
 
-// DESIGN.md tokens (Dusk).
+// docs/DESIGN.md tokens (Dusk).
 const C = {
 	accent: '#e6ba66', accentLight: '#ffeec2', bg: '#181d2d', sky: '#283254', sidebar: '#121624',
 	text: '#f7f8fd', textDim: '#c3cadd', textMuted: '#9ba2b9', star: '#dbe6ff', navy: '#0a0d16',

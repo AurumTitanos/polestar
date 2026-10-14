@@ -100,8 +100,8 @@ command.
   and commit them with the change: CI renders them again and fails when they
   differ. They change only with the addon's Lua, never with a guide
   recompile: the guide menu scenes load frozen copies of six compiled guides
-  (`tests/fixtures/preview`). [DESIGN.md](DESIGN.md) describes the visual
-  system.
+  (`tests/fixtures/preview`). [docs/DESIGN.md](docs/DESIGN.md) describes the
+  visual system.
 
 ## Commits and pull requests
 

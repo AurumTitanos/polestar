@@ -1,6 +1,6 @@
 -- Polestar.Theme: colours, fonts, media and frame skins for the UI and Nav.
 -- Contract: docs/ARCHITECTURE.md, "Theme". Direction:
--- docs/UI_BRIEF.md ("a guiding-star instrument").
+-- docs/DESIGN.md ("The Guiding-Star Instrument").
 --
 -- One world, always Polestar's own: night grounds under a starlit band, 1px
 -- hairlines, a white text ladder, the game's own font for the UI by default

@@ -22,9 +22,7 @@ and maintainers who release. Paths are from the repository root.
 | [tests/README.md](../tests/README.md) | contributors | The test layers, the fake client, the helpers, how to run one test, what needs local data |
 | [docs/SUITE.md](SUITE.md) | contributors | The modules and their scope, which other addons and sites Polestar reads, the data layer, the in-game packs |
 | [docs/SIMULATION.md](SIMULATION.md) | contributors | The route simulator: world model, character model, search, calibration, results |
-| [PRODUCT.md](../PRODUCT.md) | contributors | Who Polestar is for and what success looks like |
-| [DESIGN.md](../DESIGN.md) | contributors | The design system: colour, type, layout and component tokens |
-| [docs/UI_BRIEF.md](UI_BRIEF.md) | contributors | The intent behind the addon's windows |
+| [docs/DESIGN.md](DESIGN.md) | contributors | The design system: who the windows are for and what they must do, then colour, type, layout and component tokens |
 | [docs/RELEASING.md](RELEASING.md) | maintainers | What ships, setting the version, and the release steps |
 | [THIRD_PARTY.md](../THIRD_PARTY.md) | guide authors, maintainers | Where every input comes from, its licence, and what may enter the repository or a release |
 
