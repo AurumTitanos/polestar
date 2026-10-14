@@ -29,6 +29,7 @@
 // Runtime corrections are not applied: QuestieDB folds every Static
 // Correction into the store; its Dynamic Corrections pick values per
 // character (faction, class) at query time and have no single answer here.
+// The correction files' objective-order hints are read (readObjectiveFirst).
 
 const fs = require('node:fs');
 const path = require('node:path');
@@ -485,9 +486,33 @@ function tocInfo(file) {
 	};
 }
 
+// QuestieDB's hints for the few quests whose objectives the game lists in
+// another order than by kind (`QuestieCorrections.itemObjectiveFirst[503] =
+// true`): side effects in the correction files, not data in the store. Only
+// the Forever scope counts (src/corrections/Forever, with its own copy of the
+// Era baseline in legacy/): QuestieDB_Forever.toc loads no other.
+// Commented-out lines do not count.
+// -> { killCredit, object, item, event: Set of quest ids }
+const HINT_SCOPES = ['Forever'];
+function readObjectiveFirst(qdir) {
+	const out = { killCredit: new Set(), object: new Set(), item: new Set(), event: new Set() };
+	const hint = /\b(killCredit|object|item|event)ObjectiveFirst\[(\d+)\]\s*=\s*true\b/g;
+	for (const scope of HINT_SCOPES) {
+		const root = path.join(qdir, 'src', 'corrections', scope);
+		if (!fs.existsSync(root)) continue;
+		const files = fs.readdirSync(root, { recursive: true }).filter((f) => f.endsWith('.lua')).sort();
+		for (const f of files) {
+			for (const line of fs.readFileSync(path.join(root, f), 'utf8').split('\n')) {
+				for (const m of line.replace(/--.*$/, '').matchAll(hint)) out[m[1]].add(Number(m[2]));
+			}
+		}
+	}
+	return out;
+}
+
 // -> { dir, info, metas, quests, npcs, objects, items (Maps id -> record keyed
 //      by Questie field name), xp, drops, areaToUiMap, uiMapToArea,
-//      subZoneToParent, eraToForever }
+//      subZoneToParent, eraToForever, objectiveFirst }
 function readQuestie(dir, { log = () => {} } = {}) {
 	const qdir = questieDbDir(dir);
 	if (!qdir) throw new Error(`QuestieDB: no ${TOC} under ${dir}`);
@@ -507,7 +532,7 @@ function readQuestie(dir, { log = () => {} } = {}) {
 		interface: meta.get('Interface') || null,
 		questie,
 	};
-	return { dir: qdir, info, metas, ...tables, ...loadSupport(qdir) };
+	return { dir: qdir, info, metas, ...tables, ...loadSupport(qdir), objectiveFirst: readObjectiveFirst(qdir) };
 }
 
 module.exports = {

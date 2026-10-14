@@ -24,8 +24,6 @@ const NPC_ROLES = {
 };
 const OBJECT_ROLES = { chests: 'chest', fish: 'fishing', herbs: 'herb', mailbox: 'mailbox', meetingstone: 'meetingstone', mines: 'mine' };
 
-const TYPE_ORDER = { kill: 0, item: 1, object: 2, event: 3 };
-
 function ids(v) {
 	if (!Array.isArray(v)) return [];
 	const out = [];
@@ -115,25 +113,21 @@ function normalizeSpawnTable(source, names, meta, roleTable, resolveArea, spawnO
 	return { table: out, main };
 }
 
+// The game lists a quest's objectives by kind: creatures, objects, items,
+// then the trigger, each kind in the order the source gives it (as for
+// QuestieDB quests, questie-merge.js); the Engine's goal.oi counts in it.
 function buildObjectives(q, loc, names, ctx) {
 	const text = loc && typeof loc.O === 'string' ? loc.O : null;
 	const obj = q.obj || {};
 	const entries = [];
 	for (const id of ids(obj.U)) entries.push({ type: 'kill', id, name: names.units.get(id) });
-	for (const id of ids(obj.I)) entries.push({ type: 'item', id, name: names.items.get(id) });
 	for (const id of ids(obj.O)) entries.push({ type: 'object', id, name: names.objects.get(id) });
+	for (const id of ids(obj.I)) entries.push({ type: 'item', id, name: names.items.get(id) });
 	for (const id of ids(obj.A)) entries.push({ type: 'event', id, name: null });
 	const allNames = entries.map((e) => e.name).filter(Boolean);
 	const list = entries.map(({ type, id, name }) => {
-		const { count, pos } = type === 'event' ? { count: null, pos: -1 } : parseCount(text, name, { type, others: allNames });
-		return { type, id, count, text: typeof name === 'string' ? name : null, pos };
-	});
-	// Text order approximates the client's objective order; unmentioned ones follow by type, id.
-	list.sort((a, b) => {
-		const pa = a.pos < 0 ? Infinity : a.pos;
-		const pb = b.pos < 0 ? Infinity : b.pos;
-		if (pa !== pb) return pa - pb;
-		return TYPE_ORDER[a.type] - TYPE_ORDER[b.type] || a.id - b.id;
+		const { count } = type === 'event' ? { count: null } : parseCount(text, name, { type, others: allNames });
+		return { type, id, count, text: typeof name === 'string' ? name : null };
 	});
 	return list.map((o) => {
 		const out = { type: o.type, id: o.id, count: o.count, text: o.text };

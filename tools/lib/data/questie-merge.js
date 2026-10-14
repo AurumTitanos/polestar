@@ -22,7 +22,6 @@ const NPC_FLAG_ROLES = [
 	[4, 'vendor'], [8, 'flightmaster'], [16, 'trainer'], [32, 'spirithealer'], [128, 'innkeeper'], [256, 'banker'],
 	[2048, 'battlemaster'], [4096, 'auctioneer'], [8192, 'stablemaster'], [16384, 'repair'],
 ];
-const TYPE_ORDER = { kill: 0, item: 1, object: 2, event: 3 };
 
 function ids(v) {
 	const out = [];
@@ -252,31 +251,37 @@ function objectiveTextOf(lines) {
 }
 
 // objectives = { creature, object, item, reputation, killCredit, spell },
-// triggerEnd = { text, spawnlist }. Counts come from the objective text (the
-// store has none), else pfQuest's count for the same objective.
+// triggerEnd = { text, spawnlist }. The game lists a quest's objectives by
+// kind: creatures, objects, items, kill credits, then the trigger. That is the
+// order Questie maps the quest log by, and the order the Engine's goal.oi
+// counts in; QuestieDB's hints (readObjectiveFirst) move one kind to the front
+// for the few quests the game lists otherwise, one entry at a time as Questie
+// does. A reputation objective, which would sit after the items, is not kept:
+// no quest has one before another objective; nor is a spell objective (after
+// the kill credits), which no quest in the store has. Counts come from the
+// objective text (the store has none), else pfQuest's count for the same
+// objective.
 function questObjectives(q, pf, names, ctx) {
 	const text = objectiveTextOf(q.objectivesText);
 	const o = q.objectives;
+	const first = ctx.objectiveFirst || {};
+	const moved = (kind) => Boolean(first[kind] && first[kind].has(Number(q.id)));
 	const entries = [];
-	for (const e of luaList(luaGet(o, 1))) entries.push({ type: 'kill', id: Number(luaGet(e, 1)), text: luaGet(e, 2) ?? names.npc(Number(luaGet(e, 1))) });
+	const add = (kind, e) => (moved(kind) ? entries.unshift(e) : entries.push(e));
+	for (const e of luaList(luaGet(o, 1))) add('creature', { type: 'kill', id: Number(luaGet(e, 1)), text: luaGet(e, 2) ?? names.npc(Number(luaGet(e, 1))) });
+	for (const e of luaList(luaGet(o, 2))) add('object', { type: 'object', id: Number(luaGet(e, 1)), text: luaGet(e, 2) ?? names.object(Number(luaGet(e, 1))) });
+	for (const e of luaList(luaGet(o, 3))) add('item', { type: 'item', id: Number(luaGet(e, 1)), text: luaGet(e, 2) ?? names.item(Number(luaGet(e, 1))) });
 	for (const e of luaList(luaGet(o, 5))) {
 		const base = Number(luaGet(e, 2));
-		entries.push({ type: 'kill', id: base, text: luaGet(e, 3) ?? names.npc(base), credit: ids(luaGet(e, 1)) });
+		add('killCredit', { type: 'kill', id: base, text: luaGet(e, 3) ?? names.npc(base), credit: ids(luaGet(e, 1)) });
 	}
-	for (const e of luaList(luaGet(o, 3))) entries.push({ type: 'item', id: Number(luaGet(e, 1)), text: luaGet(e, 2) ?? names.item(Number(luaGet(e, 1))) });
-	for (const e of luaList(luaGet(o, 2))) entries.push({ type: 'object', id: Number(luaGet(e, 1)), text: luaGet(e, 2) ?? names.object(Number(luaGet(e, 1))) });
 	const valid = entries.filter((e) => Number.isInteger(e.id) && e.id > 0);
 	const allNames = valid.map((e) => e.text).filter(Boolean);
 	const pfObj = (pf && pf.objectives) || [];
 	const list = valid.map((e) => {
-		const { count, pos } = parseCount(text, e.text, { type: e.type, others: allNames });
+		const { count } = parseCount(text, e.text, { type: e.type, others: allNames });
 		const pfSame = pfObj.find((p) => p.type === e.type && p.id === e.id);
-		return { ...e, count: count ?? (pfSame ? pfSame.count : null), pos };
-	});
-	list.sort((a, b) => {
-		const pa = a.pos < 0 ? Infinity : a.pos;
-		const pb = b.pos < 0 ? Infinity : b.pos;
-		return pa - pb || TYPE_ORDER[a.type] - TYPE_ORDER[b.type] || a.id - b.id;
+		return { ...e, count: count ?? (pfSame ? pfSame.count : null) };
 	});
 	const out = list.map((e) => {
 		const r = { type: e.type, id: e.id, count: e.count, text: typeof e.text === 'string' ? e.text : null };
@@ -295,7 +300,8 @@ function questObjectives(q, pf, names, ctx) {
 				break;
 			}
 		}
-		out.push(ev);
+		if (moved('event')) out.unshift(ev);
+		else out.push(ev);
 	}
 	return out;
 }
@@ -455,6 +461,7 @@ function applyQuestie(tables, qz, ctx) {
 		names: { npc: nameOf(tables.npcs), object: nameOf(tables.objects), item: nameOf(tables.items) },
 		main: (kind, id) => (id === undefined ? null : mains[kind].get(id) ?? null),
 		added: { quests: { n: 0 } },
+		objectiveFirst: qz.objectiveFirst,
 	};
 	const questieIds = new Set(qz.quests.keys());
 	for (const id of Object.keys(tables.quests).map(Number)) if (!questieIds.has(id)) stats.removedQuests.push(id);

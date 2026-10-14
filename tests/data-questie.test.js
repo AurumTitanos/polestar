@@ -177,7 +177,8 @@ const ITEMS = {
 	252665: { name: "Head of Urs'anah", npcDrops: [251361] },
 };
 
-function writeQuestie(dir) {
+// store: { quests (added to QUESTS), files ({ path in QuestieDB: text }) }
+function writeQuestie(dir, store = {}) {
 	const q = path.join(dir, 'QuestieDB');
 	const w = (rel, text) => {
 		fs.mkdirSync(path.dirname(path.join(q, rel)), { recursive: true });
@@ -186,7 +187,7 @@ function writeQuestie(dir) {
 	const toc = [
 		'## Interface: 16001', '## Title: QuestieDB', '## Author: Fixture Authors', '## Version: 9.9.9',
 		'## X-Contract-Version: 3', '## X-Flavor: Forever', '## X-Mode: baked', '## X-BUILD-COMMIT: abc123', '## X-BUILD-TIME: 2026-01-01T00:00:00Z', '',
-		...storeLines('Quest', QUESTS, { chunk: [92460], hidden: [[92460, 'breadcrumbs', [7]]] }),
+		...storeLines('Quest', { ...QUESTS, ...(store.quests || {}) }, { chunk: [92460], hidden: [[92460, 'breadcrumbs', [7]]] }),
 		...storeLines('Npc', NPCS),
 		...storeLines('Object', OBJECTS),
 		...storeLines('Item', ITEMS),
@@ -210,12 +211,13 @@ function writeQuestie(dir) {
 		'-- DBC bounds: 1.15.9.1 -> 1.60.1.2. Assumes unchanged world positions.\nlocal transforms = {\n  [1519] = { 0.77, 19.68, 0.77, 24.43 }, -- Stormwind City\n}\nlocal uiMapToArea = {\n  [1453] = 1519, -- Stormwind City\n}\n',
 	);
 	w('../Questie/Questie_Camelot.toc', '## Title: Questie\n## Version: 8.8.8\n## Author: Fixture Questie Authors\n## X-BUILD-COMMIT: def456\n');
+	for (const [rel, text] of Object.entries(store.files || {})) w(rel, text);
 	return q;
 }
 
-async function build(extra = {}) {
+async function build(extra = {}, store = {}) {
 	const root = tmpdir('polestar-questie-');
-	const questieDir = writeQuestie(root);
+	const questieDir = writeQuestie(root, store);
 	const outDir = path.join(root, 'out');
 	const result = await buildData({
 		offline: true,
@@ -339,11 +341,12 @@ describe('QuestieDB merge', () => {
 		assert.equal(q[100].level, 3);
 		assert.equal(q[100].xp, 85, 'xp from QuestieDB QuestXP');
 		assert.deepEqual(q[100].source, ['pfquest', 'questie-forever']);
-		// 101: same objectives, counts from the text; pre stays pfQuest's; excl is the union.
+		// 101: objectives in the order the game lists them, creatures before
+		// items, though the text names the pelts first; counts from the text.
 		assert.deepEqual(q[101].objectives, [
-			{ type: 'item', id: 50, count: 3, text: 'Wolf Pelt' },
 			{ type: 'kill', id: 3, count: 10, text: 'Fixture Wolf' },
 			{ type: 'kill', id: 4, count: 4, text: 'Fixture Wolf Alpha' },
+			{ type: 'item', id: 50, count: 3, text: 'Wolf Pelt' },
 		]);
 		assert.deepEqual(q[101].pre, [100]);
 		assert.deepEqual(q[101].preAny, [100]);
@@ -395,6 +398,47 @@ describe('QuestieDB merge', () => {
 		assert.equal(q[100].xp, 40, 'recorded xp beats QuestXP');
 		assert.deepEqual(q[100].source, ['pfquest', 'questie-forever', 'recorder', 'recorder:xp-turnin']);
 		assert.deepEqual(read('npcs')[1].spawns, { 1429: { f: 'l', pts: [[47.5, 40.25]] } });
+	});
+
+	test("objectives come in the game's order: creatures, objects, items, kill credits, the trigger", async () => {
+		const { read } = await build({}, {
+			quests: {
+				// The Guns of Northwatch: the text names the medals first, the game
+				// lists the three kills first and the medals fourth.
+				891: {
+					name: 'The Guns of Northwatch', questLevel: 20, requiredLevel: 13, startedBy: [[2]], finishedBy: [[2]],
+					objectivesText: ["Captain Thalo'thas Brightsun of Ratchet wants you to collect 10 Theramore Medals and slay Captain Fairmount, Cannoneer Whessan and Cannoneer Smythe."],
+					objectives: [[{ 1: 3393, 2: 'Captain Fairmount' }, { 1: 3455, 2: 'Cannoneer Whessan' }, { 1: 3454, 2: 'Cannoneer Smythe' }], [], [{ 1: 5078, 2: 'Theramore Medal' }]],
+				},
+				110: {
+					name: 'Fixture Order', questLevel: 3, requiredLevel: 1, startedBy: [[2]], finishedBy: [[2]],
+					objectivesText: ['Scout the ridge, question Bob, bring 3 Wolf Pelts, light the Fixture Altar and kill 5 Fixture Wolves.'],
+					objectives: { 1: [{ 1: 3 }], 2: [{ 1: 500 }], 3: [{ 1: 50 }], 5: [{ 1: [1, 2], 2: 1, 3: 'Bob questioned' }] },
+					triggerEnd: ['Scout the ridge', { 12: [[50, 50]] }],
+				},
+			},
+		});
+		const q = read('quests');
+		const order = (id) => q[id].objectives.map((o) => `${o.type} ${o.id ?? o.text}`);
+		assert.deepEqual(order(891), ['kill 3393', 'kill 3455', 'kill 3454', 'item 5078']);
+		assert.equal(q[891].objectives[3].count, 10);
+		assert.deepEqual(order(110), ['kill 3', 'object 500', 'item 50', 'kill 1', 'event Scout the ridge']);
+	});
+
+	test("QuestieDB's hints move a kind to the front; commented hints and other scopes' do not count", async () => {
+		const quest = (name) => ({ name, questLevel: 3, requiredLevel: 1, startedBy: [[2]], finishedBy: [[2]], objectives: [[{ 1: 3 }], [], [{ 1: 50 }]] });
+		const { read } = await build({}, {
+			quests: { 111: quest('Fixture Item First'), 112: quest('Fixture Commented'), 113: quest('Fixture Era'), 114: quest('Fixture Season') },
+			files: {
+				'src/corrections/Forever/legacy/classicQuestFixes.lua': 'QuestieCorrections.itemObjectiveFirst[111] = true\n-- QuestieCorrections.itemObjectiveFirst[112] = true\n',
+				'src/corrections/Era/classicQuestFixes.lua': 'QuestieCorrections.itemObjectiveFirst[113] = true\n',
+				'src/corrections/Sod/sodQuestFixes.lua': 'QuestieCorrections.itemObjectiveFirst[114] = true\n',
+			},
+		});
+		const q = read('quests');
+		const order = (id) => q[id].objectives.map((o) => `${o.type} ${o.id}`);
+		assert.deepEqual(order(111), ['item 50', 'kill 3']);
+		for (const id of [112, 113, 114]) assert.deepEqual(order(id), ['kill 3', 'item 50'], `quest ${id}`);
 	});
 });
 

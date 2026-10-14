@@ -57,7 +57,7 @@ function numericCount(text, forms) {
 	if (!m) return null;
 	const raw = m[1].toLowerCase();
 	const count = /^\d+$/.test(raw) ? Number(raw) : WORDS[raw];
-	return count >= 1 && count <= MAX_COUNT ? { count, pos: m.index } : null;
+	return count >= 1 && count <= MAX_COUNT ? count : null;
 }
 
 // Trailing parts of a multi-word name that no other objective name ends with.
@@ -75,29 +75,24 @@ function suffixAliases(name, others) {
 	return out;
 }
 
-// -> { count: number|null, pos: index of first mention or -1 }
+// -> { count: number|null }
 // options: { type: "kill"|"item"|..., others: [names of the quest's other objectives] }
 function parseCount(text, name, { type, others = [] } = {}) {
-	if (!text || !name) return { count: null, pos: -1 };
+	if (!text || !name) return { count: null };
 	const forms = formsPattern(name);
-	const mention = new RegExp(`(?<![A-Za-z])(?:${forms})(?![A-Za-z])`, 'i').exec(text);
-	let pos = mention ? mention.index : -1;
-	let hit = numericCount(text, forms);
-	if (!hit) {
+	let count = numericCount(text, forms);
+	if (count === null) {
 		for (const alias of suffixAliases(name, others)) {
-			hit = numericCount(text, formsPattern(alias));
-			if (hit) break;
+			count = numericCount(text, formsPattern(alias));
+			if (count !== null) break;
 		}
 	}
-	if (!hit) {
+	if (count === null) {
 		const articles = type === 'item' ? 'an?|the' : 'an?';
 		const re = new RegExp(`(?<![A-Za-z])(?:${articles})\\s+(?:[A-Za-z]+\\s+of\\s+)?${escapeRe(name)}(?![A-Za-z'])`, 'i');
-		const m = re.exec(text);
-		if (m) hit = { count: 1, pos: m.index };
+		if (re.test(text)) count = 1;
 	}
-	if (!hit) return { count: null, pos };
-	if (pos < 0) pos = hit.pos;
-	return { count: hit.count, pos };
+	return { count };
 }
 
 // Recorded objective text: "Kobold Vermin slain: 3/10" -> { name, slain, cur, max }

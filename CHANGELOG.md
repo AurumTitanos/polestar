@@ -29,6 +29,10 @@
 - `compile` no longer reads `data/forever/dungeons.json`: a quest only
   DungeonJournal knows gives its title and `lvl` in the guide, so nothing from
   DungeonJournal reaches a guide pack.
+- `find` and `lint` number a quest's objectives as the game lists them in the
+  quest log: creatures, objects, items, kill credits, then exploration, with
+  QuestieDB's exceptions. `quest Q.O` in a guide written before 0.2.1 may
+  point at another objective: check each against `find <quest>`.
 
 ### For contributors
 

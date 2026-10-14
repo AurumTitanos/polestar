@@ -213,9 +213,9 @@ describe('fixture build', () => {
 			excl: [102],
 			next: 104,
 			objectives: [
-				{ type: 'item', id: 50, count: 3, text: 'Wolf Pelt' },
 				{ type: 'kill', id: 3, count: 10, text: 'Fixture Wolf' },
 				{ type: 'kill', id: 4, count: 4, text: 'Fixture Wolf Alpha' },
+				{ type: 'item', id: 50, count: 3, text: 'Wolf Pelt' },
 			],
 			objectiveText: 'Bring 3 pieces of Wolf Pelt, and kill 10 Fixture Wolves and 4 Fixture Wolf Alphas for Alice.',
 			zone: 1429,
@@ -329,8 +329,8 @@ describe('fixture build', () => {
 		// Recorded objective: count and client index (oi 1) win.
 		assert.deepEqual(q[101].objectives, [
 			{ type: 'kill', id: 3, count: 12, text: 'Fixture Wolf' },
-			{ type: 'item', id: 50, count: 3, text: 'Wolf Pelt' },
 			{ type: 'kill', id: 4, count: 4, text: 'Fixture Wolf Alpha' },
+			{ type: 'item', id: 50, count: 3, text: 'Wolf Pelt' },
 		]);
 		// A quest and npcs that only the recorder saw.
 		assert.deepEqual(q[9001], {
