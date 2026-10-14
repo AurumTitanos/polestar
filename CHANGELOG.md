@@ -14,10 +14,9 @@
   so: reinstall Polestar or enable it in the AddOns list, then /reload.
 - The Codex knows more: the battleground war mounts and tabards show their
   PvP rank and reputation, the Orange Murloc Egg and Green Helper Box are
-  companions, Molten Core and the other raids list their bosses' loot,
-  dungeons list their rare spawns and named fighters (the Ring of Law) after
-  their bosses, more rares are known, and a dungeon's entrance comes from a
-  guide's own marker before the spot where a ghost returns.
+  companions, Molten Core and the other raids list their bosses' loot, more
+  rares are known, and every dungeon and raid points at its real entrance
+  (the Deadmines at Moonbrook), not the spot where a ghost returns.
 - Distances can read in metres: Options, Arrow & routes, Distances.
 - The starting zones follow Forever's new quest chains: a follow-up is taken
   once the quest before it is handed in, where the guides offered several
