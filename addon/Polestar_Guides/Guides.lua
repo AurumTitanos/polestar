@@ -9255,11 +9255,12 @@ do
 					goals = {
 						{ t = "turnin", quest = 84, title = "Back to Billy", npc = 247, npcName = "Billy Maclure", map = 1429, x = 43.13, y = 85.72, f = "e" },
 						{ t = "accept", quest = 87, title = "Goldtooth", npc = 247, npcName = "Billy Maclure", minLevel = 5, qlvl = 8, pre = { 84 }, preTitles = { [84] = "Back to Billy" }, map = 1429, x = 43.13, y = 85.72, f = "e" },
+						{ t = "goto", text = "Fargodeep Mine's mouth", map = 1429, x = 39.5, y = 82.4, f = "e" },
 					},
 				},
 				{
 					title = "Goldtooth",
-					note = "Goldtooth, a named kobold, sits in the back of the Fargodeep Mine's lower level. Defias Bandits around the vineyards drop a Westfall Deed now and then: right-click it.",
+					note = "Goldtooth is inside the Fargodeep Mine, not on the hill above it: go in at the mouth and keep left to the back of the mine floor; don't take the stairs up. Defias Bandits around the vineyards drop a Westfall Deed now and then: right-click it.",
 					goals = {
 						{ t = "collect", quest = 87, title = "Goldtooth", item = 981, itemName = "Bernice's Necklace", oi = 1, map = 1429, x = 41.71, y = 78.03, f = "e", note = "Bernice's Necklace" },
 						{ t = "collect", item = 1972, itemName = "Westfall Deed", count = 1, map = 1429, x = 44.37, y = 74.93, f = "e", spots = { { x = 45.6, y = 75.1, r = 43, n = 4 }, { x = 48.3, y = 87.2, r = 40, n = 3 }, { x = 55.3, y = 59.9, r = 40, n = 1 }, { x = 73.3, y = 55, r = 49, n = 5 }, { x = 73.5, y = 46.7, r = 40, n = 2 }, { x = 71.3, y = 76.7, r = 40, n = 1 }, { x = 68.3, y = 81.2, r = 40, n = 2 }, { x = 89.5, y = 79.3, r = 40, n = 8 }, { x = 34.1, y = 55.6, r = 40, n = 1 }, { x = 30.1, y = 57.9, r = 40, n = 3 }, { x = 30.7, y = 65, r = 40, n = 4 }, { x = 25, y = 58.5, r = 48, n = 9 }, { x = 47.5, y = 74.1, r = 40, n = 1, alt = true }, { x = 47.5, y = 81.2, r = 40, n = 1, alt = true }, { x = 47.5, y = 83.7, r = 53, n = 4, alt = true }, { x = 50.1, y = 82.8, r = 46, n = 4, alt = true }, { x = 52.4, y = 59.1, r = 40, n = 3, alt = true }, { x = 29, y = 60.5, r = 51, n = 7, alt = true }, { x = 68.3, y = 77.4, r = 40, n = 4, alt = true }, { x = 70.8, y = 80.5, r = 40, n = 4, alt = true }, { x = 73.6, y = 51.2, r = 76, n = 10, alt = true }, { x = 76.9, y = 52.5, r = 40, n = 2, alt = true }, { x = 76.4, y = 48, r = 40, n = 2, alt = true } }, spread = true, optional = true, note = "Westfall Deed" },
@@ -23496,10 +23497,17 @@ do
 					},
 				},
 				{
-					title = "Sapphires of Aku'Mai",
-					note = "The Sapphires grow on the rocks at the far north end of the strand, by the Blackfathom Deeps ruins.",
+					title = "Blackfathom Deeps ruins",
+					note = "The way to the Sapphires is through the sunken ruins at the north end of the strand: go down the stairs into the pit.",
 					goals = {
-						{ t = "collect", quest = 6563, title = "The Essence of Aku'Mai", item = 16784, itemName = "Sapphire of Aku'Mai", count = 20, oi = 1, map = 1440, x = 13.17, y = 13.49, f = "e", spots = { { x = 13.3, y = 12.8, r = 39, n = 8 }, { x = 13.8, y = 11.2, r = 24, n = 3 } } },
+						{ t = "goto", text = "Blackfathom Deeps ruins", map = 1440, x = 14.5, y = 14.2, f = "e" },
+					},
+				},
+				{
+					title = "Sapphires of Aku'Mai",
+					note = "The Sapphires are blue crystals on the walls of the tunnels leading to the Blackfathom Deeps portal, underground and outside the instance: swim down from the pit, under the wall, into the cave. The satyrs and naga in the tunnels are elite: grouping up is advised. The crystals respawn quickly, so there is no need to go deep.",
+					goals = {
+						{ t = "collect", quest = 6563, title = "The Essence of Aku'Mai", item = 16784, itemName = "Sapphire of Aku'Mai", count = 20, oi = 1, map = 1440, x = 13.59, y = 13.14, f = "e", spots = { { x = 13.3, y = 12.8, r = 39, n = 8 }, { x = 13.8, y = 11.2, r = 24, n = 3 } } },
 					},
 				},
 				{

@@ -105,6 +105,13 @@
 - An object a quest item drops from names the quest once on its tooltip,
   not once per object of that name: the Sapphire of Aku'Mai in Blackfathom
   Deeps listed its quest three times (thanks Mightie).
+- Elwynn Forest: Goldtooth is inside the Fargodeep Mine, at the back of the
+  mine floor; the arrow now leads to the mine's mouth first instead of onto
+  the hill above it (thanks Verium).
+- Ashenvale (Horde): the Sapphires of Aku'Mai grow in the tunnels leading to
+  the Blackfathom Deeps portal, underground, not on the strand; the arrow
+  now leads to the ruins' pit first, and the step warns that the tunnels'
+  satyrs and naga are elite (thanks Mightie).
 - The arrow no longer vanishes on the Deeprun Tram, where the game gives no
   position: on the ride it keeps showing "Take the tram to Stormwind" (or
   Ironforge), anywhere else without a position it says "No position here"
