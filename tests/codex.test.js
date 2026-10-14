@@ -661,3 +661,14 @@ test('mergeCodex: an NPC casting a spell that creates the item hands it out (gif
 	const it = mergeCodex(inputs).items;
 	assert.deepEqual(it[20001].sources, [{ type: 'gift', npc: 4730, spell: 21357, from: ['wowhead'] }], 'an NPC the data does not know is left out');
 });
+
+test('mergeCodex: a Wowhead list row gives the level of an NPC nothing else does, only the level', () => {
+	const inputs = syntheticInputs();
+	delete inputs.atlasloot;
+	inputs.forever.npcs[7747].level = null;
+	const row = (id, level) => ({ id, name: 'x', location: [1], level, classification: 'rare', boss: true, change: { status: 'new', lines: [] } });
+	inputs.wowhead = { npc: {}, object: {}, item: {}, spell: {}, listed: { npc: { 7747: row(7747, [9, 10]), 4730: row(4730, [50, 50]) } } };
+	const { npcs } = mergeCodex(inputs);
+	assert.deepEqual([npcs[7747].level, npcs[7747].levelMax, npcs[7747].rare, npcs[7747].boss], [9, 10, false, false]);
+	assert.equal(npcs[4730].level, 35, "the data's level stays");
+});

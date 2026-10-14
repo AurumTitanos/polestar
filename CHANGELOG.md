@@ -91,6 +91,8 @@
   Rin'wosho the Trader's quests. Such a source shows as unavailable, with
   the grind, until you have the standing, and a guide built from it reaches
   the standing first.
+- 286 more NPCs show their level in Lookup (from Wowhead Forever's NPC list,
+  where nothing else gave one).
 
 ### For guide authors
 
@@ -126,6 +128,16 @@
   build` applies after the client's own gates and before a guide's; a row
   whose item, vendor or quest the Codex lacks is a build warning. Parity
   "items: rep" goes from 505 to 682 of 689.
+- `codex wowhead` reads Wowhead Forever's NPC, object and item lists first
+  (1,000 rows a request, by id range, cached under
+  `data/sources/wowhead/codex/lists/`) and fetches a cached page again only
+  when its list row changed, an older parser read it, or it is older than
+  `--max-age` (default 7 days) and an open parity gap or Forever's own (new
+  or updated): an entity Forever left as in Classic keeps its page. A
+  refresh with every page stale goes from 1,704 page requests to 210 plus
+  103 list requests (151 the first time). `--dry-run` counts a run's
+  requests. The Codex reads the lists for NPC levels only; parity is
+  unchanged.
 
 ## 0.2.3 (2026-10-14)
 

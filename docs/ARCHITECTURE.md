@@ -1940,11 +1940,36 @@ built.
   `--local-extras` takes the instances from AtlasLoot and `dungeons.json`
   instead.
 - Wowhead Forever per entity (`tools/lib/codex/wowhead.js`, release build
-  only, lowest precedence): `codex wowhead` fetches the NPC and object pages
-  and item tooltips of what `data/local/codex-parity.json` lists as missing
-  or different, and of our instances' bosses, one request at a time (1.5 s
-  apart, a growing pause on 403/429), and caches each entity's facts under
-  `data/sources/wowhead/codex/<npc|object|item>/<id>.json` for 14 days;
+  only, lowest precedence). `codex wowhead [--max-age <days>] [--dry-run]`
+  first reads Wowhead's list pages (`/forever/npcs`, `/objects`, `/items`):
+  up to 1,000 rows a request (past that the page says "15,205 NPCs found
+  (1,000 displayed)"), each with id, name, levels, classification, boss
+  flag, `location` and `envChange` (how Forever differs from Classic: new,
+  updated with its change lines, or unchanged). It reads them by id range
+  (the ID filter, 25,000 wide up to 300,000, then open; a range at the cap
+  splits by the count its note gives; a filter starting past the last id is
+  ignored by Wowhead and counts as empty; at most 150 list requests a type),
+  cached per range in `data/sources/wowhead/codex/lists/<type>.json`. On
+  2026-10-14 a first read took 151 requests (NPCs 51 for 15,205 rows,
+  objects 23 for 4,985, items 77 for 22,677: a split range costs its capped
+  parent too), a refresh one per cached range (103). `codex build` reads the
+  NPC rows for one fact only: the level of an NPC neither our data nor a
+  page gives one (286 NPCs); a row's rank, boss flag and place are no page's,
+  so rares, bosses and parity's verdicts read only pages.
+  Then the crawl fetches the NPC and object pages and item tooltips of what
+  `data/local/codex-parity.json` lists as missing or different, and of our
+  instances' bosses, one request at a time (1.5 s apart, lists included, a
+  growing pause on 403/429), caching each entity's facts under
+  `data/sources/wowhead/codex/<npc|object|item|spell>/<id>.json`. A wanted
+  page is fetched when it is not cached, the parser's `VERSION` changed,
+  its list row differs from the one it was fetched with (`listSig`; a page
+  Wowhead had not that a list now shows), or it is older than `--max-age`
+  (7 days, lists too) and an open parity gap (`openGaps`: neither "not in
+  Forever" nor settled with a reason), Forever's own (new or updated) or on
+  no list: a page of an entity Forever left as in Classic is kept. Of the
+  1,704 pages wanted on 2026-10-14, a refresh with every page stale fetches
+  210 (was all 1,704; spell pages have no list) plus the 103 list ranges.
+  `--dry-run` counts the list ranges and pages a run would fetch.
   `codex build` only reads the cache. From them: an NPC's level, rare rank and
   spawns where ours lack them (and the rares only Wowhead places), drops and
   object contents with chance = looted count / looted kills, an NPC's or

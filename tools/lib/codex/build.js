@@ -485,6 +485,16 @@ function mergeCodex(inputs) {
 			}
 			if (!rec.spawns.length && spawns.length) rec.spawns = spawns;
 		}
+		// Wowhead's NPC list rows (`codex wowhead`, one request per 1,000):
+		// the level of an NPC neither our data nor a page gives one. Only the
+		// level: a row's rank and place are no page's (rares and bosses stay
+		// the pages' and the data's).
+		for (const [id, r] of Object.entries((wh.listed && wh.listed.npc) || {})) {
+			const rec = npcs[id];
+			if (!rec || rec.level != null || !r.level) continue;
+			rec.level = r.level[0];
+			rec.levelMax = r.level[1] !== r.level[0] ? r.level[1] : null;
+		}
 	}
 	const addRole = (id, role) => {
 		if (!npcs[id]) return;
@@ -1440,7 +1450,8 @@ function sourcesMeta(inputs) {
 	const wh = inputs.wowhead;
 	if (wh) {
 		const n = Object.keys(wh.npc).length + Object.keys(wh.object).length + Object.keys(wh.item).length;
-		if (n) out.push({ name: 'Wowhead Forever database (wowhead.com/forever): NPC and object pages, item tooltips', version: `${n} entities; cache data/sources/wowhead/codex`, licence: 'Public web pages; facts only (levels, classification, positions, drop counts, requirements)' });
+		const listed = wh.listed && wh.listed.npc ? Object.keys(wh.listed.npc).length : 0;
+		if (n || listed) out.push({ name: `Wowhead Forever database (wowhead.com/forever): NPC and object pages, item tooltips${listed ? ', NPC list levels' : ''}`, version: `${n} entities${listed ? `, ${listed} listed NPCs` : ''}; cache data/sources/wowhead/codex`, licence: 'Public web pages; facts only (levels, classification, positions, drop counts, requirements)' });
 	}
 	const ne = Object.keys(inputs.entranceTable || {}).length;
 	if (ne && !inputs.atlasloot) out.push({ name: 'Curated instance entrances (tools/lib/codex/entrances.json): QuestieDB Forever dungeon table, warcraft.wiki.gg, Wowhead Forever', version: `${ne} entrances`, licence: 'Facts only (coordinates), each entry with its source' });
