@@ -324,12 +324,13 @@ local BUILTIN = {
 	{ page = MAP, tab = L["Zones"], section = L["Coordinates"], controls = {} },
 }
 
--- Pages filled by modules alone: Quests, QoL and Gear on Questing; Lookup,
+-- Pages filled by modules alone: Quests, QoL, Gear and Talents on Questing; Lookup,
 -- Dungeons and Rares on Discovery; QoL and Maps on Quality of Life.
 for _, list in ipairs({
 	declare(QUESTING, "icon-accept", 40, L["Quest information, rewards and gear advice, and the quest buttons."], {
 		{ L["Quests"], { L["Quest database"], L["Tooltips and quest log"], L["Faster questing"] } },
 		{ L["Rewards & gear"], { L["Quest rewards"], L["Gear advice"], L["Comparison"] } },
+		{ L["Talents"], { L["Talent plan"] } },
 		{ L["Buttons"], { L["Action buttons"] } },
 	}),
 	declare(DISCOVERY, "search", 50, L["Lookup, the dungeon journal and rares: finding things in the world."], {
@@ -599,7 +600,7 @@ local ALIASES = {
 	guidewindow = { "guide", L["Window"] }, general = { "guide", L["Window"] }, window = { "guide", L["Window"] },
 	navigation = { "guide", L["Arrow & routes"] }, nav = { "guide", L["Arrow & routes"] }, arrow = { "guide", L["Arrow & routes"] },
 	automation = { "guide", L["Automation"] }, behavior = { "guide", L["Automation"] }, behaviour = { "guide", L["Automation"] },
-	quests = { "questing", L["Quests"] }, gear = { "questing", L["Rewards & gear"] },
+	quests = { "questing", L["Quests"] }, gear = { "questing", L["Rewards & gear"] }, talents = { "questing", L["Talents"] },
 	lookup = { "discovery", L["Lookup"] }, dungeons = { "discovery", L["Dungeons"] }, rares = { "discovery", L["Rares"] },
 	look = { "appearance" }, qol = { "qualityoflife" },
 }
