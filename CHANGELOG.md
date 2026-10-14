@@ -103,6 +103,12 @@
   `tools/lib/sim/solo.js`) is shared with the compiler's group content
   (`tools/lib/dsl/group.js`), and `preview` renders the group line
   (`docs/preview/guide-group.svg`).
+- The search speed test no longer pins one machine's speed (it failed under
+  4 ms on slower Windows machines running the full suite): a keystroke over
+  25,000 names must cost under 12 scans of the same names in the same run,
+  and grow under 15x from 2,500 names, each the median of several batches,
+  so a per-keystroke index rebuild or a quadratic search still fails it
+  (thanks CDVolvik).
 
 ## 0.2.3 (2026-10-14)
 
