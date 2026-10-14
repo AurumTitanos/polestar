@@ -34,7 +34,7 @@ function snapshot(dir) {
 	const walk = (d) => {
 		for (const e of fs.readdirSync(d, { withFileTypes: true })) {
 			const p = path.join(d, e.name);
-			const rel = path.relative(dir, p);
+			const rel = path.relative(dir, p).split(path.sep).join('/');
 			if (e.isSymbolicLink()) out[rel] = `-> ${fs.readlinkSync(p)}`;
 			else if (e.isDirectory()) walk(p);
 			else out[rel] = fs.readFileSync(p, 'utf8');
