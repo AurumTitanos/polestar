@@ -1,5 +1,6 @@
 -- Polestar.Search: one search over guides and every Codex entity, shared by
--- the guide menu's search box and the Lookup window. Contract: docs/SUITE.md.
+-- the guide menu's search box and the Lookup window. Contract:
+-- docs/ARCHITECTURE.md, "Core services: Data, Hooks, Search".
 --
 --   Search.Query(text, opts) -> results, counts, more
 --     opts = { kinds = { item = true, ... } | nil (all), limit = 60, perKind = n,

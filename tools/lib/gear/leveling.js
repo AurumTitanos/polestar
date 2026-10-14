@@ -4,13 +4,13 @@
 // leveling item comes from (quests, dungeon drops, crafting) for Gear's
 // "next upgrades" and the quest reward pick.
 //
-// Precedence (docs/SUITE.md): Forever-specific sources beat Era tables. The
-// addon scrapes Forever's item pages, so for every item it lists its numbers
-// win for the stats it records (primary stats, armor, attack and spell power,
-// defense, weapon damage); the Era table keeps the equip bonuses the scrape
-// does not carry (crit, hit, mp5, dodge, parry, block). A quest reward's
-// "requires level" in the scrape is the quest's, so the Era table's own
-// requirement wins when the item exists there.
+// Precedence (docs/SUITE.md, "Data layer"): Forever-specific sources beat Era
+// tables. The addon scrapes Forever's item pages, so for every item it lists
+// its numbers win for the stats it records (primary stats, armor, attack and
+// spell power, defense, weapon damage); the Era table keeps the equip bonuses
+// the scrape does not carry (crit, hit, mp5, dodge, parry, block). A quest
+// reward's "requires level" in the scrape is the quest's, so the Era table's
+// own requirement wins when the item exists there.
 
 const { encode, decode, STAT_KEYS } = require('../itemdb/stats');
 const { header } = require('../generated');

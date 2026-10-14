@@ -1,7 +1,7 @@
 'use strict';
-// The Dungeons section's data (docs/SUITE.md, module "Dungeons"): a journal
-// page per dungeon and raid the way DungeonJournal presents them: every
-// quest with where it starts and ends, its objective, its chain and its
+// The Dungeons section's data (docs/ARCHITECTURE.md, "Reference data"): a
+// journal page per dungeon and raid the way DungeonJournal presents them:
+// every quest with where it starts and ends, its objective, its chain and its
 // rewards, the bosses in kill order with the quests tied to them, and the
 // entrance. No loot tables. Built by `codex build` and shipped inside the
 // load-on-demand Codex pack as Dungeons1.lua, which registers into

@@ -1,6 +1,6 @@
 -- Polestar.Lookup.Sources: where an item, mount or pet comes from (and where
 -- an NPC, quest, dungeon or treasure is), ranked for this character.
--- Contract: docs/SUITE.md ("Runtime services") and the Lookup contract.
+-- Contract: docs/ARCHITECTURE.md, "Lookup".
 --
 --   Lookup.Sources(kind, id) -> list, entity
 --     kind: "item" | "mount" | "pet" | "recipe" | "tabard" (item IDs), "npc" | "rare",

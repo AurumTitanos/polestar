@@ -2,8 +2,9 @@
 
 The goal: every inch of WoW: Forever covered by guides, and anything a
 player sees in the world (a mount, an item, an NPC, a quest) answerable from
-inside Polestar with "how do I get that?". This document is the contract every
-module is built against.
+inside Polestar with "how do I get that?". This document sets what each
+module covers, what is out of scope and the rules for the inputs; the
+contracts between the modules are in [docs/ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Modules
 
@@ -17,7 +18,7 @@ module is built against.
 | Upgrades | Upgrade indicator on item tooltips and the best pick on quest reward choices, from stat weights per spec (detected from the client's talent points) and level band |
 | Rares | Rare NPC and treasure database with locations and loot, map pins (off by default, Map options), alerts (only through APIs the Forever client has) |
 | Maps | World map without fog of war (the zone-art overlay table), coordinates, zone level ranges, dungeon entrance and travel pins (off by default, Map options) |
-| QoL | The existing QoL module, extended |
+| QoL | Quality of life helpers: action buttons, XP and pace, merchant, reward marks, flight masters, death helper, toggles, requests from other players |
 
 Out of scope: a full UI suite (Polestar integrates with EllesmereUI through its
 public skinning API), boss and combat warnings, aura tracking, best-in-slot
@@ -40,7 +41,7 @@ GPL-3.0; each input keeps its own licence, and the rules follow it:
 | Licence of the input | What may enter the repository |
 |---|---|
 | MIT (ForeverLevelingBiS, wowsims) | Derived data, with attribution (THIRD_PARTY.md) |
-| GPL, no licence, All Rights Reserved (AtlasLoot, QuestieDB, DungeonJournal, RareScanner, AtlasBIStooltips) and web sources | Nothing: the importer code only. Outputs are local build products (gitignored) |
+| GPL, no licence, All Rights Reserved (AtlasLoot, QuestieDB, DungeonJournal, RareScanner) and web sources | Nothing: the importer code only. Outputs are local build products (gitignored) |
 
 Always facts (ids, names, levels, coordinates, drop rates, sources, rewards),
 never another addon's prose, art or code. Every output records its sources and
@@ -86,6 +87,9 @@ The tools treat every pack alike (`new`, `doctor`, `lint`, `compile`,
 `docs/PACK_FORMAT.md` is the contract.
 
 ## Runtime services (core)
+
+Their contracts are in docs/ARCHITECTURE.md, "Core services: Data, Hooks,
+Search" and "Lookup"; in short:
 
 - `Data`: `Data.Pack(name)` loads a pack on demand (`C_AddOns.LoadAddOn`) and
   reports memory; modules never touch another module's tables directly.

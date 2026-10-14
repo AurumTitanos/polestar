@@ -1,6 +1,7 @@
 -- Polestar.Hooks: the one owner of the client's tooltip and item-click hooks,
 -- so modules add lines and handle clicks instead of each hooking the client.
--- Contract: docs/SUITE.md ("Runtime services") and the Lookup contract.
+-- Contract: docs/ARCHITECTURE.md, "Core services: Data, Hooks, Search" and
+-- "Lookup".
 --
 --   Hooks.ItemLines(owner, fn(tooltip, link, itemID))   -- item tooltips (GameTooltip, ItemRefTooltip)
 --   Hooks.UnitLines(owner, fn(tooltip, unit))           -- unit tooltips (GameTooltip)

@@ -6,8 +6,8 @@
 // field it has (a non-empty value; Questie stores absent numbers as 0) and
 // pfQuest-only fields stay. `source` lists every contributor.
 //
-// Coordinates: the store holds Forever-frame percentages (see FRAMES in
-// docs/ARCHITECTURE.md for the evidence). On maps whose Forever bounds equal
+// Coordinates: the store holds Forever-frame percentages (see "Map frames"
+// in docs/ARCHITECTURE.md for the evidence). On maps whose Forever bounds equal
 // the Era bounds that is the same point in both frames and it is tagged "e";
 // on maps whose bounds changed, or that exist only in Forever, "l".
 

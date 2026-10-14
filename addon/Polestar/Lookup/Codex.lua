@@ -6,7 +6,7 @@
 -- RegisterIndex once per searchable kind. Nothing is parsed at load or
 -- indexed afterwards: an entry is one plain find of "\n" .. id .. "\t" in its
 -- chunk (tens of microseconds), and a record is decoded on first access
--- (cached weakly). Contract: docs/SUITE.md.
+-- (cached weakly). Contract: docs/ARCHITECTURE.md, "Lookup".
 --
 --   Codex.Load() -> loaded, reason   -- Data.Pack("Polestar_Codex"); fires CODEX_LOADED(meta) once
 --   Codex.IsLoaded() ; Codex.Meta()

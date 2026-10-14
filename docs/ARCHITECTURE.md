@@ -1385,8 +1385,8 @@ Quest markers); `guideHighlight` only restyles markers those layers draw.
 
 ## Core services: Data, Hooks, Search
 
-Shared by every module (`docs/SUITE.md`, "Runtime services"); each file's
-header has the full contract.
+Shared by every module (summarised in `docs/SUITE.md`, "Runtime services");
+each file's header lists its full API.
 
 ```lua
 Polestar.Data.Pack(name) -> loaded, reason|nil   -- C_AddOns.LoadAddOn once per session; never in combat ("combat", retried later)

@@ -9,7 +9,7 @@
 //   const rs = readRareScanner();
 //   rs.rares[0] -> { npc, name: null, map, x, y, points, loot }
 //
-// Output (docs: docs/ARCHITECTURE.md, section "Lookup"):
+// Output (read by `codex build`, docs/ARCHITECTURE.md "Codex (`codex build`)"):
 //   meta      { source, version, licence, files, warnings }
 //   rares     [{ npc, name, map, x, y, points, loot }]   one row per map an NPC is placed on;
 //             map/x/y null when RareScanner has no position (zoneID 0)

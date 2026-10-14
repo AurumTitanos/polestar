@@ -1,8 +1,9 @@
 -- Polestar.Dungeons: a journal page per dungeon and raid:
 -- every quest with where it starts and ends,
 -- its objective, chain and rewards, the bosses in kill order with the quests
--- tied to them, and the entrance. No loot tables. Contract: docs/SUITE.md,
--- module "Dungeons".
+-- tied to them, and the entrance. No loot tables. Scope: docs/SUITE.md,
+-- "Modules"; data and runtime: docs/ARCHITECTURE.md, "Reference data"
+-- (`dungeons.json` and the journal pages).
 --
 -- The data rides in the load-on-demand Codex pack (Dungeons1.lua, written by
 -- `codex build` through tools/lib/codex/journal.js): per dungeon a summary

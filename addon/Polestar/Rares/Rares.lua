@@ -1,5 +1,5 @@
--- Polestar.Rares: rare NPCs and treasures (replaces RareScanner). Contract:
--- docs/SUITE.md ("Rares") and docs/ARCHITECTURE.md ("Rares").
+-- Polestar.Rares: rare NPCs and treasures. Contract: docs/ARCHITECTURE.md,
+-- "Rares".
 --
 -- This file holds the module's settings, the "last seen" history, and the
 -- decision every sighting goes through; Detect.lua feeds it sightings from

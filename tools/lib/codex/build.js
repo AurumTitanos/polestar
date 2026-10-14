@@ -1,7 +1,7 @@
 'use strict';
 // `codex build`: every importer + data/forever + the Forever client's tables
-// -> the Codex (data/forever/codex/*.json, shapes in docs/SUITE.md and
-// tools/lib/codex/pack.js) and the load-on-demand pack addon/Polestar_Codex.
+// -> the Codex (data/forever/codex/*.json, shapes in docs/ARCHITECTURE.md,
+// "Codex (`codex build`)", and tools/lib/codex/pack.js) and the load-on-demand pack addon/Polestar_Codex.
 // Same inputs give byte-identical output.
 //
 //   loadInputs(opts)      -> inputs (runs importers, reads files, client tables)
@@ -15,11 +15,12 @@
 //   client: clientFacts(tables)|null,
 // }
 //
-// Precedence for one fact found in several inputs (docs/SUITE.md): recordings >
-// client tables > Forever-specific (QuestieDB Forever, ForeverLevelingBiS,
-// RareScanner, DungeonJournal) > Era (pfQuest, AtlasLoot) > Wowhead. Sources of
-// one item dedupe by type + npc/object/quest/spell/faction; each field comes
-// from the highest-ranked input that has it and `from` keeps every input.
+// Precedence for one fact found in several inputs (docs/SUITE.md, "Data
+// layer"): recordings > client tables > Forever-specific (QuestieDB Forever,
+// ForeverLevelingBiS, RareScanner, DungeonJournal) > Era (pfQuest, AtlasLoot)
+// > Wowhead. Sources of one item dedupe by type + npc/object/quest/spell/
+// faction; each field comes from the highest-ranked input that has it and
+// `from` keeps every input.
 
 const fs = require('node:fs');
 const os = require('node:os');

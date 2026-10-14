@@ -1,5 +1,5 @@
 -- Polestar.Data: load-on-demand data packs (Polestar_Codex and friends).
--- Contract: docs/SUITE.md, "Runtime services".
+-- Contract: docs/ARCHITECTURE.md, "Core services: Data, Hooks, Search".
 --
 --   Data.Pack(name) -> loaded, reason|nil
 --     Loads the pack once per session through C_AddOns.LoadAddOn. Never in

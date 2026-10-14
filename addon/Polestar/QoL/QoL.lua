@@ -15,10 +15,10 @@ ns.QoL = QoL
 local type, pairs, select, tonumber = type, pairs, select, tonumber
 local floor, format = math.floor, string.format
 
--- EllesmereUI modules that already do some of these jobs (docs/SUITE.md:
--- Polestar integrates with EllesmereUI, never fights it). While the module is
--- installed and enabled for this character, the overlapping toggle defaults to
--- off; the player can still turn it on.
+-- EllesmereUI modules that already do some of these jobs (docs/SUITE.md,
+-- "Modules": Polestar integrates with EllesmereUI, never fights it). While
+-- the module is installed and enabled for this character, the overlapping
+-- toggle defaults to off; the player can still turn it on.
 local COVERED = {
 	sellJunk = "EllesmereUIQoL",           -- Auto Sell Junk
 	autoRepair = "EllesmereUIQoL",         -- Auto Repair

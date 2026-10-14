@@ -13,7 +13,7 @@
 //   const al = readAtlasLoot();          // the installed copy
 //   al.instances[0].bosses[0].items[0]   -> { item, faction?, quest?, price?, chance? }
 //
-// Output (docs: docs/ARCHITECTURE.md, section "Lookup"):
+// Output (read by `codex build`, docs/ARCHITECTURE.md "Codex (`codex build`)"):
 //   meta        { source, version, licence, modules, files, warnings }
 //   instances   [{ key, name, kind, forever, areaId, levels, phase, bosses: [{ name, npc, object?, items }] }]
 //   droprates   { "<npcId>": { "<itemId>": percent } }
