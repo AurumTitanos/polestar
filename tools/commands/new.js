@@ -27,7 +27,8 @@ const usage = `usage: node tools/polestar.js new [dir] [options]
 Starts a guide pack in [dir] (default: the current folder), which must be
 empty or missing (run it before \`git init\`: a folder holding .git is not
 empty): pack.json, an example guide, README.md, LICENSE, .gitignore, VS Code
-tasks, and a GitHub workflow and a dev container that install Polestar from
+tasks, AGENTS.md / CLAUDE.md for AI assistants, and a GitHub workflow and a
+dev container that install Polestar from
 this clone's origin remote. The origin must be an http(s) or SSH URL; it is
 written as https, without a user name, password, query or fragment. With no
 origin, or any other kind, those two are left out.

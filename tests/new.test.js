@@ -50,7 +50,11 @@ test('new --yes writes the template with the values filled in', () => {
 	const lint = tasks.tasks.find((t) => t.group && t.group.isDefault);
 	assert.match(lint.command, /lint/);
 	assert.equal(lint.problemMatcher.pattern.regexp, '^(.*):(\\d+): (error|warning): (.*)$');
-	for (const f of ['pack.json', 'guides/example.guide', 'README.md']) assert.doesNotMatch(read(dir, f), /\{\{\w+\}\}/, f);
+	const agents = read(dir, 'AGENTS.md');
+	assert.match(agents, /`ann-routes\/`/);
+	for (const s of ['polestar find', '--json', 'polestar lint --format json', 'polestar playtest']) assert.ok(agents.includes(s), s);
+	assert.match(read(dir, 'CLAUDE.md'), /AGENTS\.md/);
+	for (const f of ['pack.json', 'guides/example.guide', 'README.md', 'AGENTS.md']) assert.doesNotMatch(read(dir, f), /\{\{\w+\}\}/, f);
 });
 
 test("LICENSE: GPL-3.0-only names the pack and its author before the GPL's text, MIT has the author and year, others a reminder", () => {

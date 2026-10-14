@@ -94,6 +94,8 @@ polestar dev --play               # lint and build on every save, with the playg
    - `.gitignore` (`dist/`, `drafts/`);
    - `.vscode/tasks.json`: lint as the default build task, so VS Code
      underlines the lines with problems, and playtest as a test task;
+   - `AGENTS.md`, and `CLAUDE.md` pointing to it: how a coding agent works in
+     the pack (below, "With an AI assistant");
    - `.github/workflows/pack.yml` (lint and playtest on every push and pull
      request, with read-only access to your repository; on a version tag the
      same job builds the zip, and a second job, run only once that passes,
@@ -126,7 +128,7 @@ polestar dev --play               # lint and build on every save, with the playg
    addon; after that, `/reload` shows every change. Open the guide menu
    (`/polestar guides`) and pick your guide under "Guide packs".
 
-## Three ways to write guides
+## Four ways to write guides
 
 [GUIDE_FORMAT.md](GUIDE_FORMAT.md) is the language, with a cookbook of
 examples; [GUIDE_CHEATSHEET.md](GUIDE_CHEATSHEET.md) puts every line of it on
@@ -234,6 +236,26 @@ A pack's guide may hand over to any of Polestar's guides with `next`
 your guide can follow: check its races, classes and levels with `polestar find
 --kind guide <zone> --race <Race>` (and `--class <Class>` for a class guide).
 Lint stops a `next` that no character of the guide can follow.
+
+### With an AI assistant
+
+An AI assistant can help you turn **your own material** into guides: your
+notes, routes you played, guides you wrote. Two ways work well:
+
+- **A chat assistant.** Give it [GUIDE_FORMAT.md](GUIDE_FORMAT.md) (or
+  [GUIDE_CHEATSHEET.md](GUIDE_CHEATSHEET.md)) and your material, and ask for
+  `.guide` text. Paste the result into your pack and run `polestar lint`.
+- **A coding agent in the pack folder.** `polestar new` writes `AGENTS.md`
+  (and `CLAUDE.md`, which points to it): look up every id, name and
+  coordinate with `polestar find --json` and never guess one; repeat
+  `polestar lint --format json` and `polestar playtest` until both pass;
+  write only from the author's own material.
+
+**The ground rule:** an assistant's quest ids, NPC ids, place names and
+coordinates are guesses until `find`, lint and playtest confirm them.
+Assistants write plausible numbers that are wrong. Check every id with
+`find`, and do not publish until lint has no errors and playtest plays every
+guide to the end.
 
 ## Testing
 

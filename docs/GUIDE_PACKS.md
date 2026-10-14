@@ -118,7 +118,10 @@ polestar dev --play    # lint and build on every save, with the browser playgrou
    public repository it also writes a GitHub workflow that checks every push.
 2. **Write your guides** in the `.guide` files. `polestar find <text>`
    prints quest, NPC and place lines ready to paste; in the game,
-   `/polestar where` prints where you stand.
+   `/polestar where` prints where you stand. An AI assistant can help you
+   draft guides from your own material:
+   [PACKS.md, "With an AI assistant"](PACKS.md#with-an-ai-assistant) says
+   how, and why every id it writes needs checking.
 3. **Check them.** `polestar lint` checks every guide, and
    `polestar playtest` plays each one to the end in the real addon, for
    each race that can reach it and each class it has steps for.

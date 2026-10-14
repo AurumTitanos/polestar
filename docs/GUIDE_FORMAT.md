@@ -560,6 +560,13 @@ something to do, or lands on one that does not apply to the character
 (`no Human can follow it`), is reported as stuck at the hand-over. Turn-ins
 in our guide of quests your guide accepted count too.
 
+### With an AI assistant
+
+An assistant can draft guides from your own notes and routes;
+[PACKS.md](PACKS.md) ("With an AI assistant") explains how, and the ground
+rule: its ids and coordinates are guesses until `find`, lint and playtest
+confirm them.
+
 ### Patterns
 
 **Several objectives at once.** The goals of one step are open together:
