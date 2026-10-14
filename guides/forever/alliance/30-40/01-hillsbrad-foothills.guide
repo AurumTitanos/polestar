@@ -102,7 +102,7 @@ step Syndicate camp
 
 step Yeti cave
   tip The yetis live in the cave in the hills north of Southshore, on your way back south.
-  collect 3720 quest 565.3            -- Yeti Fur
+  collect 3720 quest 565.4            -- Yeti Fur
   note Bartolo also wants a Hillman's Cloak, a Bolt of Woolen Cloth and Fine Thread: crafted or bought; the cloak is turned in when you are back in Southshore later.
 
 step Southshore

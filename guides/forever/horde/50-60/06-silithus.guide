@@ -131,7 +131,7 @@ step Scouring the Desert
 
 step Flayers and Rock Stalkers
   tip Stonelash Flayers and Rock Stalkers roam the dunes south-west of Kirika's camp.
-  collect 20375 quest 8278.2
+  collect 20375 quest 8278.1
   collect 20377 quest 8278.3
 
 step Twilight Vanguard
@@ -142,7 +142,7 @@ step Twilight Vanguard
 step Dredge Crushers and Pincers
   tip Head north along the western dunes; Dredge Crushers and Stonelash Pincers range from here back toward the hold.
   kill 11741 quest 8281.1
-  collect 20374 quest 8278.1
+  collect 20374 quest 8278.2
 
 step Twilight Post
   tip Twilight Keeper Mayna holds the camp in the west.
@@ -190,7 +190,7 @@ step Layo Starstrike
 step Marshal's Refuge
   zone Un'Goro Crater
   tip Through the pass and east along the northern cliffs to Marshal's Refuge. Linken stands by the cave; J.D. Collie is inside it.
-  kill 10977 quest 5163.2             -- Use Umi's Mechanical Yeti on Quixxil
+  kill 10977 quest 5163.3             -- Use Umi's Mechanical Yeti on Quixxil
   turnin 3914                         -- Linken
   accept 3941
   turnin 3941                         -- J.D. Collie

@@ -78,8 +78,8 @@ step Kim'jael
   accept 3601
   collect 10717 quest 3601.1          -- Kim'Jael's Compass
   collect 10715 quest 3601.2          -- Kim'Jael's Scope
-  collect 10718 quest 3601.3          -- Kim'Jael's Wizzlegoober
-  collect 10722 quest 3601.4          -- Kim'Jael's Stuffed Chicken
+  collect 10718 quest 3601.4          -- Kim'Jael's Wizzlegoober
+  collect 10722 quest 3601.3          -- Kim'Jael's Stuffed Chicken
   turnin 3601
   accept 5534
 
@@ -122,8 +122,8 @@ step Morgan's Vigil
 
 step Dreadmaul Rock
   tip The Firegut ogres hold the great rock north of the Vigil, with the Brutes on its east side.
-  kill 7033 quest 3823.1              -- Firegut Ogre
-  kill 7034 quest 3823.2              -- Firegut Ogre Mage
+  kill 7033 quest 3823.2              -- Firegut Ogre
+  kill 7034 quest 3823.1              -- Firegut Ogre Mage
   kill 7035 quest 3823.3              -- Firegut Brute
 
 step Morgan's Vigil

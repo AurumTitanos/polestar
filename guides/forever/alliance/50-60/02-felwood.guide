@@ -69,9 +69,9 @@ step Jadefire Glen
 step Jaedenar
   tip Jaedenar is the ruined temple north of the glen. Some of its cultists drop a Blood Red Key, about one kill in thirty: it opens Arko'narin's cell in Shadow Hold, the cave at the back. If it drops, clear the way out before you free her; if not, skip her quests.
   kill 7125 quest 5155.1              -- Jaedenar Hound
-  kill 7115 quest 5155.2              -- Jaedenar Adept
-  kill 7112 quest 5155.3              -- Jaedenar Cultist
-  kill 7113 quest 5155.4              -- Jaedenar Guardian
+  kill 7115 quest 5155.3              -- Jaedenar Adept
+  kill 7112 quest 5155.4              -- Jaedenar Cultist
+  kill 7113 quest 5155.2              -- Jaedenar Guardian
   collect 13140 optional              -- Blood Red Key, a rare drop
   accept 5202 optional
   turnin 5202 optional                -- Captured Arko'narin, in Shadow Hold

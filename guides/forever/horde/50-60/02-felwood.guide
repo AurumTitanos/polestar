@@ -160,8 +160,8 @@ step Scarlet Crusade
   tip Knights and magi work the Northridge Lumber Camp; the medics and hunters camp south of it.
   kill 10605 quest 6004.1
   kill 1831 quest 6004.2
-  kill 1833 quest 6004.3
-  kill 1826 quest 6004.4
+  kill 1833 quest 6004.4
+  kill 1826 quest 6004.3
 
 step Kirsta Deepshadow
   turnin 6004
@@ -222,9 +222,9 @@ step Emerald Sanctuary
 step Southern Jaedenar
   tip Follow the road north-west. The south of Jaedenar, around its corrupted moonwell, is held by Shadow Council cultists, adepts, guardsmen and their hounds.
   kill 7125 quest 5155.1
-  kill 7115 quest 5155.2
-  kill 7112 quest 5155.3
-  kill 7113 quest 5155.4
+  kill 7115 quest 5155.3
+  kill 7112 quest 5155.4
+  kill 7113 quest 5155.2
 
 step A Strange Red Key
   tip Only if a Blood Red Key dropped: use it to start the quest, then free Arko'narin in her cage in Shadow Hold, the cave at the north end of Jaedenar, and escort her out.

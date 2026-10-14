@@ -102,7 +102,7 @@ step Lakkari Tar Pits
 step Western jungle
   tip Ride south-west along the western cliffs. Frenzied Pterrordax fly over the west side, and Bloodpetal Trappers grow in the same jungle.
   kill 9167 quest 4501.2
-  kill 6512 quest 4145.4
+  kill 6512 quest 4145.2
 
 step Stegodons and ravasaurs
   tip South of the hot springs, Stegodons graze and Dinosaur Bones drop from them or lie on the ground; Diemetradons nearby carry the scales Shizzle wants. Ravasaurs hunt in packs in the south-west: their claws are for Jes'rimon, and now and then one carries a Mangled Journal (a rare drop: take its quest only if you get one). Avoid Gruff, a level 57 Stegodon.
@@ -161,7 +161,7 @@ step Torwa Pathfinder
 step Lashers and Threshers
   tip Ride north along the east side. Bloodpetal Lashers and Threshers fill the jungle.
   kill 6509 quest 4145.1
-  kill 6511 quest 4145.2
+  kill 6511 quest 4145.4
 
 step Crate of Foodstuffs
   tip The expedition's crate sits at an abandoned camp in the eastern jungle.
@@ -183,10 +183,10 @@ step Bloodpetal Flayers
 
 step Power Crystals and soil
   tip The crystal clusters stand all over the crater, many around Fire Plume Ridge. Take a few extra of each colour for the pylons.
-  collect 11184 quest 4284.1
-  collect 11185 quest 4284.2
-  collect 11186 quest 4284.3
-  collect 11188 quest 4284.4
+  collect 11184 quest 4284.4
+  collect 11185 quest 4284.3
+  collect 11186 quest 4284.1
+  collect 11188 quest 4284.2
   collect 11018 quest 3761
   collect 11018 quest 4496.2
 

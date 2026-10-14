@@ -324,7 +324,7 @@ step Crusader's Outpost
 
 step Vile Fin shore
   tip More Vile Fin murlocs walk the shore just north of the outpost.
-  collect 278244 quest 97558.3
+  collect 278244 quest 97558.2
 
 step Whispering Forest
   tip Head west into the Whispering Forest; Hilda and Ephram camp at its edge.
@@ -430,7 +430,7 @@ step Vicious Night Web Spiders
 step Hides for the Forsaken
   tip Duskbats and Darkhounds roam all along the road back west; finish the wings and hides on the way.
   collect 278242 quest 97558.1
-  collect 278243 quest 97558.2
+  collect 278243 quest 97558.3
 
 step Deathguard Linnea's camp
   turnin 356                          -- Deathguard Linnea

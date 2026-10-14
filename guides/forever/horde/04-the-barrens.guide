@@ -109,10 +109,10 @@ step Baron Longshore
 
 step Northwatch Hold
   tip Northwatch Hold, on the coast further south. The Theramore Marines and Preservers (15-16) drop the medals; Captain Fairmount (20) and the two cannoneers (19) stand in the keep and on its walls, and they are why the hold waits until now.
-  collect 5078 quest 891.1
-  kill 3393 quest 891.2
-  kill 3455 quest 891.3
-  kill 3454 quest 891.4
+  collect 5078 quest 891.4
+  kill 3393 quest 891.1
+  kill 3455 quest 891.2
+  kill 3454 quest 891.3
 
 step Free From the Hold
   tip Gilthares Firebough is chained inside the hold. Talk to him to start the escort and stay close: Theramore soldiers attack on the way out. He walks you back to Ratchet.
@@ -267,12 +267,12 @@ step Mission: Possible But Not Probable
   only Rogue
   tip Stay stealthed: Foreman Silixiz carries the key to the tower; Gallywix and his lockbox are at the top. Gallywix is elite: grouping up is advised.
   goto 54.8,5.6 "Venture Co. tower" optional
-  collect 8072 quest 2478.1 optional
-  kill 7310 quest 2478.2 optional
+  collect 8072 quest 2478.5 optional
+  kill 7310 quest 2478.1 optional
   kill 7308 quest 2478.3 optional
-  kill 7307 quest 2478.4 optional
-  collect 8073 quest 2478.5 optional
-  collect 8074 quest 2478.6 optional
+  kill 7307 quest 2478.2 optional
+  collect 8073 quest 2478.6 optional
+  collect 8074 quest 2478.4 optional
 
 step Boulder Lode Mine
   tip The Venture Co. Overseers and Enforcers at the mine in the north-east corner of the zone drop the Cats Eye Emerald.
@@ -410,14 +410,14 @@ step Gann Stonespire
 step Blackthorn Ridge
   tip West of Gann, the Razormane hold Blackthorn Ridge. Kuz is on the east side, Nak to the south, Lok Orcbane at the west end. Lok (25) and the Warfrenzies (24-25) are a few levels above you; Hagg Taurenbane, a rare elite, sometimes walks the ridge: leave him. Pathfinders and Stalkers drop the Backstabber, Seers the Wand, Warfrenzies the War Shield. Stormhide lizards and Hecklefang Stalkers roam the plain between Gann and the ridge. Washte Pawne, a rare red wind serpent, flies over the ridge: its feather starts a quest.
   goto 42.5,81.0 "Blackthorn Ridge"
-  collect 5074 quest 879.3
+  collect 5074 quest 879.1
   collect 5073 quest 879.2
-  collect 5072 quest 879.1
+  collect 5072 quest 879.3
   collect 5093 quest 893.1
   collect 5092 quest 893.2
   collect 5094 quest 893.3
-  kill 3238 quest 98093.1             -- Stormhide, on the plain between Gann and the ridge
-  kill 4128 quest 98093.2             -- Hecklefang Stalker
+  kill 3238 quest 98093.2             -- Stormhide, on the plain between Gann and the ridge
+  kill 4128 quest 98093.1             -- Hecklefang Stalker
   collect 5103 optional               -- Washte Pawne's Feather
   accept 885 optional
 

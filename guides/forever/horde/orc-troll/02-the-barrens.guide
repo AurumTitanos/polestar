@@ -205,9 +205,9 @@ step The Sludge Fen
   tip Head east to the Venture Co. research site west of the Sludge Fen. Use the Control Console, close the three valves around the drill, use the console again, then take the Console Key from Tinkerer Sniggles.
   turnin 894
   accept 900
-  interact 61936 quest 900.1
-  interact 61935 quest 900.2
-  interact 4072 quest 900.3
+  interact 61936 quest 900.2
+  interact 61935 quest 900.3
+  interact 4072 quest 900.1
   turnin 900
   accept 901
   collect 5089 quest 901.1
@@ -247,9 +247,9 @@ step The Stagnant Oasis
 
 step Raptor Grounds
   tip The Raptor Grounds lie south-west of the oasis. Sunscale Scytheclaws drop the feathers you use on the three nests.
-  interact 6906 quest 905.1 @52.5,46.6
-  interact 6907 quest 905.2 @52.6,46.1
-  interact 6908 quest 905.3 @52.0,46.5
+  interact 6906 quest 905.3 @52.5,46.6
+  interact 6907 quest 905.1 @52.6,46.1
+  interact 6908 quest 905.2 @52.0,46.5
 
 step The Crossroads
   turnin 905                          -- Sergra Darkthorn

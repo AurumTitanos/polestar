@@ -224,8 +224,8 @@ step The Sepulcher
 step Ambermill
   tip South-east down the road to Ambermill. Protectors guard the outskirts and Mages the town; both drop pendants. Wizards and Watchers patrol the roads around it. Stay out of the middle, where Archmage Ataeric stands.
   collect 3354 quest 479.1
-  kill 1889 quest 95981.1
-  kill 1888 quest 95981.2
+  kill 1889 quest 95981.2
+  kill 1888 quest 95981.1
 
 step Moonrage Bloodhowlers
   tip Only if Dalar gave you Arugal's Folly: the Bloodhowlers prowl the woods south-west of Ambermill, east of Pyrewood; they drop the Worgen Bits.
@@ -233,8 +233,8 @@ step Moonrage Bloodhowlers
 
 step The refugees
   tip The Sickly and Haggard Refugees shamble along the road south of Pyrewood toward the Greymane Wall.
-  kill 2054 quest 98299.1
-  kill 2053 quest 98299.2
+  kill 2054 quest 98299.2
+  kill 2053 quest 98299.1
 
 step Hearth to the Sepulcher
   hearth "The Sepulcher"

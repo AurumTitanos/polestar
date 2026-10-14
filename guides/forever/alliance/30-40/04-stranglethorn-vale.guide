@@ -204,8 +204,8 @@ step Rebel Camp
 
 step Kurzen's Compound
   tip Headshrinkers stand deeper in the compound; the Commandos lurk stealthed around it and in the cave. Pick up Green Hills pages as they drop.
-  kill 941 quest 574.1                -- Kurzen Headshrinker
-  kill 938 quest 574.2                -- Kurzen Commando
+  kill 941 quest 574.2                -- Kurzen Headshrinker
+  kill 938 quest 574.1                -- Kurzen Commando
 
 step The jungle ruins
   tip Loop through the troll ruins of the north and centre: each holds one stone tablet of the troll legends. Shadowmaw Panthers prowl stealthed in the jungle around them; the Venture Co. camp on Lake Nazferiti carries the Tumbled Crystals.

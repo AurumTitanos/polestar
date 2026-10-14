@@ -67,7 +67,7 @@ step Kadrak
 
 step Warsong Scout
   tip Keep north on the road. The Warsong Scout waits at the Warsong lumber camp, south of Splintertree.
-  collect 16764 quest 6543.2 @71.05,68.36 -- Warsong Scout
+  collect 16764 quest 6543.1 @71.05,68.36 -- Warsong Scout
 
 step Splintertree Post
   tip Splintertree Post is just north up the road.
@@ -91,7 +91,7 @@ step Warsong Outrider
 step Zoram'gar Outpost
   tip Ride west along the main road across Ashenvale, past Astranaar (Alliance: keep to the road), to the coast. Zoram'gar Outpost is on the Zoram Strand in the north-west. Its other quests are for the next visit, at 27.
   getfp "Zoram'gar Outpost"
-  collect 16763 quest 6543.1 @12.22,34.22 -- Warsong Runner
+  collect 16763 quest 6543.2 @12.22,34.22 -- Warsong Runner
   accept 6442                         -- Marukai
 
 step Naga heads

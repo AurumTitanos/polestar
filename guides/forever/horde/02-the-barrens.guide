@@ -230,8 +230,8 @@ step Samophlange
   turnin 894
   accept 900
   interact 4072 quest 900.1
-  interact 61935 quest 900.2
-  interact 61936 quest 900.3
+  interact 61935 quest 900.3
+  interact 61936 quest 900.2
   turnin 900
   accept 901
   collect 5089 quest 901.1
@@ -280,9 +280,9 @@ step The Stagnant Oasis
 
 step Raptor nests
   tip The three nests sit together in the Raptor Grounds south-west of the oasis; Sunscale Scytheclaws guard them.
-  interact 6906 quest 905.1
-  interact 6907 quest 905.2
-  interact 6908 quest 905.3
+  interact 6906 quest 905.3
+  interact 6907 quest 905.1
+  interact 6908 quest 905.2
 
 step Ratchet
   tip East to Ratchet, on the coast.

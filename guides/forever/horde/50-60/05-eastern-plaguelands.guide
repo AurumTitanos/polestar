@@ -106,10 +106,10 @@ step Egan
 
 step Quel'Lithien Lodge
   tip The high elf Rangers, Pathstriders and Woodsmen guard the lodge by Northpass Tower; the Registry lies inside. Rangers reach 60: pull one at a time. Noxious Plaguebats fly over the fields on the way.
-  collect 15847 quest 6133.1
+  collect 15847 quest 6133.4
   kill 8564 quest 6133.2
-  kill 8565 quest 6133.3
-  kill 8563 quest 6133.4
+  kill 8565 quest 6133.1
+  kill 8563 quest 6133.3
   kill 8601 quest 6042.1
 
 step Infiltrator Hameya
@@ -210,7 +210,7 @@ step Gadgetzan
 
 step Sprinkle
   tip Use Umi's Mechanical Yeti on Sprinkle, the goblin girl in Gadgetzan. Quixxil and Legacki are scared later in the route.
-  kill 7583 quest 5163.1
+  kill 7583 quest 5163.2
 
 step Gaeriyan
   tip Gaeriyan is a ghost at the graveyard just north of Gadgetzan; the Conspicuous Gravestone is south of it, outside the town wall.

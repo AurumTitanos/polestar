@@ -144,7 +144,7 @@ step Fire Plume Ridge
 
 step Marshal's Refuge
   tip Ride north to Marshal's Refuge. Use Umi's Mechanical Yeti beside Quixxil.
-  kill 10977 quest 5163.2             -- Quixxil
+  kill 10977 quest 5163.3             -- Quixxil
   turnin 4005                         -- J.D. Collie
   accept 3961
   turnin 3961                         -- Linken, at the back of the refuge

@@ -229,8 +229,8 @@ step Northspring harpies
   tip The Northspring harpies nest on the ridges in the far north-west. They are 48-50, a few levels above you: the Windcallers heal, so kill them first and pull one at a time.
   kill 5362 quest 3063.1
   kill 5363 quest 3063.2
-  kill 5366 quest 3063.3
-  kill 5364 quest 3063.4
+  kill 5366 quest 3063.4
+  kill 5364 quest 3063.3
 
 step Camp Mojache
   hearth "Camp Mojache"

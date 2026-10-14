@@ -218,10 +218,10 @@ step Silvermane Howlers
 
 step Highvale
   tip Back west to Quel'Danil Lodge; rangers and marksmen stay near the lodge, scouts and outrunners on the slopes south of it.
-  kill 2691 quest 7841.1
-  kill 2692 quest 7841.2
-  kill 2693 quest 7841.3
-  kill 2694 quest 7841.4
+  kill 2691 quest 7841.2
+  kill 2692 quest 7841.1
+  kill 2693 quest 7841.4
+  kill 2694 quest 7841.3
 
 step Gilveradin's camp
   turnin 77                             -- Gilveradin Sunchaser

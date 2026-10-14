@@ -115,8 +115,8 @@ step The standing stones
   tip Yala Windwatcher stands at the Thendal Standing Stones, east of the village. Roiling Winds and Al'Aketh Converts gather just north of her; the Elemental Convergence is just north-east of her.
   turnin 92464                        -- Yala Windwatcher
   accept 92465
-  kill 251143 quest 92465.1
-  kill 251160 quest 92465.2
+  kill 251143 quest 92465.2
+  kill 251160 quest 92465.1
   interact 450001 quest 92598.1
   turnin 92465
   accept 92469
@@ -338,7 +338,7 @@ step Riaani Nightwind
 step Wind Hollows and Construct Parts
   tip Wind Hollows drift over the lowlands around Valanaar. The first Construct Parts lie west of the orchard road.
   collect 262357 quest 93736.1
-  collect 260880 quest 93737.2
+  collect 260880 quest 93737.4
 
 step Endaria Mistgaze
   turnin 93736
@@ -372,7 +372,7 @@ step Aamelia Windfield
 step Bandit Highwaymen
   tip The highwaymen hold the hills north-east of the orchard. More Construct Parts lie near the road to Valanaar.
   collect 253596 quest 92685.1
-  collect 260881 quest 93737.3
+  collect 260881 quest 93737.2
 
 step Standing Our Ground
   turnin 92685                        -- Aamelia Windfield
@@ -572,8 +572,8 @@ step The Al'Aketh camp
   tip Commander Haalien, Jorel Windsinger and Naaleos Leafwhisper are in the cult camp east of Elegael. Vayn Moongaze stands at its edge. Haalien also drops a Ripped Missive: read it to start the next quest.
   accept 93165                        -- Vayn Moongaze
   collect 265475 quest 94488.1
-  kill 258130 quest 94489.1
-  kill 258134 quest 94489.2
+  kill 258130 quest 94489.2
+  kill 258134 quest 94489.1
   collect 258771 quest 93165.1
   collect 265476
   accept 94490

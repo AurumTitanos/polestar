@@ -159,9 +159,9 @@ step Gadgetzan
 
 step Southern Wastewander camps
   tip The shadow mages, rogues and assassins camp south-east of Gadgetzan.
-  kill 5617 quest 1691.1
-  kill 5615 quest 1691.2
-  kill 5623 quest 1691.3
+  kill 5617 quest 1691.3
+  kill 5615 quest 1691.1
+  kill 5623 quest 1691.2
 
 # ---------------------------------------------------------------- Steamwheedle Port
 
@@ -221,8 +221,8 @@ step Woodpaw north camp
 step Gordunni Outpost
   tip North of the gnolls the ogres hold a hilltop outpost; pull the ogre-magi to you. The cobalt is in the dirt mounds around the outpost, and the scroll lies on the ground inside it.
   kill 5229 quest 2975.1
-  kill 5232 quest 2975.2
-  kill 5237 quest 2975.3
+  kill 5232 quest 2975.3
+  kill 5237 quest 2975.2
   collect 9463 quest 2987.1
   collect 9370 "Gordunni Scroll"
   accept 2978

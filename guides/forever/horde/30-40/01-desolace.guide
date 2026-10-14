@@ -379,8 +379,8 @@ step The Dalaran traitors
   tip Head west along the foot of the mountains to the violet dome of Dalaran. Ricter, Alina and Dermot (33-34) stand together inside the crater's eastern rim, Kegan Darkmar (35) a little west of them; each carries one Bloodstone piece. The Shield Guards and Theurgists (31-32) around them drop the Worn Stone Tokens.
   collect 3689 quest 544.2            -- Ricter
   collect 3690 quest 544.3            -- Alina
-  collect 3691 quest 544.4            -- Dermot
-  collect 3688 quest 544.1            -- Kegan Darkmar
+  collect 3691 quest 544.1            -- Dermot
+  collect 3688 quest 544.4            -- Kegan Darkmar
   collect 3714 quest 556
 
 step Tarren Mill
@@ -398,7 +398,7 @@ step Tarren Mill
 step Gol'dir
   zone Alterac Mountains
   tip Ride north past Valik's camp to Strahnbrad, the Syndicate-held village (35-37). Jailor Borhuin carries the Rusted Iron Key; Gol'dir sits in a cage in the house on the north side.
-  collect 3704 quest 503.2
+  collect 3704 quest 503.1
   turnin 503                          -- Gol'dir
   accept 506
 

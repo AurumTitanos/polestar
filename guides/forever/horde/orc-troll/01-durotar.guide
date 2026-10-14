@@ -210,8 +210,8 @@ step Gar'Thok
 
 step Tiragarde Keep
   tip The keep stands on the coast south-east of Razor Hill. The raiders' axe, bow and shield lie on its outskirts. Sailors and marines drop the Canvas Scraps. Lieutenant Benedict waits at the top of the keep; his key opens the chest beside him, which holds the Aged Envelope.
-  collect 275716 quest 96822.1 @57.4,56.4
-  collect 275713 quest 96822.2 @57.3,57.9
+  collect 275716 quest 96822.2 @57.4,56.4
+  collect 275713 quest 96822.1 @57.3,57.9
   collect 275717 quest 96822.3 @56.6,53.0
   kill 3128 quest 784.1
   kill 3129 quest 784.2
@@ -293,8 +293,8 @@ step Bloodtalon Matriarch
 step Echo Isles
   tip Head south through the isles. The Loa idols lie all over the southern isles; Voodoo and Hexed Trolls hold them and drop the Hexed Pendants. Zalazane and Minshina's cage are on the southernmost isle.
   collect 277135 quest 97225.1
-  kill 3206 quest 826.1
-  kill 3207 quest 826.2
+  kill 3206 quest 826.2
+  kill 3207 quest 826.1
   complete 96873
   collect 4866 quest 826.3
   collect 4864 quest 808.1 @67.4,87.8
@@ -358,9 +358,9 @@ step Heglan Shadeeye
   tip Heglan stands on the shore east of Razor Hill. The trident, banner and dagger lie on the beach around him.
   turnin 99048
   accept 99049
-  collect 286010 quest 99049.1 @60.1,44.8
+  collect 286010 quest 99049.3 @60.1,44.8
   collect 286011 quest 99049.2 @60.1,42.4
-  collect 286012 quest 99049.3 @58.9,44.4
+  collect 286012 quest 99049.1 @58.9,44.4
 
 step Spitelash naga
   tip Follow the shore north. Spitelash Scouts and Attendants hold the beach below Drygulch Ravine. Hunters: tame a Surf Crawler on the beach.

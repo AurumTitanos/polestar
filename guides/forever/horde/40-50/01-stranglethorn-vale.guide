@@ -192,9 +192,9 @@ step Jungle stalkers
 
 step Naga shore and the Holy Spring
   tip Follow the coast south. The naga explorers wade along the shore and carry the reed bundles; the Holy Spring bubbles in the hills just east of them.
-  kill 1907 quest 573.2
+  kill 1907 quest 573.1
   collect 4029 quest 617.1
-  collect 737 quest 573.1 @29.0,61.9
+  collect 737 quest 573.2 @29.0,61.9
 
 step Booty Bay
   tip Ride south to Booty Bay. Shaky Phillipe waits on the docks.

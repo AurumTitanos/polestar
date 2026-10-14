@@ -216,8 +216,8 @@ step Doctor Draxlegauge
 step Daggerspine shore
   tip West of the cove the Daggerspine Raiders and Sorceresses (38-40) hold the shore: pull them one at a time. The two wrecks lie in the shallows off it, the charts and logs inside them; the gems lie on the sea floor around the wrecks.
   collect 4487 quest 662.1
-  collect 4488 quest 662.2
-  collect 4489 quest 662.3
+  collect 4488 quest 662.3
+  collect 4489 quest 662.2
   collect 4490 quest 662.4
   collect 4492 quest 666
   kill 2595 quest 664.1

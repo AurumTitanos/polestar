@@ -104,7 +104,7 @@ step Molsen Farm
   collect 255155                              -- Precessive Autocognition Assembly
   accept 92910
   collect 723 quest 22                        -- Goretusk Liver
-  collect 731 quest 38.2                      -- Goretusk Snout
+  collect 731 quest 38.3                      -- Goretusk Snout
   collect 729 quest 38.1                      -- Stringy Vulture Meat: Fleshrippers
 
 step The Gold Coast Quarry
@@ -122,7 +122,7 @@ step Jangolode Mine
 step The north coast
   tip Murloc Coastrunners and Raiders line the beach north of the mine. They flee at low health: pull one at a time.
   collect 254548 quest 92744                  -- Longshore Murloc Gills
-  collect 730 quest 38.3                      -- Murloc Eye
+  collect 730 quest 38.2                      -- Murloc Eye
 
 step The gnoll hills
   tip Riverpaw Gnolls and Scouts roam the hills between the coast and the Jansen Stead.

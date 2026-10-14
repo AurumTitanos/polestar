@@ -210,8 +210,8 @@ step Agent Kearnen
   tip Ride west along the road out of Raven Hill into Westfall. Agent Kearnen watches Klaven Mortwake's tower from the hills just inside the border. The Malformed Defias Drone (level 23) guarding the tower carries its key; Klaven's journal is in the chest at the top.
   turnin 2360                                 -- Agent Kearnen
   accept 2359
-  collect 7923 quest 2359.1                   -- Defias Tower Key: Malformed Defias Drone
-  collect 7908 quest 2359.2                   -- Klaven Mortwake's Journal, in the chest
+  collect 7923 quest 2359.2                   -- Defias Tower Key: Malformed Defias Drone
+  collect 7908 quest 2359.1                   -- Klaven Mortwake's Journal, in the chest
 
 step Master Mathias Shaw
   only Rogue

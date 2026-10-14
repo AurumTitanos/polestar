@@ -4,6 +4,11 @@
 
 ### For players
 
+- Quests with several objectives check off the right one: a goal counted the
+  objective at its place in the quest's text instead of its place in the quest
+  log, so in The Guns of Northwatch "Kill Cannoneer Smythe" showed the 10/10
+  medals and Captain Fairmount never ticked. 135 goals in 46 quests of the
+  leveling guides now count the objective they name.
 - A new character's welcome survives the intro cinematic: the cinematic
   closed it as it started and it never came back. It now waits for the
   cinematic to end, or comes back on the page it was on.

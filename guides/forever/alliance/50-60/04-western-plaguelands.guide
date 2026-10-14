@@ -230,8 +230,8 @@ step The Scarlet Crusade
   tip The Scarlet Medics, Hunters, Knights and Mages patrol the lumber camp and the road toward Hearthglen.
   kill 10605 quest 6004.1             -- Scarlet Medic
   kill 1831 quest 6004.2              -- Scarlet Hunter
-  kill 1833 quest 6004.3              -- Scarlet Knight
-  kill 1826 quest 6004.4              -- Scarlet Mage
+  kill 1833 quest 6004.4              -- Scarlet Knight
+  kill 1826 quest 6004.3              -- Scarlet Mage
 
 step Kirsta Deepshadow
   turnin 6004

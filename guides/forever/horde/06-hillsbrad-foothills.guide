@@ -97,8 +97,8 @@ step Bears, creepers and lions
 
 step Hillsbrad Fields
   tip The farms east of Hillsbrad town. Farmer Ray works the field by the northern farmhouse, Farmer Getz the one further south-east; Farmhands and Farmers are everywhere. Farmer Kalaba tends the field south of the farms.
-  kill 2360 quest 527.1
-  kill 2266 quest 527.2
+  kill 2360 quest 527.2
+  kill 2266 quest 527.1
   kill 232 quest 527.3
   kill 2403 quest 527.4
   kill 2451 quest 567.4
@@ -174,8 +174,8 @@ step Town hall
   tip The town hall is on the west side of Hillsbrad. Magistrate Burnside (30) and Clerk Horrace Whitesteed are inside with the Town Registry; the Proclamation is pinned up beside it. Councilmen walk the town.
   kill 2335 quest 532.1
   kill 2387 quest 532.2
-  collect 3657 quest 532.3
-  interact 1761 quest 532.4           -- Hillsbrad Proclamation
+  collect 3657 quest 532.4
+  interact 1761 quest 532.3           -- Hillsbrad Proclamation
   kill 2448 quest 567.1
 
 step Tarren Mill

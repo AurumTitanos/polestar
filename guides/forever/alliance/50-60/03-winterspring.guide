@@ -127,7 +127,7 @@ step Everlook
   turnin 977
   accept 5163
   use 12928 @61.5,38.6 "Umi's Mechanical Yeti" -- On Legacki, by the inn
-  kill 10978 quest 5163.3             -- Legacki: Sprinkle and Quixxil come later
+  kill 10978 quest 5163.1             -- Legacki: Sprinkle and Quixxil come later
   accept 6604                         -- Harlo Wigglesworth
 
 step Starfall Village

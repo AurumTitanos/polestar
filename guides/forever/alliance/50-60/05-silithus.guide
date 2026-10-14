@@ -49,7 +49,7 @@ step Gadgetzan
   turnin 5538                         -- Krinkle Goodsteel
   accept 5801                         -- For Chillwind Camp: keep it
   use 12928 @51.1,26.9 "Umi's Mechanical Yeti" -- On Sprinkle
-  kill 7583 quest 5163.1              -- Sprinkle
+  kill 7583 quest 5163.2              -- Sprinkle
 
 step Gaeriyan
   tip Gaeriyan waits at the graveyard just east of town; the gravestone stands nearby.
@@ -106,8 +106,8 @@ step Cenarion Hold
 step The western dunes
   tip Dredge Crushers dig further west; Stonelash Pincers, Flayers and Rock Stalkers hunt the same sands.
   kill 11741 quest 8281.1             -- Dredge Crusher
-  collect 20374 quest 8278.1          -- Stonelash Pincer Stinger
-  collect 20375 quest 8278.2          -- Stonelash Flayer Stinger
+  collect 20374 quest 8278.2          -- Stonelash Pincer Stinger
+  collect 20375 quest 8278.1          -- Stonelash Flayer Stinger
   collect 20377 quest 8278.3          -- Rock Stalker Fang
 
 step Cenarion Hold
