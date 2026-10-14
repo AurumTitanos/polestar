@@ -1582,16 +1582,18 @@ Reading flow: `docs/DESIGN.md` ("Intent" and "The Guide Window").
   name both Polestar Guides and guide packs.
 - **Guide packs page** (`UI/Packs.lua`, Options order 70, `/polestar
   packs`): one row per `Guides.Packs()` record: title, credits, guide count,
-  website in a copy box, source, and a `W.Switch` (`Guides.SetPackShown`) or
+  website as a `W.Link` (the address without its scheme; the click opens
+  `UI.ShowCopy("<title> website", <address>)`), source, and a `W.Switch` (`Guides.SetPackShown`) or
   the status text ("turned off in the AddOns list" with **Enable and reload**,
   "not loaded[: <reason>]", "needs Polestar <v> or newer" (or "needs a newer
   Polestar"), "broken: registered
   no guides", "refused: <reason>"); with problems a warning chip, **Show**
   (the list) and **Copy report** (`P.Report`: pack, versions, client build,
   every problem). Then **Suggest guides from** (`behavior.suggestFrom`,
-  `Guides.SuggestSources()`), what a guide pack is, and the link to
-  docs/GUIDE_PACKS.md (`ns.DocsURL()` with `GUIDE_PACKS.md` for `PACKS.md`:
-  the TOC's `X-Website` + `/blob/HEAD/docs/GUIDE_PACKS.md`, else
+  `Guides.SuggestSources()`), what a guide pack is, and "Read more:" with a
+  `W.Link` to docs/GUIDE_PACKS.md opening `UI.ShowCopy("Guide packs,
+  explained", <address>)` (`ns.DocsURL()` with `GUIDE_PACKS.md` for
+  `PACKS.md`: the TOC's `X-Website` + `/blob/HEAD/docs/GUIDE_PACKS.md`, else
   "docs/GUIDE_PACKS.md in Polestar's source"). While `Guides.ProblemCount() > 0` the page's sidebar row carries
   the warning dot (a page spec's `dot`). Nothing goes to chat.
 - **Welcome** (`UI/Welcome.lua`, `SHOW_WELCOME`): centred, three pages under

@@ -103,7 +103,7 @@ test('one row per pack, ours first: credits, count, website, source and each sta
 				rows[#rows + 1] = { addon = r.psRecord.addon, title = r.Title:GetText(), credits = r.Credits:GetText(),
 					count = shownText(r.Count), switch = r.Switch:IsShown(), enable = r.Enable:IsShown(),
 					status = shownText(r.Status), problems = r.Problems:IsShown() and r.Problems.Text:GetText() or false,
-					website = r.Website:IsShown() and r.Website:GetText() or false, source = shownText(r.Source) }
+					website = r.Website:IsShown() and r.Website.Label:GetText() or false, source = shownText(r.Source) }
 			end
 		end
 		emit({ rows = rows, title = PolestarOptions.Title:GetText() })`);
@@ -115,11 +115,11 @@ test('one row per pack, ours first: credits, count, website, source and each sta
 		count: '2 guides', switch: true, enable: false, status: false, problems: false, website: false, source: false });
 	assert.deepEqual(by.JoeAddon, { addon: 'JoeAddon', title: "Joe's Routes", credits: 'Joe  ·  1.2.0  ·  CC-BY-4.0',
 		count: '1 guide', switch: true, enable: false, status: false, problems: false,
-		website: 'https://github.com/joe/routes', source: '“Written from my own play”' });
+		website: 'github.com/joe/routes', source: '“Written from my own play”' });
 	assert.equal(by.EmptyAddon.status, 'broken: registered no guides');
 	assert.equal(by.EmptyAddon.switch, false);
 	assert.equal(by.Crash.status, 'broken: registered no guides');
-	assert.equal(by.Crash.website, 'https://example.org/crash', 'a pack read from its TOC shows its website');
+	assert.equal(by.Crash.website, 'example.org/crash', 'a pack read from its TOC shows its website');
 	assert.equal(by.Off.status, 'turned off in the AddOns list');
 	assert.equal(by.Off.enable, true);
 	assert.equal(by.Old.status, 'not loaded: Out of date');
@@ -317,16 +317,26 @@ test('/polestar packs opens the page', () => {
 	assert.deepEqual(out, { shown: true, title: 'Guide packs' });
 });
 
-test('the docs line: the guide packs page in a box with X-Website, the source path without it', () => {
+test('the website and the docs line are links that open the copy window; without X-Website, the source path', () => {
 	const [withSite] = run(`
 		local view = openPage()
-		emit({ label = view.DocsLabel:GetText(), box = view.Docs:IsShown() and view.Docs:GetText() or false })`,
+		local seen = { label = view.DocsLabel:GetText(), link = view.Docs:IsShown() and view.Docs.Label:GetText() or false,
+			kind = view.Docs:GetObjectType() }
+		view.Docs:Click()
+		seen.docsTitle, seen.docsCopy = PolestarCopy.Title:GetText(), PolestarCopy.Box:GetText()
+		rowOf("JoeAddon").Website:Click()
+		seen.siteTitle, seen.siteCopy = PolestarCopy.Title:GetText(), PolestarCopy.Box:GetText()
+		emit(seen)`,
 	{ before: 'stub.addonMeta.Polestar = { ["X-Website"] = "https://github.com/polestar/polestar/" }' });
-	assert.deepEqual(withSite, { label: 'Read more:', box: 'https://github.com/polestar/polestar/blob/HEAD/docs/GUIDE_PACKS.md' });
+	assert.deepEqual(withSite, {
+		label: 'Read more:', link: 'github.com/polestar/polestar/blob/HEAD/docs/GUIDE_PACKS.md', kind: 'Button',
+		docsTitle: 'Guide packs, explained', docsCopy: 'https://github.com/polestar/polestar/blob/HEAD/docs/GUIDE_PACKS.md',
+		siteTitle: "Joe's Routes website", siteCopy: 'https://github.com/joe/routes',
+	});
 	const [without] = run(`
 		local view = openPage()
-		emit({ label = view.DocsLabel:GetText(), box = view.Docs:IsShown() })`);
-	assert.deepEqual(without, { label: "Read more: docs/GUIDE_PACKS.md in Polestar's source", box: false });
+		emit({ label = view.DocsLabel:GetText(), link = view.Docs:IsShown() })`);
+	assert.deepEqual(without, { label: "Read more: docs/GUIDE_PACKS.md in Polestar's source", link: false });
 });
 
 test('a 64-character title is cut to its column, inside the row', () => {

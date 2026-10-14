@@ -1,10 +1,11 @@
 -- The Guide packs page of the options window (Options.lua registers it at
 -- order 70; `/polestar packs` opens it): one row per pack the core found
--- (Guides.Packs: ours first, then by title) with its credits, its website to
--- copy, its source and its state: a switch while it can be shown or hidden,
--- otherwise why it is not running, and its problems with a report to copy
--- for the author. Below: where suggestions come from (behavior.suggestFrom),
--- what guide packs are, and where to read more (guidePacksURL).
+-- (Guides.Packs: ours first, then by title) with its credits, its website
+-- (a link opening the copy window), its source and its state: a switch while
+-- it can be shown or hidden, otherwise why it is not running, and its
+-- problems with a report to copy for the author. Below: where suggestions
+-- come from (behavior.suggestFrom), what guide packs are, and a link to
+-- read more (guidePacksURL).
 --
 -- While any pack has problems the page's navigation entry carries a dot
 -- (P.HasProblems); nothing goes to chat.
@@ -18,7 +19,16 @@ local SH = W.SHELL
 local PAD = 12 -- a row's inner inset, as a settings row's
 local SEP = "  \194\183  "
 local LINE1 = 40 -- the title line
-local BOX_W = 280 -- the website box at most
+
+-- An address as a link's text: without its scheme, cut to maxW.
+local function setLink(b, url, maxW)
+	b.Label:SetWidth(0)
+	W.SetLinkText(b, (url:gsub("^%a+://", "")))
+	if b:GetWidth() > maxW then
+		b.Label:SetWidth(maxW)
+		b:SetWidth(maxW)
+	end
+end
 
 local P = {}
 UI.Packs = P
@@ -160,7 +170,12 @@ local function newRow(view)
 		C_AddOns.EnableAddOn(r.addon)
 		if ReloadUI then ReloadUI() end
 	end, { height = 24 })
-	row.Website = W.CopyBox(row)
+	-- The website: a link opening the copy window.
+	row.Website = W.Link(row, "", function()
+		local r = row.psRecord
+		if r and r.website then UI.ShowCopy((L["%s website"]):format(r.title or ns.EscapeText(r.id)), r.website) end
+	end)
+	row.Website.Label:SetWordWrap(false)
 	row.Source = W.Text(row, "note", "textDim")
 	row.Source:SetWordWrap(true)
 	row.Source:SetJustifyV("TOP")
@@ -247,17 +262,16 @@ local function layoutRow(row, r, width)
 	end
 	local y = LINE1
 
-	-- The website to copy, then the source on its own line, wrapped.
+	-- The website link, then the source on its own line, wrapped.
 	local site = type(r.website) == "string" and r.website ~= "" and r.website or nil
 	local source = type(r.source) == "string" and r.source ~= "" and r.source or nil
 	row.Website:SetShown(site ~= nil)
 	row.Source:SetShown(source ~= nil)
 	if site then
-		W.SetCopyText(row.Website, site)
+		setLink(row.Website, site, avail)
 		row.Website:ClearAllPoints()
 		row.Website:SetPoint("TOPLEFT", row, "TOPLEFT", col, -y)
-		row.Website:SetWidth(min(BOX_W, avail))
-		y = y + row.Website:GetHeight() + 8
+		y = y + row.Website:GetHeight() + 6
 	end
 	if source then
 		row.Source:SetText("\226\128\156" .. source .. "\226\128\157")
@@ -374,7 +388,12 @@ function P.Build(view)
 		L["Anyone can write a pack with Polestar's own tools."],
 	}, "\n\n"))
 	local docsLabel = oneLine(W.Text(view, "note", "text"))
-	local docs = W.CopyBox(view)
+	-- The page on guide packs: a link opening the copy window.
+	local docs = W.Link(view, "", function()
+		local url = guidePacksURL()
+		if url then UI.ShowCopy(L["Guide packs, explained"], url) end
+	end, { role = "note" })
+	docs.Label:SetWordWrap(false)
 	view.Docs, view.DocsLabel = docs, docsLabel
 
 	view.Refresh = function()
@@ -426,23 +445,22 @@ function P.Build(view)
 		y = y + about:GetStringHeight() + 14
 		local url = guidePacksURL()
 		docsLabel:ClearAllPoints()
-		docsLabel:SetPoint("TOPLEFT", view, "TOPLEFT", SH.pad, -(y + 8))
+		docsLabel:SetPoint("TOPLEFT", view, "TOPLEFT", SH.pad, -(y + 3))
 		if url then
 			docsLabel:SetText(L["Read more:"])
 			docsLabel:SetWidth(0)
 			local lw = min(floor(width / 3), docsLabel:GetStringWidth() + 2)
 			docsLabel:SetWidth(lw)
-			W.SetCopyText(docs, url)
+			setLink(docs, url, width - lw - 8)
 			docs:ClearAllPoints()
-			docs:SetPoint("TOPLEFT", view, "TOPLEFT", SH.pad + lw + 10, -y)
-			docs:SetWidth(max(120, width - lw - 10))
+			docs:SetPoint("TOPLEFT", view, "TOPLEFT", SH.pad + lw + 8, -y)
 			docs:Show()
 		else
 			docsLabel:SetText(L["Read more: docs/GUIDE_PACKS.md in Polestar's source"])
 			docsLabel:SetWidth(width)
 			docs:Hide()
 		end
-		return y + 30 + 24
+		return y + 20 + 24
 	end
 end
 

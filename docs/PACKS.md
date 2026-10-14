@@ -359,8 +359,9 @@ them.
 
 Below the list, **Suggest guides from** picks where suggestions come from
 (Publishing, above), and **About guide packs** tells players in plain words
-what a pack is, with a **Read more:** box holding the address of
-[GUIDE_PACKS.md](GUIDE_PACKS.md) to copy.
+what a pack is, with a **Read more:** link to
+[GUIDE_PACKS.md](GUIDE_PACKS.md). A pack's website and that link open the
+copy window, with the address selected to copy.
 
 ## Lint messages
 
