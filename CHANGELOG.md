@@ -105,6 +105,11 @@
 - An object a quest item drops from names the quest once on its tooltip,
   not once per object of that name: the Sapphire of Aku'Mai in Blackfathom
   Deeps listed its quest three times (thanks Mightie).
+- Teldrassil, Dun Morogh and Mulgore: the starting glens no longer send you
+  off for one delivery quest and back. Dolanaar Delivery and Supplies to
+  Tannok are taken on the way out of Shadowglen and Coldridge Valley, by the
+  path where Porthannius and Hands Springsprocket stand, and A Task
+  Unfinished starts the cougar hunt at Antur Fallow's end of Camp Narache.
 
 ### For guide authors
 

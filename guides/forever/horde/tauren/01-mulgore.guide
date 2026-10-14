@@ -26,6 +26,14 @@ next forever/horde/02-the-barrens
 #   Narache and handed to Kaga Wildhoof on the road into Bloodhoof; it unlocks
 #   The Great Outdoors and Camping 101, which the export took earlier than
 #   The Adventurer (impossible in game). All three are done on arrival.
+# - A Task Unfinished (1656, Antur Fallow, handed to Innkeeper Kauth in
+#   Bloodhoof) starts the cougar hunt instead of being a step of its own:
+#   Antur stands at the camp's west end, by the cougars' north-west corner,
+#   and the hunt goes on from him instead of walking back into the camp.
+#   He lies off every walk out of the camp; taken after the hunt or on the
+#   way to Seer Graytongue (about 230 yards out of the way) it is 0.002 h
+#   later to 10 and 20 under the simulator, with the plainstriders 0.02 h,
+#   so it stays first and saves the back-and-forth instead.
 # - Fizsprocket's Notes (98424) and the Venture Co. quests (764, 765) share
 #   one trip into the mine: the notes start from Supervisor Fizsprocket's drop,
 #   so the export's first mine visit is folded into the second.
@@ -111,12 +119,9 @@ step Chief Hawkwind
   turnin 753
   accept 755
 
-step Antur Fallow
-  tip Antur stands at the west end of the camp.
-  accept 1656
-
 step The Hunt Continues
-  tip Mountain Cougars prowl the hills south of the camp.
+  tip Antur Fallow stands at the west end of the camp, at the north-west corner of the hills where the Mountain Cougars prowl: take his quest, hunt the cougars from there south and east, then come back up to Grull.
+  accept 1656                         -- Antur Fallow
   complete 750
 
 step Grull Hawkwind

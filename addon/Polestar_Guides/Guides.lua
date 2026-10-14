@@ -8231,11 +8231,10 @@ do
 				},
 				{
 					title = "The troggs",
-					note = "Rockjaw Troggs and Burly Rockjaw Troggs dig all over the valley floor south of Anvilmar. Hands Springsprocket stands at the mouth of the tunnel to the east.",
+					note = "Rockjaw Troggs and Burly Rockjaw Troggs dig all over the valley floor south of Anvilmar.",
 					goals = {
 						{ t = "kill", quest = 170, title = "A New Threat", target = "Rockjaw Trogg", npc = 707, count = 6, oi = 1, map = 1426, x = 31.05, y = 73.95, f = "e", spots = { { x = 30.9, y = 75, r = 52, n = 10 }, { x = 31.5, y = 76.8, r = 40, n = 5 }, { x = 32.6, y = 75.2, r = 40, n = 5 }, { x = 29.5, y = 77, r = 51, n = 9 }, { x = 23.7, y = 77.8, r = 40, n = 2 }, { x = 22.8, y = 76.3, r = 40, n = 1 }, { x = 23.4, y = 73.6, r = 40, n = 2 }, { x = 21.8, y = 72.9, r = 40, n = 2 }, { x = 19.8, y = 73.8, r = 40, n = 2 }, { x = 24.3, y = 71, r = 40, n = 1 } }, spread = true, note = "Rockjaw Trogg" },
 						{ t = "kill", quest = 170, title = "A New Threat", target = "Burly Rockjaw Trogg", npc = 724, count = 6, oi = 2, map = 1426, x = 31.63, y = 73.69, f = "e", spots = { { x = 31.6, y = 73.7, r = 40, n = 1 }, { x = 30.4, y = 75.4, r = 59, n = 7 }, { x = 30, y = 77.4, r = 40, n = 1 }, { x = 28.5, y = 77.4, r = 50, n = 3 }, { x = 31.9, y = 76.2, r = 40, n = 3 }, { x = 26.4, y = 72.8, r = 80, n = 16 }, { x = 23.5, y = 74, r = 66, n = 10 }, { x = 21.4, y = 74.1, r = 53, n = 5 }, { x = 20.4, y = 71.6, r = 53, n = 5 }, { x = 20, y = 76.5, r = 40, n = 2 }, { x = 22.3, y = 77.2, r = 54, n = 5 }, { x = 24, y = 79.6, r = 40, n = 1 } }, spread = true, note = "Burly Rockjaw Trogg" },
-						{ t = "accept", quest = 2160, title = "Supplies to Tannok", npc = 6782, npcName = "Hands Springsprocket", minLevel = 1, qlvl = 5, map = 1426, x = 33.85, y = 72.24, f = "e", note = "Hands Springsprocket, at the tunnel" },
 					},
 				},
 				{
@@ -8344,10 +8343,11 @@ do
 				},
 				{
 					title = "The tunnel",
-					note = "Mountaineer Thalos guards the tunnel out of the valley, east of Anvilmar.",
+					note = "Mountaineer Thalos guards the tunnel out of the valley, east of Anvilmar; Hands Springsprocket stands beside him at its mouth.",
 					goals = {
 						{ t = "turnin", quest = 282, title = "Senir's Observations", npc = 1965, npcName = "Mountaineer Thalos", map = 1426, x = 33.48, y = 71.84, f = "e", note = "Mountaineer Thalos" },
 						{ t = "accept", quest = 420, title = "Senir's Observations", npc = 1965, npcName = "Mountaineer Thalos", minLevel = 1, qlvl = 5, pre = { 282 }, preTitles = { [282] = "Senir's Observations" }, map = 1426, x = 33.48, y = 71.84, f = "e" },
+						{ t = "accept", quest = 2160, title = "Supplies to Tannok", npc = 6782, npcName = "Hands Springsprocket", minLevel = 1, qlvl = 5, map = 1426, x = 33.85, y = 72.24, f = "e", note = "Hands Springsprocket" },
 					},
 				},
 				{
@@ -9704,7 +9704,6 @@ do
 						{ t = "accept", quest = 457, title = "The Balance of Nature", npc = 2079, npcName = "Conservator Ilthalaine", minLevel = 1, qlvl = 3, pre = { 456 }, preTitles = { [456] = "The Balance of Nature" }, map = 1438, x = 58.69, y = 44.27, f = "e" },
 						{ t = "accept", quest = 4495, title = "A Good Friend", npc = 8583, npcName = "Dirania Silvershine", minLevel = 2, qlvl = 4, map = 1438, x = 60.9, y = 41.96, f = "e", note = "Dirania Silvershine, east of the tree" },
 						{ t = "accept", quest = 916, title = "Webwood Venom", npc = 2082, npcName = "Gilshalan Windwalker", minLevel = 3, qlvl = 4, map = 1438, x = 57.81, y = 41.65, f = "e", note = "Gilshalan Windwalker, on the tree's ramp" },
-						{ t = "accept", quest = 2159, title = "Dolanaar Delivery", npc = 6780, npcName = "Porthannius", minLevel = 1, qlvl = 5, map = 1438, x = 61.16, y = 47.64, f = "e", note = "Porthannius, by the path out of the glen" },
 					},
 				},
 				{
@@ -9774,6 +9773,13 @@ do
 						{ t = "turnin", quest = 921, title = "Crown of the Earth", npc = 3514, npcName = "Tenaron Stormgrip", map = 1438, x = 59.06, y = 39.45, f = "e" },
 						{ t = "accept", quest = 928, title = "Crown of the Earth", npc = 3514, npcName = "Tenaron Stormgrip", minLevel = 1, qlvl = 5, pre = { 921 }, preTitles = { [921] = "Crown of the Earth" }, map = 1438, x = 59.06, y = 39.45, f = "e" },
 						{ t = "accept", quest = 96630, title = "The Adventurer", object = 654846, objName = "Lost Journal", minLevel = 4, qlvl = 6, pre = { 921 }, closedBy = { 96606, 96627, 96628, 96638, 96652, 96656, 96659 }, preTitles = { [921] = "Crown of the Earth", [96606] = "The Great Outdoors", [96627] = "The Adventurer", [96628] = "The Adventurer", [96638] = "The Adventurer", [96652] = "The Adventurer", [96656] = "The Adventurer", [96659] = "The Adventurer" }, map = 1438, x = 59.07, y = 39.55, f = "e", note = "Lost Journal" },
+					},
+				},
+				{
+					title = "Porthannius",
+					note = "Leave Shadowglen by the path south-east of Aldrassil: Porthannius stands beside it, where it goes down towards the road to Dolanaar.",
+					goals = {
+						{ t = "accept", quest = 2159, title = "Dolanaar Delivery", npc = 6780, npcName = "Porthannius", minLevel = 1, qlvl = 5, map = 1438, x = 61.16, y = 47.64, f = "e", note = "Porthannius" },
 					},
 				},
 				{
@@ -31703,16 +31709,10 @@ do
 					},
 				},
 				{
-					title = "Antur Fallow",
-					note = "Antur stands at the west end of the camp.",
-					goals = {
-						{ t = "accept", quest = 1656, title = "A Task Unfinished", npc = 6775, npcName = "Antur Fallow", minLevel = 1, qlvl = 5, map = 1412, x = 39.16, y = 81.24 },
-					},
-				},
-				{
 					title = "The Hunt Continues",
-					note = "Mountain Cougars prowl the hills south of the camp.",
+					note = "Antur Fallow stands at the west end of the camp, at the north-west corner of the hills where the Mountain Cougars prowl: take his quest, hunt the cougars from there south and east, then come back up to Grull.",
 					goals = {
+						{ t = "accept", quest = 1656, title = "A Task Unfinished", npc = 6775, npcName = "Antur Fallow", minLevel = 1, qlvl = 5, map = 1412, x = 39.16, y = 81.24, note = "Antur Fallow" },
 						{ t = "complete", quest = 750, title = "The Hunt Continues" },
 					},
 				},

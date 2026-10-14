@@ -35,6 +35,11 @@ next forever/alliance/02-westfall
 #   in to Sister Aquinne beside the Rut'theran portal.
 # - Flight to Auberdine (6342) is turned in at Laird on the Auberdine dock
 #   while changing boats, not on the later Darkshore visit.
+# - Dolanaar Delivery (2159) is taken from Porthannius when you leave
+#   Shadowglen for Dolanaar, not with the Aldrassil pickups before the cave:
+#   he stands by the path out of the glen, about 380 yards out of the way
+#   there and 65 on the way down to Dolanaar. 0.014 h sooner to 10 and to
+#   20 under the simulator.
 # - Added: The Enchanted Glade (937), Darkness in the Glade (98392) and The
 #   Oracle Tree (98398) from Sentinel Arynia Cloudsbreak at the Oracle Glade
 #   moonwell: every harpy lives around it. The chain's last steps go to
@@ -134,7 +139,6 @@ step Back at Aldrassil
   accept 457
   accept 4495                                 -- Dirania Silvershine, east of the tree
   accept 916                                  -- Gilshalan Windwalker, on the tree's ramp
-  accept 2159                                 -- Porthannius, by the path out of the glen
 
 step North to Shadowthread Cave
   tip Mangy Nightsabers and Thistle Boars roam north of Aldrassil, on the way to the cave. Iverron waits in the trees west of the cave mouth; Githyiss the Vile sits deep inside.
@@ -185,6 +189,10 @@ step Tenaron Stormgrip
   turnin 921
   accept 928
   accept 96630                                -- Lost Journal
+
+step Porthannius
+  tip Leave Shadowglen by the path south-east of Aldrassil: Porthannius stands beside it, where it goes down towards the road to Dolanaar.
+  accept 2159                                 -- Porthannius
 
 # ---------------------------------------------------------------- Dolanaar
 

@@ -20,6 +20,10 @@ next forever/alliance/02-westfall
 # Order changes against the export:
 # - Felix's parts and the Mornbrew errand (3361, 3364, 3365) are finished
 #   before leaving Coldridge Valley instead of walking back for Nori.
+# - Supplies to Tannok (2160) is taken from Hands Springsprocket at the
+#   tunnel when you leave Coldridge Valley, beside Thalos, not on the first
+#   trogg hunt: about 250 yards out of the way there, 20 at the tunnel.
+#   0.010 h sooner to 10 and to 20 under the simulator.
 # - The Kharanos and depot pickups are grouped: the simulator shuttled between
 #   them several times. Beldin's "A Visitor to Dun Morogh" (96408) is taken at
 #   the depot on the way east after Brewnall instead of from the quarry.
@@ -134,10 +138,9 @@ step Anvilmar
   train class                                 -- Level 2 spells, inside Anvilmar
 
 step The troggs
-  tip Rockjaw Troggs and Burly Rockjaw Troggs dig all over the valley floor south of Anvilmar. Hands Springsprocket stands at the mouth of the tunnel to the east.
+  tip Rockjaw Troggs and Burly Rockjaw Troggs dig all over the valley floor south of Anvilmar.
   kill 707 quest 170                          -- Rockjaw Trogg
   kill 724 quest 170                          -- Burly Rockjaw Trogg
-  accept 2160                                 -- Hands Springsprocket, at the tunnel
 
 step Back to Anvilmar
   turnin 170                                  -- Balir Frosthammer
@@ -210,9 +213,10 @@ step Call of Earth
   turnin 94375                                -- Teo Hammerstorm: Stoneskin Totem and your Earth Totem
 
 step The tunnel
-  tip Mountaineer Thalos guards the tunnel out of the valley, east of Anvilmar.
+  tip Mountaineer Thalos guards the tunnel out of the valley, east of Anvilmar; Hands Springsprocket stands beside him at its mouth.
   turnin 282                                  -- Mountaineer Thalos
   accept 420
+  accept 2160                                 -- Hands Springsprocket
 
 # ---------------------------------------------------------------- Kharanos
 
