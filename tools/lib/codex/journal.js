@@ -10,7 +10,7 @@
 // Polestar.Dungeons (addon/Polestar/Dungeons/Dungeons.lua).
 //
 //   instanceMapsOf(mapRows, areaRows)  Map (+ AreaTable) CSV rows -> [ { id, name, raid, players, area,
-//                                      areas: [areaIds], zones: [areaIds], corpse: { c, x, y } | null } ]
+//                                      areas: [areaIds], inner: [areaIds on the map itself], zones: [areaIds], corpse: { c, x, y } | null } ]
 //   zonePoint(frames, c, wx, wy, prefer) world point -> { map, x, y, f } on a zone frame
 //   buildJournal(inputs, codex)        -> { meta, dungeons: { key: Page } }
 //   emitJournal(journal)               -> [ { name: 'Dungeons1.lua', text } ]
@@ -23,7 +23,8 @@
 // Page: { key, name, kind, forever, minLevel, maxLevel, players, zone, zoneName,
 //   entrance: { map, x, y, f } | null,
 //   quests: [ Quest ] (level order), chain: { id: Quest } (prerequisites not on the page),
-//   bosses: [ { order, name, npc, level, quests: [ { id, how, item?, itemName? } ] } ] }
+//   bosses: [ { order, name, npc, level, object?, role?, quests: [ { id, how, item?, itemName? } ] } ] }
+//   (object: a chest boss's object id; role: rare | event | optional, the bosses after the encounters)
 // Quest: { id, title, level, minLevel, faction 'A'|'H'|null, classes|null, inside, shareable,
 //   objective|null, start|null, finish|null (each { kind, id, name, map, x, y, f, inside }),
 //   startItem: { id, name }|null, chain: [ids, oldest first],
@@ -79,6 +80,8 @@ function instanceMapsOf(mapRows, areaRows) {
 		const y = num(r.Corpse_1);
 		const areas = new Set(areasByMap[id] || []);
 		if (num(r.AreaTableID)) areas.add(num(r.AreaTableID));
+		// The areas on the instance's own map (what Wowhead's `location` names).
+		const inner = [...areas].sort((a, b) => a - b);
 		// Areas of the same name outside the instance (Questie files some
 		// dungeon quests under the outdoor sub-zone, e.g. Gnomeregan in Dun Morogh).
 		const zones = new Set();
@@ -94,6 +97,7 @@ function instanceMapsOf(mapRows, areaRows) {
 			players: num(r.MaxPlayers) || null,
 			area: num(r.AreaTableID) || null,
 			areas: [...areas].sort((a, b) => a - b),
+			inner,
 			zones: [...zones].sort((a, b) => a - b),
 			corpse: c >= 0 && (x || y) ? { c, x, y } : null,
 		});
@@ -374,10 +378,14 @@ function buildPages(inputs, codex) {
 				}
 			}
 		}
-		// Bosses in kill order, with the quests tied to each.
+		// Bosses in kill order, with the quests tied to each. A chest boss
+		// (object) ties the quests whose item it holds; role marks the bosses
+		// after the encounters (rare, event, optional).
 		const bossList = d
 			? (d.bosses || []).map((b) => ({ name: b.name, npc: b.npc ?? null, level: b.level ?? null }))
-			: (inst.bosses || []).filter((b) => b.name && b.name !== 'Trash').map((b) => ({ name: b.name, npc: b.npc ?? null, level: (npcs[b.npc] && npcs[b.npc].level) || null }));
+			: (inst.bosses || [])
+					.filter((b) => b.name && b.name !== 'Trash')
+					.map((b) => ({ name: b.name, npc: b.npc ?? null, object: b.object ?? null, role: b.role ?? null, items: b.items || [], level: (npcs[b.npc] && npcs[b.npc].level) || null }));
 		const bosses = bossList.map((b, i) => {
 			const tied = [];
 			const add = (id, how, item) => {
@@ -394,11 +402,16 @@ function buildPages(inputs, codex) {
 				for (const o of src.objectives || []) {
 					if (o.type === 'kill' && b.npc && o.id === b.npc) add(q.id, 'kill');
 					if (o.type === 'item' && b.npc && dropNpcs[o.id] && dropNpcs[o.id].has(b.npc)) add(q.id, 'item', o.id);
+					if (o.type === 'item' && b.object && b.items.includes(o.id)) add(q.id, 'item', o.id);
 				}
 				if (q.startItem && b.npc && dropNpcs[q.startItem.id] && dropNpcs[q.startItem.id].has(b.npc)) add(q.id, 'starts', q.startItem.id);
+				if (q.startItem && b.object && b.items.includes(q.startItem.id)) add(q.id, 'starts', q.startItem.id);
 				if (q.bosses.includes(b.name) && !tied.some((t) => t.id === q.id)) add(q.id, 'involved');
 			}
-			return { order: i + 1, name: b.name, npc: b.npc, level: b.level, quests: tied };
+			const page = { order: i + 1, name: b.name, npc: b.npc, level: b.level, quests: tied };
+			if (b.object) page.object = b.object;
+			if (b.role) page.role = b.role;
+			return page;
 		});
 		const lv = inst.levels;
 		const zone = entrance ? entrance.map : null;

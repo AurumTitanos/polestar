@@ -288,6 +288,11 @@ local function decodeQuest(group, id, s)
 	return rec
 end
 
+-- A boss's ref: <npc>, or o<object> for a chest boss, then r|e|x for its role
+-- (rare, event, optional; none: one of the instance's encounters). An older
+-- pack's ref is the bare npc id.
+local BOSS_ROLE = { r = "rare", e = "event", x = "optional" }
+
 local function decodeInstance(group, id, s)
 	local t, n = split(s, ";")
 	local rec = {
@@ -306,7 +311,11 @@ local function decodeInstance(group, id, s)
 		local b, m = split(t[i], ",")
 		local items = {}
 		for k = 3, m do items[#items + 1] = tonumber(b[k]) end
-		rec.bosses[#rec.bosses + 1] = { name = unesc(b[1]), npc = tonumber(b[2]), items = items }
+		local boss = { name = unesc(b[1]), items = items }
+		local _, _, o, ref, role = find(b[2] or "", "^(o?)(%d*)(%a?)$")
+		if o == "o" then boss.object = tonumber(ref) else boss.npc = tonumber(ref) end
+		boss.role = BOSS_ROLE[role or ""]
+		rec.bosses[#rec.bosses + 1] = boss
 	end
 	return rec
 end

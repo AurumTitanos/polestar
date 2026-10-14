@@ -46,7 +46,9 @@
 //            objective = <k|i|o|e><id>,<count>,<text>
 //   instance kind;forever(1|empty);areaId;map;entrance(map,x,y,f[,a]);levels;<boss>...
 //            a: approximate (the client's corpse point, not the way in)
-//            boss = name,npc,item,item...
+//            boss = name,ref,item,item...   ref = <npc> | o<object> (a chest boss), then
+//                   r|e|x when its role is rare|event|optional (none: an encounter);
+//                   an old pack's ref is the bare npc id, which still reads
 //   faction  side            spell  kind;item;class            zone, skill: names only
 
 const { header } = require('../generated');
@@ -256,8 +258,15 @@ function encodeInstance(rec) {
 		e ? [num(e.map), coord(e.x), coord(e.y), e.f || '', ...(e.approx ? ['a'] : [])].join(',') : '',
 		list(rec.levels),
 	];
-	const bosses = (rec.bosses || []).map((b) => [esc(b.name), num(b.npc), ...(b.items || []).map(num)].join(','));
+	const bosses = (rec.bosses || []).map((b) => [esc(b.name), bossRef(b), ...(b.items || []).map(num)].join(','));
 	return [...head, ...bosses].join(';');
+}
+
+const ROLE = { rare: 'r', event: 'e', optional: 'x' };
+function bossRef(b) {
+	const id = b.npc ? num(b.npc) : b.object ? `o${num(b.object)}` : '';
+	if (b.role && !ROLE[b.role]) throw new Error(`codex pack: boss ${b.name}: unknown role "${b.role}"`);
+	return `${id}${b.role ? ROLE[b.role] : ''}`;
 }
 
 function encodeSpell(rec) {

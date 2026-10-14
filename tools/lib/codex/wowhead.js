@@ -6,8 +6,11 @@
 //
 //   npc page     level, classification (rare, rareelite, elite, boss), spawns
 //                (the page's mapper: uiMap ids, map percent on the live
-//                frames), drops (each row's count out of the looted kills)
-//   object page  spawns, contents (count out of the looted opens)
+//                frames), drops (each row's count out of the looted kills),
+//                location (the AreaTable ids the page's g_npcs entry places it
+//                in: an instance's area for an NPC inside one, mapper or not),
+//                boss (Wowhead's boss flag on that entry)
+//   object page  spawns, location, contents (count out of the looted opens)
 //   item tooltip (nether.wowhead.com/forever/tooltip/item/<id>) the
 //                reputation ("Requires <Faction> - <Standing>") and PvP rank
 //                ("Requires <Title> (Rank N)") the item asks for, or none
@@ -17,11 +20,12 @@
 // bosses of our own instances, one request at a time, DELAY_MS apart, with a
 // pause and retry on 403/429. Each entity's facts are cached in
 // <sources>/wowhead/codex/<npc|object|item>/<id>.json (a fresh one is never
-// fetched again); `codex build` only reads that cache.
+// fetched again, unless an older parser wrote it: VERSION); `codex build`
+// only reads that cache.
 //
 //   parseEntity(html, type, id)   page HTML -> facts | null
 //   parseTooltip(json, id)        tooltip JSON -> { id, type: 'item', rep: [ { faction, standing } ], pvpRank }
-//   wowheadWants(report, instances) -> { npc: [ids], object: [ids], item: [ids] }
+//   wowheadWants(report, instances, objects) -> { npc: [ids], object: [ids], item: [ids] }
 //   fetchEntities({ sourcesDir, want, ... }) -> { fetched, cached, missing, failed }
 //   loadWowhead(sourcesDir)       -> { npc: { id: facts }, object: {...}, item: {...} }
 //   chanceOf(drop)                -> percent, 2 decimals
@@ -37,6 +41,8 @@ const MAX_AGE_DAYS = 14;
 const TYPES = ['npc', 'object', 'item'];
 const STANDINGS = { hated: 1, hostile: 2, unfriendly: 3, neutral: 4, friendly: 5, honored: 6, revered: 7, exalted: 8 };
 const CLASSES = { 'rare elite': 'rareelite', rare: 'rare', elite: 'elite', boss: 'boss', normal: 'normal' };
+// The parser's version per type: a cached page an older one read is fetched again.
+const VERSION = { npc: 2, object: 2, item: 1 };
 
 function jsonAt(text, start) {
 	const open = text[start];
@@ -81,7 +87,7 @@ function parseEntity(html, type, id) {
 	if (!html || (type !== 'npc' && type !== 'object')) return null;
 	const title = /<h1[^>]*class="heading-size-1"[^>]*>([^<]*)</.exec(html) || /<meta property="og:title" content="([^"]*)"/.exec(html);
 	const name = title ? unhtml(title[1]).replace(/\s*<[^>]*>\s*$/, '').trim() : null;
-	const out = { id: Number(id), type, name, level: null, classification: null, spawns: {}, drops: [] };
+	const out = { id: Number(id), type, v: VERSION[type], name, level: null, classification: null, boss: false, location: [], spawns: {}, drops: [] };
 	const lv = /\[li\]Level: (\?\?|\d+)(?:\s*-\s*(\d+))?\[\\?\/li/.exec(html);
 	if (lv && lv[1] !== '??') out.level = [Number(lv[1]), Number(lv[2] || lv[1])];
 	const cls = /\[li\]Classification: (?:\[span[^\]]*\])?([A-Za-z ]+?)(?:\[\\?\/span\])?\[\\?\/li/.exec(html);
@@ -99,6 +105,17 @@ function parseEntity(html, type, id) {
 			// no usable mapper: no spawns
 		}
 	}
+	// The page's own entry: `$.extend(g_npcs[<id>], { boss, location: [areaIds], ... })`.
+	const ext = new RegExp(`\\$\\.extend\\(g_${type}s\\[${Number(id)}\\],\\s*`).exec(html);
+	if (ext) {
+		try {
+			const g = jsonAt(html, ext.index + ext[0].length) || {};
+			out.location = [...new Set((g.location || []).map(Number).filter((a) => a > 0))].sort((a, b) => a - b);
+			out.boss = !!g.boss;
+		} catch {
+			// no usable entry: no location
+		}
+	}
 	for (const r of listview(html, type === 'npc' ? 'drops' : 'contains')) {
 		const mode = (r.modes && r.modes['0']) || { count: r.count, outof: r.outof };
 		const count = Number(mode && mode.count);
@@ -112,7 +129,7 @@ function parseEntity(html, type, id) {
 
 function parseTooltip(json, id) {
 	const t = (json && json.tooltip) || '';
-	const out = { id: Number(id), type: 'item', name: json && json.name ? unhtml(json.name) : null, rep: [], pvpRank: null };
+	const out = { id: Number(id), type: 'item', v: VERSION.item, name: json && json.name ? unhtml(json.name) : null, rep: [], pvpRank: null };
 	for (const m of t.matchAll(/Requires ([^<]*?) - (Hated|Hostile|Unfriendly|Neutral|Friendly|Honored|Revered|Exalted)\b/g)) {
 		out.rep.push({ faction: unhtml(m[1]), standing: STANDINGS[m[2].toLowerCase()] });
 	}
@@ -122,18 +139,29 @@ function parseTooltip(json, id) {
 }
 
 // The entities worth a page: what the parity report misses or differs on,
-// and every boss of our instances (their loot and chances).
-function wowheadWants(report, instances = {}) {
+// every boss of our instances (their loot and chances), and the objects
+// (objects.json) named like a missing boss (a boss chest: Dark Coffer).
+function wowheadWants(report, instances = {}, objects = {}) {
 	const want = { npc: new Set(), object: new Set(), item: new Set() };
 	const kinds = (report && report.kinds) || {};
-	const ids = (name, part = 0) => [...((kinds[name] && kinds[name].missing) || []), ...((kinds[name] && kinds[name].different) || [])].map((r) => String(r.id).split('/')[part]);
+	const rows = (name) => [...((kinds[name] && kinds[name].missing) || []), ...((kinds[name] && kinds[name].different) || [])];
+	const ids = (name, part = 0) => rows(name).map((r) => String(r.id).split('/')[part]);
 	for (const id of ids('bosses', 1)) want.npc.add(id);
 	for (const id of ids('boss loot items', 1)) want.npc.add(id);
 	for (const id of ids('drop chances', 1)) want.npc.add(id);
 	for (const k of ['rares', 'rare loot', 'rare positions']) for (const id of ids(k, 0)) want.npc.add(id);
 	for (const k of ['treasures', 'treasure loot']) for (const id of ids(k, 0)) want.object.add(id);
 	for (const k of ['items: rep', 'items: pvp']) for (const id of ids(k, 0)) want.item.add(id);
-	for (const inst of Object.values(instances)) for (const b of inst.bosses || []) if (b.npc) want.npc.add(String(b.npc));
+	for (const inst of Object.values(instances)) {
+		for (const b of inst.bosses || []) {
+			if (b.npc) want.npc.add(String(b.npc));
+			if (b.object) want.object.add(String(b.object));
+		}
+	}
+	// Boss rows read "<boss> (<instance>)".
+	const lower = (s) => String(s || '').toLowerCase();
+	const bossNames = new Set(rows('bosses').map((r) => lower(String(r.name).replace(/\s*\([^()]*\)$/, ''))));
+	for (const [id, o] of Object.entries(objects)) if (bossNames.has(lower(o.name))) want.object.add(id);
 	const clean = (s) => [...s].map(Number).filter((n) => Number.isInteger(n) && n > 0).sort((a, b) => a - b);
 	return { npc: clean(want.npc), object: clean(want.object), item: clean(want.item) };
 }
@@ -150,7 +178,8 @@ async function fetchEntities({ sourcesDir, want, fetchImpl = globalThis.fetch, d
 	for (const type of TYPES) {
 		for (const id of want[type] || []) {
 			const file = cacheFile(sourcesDir, type, id);
-			if (fs.existsSync(file) && now - Date.parse(JSON.parse(fs.readFileSync(file, 'utf8')).fetchedAt) < maxAgeDays * 86400000) {
+			const old = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : null;
+			if (old && now - Date.parse(old.fetchedAt) < maxAgeDays * 86400000 && (old.notFound || (old.v || 1) >= VERSION[type])) {
 				res.cached++;
 				continue;
 			}
@@ -219,4 +248,4 @@ function chanceOf(d) {
 	return Math.round((d.count / d.outof) * 10000) / 100;
 }
 
-module.exports = { parseEntity, parseTooltip, wowheadWants, fetchEntities, loadWowhead, chanceOf, BASE, TOOLTIP, DELAY_MS };
+module.exports = { parseEntity, parseTooltip, wowheadWants, fetchEntities, loadWowhead, chanceOf, BASE, TOOLTIP, DELAY_MS, VERSION };

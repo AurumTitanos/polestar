@@ -31,7 +31,9 @@
 --   and the rewards (item icons in quality borders, "Choose one", XP, money,
 --   reputation). Item hover shows the game's tooltip (Gear adds its upgrade
 --   line there); modified clicks link or try it on.
---   Bosses: kill order, name, level and the quests each one serves.
+--   Bosses: kill order, name, level and the quests each one serves; a chest
+--   boss says Chest, the bosses after the encounters say Rare, Event or
+--   Optional.
 --   Map: the entrance on its zone's painting, with the quest givers there.
 -- Rows, blocks, tiles and cards are pooled and reused across pages.
 --
@@ -1408,6 +1410,17 @@ local TIE = {
 	involved = { "icon-note", "Part of %s" },
 }
 
+local BOSS_ROLE = { rare = "Rare", event = "Event", optional = "Optional" }
+
+-- The facts beside a boss's name: level, Chest (an object boss), its role.
+local function bossFacts(boss)
+	local t = {}
+	if boss.level then t[#t + 1] = format(L["Level %d"], boss.level) end
+	if boss.object then t[#t + 1] = L["Chest"] end
+	if BOSS_ROLE[boss.role] then t[#t + 1] = L[BOSS_ROLE[boss.role]] end
+	return concat(t, DOT)
+end
+
 local function renderBosses(key, f, plevel)
 	local side = SIDE[f]
 	local MW = mainWidth()
@@ -1420,7 +1433,7 @@ local function renderBosses(key, f, plevel)
 		r:SetWidth(MW)
 		r.Num:SetText(tostring(boss.order or i))
 		r.Name:SetText(boss.name or L["Boss"])
-		r.Level:SetText(boss.level and format(L["Level %d"], boss.level) or "")
+		r.Level:SetText(bossFacts(boss))
 		local h = 48
 		local n = 0
 		for _, t in ipairs(boss.quests or {}) do

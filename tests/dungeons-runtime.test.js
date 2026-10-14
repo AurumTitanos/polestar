@@ -18,7 +18,7 @@ const { codex, inputs } = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtu
 // Builder
 // ---------------------------------------------------------------------------
 
-test('instanceMapsOf: instances only, their areas, the zone holding the entrance, the corpse point', () => {
+test('instanceMapsOf: instances only, their areas (inner: on the map itself), the zone holding the entrance, the corpse point', () => {
 	const maps = [
 		{ ID: '0', MapName_lang: 'Eastern Kingdoms', InstanceType: '0', CorpseMapID: '-1' },
 		{ ID: '70', MapName_lang: 'Uldaman', InstanceType: '1', AreaTableID: '1337', CorpseMapID: '0', Corpse_0: '-6060.5', Corpse_1: '-2955', MaxPlayers: '10' },
@@ -31,8 +31,8 @@ test('instanceMapsOf: instances only, their areas, the zone holding the entrance
 		{ ID: '2717', AreaName_lang: 'Molten Core', ContinentID: '409', ParentAreaID: '0' },
 	];
 	assert.deepEqual(instanceMapsOf(maps, areas), [
-		{ id: 70, name: 'Uldaman', raid: false, players: 10, area: 1337, areas: [1337, 1338, 1517], zones: [3], corpse: { c: 0, x: -6060.5, y: -2955 } },
-		{ id: 409, name: 'Molten Core', raid: true, players: 40, area: 2717, areas: [2717], zones: [], corpse: null },
+		{ id: 70, name: 'Uldaman', raid: false, players: 10, area: 1337, areas: [1337, 1338, 1517], inner: [1337, 1338], zones: [3], corpse: { c: 0, x: -6060.5, y: -2955 } },
+		{ id: 409, name: 'Molten Core', raid: true, players: 40, area: 2717, areas: [2717], inner: [2717], zones: [], corpse: null },
 	]);
 	assert.deepEqual(instanceMapsOf(undefined, undefined), []);
 });

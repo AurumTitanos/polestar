@@ -1909,9 +1909,16 @@ built.
   each matched to `npcs.json` (a recorded encounter's NPCs, else the same name
   among NPCs placed in the instance, else the same name preferring elites
   without open-world spawns at the instance's level, else one spawnless NPC
-  whose name starts with it or is within two letters of it; "A and B"
-  encounters name both). A boss's loot is its `items.json` drops at 1% or
-  more, best chance first. The entrance (`chooseEntrance`): a recorded one
+  whose name starts with it or is within two letters of it, of several the
+  one placed inside (Kirtonos the Herald, not its spell visual); "A and B"
+  encounters name both; an encounter naming no NPC takes the chest placed
+  inside whose name ends with its name, The Seven: Chest of The Seven). A
+  boss's loot (at most 30 items) is its own table first: its `items.json`
+  drops at 1% or more or at an unknown rate, and its Wowhead drops outside
+  the world-drop pool at any rate (Thermaplugg's schematics, Dextren Ward's
+  plans); then Wowhead's `commondrop` rows (world books, world blues) at 1%
+  or more, so those no longer crowd out a boss's own loot (Onyxia's Sacks
+  of Gems); each part best chance first. The entrance (`chooseEntrance`): a recorded one
   (Recorder `enter`, `data/forever/instances.json`), else the curated table
   `tools/lib/codex/entrances.json` (per instance key: the point on the zone
   map where one walks in, `{ key, instance, map, x, y, source, note }`, each
@@ -1927,7 +1934,8 @@ built.
   and the trigger nearest a Corpse point is as often an inn or city trigger,
   so they are not used. Every
   NPC placed in an instance (`npcs.json` `instances`, from QuestieDB and
-  recordings) belongs to it: its drops carry the instance. An instance's
+  recordings, or Wowhead's `location` naming an `AreaTable` area of the
+  instance's map) belongs to it: its drops carry the instance. An instance's
   boss or mob the data ranks rare is not a rare unless RareScanner lists it.
   `--local-extras` takes the instances from AtlasLoot and `dungeons.json`
   instead.
@@ -1939,11 +1947,25 @@ built.
   `data/sources/wowhead/codex/<npc|object|item>/<id>.json` for 14 days;
   `codex build` only reads the cache. From them: an NPC's level, rare rank and
   spawns where ours lack them (and the rares only Wowhead places), drops and
-  object contents with chance = looted count / looted kills, and the
-  reputation ("Requires <Faction> - <Standing>") and PvP rank ("(Rank N)") an
-  item's Forever tooltip asks for. An instance also lists, after its
-  encounters and by level, the NPCs placed inside that the data or Wowhead
-  ranks rare or boss, or that alone drop an item of quality 2 or better at 5% or more.
+  object contents with chance = looted count / looted kills, an NPC's or
+  object's `location` (the areas its page entry names; the parser's
+  `VERSION` per type re-fetches pages an older parser read) and Wowhead's
+  boss flag, and the reputation ("Requires <Faction> - <Standing>") and PvP
+  rank ("(Rank N)") an item's Forever tooltip asks for; objects named like a
+  missing boss (a boss chest) are fetched too. An instance also lists, after
+  its encounters and by level, the NPCs placed inside that the data or
+  Wowhead ranks rare or boss (or flags boss), or that alone drop an item of
+  quality 2 or better at 5% or more, each with a `role`: `rare` (ranked
+  rare), `event` (pfQuest and QuestieDB know no static spawn: summoned or
+  scripted, the Ring of Law's fighters, the Tier 0.5 summons), else
+  `optional`; then the chests placed inside (no gathering node) that hold
+  more than one item (one is a quest object) and alone an item of
+  quality 2 or better (at 5% or more, or an unknown rate), as bosses with an
+  `object` and no `npc` (role `optional`). A boss is `{ name, npc, items }`,
+  plus `object` and `role` when set; the pack writes its ref as the npc id,
+  or `o<object>`, then `r`/`e`/`x` for the role (an old pack's bare npc id
+  still reads), and the Dungeons Bosses tab says Chest and the role beside
+  the level.
 - Rares and treasures: NPCs ranked rare (4) or rare elite (2) in `npcs.json`
   (pfQuest, QuestieDB, recordings), with their spawns and loot; treasures are
   objects with the `chest` role, with their loot. Loot (`Codex.Loot`, where
@@ -1988,7 +2010,13 @@ built.
   `meta.parity`; without the internal build it claims none. A confirmed
   missing drop or loot row that the build knows but a cap left out (the
   merge's `evidence.cut`, not shipped) says so ("cut by a cap") and is
-  counted on its own line. `codex parity
+  counted on its own line. A chest boss matches the internal row named after
+  its object (Chest of The Seven); a confirmed missing boss that Forever's
+  sources place outside every instance (Wowhead `location` or spawns off the
+  instance maps' areas: Techbot, Maraudon's Desolace caves) or rank an
+  ordinary NPC (no Wowhead boss flag, not rare, no green or better item
+  only it drops at 5% or more) says so, counted as "no boss of it in
+  Forever's sources". `codex parity
   [--ours <dir>] [--against <dir>]` reruns the comparison. The report also
   lists what only play can fill and the Recorder event that fills it
   (Forever instances and their entrances: `enter`, `encounter`; Forever

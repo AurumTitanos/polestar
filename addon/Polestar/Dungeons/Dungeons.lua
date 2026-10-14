@@ -23,7 +23,9 @@
 --         start, finish (= { kind, id, name, map, x, y, f, inside }), startItem = { id, name },
 --         chain = { ids }, rewards = { items = { { id, name, quality, choice } }, xp, money, rep = { { faction, name, value } } },
 --         bosses = { names } }
---   Dungeons.Bosses(key) -> { { order, name, npc, level, quests = { { id, how, item, itemName } } } }
+--   Dungeons.Bosses(key) -> { { order, name, npc, level, object, role, quests = { { id, how, item, itemName } } } }
+--       object: a chest boss's object id (npc nil); role: "rare" | "event" | "optional" for the
+--       bosses after the encounters, nil for an encounter (and on pages built before roles)
 --       how: "kill" (an objective), "item" (drops an objective item), "starts" (drops the item
 --       that starts it), "involved" (DungeonJournal names it for the quest)
 --   Dungeons.Open(key|nil)   -- fires SHOW_DUNGEON(key); the hub section listens

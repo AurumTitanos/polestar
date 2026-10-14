@@ -578,6 +578,7 @@ function mergeCodex(inputs) {
 		const built = buildInstances(cl.instances, {
 			npcs: fv.npcs,
 			items: fv.items,
+			objects: fv.objects,
 			zones: zonesIn,
 			frames: (fv.mapFrames && fv.mapFrames.forever) || {},
 			recorded: fv.instances || {},
@@ -919,6 +920,7 @@ function mergeCodex(inputs) {
 	// ----- objects: treasures, item sources, quest starts/ends/objectives
 	const wantObjects = new Set();
 	for (const it of Object.values(items)) for (const s of it.sources) if (s.type === 'object') wantObjects.add(s.object);
+	for (const inst of Object.values(instances)) for (const b of inst.bosses || []) if (b.object) wantObjects.add(b.object);
 	const questsIn = fv.quests || {};
 	for (const q of Object.values(questsIn)) {
 		for (const o of (q.start && q.start.object) || []) wantObjects.add(o);
@@ -1353,6 +1355,8 @@ function verifyOf(inputs) {
 	return {
 		wowhead: inputs.wowhead || { npc: {}, object: {}, item: {} },
 		clientInstances: new Set(((inputs.client && inputs.client.instanceMaps) || []).map((m) => norm(m.name))),
+		// The AreaTable areas on instance maps (Wowhead's `location` inside one).
+		instanceAreas: inputs.client ? new Set((inputs.client.instanceMaps || []).flatMap((m) => m.inner || [])) : null,
 	};
 }
 

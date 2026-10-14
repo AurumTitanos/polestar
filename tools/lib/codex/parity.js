@@ -105,7 +105,8 @@ function bossKey(b) {
 // Evidence for a disagreement, strongest first: recordings > the Forever
 // client's tables > Wowhead Forever > pfQuest / QuestieDB > AtlasLoot /
 // RareScanner / DungeonJournal. `verify` = { wowhead: loadWowhead(),
-// clientInstances: Set(normalised Map names) } checks each internal-only
+// clientInstances: Set(normalised Map names), instanceAreas: Set(AreaTable
+// ids on instance maps) | null } checks each internal-only
 // entity or value: `confirmed` (Forever has it: a gap of ours), `not in
 // Forever` (the internal build is wrong or ahead of the game), `unverified`
 // (no checked source says either way).
@@ -191,11 +192,13 @@ function compareCodex(ours, theirs, verify = null) {
 				if (o.forever) needs.push({ kind: 'entrance', id: key, name: t.name, what: 'the entrance (no corpse point in the client for Forever instances)', event: 'enter' });
 			}
 		}
-		// Bosses: by npc, else by name.
+		// Bosses: by npc, else by name (a chest boss by its object's name too).
 		const ob = new Map();
 		for (const b of o.bosses || []) {
 			ob.set(bossKey(b), b);
 			ob.set(`s${norm(b.name)}`, b);
+			const chest = b.object && (ours.objects || {})[b.object];
+			if (chest && chest.name && !ob.has(`s${norm(chest.name)}`)) ob.set(`s${norm(chest.name)}`, b);
 		}
 		for (const b of t.bosses || []) {
 			if (!b.name || norm(b.name) === 'trash') continue;
@@ -455,6 +458,27 @@ function compareCodex(ours, theirs, verify = null) {
 			}
 		}
 	}
+	// A confirmed missing boss (Forever has the NPC) that Forever's sources do
+	// not make a boss of this instance says why: Wowhead Forever (or ours)
+	// places it outside every instance (verify.instanceAreas: the AreaTable
+	// areas on instance maps), or ranks it an ordinary NPC (no boss flag, not
+	// rare) without loot of its own. Still a confirmed row; counted in
+	// internalOnly.notBoss.
+	const wh = (verify && verify.wowhead && verify.wowhead.npc) || {};
+	const areas = (verify && verify.instanceAreas) || null;
+	for (const r of (K.bosses && K.bosses.missing) || []) {
+		const npc = Number(String(r.id).split('/')[1]);
+		const w = wh[npc];
+		if (r.verdict !== 'confirmed' || !w) continue;
+		const loc = w.location || [];
+		const maps = [...new Set([...Object.keys(w.spawns || {}), ...((oNpcs[npc] && oNpcs[npc].spawns) || []).map((s) => String(s.map))])];
+		if (areas && !loc.some((a) => areas.has(a)) && (loc.length || maps.length)) {
+			r.reason = `Forever's sources place it outside the instance (${[...loc.map((a) => `area ${a}`), ...maps.map((m) => `map ${m}`)].join(', ')})`;
+		} else if (!w.boss && !['boss', 'rare', 'rareelite'].includes(w.classification)) {
+			r.reason = `Wowhead Forever ranks it an ordinary ${w.classification || 'normal'} NPC (no boss flag, not rare), and no green or better item only it drops at 5% or more`;
+		} else continue;
+		K.bosses.internalOnly.notBoss = (K.bosses.internalOnly.notBoss || 0) + 1;
+	}
 	// Differences with a reason count as matches already; the rest are not.
 	for (const c of Object.values(K)) {
 		c.share = c.total ? Math.round((c.match / c.total) * 1000) / 1000 : 1;
@@ -501,6 +525,7 @@ function markdown(report, { theirs = 'internal (--local-extras)', ours = 'releas
 		lines.push(`| ${name} | ${c.total} | ${c.match} | ${pct(c.share)} | ${io.confirmed} | ${io.notInForever} | ${io.unverified} | ${c.oursOnly ?? ''} | ${bad} |`);
 		if (c.withinTolerance) lines.push(`| ${name}: within tolerance | | ${c.withinTolerance} | | | | | | |`);
 		if (io.cut) lines.push(`| ${name}: confirmed, cut by a cap | | | | ${io.cut} | | | | |`);
+		if (io.notBoss) lines.push(`| ${name}: confirmed, no boss of it in Forever's sources | | | | ${io.notBoss} | | | | |`);
 	}
 	lines.push('');
 	for (const [name, c] of Object.entries(report.kinds)) {

@@ -123,11 +123,18 @@ async function runParity(rest) {
 	const { loadWowhead } = require('../lib/codex/wowhead');
 	const { parseCsv } = require('../lib/data/csv');
 	const { BUILD } = require('../lib/codex/build');
-	const mapCsv = path.join(SOURCES, 'wago', BUILD, 'Map.csv');
+	const csv = (table) => {
+		const f = path.join(SOURCES, 'wago', BUILD, `${table}.csv`);
+		return fs.existsSync(f) ? parseCsv(fs.readFileSync(f, 'utf8')) : null;
+	};
+	const mapRows = csv('Map');
+	const areaRows = csv('AreaTable');
 	const norm = (x) => String(x || '').toLowerCase().replace(/^the\s+/, '').replace(/[^a-z0-9]/g, '');
-	const clientInstances = new Set(fs.existsSync(mapCsv) ? parseCsv(fs.readFileSync(mapCsv, 'utf8')).filter((r) => r.InstanceType === '1' || r.InstanceType === '2').map((r) => norm(r.MapName_lang)) : []);
+	const clientInstances = new Set((mapRows || []).filter((r) => r.InstanceType === '1' || r.InstanceType === '2').map((r) => norm(r.MapName_lang)));
+	// The AreaTable areas on instance maps (Wowhead's `location` inside one).
+	const instanceAreas = mapRows && areaRows ? new Set(require('../lib/codex/journal').instanceMapsOf(mapRows, areaRows).flatMap((m) => m.inner)) : null;
 	const oursCodex = { ...readCodex(ours), evidence: null };
-	const { report, files } = writeParity(oursCodex, readCodex(against), path.join(ROOT, 'data', 'local'), { wowhead: loadWowhead(SOURCES), clientInstances });
+	const { report, files } = writeParity(oursCodex, readCodex(against), path.join(ROOT, 'data', 'local'), { wowhead: loadWowhead(SOURCES), clientInstances, instanceAreas });
 	printParity(report, files);
 	return 0;
 }
@@ -145,7 +152,7 @@ async function runWowhead(rest) {
 	const read = (f) => (fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : null);
 	const report = read(path.join(ROOT, 'data', 'local', 'codex-parity.json'));
 	if (!report) return fail('no data/local/codex-parity.json: run `codex build --local-extras`, then `codex build`');
-	const want = wowheadWants(report, read(path.join(ROOT, 'data', 'forever', 'codex', 'instances.json')) || {});
+	const want = wowheadWants(report, read(path.join(ROOT, 'data', 'forever', 'codex', 'instances.json')) || {}, read(path.join(ROOT, 'data', 'forever', 'objects.json')) || {});
 	let left = values.limit ? Number(values.limit) : Infinity;
 	for (const t of Object.keys(want)) {
 		want[t] = want[t].slice(0, Math.max(0, left));
