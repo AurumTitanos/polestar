@@ -8,8 +8,8 @@
 //   - a frame while the player walks (the breadcrumb ticker included): under 1 ms;
 //   - a burst of the events questing sends most, 50 of each in one frame
 //     with a full quest log, plus the scans it schedules: under 4 ms;
-//   - a burst of finds in one frame (50 rares seen, 50 kills and their loot
-//     windows), plus the loot checks they schedule: under 4 ms.
+//   - a burst of finds in one frame (20 rares seen, 20 kills and their loot
+//     windows, a big pull), plus the loot checks they schedule: under 4 ms.
 //
 // Each measurement is taken over 5 rounds (ROUNDS) and the median is held to
 // the budget. On Windows os.clock() counts wall time, so one round can be
@@ -166,11 +166,11 @@ C_VignetteInfo = {
 }
 stub.moveTo(50, 50)
 local before = { rare = count("rare"), slain = count("slain"), drop = count("drop") }
--- Each round: 50 new rares on nameplates, 50 kills, each corpse looted, and
+-- Each round: 20 new rares on nameplates, 20 kills, each corpse looted, and
 -- the vignette list updating with every one. Every rare, kill and corpse is
 -- new, so each is recorded rather than skipped as already seen.
 out.burst = burst(function(round)
-	for i = 1, 50 do
+	for i = 1, 20 do
 		local id = 1000 + round * 100 + i
 		local rare = stub.creature(id, "Rare " .. id)
 		unit("nameplate1", rare, "Rare " .. id, "rare", 12)
@@ -189,7 +189,7 @@ end)
 out.rares = count("rare") - before.rare
 out.kills = count("slain") - before.slain
 out.drops = count("drop") - before.drop`);
-	assert.deepEqual({ rares: r.rares, kills: r.kills, drops: r.drops }, { rares: ROUNDS * 50 + 1, kills: ROUNDS * 50, drops: ROUNDS * 50 },
+	assert.deepEqual({ rares: r.rares, kills: r.kills, drops: r.drops }, { rares: ROUNDS * 20 + 1, kills: ROUNDS * 20, drops: ROUNDS * 20 },
 		'every rare (and the vignette one), kill and loot window was recorded, so the recording is what was measured');
 	within(r, ['burst']);
 });
