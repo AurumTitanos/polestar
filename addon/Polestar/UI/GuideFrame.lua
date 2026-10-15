@@ -1555,15 +1555,32 @@ function GF.ApplyAlpha(animate)
 	end
 end
 
+-- The corner the window is pinned by and that corner's y: the bottom-left
+-- with ui.growUp (a longer step pushes the top edge up), else the top-left
+-- (it pushes the bottom edge down). ui.pos holds that corner.
+local function pinCorner()
+	if ns.Get("ui.growUp") then return "BOTTOMLEFT", F:GetBottom() end
+	return "TOPLEFT", F:GetTop()
+end
+
 function GF.ApplyPosition()
 	if not F then return end
 	local pos = ns.Get("ui.pos")
 	F:ClearAllPoints()
 	if type(pos) == "table" and type(pos[1]) == "number" and type(pos[2]) == "number" then
-		F:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", pos[1], pos[2])
+		F:SetPoint(ns.Get("ui.growUp") and "BOTTOMLEFT" or "TOPLEFT", UIParent, "BOTTOMLEFT", pos[1], pos[2])
+	elseif ns.Get("ui.growUp") then
+		F:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -64, 240)
 	else
 		F:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -64, -240)
 	end
+end
+
+function GF.SavePosition()
+	if not F then return end
+	local l = F:GetLeft()
+	local _, y = pinCorner()
+	if l and y then ns.Set("ui.pos", { floor(l + 0.5), floor(y + 0.5) }) end
 end
 
 function GF.ApplyLock()
@@ -1584,18 +1601,19 @@ function GF.ApplyCompact()
 	GF.Layout()
 end
 
--- Scale about the top-left corner, so the window stays where the user put
+-- Scale about the pinned corner, so the window stays where the user put
 -- it, then repaint so 1px lines land on the new pixel grid.
 function GF.ApplyScale()
 	local new = ns.Get("ui.scale") or 1
 	local old = F:GetScale()
 	if old == new then return end
-	local l, t = F:GetLeft(), F:GetTop()
+	local l = F:GetLeft()
+	local corner, y = pinCorner()
 	F:SetScale(new)
-	if l and t and type(ns.Get("ui.pos")) == "table" then
+	if l and y and type(ns.Get("ui.pos")) == "table" then
 		F:ClearAllPoints()
-		F:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", l * old / new, t * old / new)
-		ns.Set("ui.pos", { floor(l * old / new + 0.5), floor(t * old / new + 0.5) })
+		F:SetPoint(corner, UIParent, "BOTTOMLEFT", l * old / new, y * old / new)
+		ns.Set("ui.pos", { floor(l * old / new + 0.5), floor(y * old / new + 0.5) })
 	end
 	Theme.Refresh()
 end
@@ -1610,6 +1628,8 @@ local APPLY = {
 	["ui.compact"] = function() GF.ApplyCompact() end,
 	["ui.width"] = function() GF.ApplyWidth() end,
 	["ui.pos"] = function() GF.ApplyPosition() end,
+	-- Re-pin by the other corner where the window stands now, so it does not jump.
+	["ui.growUp"] = function() GF.SavePosition() end,
 	["ui.upcoming"] = function() GF.Render() end,
 	["ui.upcomingOpen"] = function() GF.Render() end,
 	["ui.showNotes"] = function() GF.Render() end,
@@ -1632,10 +1652,7 @@ end
 -- Move and resize
 ---------------------------------------------------------------------------
 
-local function savePosition()
-	local l, t = F:GetLeft(), F:GetTop()
-	if l and t then ns.Set("ui.pos", { floor(l + 0.5), floor(t + 0.5) }) end
-end
+local savePosition = GF.SavePosition
 
 local function dragStart()
 	if ns.Get("ui.locked") then return end
@@ -1658,11 +1675,12 @@ end
 
 local function resizeStart(self)
 	if ns.Get("ui.locked") then return end
-	-- Grow from the left edge: pin the window by its top-left first.
-	local l, t = F:GetLeft(), F:GetTop()
-	if l and t then
+	-- Grow from the left edge: pin the window by its left corner first.
+	local l = F:GetLeft()
+	local corner, y = pinCorner()
+	if l and y then
 		F:ClearAllPoints()
-		F:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", l, t)
+		F:SetPoint(corner, UIParent, "BOTTOMLEFT", l, y)
 	end
 	self.psStartX = GetCursorPosition() / F:GetEffectiveScale()
 	self.psStartW = F:GetWidth()

@@ -53,6 +53,9 @@
 - Without the Codex, Lookup and Dungeons say which case it is: not installed
   (get the Polestar zip from CurseForge or the GitHub Releases page, not
   GitHub's "Source code" download) or turned off in the AddOns list.
+- Grow upward (Options, Guide, Window, Position): the guide window keeps its
+  bottom edge in place, so a longer step extends it up instead of down.
+  Turning it on or off leaves the window where it stands.
 
 ### For guide authors
 
