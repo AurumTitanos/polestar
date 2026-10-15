@@ -234,6 +234,14 @@
   and grow under 15x from 2,500 names, each the median of several batches,
   so a per-keystroke index rebuild or a quadratic search still fails it
   (thanks CDVolvik).
+- `tests/recorder-perf.test.js` holds the Recorder to Polestar's CPU budgets
+  while it records, without reference data so CI runs it: a walking frame
+  under 1 ms, a burst of questing events with a full quest log and a burst
+  of finds (20 rares, kills and loot windows in one frame) under 4 ms, each
+  the median of 5 rounds. Each is also held against a reference timed in
+  the same round (400 events to a plain handler doing a Recorder handler's
+  work), which holds across machines and lua5.1 or LuaJIT; on Windows,
+  where `os.clock()` is wall time, only that is held (thanks CDVolvik).
 - `tools/lib/codex/repgates.json`: a curated, cited table of the reputation
   a vendor, giver or quest asks for an item (one row per item and faction,
   each with its warcraft.wiki.gg or Wowhead Classic page), which `codex
