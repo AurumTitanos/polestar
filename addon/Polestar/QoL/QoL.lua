@@ -54,6 +54,7 @@ local defaults = {
 	sellJunk = true,
 	autoRepair = true,
 	repairGuild = false,     -- guild bank first when the rank allows
+	buyGoals = false,        -- buy what the step's buy goals still need
 	rewardHighlight = true,
 	rewardAutoPick = false,
 	flightAutoOpen = true,

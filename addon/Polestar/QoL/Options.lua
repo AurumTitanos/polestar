@@ -95,6 +95,8 @@ register(QOL, L["Vendors"], L["Merchants"], {
 		help = help("autoRepair", L["Repairs all gear at merchants who can, when you can afford it. Hold Shift to skip."]) },
 	{ kind = "toggle", key = "qol.repairGuild", label = L["Guild bank first"], disabled = repairOff,
 		help = help("repairGuild", L["When your guild rank may, the guild bank pays for repairs and your money covers the rest."]) },
+	{ kind = "toggle", key = "qol.buyGoals", label = L["Buy for the guide"],
+		help = L["When the step asks you to buy something and the merchant sells it, buys what you still need after selling and repairing. Optional buys and anything over 50g are left to you. Hold Shift to skip."] },
 })
 
 register(QOL, L["Trackers"], L["Experience"], {
