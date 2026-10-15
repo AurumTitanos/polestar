@@ -1,10 +1,14 @@
 -- Nav's own pins, drawn through Polestar.Pins:
 --   nav.target  the point being guided to (world map + minimap, clamped to the rim); an
---               area target (a spawn area) also shows its area as a soft disc on the world map
+--               area target (a spawn area) also shows its area as a soft disc on both
 --   nav.route   where the travel route changes mode: flight masters, docks, the inn (world map)
 --   nav.goals   the current step's other open goals; click one to point the arrow there (world map)
 --   nav.spots   the target's other spawn places, small marks (other places it spawns fainter);
 --               click one to search there next (world map)
+--   nav.areas   every other spawn area of the target's goal, soft discs in the arrow's
+--               colour (world map + minimap)
+--   nav.goalAreas  the spawn areas of the step's other open goals, fainter, in the
+--               goals' colour (world map)
 -- and the trail (Pins.SetTrail): dots from the player along the travel route's lines (each
 -- leg's start where the mode changes, and its end), broken at a Hearthstone (a jump, not a
 -- path) and across continents; without a route, straight to the target (both surfaces).
@@ -21,6 +25,7 @@ local Layers = {}
 Nav.layers = Layers
 
 local TARGET, ROUTE, GOALS, SPOTS = "nav.target", "nav.route", "nav.goals", "nav.spots"
+local AREAS, GOAL_AREAS = "nav.areas", "nav.goalAreas"
 
 local function color(name)
 	local r, g, b = Nav.RGB(name)
@@ -46,7 +51,7 @@ local function updateTarget(world, minimap)
 	Pins.SetLayer(TARGET, {
 		{ map = target.map, x = target.x, y = target.y, f = target.f, color = color("arrow"), glow = true,
 			area = target.area, tooltip = targetTooltip, priority = 100 },
-	}, { world = world, minimap = minimap, edge = true, scale = 1.4 })
+	}, { world = world, minimap = minimap, edge = true, scale = 1.4, minimapAreas = true })
 end
 
 -- Every other spot of the target's spawn places, so the player sees where
@@ -139,6 +144,54 @@ local function updateGoals(world)
 	end
 end
 
+-- Every spawn area of the step's open goals (compiled `spots`), so the map
+-- shows each camp the player could try, not one point. The target's goal
+-- wears the arrow's colour on both surfaces (its current spot is the target
+-- pin's own disc); the other goals' areas, fainter in their pins' colour,
+-- only on the world map, so the minimap stays about where the arrow leads.
+-- The other places a target spawns (`alt`) are fainter still.
+local function updateAreas(world, minimap)
+	local Engine = ns.Engine
+	local index = (world or minimap) and Engine and Engine.GetStepIndex and Engine.GetStepIndex()
+	local view = index and Engine.GetStepView and Engine.GetStepView(index)
+	local guide = view and view.goals and Engine.GetGuide and Engine.GetGuide()
+	local step = guide and guide.steps and guide.steps[index]
+	local own, others = {}, {}
+	if step then
+		local target = Nav.GetTarget()
+		local tg = target and target.stepIndex == index and target.goalIndex or nil
+		local current = tg and target.area and (target.spot or 1) or nil
+		local ar, ag, ab = Nav.RGB("arrow")
+		local pr, pg, pb = Nav.RGB("place")
+		for _, v in ipairs(view.goals) do
+			local goal = (v.status == "active" or v.status == "pending") and step.goals and step.goals[v.index]
+			local spots = goal and goal.map and goal.spots
+			if spots then
+				local mine = v.index == tg
+				local list = mine and own or others
+				for i, s in ipairs(spots) do
+					if not (mine and i == current) then
+						list[#list + 1] = {
+							map = goal.map, x = s.x, y = s.y, f = goal.f, area = s.r, areaOnly = true,
+							color = mine and { ar, ag, ab, s.alt and 0.5 or 0.85 } or { pr, pg, pb, s.alt and 0.4 or 0.65 },
+						}
+					end
+				end
+			end
+		end
+	end
+	if #own > 0 then
+		Pins.SetLayer(AREAS, own, { world = world, minimap = minimap, minimapAreas = true })
+	else
+		Pins.ClearLayer(AREAS)
+	end
+	if world and #others > 0 then
+		Pins.SetLayer(GOAL_AREAS, others, { world = true, minimap = false })
+	else
+		Pins.ClearLayer(GOAL_AREAS)
+	end
+end
+
 -- The trail's runs: the player, then from the current leg on each leg's start
 -- (unless it walks there) and end; a Hearthstone starts a new run at the inn.
 local function updateTrail(world, minimap)
@@ -183,6 +236,7 @@ function Layers.Update()
 	updateRoute(world)
 	updateGoals(world)
 	updateSpots(world)
+	updateAreas(world, minimap)
 	updateTrail(world, minimap)
 end
 

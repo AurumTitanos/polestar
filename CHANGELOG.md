@@ -260,6 +260,12 @@
 - The guide window no longer fades out on every pull: "In combat" (Options,
   Guide, Window, Combat) is "Keep visible" by default. "Hide" stays if you
   chose it; to keep the fade, pick "Fade out" there (thanks Pynte).
+- Every place the guide step's mobs and objects spawn is a zone on the map
+  now, not one point: all the camps of the goal the arrow follows, in the
+  arrow's colour on the world map and the minimap, and the step's other
+  goals' camps, fainter, on the world map. If the first camp is crowded, the
+  next one is in sight; the next-spot button, or a click on a camp's mark on
+  the world map, moves the arrow there (thanks Pynte).
 
 ### For guide authors
 

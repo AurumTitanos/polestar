@@ -316,8 +316,8 @@ local BUILTIN = {
 	{ page = MAP, key = "map", icon = "icon-explore", order = 30, tab = L["Guide & quests"], section = L["Guide"],
 		subtitle = L["What Polestar draws on the world map and the minimap. Quest, rare and travel icons start off."], controls = {
 		{ kind = "toggle", key = "nav.worldPins", label = L["Guide pins on the world map"],
-			help = L["The arrow's target, the stops of its travel route and the step's other goals."] },
-		{ kind = "toggle", key = "nav.minimapPins", label = L["Guide pin on the minimap"], help = L["The arrow's target."] },
+			help = L["The arrow's target, the stops of its travel route, the step's other goals and the areas their mobs and objects spawn in."] },
+		{ kind = "toggle", key = "nav.minimapPins", label = L["Guide pin on the minimap"], help = L["The arrow's target and the areas it spawns in."] },
 		{ kind = "toggle", key = "nav.trailDots", label = L["Trail dots along the travel route"],
 			help = L["Moving dots from you to the target on the world map and the minimap, along the travel route."] },
 	} },

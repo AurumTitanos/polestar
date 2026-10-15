@@ -470,6 +470,71 @@ test('the other places a target spawns are marked fainter and smaller, and say s
 	assert.ok(alt[2] < camp[2], `the alt mark is smaller (${alt[2]} vs ${camp[2]})`);
 });
 
+test("every spawn area of the step's open goals is a zone on the map; the target's goal's on the minimap too", () => {
+	const [out] = run(`${SEARCH}
+		spots[2].x, spots[2].y = select(2, nav.mapPoint(0, 250))        -- 250 yd west: its disc reaches into the minimap
+		spots[3].alt = true
+		local function spot(wx, wy, r, alt)
+			local _, x, y = nav.mapPoint(wx, wy)
+			return { x = x, y = y, r = r, n = 3, alt = alt }
+		end
+		local guide = { steps = { { goals = {
+			{ t = "collect", map = 9000, spots = spots },
+			{ t = "kill", map = 9000, spots = { spot(100, 100, 40), spot(150, -150, 30), spot(-300, 0, 15, true) } },
+			{ t = "kill", map = 9000, spots = { spot(-100, -100, 40) } },
+			{ t = "goto", map = 9000, x = 40, y = 40 },
+		} } } }
+		function nav.Engine.GetGuide() return guide end
+		nav.engine.views[1] = { index = 1, goals = {
+			{ index = 1, status = "active", text = "Collect Raptor Head", map = 9000, x = spots[1].x, y = spots[1].y },
+			{ index = 2, status = "active", text = "Kill Raptors", map = 9000, x = 45, y = 45 },
+			{ index = 3, status = "done", text = "Kill Boars", map = 9000, x = 55, y = 55 },
+			{ index = 4, status = "pending", text = "Go there", map = 9000, x = 40, y = 40 },
+		} }
+		local function colors(layer)
+			local r = {}
+			for _, p in ipairs(Pins.GetLayer(layer) or {}) do r[#r + 1] = { p.area, math.floor(p.color[4] * 100 + 0.5), p.areaOnly } end
+			return r
+		end
+		local function minimap()
+			return { #Pins.GetMinimapAreas("nav.target"), #Pins.GetMinimapAreas("nav.areas"), #Pins.GetMinimapAreas("nav.goalAreas") }
+		end
+		nav.setWaypoint(searchWp(1))
+		nav.showWorldMap(9000)
+		stub.advance(0.3)
+		local r = {}
+		r.world = #nav.pins("PolestarPinsAreaTemplate")
+		r.own, r.others = colors("nav.areas"), colors("nav.goalAreas")
+		local ar, ag, ab = N.RGB("arrow")
+		local pr = N.RGB("place")
+		r.ownColor = Pins.GetLayer("nav.areas")[1].color[1] == ar and Pins.GetLayer("nav.areas")[1].color[3] == ab
+		r.otherColor = Pins.GetLayer("nav.goalAreas")[1].color[1] == pr
+		r.minimap = minimap()
+		N.NextSpot(2)                                                    -- the target moves on: its old spot joins the others
+		stub.advance(0.3)
+		r.cycled = { N.GetTarget().spot, #Pins.GetLayer("nav.areas"), Pins.GetLayer("nav.areas")[1].x == spots[1].x }
+		N.SetTarget(9000, 30, 30, "Somewhere")                          -- a point picked by hand: every goal's areas in the goals' colour
+		stub.advance(0.3)
+		r.manual = { Pins.GetLayer("nav.areas") ~= nil, #Pins.GetLayer("nav.goalAreas") }
+		N.ReleaseTarget()
+		Polestar.Set("nav.minimapPins", false)
+		stub.advance(0.3)
+		r.minimapOff = minimap()
+		Polestar.Set("nav.worldPins", false)
+		r.worldOff = #nav.pins("PolestarPinsAreaTemplate")
+		emit(r)`);
+	assert.equal(out.world, 6, "the target's disc, its goal's two other spots and the other open goal's three; none for a done goal");
+	assert.deepEqual(out.own, [[60, 85, true], [60, 50, true]], "the target's goal: every other spot, the other places it spawns fainter");
+	assert.deepEqual(out.others, [[40, 65, true], [30, 65, true], [15, 40, true]], "the other goal's areas, a step fainter");
+	assert.equal(out.ownColor, true, "the target's goal wears the arrow's colour");
+	assert.equal(out.otherColor, true, "the other goals wear their pins' colour");
+	assert.deepEqual(out.minimap, [1, 2, 0], "the minimap: the target's disc and its goal's areas in reach, not the other goals'");
+	assert.deepEqual(out.cycled, [2, 2, true]);
+	assert.deepEqual(out.manual, [false, 6]);
+	assert.deepEqual(out.minimapOff, [0, 0, 0]);
+	assert.equal(out.worldOff, 0);
+});
+
 test('hidden on a taxi, in an instance and without a target; zone name on another continent', () => {
 	const [out] = run(`
 		local seen = {}

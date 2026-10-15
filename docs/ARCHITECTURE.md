@@ -1052,11 +1052,20 @@ and the arrow says "Search here", the goal label, and "Click the arrow for the
 next spot". A left click on the arrow (not a drag) calls
 `Nav.NextSpot([index])`, which asks the Engine (`CycleSpot`) for the next spot
 while the target is the Engine's waypoint with `spots`. The `nav.target` pin
-carries the `area`, so the world map draws the area's soft disc under the
-target pin; the `nav.spots` layer (world map, under `nav.worldPins`) marks
-every other spot of the target as a small pin (an `alt` spot smaller and
+carries the `area`, so the world map and the minimap draw the area's soft disc
+under the target pin; the `nav.spots` layer (world map, under `nav.worldPins`)
+marks every other spot of the target as a small pin (an `alt` spot smaller and
 fainter, its tooltip "It also spawns here"); clicking one searches there next
 (`Nav.NextSpot(i)`). TomTom's arrival distance is `area + r`.
+
+Every spawn area of the current step's open goals is a zone on the map
+(`Layers.lua`, read from `Engine.GetGuide().steps[step].goals[i].spots` for
+the goals `GetStepView` shows active or pending): `nav.areas` holds the other
+spots of the target's goal, area-only pins in the arrow's colour at 0.85
+(`alt` 0.5), on the world map and the minimap (`nav.worldPins`,
+`nav.minimapPins`); `nav.goalAreas` the spots of the step's other goals, in
+`place` at 0.65 (`alt` 0.4), on the world map only. A point picked by hand
+(`SetTarget`) leaves every goal's areas in `nav.goalAreas`.
 
 While a `SetTarget` override is active the Engine keeps announcing its own
 waypoint; `Nav.GetTarget()` is the point actually being guided to. Nav fires
@@ -1066,12 +1075,14 @@ Engine's waypoint until the Engine announces a different one or the step changes
 ### Pins — map and minimap icons for every module
 
 ```lua
-Polestar.Pins.SetLayer(layer, pins, opts)   -- replace a layer; opts = { world = true, minimap = true, edge = false, scale = 1 }
+Polestar.Pins.SetLayer(layer, pins, opts)   -- replace a layer; opts = { world = true, minimap = true, edge = false, scale = 1,
+                                            --   minimapAreas = false }
 Polestar.Pins.ClearLayer(layer)
 Polestar.Pins.SetLayerVisible(layer, visible)
 -- pin = { map, x, y, f, icon (Theme.Media name or texture path), size, minimapSize, color = { r, g, b, a },
 --         tooltip = string | function(tooltip), onClick = function(button), priority,
---         glow (soft halo), ring = { r, g, b } (ring round the disc), backdrop (scrim disc), area (yards) }
+--         glow (soft halo), ring = { r, g, b } (ring round the disc), backdrop (scrim disc), area (yards),
+--         areaOnly (only the area draws, no pin) }
 ```
 
 Pins are drawn on the world map for the map being viewed (converted through Compat
@@ -1084,8 +1095,16 @@ player; layer changes made in one frame share one minimap redraw on the next
 (`GetMinimapFrames` runs a pending one first). Nav's own target pins are one layer. A pin's `area`
 draws a soft disc of that radius (`Media/Nav/area`, the pin's colour at 0.32
 alpha) under every pin on the world map (`PIN_FRAME_LEVEL_QUEST_BLOB`, own
-pool, no mouse, sized in canvas units so it scales with the terrain); the
-minimap shows the pin only.
+pool, no mouse, sized in canvas units so it scales with the terrain). On the
+minimap only a layer with `minimapAreas` draws its areas (Nav's target and
+`nav.areas`; quest objective areas stay on the world map): textures on one
+no-mouse frame under the trail and the pins, every area whose disc reaches
+into the view (the layer's grid is searched out to the view plus its widest
+area), sized 2 × area × the minimap's pixels per yard, and masked to the
+minimap's shape (a round minimap: `Media/Nav/pin-fill`'s disc over the
+minimap's width; a square one: a plain square), so a disc is cut at the rim.
+A client without mask textures draws only the discs that fit inside.
+`GetMinimapAreas(layer)` lists the drawn discs (tests).
 
 ```lua
 Polestar.Pins.SetTrail(runs, opts)   -- runs = { { live = true?, { c, wx, wy }, ... }, ... }; opts = { world, minimap, color }

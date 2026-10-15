@@ -237,6 +237,56 @@ test('a pin\'s area draws a disc of its radius in yards under the world map pins
 	assert.equal(out.cleared, 0);
 });
 
+test('a layer with minimapAreas draws its areas on the minimap too, cut at the rim; areaOnly pins draw no pin', () => {
+	const [out] = run(`
+		nav.viewRadius = 200                                             -- 70 px for 200 yd: 0.35 px a yard
+		local function areas(layer)
+			local r = {}
+			for _, t in ipairs(Pins.GetMinimapAreas(layer)) do
+				local _, _, _, x, y = t:GetPoint(1)
+				r[#r + 1] = { math.floor(x + 0.5), math.floor(y + 0.5), math.floor(t.width + 0.5), t.mask ~= nil }
+			end
+			table.sort(r, function(a, b) return a[1] > b[1] end)
+			return r
+		end
+		Pins.SetLayer("spawns", {
+			at(100, 0, { area = 60, areaOnly = true, color = { 1, 0.5, 0.5, 1 } }),   -- in view
+			at(0, 240, { area = 60, areaOnly = true }),                               -- centre past the rim, disc reaching in
+			at(0, 300, { area = 60, areaOnly = true }),                               -- out of reach
+		}, { minimapAreas = true })
+		Pins.SetLayer("quests.objectives", { at(-50, 0, { area = 60 }) })        -- no minimapAreas: the pin only
+		stub.advance(0.3)
+		local r = { areas = areas("spawns"), pins = frames("spawns"), quests = { frames("quests.objectives"), #Pins.GetMinimapAreas("quests.objectives") } }
+		local t = Pins.GetMinimapAreas("spawns")[1]
+		local _, _, _, alpha = t:GetVertexColor()
+		r.alpha = alpha
+		local mask = t.mask
+		r.mask = { mask.texture, math.floor(mask.width + 0.5) }
+		nav.place(100, 0); stub.advance(0.3)
+		r.moved = areas("spawns")
+		GetMinimapShape = function() return "SQUARE" end
+		nav.place(0, 0); stub.advance(0.3)
+		r.square = #areas("spawns")
+		r.squareMask = { mask.texture, math.floor(mask.width + 0.5) }
+		GetMinimapShape = nil
+		nav.showWorldMap(9000)
+		r.world = { #nav.pins("PolestarPinsAreaTemplate"), #nav.pins() }
+		Pins.ClearLayer("spawns")
+		stub.advance(0.3)
+		r.cleared = #Pins.GetMinimapAreas("spawns")
+		emit(r)`);
+	assert.deepEqual(out.areas, [[0, 35, 42, true], [-84, 0, 42, true]], 'discs 2 x 60 yd wide where the player sees them, one reaching in past the rim');
+	assert.equal(out.pins, 0, 'areaOnly: no pin frame');
+	assert.deepEqual(out.quests, [1, 0], 'a layer without minimapAreas keeps its areas on the world map');
+	assert.ok(out.alpha > 0 && out.alpha < 0.5, 'a faint disc');
+	assert.deepEqual(out.mask, ['Interface\\AddOns\\Polestar\\Media\\Nav\\pin-fill', 213], "masked to the round minimap: pin-fill's disc over its width");
+	assert.deepEqual(out.moved[0], [0, 0, 42, true], 'the disc follows the player');
+	assert.equal(out.square, 3, "a square minimap's corners reach further");
+	assert.deepEqual(out.squareMask, ['Interface\\Buttons\\WHITE8X8', 140]);
+	assert.deepEqual(out.world, [4, 1], 'every area on the world map; only the plain pin as a pin');
+	assert.equal(out.cleared, 0);
+});
+
 test('icon pins may sit on a dark disc, carry a ring, and take their own minimap size', () => {
 	const [out] = run(`
 		nav.viewRadius = 200

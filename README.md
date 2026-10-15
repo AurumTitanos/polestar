@@ -238,8 +238,9 @@ map. Renders of every window and state, drawn without the game, are in
   health bar of EllesmereUI and other replacement nameplates too.
 - **Rare and treasure spawns, dungeon entrances, flight masters, docks and
   inns** can mark the map too. Every map icon is off by default and turns on
-  under **Map** in the options; the arrow's target, its spawn area and its
-  route always show.
+  under **Map** in the options; the arrow's target, its route and the spawn
+  areas of the guide step's mobs and objects (every camp, on the world map
+  and the minimap) always show.
 - **A world map without fog of war**, with coordinates and zone level ranges.
 
 ### Gear advice
