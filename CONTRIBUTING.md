@@ -151,6 +151,35 @@ command.
   who reported it at the end of its entry, by the name they reported under:
   "(thanks Tom)". A contribution credits its author the same way.
 
+## How a pull request is reviewed
+
+Every pull request is read for safety **before any of its code is run**:
+its tests run Node tools on the maintainer's machine and Lua in the test
+client, so running them is already trusting them. The diff is read in full,
+generated files included, and the pull request waits while anything below is
+unexplained.
+
+- **Money and items leaving the player.** Any use of the mailbox
+  (`SendMail`, `SetSendMailMoney`, `SetSendMailCOD`, items attached to a
+  mail), trade (`SetTradeMoney`, `AcceptTrade`), the auction house, the guild
+  bank, or buying, learning and repairing beyond what the pull request says
+  it does, and any hard-coded character or realm name. The known scam is an
+  addon that mails gold to someone when the mailbox opens.
+- **Code that acts on its own or hides what it does.** `loadstring`,
+  `RunScript` or other dynamic code, obfuscated or encoded text, addon
+  messages and chat sent without the player asking, hooks on secure
+  functions, slash commands that do something other than what they say.
+- **The toolchain.** New dependencies or install scripts, `child_process`,
+  network access to hosts the project does not already use (wago.tools,
+  Wowhead), reading or writing outside the repository (the home folder,
+  tokens, other addons' saved data), changes to `.github/workflows`.
+- **Data and guides.** Executable code or links hidden in data, guide or
+  locale files.
+
+Then the change is reviewed for correctness (tests, the game's limits,
+Options toggles off by default for anything that spends, equips or acts for
+the player) and merged into `next`.
+
 ## Licence
 
 Contributions to Polestar are under GPL-3.0 ([LICENSE](LICENSE)). Guide packs
