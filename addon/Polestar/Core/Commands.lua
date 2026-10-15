@@ -66,12 +66,14 @@ ns.RegisterCommand("guide", function(rest)
 		ns.Print(g and (L["Current guide: %s (%s)"]):format(g.title, g.id) or L["No guide selected."])
 		return
 	end
-	if not ns.Guides.Get(id) then
+	-- Guide ids are lower-case; an exact match still wins.
+	local g = ns.Guides.Get(id) or ns.Guides.Get(id:lower())
+	if not g then
 		ns.Print((L["Unknown guide '%s'."]):format(id))
 		return
 	end
-	Engine.SetGuide(id)
-	ns.Print((L["Guide: %s"]):format(ns.Guides.Get(id).title))
+	Engine.SetGuide(g.id)
+	ns.Print((L["Guide: %s"]):format(g.title))
 end, L["Switch to a guide by id"])
 
 ns.RegisterCommand("status", function()

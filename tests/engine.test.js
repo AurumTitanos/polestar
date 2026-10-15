@@ -926,7 +926,10 @@ test('slash commands drive the engine and report status', () => {
 			local afterPrev = E.GetStepIndex()
 			SlashCmdList.POLESTAR("guide nope")
 			SlashCmdList.POLESTAR("guide test/02-elwynn")
-			emit({ status = status, afterSkip = afterSkip, afterPrev = afterPrev, guide = E.GetGuide().id, msgs = stub.messages,
+			local exact = E.GetGuide().id
+			SlashCmdList.POLESTAR("guide test/01-northshire")
+			SlashCmdList.POLESTAR("guide Test/02-Elwynn")
+			emit({ status = status, afterSkip = afterSkip, afterPrev = afterPrev, exact = exact, guide = E.GetGuide().id, msgs = stub.messages,
 				header = BINDING_HEADER_POLESTAR, binding = BINDING_NAME_POLESTAR_NEXT })
 		`,
 	});
@@ -937,8 +940,15 @@ test('slash commands drive the engine and report status', () => {
 	]);
 	assert.equal(out.afterSkip, 4);
 	assert.equal(out.afterPrev, 3);
+	assert.equal(out.exact, 'test/02-elwynn');
+	// A mixed-case id finds the lower-case guide.
 	assert.equal(out.guide, 'test/02-elwynn');
-	assert.deepEqual(out.msgs, ["|cff4fd1c5Polestar|r: Unknown guide 'nope'.", '|cff4fd1c5Polestar|r: Guide: Elwynn Forest']);
+	assert.deepEqual(out.msgs, [
+		"|cff4fd1c5Polestar|r: Unknown guide 'nope'.",
+		'|cff4fd1c5Polestar|r: Guide: Elwynn Forest',
+		'|cff4fd1c5Polestar|r: Guide: Northshire Valley',
+		'|cff4fd1c5Polestar|r: Guide: Elwynn Forest',
+	]);
 	assert.equal(out.header, 'Polestar');
 	assert.equal(out.binding, 'Next step');
 });
