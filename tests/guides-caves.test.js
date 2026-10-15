@@ -33,6 +33,13 @@ const CASES = [
 		mouth: { map: 1440, x: 14.5, y: 14.2 }, // the client's Blackfathom Deeps entrance, the ruins' pit
 		tip: /tunnels leading to the Blackfathom Deeps portal/,
 	},
+	{
+		// Turesh: in Coldridge Valley the arrow pointed above ground, at Grik'nir inside the troll cave.
+		guide: 'forever/alliance/dwarf-gnome/01-dun-morogh.guide',
+		target: (g) => g.t === 'collect' && g.item === 2004, // Grelin Whitebeard's Journal, from Grik'nir the Cold
+		mouth: { map: 1426, x: 26.93, y: 80.03 }, // marked in game (PR #16)
+		tip: /inside the troll cave/,
+	},
 ];
 
 let data;

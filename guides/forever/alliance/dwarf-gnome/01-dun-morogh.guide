@@ -221,7 +221,7 @@ step Grund and Gozwin
   goto 26.93,80.03 live "The troll cave"
 
 step Grik'nir the Cold
-  tip Grik'nir the Cold sits at the back of the troll cave, east of Grelin's camp.
+  tip Grik'nir the Cold is inside the troll cave east of Grelin's camp, not on the hill above it: go in at the mouth and follow the tunnel to the back.
   collect 2004 quest 218                      -- Grelin Whitebeard's Journal
 
 step Grelin Whitebeard
