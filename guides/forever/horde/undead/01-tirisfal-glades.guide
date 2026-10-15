@@ -80,6 +80,13 @@ next forever/horde/02-the-barrens
 # church.
 # Class training at Deathknell (2, 4) and in Brill (6, 8, 10, 12).
 #
+# Paladin only: As Above, So Below (99152, Hilda the Breaker) and The One
+# That Got Away (99153, Ephram Barbaro) at Bandarion Keep. QuestieDB has no
+# class gate on them, but a Scourge Mage (Mike_, 0.2.3) found neither in the
+# givers' quest windows, and warcraft.wiki.gg calls Hilda a Forsaken paladin
+# trainer: the keep is the Paladin hub. Other classes skip the keep; the
+# Shadowvale elixir bottles (95314) stay for everyone.
+#
 # Left out for Paladins: the Bandarion Keep chain (91282-91317, 95803) and A
 # Lesson in Divinity (94427-94441, Redemption) run from Bandarion Keep on the
 # west coast to the Undercity and Deathguard Falgan at the far east end of the
@@ -376,18 +383,20 @@ step Vile Fin shore
   tip More Vile Fin murlocs walk the shore just north of the outpost.
   collect 278244 quest 97558.2
 
-step Whispering Forest
+step Paladin: Whispering Forest
+  only Paladin
   tip Head west into the Whispering Forest; Hilda and Ephram camp at its edge.
   accept 99152                        -- Hilda the Breaker
   accept 99153                        -- Ephram Barbaro
 
 step Shadowvale
   tip Shadowvale is the hollow at the west edge of the glades. The Shadowvale Lurchers and Mystics drop the bones; the bottles lie on the ground among them, and the Glowing Crystal Fragment is at the south end.
-  collect 286259 quest 99152.1
+  collect 286259 quest 99152.1 only Paladin
   collect 268801 quest 95314.1
-  collect 286269 quest 99153.1
+  collect 286269 quest 99153.1 only Paladin
 
-step Whispering Forest
+step Paladin: Whispering Forest
+  only Paladin
   turnin 99153                        -- Ephram Barbaro
   turnin 99152                        -- Hilda the Breaker
 

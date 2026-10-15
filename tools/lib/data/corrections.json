@@ -156,6 +156,18 @@
 				]
 			},
 			"note": "Seeking Refuge (Tirisfal) is an escort: Wowhead Forever https://www.wowhead.com/forever/quest=99144 lists one objective \"Escort Bareth Dawnstone out of Crusader's Outpost\" (1) with no map point (checked 2026-10-13). QuestieDB 1.0.5 has no objectives. No map point: the event runs where it starts (Bareth Dawnstone 275954)."
+		},
+		"99152": {
+			"set": {
+				"classes": 2
+			},
+			"note": "As Above, So Below (Hilda the Breaker 246389, Bandarion Keep) is Paladin-only: Mike_'s in-game report (Discord, Polestar 0.2.3, Scourge Mage 11): Polestar marked it 'Not offered by Hilda the Breaker', which it does only when the giver's quest window opened without the quest; warcraft.wiki.gg https://warcraft.wiki.gg/wiki/Hilda_the_Breaker: Hilda the Breaker is a Forsaken paladin trainer at Bandarion Keep, the Undead Paladin hub (checked 2026-10-15). QuestieDB 1.0.5 has no class gate (classes null)."
+		},
+		"99153": {
+			"set": {
+				"classes": 2
+			},
+			"note": "The One That Got Away (Ephram Barbaro 259190, Bandarion Keep) is Paladin-only: Mike_'s in-game report (Discord, Polestar 0.2.3, Scourge Mage 11): Polestar marked it 'Not offered by Ephram Barbaro', which it does only when the giver's quest window opened without the quest; warcraft.wiki.gg https://warcraft.wiki.gg/wiki/Hilda_the_Breaker: Hilda the Breaker is a Forsaken paladin trainer at Bandarion Keep, the Undead Paladin hub (checked 2026-10-15). QuestieDB 1.0.5 has no class gate (classes null)."
 		}
 	},
 	"npcs": {
