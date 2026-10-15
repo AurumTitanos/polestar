@@ -298,6 +298,7 @@ The fields:
 | `pre` | prerequisite quest ids, any one suffices; `preAll` every one needed |
 | `closedBy` | quest ids that close this one once taken or done |
 | `preTitles` | `{ [questId] = title }` for the quests those name |
+| `profLine`, `profName`, `profRank` | on any goal of a quest only characters with a profession can take: its skill line id, name and the rank it needs; the goal is hidden from characters without it |
 | `location` | an inn, flight point or zone name as the game shows it |
 | `class` | `true` on `train`: the nearest trainer of the player's class |
 | `skill` | a profession name; `skillLine` its skill line id |

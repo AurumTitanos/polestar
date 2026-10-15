@@ -217,6 +217,13 @@
 - `/polestar way 40 60` where the game gives no map position (an instance,
   another continent) says "No position here" instead of how to type the
   command (thanks meellm).
+- Quests only a profession's practitioners are offered stay out of sight
+  for everyone else, the way another class's quests do: a Troll Warrior
+  without Enchanting no longer sees A Pain in the Neck in Durotar, and
+  learning the profession (or the rank the quest needs) brings it back. The
+  Dun Morogh and Teldrassil guides take Beer Basted Boar Ribs and Recipe of
+  the Kaldorei after the cooking lesson, since Ragnar Thunderbrew and Zarrin
+  offer them to cooks only (thanks AndarKerran).
 
 ### For guide authors
 
@@ -250,6 +257,12 @@
   ready for the local crossings file once checked in game. `--session`
   drafts from chosen recordings, `--reverse` counts ways out as ways in
   (thanks CDVolvik).
+- Every goal of a quest that needs a profession (quests.json `skill` and
+  `skillLevel`) carries `profLine`, `profName` and `profRank`, and Polestar
+  hides it from characters without that profession and rank (older
+  versions ignore the fields). In a Leveling guide lint warns on such a goal
+  unless it is `optional` or the guide trains the profession (and levels it
+  to the quest's rank) first.
 
 ### For contributors
 

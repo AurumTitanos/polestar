@@ -439,6 +439,20 @@ function resolveGuide(ast, data, diag, opts = {}) {
 			hidden(goal, '_line', g.line);
 			hidden(goal, '_only', g.only || null);
 			step.goals.push(goal);
+			// Leveling guides are for every character: a goal only those with a
+			// profession see should be optional, unless the guide trains it first
+			// (and levels it to the quest's rank above 1).
+			if (guide.category === 'Leveling' && goal.profLine !== undefined && !goal.optional) {
+				const prog = profProgress.get(goal.profLine);
+				if (!prog || !(prog.target >= goal.profRank || (prog.rank >= 1 && goal.profRank <= 1))) {
+					const prof = `${goal.profName || `skill ${goal.profLine}`} ${goal.profRank}`;
+					warn(
+						g.line,
+						`quest ${goal.quest} (${goal.title || 'untitled'}) needs ${prof}, and the guide does not train it before here: characters without it never see this goal`,
+						`make the goal \`optional\`, or \`train ${goal.profName || '<Profession>'}\` earlier in the guide`,
+					);
+				}
+			}
 			if (goal.map !== undefined && zoneId !== null && goal.map !== zoneId && !zonesSet.has(goal.map)) {
 				const name = (id) => {
 					const z = data.zone(id);
@@ -1016,6 +1030,19 @@ function resolveGoal(g, zoneMap, prev, data, err, warn, ctx = { sides: ['Allianc
 		if (oi !== undefined) goal.oi = oi;
 	}
 	if ((v === 'kill' || v === 'collect') && g.count !== undefined) goal.count = g.count;
+	// A quest only characters with a profession can take (quests.json `skill`
+	// and `skillLevel`, rank 1 when the level is unknown): every goal of it is
+	// for them only, as another class's goals are not this character's.
+	if (goal.quest !== undefined) {
+		const q = data.quest(goal.quest);
+		const line = q ? Number(q.skill) : 0;
+		if (Number.isInteger(line) && line > 0) {
+			const p = data.profession(line);
+			goal.profLine = line;
+			setIf(goal, 'profName', p && p.name ? String(p.name) : undefined);
+			goal.profRank = Number(q.skillLevel) > 0 ? Number(q.skillLevel) : 1;
+		}
+	}
 
 	// Explicit display text, note, flags.
 	if (g.text !== undefined) goal.text = g.text;

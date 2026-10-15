@@ -236,8 +236,24 @@ local function orphaned(goal)
 	return true
 end
 
+-- A goal of a quest only characters with a profession can take (`profLine`,
+-- `profName`, `profRank`: the quest's required skill) is not this
+-- character's without the profession or below that rank, like another
+-- class's goals; learning it brings them back (SKILL_LINES_CHANGED). A quest
+-- in the log or done keeps its goals, and a client that cannot read skills
+-- shows them. (Inline: the main chunk is at Lua's 200 locals.)
 local function goalApplies(goal)
-	return Guides.Matches(goal.only, player) and not greySkipped(goal) and not orphaned(goal)
+	if not Guides.Matches(goal.only, player) then return false end
+	if goal.profLine or goal.profName then
+		local C = Compat()
+		local q = goal.quest
+		if C.GetSkillRank and C.Supports("skill") and not (q and (C.IsOnQuest(q) or questDone(q))) then
+			local rank = goal.profLine and C.GetSkillRank(goal.profLine)
+			if not rank and goal.profName then rank = C.GetSkillRank(goal.profName) end
+			if (rank or 0) < (goal.profRank or 1) then return false end
+		end
+	end
+	return not greySkipped(goal) and not orphaned(goal)
 end
 
 -- Quests found unavailable at their giver this session (questID ->

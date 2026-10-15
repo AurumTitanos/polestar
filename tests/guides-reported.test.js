@@ -19,6 +19,7 @@ const { loadData } = require('../tools/lib/dsl/data');
 const { DATA } = require('../tools/lib/paths');
 const { runAddon } = require('./helpers/lua');
 const { writeTestPack } = require('./helpers/dsl');
+const { buildSimPack, playGuide, SIMULATE } = require('../tools/lib/playtest');
 
 const skip = needs('quests.json', 'npcs.json', 'objects.json', 'map-frames.json');
 
@@ -243,4 +244,103 @@ test('forever/alliance/03-darkshore.guide: Wogi\'s report: with Skip grey quests
 	// The simulator's Human reaches Darkshore at 16 to 18: Buzzbox 827 is
 	// already grey then, and stays for its chain.
 	assert.deepEqual(greySkippedInDarkshore(17), []);
+});
+
+// --- Durotar (AndarKerran): A Pain in the Neck (96873) is for enchanters.
+
+// Durotar played by the Engine for a level 12 Troll Warrior: the status of
+// each 96873 goal ("accept na", ...), with `skills` (Lua) set before login and
+// `after` run once the guide is open.
+function painInTheNeck({ skills = '', after = '' } = {}) {
+	data = data || loadData(DATA);
+	const file = path.join(OFFICIAL_DIR, DUROTAR);
+	const { guides } = compileSources([{ file, text: fs.readFileSync(file, 'utf8') }], data);
+	const { dir, scripts } = writeTestPack(guides, data);
+	try {
+		const loads = scripts.map((f) => `assert(loadfile(${JSON.stringify(f)}))("Polestar_Guides", ns)`).join('\n');
+		const { emitted } = runAddon({
+			stubs: ['stub_world.lua'],
+			before: `local w = stub.world
+				w.race, w.raceName, w.faction, w.class, w.className = "Troll", "Troll", "Horde", "WARRIOR", "Warrior"
+				w.level = 12
+				${skills}`,
+			addons: [{ name: 'Polestar', files: ['Core/Core.xml'] }],
+			saved: { Polestar: 'PolestarDB = { schema = 1, settings = { behavior = { autoSelectGuide = false } } }' },
+			script: `do local ns = {}
+				${loads}
+				end
+				stub.login(); stub.advance(0.5)
+				local E = Polestar.Engine
+				E.SetGuide("forever/horde/orc-troll/01-durotar")
+				${after}
+				stub.advance(0.5)
+				local out = {}
+				for i = 1, #E.GetGuide().steps do
+					for _, g in ipairs(E.GetStepView(i).goals) do
+						if g.quest == 96873 then out[#out + 1] = g.t .. " " .. g.status end
+					end
+				end
+				emit(out)`,
+		});
+		return Object.values(emitted[0]);
+	} finally {
+		fs.rmSync(dir, { recursive: true, force: true });
+	}
+}
+
+test(`${DUROTAR}: AndarKerran's report: A Pain in the Neck is not offered to a Troll Warrior without Enchanting, and is to an enchanter`, { skip }, () => {
+	// Pa'zula offers it to enchanters only (QuestieDB: Enchanting 1): every goal carries the profession.
+	const pain = goals(DUROTAR).filter(({ goal }) => goal.quest === 96873);
+	assert.deepEqual(pain.map(({ goal }) => [goal.t, goal.profLine, goal.profName, goal.profRank]), [
+		['accept', 333, 'Enchanting', 1],
+		['complete', 333, 'Enchanting', 1],
+		['turnin', 333, 'Enchanting', 1],
+	]);
+	// Hidden ("na", like another class's goals), not offered and then skipped.
+	assert.deepEqual(painInTheNeck(), ['accept na', 'complete na', 'turnin na']);
+	const offered = ['accept pending', 'complete pending', 'turnin pending'];
+	assert.deepEqual(painInTheNeck({ skills: 'w.skills[333] = { name = "Enchanting", rank = 1, maxRank = 75 }' }), offered);
+	// Learning Enchanting during the session brings them back.
+	assert.deepEqual(painInTheNeck({ after: 'stub.world.learnSkill(333, "Enchanting", 1, 75)' }), offered);
+});
+
+// The Cooking quests of the starting zones (Beer Basted Boar Ribs 384, Recipe
+// of the Kaldorei 4161) are offered to cooks only: the guide teaches Cooking
+// at the giver's door first.
+test('the starting-zone Cooking quests are taken after the guide teaches Cooking', { skip }, () => {
+	for (const [guide, lesson, quest] of [
+		[DUN_MOROGH, 96629, 384],
+		[TELDRASSIL, 96634, 4161],
+	]) {
+		const list = goals(guide);
+		const take = at(list, `accept ${quest}`, is('accept', quest));
+		assert.equal(list[take].goal.profName, 'Cooking', `${quest} needs Cooking`);
+		assert.ok(at(list, `turnin ${lesson} (Camping 101: Cooking)`, is('turnin', lesson)) < take, `${guide}: ${quest} after the cooking lesson`);
+		assert.ok(at(list, 'train Cooking', (g) => g.t === 'train' && g.skillLine === 185) < take, `${guide}: ${quest} after training Cooking`);
+	}
+});
+
+// Every leveling guide with a profession quest still plays to the end for a
+// character who already has the profession (tests/guides.test.js plays them
+// all without one).
+test('the leveling guides with profession quests play to the end for a character with the profession', { skip }, () => {
+	const pack = buildSimPack([DUROTAR, DUN_MOROGH, TELDRASSIL, ELWYNN]);
+	try {
+		const learn = (line, name) => `w.skills[${line}] = { name = "${name}", rank = 1, maxRank = 75 }`;
+		for (const [guide, race, faction, skills, quest] of [
+			[DUROTAR, 'Troll', 'Horde', learn(333, 'Enchanting'), null],
+			[DUN_MOROGH, 'Dwarf', 'Alliance', `${learn(185, 'Cooking')} ${learn(164, 'Blacksmithing')}`, 384],
+			[TELDRASSIL, 'NightElf', 'Alliance', learn(185, 'Cooking'), 4161],
+			[ELWYNN, 'Human', 'Alliance', learn(393, 'Skinning'), null],
+		]) {
+			const g = pack.guides.find((x) => `${x.id}.guide` === guide);
+			assert.ok(g, `${guide} compiles`);
+			const [out, done] = playGuide(pack, g, { race, faction, cls: 'WARRIOR', before: skills, script: `${SIMULATE}\nemit({ quest = ${quest || 0} > 0 and C_QuestLog.IsQuestFlaggedCompleted(${quest || 0}) or false })` });
+			assert.equal(out.stuck, undefined, `${guide} (${race}) is not stuck: ${JSON.stringify(out.stuck)}`);
+			assert.ok(out.done, `${guide} (${race}) plays to the end`);
+			if (quest) assert.equal(done.quest, true, `${guide}: a cook does ${quest}`);
+		}
+	} finally {
+		pack.dispose();
+	}
 });

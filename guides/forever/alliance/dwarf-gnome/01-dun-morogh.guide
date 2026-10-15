@@ -53,6 +53,9 @@ next forever/alliance/02-westfall
 #   - "Stolen Blasting Powder" 95214 after the Empty Powder Keg (95213), at
 #     Thesten.
 #   - "Nip 'Em in the Bud" (96390) after "Farsen's Watch" (96392).
+# - "Beer Basted Boar Ribs" (384) is taken from Ragnar after Gremlock Pilsnor
+#   teaches Cooking (Camping 101: Cooking, 96629), not on arrival in
+#   Kharanos: Ragnar offers it to cooks only (pfQuest lists Cooking).
 #
 # Left out: "The Reports" (291) and "Stout to Kadrell" (414) are accepted by
 # the route but never turned in (the route goes to Westfall, not Ironforge's
@@ -254,17 +257,18 @@ step Kharanos
   train class
   accept 400                                  -- Tharek Blackstone
   accept 99158                                -- Maxan Anvol
-  accept 384                                  -- Ragnar Thunderbrew
   accept 98322                                -- Senir Whitebeard
 
 step The Great Outdoors
-  tip Sit by Eric's campfire (type /sit) and wait for the buff, then Gremlock Pilsnor in the distillery teaches you cooking.
+  tip Sit by Eric's campfire (type /sit) and wait for the buff, then Gremlock Pilsnor in the distillery teaches you cooking. Ragnar Thunderbrew, inside too, offers Beer Basted Boar Ribs only to cooks.
   turnin 96628                                -- Eric Brighthammer: The Adventurer
   accept 96608                                -- Eric Brighthammer
   complete 96608
   turnin 96608
   accept 96629
   turnin 96629                                -- Gremlock Pilsnor
+  train Cooking
+  accept 384                                  -- Ragnar Thunderbrew
 
 step Steelgrill's Depot
   tip Follow the road north-east from Kharanos to the depot below the Ironforge road.
