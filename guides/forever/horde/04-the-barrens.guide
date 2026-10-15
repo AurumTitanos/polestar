@@ -44,6 +44,10 @@ next forever/horde/05-stonetalon-mountains
 #   east of Gann Stonespire: its lizards and stalkers live on the walk to
 #   Blackthorn Ridge.
 # - A level-20 stop before the Orgrimmar trip: the class quests there need 20.
+# - Walton and Vrang in the order the game offers their quests: Vrang's two
+#   first, The Hermit Tanner up to Walton, then Trouble in the Valley and
+#   Unwelcome Guests. The export took Walton's two first, which he does not
+#   offer yet (a player's report).
 #
 # Optional: WANTED: Bruuz (92706): Bruuz is elite, grouping up is advised.
 # Owatanka (884), Lakota'mani (883), The Harvester (897) and Washte Pawne
@@ -241,28 +245,36 @@ step Ken'zigla
   turnin 1510
   accept 1511
 
-step Walton and Vrang
+step Vrang Wildgore
   zone The Barrens
-  tip North to the Dry Hills. Walton's camp and Vrang Wildgore are a few steps apart below the hills.
-  accept 95508                        -- Walton
-  turnin 95508                        -- Assist Walton: stay by him when Terry Longdrink and the Kul Tiras marines come up the ridge
-  accept 95621
+  tip North to the Dry Hills. Vrang Wildgore camps below the hills; Walton, the hermit on the ridge behind him, has work for you only once Vrang sends you up.
   accept 95494                        -- Vrang Wildgore
-  accept 95495
   accept 95507
 
 step The Dry Hills
-  tip Corporal Adamore and his marines hold the wrecked caravan south of Walton. Savannah Patriarchs roam the plains east of the hills, and the Sprung Traps lie among them. Serena Bloodfeather leads the Witchwing harpies in the hills to the west.
-  collect 270151 quest 95621.1 @41.8,15.6
+  tip Savannah Patriarchs roam the plains east of the hills, and the Sprung Traps lie among them. Serena Bloodfeather leads the Witchwing harpies in the hills to the west.
   collect 269715 quest 95494.1
   collect 269719 quest 95507.1
   collect 5067 quest 876.1
 
-step Walton and Vrang
+step Vrang Wildgore
   turnin 95494                        -- Vrang Wildgore
   turnin 95507
+  accept 95495
+
+step Walton
   turnin 95495                        -- Walton
-  turnin 95621
+  accept 95621
+
+step Trouble in the Valley
+  tip Corporal Adamore and his marines hold the wrecked caravan south of Walton.
+  collect 270151 quest 95621.1 @41.8,15.6
+
+step Walton
+  turnin 95621                        -- Walton
+  accept 95508
+  complete 95508                      -- Assist Walton: stay by him when Terry Longdrink and the Kul Tiras marines come up the ridge
+  turnin 95508
 
 # ---------------------------------------------------------------- The Sludge Fen
 
