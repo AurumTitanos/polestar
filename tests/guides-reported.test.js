@@ -17,6 +17,8 @@ const { needs } = require('./helpers/data');
 const { compileSources, OFFICIAL_DIR } = require('../tools/lib/dsl/project');
 const { loadData } = require('../tools/lib/dsl/data');
 const { DATA } = require('../tools/lib/paths');
+const { runAddon } = require('./helpers/lua');
+const { writeTestPack } = require('./helpers/dsl');
 
 const skip = needs('quests.json', 'npcs.json', 'objects.json', 'map-frames.json');
 
@@ -192,4 +194,53 @@ test(`${DUN_MOROGH}: thmastin's report: The Adventurer is taken from Thalos at t
 	const give = at(list, 'turnin 96628 (The Adventurer)', is('turnin', 96628));
 	assert.equal(list[give].goal.npcName, 'Eric Brighthammer', 'turned in at Eric');
 	assert.ok(give < at(list, 'accept 96608 (The Great Outdoors)', is('accept', 96608)), 'before The Great Outdoors, which it leads to');
+});
+
+// --- Darkshore (Wogi): a Human at 20 was sent to grey quests.
+
+// Darkshore and the guides after it, played by the Engine for a level-`level`
+// Human with "Skip grey quests" on: the accepts it leaves out as grey.
+function greySkippedInDarkshore(level) {
+	data = data || loadData(DATA);
+	const files = ['03-darkshore', '04-redridge-mountains', '05-duskwood', '06-ashenvale', '07-thousand-needles']
+		.map((n) => path.join(OFFICIAL_DIR, 'forever/alliance', `${n}.guide`));
+	const { guides } = compileSources(files.map((file) => ({ file, text: fs.readFileSync(file, 'utf8') })), data);
+	const { dir, scripts } = writeTestPack(guides, data);
+	try {
+		const loads = scripts.map((f) => `assert(loadfile(${JSON.stringify(f)}))("Polestar_Guides", ns)`).join('\n');
+		const { emitted } = runAddon({
+			stubs: ['stub_world.lua'],
+			before: `local w = stub.world
+				w.race, w.raceName, w.faction, w.class, w.className = "Human", "Human", "Alliance", "WARRIOR", "Warrior"
+				w.level = ${level}`,
+			addons: [{ name: 'Polestar', files: ['Core/Core.xml'] }],
+			saved: { Polestar: 'PolestarDB = { schema = 1, settings = { behavior = { skipGrey = true, autoSelectGuide = false } } }' },
+			script: `do local ns = {}
+				${loads}
+				end
+				stub.login(); stub.advance(0.5)
+				local E = Polestar.Engine
+				E.SetGuide("forever/alliance/03-darkshore")
+				local out = {}
+				for i = 1, #E.GetGuide().steps do
+					for _, g in ipairs(E.GetStepView(i).goals) do
+						if g.skippedGrey then out[#out + 1] = g.quest end
+					end
+				end
+				emit(out)`,
+		});
+		return Object.values(emitted[0]); // an empty Lua table comes back as {}
+	} finally {
+		fs.rmSync(dir, { recursive: true, force: true });
+	}
+}
+
+test('forever/alliance/03-darkshore.guide: Wogi\'s report: with Skip grey quests on, a Human at 20 leaves out the grey quests, keeps the Buzzbox chain, and one on the route\'s level keeps them all', { skip }, () => {
+	// At 20, quests of level 13 and below are grey. Buzzbox 827 (983, level
+	// 10) and Buzzbox 411 (1001, 12) open Buzzbox 323 and 525, and the first
+	// Washed Ashore (3524, 13) the second: they stay.
+	assert.deepEqual(greySkippedInDarkshore(20).sort((a, b) => a - b), [953, 954, 955, 956, 957, 958, 4722, 4723, 98025]);
+	// The simulator's Human reaches Darkshore at 16 to 18: Buzzbox 827 is
+	// already grey then, and stays for its chain.
+	assert.deepEqual(greySkippedInDarkshore(17), []);
 });

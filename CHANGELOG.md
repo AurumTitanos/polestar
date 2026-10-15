@@ -4,6 +4,11 @@
 
 ### For players
 
+- "Skip grey quests" (Options, Guide, Automation) leaves out grey quests now:
+  it kept every quest the guide also turns in, which is nearly all of them,
+  so a character ahead of the route still saw them. A grey quest goes with
+  its turn-in; one that opens a quest still worth doing stays, as Buzzbox 827
+  does in Darkshore at 20 (thanks Wogi).
 - The Undead Tirisfal Glades guide sends only Paladins to Bandarion Keep for
   As Above, So Below and The One That Got Away: Hilda the Breaker and Ephram
   Barbaro offer them to Paladins only. Other classes still collect the

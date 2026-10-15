@@ -112,13 +112,25 @@ local function missingPre(goal)
 end
 
 -- Quests a guide or any guide after it (via `next` and every route choice)
--- still needs: targets of non-accept goals (turn-ins, objectives) and
--- prerequisites (`pre`) of its accepts. Cached per guide.
+-- still needs at a character level: the prerequisites (`pre`, `preAll`) of
+-- every accept that is not grey at that level, and of every accept a needed
+-- quest's own accept is, down the chain (a grey Buzzbox 827 opens the Buzzbox
+-- quests that still give full experience). A quest's own turn-in and
+-- objectives are not a need: they go with its accept. Cached per guide and
+-- level.
 local chainNeedsCache = setmetatable({}, { __mode = "k" })
-local function chainNeeds(g)
-	local set = chainNeedsCache[g]
+local function chainNeeds(g, level)
+	local byLevel = chainNeedsCache[g]
+	if not byLevel then
+		byLevel = {}
+		chainNeedsCache[g] = byLevel
+	end
+	local set = byLevel[level]
 	if set then return set end
-	set = {}
+	local C = Compat()
+	-- Every accept down the chain: quest -> its prerequisite lists; open: the
+	-- quests whose accepts are not grey, needed as they are.
+	local pres, open = {}, {}
 	local seenIds, queue, head = {}, { g }, 1
 	while queue[head] and head <= 200 do
 		local cur = queue[head]
@@ -127,13 +139,16 @@ local function chainNeeds(g)
 			seenIds[cur.id] = true
 			for _, step in ipairs(cur.steps) do
 				for _, goal in ipairs(step.goals) do
-					if goal.quest and goal.t ~= "accept" then set[goal.quest] = true end
-					if goal.t == "accept" then
-						for _, key in ipairs({ "pre", "preAll" }) do
-							if type(goal[key]) == "table" then
-								for _, q in ipairs(goal[key]) do set[q] = true end
-							end
+					if goal.t == "accept" and goal.quest then
+						local list = pres[goal.quest]
+						if not list then
+							list = {}
+							pres[goal.quest] = list
 						end
+						for _, key in ipairs({ "pre", "preAll" }) do
+							if type(goal[key]) == "table" then list[#list + 1] = goal[key] end
+						end
+						if not (goal.qlvl and C.IsQuestTrivial(tonumber(goal.qlvl), level)) then open[#open + 1] = goal.quest end
 					end
 				end
 			end
@@ -143,20 +158,36 @@ local function chainNeeds(g)
 			end
 		end
 	end
-	chainNeedsCache[g] = set
+	set = {}
+	local walked = {}
+	while #open > 0 do
+		local q = table.remove(open)
+		if not walked[q] then
+			walked[q] = true
+			for _, list in ipairs(pres[q] or {}) do
+				for _, p in ipairs(list) do
+					set[p] = true
+					open[#open + 1] = p
+				end
+			end
+		end
+	end
+	byLevel[level] = set
 	return set
 end
 
 -- behavior.skipGrey: an accept for a quest already grey for the character,
--- not taken yet and not needed later in the guide or its chain, no longer
--- applies (status "na", never blocks, never auto-accepted).
+-- not taken yet and not a prerequisite of a quest later in the guide or its
+-- chain, no longer applies (status "na", never blocks, never auto-accepted);
+-- its turn-in and objectives go with it (orphaned).
 local function greySkipped(goal)
 	if goal.t ~= "accept" or not goal.qlvl or not ns.Get("behavior.skipGrey") then return false end
 	local C = Compat()
-	if not C.IsQuestTrivial(tonumber(goal.qlvl), player.level or 1) then return false end
+	local level = player.level or 1
+	if not C.IsQuestTrivial(tonumber(goal.qlvl), level) then return false end
 	local q = goal.quest
 	if C.IsOnQuest(q) or questDone(q) then return false end
-	return not chainNeeds(guide)[q]
+	return not chainNeeds(guide, level)[q]
 end
 
 -- Per guide: each goal's step index, and each quest's accept goals.
@@ -185,9 +216,9 @@ end
 
 -- A turn-in, complete or objective goal for a quest the character neither
 -- has nor has done, and that this guide does not (for this character) accept
--- at or before that step, in a step the player has not skipped: it was picked
--- up on another route, or skipped, so it cannot be done here and no longer
--- applies.
+-- at or before that step, in a step the player has not skipped, with an
+-- accept that is not left out as grey: it was picked up on another route, or
+-- skipped, so it cannot be done here and no longer applies.
 local function orphaned(goal)
 	local q = goal.quest
 	if not q or goal.t == "accept" or not guide then return false end
@@ -198,7 +229,7 @@ local function orphaned(goal)
 	if not s then return false end
 	local skipped = ns.CharState().skipped[guide.id]
 	for _, a in ipairs(l.accepts[q] or NONE) do
-		if a.s <= s and not (skipped and skipped[a.s]) and Guides.Matches(a.step.only, player) and Guides.Matches(a.goal.only, player) then
+		if a.s <= s and not (skipped and skipped[a.s]) and Guides.Matches(a.step.only, player) and Guides.Matches(a.goal.only, player) and not greySkipped(a.goal) then
 			return false
 		end
 	end
