@@ -1601,15 +1601,16 @@ local ATT_GLYPH = {
 }
 -- An open step that is no quest wears its own verb's glyph.
 local ITEM_GLYPH = { drop = "icon-kill", object = "icon-interact", rep = "icon-rep", gift = "icon-talk" }
-local ATT_KIND = { attunement = "Attunement", key = "Key", item = "Item" }
+local ATT_KIND = { attunement = L["Attunement"], key = L["Key"], item = L["Item"] }
 
 local function colored(token, text)
 	return "|c" .. Theme.Hex(token) .. (text or L["Not known"]) .. "|r"
 end
 
+-- Lookup.STANDINGS holds the standings already translated.
 local function standingName(n)
 	local S = ns.Lookup and ns.Lookup.STANDINGS
-	return L[(S and S[n]) or "Neutral"]
+	return (S and S[n]) or L["Neutral"]
 end
 
 -- A step -> its line and the point its click sets the arrow to.
@@ -1698,7 +1699,7 @@ local function renderAttune(key, f, plevel)
 		end
 		h.Glyph:SetTexture(Theme.Media(glyph[1]))
 		W.Color(h.Glyph, glyph[2])
-		local facts = { L[ATT_KIND[a.kind] or "Attunement"] }
+		local facts = { ATT_KIND[a.kind] or ATT_KIND.attunement }
 		facts[#facts + 1] = a.need == "one" and L["One in the group is enough"] or L["Everyone entering needs it"]
 		if a.level then facts[#facts + 1] = format(L["From level %d"], a.level) end
 		if a.faction == "A" then facts[#facts + 1] = L["Alliance only"] elseif a.faction == "H" then facts[#facts + 1] = L["Horde only"] end
