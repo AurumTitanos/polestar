@@ -55,11 +55,14 @@ local function keyOf(name) return (name:lower():gsub("[^%w]+", "")) end
 -- Recorder, then About.
 local TAIL = { [L["Recorder"]] = 1, [L["About"]] = 2 }
 
-local function pageOf(name, icon, order, builtin)
+-- key: the page's stable key (`/polestar options <key>`, O.Select), the
+-- spec's own or else made from the name. Built-in pages give theirs, so a
+-- translated title does not move them.
+local function pageOf(name, icon, order, builtin, key)
 	local p = pages[name]
 	if not p then
 		seq = seq + 1
-		p = { name = name, key = keyOf(name), icon = icon or "gear", order = order or 100, builtin = builtin, seq = seq, tabs = {} }
+		p = { name = name, key = keyOf(key or name), icon = icon or "gear", order = order or 100, builtin = builtin, seq = seq, tabs = {} }
 		pages[name] = p
 		pageList[#pageList + 1] = p
 		-- By order (built-in pages first on a tie), Recorder and About last.
@@ -93,7 +96,7 @@ local function sectionOf(t, name)
 end
 
 local function add(spec, builtin)
-	local p = pageOf(spec.page, spec.icon, spec.order, builtin)
+	local p = pageOf(spec.page, spec.icon, spec.order, builtin, spec.key)
 	if spec.subtitle then p.subtitle = spec.subtitle end
 	if spec.custom then p.custom = spec.custom end
 	if spec.dot then p.dot = spec.dot end
@@ -148,11 +151,11 @@ local function borderOff() return not ns.Get("ui.border") end
 local function px(v) return string.format(L["%d px"], floor(v + 0.5)) end
 
 -- A page's tabs and sections in their order, for modules to fill.
-local function declare(page, icon, order, subtitle, tabs)
+local function declare(page, key, icon, order, subtitle, tabs)
 	local out = {}
 	for _, t in ipairs(tabs) do
 		for _, section in ipairs(t[2]) do
-			out[#out + 1] = { page = page, icon = icon, order = order, subtitle = subtitle, tab = t[1], section = section, controls = {} }
+			out[#out + 1] = { page = page, key = key, icon = icon, order = order, subtitle = subtitle, tab = t[1], section = section, controls = {} }
 		end
 	end
 	return out
@@ -160,7 +163,7 @@ end
 
 local BUILTIN = {
 	-- Following the guide: the window, the arrow and routes, automation.
-	{ page = GUIDE, icon = "window", order = 10, tab = L["Window"], section = L["What it shows"],
+	{ page = GUIDE, key = "guide", icon = "window", order = 10, tab = L["Window"], section = L["What it shows"],
 		subtitle = L["The guide window, the arrow and its routes, and what Polestar does for you."], controls = {
 		{ kind = "toggle", key = "ui.shown", label = L["Show the window"], help = L["Also /polestar, or the key binding."] },
 		{ kind = "toggle", key = "ui.compact", label = L["Compact mode"], help = L["Only the header and the current step's goals."] },
@@ -216,7 +219,7 @@ local BUILTIN = {
 	-- guide window's own look, the arrow. Every change repaints live. The
 	-- accent's sources sit together in their own section, so "Class colour"
 	-- shares a row with the accent swatch it drives.
-	{ page = LOOK, icon = "palette", order = 20, tab = L["Colour & type"], section = L["Accent"],
+	{ page = LOOK, key = "appearance", icon = "palette", order = 20, tab = L["Colour & type"], section = L["Accent"],
 		subtitle = L["Colours, type, window frames and the arrow. Everything repaints as you change it; right-click a setting to reset it."], controls = {
 		{ kind = "color", key = "ui.accent", label = L["Accent colour"], linked = { "ui.matchAccent", "ui.classAccent" },
 			help = L["Click to pick your own, right-click to go back to the scheme's."],
@@ -309,7 +312,7 @@ local BUILTIN = {
 	-- Everything Polestar draws on the world map and the minimap, in one
 	-- place. The sections are declared here, in this order; the Quests,
 	-- Rares and Maps modules register their controls into them by name.
-	{ page = MAP, icon = "icon-explore", order = 30, tab = L["Guide & quests"], section = L["Guide"],
+	{ page = MAP, key = "map", icon = "icon-explore", order = 30, tab = L["Guide & quests"], section = L["Guide"],
 		subtitle = L["What Polestar draws on the world map and the minimap. Quest, rare and travel icons start off."], controls = {
 		{ kind = "toggle", key = "nav.worldPins", label = L["Guide pins on the world map"],
 			help = L["The arrow's target, the stops of its travel route and the step's other goals."] },
@@ -327,17 +330,17 @@ local BUILTIN = {
 -- Pages filled by modules alone: Quests, QoL and Gear on Questing; Lookup,
 -- Dungeons and Rares on Discovery; QoL and Maps on Quality of Life.
 for _, list in ipairs({
-	declare(QUESTING, "icon-accept", 40, L["Quest information, rewards and gear advice, and the quest buttons."], {
+	declare(QUESTING, "questing", "icon-accept", 40, L["Quest information, rewards and gear advice, and the quest buttons."], {
 		{ L["Quests"], { L["Quest database"], L["Tooltips and quest log"], L["Faster questing"] } },
 		{ L["Rewards & gear"], { L["Quest rewards"], L["Gear advice"], L["Comparison"] } },
 		{ L["Buttons"], { L["Action buttons"] } },
 	}),
-	declare(DISCOVERY, "search", 50, L["Lookup, the dungeon journal and rares: finding things in the world."], {
+	declare(DISCOVERY, "discovery", "search", 50, L["Lookup, the dungeon journal and rares: finding things in the world."], {
 		{ L["Lookup"], { L["How to get anything"] } },
 		{ L["Dungeons"], { L["Dungeon journal"] } },
 		{ L["Rares"], { L["When a rare shows up"], L["How rares are noticed"], L["History"] } },
 	}),
-	declare(QOL, "qol-toggles", 60, L["Small conveniences: travel, invitations, merchants and trackers."], {
+	declare(QOL, "qualityoflife", "qol-toggles", 60, L["Small conveniences: travel, invitations, merchants and trackers."], {
 		{ L["Travel"], { L["Flight masters"], L["Flight timer"], L["Death"] } },
 		{ L["Social"], { L["Requests"], L["Blocking"] } },
 		{ L["Vendors"], { L["Merchants"] } },
@@ -588,10 +591,10 @@ local function buildAbout(view)
 	end
 end
 
-add({ page = L["Guide packs"], icon = "layers", order = 70, subtitle = L["Guides made by other players: switch them on or off, and choose where suggestions come from."],
+add({ page = L["Guide packs"], key = "guidepacks", icon = "layers", order = 70, subtitle = L["Guides made by other players: switch them on or off, and choose where suggestions come from."],
 	custom = UI.Packs.Build, dot = UI.Packs.HasProblems }, true)
-add({ page = REC, icon = "record", order = 90, subtitle = L["The data recorder for guide authors."], custom = buildRecorder }, true)
-add({ page = ABOUT, icon = "info", order = 100, subtitle = L["Why Polestar exists, its commands and its credits."], custom = buildAbout }, true)
+add({ page = REC, key = "recorder", icon = "record", order = 90, subtitle = L["The data recorder for guide authors."], custom = buildRecorder }, true)
+add({ page = ABOUT, key = "about", icon = "info", order = 100, subtitle = L["Why Polestar exists, its commands and its credits."], custom = buildAbout }, true)
 
 -- Page keys from before the pages were regrouped (and older section names)
 -- reach the page, and the tab, that holds those settings now.

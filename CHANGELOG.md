@@ -191,6 +191,11 @@
   `"slot: Chest"` and so on, and a dungeon boss that is a chest is
   `"boss: Chest"`, so they no longer share "Back" with the welcome's button
   or "Chest" with each other.
+- Translations: the options pages keep English keys whatever their titles
+  read, so `/polestar options quests`, `gear`, `lookup` and the others and
+  `/polestar packs` open the right page on a translated client instead of
+  the first one. `Polestar.RegisterOptions` takes an optional `key` for a
+  page's stable key.
 
 ## 0.2.3 (2026-10-14)
 

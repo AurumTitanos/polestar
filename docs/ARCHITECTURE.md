@@ -1446,7 +1446,8 @@ Any module adds settings to the options window without touching UI files:
 
 ```lua
 Polestar.RegisterOptions({
-  page = "Quests", icon = "icon-accept", order = 30,      -- sidebar page (created on first use)
+  page = "Quests", icon = "icon-accept", order = 30,      -- sidebar page (created on first use), its title as shown
+  key = "quests",                                           -- optional: the page's stable key (default: made from page)
   tab = "Map", section = "Markers",                         -- tab row entry and section header
   controls = {
     { kind = "toggle",   key = "qol.mapObjectives", label = "Objective markers", help = "One line." },
@@ -1481,10 +1482,16 @@ Gear fill Questing; Lookup, Dungeons and Rares fill Discovery; QoL and Maps
 (flight timer, instances) fill Quality of Life. On the **Map** page (Guide &
 quests: Guide, Quest markers; Rares & travel: Rares and treasures, Dungeons and
 travel; Zones: Zones, Coordinates) Nav, Quests, Rares and Maps place every map
-and minimap setting. Old page keys (`guidewindow`, `navigation`, `automation`,
-`quests`, `gear`, `lookup`, `dungeons`, `rares`, …) reach the page and tab that
-now hold their settings (`ALIASES` in UI/Options.lua); a page's own key wins
-over an alias.
+and minimap setting.
+
+A page is opened by its key (`/polestar options <key>`, `UI.ShowOptions(key)`,
+`Options.Select`), not its title: the built-in pages give English keys
+(`guide`, `appearance`, `map`, `questing`, `discovery`, `qualityoflife`,
+`guidepacks`, `recorder`, `about`) so a translated title does not move them;
+a registered page without `key` takes one made from its title. Old page keys
+(`guidewindow`, `navigation`, `automation`, `quests`, `gear`, `lookup`,
+`dungeons`, `rares`, …) reach the page and tab that now hold their settings
+(`ALIASES` in UI/Options.lua); a page's own key wins over an alias.
 
 The sidebar's page list is its own scroll area (`f.NavScroll`, `W.ShellNav`)
 from 12px under the search to the footer bar's line, so the version and stage

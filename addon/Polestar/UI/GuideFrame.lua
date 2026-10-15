@@ -1119,7 +1119,7 @@ local function setEmpty(kind)
 		empty.Title:SetText(L["No guides shown"])
 		empty.Text:SetText(L["The guide packs are switched off. Turn one on under Options, Guide packs (/polestar packs)."])
 		W.SetButtonText(empty.Primary, L["Guide packs"])
-		empty.Primary.psAction = function() UI.ShowOptions(L["Guide packs"]) end
+		empty.Primary.psAction = function() UI.ShowOptions("guidepacks") end
 		empty.Primary:Show()
 	elseif kind == "noguides" then
 		empty.Title:SetText(L["No guides installed"])
