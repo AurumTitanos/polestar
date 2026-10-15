@@ -202,6 +202,9 @@
 - Grow upward (Options, Guide, Window, Position): the guide window keeps its
   bottom edge in place, so a longer step extends it up instead of down.
   Turning it on or off leaves the window where it stands (thanks thmastin).
+- `/polestar way 40 60` where the game gives no map position (an instance,
+  another continent) says "No position here" instead of how to type the
+  command (thanks meellm).
 
 ### For guide authors
 
