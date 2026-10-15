@@ -196,6 +196,8 @@ function Methods.GetDrawLayer(self) return self.layer or "ARTWORK", self.sublaye
 
 -- Mouse / movement
 function Methods.EnableMouse(self, v) self.mouse = v and true or false end
+function Methods.SetHitRectInsets(self, l, r, t, b) self.hitInsets = { l, r, t, b } end
+function Methods.GetHitRectInsets(self) local h = self.hitInsets or { 0, 0, 0, 0 } return h[1], h[2], h[3], h[4] end
 function Methods.IsMouseEnabled(self) return self.mouse == true end
 function Methods.EnableMouseWheel(self, v) self.mouseWheel = v and true or false end
 function Methods.SetMovable(self, v) self.movable = v and true or false end

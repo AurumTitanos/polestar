@@ -279,6 +279,9 @@
   the step's other goals' regions are fainter, on the world map. If the first
   camp is crowded, the next one is in sight; the next-spot button, or a click
   on a camp's mark on the world map, moves the arrow there (thanks Pynte).
+- The arrow takes the mouse on the arrow itself, not on the distance and
+  label under it, so a large arrow no longer catches drags meant for the
+  world, and the hover wash sits behind the arrow only.
 
 ### For guide authors
 

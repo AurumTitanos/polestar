@@ -58,24 +58,29 @@ function Nav.ArrowFrameCoords(index)
 	return col * CELL / SHEET, (col + 1) * CELL / SHEET, row * CELL / SHEET, (row + 1) * CELL / SHEET
 end
 
+local WIDTH, TEXT_H = 200, 52 -- the frame: the dial, and the distance and label under it
+
 local frame = CreateFrame("Frame", "PolestarNavArrow", UIParent)
-frame:SetSize(200, DIAL + 52)
+frame:SetSize(WIDTH, DIAL + TEXT_H)
 frame:SetFrameStrata("MEDIUM")
 frame:SetClampedToScreen(true)
 frame:SetMovable(true)
-frame:EnableMouse(true) -- always movable: drag anywhere on it
+frame:EnableMouse(true) -- always movable: drag the arrow anywhere
+-- Only the dial takes the mouse: the text under it would otherwise catch
+-- drags meant for the world, more so at a large scale.
+frame:SetHitRectInsets((WIDTH - DIAL) / 2, (WIDTH - DIAL) / 2, 0, TEXT_H)
 frame:RegisterForDrag("LeftButton")
 frame:Hide()
-
--- Shown while hovering the arrow, so it reads as movable.
-local mover = frame:CreateTexture(nil, "BACKGROUND", nil, -8)
-mover:SetAllPoints()
-mover:SetColorTexture(Nav.Wash("mover"))
-mover:Hide()
 
 local dial = CreateFrame("Frame", nil, frame)
 dial:SetSize(DIAL, DIAL)
 dial:SetPoint("TOP", frame, "TOP", 0, 0)
+
+-- Shown behind the dial while hovering it, so it reads as movable.
+local mover = frame:CreateTexture(nil, "BACKGROUND", nil, -8)
+mover:SetAllPoints(dial)
+mover:SetColorTexture(Nav.Wash("mover"))
+mover:Hide()
 
 local glow = dial:CreateTexture(nil, "BACKGROUND")
 glow:SetTexture(MEDIA .. "arrow-glow")
@@ -138,7 +143,7 @@ etaText:SetPoint("TOP", labelText, "BOTTOM", 0, -2)
 etaText:SetJustifyH("CENTER")
 
 local Arrow = {
-	frame = frame, dial = dial, body = body, facet = facet, glow = glow, sheet = sheet, sheetSpec = sheetSpec,
+	frame = frame, dial = dial, mover = mover, body = body, facet = facet, glow = glow, sheet = sheet, sheetSpec = sheetSpec,
 	ring = ring, halo = halo, legIcon = legIcon, distText = distText, labelText = labelText, etaText = etaText,
 }
 Nav.arrow = Arrow

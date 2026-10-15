@@ -859,6 +859,19 @@ test('TomTom mirrors the target: one waypoint, replaced on change, removed when 
 	assert.equal(out.arrowAfter, true, 'ours returns when the bridge is off');
 });
 
+test('the arrow takes the mouse on its dial only, and the hover wash sits behind the dial', () => {
+	const [out] = run(`
+		local l, r, t, b = A.frame:GetHitRectInsets()
+		local _, rel = A.mover:GetPoint(1)
+		stub.RunScript(A.frame, "OnEnter")
+		emit({ insets = { l, r, t, b }, washOnDial = rel == A.dial, washShown = A.mover:IsShown(), mouse = A.frame:IsMouseEnabled() })`);
+	// The frame is 200 wide and 64 + 52 tall; the dial is the 64 x 64 at its top centre.
+	assert.deepEqual(out.insets, [68, 68, 0, 52], 'the text under the dial does not catch the mouse');
+	assert.equal(out.washOnDial, true, 'the wash covers the dial, not the whole frame');
+	assert.equal(out.washShown, true, 'hovering still shows it');
+	assert.equal(out.mouse, true, 'the arrow is still movable');
+});
+
 test('settings apply live: scale, alpha, visibility, pins, position and Blizzard waypoint; the arrow is always movable', () => {
 	const [out] = run(`
 		local r = {}
