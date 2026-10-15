@@ -20,7 +20,7 @@ local L = ns.L
 local QoL = ns.QoL
 local Client = QoL.Client
 
-local format, floor, tremove = string.format, math.floor, table.remove
+local format, tremove = string.format, table.remove
 
 local Equip = {}
 QoL.Equip = Equip
@@ -32,7 +32,7 @@ local HAND = { [13] = MAIN, [21] = MAIN, [14] = OFF, [22] = OFF, [23] = OFF } --
 
 local expected = {} -- { link, id, before, at }: given by a turn-in, not arrived yet
 local landed = {}   -- { link }: arrived, waiting to be worn
-local waiting       -- { id, slot }: the reward last put on, until it is on (or WAIT passes)
+local waiting       -- { id, slot, link, pct }: the reward last put on, until it is on (or WAIT passes)
 
 local function itemID(link) return link and tonumber(link:match("item:(%d+)")) end
 
@@ -82,18 +82,18 @@ end
 
 -- One reward at a time: the next is scored once the last is on
 -- (PLAYER_EQUIPMENT_CHANGED), so a second ring takes the other finger only
--- when it beats the ring there, and never replaces the first. One that never
--- goes on (its bind confirmation cancelled) holds up the rest for WAIT seconds.
+-- when it beats the ring there, which may be the first reward's finger if
+-- that is now the weaker. One that never goes on (its bind confirmation
+-- cancelled) holds up the rest for WAIT seconds and is never announced.
 local function wear()
 	local G = QoL.On("rewardEquip") and gear()
 	while G and C_Item and C_Item.EquipItemByName and #landed > 0 do
 		local link = tremove(landed, 1)
 		local slot, pct = placement(G, link)
 		if slot then
-			C_Item.EquipItemByName(link, slot)
-			ns.Print(pct and format(L["Wearing %s (%d%% better)."], link, floor(pct)) or format(L["Wearing %s."], link))
-			local this = { id = itemID(link), slot = slot }
+			local this = { id = itemID(link), slot = slot, link = link, pct = pct }
 			waiting = this
+			C_Item.EquipItemByName(link, slot)
 			C_Timer.After(WAIT, function()
 				if waiting == this then waiting = nil; QoL.Secure("rewardEquip", wear) end
 			end)
@@ -119,11 +119,15 @@ local function onBags()
 	if #landed > 0 and not waiting then QoL.Secure("rewardEquip", wear) end
 end
 
--- Only the pending reward reaching its slot moves on to the next one.
+-- Only the pending reward reaching its slot is announced and moves on to the
+-- next one.
 local function onEquipment()
 	local G = ns.Gear
 	if not (waiting and G and itemID(G.Client.InventoryLink(waiting.slot)) == waiting.id) then return end
+	local done = waiting
 	waiting = nil
+	local gain = done.pct and G.GainText and (G.GainText(done.pct))
+	ns.Print(gain and format(L["Wearing %s (%s)."], done.link, gain) or format(L["Wearing %s."], done.link))
 	if #landed > 0 then QoL.Secure("rewardEquip", wear) end
 end
 

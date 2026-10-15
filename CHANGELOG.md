@@ -131,7 +131,9 @@
   to Ruga at once. Teldrassil says Iverron's Antidote lasts five minutes.
 - Quest rewards that are upgrades can go on by themselves once they reach
   your bags, out of combat: Options, Questing, Rewards & gear, Wear reward
-  upgrades (off by default; Shift at the turn-in skips).
+  upgrades (off by default; Shift at the turn-in skips). Chat says
+  "Wearing [item] (+12%)" once it is on, and nothing when you cancel its
+  bind confirmation (thanks CDVolvik).
 
 ### For guide authors
 

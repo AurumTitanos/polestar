@@ -713,6 +713,7 @@ const WEAR = `
 		CompareToEquipped = function(link) return { slot = link:find("item:11|", 1, true) and 8 or 6 } end,
 		Client = { InventoryLink = function(slot) return q.worn[slot] and ("|Hitem:" .. q.worn[slot] .. "|h") end },
 		GetItemInfo = function() end,
+		GainText = function(pct) return "+" .. math.floor(pct + 0.5) .. "%" end,
 	}
 	local function worn()
 		local out = {}
@@ -730,7 +731,7 @@ test('rewards: what a turn-in gives is worn once it reaches the bags, when it is
 		GetQuestReward(1)                 -- the player's pick; the belt comes with every turn-in
 		local early = #worn()
 		stub.advance(1)
-		emit({ early = early, worn = worn(), boots = printed("Wearing |Hitem:11|h%[Sturdy Boots%]|h %(12%% better%)"), belt = printed("Wearing |Hitem:13|h%[Old Belt%]|h%.") })
+		emit({ early = early, worn = worn(), boots = printed("Wearing |Hitem:11|h%[Sturdy Boots%]|h %(%+13%%%)"), belt = printed("Wearing |Hitem:13|h%[Old Belt%]|h%.") })
 	`);
 	assert.deepEqual(out, { early: 0, worn: ['11@8', '13@6'], boots: true, belt: true });
 });
@@ -816,6 +817,7 @@ const GEAR = `
 		IsEnabled = function() return true end,
 		Client = { InventoryLink = function(slot) return linkOf(q.worn[slot]) end },
 		GetItemInfo = function(link) local id = idOf(link); return inv[id] and { id = id, inv = inv[id] } end,
+		GainText = function(pct) return "+" .. math.floor(pct + 0.5) .. "%" end,
 		CompareToEquipped = function(link)
 			local id = idOf(link)
 			local s, t, r = score[id], inv[id]
@@ -853,7 +855,7 @@ test('rewards: with a two-hander worn, a one-hand or off-hand reward is worn onl
 
 		score[31] = 11                      -- beats the two-hander by itself
 		turnIn(1, { { id = 31 } }, {})
-		emit({ worn = worn(), main = q.worn[16], said = printed("Wearing |Hitem:31|h%[Short Sword%]|h %(10%% better%)") })
+		emit({ worn = worn(), main = q.worn[16], said = printed("Wearing |Hitem:31|h%[Short Sword%]|h %(%+10%%%)") })
 	`);
 	assert.deepEqual(out[0], { worn: {}, main: 30 }, 'the two-hander stays on');
 	assert.deepEqual(out[1], { worn: ['31@16'], main: 31, said: true });
@@ -906,9 +908,73 @@ test('rewards: a reward that never goes on (its bind confirmation cancelled) hol
 		q.refuse[21] = true
 		turnIn(1, { { id = 21 } }, { { id = 22 } })
 		stub.advance(12)
-		emit({ worn = worn(), fingers = { q.worn[11], q.worn[12] } })
+		emit({ worn = worn(), fingers = { q.worn[11], q.worn[12] },
+			refused = printed("Wearing |Hitem:21|"), second = printed("Wearing |Hitem:22|") })
 	`);
-	assert.deepEqual(out, { worn: ['21@12', '22@12'], fingers: [20, 22] });
+	assert.deepEqual(out, { worn: ['21@12', '22@12'], fingers: [20, 22], refused: false, second: true }, 'only what goes on is announced');
+});
+
+// The real Gear module (Arms Warrior, level 30, no Dual Wield) scoring
+// ItemDB entries in the generated format, reading what q.worn and q.bags hold.
+test('rewards: with the real Gear module, a two-hander stays on against a one-hander that wins only with a bag shield, rings end as the best two', () => {
+	const out = runAddon({
+		stubs: ['stub_qol.lua'],
+		addons: [{ name: 'Polestar', files: ['Core/Init.lua', 'Core/Compat.lua', 'Theme/Theme.xml', 'Gear/ItemDB.lua', 'Gear/Weights.lua', 'Gear/SpecData.lua', 'Gear/Gear.lua', 'QoL/QoL.xml'] }],
+		before: `
+			local q = stub.qol
+			q.level = 30
+			function UnitClass(unit) return "Warrior", "WARRIOR", 1 end
+			function UnitRace(unit) return "Troll", "Troll", 8 end
+			function UnitFactionGroup(unit) return "Horde" end
+			local function linkOf(id) return id and ("|Hitem:" .. id .. "|h[" .. ((q.items[id] or {}).name or "?") .. "]|h") end
+			function GetInventoryItemLink(unit, slot) if unit == "player" then return linkOf(q.worn[slot]) end end
+			function C_Container.GetContainerItemLink(bag, slot) local s = q.bags[bag].slots[slot]; return s and linkOf(s.itemID) end
+		`,
+		login: true,
+		script: PRELUDE + `
+			Polestar.ItemDB.Register({ schema = 1, build = "test" }, {
+				[9032] = "17 22 17 2 2 8 str10 dmin40 dmax60 speed3000",          -- two-hander: 126.9
+				[9033] = "13 22 17 2 2 7 agi3 dmin12 dmax22 speed1800",           -- weak one-hander: 67.6
+				[9034] = "14 30 25 3 4 6 sta20 armor3000",                        -- strong shield: 70
+				[9035] = "13 30 25 3 2 7 str20 dmin30 dmax50 speed2000",          -- strong one-hander: 160
+				[9010] = "11 20 15 2 4 0 sta5", [9011] = "11 20 15 2 4 0 sta2",
+				[9012] = "11 20 15 2 4 0 sta4", [9013] = "11 25 20 3 4 0 sta6",
+			})
+			for _, id in ipairs({ 9032, 9033, 9034, 9035, 9010, 9011, 9012, 9013 }) do q.items[id] = { name = "Item " .. id } end
+			q.landRewards = true
+			set("rewardEquip", true)
+			local function turnIn(choices, rewards)
+				q.choices, q.rewards = choices, rewards
+				q.questComplete(); stub.runTimers()
+				GetQuestReward(1)
+				stub.advance(1)
+			end
+			local function worn()
+				local out = {}
+				for _, c in ipairs(q.calls) do
+					if c[1] == "EquipItemByName" then out[#out + 1] = c[2]:match("item:(%d+)") .. "@" .. tostring(c[3]) end
+				end
+				return out
+			end
+
+			q.worn[16] = 9032
+			q.addItem(0, 16, 9034, 1)             -- the shield waits in the bags
+			turnIn({ { id = 9033 } }, {})
+			emit({ worn = worn(), main = q.worn[16], off = q.worn[17] or false })
+
+			q.calls = {}
+			turnIn({ { id = 9035 } }, {})
+			emit({ worn = worn(), main = q.worn[16], said = printed("Wearing |Hitem:9035|h%[Item 9035%]|h %(%+26%%%)") })
+
+			q.calls = {}
+			q.worn[11], q.worn[12] = 9013, 9011   -- 3 and 1
+			turnIn({ { id = 9012 } }, { { id = 9010 } })   -- 2 takes the 1's finger, then 2.5 takes the 2's
+			emit({ worn = worn(), fingers = { q.worn[11], q.worn[12] } })
+		`,
+	}).emitted;
+	assert.deepEqual(out[0], { worn: {}, main: 9032, off: false }, 'the one-hander beats the two-hander only with the bag shield: nothing goes on');
+	assert.deepEqual(out[1], { worn: ['9035@16'], main: 9035, said: true }, 'a one-hander that beats the two-hander by itself goes on');
+	assert.deepEqual(out[2], { worn: ['9012@12', '9010@12'], fingers: [9013, 9010] }, 'the rings end as the best two');
 });
 
 test('rewards: turning wearing off while a reward waits for combat to end wears nothing', () => {
