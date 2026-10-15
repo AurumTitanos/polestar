@@ -32,6 +32,8 @@ Before the first `step`. `guide`, `title`, `levels` and `zone` are required.
 | `folder <text>` | The guide menu folder to list it under |
 | `keywords <word>, ...` | Extra words the guide menu search matches |
 | `collects <item>, ...` | Item ids the guide obtains |
+| `reward item <item> ...` / `reward spell <id> "Name"` / `reward text <words>` | Repeatable: what the guide's goal gives, first in the guide menu's details (several items on one line: a choice of one). Lint warns on a `Class` guide without it |
+| `why <text>` | One short line in the guide menu's details: why the goal is worth doing (lint warns on a `Class` guide without it) |
 | `author <name>` | Default: `pack.json`'s author |
 | `version <N>` | A whole number, raised when the guide changes (default 1) |
 | `coords era` / `coords live` | The map frame of typed coordinates (default `era`) |

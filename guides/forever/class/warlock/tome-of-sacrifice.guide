@@ -1,11 +1,13 @@
-guide forever/class/warlock/daio-the-decrepit
-title Daio the Decrepit
+guide forever/class/warlock/tome-of-sacrifice
+title Tome of Sacrifice
 category Class
 class Warlock
 folder Warlock
 levels 60-60
 zone Blasted Lands
 keywords The Prison's Bindings, The Prison's Casing, Suppression, Daio the Decrepit, Tainted Scar, Satyr Blood, Tears of the Hederine, Glowing Crystal Prison, Doomguard Commander, Tome of Sacrifice, Dire Maul, Warpwood Quarter, Darkwhisper Gorge, Warlock, class quest
+reward item 18602
+why A rare off-hand at 60, Daio's payment for capturing a Doomguard Commander in the Blasted Lands.
 
 # Daio the Decrepit's chain in the Tainted Scar: The Prison's Bindings (7581,
 # Satyr Blood from the Warpwood Quarter of Dire Maul), The Prison's Casing

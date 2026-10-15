@@ -1,5 +1,5 @@
 guide forever/class/hunter/rhokdelar
-title Stave of the Ancients (Rhok'delar)
+title Rhok'delar and Lok'delar
 category Class
 class Hunter
 folder Hunter
@@ -7,6 +7,10 @@ levels 60-60
 zone Felwood
 keywords Rhok'delar, Lok'delar, Ancient Sinew Wrapped Lamina, Stave of the Ancients, A Proper String, Vartrus the Ancient, Ancient Petrified Leaf, Molten Core, Onyxia, Azuregos, epic bow, class quest
 collects 18707, 18724, 18714
+reward item 18707
+reward item 18724
+reward item 18714
+why The hunter's epic bow chain: in Classic the stave and sinew became Rhok'delar and Lok'delar (unconfirmed in Forever).
 
 # The level 60 Hunter weapon chain: The Ancient Leaf (7632) from Molten Core
 # to Vartrus the Ancient in Felwood, An Introduction (7633), then Stave of

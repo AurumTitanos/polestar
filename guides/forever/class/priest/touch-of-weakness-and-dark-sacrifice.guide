@@ -8,6 +8,9 @@ race Undead
 levels 10-20
 zone Undercity
 keywords Touch of Weakness, Dark Sacrifice, Devouring Plague, Aelthalyste, War Quarter, Undead, Forsaken, racial, Priest
+reward text Touch of Weakness
+reward text Dark Sacrifice
+why The Undead priest spells: Touch of Weakness at 10, Dark Sacrifice at 20.
 
 # The Undead Priest spell quests: Touch of Weakness at 10 (5658) and Dark
 # Sacrifice at 20 (5679), both from Aelthalyste in the Undercity.

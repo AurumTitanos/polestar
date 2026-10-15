@@ -6,6 +6,8 @@ folder Mage
 levels 50-54
 zone Azshara
 keywords Magecraft, Archmage Xylem, Sanath Lim-yo, Magic Dust, Glittering Dust, Blood Elf, The Siren's Coral, Enchanted Coral, Spitelash Siren, Destroy Morphaz, Arcane Shard, Sunken Temple, Temple of Atal'Hakkar, Mage
+reward text Experience
+why Experience at 50 through Azshara and the Sunken Temple; Forever removed the Classic item choice.
 
 # Archmage Xylem's chain, both factions: Magecraft (8250), Magic Dust (8251),
 # The Siren's Coral (8252) and Destroy Morphaz (8253).

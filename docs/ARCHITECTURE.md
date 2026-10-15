@@ -258,7 +258,8 @@ layers and exploration (`UI/ZoneArt.lua`), the class name in the options
 (`UnitClass`, `UI/Options.lua`), quest level colours
 (`GetQuestDifficultyColor`, `UI/Dungeons.lua`) and item names, icons,
 quality colours and links (`C_Item`; `UI/Dungeons.lua`, `UI/GearPick.lua`,
-`UI/Lookup.lua`). Frame and system calls (`GetTime`, `C_Timer`,
+`UI/Lookup.lua`), and the item and spell tooltips of the guide menu's
+rewards (`GameTooltip:SetHyperlink`, `SetSpellByID`; `UI/Picker.lua`). Frame and system calls (`GetTime`, `C_Timer`,
 `InCombatLockdown`, the cursor, CVars, addon loading, the build and locale)
 are not routed either. Routing the rest keeps Forever specifics in few
 places and lets other modules' tests replace Compat with a fake.
@@ -293,6 +294,8 @@ Compat.IsQuestTrivial(qlvl, level)     -> bool   (grey for that level)
 Compat.GetItemCount(itemID, includeBank) -> number   (includeBank: the bank's too)
 Compat.GetItemQuality(itemID)          -> 0..7 | nil (nil while not cached)
 Compat.ItemQualityHex(quality)         -> "ffrrggbb" | nil
+Compat.ItemIcon(itemID)                -> icon | nil (C_Item.GetItemIconByID; no cache needed)
+Compat.SpellIcon(spellID)              -> icon | nil
 Compat.GetBindLocation()               -> string | nil
 Compat.IsOnTaxi()                      -> bool
 Compat.GetCurrentTaxiNode()            -> name of the open taxi map's node | nil
@@ -398,6 +401,8 @@ Polestar.RegisterGuide({
   next = "forever/alliance/02-westfall",   -- or nil
   author = "Polestar", version = 1,
   group = true,                    -- or nil: a goal of the route (not optional) needs a group
+  reward = { { spell = 23161, spellName = "Summon Dreadsteed" } },  -- or nil: what the goal gives (format 2)
+  why = "...",                     -- or nil: one line on why it is worth doing (format 2)
   steps = {
     {
       title = "Deputy Willem",     -- optional
@@ -434,6 +439,16 @@ the goal's field group) and the guide window says it under the goal
 (`UI.GroupLine`: "Elite: group advised", "Dungeon: Dire Maul", "Group of 3
 advised"), once per card. The guide's `group = true` (some non-optional goal
 has `group`) is the guide menu's "Group" chip.
+
+A guide's `reward` (format 2; GUIDE_FORMAT, `reward`) lists what its goal
+gives: `{ item, itemName, quality, choice }`, `{ spell, spellName }` or
+`{ text }`; its `why` is one line on why. Display only: the guide menu's
+details lead their facts with them (UI/Picker.lua): the entries given
+outright under "Reward", the `choice` ones under "Choose one", each a tile
+with the item's or spell's icon (`Compat.ItemIcon`, `Compat.SpellIcon`; a
+glyph for words and unknown ids), an item's name in its quality colour
+(the client's when cached, else the compiled `quality`) and the game's item
+or spell tooltip on hover; then "Why".
 
 | `t` | Required | Optional | Done when (Engine) |
 |---|---|---|---|
@@ -1689,7 +1704,8 @@ Reading flow: `docs/DESIGN.md` ("Intent" and "The Guide Window").
   character's) on the player's own faction lists only the guides this
   character can follow (`Guides.GuideMatches`: no other race's or class's
   guides); the other faction and All list every guide. Right: the
-  selected guide's zone art, facts, progress, pitch, pros and cons, a favourite
+  selected guide's zone art, facts (led by a guide's `reward` tiles and
+  `why`, "Guide data"), progress, pitch, pros and cons, a favourite
   star, "Load guide" and "Open in new tab". Selecting never loads; the buttons,
   a double-click or Enter do.
   Its search also lists Codex matches under the guides (`UI.LookupRows`,

@@ -1,5 +1,5 @@
-guide forever/class/paladin/forging-the-mightstone
-title Forging the Mightstone
+guide forever/class/paladin/holy-mightstone
+title Holy Mightstone
 category Class
 class Paladin
 folder Paladin
@@ -8,10 +8,15 @@ levels 50-56
 zone Stormwind City
 keywords Chillwind Point, Dispelling Evil, Inert Scourgestones, Forging the Mightstone, Holy Mightstone, Commander Ashlam Valorfist, High Priest Thel'danis, Lord Grayson Shadowbreaker, Brandur Ironhammer, Minion's Scourgestone, Voodoo Feather, Sunken Temple, Paladin, class quest
 collects 20620
+reward item 20620
+why A one-use stone that makes you much stronger against undead for 10 minutes; the old choice rewards are gone.
 
 # The level 52 Paladin chain: Chillwind Point (8415) from Lord Grayson
 # Shadowbreaker in Stormwind or Brandur Ironhammer in Ironforge, Dispelling
 # Evil (8414), Inert Scourgestones (8416) and Forging the Mightstone (8418).
+# Titled after its reward, the Holy Mightstone (one use, ten minutes against
+# the undead: Wowhead Classic's item tooltip, wowhead.com/classic/item=20620);
+# the quest name stays in keywords.
 # Sources: quests.json, npcs.json and items.json for givers, enders,
 # objectives and the droppers of the Minion's Scourgestones and the Voodoo
 # Feathers; Wowhead Forever's Paladin class page

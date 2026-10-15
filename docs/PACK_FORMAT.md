@@ -179,8 +179,8 @@ has nothing for the character.
 ## Format 2
 
 The format the compiler writes. Format 2 is format 1 with the two `group`
-keys (a guide's and a goal's, marked "format 2" below); Polestar 0.2.4 and
-later read it. A format 1 pack is the same without them and keeps loading.
+keys (a guide's and a goal's) and a guide's `reward` and `why`, marked
+"format 2" below; Polestar 0.2.4 and later read it. A format 1 pack is the same without them and keeps loading.
 
 ### `RegisterPack(meta)`
 
@@ -237,6 +237,8 @@ Guide keys (the compiler writes them in this order):
 | `folder` | no | the guide menu folder |
 | `keywords` | no | list of extra search words |
 | `collects` | no | list of item ids the guide obtains |
+| `reward` | no | format 2: what the guide's goal gives, shown first in the guide menu's details, in order: `{ item = 20536, itemName = "Soul Harvester", quality = 3, choice = true }` (an item; `choice` when one of several to choose from; the name shows in the client's quality colour when the item is cached, else the compiled `quality`'s), `{ spell = 23161, spellName = "Summon Dreadsteed" }` or `{ text = "Summon Incubus" }`; an entry with none of `item`, `spell` or `text` refuses the guide |
+| `why` | no | format 2: one line on why the goal is worth doing, shown under the reward |
 | `zone`, `zoneName` | no | the default zone's uiMapID and name |
 | `next` | no | the id of the guide that follows: one of the pack's or one of Polestar's |
 | `nextChoices` | no | list of guide ids offered as a route choice (the first is the default) |
@@ -343,7 +345,7 @@ frames of a pack that is not registered are dropped.
   keeps working when Polestar updates.
 - The compiler writes the first Polestar version that reads the pack's format
   into the TOC as `X-Polestar-Needs`. Format 1 is read by Polestar 0.1.0 and
-  later, format 2 (the `group` keys) by 0.2.4 and later.
+  later, format 2 (the `group`, `reward` and `why` keys) by 0.2.4 and later.
 - A pack in a format this Polestar does not read registers nothing; the
   Guide packs page shows it as `too-new` with "Needs Polestar <version> or
   newer." (rule 5).

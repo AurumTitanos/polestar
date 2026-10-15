@@ -1,0 +1,101 @@
+guide forever/class/warlock/incubus-horde
+title Incubus (Horde)
+category Class
+class Warlock
+folder Warlock
+faction Horde
+levels 20-28
+zone Orgrimmar
+keywords Summon Incubus, sayaad, Incubus (Orgrimmar), Incubus (Undercity), Love Hurts, Wish You Were Here, Withered Scarf, Magar, Krilge, Fallen Sky Lake, Hearts of the Lovers, Avelina Lilly, Isaac Pearson, Ambermill, Ratchet, Devourer of Souls, Gan'rul Bloodeye, Cazul, Carendin Halgar, Godrick Farsan, The Binding, Warlock, class pet
+reward text Summon Incubus
+reward item 22243
+why A second seducer demon, the male sayaad, and a soul shard bag to carry your shards.
+
+# The incubus for Horde warlocks, in two versions that exclude each other
+# (Devourer of Souls 1507 and 1472, quests.json `excl`): the guide follows
+# whichever one you take. Orgrimmar's comes first because the Horde leveling
+# guides take Gan'rul's Devourer of Souls (forever/horde/04-the-barrens, the
+# succubus); once you hold or finished one, the other's steps are skipped
+# ("No longer offered"). Accepts and turn-ins you already have tick off.
+# This guide merges the former incubus-orgrimmar and incubus-undercity guides.
+#
+# Orgrimmar: Devourer of Souls (1507) from Gan'rul Bloodeye to Cazul, Love
+# Hurts (65601) to Magar, Wish You Were Here (65610, the Withered Scarf at
+# Fallen Sky Lake in Ashenvale) and The Binding (65604) at the summoning
+# circle in Neeru Fireblade's tent.
+# Undercity: Devourer of Souls (1472) from Carendin Halgar to Godrick Farsan,
+# Hearts of the Lovers (65593: Avelina Lilly at Ambermill in Silverpine
+# Forest, Isaac Pearson in Ratchet) and The Binding (65597) at Carendin's
+# summoning circle.
+# Sources: quests.json, npcs.json and items.json (Questie 12.1.0 and
+# Questie-Forever) for the givers, the scarf's droppers, the two hearts and
+# their owners and the summoning circles; Wowhead Forever's Warlock class
+# page (data/local/quest-audit/wowhead-class-quests.json): Forever gives both
+# chains level 20 (Wish You Were Here level 27, 2200 experience) and lists a
+# Small Soul Pouch as each Binding's reward (codex quests.json: 22243 on
+# 65604 and 65597). Forever's data does not list the spell; in Classic it is
+# Summon Incubus (Wowpedia, "The Binding (Incubus, Orgrimmar)"), and
+# Wowpedia ("Incubus (warlock minion)") describes the incubus as the male
+# sayaad, the succubus's counterpart. Wowpedia is Classic-only: neither point
+# is confirmed in Forever, so the reward names the minion as text.
+# The Withered Scarf drops from the Shadethicket bog beasts (25-30) at about
+# one in twenty (Questie-Forever's rate): come at 27 or later.
+# Left out: Carendin's succubus, Hearts of the Pure (1476, 1474): Forever
+# replaced its second heart with Corma's Heart, which the data cannot place.
+# Lint warns that 1472, 65593 and 65597 are not offered once 1507 is taken:
+# that is the merge (the engine skips the version you did not take), kept
+# visible, not hidden. Avelina's Heart is not one of Hearts of the Lovers'
+# objectives in the data (only Isaac's Heart is), so lint warns on its
+# `quest 65593`; the tie is kept so the step is skipped with the Undercity
+# version when you took Gan'rul's.
+
+step Devourer of Souls (Orgrimmar)
+  tip At 20 Gan'rul Bloodeye, in the Cleft of Shadow under the Valley of Strength, sends you to Cazul a few steps away. Two trainers offer the incubus, Gan'rul here and Carendin Halgar in the Undercity, and you can take only one: this guide follows whichever Devourer of Souls you took.
+  level 20
+  accept 1507                         -- Gan'rul Bloodeye
+  turnin 1507                         -- Cazul
+  accept 65601
+
+step Magar
+  tip Magar keeps Magar's Cloth Goods, east of the Cleft of Shadow along the main street. He asks you to look for his mate, Krilge.
+  turnin 65601                        -- Magar
+  accept 65610
+
+step Fallen Sky Lake
+  zone Ashenvale
+  tip Fallen Sky Lake lies in southern Ashenvale, south of Splintertree Post. The Shadethicket bog beasts around the lake drop the Withered Scarf, about one in twenty.
+  collect 190232 quest 65610.1        -- Withered Scarf
+
+step The Binding (Orgrimmar)
+  zone Orgrimmar
+  tip Back to Gan'rul in the Cleft of Shadow. Take the scarf to the summoning circle in Neeru Fireblade's tent nearby and defeat the incubus it calls.
+  turnin 65610                        -- Gan'rul Bloodeye
+  accept 65604
+  kill 185335 quest 65604.1           -- Summoned Incubus
+  turnin 65604                        -- Gan'rul Bloodeye: he binds the incubus to you
+
+step Devourer of Souls (Undercity)
+  zone Undercity
+  tip The Undercity's version, for warlocks who took Carendin Halgar's Devourer of Souls instead of Gan'rul's. At 20 Carendin, in the Magic Quarter, sends you to Godrick Farsan in the Temple of the Damned, just north of him.
+  level 20
+  accept 1472                         -- Carendin Halgar
+  turnin 1472                         -- Godrick Farsan
+  accept 65593
+
+step Avelina Lilly
+  zone Silverpine Forest
+  tip Avelina Lilly works as a tailor for the Dalaran wizards at Ambermill, in eastern Silverpine Forest. Take her heart.
+  collect 190179 quest 65593          -- Avelina's Heart
+
+step Isaac Pearson
+  zone The Barrens
+  tip Isaac Pearson works in Ratchet, on the Barrens coast. Take the zeppelin to Durotar and ride or fly on to Ratchet.
+  collect 190180 quest 65593.1        -- Isaac's Heart
+
+step The Binding (Undercity)
+  zone Undercity
+  tip Back to Carendin in the Magic Quarter. Place the hearts at the summoning circle below him and defeat the incubus they call.
+  turnin 65593                        -- Carendin Halgar
+  accept 65597
+  kill 185335 quest 65597.1           -- Summoned Incubus
+  turnin 65597                        -- Carendin Halgar: he binds the incubus to you

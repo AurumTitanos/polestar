@@ -7,6 +7,8 @@ faction Horde
 levels 16-20
 zone Orgrimmar
 keywords Plundering the Plunderers, Find the Shattered Hand, To Orgrimmar!, Shenthul, Zando'zan, Wrenix of Ratchet, Wrenix the Wretched, Gizmotronic Apparatus, E.C.A.C., Thieves' Tools, Southsea Treasure, Polly, Thistle Tea, Fenwick Thatros, Tools of the Trade, Ambermill Strongbox, Dalaran Status Report, Mennet Carkad, Rogue, lockpicking quest
+reward item 7676
+why Ten Thistle Tea, the rogue energy drink, from the Horde lockpicking jobs at 16.
 
 # The Horde Rogue level 16 quests:
 # - Find the Shattered Hand (2378, Undead, from Mennet Carkad in the

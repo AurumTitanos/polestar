@@ -8,6 +8,8 @@ race Human,Gnome
 levels 26-30
 zone Stormwind City
 keywords High Sorcerer Andromath, Ur's Treatise on Shadow Magic, Tower of Ilgalar, Redridge Mountains, Pristine Spider Silk, Carrion Recluse, Duskwood, Wynne Larson, Astral Knot Robe, Astral Knot Blouse, Mage, class robe
+reward item 7511 9516
+why A robe or a blouse for Human and Gnome mages in their late 20s.
 
 # The Alliance mage robe at 26: High Sorcerer Andromath (1939), Ur's Treatise
 # on Shadow Magic (1938), Pristine Spider Silk (1940) and Astral Knot Garment

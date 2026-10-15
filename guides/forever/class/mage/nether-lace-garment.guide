@@ -8,6 +8,8 @@ race Undead,Troll
 levels 26-30
 zone Orgrimmar
 keywords Anastasia Hartwell, Speak with Deino, Waters of Xavian, Laughing Sisters, Raynewood Retreat, Ashenvale, Kil'hala, Crossroads, Nether-lace Robe, Nether-lace Tunic, Mage, class robe
+reward item 7512 9515
+why A robe or a tunic for Undead and Troll mages in their late 20s.
 
 # The Horde mage robe at 26: Speak with Deino (1943), Waters of Xavian (1944),
 # Laughing Sisters (1945) and Nether-lace Garment (1946).

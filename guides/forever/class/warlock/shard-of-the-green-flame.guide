@@ -1,11 +1,13 @@
-guide forever/class/warlock/niby-the-almighty
-title Niby the Almighty
+guide forever/class/warlock/shard-of-the-green-flame
+title Shard of the Green Flame
 category Class
 class Warlock
 folder Warlock
 levels 50-56
 zone Felwood
-keywords What Niby Commands, Flawless Fel Essence, Kroshius' Infernal Core, Kroshius, Fel Fire, Impsy, Shard of the Green Flame, Jaedenar, Legashi, Felguard Sentry, Shatter Scar Vale, Warlock, class quest
+keywords Niby the Almighty, What Niby Commands, Flawless Fel Essence, Kroshius' Infernal Core, Kroshius, Fel Fire, Impsy, Shard of the Green Flame, Jaedenar, Legashi, Felguard Sentry, Shatter Scar Vale, Warlock, class quest
+reward item 18762
+why A rare off-hand for your 50s from Niby and Impsy in Felwood, the camp that also offers An Imp's Request.
 
 # Niby the Almighty's errands in Felwood: What Niby Commands (7601) to Impsy,
 # Flawless Fel Essence (7602: Azshara, Jaedenar and the Dark Portal) and

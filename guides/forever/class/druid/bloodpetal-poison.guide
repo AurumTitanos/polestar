@@ -1,8 +1,10 @@
-guide forever/class/druid/torwa-pathfinder
-title Torwa Pathfinder: Bloodpetal Poison
+guide forever/class/druid/bloodpetal-poison
+title Bloodpetal Poison
 category Class
 folder Druid
 keywords Torwa Pathfinder, Bloodpetal Poison, Toxic Test, A Better Ingredient, Putrid Vine, Atal'alarion, Sunken Temple, Devilsaur, Gorishi Sting, Bloodcap, Un'Goro Crater, Loganaar, class quest
+reward item 13446
+why Experience in Un'Goro at 50 and two healing potions; Forever removed the Classic item choice.
 class Druid
 levels 50-54
 zone Un'Goro Crater

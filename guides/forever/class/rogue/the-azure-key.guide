@@ -6,6 +6,8 @@ folder Rogue
 levels 50-52
 zone Alterac Mountains
 keywords The Azure Key, A Simple Request, Sealed Azure Bag, Encoded Fragments, Lord Jorach Ravenholdt, Ravenholdt Manor, Archmage Xylem, Timbermaw Shaman, Forest Ooze, Morphaz, Sunken Temple, Temple of Atal'Hakkar, Azshara, Rogue, class quest
+reward text Ravenholdt reputation
+why Ravenholdt reputation and experience at 50; Forever removed the Classic item choice.
 
 # The level 52 Rogue class chain: A Simple Request (8233) from your class
 # leaders to Lord Jorach Ravenholdt, then Sealed Azure Bag (8234) and Encoded

@@ -1,11 +1,14 @@
 guide forever/class/mage/arcane-refreshment
-title Arcane Refreshment
+title Conjure Water (Arcane Refreshment)
 category Class
 class Mage
 folder Mage
 levels 60-60
 zone Feralas
-keywords Conjure Water, Lorekeeper Lydros, Athenaeum, Hydrospawn, Hydrospawn Essence, Warpwood Quarter, Dire Maul, Shen'dralar, Mage, class spell
+keywords Arcane Refreshment, Conjure Water, Lorekeeper Lydros, Athenaeum, Hydrospawn, Hydrospawn Essence, Warpwood Quarter, Dire Maul, Shen'dralar, Mage, class spell
+reward spell 10140 "Conjure Water"
+reward text Shen'dralar reputation
+why The level 60 Conjure Water, from a Dire Maul library: drink for you and your group.
 
 # Arcane Refreshment (7463), both factions: Lorekeeper Lydros in Dire Maul's
 # Athenaeum teaches Conjure Water (spell 10140) for the Hydrospawn Essence.

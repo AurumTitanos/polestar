@@ -7,6 +7,9 @@ faction Alliance
 levels 10-11
 zone Stormwind City
 keywords Defensive Stance, Bartleby, Harry Burlguard, Marshal Haggard, Dead-tooth Jack, Haggard's Axe, Haggard's Hammer, Haggard's Dagger, Haggard's Sword, Warrior, class weapon
+reward item 6979 6983 6980 6985
+reward text Defensive Stance
+why Defensive Stance and a one-hand weapon of your choice at 10.
 
 # Marshal Haggard and Dead-tooth Jack (1666, 1667): the weapon at the end of
 # the Alliance Defensive Stance quests (1638, 1639, 1640, 1665).

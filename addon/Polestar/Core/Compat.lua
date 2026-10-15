@@ -269,6 +269,25 @@ function Compat.ItemQualityHex(quality)
 	return string.format("ff%02x%02x%02x", math.floor(c.r * 255 + 0.5), math.floor(c.g * 255 + 0.5), math.floor(c.b * 255 + 0.5))
 end
 
+-- An item's icon (file id or path) from its id; the client knows it without
+-- the item being cached. nil when unknown.
+function Compat.ItemIcon(itemID)
+	local fn = type(itemID) == "number" and ((C_Item and C_Item.GetItemIconByID) or GetItemIcon)
+	if not fn then return nil end
+	local ok, icon = pcall(fn, itemID)
+	if ok and icon and not isSecret(icon) then return icon end
+	return nil
+end
+
+-- A spell's icon from its id, or nil.
+function Compat.SpellIcon(spellID)
+	local fn = type(spellID) == "number" and ((C_Spell and C_Spell.GetSpellTexture) or GetSpellTexture)
+	if not fn then return nil end
+	local ok, icon = pcall(fn, spellID)
+	if ok and icon and not isSecret(icon) then return icon end
+	return nil
+end
+
 ---------------------------------------------------------------------------
 -- Maps and world coordinates
 ---------------------------------------------------------------------------

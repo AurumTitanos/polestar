@@ -8,6 +8,10 @@ race Undead
 levels 9-13
 zone Tirisfal Glades
 keywords Tyr's Watch, Bandarion Keep, Danitha Morr, Breton Samuels, Shari Stilwell, A Lesson in Divinity, Redemption, Symbol of Life, Rudolph Gelhardt, Forsaken Paladin, class quest
+reward text Redemption
+reward item 246164 246165
+reward item 246265
+why Redemption to raise fallen allies, plus a weapon and a shield for a new Forsaken paladin.
 
 # The Forsaken Paladin order at Bandarion Keep (Tyr's Watch), new in Forever:
 # A Second Home (91282) from Shari Stilwell in Brill, Murlocs at the Gates

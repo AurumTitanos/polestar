@@ -243,7 +243,9 @@ test('without professions.json and factions.json: built-in professions still res
 });
 
 test('documented categories are accepted case-insensitively; others warn and pass through', () => {
-	const base = (cat) => guideText(['guide t/c', 'title C', 'levels 1-5', 'zone Elwynn Forest', `category ${cat}`, '', 'step S', '  level 2']);
+	// A Class guide says what its goal gives and why (a warning without them).
+	const base = (cat) =>
+		guideText(['guide t/c', 'title C', 'levels 1-5', 'zone Elwynn Forest', `category ${cat}`, ...(cat === 'class' ? ['reward text Defensive Stance', 'why A stance.'] : []), '', 'step S', '  level 2']);
 	for (const c of ['Leveling', 'Class', 'Professions', 'Reputation', 'Legacy', 'Exploration', 'Collectibles', 'Dungeons']) {
 		const r = compile(base(c.toLowerCase()));
 		assert.deepEqual([r.guides[0].category, r.warnings], [c, []]);

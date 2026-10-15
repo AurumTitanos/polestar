@@ -331,6 +331,59 @@ test('selecting a guide shows its details and loads nothing; the selection is re
 	});
 });
 
+test('a Class guide\'s details lead with its reward (item and spell icons, quality colour, the game\'s tooltip on hover) and why', () => {
+	const out = run(`
+		local id = "forever/class/warlock/test"
+		uistub.guides[id] = { id = id, pack = "guides", title = "An Imp's Request", category = "Class", folder = "Warlock", minLevel = 50, maxLevel = 54,
+			zone = 1429, zoneName = "Felwood",
+			reward = { { spell = 23161, spellName = "Summon Dreadsteed" }, { item = 20536, itemName = "Soul Harvester", quality = 3, choice = true },
+				{ item = 20534, itemName = "Abyss Shard", quality = 3, choice = true }, { text = "Summon Incubus" } },
+			why = "A staff, an off-hand or a robe for the 50s.",
+			steps = { { title = "One", goals = { { t = "note", text = "One", status = "pending" } } } } }
+		table.insert(uistub.order, id)
+		ITEM_QUALITY_COLORS = { [3] = { r = 0, g = 0.44, b = 0.87 } }
+		Polestar.Compat.ItemIcon = function(item) return item == 20536 and 135139 or nil end
+		Polestar.Compat.SpellIcon = function(spell) return spell == 23161 and 132238 or nil end
+		local tips = {}
+		GameTooltip.SetHyperlink = function(_, link) tips[#tips + 1] = link end
+		GameTooltip.SetSpellByID = function(_, spell) tips[#tips + 1] = "spell:" .. spell end
+		Polestar.Set("ui.pickerFaction", "All")
+		UI.ShowPicker()
+		P.Select(id)
+		local d = D()
+		local tiles = {}
+		for _, t in ipairs(d.Rewards) do
+			if t:IsShown() then
+				stub.RunScript(t, "OnEnter")
+				tiles[#tiles + 1] = { t.Name:GetText(), t.Icon:GetTexture() }
+			end
+		end
+		emit({ reward = P.detail.reward, facts = { P.detail.facts[1], P.detail.facts[2], P.detail.facts[3] }, tiles = tiles, tips = tips,
+			blue = select(3, d.Rewards[3].Name:GetTextColor()) > 0.8 })
+		P.Select("forever/alliance/02-westfall")
+		local shown = 0
+		for _, t in ipairs(d.Rewards) do if t:IsShown() then shown = shown + 1 end end
+		emit({ shown = shown, reward = P.detail.reward == nil, first = P.detail.facts[1][1] })`);
+	const [rows, after] = out;
+	assert.deepEqual(rows.reward, [
+		{ kind: 'spell', id: 23161, name: 'Summon Dreadsteed' },
+		{ kind: 'text', name: 'Summon Incubus' },
+		{ kind: 'item', id: 20536, name: 'Soul Harvester', choice: true },
+		{ kind: 'item', id: 20534, name: 'Abyss Shard', choice: true },
+	]);
+	assert.deepEqual(rows.facts, [
+		['Reward', 'Summon Dreadsteed, Summon Incubus'],
+		['Choose one', 'Soul Harvester, Abyss Shard'],
+		['Why', 'A staff, an off-hand or a robe for the 50s.'],
+	]);
+	assert.equal(rows.tiles.length, 4);
+	assert.equal(rows.tiles[0][1], 132238, 'the spell\'s icon');
+	assert.equal(rows.tiles[2][1], 135139, 'the item\'s icon');
+	assert.deepEqual(rows.tips, ['spell:23161', 'item:20536', 'item:20534'], 'items and spells show the game\'s tooltip; words none');
+	assert.equal(rows.blue, true, 'a rare item in its quality colour');
+	assert.deepEqual(after, { shown: 0, reward: true, first: 'Steps' });
+});
+
 test('Load guide replaces the current tab, Open in new tab adds one; double-click and Enter load', () => {
 	const [out] = run(`
 		uistub.openTabs(TABS, 1)

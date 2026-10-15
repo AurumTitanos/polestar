@@ -1,11 +1,13 @@
 guide forever/class/mage/celestial-orb
-title Celestial Power
+title Celestial Orb and Stave
 category Class
 class Mage
 folder Mage
 levels 35-40
 zone Dustwallow Marsh
 keywords Return to the Marsh, Tabetha, The Infernal Orb, Burning Blade Summoner, Mannoroc Coven, Desolace, The Exorcism, Demon of the Orb, Power in Uldaman, Obsidian Sentinel, Uldaman, Mana Surges, Celestial Power, Celestial Orb, Celestial Stave, Mage, class weapon
+reward item 7515 9517
+why An off-hand orb or a staff for the late 30s, your pick.
 
 # Tabetha's second chain, both factions: Return to the Marsh (1953), The
 # Infernal Orb (1954), The Exorcism (1955), Power in Uldaman (1956), Mana

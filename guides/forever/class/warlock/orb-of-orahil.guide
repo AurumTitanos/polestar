@@ -1,24 +1,49 @@
 guide forever/class/warlock/orb-of-orahil
-title The Orb of Orahil
+title Orb of Orahil
 category Class
 class Warlock
 folder Warlock
 levels 35-40
 zone The Barrens
-keywords Knowledge of the Orb of Orahil, Fragments of the Orb of Orahil, Menara Voidrender, Infernal Orb, Tabetha, Orb of Dar'Orahil, Orb of Noh'Orahil, Staff of Dar'Orahil, Staff of Noh'Orahil, Warlock, class weapon
-next forever/class/warlock/orb-of-dar-orahil, forever/class/warlock/orb-of-noh-orahil
+keywords The Orb of Orahil, Knowledge of the Orb of Orahil, Fragments of the Orb of Orahil, Cleansing of the Orb of Orahil, Returning the Cleansed Orb, Menara Voidrender, Infernal Orb, Tabetha, Shard of a Felhound, Acolyte Wytula, Felhas Ruby, Imprisoned Felhound Spirit, Mana Eater, Shard of an Infernal, Acolyte Magaz, Infus Emerald, Imprisoned Infernal Spirit, Lesser Infernal, The Orb of Dar'Orahil, The Orb of Noh'Orahil, Orb of Dar'Orahil, Orb of Noh'Orahil, Staff of Dar'Orahil, Staff of Noh'Orahil, Warlock, class weapon
+reward item 15108 15106
+reward item 15107 15105
+why An off-hand orb or a staff for your late 30s, down the felhound's or the infernal's path, your pick.
 
 # The Orb of Orahil: Knowledge of the Orb of Orahil (4965, 4967, 4968, 4969)
 # from your trainer to Menara Voidrender in Ratchet, and Fragments of the Orb
 # of Orahil (1799). Menara's two acolytes then each offer one path, and the
 # game lets you take only one (Shard of a Felhound 4962 and Shard of an
-# Infernal 4963 exclude each other): the next guide is your choice of path,
-# and both end with an off-hand orb or a staff.
+# Infernal 4963 exclude each other, quests.json `excl`):
+# - felhound: Shard of a Felhound (4962) from Acolyte Wytula, ending with The
+#   Completed Orb of Dar'Orahil (4964): the Orb or the Staff of Dar'Orahil;
+# - infernal: Shard of an Infernal (4963) from Acolyte Magaz, ending with The
+#   Completed Orb of Noh'Orahil (4975): the Orb or the Staff of Noh'Orahil.
+# Both share the Infernal Orb for Fragments of the Orb of Orahil (1799),
+# Cleansing of the Orb of Orahil (4961) and Returning the Cleansed Orb (4976)
+# with Tabetha in Dustwallow Marsh. The guide lists the felhound path first
+# and the infernal one after it; once you take one acolyte's quest the
+# other's goals are skipped ("No longer offered"). The two `reward` lines are
+# the two ends, each a choice of orb or staff (codex quests.json: 4964
+# 15106/15108, 4975 15105/15107).
+# This guide merges the former orb-of-orahil, orb-of-dar-orahil and
+# orb-of-noh-orahil guides.
 # Sources: quests.json, npcs.json and items.json (Questie 12.1.0 and
-# Questie-Forever) for the givers and the chain; Wowhead's Classic quest pages
-# (wowhead.com/classic/quest=1799 and =4962, =4963) for taking the acolyte's
-# path before the Infernal Orb; Wowhead Forever's Warlock class page
+# Questie-Forever) for the givers, drops and spawns; Wowhead's Classic quest
+# pages (wowhead.com/classic/quest=1799, =4962, =4963, =4964) for taking the
+# acolyte's path before the Infernal Orb, for using the Felhas Ruby on a
+# felhound or the Infus Emerald on an infernal, and for waiting while Menara
+# finishes the orb; Wowhead Forever's Warlock class page
 # (data/local/quest-audit/wowhead-class-quests.json): unchanged in Forever.
+# The Demon of the Orb (4961) is elite.
+# Cleansing of the Orb of Orahil (4961) lists Shard of a Felhound (4962) as
+# well as 1799 before it (quests.json preAll, from pfQuest and
+# Questie-Forever), though 4962 and 4963 exclude each other: whether the
+# infernal path still reaches Tabetha in Forever is unconfirmed until launch.
+# The separate infernal guide carried lint's warning for it; in this guide
+# the felhound turn-in comes earlier, so lint no longer flags it.
+# Lint warns that 4963 and 4975 are not offered once 4962 is taken, and 4964
+# once 4963 is: that is the merge, kept visible, not hidden.
 # Based on data, not play: the beta caps at level 30 until launch on
 # 4 November, so nothing here has been checked in game.
 
@@ -52,9 +77,50 @@ step Knowledge of the Orb of Orahil (Undercity)
 
 step Menara Voidrender
   zone The Barrens
-  tip Menara Voidrender and her two acolytes stand in the tower on the hill above Ratchet, beside Strahad Farsan. Next, choose one acolyte's path: the next guide is that choice.
+  tip Menara Voidrender and her two acolytes stand in the tower on the hill above Ratchet, beside Strahad Farsan.
   turnin 4968 only Human              -- Menara Voidrender
   turnin 4965 only Gnome              -- Menara Voidrender
   turnin 4967 only Orc,Troll          -- Menara Voidrender
   turnin 4969 only Undead             -- Menara Voidrender
   accept 1799
+
+step Choose an acolyte
+  tip Pick one acolyte: you can take only one of their quests. Acolyte Wytula's felhound path ends with the Orb or Staff of Dar'Orahil, Acolyte Magaz's infernal path with the Orb or Staff of Noh'Orahil. The guide follows the one you take.
+  accept 4962                         -- Acolyte Wytula: she gives you the Felhas Ruby
+  accept 4963                         -- Acolyte Magaz: he gives you the Infus Emerald
+
+step Mannoroc Coven
+  zone Desolace
+  tip The demons of Mannoroc Coven, in southern Desolace, have all you need. Burning Blade Summoners carry the Infernal Orb. On the felhound path, use the Felhas Ruby on a Mana Eater, a felhound, and kill it for its spirit; on the infernal path, use the Infus Emerald on a Lesser Infernal and kill it.
+  collect 7291 quest 1799.1           -- Infernal Orb, from the Burning Blade Summoners
+  collect 12648 quest 4962.1          -- Imprisoned Felhound Spirit, from a Mana Eater
+  collect 12649 quest 4963.1          -- Imprisoned Infernal Spirit, from a Lesser Infernal
+
+step The demon's spirit
+  zone The Barrens
+  tip Back to Menara Voidrender in the tower above Ratchet with the spirit first: Tabetha's cleansing follows it.
+  turnin 4962                         -- Menara Voidrender
+  turnin 4963                         -- Menara Voidrender
+
+step Tabetha
+  zone Dustwallow Marsh
+  tip Tabetha lives at her farm in western Dustwallow Marsh. She calls the Demon of the Orb out of the Infernal Orb; it is elite: grouping up is advised.
+  turnin 1799                         -- Tabetha
+  accept 4961
+  kill 6549 quest 4961.1              -- Demon of the Orb
+  turnin 4961                         -- Tabetha
+  accept 4976
+
+step The Orb of Dar'Orahil
+  zone The Barrens
+  tip Back to Menara in the tower above Ratchet with the cleansed orb. On the felhound path, wait while she completes the Orb of Dar'Orahil, then speak to her again.
+  turnin 4976                         -- Menara Voidrender
+  accept 4964
+  complete 4964                       -- Wait for the orb
+  turnin 4964 choose 15108 15106      -- Menara Voidrender
+
+step The Orb of Noh'Orahil
+  tip On the infernal path, wait while Menara completes the Orb of Noh'Orahil, then speak to her again.
+  accept 4975
+  complete 4975                       -- Wait for the orb
+  turnin 4975 choose 15107 15105      -- Menara Voidrender

@@ -7,6 +7,11 @@ faction Horde
 levels 20-26
 zone Orgrimmar
 keywords Poisons, The Shattered Salute, Deep Cover, Shenthul, Taskmaster Fizzule, Flare Gun, Fizzule's Whistle, Mission: Possible But Not Probable, Gallywix, Foreman Silixiz, Venture Co. tower, Hinott's Assistance, Serge Hinott, Hinott's Oil, Tarren Mill, Thistle Tea, Rogue, class spell
+reward text Poisons
+reward item 18160
+reward item 8066
+reward item 8095
+why Forever teaches Poisons through this chain, not the trainer; the Thistle Tea recipe comes with it.
 
 # Poisons for Horde Rogues: The Shattered Salute (2460) and Deep Cover (2458)
 # from Shenthul in Orgrimmar's Cleft of Shadow to Taskmaster Fizzule at the

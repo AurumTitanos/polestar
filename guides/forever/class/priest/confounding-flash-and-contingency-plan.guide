@@ -8,6 +8,9 @@ race Gnome
 levels 10-20
 zone Ironforge
 keywords Confounding Flash, Contingency Plan, High Priestess Mims, Hall of Mysteries, Mystic Ward, Gnome, racial, Priest
+reward text Confounding Flash
+reward text Contingency Plan
+why The Gnome priest spells, new in Forever: one at 10, one at 20.
 
 # The Gnome Priest spell quests, new in Forever: Confounding Flash at 10
 # (94817) and Contingency Plan at 20 (94818), both from High Priestess Mims
