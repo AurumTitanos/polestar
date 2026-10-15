@@ -844,3 +844,26 @@ test('the ETA closing speed ignores out-of-band refreshes', () => {
 	const expected = out.dist / 7;
 	for (const s of secs) assert.ok(Math.abs(s - expected) <= 4, `ETA ${s} s vs ${expected.toFixed(0)} s (${out.etas})`);
 });
+
+test('/polestar way without a position here says so, not how to type it', () => {
+	const [out] = run(`
+		local function way(msg)
+			stub.messages = {}
+			SlashCmdList.POLESTAR(msg)
+			local t = N.GetTarget()
+			return { msgs = #stub.messages > 0 and stub.messages or "none", target = t and t.label or "nil" }
+		end
+		local r = {}
+		nav.place(0, 0, 1)                 -- other continent: the game gives no map position
+		r.noPosition = way("way 40 60 Mine")
+		nav.place(0, 0, 0)
+		r.malformed = way("way 40")
+		r.valid = way("way 40 60 Mine")
+		emit(r)`);
+	assert.deepEqual(out.noPosition, {
+		msgs: ['|cff4fd1c5Polestar|r: No position here: the game gives none in instances and on some maps.'],
+		target: 'nil',
+	});
+	assert.deepEqual(out.malformed, { msgs: ['|cff4fd1c5Polestar|r: Usage: /polestar way <x> <y> [label]'], target: 'nil' });
+	assert.deepEqual(out.valid, { msgs: 'none', target: 'Mine' });
+});

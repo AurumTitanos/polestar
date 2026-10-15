@@ -501,14 +501,18 @@ end, L["Waypoint arrow: show, hide, reset"])
 ns.RegisterCommand("way", function(rest)
 	local x, y, label = (rest or ""):match("^%s*([%d%.]+)[%s,]+([%d%.]+)%s*(.-)%s*$")
 	x, y = tonumber(x), tonumber(y)
-	local C = ns.Compat
-	local map = C and C.GetPlayerMapPosition and C.GetPlayerMapPosition()
-	if not (x and y and map) then
+	if not (x and y) then
 		if (rest or ""):match("^%s*$") then
 			Nav.ClearTarget()
 		else
 			ns.Print(L["Usage: /polestar way <x> <y> [label]"])
 		end
+		return
+	end
+	local C = ns.Compat
+	local map = C and C.GetPlayerMapPosition and C.GetPlayerMapPosition()
+	if not map then
+		ns.Print(L["No position here: the game gives none in instances and on some maps."])
 		return
 	end
 	Nav.SetTarget(map, x, y, label ~= "" and label or nil)
