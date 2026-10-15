@@ -279,6 +279,9 @@
   the step's other goals' regions are fainter, on the world map. If the first
   camp is crowded, the next one is in sight; the next-spot button, or a click
   on a camp's mark on the world map, moves the arrow there (thanks Pynte).
+- Tirisfal Glades: Hides for the Forsaken counts the Vile Fin Murloc Skins
+  (3) on the shore step and the Darkhound Hides (6) with the darkhounds; the
+  two had swapped objectives, so the murloc step showed the hide count.
 
 ### For guide authors
 
@@ -322,6 +325,9 @@
   versions ignore the fields). In a Leveling guide lint warns on such a goal
   unless it is `optional` or the guide trains the profession (and levels it
   to the quest's rank) first.
+- `quest Q.O` on a `collect`, `kill` or `interact` warns when objective O is
+  another item, npc or object, and names the index that is this one's (or
+  write `quest Q` and the index comes from the target).
 
 ### For contributors
 
