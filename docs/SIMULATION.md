@@ -9,8 +9,8 @@ under the same model.
 "Proven" here means: best found under the model, after a search large enough
 that more search stops improving it, and still best (or within a stated margin)
 across thousands of plausible variations of the model's parameters. Real-world
-proof comes from recorded play (`record report`), which also recalibrates the
-model.
+proof comes from recorded play (`record report`); `sim calibrate` fits the
+model's kill time to the same recordings.
 
 Code: `tools/lib/sim/` (Node ≥24, CommonJS, zero npm dependencies,
 `worker_threads` for parallel search). CLI: `node tools/polestar.js sim <cmd>`.
