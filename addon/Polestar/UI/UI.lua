@@ -28,7 +28,7 @@ ns.RegisterDefaults("ui", {
 	upcoming = 0, -- Up next is off by default (the reading flow names the next person instead)
 	upcomingOpen = false, -- when on, upcoming steps start listed instead of collapsed
 	showNotes = true,
-	combat = "fade", -- "show" | "fade" | "hide"
+	combat = "show", -- "show" | "fade" | "hide"; steady by default, a fade on every pull distracts
 	reduceMotion = false,
 	font = "game", -- "game" (the client's own font, the default) | "inter" (EllesmereUI's while matchFont is on)
 	scheme = "dusk", -- "dusk" | "night" | "graphite" | "ellesmere" (Polestar.Theme.SCHEMES)

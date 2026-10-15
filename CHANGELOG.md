@@ -223,6 +223,9 @@
   two creatures that drop it at 50% or more are named; cloth and other items
   that drop everywhere are not. Two tips that said "click" for picking up an
   item now say so (thanks Pynte).
+- The guide window no longer fades out on every pull: "In combat" (Options,
+  Guide, Window, Combat) is "Keep visible" by default. "Hide" stays if you
+  chose it; to keep the fade, pick "Fade out" there (thanks Pynte).
 
 ### For guide authors
 

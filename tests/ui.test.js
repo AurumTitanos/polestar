@@ -404,9 +404,15 @@ test('grow upward pins the window by its bottom-left; turning it on or off keeps
 	assert.equal(out.offPoint[0], 'TOPLEFT');
 });
 
-test('combat: fade dims the window, hide hides it, both restore afterwards', () => {
+test('combat: by default the window stays as it is; fade dims it, hide hides it, both restore afterwards', () => {
 	const [out] = run(`
 		uistub.setGuide(uistub.elwynn, 3)
+		stub.fire("PLAYER_REGEN_DISABLED")
+		stub.advance(1)
+		local steady = F:GetAlpha()
+		stub.fire("PLAYER_REGEN_ENABLED")
+		stub.advance(1)
+		Polestar.Set("ui.combat", "fade")
 		stub.fire("PLAYER_REGEN_DISABLED")
 		stub.advance(1)
 		local faded = F:GetAlpha()
@@ -417,7 +423,8 @@ test('combat: fade dims the window, hide hides it, both restore afterwards', () 
 		stub.fire("PLAYER_REGEN_DISABLED")
 		local hidden = not F:IsShown()
 		stub.fire("PLAYER_REGEN_ENABLED")
-		emit({ faded = faded, restored = restored, hidden = hidden, shown = F:IsShown() })`);
+		emit({ steady = steady, faded = faded, restored = restored, hidden = hidden, shown = F:IsShown() })`);
+	assert.equal(out.steady, 1, 'no fade on every pull unless the player asks for it');
 	assert.ok(Math.abs(out.faded - 0.35) < 1e-9);
 	assert.equal(out.restored, 1);
 	assert.equal(out.hidden, true);
