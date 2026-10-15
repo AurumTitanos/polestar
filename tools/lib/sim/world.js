@@ -84,7 +84,13 @@ const DUP_R = 10; // yards: one spawn recorded on two overlapping zone maps
 const VOTE_R = 150; // yards: cell of the zone vote (spawn records per map around a spot)
 const HUB_R = 150; // yards: givers/enders this close form one hub
 const NEAR_HUB = 200; // yards: a flight master or inn this close belongs to the hub
-const MAX_OPEN = 20; // quest log
+// Quest log size. Forever's client accepts 40 quests
+// (Constants.QuestLogConsts.MAXIMUM_NUM_QUESTS_LOG_CAN_ACCEPT = 40 for its
+// Camelot game type, Blizzard_APIDocumentationGenerated/QuestConstantsDocumentation.lua;
+// its quest log shows N/40), but the published results were searched at 20,
+// which only splits a zone's quest package (one: Alliance Elwynn Forest 6-10).
+// 40 lands in 0.2.5 with the next world and new searches (issue #30).
+const MAX_OPEN = 20;
 const MIN_START_DROP = 1; // % drop chance for a quest-starting item to count
 // % assumed for an item drop (objective or quest-starting item) without a
 // recorded rate (Forever creatures in items.json drops with chance null);
@@ -1392,4 +1398,4 @@ function getWorld(opts) {
 	return w;
 }
 
-module.exports = { buildWorld, getWorld, worldFile, dataHash, cluster, ISLANDS, ISLE_MAPS };
+module.exports = { buildWorld, getWorld, worldFile, dataHash, cluster, ISLANDS, ISLE_MAPS, MAX_OPEN };

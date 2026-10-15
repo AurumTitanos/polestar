@@ -13,7 +13,7 @@ const { K_TURNIN } = require('./run');
 const { compileSequence, routeSequence } = require('./sequence');
 const { fmtH, table, mdTable } = require('./report');
 const { LEVEL_XP } = require('../game/xp');
-const { loadPolestarRoutes } = require('./baselines/polestar');
+const { loadPolestarRoutes, requiredEvents } = require('./baselines/polestar');
 const { resolvePack, packArgument } = require('../pack/locate');
 const { printDiagnostics } = require('../cli');
 const { isDir } = require('../addons');
@@ -25,6 +25,8 @@ let LEVELS = [10, 20, 30, 40, 50, 60];
 function sources(o, faction, race, run, runD) {
 	const out = [];
 	const warn = [];
+	// Guides are scored on what they require; --with-optional adds their optional goals.
+	const evs = (events) => (o.withOptional ? events : requiredEvents(events));
 	const res = loadResult(o, faction, race, 'solo', run.world, warn);
 	if (res) out.push({ id: 'best', label: 'Best found (solo)', source: 'sim', route: sim.routeFromKeys(run, res.best.route) });
 	const resD = loadResult(o, faction, race, 'dungeons', run.world, warn);
@@ -33,8 +35,8 @@ function sources(o, faction, race, run, runD) {
 	try {
 		const L = loadPolestarRoutes({ guidesDir, dataDir: o.dataDir, faction, race, cls: null });
 		if (L) {
-			out.push({ id: 'polestar', label: 'Polestar default', source: 'polestar', events: L.default.events });
-			L.variants.forEach((v, i) => out.push({ id: `polestar-${i + 1}`, label: `Polestar ${v.label}`, source: 'polestar-variant', events: v.sequence.events }));
+			out.push({ id: 'polestar', label: 'Polestar default', source: 'polestar', events: evs(L.default.events) });
+			L.variants.forEach((v, i) => out.push({ id: `polestar-${i + 1}`, label: `Polestar ${v.label}`, source: 'polestar-variant', events: evs(v.sequence.events) }));
 		}
 	} catch (err) {
 		warn.push(`Polestar: ${err.message}`);
@@ -45,8 +47,8 @@ function sources(o, faction, race, run, runD) {
 		try {
 			const P = loadPolestarRoutes({ guidesDir, dataDir: o.dataDir, faction, race, cls: null, pack: o.pack });
 			if (P) {
-				out.push({ id: 'pack', label: `${id} default`, source: 'pack', events: P.default.events, guides: ids(P.default) });
-				P.variants.forEach((v, i) => out.push({ id: `pack-${i + 1}`, label: `${id} ${v.label}`, source: 'pack-variant', events: v.sequence.events, guides: ids(v.sequence) }));
+				out.push({ id: 'pack', label: `${id} default`, source: 'pack', events: evs(P.default.events), guides: ids(P.default) });
+				P.variants.forEach((v, i) => out.push({ id: `pack-${i + 1}`, label: `${id} ${v.label}`, source: 'pack-variant', events: evs(v.sequence.events), guides: ids(v.sequence) }));
 			} else {
 				warn.push(`${id}: no leveling guide of the pack starts ${race}`);
 			}
@@ -182,7 +184,7 @@ async function compareCommand(args, o) {
 		console.error(`sim compare: ${error}`);
 		return 1;
 	}
-	const opts = { ...sim.DEFAULTS, ...o, faction: args.faction, race: args.race, guidesDir: args.guides ? path.resolve(args.guides) : undefined, pack };
+	const opts = { ...sim.DEFAULTS, ...o, faction: args.faction, race: args.race, guidesDir: args.guides ? path.resolve(args.guides) : undefined, pack, withOptional: !!args['with-optional'] };
 	if (args.to) LEVELS = String(args.to).split(',').map(Number).filter((l) => l >= 2 && l <= 60);
 	HEAD = makeHead();
 	const res = await compare(opts);
@@ -199,7 +201,7 @@ async function compareCommand(args, o) {
 			shown.push({ ...variants[variants.length - 1], label: `${name} worst choice: ${variants[variants.length - 1].label.replace(prefix, '')}` });
 			choices.push([name, variants]);
 		}
-		console.log(`\n== ${c.faction} ${c.race}: same calibrated model (times are /played hours; grind = time spent grinding incl. after the guide ends) ==`);
+		console.log(`\n== ${c.faction} ${c.race}: same calibrated model (guides ${opts.withOptional ? 'with' : 'without'} their optional goals; times are /played hours; grind = time spent grinding incl. after the guide ends) ==`);
 		console.log(table(HEAD, shown.map(fmtRow)));
 		for (const [name, variants] of choices) {
 			console.log(`\n${name} route choices (${variants.length} complete paths):`);
@@ -269,7 +271,7 @@ async function bench(o) {
 }
 
 async function benchCommand(args, o) {
-	const opts = { ...sim.DEFAULTS, ...o, faction: args.faction, race: args.race };
+	const opts = { ...sim.DEFAULTS, ...o, faction: args.faction, race: args.race, withOptional: !!args['with-optional'] };
 	const res = await bench(opts);
 	fs.mkdirSync(opts.benchDir, { recursive: true });
 	for (const b of res) {
@@ -292,4 +294,4 @@ async function benchCommand(args, o) {
 	return 0;
 }
 
-module.exports = { compare, bench, compareCommand, benchCommand, score, LEVELS };
+module.exports = { compare, bench, compareCommand, benchCommand, score, sources, LEVELS };

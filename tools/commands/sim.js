@@ -12,7 +12,8 @@ const usage = `usage: node tools/polestar.js sim <command> [options]
   sim run     --faction F [--race R] [--class C] [--paths N] [--workers W] [--seed S] [--dungeons]
               [--jobs J] [--anneal A] [--max-paths M]
   sim robust  --faction F [--race R] [--draws K] [--top N]   robustness of the top routes
-  sim compare --faction F [--race R] [--guides DIR] [--pack DIR | DIR] [--to 10,20,30]  Polestar's routes vs the best found, same model
+  sim compare --faction F [--race R] [--guides DIR] [--pack DIR | DIR] [--to 10,20,30] [--with-optional]
+              Polestar's routes vs the best found, same model
   sim bench   --faction F [--race R]                  bracket table: zones, levels, quests per 10 levels
   sim export  --result <file> --out <dir>             zone-by-zone skeleton guides + visits.json for authors
   sim consensus --faction F [--dungeons] [--evals N]  one 12-60 route shared by the faction's starts (+ exports)
@@ -32,6 +33,8 @@ options:
                      up to its first level when it starts above 1;
                      written to data/bench/compare-<faction>-<race>-<pack id>.json
   --to <levels>      compare: levels to show time to (default 10,20,30,40,50,60)
+  --with-optional    compare/bench: also score the guides' optional goals (default: only what
+                     a guide requires; elite and dungeon quests stay out either way)
   --jobs <n>         run: search jobs per round (default 32)
   --anneal <n>       run: annealing evaluations per job (default 6000)
   --max-paths <n>    run: hard cap on evaluated routes (default 3x --paths)
@@ -40,7 +43,7 @@ options:
   --quiet            less output`;
 
 const VALUE = new Set(['faction', 'race', 'class', 'paths', 'workers', 'seed', 'draws', 'top', 'result', 'out', 'data', 'sim', 'fdj', 'guides', 'pack', 'to', 'band', 'jobs', 'anneal', 'max-paths', 'evals']);
-const FLAGS = new Set(['rebuild', 'offline', 'quiet', 'help', 'dungeons']);
+const FLAGS = new Set(['rebuild', 'offline', 'quiet', 'help', 'dungeons', 'with-optional']);
 
 function parseArgs(argv) {
 	const out = { _: [] };

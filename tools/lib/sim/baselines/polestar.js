@@ -277,4 +277,13 @@ function loadPolestarRoutes({ guidesDir, dataDir, data = null, faction = null, r
 	};
 }
 
-module.exports = { loadPolestarRoutes };
+// A guide's events without its `optional` goals: what the guide requires. A
+// quest whose accept is optional is left out whole (its objectives and
+// turn-in too); other optional goals are left out one by one. Guide hours
+// are scored on these unless `sim compare --with-optional` (issue #30).
+function requiredEvents(events) {
+	const optQuest = new Set(events.filter((e) => e.optional && e.t === 'accept').map((e) => Number(e.q)));
+	return events.filter((e) => !e.optional && !(e.q != null && optQuest.has(Number(e.q))));
+}
+
+module.exports = { loadPolestarRoutes, requiredEvents };

@@ -80,7 +80,7 @@ Quest item, target and Hearthstone buttons; XP per hour and time to level; selli
 
 ## How the routes are made
 
-The leveling routes are not hand-picked. A simulator models every quest Forever offers a faction (solo quests only, with their levels, prerequisites, givers and the kills and drops their objectives take), plays millions of complete 1-60 routes for each start, and keeps the one that reaches 60 soonest under its model. From level 12 one shared route per faction is searched, so the guides join into one chain; the guides are written by hand from it and scored under the same model. Four independent searches land within five hours of each other, and under the model the guides reach 60 in about 123-124 hours played for the Horde and 128-129 for the Alliance.
+The leveling routes are not hand-picked. A simulator models every quest Forever offers a faction (solo quests only, with their levels, prerequisites, givers and the kills and drops their objectives take), plays millions of complete 1-60 routes for each start, and keeps the one that reaches 60 soonest under its model. From level 12 one shared route per faction is searched, so the guides join into one chain; the guides are written by hand from it and scored under the same model. Four independent searches land within five hours of each other, and under the model the guides reach 60 in about 130-132 hours played for the Horde and 132-134 for the Alliance, counting only what they require (their optional extras can save up to about 8 hours).
 
 ![Chart: hours to 60 and hours of grinding per start, for the guides, the best route found, the consensus route and Polestar 0.1.0](https://raw.githubusercontent.com/fitzforge/polestar/main/docs/curseforge/images/starts.png)
 
