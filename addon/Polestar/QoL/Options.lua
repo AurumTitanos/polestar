@@ -99,6 +99,11 @@ register(QOL, L["Vendors"], L["Merchants"], {
 		help = L["When the step asks you to buy something and the merchant sells it, buys what you still need after selling and repairing. Optional buys and anything over 50g are left to you. Hold Shift to skip."] },
 })
 
+register(QOL, L["Vendors"], L["Trainers"], {
+	{ kind = "toggle", key = "qol.trainAll", label = L["Learn new spells"],
+		help = L["Learns every spell a class trainer offers that you can afford, and prints the total. Profession trainers are left alone. Hold Shift to skip."] },
+})
+
 register(QOL, L["Trackers"], L["Experience"], {
 	{ kind = "toggle", key = "qol.xpTracker", label = L["XP tracker"],
 		help = L["XP per hour, time, kills and quests to level, and level splits (/pole xp)."] },

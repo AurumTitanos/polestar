@@ -2127,7 +2127,7 @@ end
 ---------------------------------------------------------------------------
 
 local classTrainers = { candidates = {} } -- a pseudo goal, so pickFor ranks them
-local trainerClasses = {} -- npc -> { classFile, ... }
+local trainerClasses = {} -- npc -> { [classFile] = true }, every class trainer
 local TRAIN_LOOKAHEAD = 4 -- applicable steps, from the current one
 
 function ns.RegisterClassTrainers(list)
@@ -2137,10 +2137,25 @@ function ns.RegisterClassTrainers(list)
 		if type(t) == "table" and type(t.npc) == "number" and type(t.map) == "number" and type(t.x) == "number"
 			and type(t.y) == "number" and type(t.classes) == "table" then
 			c[#c + 1] = t
-			trainerClasses[t.npc] = t.classes
 		end
 	end
 	picks[classTrainers] = nil
+end
+
+-- Every class trainer's npc id by class ({ WARRIOR = { 914, ... } }), not only
+-- the reminder's one per town: what Engine.IsClassTrainer answers from.
+function ns.RegisterClassTrainerIds(byClass)
+	if type(byClass) ~= "table" then return end
+	for cls, ids in pairs(byClass) do
+		if type(cls) == "string" and type(ids) == "table" then
+			for _, id in ipairs(ids) do
+				if type(id) == "number" then
+					trainerClasses[id] = trainerClasses[id] or {}
+					trainerClasses[id][cls] = true
+				end
+			end
+		end
+	end
 end
 
 -- The best class trainer for the character from where they stand, or nil.
@@ -2149,6 +2164,14 @@ function Engine.NearestClassTrainer()
 	if not player then refreshPlayer() end
 	local p = pickFor(classTrainers)
 	return p.list[p.i]
+end
+
+-- Whether `npc` is a class trainer of the character's class.
+function Engine.IsClassTrainer(npc)
+	local classes = npc and trainerClasses[npc]
+	if not classes then return false end
+	if not player then refreshPlayer() end
+	return classes[player.class] == true
 end
 
 -- The active guide sends the character to their class trainer soon.
@@ -2191,17 +2214,11 @@ end
 
 -- A trainer window of the character's class: trained at this level.
 local function noteClassTrainer(npc)
-	local classes = npc and trainerClasses[npc]
-	if not classes then return end
+	if not Engine.IsClassTrainer(npc) then return end
 	refreshPlayer()
-	for _, c in ipairs(classes) do
-		if c == player.class then
-			local s = ns.CharState()
-			s.classTrainLevel = player.level or 1
-			ns.Fire("CLASS_TRAINED", s.classTrainLevel)
-			return
-		end
-	end
+	local s = ns.CharState()
+	s.classTrainLevel = player.level or 1
+	ns.Fire("CLASS_TRAINED", s.classTrainLevel)
 end
 
 -- Fresh step state for a new guide in the loaded tab.

@@ -52,11 +52,11 @@ Revision: wow_classic_era 1.15.9.70003
 License: Blizzard Entertainment game client data; factual map geometry, names and faction hierarchy only
 World of Warcraft (c) Blizzard Entertainment, Inc.
 
-World of Warcraft: Forever client tables (UiMap, UiMapAssignment, AreaTable, ChrRaces, ChrClasses, CharBaseInfo, Faction, Map, ItemSparse) via wago.tools
----------------------------------------------------------------------------------------------------------------------------------------------------------
+World of Warcraft: Forever client tables (UiMap, UiMapAssignment, AreaTable, ChrRaces, ChrClasses, CharBaseInfo, Faction, Map) via wago.tools
+---------------------------------------------------------------------------------------------------------------------------------------------
 URL: https://wago.tools/db2?build=1.60.1.70374
 Revision: wow_classic_beta 1.60.1.70374
-License: Blizzard Entertainment game client data; factual map geometry, names, item durations and race/class combinations only
+License: Blizzard Entertainment game client data; factual map geometry, names and race/class combinations only
 World of Warcraft (c) Blizzard Entertainment, Inc.
 
 Wowhead Forever database: zone quest lists (XP, levels, Forever change notes)

@@ -55,6 +55,7 @@ local defaults = {
 	autoRepair = true,
 	repairGuild = false,     -- guild bank first when the rank allows
 	buyGoals = false,        -- buy what the step's buy goals still need
+	trainAll = false,        -- learn every spell a class trainer offers now
 	rewardHighlight = true,
 	rewardAutoPick = false,
 	flightAutoOpen = true,

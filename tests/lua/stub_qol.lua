@@ -2,7 +2,8 @@
 -- wow_stub.lua. It installs contract-faithful fakes for the Engine, Nav and
 -- Pins (just before ADDON_LOADED, after the addon files ran), overrides the
 -- map half of Compat with one flat test map, and provides the client APIs QoL
--- uses: XP, bags and items, merchant (guild repair, goods), quest rewards, gossip,
+-- uses: XP, bags and items, merchant (guild repair, goods), trainer, quest
+-- rewards, gossip,
 -- taxi map, death, loot, requests from other players (q.social), popups
 -- (q.showPopup), UIErrorsFrame message types, and installed-but-unloaded
 -- addons (q.installed).
@@ -256,6 +257,55 @@ function q.closeMerchant()
 end
 
 ---------------------------------------------------------------------------
+-- Trainer: q.trainer = { tradeskill = bool, services = { { name, rank, kind
+-- ("available" | "unavailable" | "used"), cost }, ... } }. A purchase lands
+-- a moment later, as from the server: the money is taken, the service is
+-- used and moves to the end of the list (the indexes shift), then
+-- TRAINER_UPDATE. A service with `refuse = true` is refused: nothing comes back.
+-- q.classTrainers holds the npcs the Engine knows as trainers of the
+-- character's class; q.openTrainer(npc) opens one of them unless given another.
+---------------------------------------------------------------------------
+
+q.trainer = { tradeskill = false, services = {} }
+function IsTradeskillTrainer() return q.trainer.tradeskill end
+function GetNumTrainerServices() return #q.trainer.services end
+function GetTrainerServiceInfo(i)
+	local s = q.trainer.services[i]
+	if s then return s.name, s.kind, 136096, 1, s.rank, "" end
+end
+function GetTrainerServiceCost(i)
+	local s = q.trainer.services[i]
+	if s then return s.cost or 0, q.trainer.tradeskill end
+end
+function BuyTrainerService(i)
+	local s = q.trainer.services[i]
+	call("BuyTrainerService", s and s.name, s and s.rank)
+	C_Timer.After(0.1, function()
+		if not (s and s.kind == "available" and not s.refuse and q.money >= (s.cost or 0)) then return end
+		q.money = q.money - (s.cost or 0)
+		s.kind = "used"
+		local list = q.trainer.services
+		for j = 1, #list do
+			if list[j] == s then table.remove(list, j); break end
+		end
+		list[#list + 1] = s
+		if q.trainerOpen then stub.fire("TRAINER_UPDATE") end
+	end)
+end
+
+q.classTrainers = { [198] = true }
+function q.openTrainer(npc)
+	q.npc = npc or 198
+	q.trainerOpen = true
+	stub.fire("TRAINER_SHOW")
+end
+function q.closeTrainer()
+	q.npc = nil
+	q.trainerOpen = false
+	stub.fire("TRAINER_CLOSED")
+end
+
+---------------------------------------------------------------------------
 -- Quest rewards: q.choices = { { id, count }, ... }; reward buttons like QuestInfo's
 ---------------------------------------------------------------------------
 
@@ -438,6 +488,7 @@ function Engine.GetStepIndex() return q.engine.step end
 function Engine.GetStepView(i) if i == q.engine.step then return q.engine.view end end
 function Engine.GetGuide() return q.engine.guide end
 function Engine.GetWaypoint() return q.engine.waypoint end
+function Engine.IsClassTrainer(npc) return npc ~= nil and q.classTrainers[npc] == true end
 
 -- A step from raw goals: views get status "active" unless goal.status says otherwise.
 function q.step(goals, index)
