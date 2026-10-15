@@ -6920,7 +6920,7 @@ do
 				},
 				{
 					title = "Chillwind Camp",
-					note = "Ride back south to the camp. Buy the Arcane Quickeners for the cauldrons from Alchemist Arbington.",
+					note = "Ride back south to the camp.",
 					goals = {
 						{ t = "turnin", quest = 5402, title = "Minion's Scourgestones", npc = 10840, npcName = "Argent Officer Pureheart", map = 1422, x = 42.97, y = 83.55, f = "e", note = "Argent Officer Pureheart" },
 						{ t = "turnin", quest = 5403, title = "Invader's Scourgestones", npc = 10840, npcName = "Argent Officer Pureheart", map = 1422, x = 42.97, y = 83.55, f = "e" },
@@ -6929,7 +6929,6 @@ do
 						{ t = "accept", quest = 5215, title = "The Scourge Cauldrons", npc = 10838, npcName = "Commander Ashlam Valorfist", minLevel = 50, qlvl = 53, pre = { 5092 }, preTitles = { [5092] = "Clear the Way" }, map = 1422, x = 42.7, y = 84.03, f = "e" },
 						{ t = "turnin", quest = 5215, title = "The Scourge Cauldrons", npc = 11053, npcName = "High Priestess MacDonnell", map = 1422, x = 42.97, y = 84.5, f = "e", note = "High Priestess MacDonnell" },
 						{ t = "accept", quest = 5216, title = "Target: Felstone Field", npc = 11053, npcName = "High Priestess MacDonnell", minLevel = 50, qlvl = 53, pre = { 5215 }, preTitles = { [5215] = "The Scourge Cauldrons" }, map = 1422, x = 42.97, y = 84.5, f = "e" },
-						{ t = "buy", npc = 11056, npcName = "Alchemist Arbington", item = 13320, itemName = "Arcane Quickener", count = 4, map = 1422, x = 42.66, y = 83.77, f = "e", note = "Arcane Quickener, from Alchemist Arbington" },
 					},
 				},
 				{
@@ -6953,10 +6952,12 @@ do
 				},
 				{
 					title = "Chillwind Camp",
+					note = "Buy one Arcane Quickener from Alchemist Arbington for Felstone's cauldron, right before you go: the quickeners vanish after 30 minutes.",
 					goals = {
 						{ t = "turnin", quest = 5097, title = "All Along the Watchtowers", npc = 10838, npcName = "Commander Ashlam Valorfist", map = 1422, x = 42.7, y = 84.03, f = "e", note = "Commander Ashlam Valorfist" },
 						{ t = "turnin", quest = 5217, title = "Return to Chillwind Camp", npc = 11053, npcName = "High Priestess MacDonnell", map = 1422, x = 42.97, y = 84.5, f = "e", note = "High Priestess MacDonnell" },
 						{ t = "accept", quest = 5219, title = "Target: Dalson's Tears", npc = 11053, npcName = "High Priestess MacDonnell", minLevel = 50, qlvl = 55, pre = { 5217 }, preTitles = { [5217] = "Return to Chillwind Camp" }, map = 1422, x = 42.97, y = 84.5, f = "e" },
+						{ t = "buy", npc = 11056, npcName = "Alchemist Arbington", item = 13320, itemName = "Arcane Quickener", map = 1422, x = 42.66, y = 83.77, f = "e", note = "Arcane Quickener, from Alchemist Arbington" },
 					},
 				},
 				{
@@ -6997,6 +6998,7 @@ do
 				},
 				{
 					title = "Chillwind Camp",
+					note = "Buy two more Arcane Quickeners for the Writhing Haunt's and Dalson's cauldrons, and ride straight there: they vanish after 30 minutes.",
 					goals = {
 						{ t = "turnin", quest = 5223, title = "Return to Chillwind Camp", npc = 11053, npcName = "High Priestess MacDonnell", map = 1422, x = 42.97, y = 84.5, f = "e", note = "High Priestess MacDonnell" },
 						{ t = "accept", quest = 5225, title = "Target: Gahrron's Withering", npc = 11053, npcName = "High Priestess MacDonnell", minLevel = 50, qlvl = 58, pre = { 5223 }, preTitles = { [5223] = "Return to Chillwind Camp" }, map = 1422, x = 42.97, y = 84.5, f = "e" },
@@ -7004,6 +7006,7 @@ do
 						{ t = "accept", quest = 211, title = "Alas, Andorhal", npc = 10838, npcName = "Commander Ashlam Valorfist", minLevel = 50, qlvl = 60, pre = { 5097 }, preTitles = { [5097] = "All Along the Watchtowers" }, map = 1422, x = 42.7, y = 84.03, f = "e", optional = true, note = "Araj the Summoner is a level 61 elite" },
 						{ t = "turnin", quest = 5533, title = "Scholomance", npc = 11056, npcName = "Alchemist Arbington", map = 1422, x = 42.66, y = 83.77, f = "e", note = "Alchemist Arbington" },
 						{ t = "accept", quest = 5537, title = "Skeletal Fragments", npc = 11056, npcName = "Alchemist Arbington", minLevel = 55, qlvl = 57, pre = { 5533 }, preTitles = { [5533] = "Scholomance" }, map = 1422, x = 42.66, y = 83.77, f = "e" },
+						{ t = "buy", npc = 11056, npcName = "Alchemist Arbington", item = 13320, itemName = "Arcane Quickener", count = 2, map = 1422, x = 42.66, y = 83.77, f = "e", note = "Arcane Quickener, from Alchemist Arbington" },
 					},
 				},
 				{

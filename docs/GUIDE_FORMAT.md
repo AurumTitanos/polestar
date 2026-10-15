@@ -360,6 +360,17 @@ Warnings:
 - a `goto` right before a goal that already leads to the same place: the next
   goal (notes skipped) is located within 200 yards of the goto point, measured to
   the edge of its nearest spawn area (see `goto` under "Places")
+- a quest item that vanishes after a while (items.json `duration`, from the
+  Forever client's ItemSparse) carried longer than it lasts: from the goal
+  that gets it (an `accept` whose quest hands it over, a `collect`, a `buy`)
+  to a later `turnin` that needs it or `use` of it, timed from the latest
+  goal that got more of it (`buy 13320 x2` serves two turn-ins, the second
+  measured from the purchase), with the simulator's travel and kill times
+  over the guide's goals (docs/SIMULATION.md, "Keeping the guides' fixes"):
+  ``item 10439 (Durnan's Scalding Mornbrew) lasts 5 minutes, but the route
+  takes about 11:29 from here to the `turnin` that spends it (line 196)``.
+  Goals for other characters and `optional` ones are left out, so the
+  estimate errs short
 - a smart target with no candidate for a faction the goal applies to (and, for
   `train class`, for a class that faction's allowed races can be); a `train
   <Profession>` whose default rank needs more skill than any earlier `skill` target

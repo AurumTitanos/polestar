@@ -6,8 +6,9 @@
 // never take, missing prerequisites, accepts above the plausible level,
 // accepts closed by an exclusive quest taken earlier, accepts never turned in
 // on a route, `complete` on quests without objectives, required elite work in
-// Leveling guides, `|` in player-facing text, and a `goto` placed right
-// before a goal that already leads to the same place.
+// Leveling guides, `|` in player-facing text, a `goto` placed right before a
+// goal that already leads to the same place, and timed quest items carried
+// longer than they last (timed.js).
 //
 // Our house rules (required elite work, the solo filter) are errors in our
 // pack (`guides`) and warnings in every other.
@@ -25,6 +26,7 @@ const SOLO = require('../sim/solo');
 const { eliteWork } = require('./group');
 const { PIPE_HINT } = require('../pack/manifest');
 const { MAX_LEVEL, CUM_XP } = require('../game/xp');
+const { checkTimedItems } = require('./timed');
 
 // Quest XP is only part of what a questing route earns; mob kills on the way
 // add roughly as much again. Generous on purpose: this only drives a warning.
@@ -346,11 +348,11 @@ function validateGuides(guides, data, diag) {
 		}
 		return xp;
 	};
-	const walkXp = (g, start, onAccept) => {
+	const walkXp = (g, start, onGoal) => {
 		let xp = start;
 		for (const { step, goal } of goalsOf(g)) {
-			if (goal.t === 'accept' && onAccept) onAccept(step, goal, xp);
-			else if (goal.t === 'turnin') {
+			if (onGoal) onGoal(step, goal, xp);
+			if (goal.t === 'turnin') {
 				const q = data.quest(goal.quest);
 				// Data XP, else the XP the turn-in line states (`xp <N>`).
 				const qxp = q && q.xp > 0 ? q.xp : goal.rewards && goal.rewards.xp > 0 ? goal.rewards.xp : 0;
@@ -537,15 +539,24 @@ function validateGuides(guides, data, diag) {
 			for (const r of failing) diag.warn(file, a.goal._line, `quest ${name} is accepted but never turned in on the route through "${r.s.id}"${some(r.left)}${why(r, 'it')}`, hint(outside(r)));
 		});
 
+		// The route's level at each goal (when XP data exists): accepts above
+		// it warn, and the timed-item check times kills at it.
+		const levels = new Map();
 		if (data.hasXp) {
 			walkXp(g, entryXp(g, new Set([g.id])), (step, goal, xp) => {
-				if (!(goal.minLevel > 0)) return;
 				const reach = levelAt(xp);
+				levels.set(goal, reach);
+				if (goal.t !== 'accept' || !(goal.minLevel > 0)) return;
 				if (goal.minLevel > reach) {
 					diag.warn(file, goal._line, `quest ${goal.quest} needs level ${goal.minLevel}, but the route plausibly reaches only level ${reach} here`);
 				}
 			});
 		}
+		checkTimedItems(g, data, diag, {
+			levelAt: (goal) => levels.get(goal),
+			characters: (step, goal) => characters([gl, step._only, goal._only], goal.quest !== undefined ? data.quest(goal.quest) : null),
+			meets,
+		});
 	}
 }
 

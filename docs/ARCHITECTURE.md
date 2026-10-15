@@ -2223,7 +2223,9 @@ Optional extras: quests `skill` (profession requirement), `event` (holiday),
 `f`, `x`, `y`; npcs `levelMax`, `rank`, `roles` (flightmaster, innkeeper,
 vendor, trainer, ...), `subName`; objects `roles` (herb, mine, chest, ...); items
 `containers` (items that contain it), `questItem: true` (QuestieDB item class 12:
-drops only while on the quest). A drop chance is `null` when QuestieDB lists the
+drops only while on the quest), `duration` (seconds the item lasts once the
+player has it: the Forever client's ItemSparse DurationInInventory, when that
+table is cached; the timed-item lint reads it). A drop chance is `null` when QuestieDB lists the
 dropper but no source has a rate. From QuestieDB, each only when it has a
 value: quests `preAll` (all must be done; preQuestGroup), `preAny` (any one
 suffices; preQuestSingle), `breadcrumbFor` (the quest this optional breadcrumb
