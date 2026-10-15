@@ -498,12 +498,15 @@ ns.RegisterCommand("arrow", function(rest)
 	end
 end, L["Waypoint arrow: show, hide, reset"])
 
--- Two whitespace-separated coordinates may use a decimal comma ("45,5 30,2");
--- otherwise a comma separates x and y ("45,30"). A comma in x alone stays the
--- separator, so "45,30 50" keeps its numeric label.
+-- Two whitespace-separated coordinates take decimal points ("45.5 30.2") or a
+-- decimal comma in both ("45,5 30,2"); otherwise a comma separates x and y
+-- ("45,30", "45, 30 Camp"). A decimal comma in only one ("45,5 30", "45 30,2")
+-- is refused: it reads just as well as x,y with a numeric label ("45,30 50"),
+-- and either guess can point the arrow at a plausible wrong spot.
 local function parseWay(s)
 	local x, y, label = s:match("^%s*(%d+[,%.]?%d*)%s+(%d+[,%.]?%d*)(.*)$")
-	if x and (label == "" or label:match("^%s")) and (y:find(",") or not x:find(",")) then
+	if x and (label == "" or label:match("^%s")) then
+		if (x:find("%d,%d") ~= nil) ~= (y:find("%d,%d") ~= nil) then return end
 		x, y = x:gsub(",", "."), y:gsub(",", ".")
 	else
 		x, y, label = s:match("^%s*([%d%.]+)[%s,]+([%d%.]+)(.*)$")
