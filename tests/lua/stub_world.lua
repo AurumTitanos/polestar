@@ -384,6 +384,22 @@ function C_QuestLog.GetQuestObjectives(q)
 	end
 	return out
 end
+-- The log's entries in order (QuestLogDocumentation.lua GetNumQuestLogEntries,
+-- GetInfo): quests by id, no headers.
+local function logIDs()
+	local ids = {}
+	for q in pairs(world.log) do ids[#ids + 1] = q end
+	table.sort(ids)
+	return ids
+end
+function C_QuestLog.GetNumQuestLogEntries()
+	local n = #logIDs()
+	return n, n
+end
+function C_QuestLog.GetInfo(i)
+	local q = logIDs()[i]
+	if q then return { questID = q, isHeader = false, title = world.log[q].title } end
+end
 
 C_Item = {}
 function C_Item.GetItemCount(id) return world.items[id] or 0 end
