@@ -214,6 +214,86 @@ test('target button: kill targets and QuestDB droppers, preferred name last, eac
 	assert.deepEqual(out[6], ['nil', false]);
 });
 
+test('step key: one binding does the step\'s next action, the NPC, the quest item, the mobs or the Hearthstone, in guide order', () => {
+	const out = run(`
+		local s = PolestarStepButton
+		local function now() return { s:GetAttribute("type") or "nil", s:GetAttribute("item") or s:GetAttribute("macrotext") or "nil" } end
+		q.items[900] = { name = "Torch" }
+		q.items[901] = { name = "Quest Wand", classID = 12 }
+		q.items[6948] = { name = "Hearthstone" }
+		q.addItem(0, 1, 900, 1)
+		q.addItem(0, 2, 6948, 1)
+		-- the NPC of the first open goal
+		q.step({ { t = "accept", quest = 7, npc = 197, npcName = "Marshal McBride" }, { t = "kill", target = "Kobold Vermin", quest = 7, oi = 1 } })
+		emit(now())
+		-- accepted: the mobs, each press the next name
+		q.step({ { t = "accept", quest = 7, npc = 197, npcName = "Marshal McBride", status = "done" },
+			{ t = "kill", target = "Kobold Vermin", quest = 7, oi = 1 }, { t = "kill", target = "Kobold Worker", quest = 8, oi = 1 } })
+		emit(now())
+		q.click(s, true)
+		q.click(s, false)
+		emit(now())
+		-- a use goal first: the item
+		q.step({ { t = "use", item = 900, quest = 9, oi = 1 }, { t = "kill", target = "Wolf" } })
+		emit(now())
+		-- a collect with no known mobs does not jump the use goal after it
+		q.step({ { t = "collect", item = 950, quest = 9, oi = 2 }, { t = "use", item = 900, quest = 9, oi = 1 }, { t = "kill", target = "Wolf" } })
+		emit(now())
+		-- a hearth goal
+		q.step({ { t = "hearth", location = "Goldshire" }, { t = "turnin", quest = 9, npc = 240, npcName = "Marshal Dughan" } })
+		emit(now())
+		-- nothing to press for but the quest's log item: that item
+		q.specialItems[10] = 901
+		q.addItem(0, 3, 901, 1)
+		q.step({ { t = "goto", map = 9000, x = 1, y = 1 }, { t = "complete", quest = 10 } })
+		emit(now())
+		-- nothing at all
+		q.step({ { t = "goto", map = 9000, x = 1, y = 1 } })
+		emit(now())
+		-- the visible buttons off: the key still works
+		set("itemButton", false)
+		set("targetButton", false)
+		q.step({ { t = "kill", target = "Murloc" } })
+		emit(now())
+		-- mid-fight it keeps what it did until combat ends
+		q.combat(true)
+		q.step({ { t = "turnin", quest = 9, npc = 240, npcName = "Marshal Dughan" } })
+		emit(now())
+		q.combat(false)
+		emit(now())
+		emit(s:IsShown())
+	`);
+	assert.deepEqual(out[0], ['macro', '/targetexact Marshal McBride']);
+	assert.deepEqual(out[1], ['macro', '/targetexact Kobold Worker\n/targetexact Kobold Vermin']);
+	assert.deepEqual(out[2], ['macro', '/targetexact Kobold Vermin\n/targetexact Kobold Worker'], 'a press moves to the next name');
+	assert.deepEqual(out[3], ['item', 'item:900']);
+	assert.deepEqual(out[4], ['item', 'item:900'], 'guide order: the collect has no mobs to target');
+	assert.deepEqual(out[5], ['item', 'item:6948']);
+	assert.deepEqual(out[6], ['item', 'item:901']);
+	assert.deepEqual(out[7], ['nil', 'nil']);
+	assert.deepEqual(out[8], ['macro', '/targetexact Murloc']);
+	assert.deepEqual(out[9], ['macro', '/targetexact Murloc'], 'no change in combat');
+	assert.deepEqual(out[10], ['macro', '/targetexact Marshal Dughan']);
+	assert.equal(out[11], false, 'a key only: no button on screen');
+});
+
+// Every CLICK binding names a button Buttons.lua creates and has its label in
+// Commands.lua.
+test('key bindings: each CLICK binding has a button and a label', () => {
+	const fs = require('node:fs');
+	const path = require('node:path');
+	const dir = path.join(__dirname, '..', 'addon', 'Polestar');
+	const xml = fs.readFileSync(path.join(dir, 'Bindings.xml'), 'utf8');
+	const commands = fs.readFileSync(path.join(dir, 'Core', 'Commands.lua'), 'utf8');
+	const buttons = fs.readFileSync(path.join(dir, 'QoL', 'Buttons.lua'), 'utf8');
+	const names = [...xml.matchAll(/name="CLICK (\w+):LeftButton"/g)].map((m) => m[1]);
+	assert.ok(names.includes('PolestarStepButton'));
+	for (const n of names) {
+		assert.ok(commands.includes('_G["BINDING_NAME_CLICK ' + n + ':LeftButton"] = L['), n + ' has a label');
+		assert.ok(buttons.includes('"' + n + '"'), n + ' is created');
+	}
+});
+
 test('hearth: button while a hearth goal is open; GetHearth reports bind and cooldown', () => {
 	const out = run(`
 		local h = PolestarHearthButton
