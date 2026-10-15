@@ -829,6 +829,26 @@ test('buying: a goal costing over 50g is left to the player with a line saying s
 	assert.equal(thread, 120);
 });
 
+test('buying: the 50g cap weighs the whole goal, not this visit\'s stock: 5 x 20g with 2 in stock is left to the player', () => {
+	const [requests, money, left] = run(`${GOODS}
+		set("buyGoals", true)
+		q.money = 3000000                 -- 300g
+		q.items[30] = { name = "Gleaming Bauble", quality = 1, price = 0 }
+		q.goods = { { id = 30, price = 200000, numAvailable = 2 } }
+		q.step({ { t = "buy", item = 30, count = 5, itemName = "Gleaming Bauble" } })
+		q.openMerchant()
+		stub.advance(1)
+		local n = 0
+		for _, c in ipairs(q.calls) do if c[1] == "BuyMerchantItem" then n = n + 1 end end
+		emit(n)
+		emit(q.money)
+		emit(printed("Left 5 Gleaming Bauble %(100g 0s 0c%) for you to buy"))
+	`);
+	assert.equal(requests, 0, 'none bought, though the two in stock cost 40g');
+	assert.equal(money, 3000000);
+	assert.equal(left, true);
+});
+
 // ---------------------------------------------------------------------------
 // Quest rewards
 // ---------------------------------------------------------------------------

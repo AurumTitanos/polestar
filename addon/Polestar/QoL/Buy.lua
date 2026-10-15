@@ -95,8 +95,11 @@ function Buy.Run()
 			if need > 0 and not extendedCost and (price or 0) > 0 then
 				perStack = (perStack and perStack > 0) and perStack or 1
 				local items, cost, shortItems, shortCost = Buy.Plan(need, price, perStack, numAvailable, money)
-				if cost + shortCost > MAX_SPEND then
-					ns.Print(format(L["Left %d %s (%s) for you to buy."], items + shortItems, name, QoL.Money(cost + shortCost)))
+				-- The whole goal, not only what this visit's stock covers:
+				-- a merchant with fewer in stock must not split a dear goal.
+				local goalCost = ceil(need / perStack) * price
+				if goalCost > MAX_SPEND then
+					ns.Print(format(L["Left %d %s (%s) for you to buy."], need, name, QoL.Money(goalCost)))
 					items, shortItems = 0, 0
 				end
 				if shortItems > 0 then
