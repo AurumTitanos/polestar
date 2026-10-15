@@ -399,6 +399,9 @@
   waypoints, which code calls the client outside Compat), GUIDE_FORMAT (the
   guide id rule), README, SIMULATION, THIRD_PARTY and the tools README
   (thanks CDVolvik).
+- `trainers build` reads the same guides as `compile`: Recorder drafts under
+  `guides/drafts/` and build output under `dist/` no longer add class
+  trainers to `trainers.json` (thanks meellm).
 
 ## 0.2.3 (2026-10-14)
 
