@@ -521,6 +521,19 @@ function svg(dump, { fonts, textures, roots, margin = 28, prefix = 'p', shared, 
 			if (op > 0.001) body.push(`<rect x="${f2(r.x - ox)}" y="${f2(r.y - oy)}" width="${f2(r.w)}" height="${f2(r.h)}" fill="url(#${id})" opacity="${f2(op)}"${clip}/>`);
 			return;
 		}
+		if (name === 'white' && t.vertexOffset) {
+			// SetVertexOffset bends the quad: its corners (upper left, lower
+			// left, upper right, lower right) moved in UI units, y up. Pieces
+			// share edges exactly in game; crispEdges keeps the SVG renderer's
+			// own anti-aliasing from drawing seams between them.
+			const s = scaleOf(t);
+			const v = t.vertexOffset;
+			const at = (i, x, y) => `${f2(x - ox + v[2 * i] * s)},${f2(y - oy - v[2 * i + 1] * s)}`;
+			const pts = [at(0, r.x, r.y), at(2, r.x + r.w, r.y), at(3, r.x + r.w, r.y + r.h), at(1, r.x, r.y + r.h)].join(' ');
+			const { fill, opacity } = rgba(vc, a * (t.alpha ?? 1));
+			if (opacity > 0.001) body.push(`<polygon points="${pts}" fill="${fill}" fill-opacity="${f2(opacity)}" shape-rendering="crispEdges"${clip}/>`);
+			return;
+		}
 		if (name === 'white' && !t.texCoord) {
 			rect(r, vc, a * (t.alpha ?? 1), clip);
 			return;

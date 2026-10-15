@@ -1062,21 +1062,31 @@ area objective (`search`) never says arrived: `Nav.Sample` returns "search"
 and the arrow says "Search here", the goal label, and "Click the arrow for the
 next spot". A left click on the arrow (not a drag) calls
 `Nav.NextSpot([index])`, which asks the Engine (`CycleSpot`) for the next spot
-while the target is the Engine's waypoint with `spots`. The `nav.target` pin
+while the target is the Engine's waypoint with `spots`. A guide goal's area
+shows as its spawn regions (below); any other area target's `nav.target` pin
 carries the `area`, so the world map and the minimap draw the area's soft disc
-under the target pin; the `nav.spots` layer (world map, under `nav.worldPins`)
+under the target pin. The `nav.spots` layer (world map, under `nav.worldPins`)
 marks every other spot of the target as a small pin (an `alt` spot smaller and
 fainter, its tooltip "It also spawns here"); clicking one searches there next
 (`Nav.NextSpot(i)`). TomTom's arrival distance is `area + r`.
 
-Every spawn area of the current step's open goals is a zone on the map
+Every place the current step's open goals spawn is a region on the map
 (`Layers.lua`, read from `Engine.GetGuide().steps[step].goals[i].spots` for
-the goals `GetStepView` shows active or pending): `nav.areas` holds the other
-spots of the target's goal, area-only pins in the arrow's colour at 0.85
-(`alt` 0.5), on the world map and the minimap (`nav.worldPins`,
-`nav.minimapPins`); `nav.goalAreas` the spots of the step's other goals, in
-`place` at 0.65 (`alt` 0.4), on the world map only. A point picked by hand
-(`SetTarget`) leaves every goal's areas in `nav.goalAreas`.
+the goals `GetStepView` shows active or pending). `Layers.Regions(goal)`
+groups a goal's spots once per goal (cached by the compiled goal table): each
+spot's disc (its radius covers its spawns, at least 15 yd, plus 10 yd) joins
+the spots whose discs come within 90 yd, nearest first, while the region stays
+at most 700 yd across (a coast of spawns is a chain of regions, not one hull
+over the sea). A region is the polygon whose sides touch the convex hull of
+its discs from outside (16 sides, 8 under 200 yd), so it covers every spawn
+of its spots; `alt` when all its spots are. `nav.areas` holds the target's
+goal's regions as `hull` pins in the arrow's colour (alpha 1, `alt` 0.6), on
+the world map and the minimap (`nav.worldPins`, `nav.minimapPins`);
+`nav.goalAreas` the step's other goals' regions in `place` at 0.6 (`alt`
+0.35), on the world map only. A point picked by hand (`SetTarget`) leaves
+every goal's regions in `nav.goalAreas`. The layers are set again only when
+what they show changed (step, open goals, the arrow's goal, colours,
+surfaces), so route and progress updates redraw nothing.
 
 While a `SetTarget` override is active the Engine keeps announcing its own
 waypoint; `Nav.GetTarget()` is the point actually being guided to. Nav fires
@@ -1093,7 +1103,8 @@ Polestar.Pins.SetLayerVisible(layer, visible)
 -- pin = { map, x, y, f, icon (Theme.Media name or texture path), size, minimapSize, color = { r, g, b, a },
 --         tooltip = string | function(tooltip), onClick = function(button), priority,
 --         glow (soft halo), ring = { r, g, b } (ring round the disc), backdrop (scrim disc), area (yards),
---         areaOnly (only the area draws, no pin) }
+--         hull = { wx1, wy1, ... } (a convex region in world yards on the pin's continent `c`),
+--         areaOnly (only the area or hull draws, no pin) }
 ```
 
 Pins are drawn on the world map for the map being viewed (converted through Compat
@@ -1116,6 +1127,23 @@ minimap's shape (a round minimap: `Media/Nav/pin-fill`'s disc over the
 minimap's width; a square one: a plain square), so a disc is cut at the rim.
 A client without mask textures draws only the discs that fit inside.
 `GetMinimapAreas(layer)` lists the drawn discs (tests).
+
+A pin's `hull` is a region: a convex polygon cut from solid textures
+(`WHITE8X8`) whose quads `SetVertexOffset` bends into place, with pixel
+snapping off, so pieces that share an edge are rasterised without a seam or
+an overlap. The polygon inset by the rim is filled with quads fanned from its
+first point (the pin's colour at 0.2 alpha), the rim is one quad per side
+(0.7), 1.5 UI units wide on screen. Every piece shares the polygon's box
+around its centre. On the world map a hull is a pin of its own pool
+(`PIN_FRAME_LEVEL_QUEST_BLOB`, no mouse, the box in canvas units; the rim is
+laid out again when zooming changes its width by a quarter), drawn when any of
+it lies on the viewed map (the view's world-to-percent transform, the trail's).
+On the minimap a `minimapAreas` layer's hulls sit with the discs, masked the
+same way; a hull is laid out again only when its pin, the zoom, the minimap's
+size or (rotating) the facing changed, and walking moves only the first
+piece, which the others are anchored to. `GetMinimapHulls(layer)` lists the
+drawn hulls with their outlines (tests); `AreaStats()` counts hulls, pieces
+and discs per surface (in game: `/dump Polestar.Pins.AreaStats()`).
 
 ```lua
 Polestar.Pins.SetTrail(runs, opts)   -- runs = { { live = true?, { c, wx, wy }, ... }, ... }; opts = { world, minimap, color }
