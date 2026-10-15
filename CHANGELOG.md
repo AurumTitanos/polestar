@@ -148,7 +148,9 @@
 - `travel chain --to <map,x,y>` drafts an approach chain (a cave, a climb)
   from recorded walks to that spot: where the walks leave the straight line
   to it, and the walked path from there as nodes with radii and captions,
-  ready for the local crossings file once checked in game.
+  ready for the local crossings file once checked in game. `--session`
+  drafts from chosen recordings, `--reverse` counts ways out as ways in
+  (thanks CDVolvik).
 
 ### For contributors
 

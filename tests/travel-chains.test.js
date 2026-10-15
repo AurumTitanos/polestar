@@ -95,14 +95,17 @@ test('a walk around a mountain into a cave becomes a chain from where it leaves 
 		assert.ok(nodes.some((n) => yardsTo(n, corner) <= 25), `a node near [${corner}]`);
 	}
 	assert.ok(nodes.length <= 10, `${nodes.length} nodes`);
-	assert.ok(nodes.every((n) => n.map === MAP && n.radius >= 3 && n.radius <= 15 && n.caption));
+	assert.ok(nodes.every((n) => n.map === MAP && n.radius >= 3 && n.radius <= 15));
+	assert.ok(nodes.every((n) => !('caption' in n)), 'no --name: every caption is the addon\'s translated default');
 	assert.deepEqual(validateCrossings({ schema: 1, chains: [chain] }, frames).errors, []);
 });
 
 test('with walks from two sides, the chain starts at the cave mouth where they meet', () => {
 	// One session walks in from the south and leaves to the east: its way out, reversed, is a second approach.
 	const out = [...FROM_EAST].reverse();
-	const { chain, approaches } = chainFor([recording('both', [...FROM_SOUTH, ...out.slice(1)])]);
+	const both = [recording('both', [...FROM_SOUTH, ...out.slice(1)])];
+	assert.deepEqual(chainFor(both).approaches.map((a) => a.direction), ['in'], 'ways out only count with reverse');
+	const { chain, approaches } = chainFor(both, { reverse: true });
 	assert.deepEqual(approaches.map((a) => a.direction).sort(), ['in', 'out']);
 	near(chain.nodes[0], MOUTH, 20, 'the mouth');
 	assert.ok(chain.nodes.every((n) => yardsTo(n, [120, -100]) > 40), 'no node on the detour around the mountain');
@@ -112,19 +115,25 @@ test('with walks from two sides, the chain starts at the cave mouth where they m
 	assert.ok(south.yards > approaches.find((a) => a.direction === 'out').yards);
 });
 
-test('a walk that follows the straight line means no chain, even beside one that goes around; one that never reaches the target says how close it came', () => {
+test('only straight walks mean no chain; beside one that goes around they are reported, not followed; one that never reaches the target says how close it came', () => {
 	const straight = chainFor([recording('straight', [[0, -400], [0, 0]])]);
 	assert.equal(straight.chain, null);
 	assert.equal(straight.approaches.length, 1);
 	assert.equal(straight.approaches[0].mouth, null);
 
-	// One walk goes straight in, another goes around: the target is open from one side, so no chain (it would force the detour on everyone).
-	const mixed = chainFor([recording('around', FROM_SOUTH), recording('straight', [[0, -400], [0, 0]])]);
-	assert.equal(mixed.chain, null);
+	// One walk goes straight (with no height it may be on the hill above the cave), another goes around: the chain is the detour.
+	const walks = [recording('around', FROM_SOUTH), recording('straight', [[0, -400], [0, 0]])];
+	const mixed = chainFor(walks);
+	assert.ok(mixed.chain, 'a straight walk does not cancel the chain');
+	near(mixed.chain.nodes[0], DETOUR, 25, 'the mouth');
 	assert.deepEqual(mixed.approaches.map((a) => [a.session, a.mouth === null]), [['around', false], ['straight', true]]);
+	// sessions keeps only the chosen walks.
+	assert.deepEqual(chainFor(walks, { sessions: ['straight'] }).approaches.map((a) => a.session), ['straight']);
+	assert.equal(chainFor(walks, { sessions: ['straight'] }).chain, null);
+	assert.deepEqual(chainFor(walks, { sessions: ['around'] }).approaches.map((a) => a.session), ['around']);
 	// The same in one unbroken walk: in around the mountain, back out the same way, then straight in.
 	const twice = chainFor([recording('twice', [...FROM_SOUTH, ...[...FROM_SOUTH].reverse().slice(1), [0, -20]])]);
-	assert.equal(twice.chain, null);
+	assert.ok(twice.chain);
 	assert.ok(twice.approaches.some((a) => a.mouth === null), 'the second visit is an approach of its own');
 
 	const missed = chainFor([recording('missed', [[0, -400], [0, -100], [200, -100]])]);
@@ -149,7 +158,7 @@ test('travel chain prints a candidate entry, and with it the planner enters the 
 	fs.mkdirSync(recDir);
 	const { rec } = recording('both', [...FROM_SOUTH, ...[...FROM_EAST].reverse().slice(1)]);
 	fs.writeFileSync(path.join(recDir, 'both.json'), JSON.stringify(rec));
-	const args = ['travel', 'chain', '--to', `${MAP},${T.x},${T.y}`, '--name', 'Test Mine', '--data', path.join(FIX, 'data'), '--recordings', recDir];
+	const args = ['travel', 'chain', '--to', `${MAP},${T.x},${T.y}`, '--name', 'Test Mine', '--reverse', '--data', path.join(FIX, 'data'), '--recordings', recDir];
 
 	const text = polestar(args);
 	assert.equal(text.status, 0, text.stderr + text.stdout);
@@ -161,7 +170,7 @@ test('travel chain prints a candidate entry, and with it the planner enters the 
 	assert.equal(json.status, 0, json.stderr + json.stdout);
 	const chain = JSON.parse(json.stdout);
 	assert.equal(chain.nodes[0].caption, 'Go to Test Mine');
-	assert.ok(chain.nodes.slice(1).every((n) => n.caption === 'Follow the path'));
+	assert.ok(chain.nodes.slice(1).every((n) => !('caption' in n)), 'the rest take the translated default');
 
 	const crossingsFile = path.join(dir, 'crossings.json');
 	fs.writeFileSync(crossingsFile, JSON.stringify({ schema: 1, frame: 'e', chains: [chain] }));
@@ -182,7 +191,21 @@ test('travel chain prints a candidate entry, and with it the planner enters the 
 	fs.writeFileSync(path.join(openDir, 'straight.json'), JSON.stringify(recording('straight', [[0, -400], [0, 0]]).rec));
 	const open = polestar(['travel', 'chain', '--to', `${MAP},${T.x},${T.y}`, '--data', path.join(FIX, 'data'), '--recordings', openDir]);
 	assert.equal(open.status, 0, open.stderr + open.stdout);
-	assert.match(open.stdout, /no chain needed for Westfall 50, 50: a recorded walk reaches it on the straight line \(straight\)/);
+	assert.match(open.stdout, /no chain needed for Westfall 50, 50: every recorded walk reaches it on the straight line \(straight\)/);
+
+	// A straight walk beside a detour: warned about, and the chain is still drafted; --session picks walks.
+	fs.writeFileSync(path.join(openDir, 'around.json'), JSON.stringify(recording('around', FROM_SOUTH).rec));
+	const mixedArgs = ['travel', 'chain', '--to', `${MAP},${T.x},${T.y}`, '--data', path.join(FIX, 'data'), '--recordings', openDir];
+	const mixed = polestar(mixedArgs);
+	assert.equal(mixed.status, 0, mixed.stderr + mixed.stdout);
+	assert.match(mixed.stderr, /warning: straight reach Westfall 50, 50 on the straight line; drafting from the walks that detour/);
+	assert.match(mixed.stdout, /approach chain candidate for Westfall 50, 50/);
+	const picked = polestar([...mixedArgs, '--session', 'around']);
+	assert.equal(picked.status, 0, picked.stderr + picked.stdout);
+	assert.doesNotMatch(picked.stderr, /warning/);
+	assert.match(picked.stdout, /1 walk\(s\) reach the target from 300 yd or more \(around\)/);
+	const onlyStraight = polestar([...mixedArgs, '--session', 'straight']);
+	assert.match(onlyStraight.stdout, /no chain needed/);
 
 	const none = polestar(['travel', 'chain', '--to', `${MAP},90,10`, '--data', path.join(FIX, 'data'), '--recordings', recDir]);
 	assert.equal(none.status, 1);

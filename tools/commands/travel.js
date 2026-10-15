@@ -54,8 +54,11 @@ and print the legs.
 chain: a candidate approach chain (a cave, a climb) for the local crossings
 file, from the recorded walks that reach a target: where each walk leaves the
 straight line to the target, and the walked path from there simplified into
-nodes with radii and captions. Walks from several sides meet at the mouth,
-so the shortest chain is printed. Check it in game before using it.
+nodes with radii and a first caption. Walks from several sides meet at the
+mouth, so the shortest chain is printed. A walk that keeps to the straight
+line is reported but does not stop the draft (recordings have no height: it
+may have followed the arrow onto the hill above a cave). Check it in game
+before using it.
 
   --to <map,x,y>       the target (uiMapID, Era map percent)
   --name <text>        the place ("Fargodeep Mine"): the chain's name, id and first caption
@@ -63,6 +66,8 @@ so the shortest chain is printed. Check it in game before using it.
   --within <yd>        how far back from the target a walk is followed; shorter walks
                        do not count (default 300)
   --tolerance <yd>     how far the walk may stray from the line between two nodes (default 8)
+  --session <id>       draft from this session's walks only (repeatable)
+  --reverse            count each walk's way out, reversed, as a way in too
   --data <dir>         data/forever (map-frames, zones)
   --recordings <dir>   data/recordings
   --json               print only the chain entry`;
@@ -199,6 +204,8 @@ function chain(rest) {
 			data: { type: 'string' },
 			recordings: { type: 'string' },
 			json: { type: 'boolean' },
+			session: { type: 'string', multiple: true },
+			reverse: { type: 'boolean' },
 		},
 	});
 	const to = parsePoint(values.to, '--to');
@@ -212,7 +219,7 @@ function chain(rest) {
 	const recordings = readRecordings(path.resolve(values.recordings || path.join(ROOT, 'data', 'recordings')));
 	const within = yardsOption(values.within, '--within', 300);
 	const { walks } = recordedWalks({ recordings, frames });
-	const result = recordedChain({ walks, target: to, frames, within, tolerance: yardsOption(values.tolerance, '--tolerance', 8), id: values.id, name: values.name });
+	const result = recordedChain({ walks, target: to, frames, within, tolerance: yardsOption(values.tolerance, '--tolerance', 8), id: values.id, name: values.name, sessions: values.session, reverse: values.reverse });
 	const where = `${frames.name(to.map) || to.map} ${to.x}, ${to.y}`;
 	if (!result.approaches.length) {
 		const near = result.nearest === null ? 'none is on its continent' : `the nearest passes ${Math.round(result.nearest)} yd away`;
@@ -221,8 +228,12 @@ function chain(rest) {
 	}
 	if (!result.chain) {
 		const open = [...new Set(result.approaches.filter((a) => !a.mouth).map((a) => a.session))].sort();
-		console.log(`no chain needed for ${where}: a recorded walk reaches it on the straight line (${open.join(', ')})`);
+		console.log(`no chain needed for ${where}: every recorded walk reaches it on the straight line (${open.join(', ')})`);
 		return 0;
+	}
+	const straight = [...new Set(result.approaches.filter((a) => !a.mouth).map((a) => a.session))].sort();
+	if (straight.length) {
+		console.warn(`warning: ${straight.join(', ')} reach ${where} on the straight line; drafting from the walks that detour (pick sessions with --session)`);
 	}
 	if (values.json) {
 		console.log(chainJson(result.chain));

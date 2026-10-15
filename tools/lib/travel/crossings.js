@@ -282,15 +282,16 @@ function recordedCrossings(steps, frames) {
 // A candidate approach chain for one target, from the recorded walks that
 // reach it, for a person to check in game before it goes into the crossings
 // file. Every pass a walk makes within REACH yards of the target gives two
-// approaches: the walk up to its closest point, and the walk after it,
-// reversed (the way out is a way in), each followed back `within` yards; a
-// shorter one does not count. It leaves the straight line where it has walked WASTE yards more than
+// approaches: the walk up to its closest point and, with `reverse`, the walk
+// after it, reversed (a way out is not always a way in: a drop down a cliff is
+// one way), each followed back `within` yards; a shorter one does not count. It leaves the straight line where it has walked WASTE yards more than
 // a straight walk to the target (the arrow's line) would have; from there to
 // the target is its chain, simplified (Douglas-Peucker, `tolerance` yards)
 // into nodes. Walks from different sides meet at the real mouth, so the
-// shortest chain is the candidate. One approach that keeps to the straight
-// line shows the target is open from its side: then there is no candidate,
-// as a chain would send every route through the others' detour.
+// shortest chain is the candidate. An approach that keeps to the straight
+// line is reported but does not cancel the others: recordings have no height,
+// so a walk that followed the bad arrow onto the hill above a cave looks
+// straight too. `sessions` keeps only the walks of those sessions.
 const CHAIN = { reach: 30, within: 300, tolerance: 8, waste: 20, mouthRadius: 15, radius: 10 };
 
 const dist = (a, b) => Math.hypot(a.wx - b.wx, a.wy - b.wy);
@@ -344,11 +345,12 @@ function approach(way, target, within) {
 	return { yards: walked[d], path: pts.slice(d) };
 }
 
-// walks: paths.js recordedWalks; target: { map, x, y } (Era frame) ->
+// walks: paths.js recordedWalks; target: { map, x, y } (Era frame);
+// sessions: session ids to keep (all when unset); reverse: count ways out ->
 // { chain: a crossings-file chain entry or null, approaches: [{ session,
 // direction: 'in'|'out', yards, mouth: { map, x, y } | null }], nearest:
 // yards from the target to the closest breadcrumb on its continent, or null }.
-function recordedChain({ walks, target, frames, within = CHAIN.within, tolerance = CHAIN.tolerance, id, name }) {
+function recordedChain({ walks, target, frames, within = CHAIN.within, tolerance = CHAIN.tolerance, id, name, sessions, reverse = false }) {
 	const t = frames.toWorld(target.map, target.x, target.y);
 	if (!t) throw new Error(`no Era map frame for map ${target.map}`);
 	const place = (p) => {
@@ -359,7 +361,9 @@ function recordedChain({ walks, target, frames, within = CHAIN.within, tolerance
 	const approaches = [];
 	let nearest = null;
 	let best = null;
+	const keep = sessions && new Set(sessions);
 	for (const { session, points } of walks) {
+		if (keep && !keep.has(session)) continue;
 		// Visits: runs of points within REACH, each at its closest point; a walk
 		// may come back. Each visit's way in starts where the last one ended.
 		const visits = [];
@@ -377,7 +381,9 @@ function recordedChain({ walks, target, frames, within = CHAIN.within, tolerance
 		visits.forEach((v, k) => {
 			const from = k > 0 ? visits[k - 1].last : 0;
 			const to = k < visits.length - 1 ? visits[k + 1].first : points.length - 1;
-			for (const [direction, way] of [['in', points.slice(from, v.at + 1)], ['out', points.slice(v.at, to + 1).reverse()]]) {
+			const ways = [['in', points.slice(from, v.at + 1)]];
+			if (reverse) ways.push(['out', points.slice(v.at, to + 1).reverse()]);
+			for (const [direction, way] of ways) {
 				const a = approach(way, t, within);
 				if (!a) continue;
 				approaches.push({ session, direction, yards: Math.round(a.yards), mouth: a.path && place(a.path[0]) });
@@ -385,14 +391,14 @@ function recordedChain({ walks, target, frames, within = CHAIN.within, tolerance
 			}
 		});
 	}
-	if (!best || approaches.some((a) => !a.mouth)) return { chain: null, approaches, nearest };
+	if (!best) return { chain: null, approaches, nearest };
 
 	const pts = simplify(best.path, tolerance);
 	const nodes = pts.map((p, i) => {
 		const hops = [pts[i - 1], pts[i + 1]].filter(Boolean).map((q) => dist(p, q));
 		const radius = Math.max(LIMITS.radiusMin, Math.min(i === 0 ? CHAIN.mouthRadius : CHAIN.radius, Math.floor(Math.min(...hops) / 2)));
-		const caption = i === 0 && name ? `Go to ${name}` : 'Follow the path';
-		return { ...place(p), radius, caption };
+		// Unset captions take the addon's translated default ("Follow the path").
+		return { ...place(p), radius, ...(i === 0 && name ? { caption: `Go to ${name}` } : {}) };
 	});
 	const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 	const chain = {
