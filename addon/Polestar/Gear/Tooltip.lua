@@ -58,7 +58,10 @@ local function prefix()
 	return L["Polestar"]
 end
 
-local REASON = { class = "not for your class", armor = "armor you cannot wear", weapon = "weapon you cannot use", dualwield = "needs Dual Wield" }
+local REASON = {
+	class = L["not for your class"], armor = L["armor you cannot wear"],
+	weapon = L["weapon you cannot use"], dualwield = L["needs Dual Wield"],
+}
 
 function Gear.TooltipLine(link)
 	local r = Gear.CompareToEquipped(link)
@@ -66,7 +69,7 @@ function Gear.TooltipLine(link)
 	if not r.usable then
 		if not r.reason then return nil end
 		local cr, cg, cb = color("textMuted", 0.5, 0.54, 0.63)
-		return prefix(), L[REASON[r.reason]], cr, cg, cb
+		return prefix(), REASON[r.reason], cr, cg, cb
 	end
 	if not r.delta then return nil end
 	local right, cr, cg, cb

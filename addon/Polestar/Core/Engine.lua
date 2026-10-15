@@ -661,11 +661,11 @@ local function checked(s, g)
 	return m ~= nil and m[Own.key(s, g)] and true or false
 end
 
-local STANDINGS = { "Hated", "Hostile", "Unfriendly", "Neutral", "Friendly", "Honored", "Revered", "Exalted" }
+local STANDINGS = { L["Hated"], L["Hostile"], L["Unfriendly"], L["Neutral"], L["Friendly"], L["Honored"], L["Revered"], L["Exalted"] }
 
 -- Localized by the client's FACTION_STANDING_LABELn when present.
 local function standingName(n)
-	return _G["FACTION_STANDING_LABEL" .. tostring(n)] or (STANDINGS[n] and L[STANDINGS[n]]) or tostring(n)
+	return _G["FACTION_STANDING_LABEL" .. tostring(n)] or STANDINGS[n] or tostring(n)
 end
 
 -- "first aid" -> "First Aid", for goals that only carry a skill line ID.
@@ -1230,9 +1230,10 @@ local function unavailableText(u)
 	return L["Not offered by %s"]:format(a.npcName or a.objName or L["the quest giver"])
 end
 
+-- A translated pattern (L["from %s"]) filled with value; nil without one.
 local function fmt(pattern, value)
 	if not value then return nil end
-	return L[pattern]:format(value)
+	return pattern:format(value)
 end
 
 -- verb, subject, subjectKind, detail
@@ -1240,17 +1241,17 @@ local function describe(goal)
 	local t = goal.t
 	local C = Compat()
 	if t == "accept" then
-		return L["Accept"], questTitle(goal), "quest", fmt("from %s", goal.npcName or goal.objName or goal.itemName)
+		return L["Accept"], questTitle(goal), "quest", fmt(L["from %s"], goal.npcName or goal.objName or goal.itemName)
 	elseif t == "turnin" then
-		return L["Turn in"], questTitle(goal), "quest", fmt("at %s", goal.npcName or goal.objName)
+		return L["Turn in"], questTitle(goal), "quest", fmt(L["at %s"], goal.npcName or goal.objName)
 	elseif t == "complete" then
 		return L["Complete"], questTitle(goal), "quest", nil
 	elseif t == "kill" then
-		return L["Kill"], goal.target, "npc", goal.quest and fmt("for %s", questTitle(goal)) or nil
+		return L["Kill"], goal.target, "npc", goal.quest and fmt(L["for %s"], questTitle(goal)) or nil
 	elseif t == "collect" then
-		if goal.quest then return L["Collect"], goal.itemName, "item", fmt("for %s", questTitle(goal)) end
+		if goal.quest then return L["Collect"], goal.itemName, "item", fmt(L["for %s"], questTitle(goal)) end
 		local _, npcName = npcOf(goal)
-		return L["Collect"], goal.itemName, "item", fmt("from %s", npcName)
+		return L["Collect"], goal.itemName, "item", fmt(L["from %s"], npcName)
 	elseif t == "goto" then
 		local mapName = C.GetMapName(goal.map)
 		if goal.text then return L["Go to"], goal.text, "place", mapName end
@@ -1259,30 +1260,30 @@ local function describe(goal)
 	elseif t == "talk" then
 		return L["Talk to"], goal.npcName, "npc", nil
 	elseif t == "interact" then
-		return L["Click"], goal.objName, "object", goal.quest and fmt("for %s", questTitle(goal)) or nil
+		return L["Click"], goal.objName, "object", goal.quest and fmt(L["for %s"], questTitle(goal)) or nil
 	elseif t == "use" then
-		return L["Use"], goal.itemName, "item", goal.quest and fmt("for %s", questTitle(goal)) or nil
+		return L["Use"], goal.itemName, "item", goal.quest and fmt(L["for %s"], questTitle(goal)) or nil
 	elseif t == "sethome" then
 		local _, npcName = npcOf(goal)
-		if goal.location then return L["Set your home to"], goal.location, "place", fmt("at %s", npcName) end
+		if goal.location then return L["Set your home to"], goal.location, "place", fmt(L["at %s"], npcName) end
 		return L["Set your home at"], npcName or L["the nearest inn"], npcName and "npc" or "text", nil
 	elseif t == "hearth" then
 		return L["Hearth to"], goal.location, "place", nil
 	elseif t == "getfp" then
-		return L["Get the flight path at"], goal.location, "place", fmt("from %s", goal.npcName)
+		return L["Get the flight path at"], goal.location, "place", fmt(L["from %s"], goal.npcName)
 	elseif t == "fly" then
 		return L["Fly to"], goal.location, "place", nil
 	elseif t == "train" then
 		local _, npcName = npcOf(goal)
 		if goal.skillLine and rankCap(goal) then
 			local name = skillName(goal) or goal.skill
-			return L["Train"], name, "skill", fmt("at %s", npcName)
+			return L["Train"], name, "skill", fmt(L["at %s"], npcName)
 		end
 		if npcName then return L["Train at"], npcName, "npc", nil end
 		return L["Train at"], L["your trainer"], "text", nil
 	elseif t == "buy" then
 		local _, npcName = npcOf(goal)
-		return L["Buy"], goal.itemName, "item", fmt("from %s", npcName)
+		return L["Buy"], goal.itemName, "item", fmt(L["from %s"], npcName)
 	elseif t == "vendor" then
 		local _, npcName = npcOf(goal)
 		if npcName then return L["Sell and repair at"], npcName, "npc", nil end
@@ -1290,15 +1291,15 @@ local function describe(goal)
 	elseif t == "level" then
 		return L["Reach level"], tostring(goal.level), "level", nil
 	elseif t == "skill" then
-		return L["Raise"], goal.skill, "skill", fmt("to %d", goal.level)
+		return L["Raise"], goal.skill, "skill", fmt(L["to %d"], goal.level)
 	elseif t == "learn" then
 		local _, npcName = npcOf(goal)
-		return L["Learn"], goal.spellName, "spell", fmt("from %s", npcName)
+		return L["Learn"], goal.spellName, "spell", fmt(L["from %s"], npcName)
 	elseif t == "craft" then
 		local detail
 		if goal.untilSkill then
 			local name = skillName(goal)
-			detail = name and L["until %s %d"]:format(name, goal.untilSkill) or fmt("until skill %d", goal.untilSkill)
+			detail = name and L["until %s %d"]:format(name, goal.untilSkill) or fmt(L["until skill %d"], goal.untilSkill)
 		end
 		return L["Craft"], goal.spellName, "spell", detail
 	elseif t == "rep" then

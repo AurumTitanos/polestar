@@ -234,9 +234,17 @@ Core/Commands.lua).
 A word with more than one meaning gets a key per meaning:
 `Polestar.LC(context, text)` is the translation of `"<context>: <text>"`,
 and `text` while there is none. The gear slots on the tooltip line are
-`LC("slot", …)` (`"slot: Back"`, `"slot: Chest"`) and a dungeon boss that is
-a chest is `LC("boss", "Chest")`, so they translate apart from the welcome's
-`L["Back"]` button.
+`LC("slot", …)` (`"slot: Back"`, `"slot: Chest"`), a dungeon boss that is
+a chest is `LC("boss", "Chest")` and the item qualities are
+`LC("quality", …)` (`"quality: Rare"` is not a rare mob), so they translate
+apart from the welcome's `L["Back"]` button and the rares.
+
+Every player-facing string is written as a literal `L["..."]` or `LC(...)`
+where it appears, so a translator finds every key by searching for them: a
+table of labels holds `L["Home"]`, not `"Home"` translated later through
+`L[VIEW_LABEL[v]]`. `L[variable]` is left only for text that comes from data
+(a guide's category, a faction, race and class names, profession and spec
+names, the release stage).
 
 ### Compat — every client API call goes through here
 

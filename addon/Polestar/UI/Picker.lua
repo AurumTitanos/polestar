@@ -73,7 +73,7 @@ local visibleIds = {} -- guide ids in the middle pane, top to bottom (arrow keys
 
 local FACTIONS = { "Alliance", "Horde", "All" }
 local VIEWS = { "home", "browse", "current", "recent" }
-local VIEW_LABEL = { home = "Home", browse = "Browse", current = "Current", recent = "Recent" }
+local VIEW_LABEL = { home = L["Home"], browse = L["Browse"], current = L["Current"], recent = L["Recent"] }
 
 -- The guide format's categories, in the order players look for them.
 local CATEGORIES = { "Leveling", "Class", "Professions", "Reputation", "Exploration", "Legacy", "Collectibles" }
@@ -1273,7 +1273,7 @@ function P.Render()
 	W.ShellNav(win, navItems(counts, total), view == "browse" and category or nil, function(key) P.SetCategory(key) end)
 	navTips(filter)
 	local tabsList = {}
-	for i, v in ipairs(VIEWS) do tabsList[i] = { key = v, label = L[VIEW_LABEL[v]] } end
+	for i, v in ipairs(VIEWS) do tabsList[i] = { key = v, label = VIEW_LABEL[v] } end
 	W.ShellTabs(win, tabsList, view, function(key) P.SetView(key) end)
 	paintSegments(filter)
 
@@ -1296,7 +1296,7 @@ function P.Render()
 			subtitle = table.concat(parts, DOT)
 		end
 	else
-		title = L[VIEW_LABEL[view]]
+		title = VIEW_LABEL[view]
 		if view == "home" then
 			subtitle = L["Pick up where you left off, or start something new."]
 		elseif view == "current" then

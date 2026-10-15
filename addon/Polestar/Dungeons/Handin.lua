@@ -237,12 +237,12 @@ function Dungeons.HandinGuide(key)
 	local last = steps[#steps]
 	local function note(pattern, list)
 		for _, pq in ipairs(list) do
-			last.goals[#last.goals + 1] = { t = "note", text = format(L[pattern], pq.title or "") }
+			last.goals[#last.goals + 1] = { t = "note", text = format(pattern, pq.title or "") }
 		end
 	end
-	note("Not finished yet: %s", plan.unfinished)
-	note("Turned in inside the dungeon: %s", plan.inside)
-	note("Where it is turned in is not known: %s", plan.unplaced)
+	note(L["Not finished yet: %s"], plan.unfinished)
+	note(L["Turned in inside the dungeon: %s"], plan.inside)
+	note(L["Where it is turned in is not known: %s"], plan.unplaced)
 	return { title = format(L["%s: hand in the quests"], d.name), steps = steps, dungeon = key }
 end
 

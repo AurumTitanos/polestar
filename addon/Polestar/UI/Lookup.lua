@@ -67,25 +67,26 @@ UI.Lookup = LK
 -- Per kind: the glyph, the subject colour of its names (item kinds use
 -- their quality), the singular name.
 local KIND = {
-	guide = { icon = "icon-level", color = "text", name = "Guide" },
-	mount = { icon = "icon-mount", color = "item", name = "Mount", item = true },
-	pet = { icon = "icon-collect", color = "item", name = "Companion", item = true },
-	item = { icon = "icon-use", color = "item", name = "Item", item = true },
-	recipe = { icon = "icon-craft", color = "item", name = "Recipe", item = true },
-	tabard = { icon = "icon-rep", color = "item", name = "Tabard", item = true },
-	quest = { icon = "icon-accept", color = "quest", name = "Quest" },
-	npc = { icon = "icon-talk", color = "npc", name = "NPC" },
-	rare = { icon = "qol-target", color = "npc", name = "Rare" },
-	instance = { icon = "icon-kill", color = "area", name = "Dungeon" },
-	zone = { icon = "icon-explore", color = "place", name = "Zone" },
-	treasure = { icon = "icon-treasure", color = "object", name = "Treasure" },
+	guide = { icon = "icon-level", color = "text", name = L["Guide"] },
+	mount = { icon = "icon-mount", color = "item", name = L["Mount"], item = true },
+	pet = { icon = "icon-collect", color = "item", name = L["Companion"], item = true },
+	item = { icon = "icon-use", color = "item", name = L["Item"], item = true },
+	recipe = { icon = "icon-craft", color = "item", name = L["Recipe"], item = true },
+	tabard = { icon = "icon-rep", color = "item", name = L["Tabard"], item = true },
+	quest = { icon = "icon-accept", color = "quest", name = L["Quest"] },
+	npc = { icon = "icon-talk", color = "npc", name = L["NPC"] },
+	rare = { icon = "qol-target", color = "npc", name = L["Rare"] },
+	instance = { icon = "icon-kill", color = "area", name = L["Dungeon"] },
+	zone = { icon = "icon-explore", color = "place", name = L["Zone"] },
+	treasure = { icon = "icon-treasure", color = "object", name = L["Treasure"] },
 }
 LK.KIND = KIND
+-- The kinds in order without Search (its KINDS carry translated labels too).
 local FALLBACK_KINDS = {
-	{ key = "guide", label = "Guides" }, { key = "mount", label = "Mounts" }, { key = "pet", label = "Pets" },
-	{ key = "item", label = "Items" }, { key = "recipe", label = "Recipes" }, { key = "quest", label = "Quests" },
-	{ key = "npc", label = "NPCs" }, { key = "rare", label = "Rares" }, { key = "instance", label = "Dungeons" },
-	{ key = "zone", label = "Zones" }, { key = "treasure", label = "Treasures" },
+	{ key = "guide", label = L["Guides"] }, { key = "mount", label = L["Mounts"] }, { key = "pet", label = L["Pets"] },
+	{ key = "item", label = L["Items"] }, { key = "recipe", label = L["Recipes"] }, { key = "quest", label = L["Quests"] },
+	{ key = "npc", label = L["NPCs"] }, { key = "rare", label = L["Rares"] }, { key = "instance", label = L["Dungeons"] },
+	{ key = "zone", label = L["Zones"] }, { key = "treasure", label = L["Treasures"] },
 }
 
 local SOURCE_ICON = {
@@ -93,13 +94,18 @@ local SOURCE_ICON = {
 	rep = "icon-rep", pvp = "icon-achieve", container = "icon-use", world = "icon-explore",
 }
 
-local QUALITY_NAME = { [0] = "Poor", "Common", "Uncommon", "Rare", "Epic", "Legendary", "Artifact" }
+-- Item qualities under their own keys ("quality: Rare" is not a rare mob).
+local LC = ns.LC
+local QUALITY_NAME = {
+	[0] = LC("quality", "Poor"), LC("quality", "Common"), LC("quality", "Uncommon"), LC("quality", "Rare"),
+	LC("quality", "Epic"), LC("quality", "Legendary"), LC("quality", "Artifact"),
+}
 -- The client's colours, for a client (or preview) without the API.
 local QUALITY_RGB = {
 	[0] = { 0.62, 0.62, 0.62 }, { 1, 1, 1 }, { 0.12, 1, 0 }, { 0, 0.44, 0.87 }, { 0.64, 0.21, 0.93 }, { 1, 0.5, 0 }, { 0.9, 0.8, 0.5 },
 }
-local STANDING = { "Hated", "Hostile", "Unfriendly", "Neutral", "Friendly", "Honored", "Revered", "Exalted" }
-local FACTION = { A = "Alliance", H = "Horde", AH = "Both factions" }
+local STANDING = { L["Hated"], L["Hostile"], L["Unfriendly"], L["Neutral"], L["Friendly"], L["Honored"], L["Revered"], L["Exalted"] }
+local FACTION = { A = L["Alliance"], H = L["Horde"], AH = L["Both factions"] }
 
 local shell, root, results, details -- the hub window, this section, the results scroll, the details pane
 local query, kind = "", "all"
@@ -123,7 +129,7 @@ local function kinds()
 end
 
 local function kindLabel(key)
-	for _, k in ipairs(kinds()) do if k.key == key then return L[k.label] end end
+	for _, k in ipairs(kinds()) do if k.key == key then return k.label end end
 	return L[key]
 end
 
@@ -249,14 +255,14 @@ local function qualityName(q)
 	if type(q) ~= "number" then return nil end
 	local s = _G["ITEM_QUALITY" .. q .. "_DESC"]
 	if type(s) == "string" and s ~= "" then return s end
-	return QUALITY_NAME[q] and L[QUALITY_NAME[q]] or nil
+	return QUALITY_NAME[q]
 end
 
 local function standingName(n)
 	if type(n) ~= "number" then return nil end
 	local s = _G["FACTION_STANDING_LABEL" .. n]
 	if type(s) == "string" and s ~= "" then return s end
-	return STANDING[n] and L[STANDING[n]] or nil
+	return STANDING[n]
 end
 
 -- Paint a font string in a result's colour: its quality for item kinds,
@@ -373,10 +379,10 @@ end
 
 -- An entity's status (Codex item records, Search results): no longer
 -- obtainable, or no source known. Shown for reference, never guided to.
-local STATUS_TEXT = { retired = "No longer obtainable", nosource = "No known source" }
+local STATUS_TEXT = { retired = L["No longer obtainable"], nosource = L["No known source"] }
 local STATUS_NOTE = {
-	retired = "Not obtainable any more; shown for reference.",
-	nosource = "No source is known for this; shown for reference.",
+	retired = L["Not obtainable any more; shown for reference."],
+	nosource = L["No source is known for this; shown for reference."],
 }
 LK.STATUS_TEXT = STATUS_TEXT
 
@@ -386,7 +392,7 @@ local function paintStatus(chip, status)
 		chip:Hide()
 		return 0
 	end
-	local w = W.SetChip(chip, L[STATUS_TEXT[status]], "neutral")
+	local w = W.SetChip(chip, STATUS_TEXT[status], "neutral")
 	W.Color(chip.Text, "textMuted")
 	return w
 end
@@ -741,22 +747,22 @@ local function factsFor(s, entity, list)
 	end
 	if KIND[k] and KIND[k].item then
 		local q = qualityName(e.quality or s.quality)
-		add(L["Type"], L[KIND[k].name] .. (q and (DOT .. q) or ""))
+		add(L["Type"], KIND[k].name .. (q and (DOT .. q) or ""))
 		if type(e.reqLevel) == "number" and e.reqLevel > 1 then add(L["Requires"], format(L["Level %d"], e.reqLevel)) end
 	elseif k == "npc" or k == "rare" then
-		local tags = { L[KIND[k].name] }
+		local tags = { KIND[k].name }
 		if e.elite then tags[#tags + 1] = L["Elite"] end
 		if e.boss then tags[#tags + 1] = L["Boss"] end
 		add(L["Type"], table.concat(tags, DOT))
 		if e.level then add(L["Level"], (e.levelMax and e.levelMax ~= e.level) and (e.level .. "-" .. e.levelMax) or tostring(e.level)) end
-		if e.faction then add(L["Faction"], L[FACTION[e.faction] or e.faction]) end
+		if e.faction then add(L["Faction"], FACTION[e.faction] or L[e.faction]) end
 		if e.instance then
 			local inst = codexRecord("instance", e.instance)
 			add(L["Dungeon"], inst and inst.name or tostring(e.instance))
 		end
 	elseif k == "quest" then
 		if e.level then add(L["Level"], (e.minLevel and e.minLevel ~= e.level) and format(L["%d (from %d)"], e.level, e.minLevel) or tostring(e.level)) end
-		add(L["Faction"], e.faction and L[FACTION[e.faction] or e.faction] or L["Both factions"])
+		add(L["Faction"], e.faction and (FACTION[e.faction] or L[e.faction]) or L["Both factions"])
 		if e.zone then
 			local z = UI.MapName(e.zone) or (codexRecord("zone", e.zone) or {}).name
 			add(L["Zone"], z)
@@ -767,7 +773,7 @@ local function factsFor(s, entity, list)
 		add(L["Levels"], lv or nil)
 		if type(e.bosses) == "table" and #e.bosses > 0 then add(L["Bosses"], tostring(#e.bosses)) end
 	else
-		add(L["Type"], L[KIND[k] and KIND[k].name or k])
+		add(L["Type"], KIND[k] and KIND[k].name or L[k])
 	end
 	if list and k ~= "zone" then
 		local avail = 0
@@ -956,7 +962,7 @@ local function renderDetails(loaded, reason)
 	elseif s.kind == "zone" then
 		note = L["Zones have no sources. Search for what is in them."]
 	elseif blocked then
-		note = L[STATUS_NOTE[status]]
+		note = STATUS_NOTE[status]
 	elseif curated then
 		local cg = guideHeader(curated)
 		primary = L["Open guide"]
@@ -1197,7 +1203,7 @@ function LK.Nav()
 	for _, k in ipairs(kinds()) do
 		local n = c.counts[k.key] or 0
 		if (n > 0 and #items <= NAV_MAX) or (k.key == kind and query ~= "") then
-			items[#items + 1] = { key = k.key, label = L[k.label], icon = KIND[k.key] and KIND[k.key].icon or k.icon or "search", count = n }
+			items[#items + 1] = { key = k.key, label = k.label, icon = KIND[k.key] and KIND[k.key].icon or k.icon or "search", count = n }
 		end
 	end
 	return items, kind
@@ -1352,12 +1358,12 @@ function LK.Render()
 			local hits = byKind[k.key]
 			if hits then
 				local n = counts[k.key] or #hits
-				folder(L[k.label], n)
+				folder(k.label, n)
 				local cap = kind == "all" and GROUP_MAX or #hits
 				for i = 1, min(cap, #hits) do row(hits[i]) end
 				if kind == "all" and n > cap then
 					local key = k.key
-					action(format(L["Show all %d"], n), "chevron-right", function() LK.SetKind(key) end, format(L["Only %s"], L[k.label]))
+					action(format(L["Show all %d"], n), "chevron-right", function() LK.SetKind(key) end, format(L["Only %s"], k.label))
 				elseif kind ~= "all" and n > #hits then
 					action(format(L["Show more (%d more)"], n - #hits), "chevron-down", LK.More, format(L["The next %d"], min(PAGE, n - #hits)))
 				end
@@ -1701,7 +1707,7 @@ function UI.LookupRows(parent, y, q, width, x)
 	end
 	for _, res in ipairs(picked) do
 		local r = nextRow()
-		local kindName = KIND[res.kind] and L[KIND[res.kind].name] or res.kind
+		local kindName = KIND[res.kind] and KIND[res.kind].name or res.kind
 		local sub = subtitleOf(res)
 		paintResult(r, res, sub and (kindName .. DOT .. sub) or kindName, width, false)
 		r.psTip = L["Click to see where to get it."]
