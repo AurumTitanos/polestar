@@ -98,18 +98,31 @@ local function onMouseover() D.Unit("mouseover", "mouseover") end
 -- Vignettes
 ---------------------------------------------------------------------------
 
-local function vignetteWhere(vguid)
-	local V, M = C_VignetteInfo, C_Map
-	if not (V and V.GetVignettePosition and M and M.GetBestMapForUnit) then return nil end
-	local map = M.GetBestMapForUnit("player")
-	if not map then return nil end
-	local ok, pos = pcall(V.GetVignettePosition, vguid, map)
+local function positionOn(vguid, map)
+	local ok, pos = pcall(C_VignetteInfo.GetVignettePosition, vguid, map)
 	if not ok or not pos then return nil end
 	local x, y
 	if pos.GetXY then x, y = pos:GetXY() else x, y = pos.x, pos.y end
 	if not (x and y) or (x == 0 and y == 0) then return nil end
 	return { map = map, x = x * 100, y = y * 100 }
 end
+
+-- The vignette's position on the player's map, else on the first parent map
+-- that has it (a subzone or cave map can lack it while the zone has it).
+local function vignetteWhere(vguid)
+	local V, M = C_VignetteInfo, C_Map
+	if not (vguid and V and V.GetVignettePosition and M and M.GetBestMapForUnit) then return nil end
+	local map = M.GetBestMapForUnit("player")
+	for _ = 1, 4 do
+		if not map or map == 0 then return nil end
+		local where = positionOn(vguid, map)
+		if where then return where end
+		local info = M.GetMapInfo and M.GetMapInfo(map)
+		map = info and info.parentMapID
+	end
+	return nil
+end
+D.VignetteWhere = vignetteWhere
 
 function D.Vignette(vguid)
 	local V = C_VignetteInfo
@@ -128,7 +141,7 @@ function D.Vignette(vguid)
 	end
 	if not fresh(vguid) then return nil end
 	return Rares.Sighting({
-		source = "vignette", kind = what, id = id, guid = object,
+		source = "vignette", kind = what, id = id, guid = object, vignette = vguid,
 		name = readable(info.name), dead = readable(info.isDead) and true or false,
 	}, vignetteWhere(vguid))
 end

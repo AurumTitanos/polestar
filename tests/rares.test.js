@@ -172,8 +172,65 @@ stub.advance(4)
 stub.fire("PLAYER_TARGET_CHANGED")
 local a = got[1]
 emit({ before = before, after = #got, loot = a.loot, map = a.map, x = a.x, f = a.f })`);
-	// With the Codex the waypoint is its nearest known spawn, and its loot is counted.
-	assert.deepEqual(out, { before: 0, after: 1, loot: 2, map: 1429, x: 89.4, f: 'e' });
+	// The rare is in sight, so the waypoint is where it was seen, not a spawn; its loot is counted.
+	assert.deepEqual(out, { before: 0, after: 1, loot: 2, map: 1429, x: 88 });
+});
+
+test('a rare in sight sets its waypoint where it was seen, not at a known spawn across the zone', () => {
+	// Thuros's spawns are at 89.4 and 69.6; the player meets it walking at 75, 60.
+	const [out] = run(`
+local U = stub.rares
+Polestar.Codex.Load()
+U.unit("nameplate1", { npc = 61, name = "Thuros Lightfingers", level = 11, class = "rare" })
+stub.fire("NAME_PLATE_UNIT_ADDED", "nameplate1")
+local a = got[1]
+local facts = R.Toast.Facts(a)
+PolestarRareToast.Waypoint:Click()
+local t = Polestar.Nav.GetTarget()
+emit({ map = a.map, x = a.x, y = a.y, spawn = a.spawnYards or false, facts = facts, target = { t.map, t.x, t.y } })`, { at: [1429, 75, 60] });
+	assert.deepEqual(out, { map: 1429, x: 75, y: 60, spawn: false, facts: 'Level 11 Rare  \u00b7  in sight  \u00b7  Elwynn Forest', target: [1429, 75, 60] });
+});
+
+test('a vignette without a position: its nearest known spawn, said so, and the live position once the vignette has one', () => {
+	const out = run(`
+local U = stub.rares
+Polestar.Codex.Load()
+-- On the minimap, but no position on the player's map yet.
+U.vignette("V1", { npc = 61, name = "Thuros Lightfingers" })
+stub.fire("VIGNETTE_MINIMAP_UPDATED", "V1", true)
+local a = got[1]
+emit({ map = a.map, x = a.x, f = a.f, spawn = a.spawnYards and math.floor(a.spawnYards + 0.5), inSight = a.inSight or false, facts = R.Toast.Facts(a) })
+-- By the click it has one: the waypoint goes there, not to the spawn.
+U.vignette("V1", { npc = 61, name = "Thuros Lightfingers", map = 1429, x = 80, y = 70 })
+PolestarRareToast.Waypoint:Click()
+local t = Polestar.Nav.GetTarget()
+emit({ t.map, t.x, t.y, t.f or false })`);
+	assert.deepEqual(out[0], { map: 1429, x: 89.4, f: 'e', spawn: 57, inSight: false, facts: 'Level 11 Rare  \u00b7  known spawn 55 yd  \u00b7  Elwynn Forest' });
+	assert.deepEqual(out[1], [1429, 80, 70, false]);
+});
+
+test('a vignette without a position and no spawn on this continent offers no waypoint, never a spawn it cannot measure', () => {
+	const [out] = run(`
+local U = stub.rares
+Polestar.Codex.Load()
+U.vignette("V1", { npc = 61, name = "Thuros Lightfingers" })
+stub.fire("VIGNETTE_MINIMAP_UPDATED", "V1", true)
+local a = got[1]
+emit({ n = #got, map = a.map or false, button = PolestarRareToast.Waypoint:IsShown() })`, { at: [1438, 50, 50] });
+	assert.deepEqual(out, { n: 1, map: false, button: false });
+});
+
+test('a vignette the player\'s subzone map lacks is placed on its parent map', () => {
+	const [out] = run(`
+local U = stub.rares
+local z = stub.world.maps[1429]
+stub.world.addMap(9001, { name = "Fargodeep Mine", c = z.c, left = z.left, right = z.right, top = z.top, bottom = z.bottom, parent = 1429, mapType = 5 })
+stub.world.moveTo(9001, 88, 78)
+U.vignette("V1", { npc = 61, name = "Thuros Lightfingers", map = 1429, x = 90, y = 78 })
+stub.fire("VIGNETTE_MINIMAP_UPDATED", "V1", true)
+local a = got[1]
+emit({ map = a.map, x = a.x, y = a.y, spawn = a.spawnYards or false })`);
+	assert.deepEqual(out, { map: 1429, x: 90, y: 78, spawn: false });
 });
 
 test('in combat an alert waits for the fight to end, and is dropped when stale', () => {
