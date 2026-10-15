@@ -1299,7 +1299,7 @@ const GEAR = `
 	end
 `;
 
-test('rewards: with a two-hander worn, a one-hand or off-hand reward is worn only when it beats the two-hander by itself', () => {
+test('rewards: with a two-hander worn, a one-hand reward is worn only when it beats the two-hander by itself, and an off-hand piece never', () => {
 	const out = run(`${WEAR}${GEAR}
 		set("rewardEquip", true)
 		q.items[30], q.items[31], q.items[32] = { name = "Greatsword" }, { name = "Short Sword" }, { name = "Buckler" }
@@ -1311,12 +1311,17 @@ test('rewards: with a two-hander worn, a one-hand or off-hand reward is worn onl
 		turnIn(1, { { id = 31 } }, { { id = 32 } })
 		emit({ worn = worn(), main = q.worn[16] })
 
+		score[32] = 12                      -- a buckler that beats the two-hander by itself
+		turnIn(1, { { id = 32 } }, {})
+		emit({ worn = worn(), main = q.worn[16] })
+
 		score[31] = 11                      -- beats the two-hander by itself
 		turnIn(1, { { id = 31 } }, {})
 		emit({ worn = worn(), main = q.worn[16], said = printed("Wearing |Hitem:31|h%[Short Sword%]|h %(%+10%%%)") })
 	`);
 	assert.deepEqual(out[0], { worn: {}, main: 30 }, 'the two-hander stays on');
-	assert.deepEqual(out[1], { worn: ['31@16'], main: 31, said: true });
+	assert.deepEqual(out[1], { worn: {}, main: 30 }, 'an off-hand piece would leave the main hand empty: it stays in the bags');
+	assert.deepEqual(out[2], { worn: ['31@16'], main: 31, said: true });
 });
 
 test('rewards: with a two-hander worn, a reward for any other slot goes in its own slot', () => {

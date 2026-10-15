@@ -66,7 +66,9 @@ end
 -- Where a reward goes and how much better it is, or nil to leave it. With a
 -- two-hander worn, Gear weighs a one-hand or off-hand reward together with
 -- the best partner in the bags, but only the reward goes on: it must beat the
--- two-hander by itself, and a weapon that fits the main hand goes there.
+-- two-hander by itself, and a weapon that fits the main hand goes there. An
+-- off-hand piece (shield, off-hand weapon, held item) stays in the bags: on
+-- its own it would take the two-hander off and leave the main hand empty.
 local function placement(G, link)
 	local up, _, pct = G.IsUpgrade(link)
 	if not up then return nil end
@@ -74,6 +76,7 @@ local function placement(G, link)
 	local mainLink = G.Client.InventoryLink(MAIN)
 	local main, info = mainLink and G.GetItemInfo(mainLink), G.GetItemInfo(link)
 	if not (main and main.inv == TWO_HANDER and info and HAND[info.inv]) then return r and r.slot, pct end
+	if HAND[info.inv] == OFF then return nil end
 	local gain = r.score - r.old
 	pct = r.old > 0 and gain / r.old * 100 or nil
 	if gain <= 0 or (pct and pct < (tonumber(ns.Get("gear.minUpgrade")) or 0)) then return nil end
