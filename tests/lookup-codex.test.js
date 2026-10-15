@@ -178,3 +178,71 @@ emit({ loaded = loaded, item = first("Linen Cloth", "item"), mount = first("Deat
 	assert.equal(out.dm[1], 1436, 'the Deadmines entrance is in Westfall');
 	assert.ok(out.dm[2] > 0, "VanCleef's loot");
 });
+
+test("kp's report: the Deadmines pick-up guide of a level 21 Gnome Rogue in Lakeshire has no Darkmoon Faire quest, and no dungeon page carries one or a quest tied by a stray drop", { skip }, () => {
+	const [out] = runAddon({
+		stubs: ['stub_world.lua'],
+		before: `${packLua()}
+local w = stub.world
+${mapsLua()}
+w.race, w.raceName, w.class, w.className, w.faction = "Gnome", "Gnome", "ROGUE", "ROGUE", "Alliance"
+w.level = 21
+w.moveTo(1433, 26.5, 45.0)`,
+		addons: ['Polestar'],
+		script: `
+stub.login()
+local D = Polestar.Dungeons
+D.Load()
+local plan = D.PickupPlan("deadmines")
+local take = {}
+for i, t in ipairs(plan and plan.take or {}) do take[i] = t.quest.id end
+local pages = {}
+for _, d in ipairs(D.List()) do
+	for _, q in ipairs(D.Quests(d.key)) do pages[#pages + 1] = d.key .. ":" .. q.id end
+end
+emit({ take = take, pages = pages })`,
+	}).emitted;
+	assert.ok(out.take.length > 0, 'the Deadmines quests are offered');
+	assert.ok(!out.take.includes(7894), `no Copper Modulator (Rinling, the Faire): ${out.take}`);
+	// The Faire's quests: pfQuest's game events 4 and 5 (Chronos, Rinling, Yebb Neblegear, Kerri Hicks, Morja, Gelvas Grimegate).
+	const quests = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'forever', 'quests.json'), 'utf8'));
+	const faire = out.pages.filter((p) => [4, 5].includes((quests[p.split(':')[1]] || {}).event));
+	assert.deepEqual(faire, [], 'no Darkmoon Faire quest on a dungeon page');
+	const stray = ['naxxramas:8921', 'zulgurub:8921', 'blackwing-lair:9121', 'blackwing-lair:9122'];
+	assert.deepEqual(out.pages.filter((p) => stray.includes(p)), [], "The Ectoplasmic Distiller (Mux, Tanaris) and The Dread Citadel (Dosantos, Light's Hope) are on no raid page through a boss's stray essence or crystal");
+});
+
+// Tabetha's Task (2861) for Zul'Farrak: the mage trainers of both sides give
+// it; the page names the first, Anastasia Hartwell in the Undercity.
+function tabetha(race, faction, at) {
+	return runAddon({
+		stubs: ['stub_world.lua'],
+		before: `${packLua()}
+local w = stub.world
+${mapsLua()}
+w.race, w.raceName, w.class, w.className, w.faction = ${luaValue(race)}, ${luaValue(race)}, "MAGE", "MAGE", ${luaValue(faction)}
+w.level = 44
+w.moveTo(${at.join(', ')})`,
+		addons: ['Polestar'],
+		script: `
+stub.login()
+local D = Polestar.Dungeons
+D.Load()
+local giver
+for _, t in ipairs(D.PickupPlan("zulfarrak").take) do
+	if t.quest.id == 2861 then giver = t.giver end
+end
+local target = D.GiverTarget("zulfarrak", 2861)
+local npc = giver and Polestar.Codex.Npc(giver.id)
+emit({ giver = giver and giver.name or false, map = giver and giver.map or false, side = npc and npc.faction or false, target = target and target.name or false })`,
+	}).emitted[0];
+}
+
+test("Tabetha's Task: a level 44 Alliance mage in Stormwind is sent to an Alliance mage trainer in Stormwind, a Horde one in the Undercity to Anastasia Hartwell", { skip }, () => {
+	const human = tabetha('Human', 'Alliance', [1453, 50, 60]);
+	assert.equal(human.side, 'A', `an Alliance giver: ${JSON.stringify(human)}`);
+	assert.equal(human.map, 1453, 'in Stormwind');
+	assert.equal(human.target, human.giver, "the quest card's link goes there too");
+	const undead = tabetha('Scourge', 'Horde', [1458, 66, 44]);
+	assert.deepEqual({ ...undead, map: [1420, 1458].includes(undead.map) }, { giver: 'Anastasia Hartwell', map: true, side: 'H', target: 'Anastasia Hartwell' }, 'in the Undercity (the Codex also places her on its Tirisfal Glades map)');
+});

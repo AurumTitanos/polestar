@@ -2,7 +2,8 @@
 // trainers build: data/forever/trainers.json, the class trainers `train class`
 // chooses from (see tools/lib/dsl/trainers.js for the sources), and
 // addon/Polestar/Core/ClassTrainers.lua, the same trainers placed on the map
-// for the Engine's class-training reminder.
+// (one per town and class) for the Engine's class-training reminder, plus
+// every trainer's id by class for Engine.IsClassTrainer.
 
 const fs = require('node:fs');
 const path = require('node:path');
@@ -20,8 +21,9 @@ every \`train <npcId> only <Class>\` goal under guides/, recorded trainer visits
 in data/recordings (by the recording character's class), and Polestar's curated
 list of capital and starting-town trainers, each verified by name and map
 against npcs.json. Without the file, compile uses the curated list alone.
-Also writes addon/Polestar/Core/ClassTrainers.lua (one trainer per town and
-class, with positions and map frames) for the class-training reminder.
+Also writes addon/Polestar/Core/ClassTrainers.lua: one trainer per town and
+class, with positions and map frames, for the class-training reminder, and
+every class trainer's npc id by class, for Engine.IsClassTrainer.
 
 options:
   --guides <dir>      guide sources (default guides/)
@@ -37,7 +39,8 @@ function writeAtomic(file, text) {
 	fs.renameSync(tmp, file);
 }
 
-// Every trainer at each town it stands in, both factions, with the frames.
+// The reminder's trainers (one per town and class, both factions) with their
+// frames, and every class trainer's id by class for Engine.IsClassTrainer.
 function classTrainersLua(data, trainers) {
 	const entries = Object.values(trainers).map((t) => ({ npc: t.id, classes: t.classes }));
 	const { candidates } = buildCandidates(data, entries, { sides: ['Alliance', 'Horde'], ref: null });
@@ -47,7 +50,10 @@ function classTrainersLua(data, trainers) {
 		if (fr) frames[c.map] = { c: fr.c, left: fr.left, right: fr.right, top: fr.top, bottom: fr.bottom };
 	}
 	const sorted = candidates.slice().sort((a, b) => a.npc - b.npc || a.map - b.map);
-	return { lua: emitClassTrainers(sorted, frames), count: sorted.length };
+	const byClass = {};
+	for (const t of Object.values(trainers)) for (const cls of t.classes) (byClass[cls] ||= []).push(t.id);
+	for (const ids of Object.values(byClass)) ids.sort((a, b) => a - b);
+	return { lua: emitClassTrainers(sorted, frames, byClass), count: sorted.length, ids: Object.keys(trainers).length };
 }
 
 async function run(argv) {
@@ -78,9 +84,9 @@ async function run(argv) {
 		`wrote ${out}: ${Object.keys(trainers).length} class trainers (curated ${report.curated}, from guides ${report.guide} goals, from recordings ${report.record} npcs)`,
 	);
 	const luaFile = opts.lua ? path.resolve(opts.lua) : path.join(ROOT, 'addon', 'Polestar', 'Core', 'ClassTrainers.lua');
-	const { lua, count } = classTrainersLua(data, trainers);
+	const { lua, count, ids } = classTrainersLua(data, trainers);
 	writeAtomic(luaFile, lua);
-	console.log(`wrote ${luaFile}: ${count} trainer positions`);
+	console.log(`wrote ${luaFile}: ${count} trainer positions, ${ids} class trainer ids`);
 	return 0;
 }
 

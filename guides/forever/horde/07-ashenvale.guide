@@ -113,8 +113,24 @@ step Vorsha the Lasher
   goto 9.6,27.6 "Naga brazier"
   complete 6641
 
+# The Sapphires (objects 178184-178186, 12.9-13.8,10.6-13.5) grow in the
+# tunnels under the strand that lead to the Blackfathom Deeps portal, outside
+# the instance: "Within the beginning tunnels of Blackfathom Deeps, large
+# sapphire clusters can be found along the cave walls" (the quest text), "the
+# blue crystals that appear in the tunnels leading up to the instance, not
+# inside the instance itself" and "go into the ruins and then down a bunch of
+# stairs, swim under water to get to the other side of a wall"
+# (https://www.wowhead.com/classic/quest=6563, comments). The way in is the
+# ruins' pit at 14.5,14.2 (the client's Blackfathom Deeps entrance,
+# dungeons.json; "The entrance is at 14,14, in the pit",
+# https://www.wowhead.com/classic/zone=719, comments); a straight line from
+# the brazier to the crystals ends on the strand above them.
+step Blackfathom Deeps ruins
+  tip The way to the Sapphires is through the sunken ruins at the north end of the strand: go down the stairs into the pit.
+  goto 14.5,14.2 "Blackfathom Deeps ruins"
+
 step Sapphires of Aku'Mai
-  tip The Sapphires grow on the rocks at the far north end of the strand, by the Blackfathom Deeps ruins.
+  tip The Sapphires are blue crystals on the walls of the tunnels leading to the Blackfathom Deeps portal, underground and outside the instance: swim down from the pit, under the wall, into the cave. The satyrs and naga in the tunnels are elite: grouping up is advised. The crystals respawn quickly, so there is no need to go deep.
   collect 16784 quest 6563
 
 step Zoram'gar Outpost

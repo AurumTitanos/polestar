@@ -35,9 +35,20 @@ ns.DiscordURL = "https://discord.gg/vMbee6F2e9"
 
 local pcall, type, pairs, select, tostring = pcall, type, pairs, select, tostring
 
--- enUS only for now; a missing key renders as itself.
+-- Translations: a key is the English text, and a missing key renders as
+-- itself. A locale file loaded right after this one fills L for its client,
+-- so nothing in this file reads L at load: the commands with their help
+-- lines register in Commands.lua.
 local L = setmetatable({}, { __index = function(_, key) return key end })
 ns.L = L
+
+-- A word with more than one meaning ("Back": the welcome's button and the
+-- cloak slot) gets a key per meaning, so each can be translated on its own:
+-- ns.LC("slot", "Back") is the translation of "slot: Back", and "Back" while
+-- there is none.
+function ns.LC(context, text)
+	return rawget(L, context .. ": " .. text) or text
+end
 
 -- Text that prints literally in a FontString: every `|` (the client's escape
 -- character) doubled. Packs' strings go through this once, at registration.
@@ -419,12 +430,3 @@ SlashCmdList.POLESTAR = function(msg)
 	end
 	call(c.fn, rest)
 end
-
-ns.RegisterCommand("show", function() ns.Fire("SHOW_FRAME") end, L["Show the guide window"])
-ns.RegisterCommand("hide", function() ns.Fire("HIDE_FRAME") end, L["Hide the guide window"])
-ns.RegisterCommand("guides", function() ns.Fire("SHOW_PICKER") end, L["Choose a guide"])
-ns.RegisterCommand("options", function(rest) ns.Fire("SHOW_OPTIONS", rest ~= "" and rest or nil) end, L["Open settings"])
-ns.RegisterCommand("debug", function()
-	ns.debug = not ns.debug
-	ns.Print(L["Debug output"], ns.debug and L["on"] or L["off"])
-end, L["Toggle debug output"])

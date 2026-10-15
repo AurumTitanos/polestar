@@ -248,8 +248,8 @@ map. Renders of every window and state, drawn without the game, are in
   for your spec at your level, from stat weights per spec (detected from your
   talent points) and level band.
 - **On the game's reward panel** every choice that is an upgrade gets a green
-  arrow and the one to take is framed; with no upgrade, a coin marks the one
-  that sells for most. Turn-in goals name the best reward.
+  arrow, the one to take is framed, and a coin marks the one that sells for
+  most. Turn-in goals name the best reward.
 
 ### Lookup, Dungeons and Rares
 
@@ -262,7 +262,8 @@ map. Renders of every window and state, drawn without the game, are in
   and ends, its objective, chain and rewards), the bosses and the entrance.
   "Pick up the quests" builds a guide that collects every quest of the
   dungeon you can take, earlier quests first, on the shortest path from where
-  you stand to the entrance.
+  you stand to the entrance; after the run, "Hand in the quests" guides you
+  to where they are turned in and takes the follow-ups there.
 - **Rares**: rares and treasures by zone with their spawns and signature
   drop, and an alert when one shows up on your minimap, nameplates or target.
 
@@ -291,14 +292,16 @@ and each section says what is missing.
 ### Quality of life
 
 Quest item, target and Hearthstone buttons; XP per hour and time to level;
-selling greys and repairing (optionally from the guild bank first); taking
-the best quest reward; instant quest text, single-option gossip and faster
-auto-loot; hiding combat error spam; flight map and death helpers, and
-releasing at once in battlegrounds. Requests from other players: accept
-summons, resurrections and friends' or guildmates' party invitations; decline
-other party invitations, guild invitations and duels (friends and guild
-excepted). Hold **Shift** to skip auto-accept, auto-turn-in, auto-sell or the
-flight helper once, or to answer a request yourself.
+selling greys and repairing (optionally from the guild bank first); buying
+what a step asks you to buy; learning new spells at class trainers; taking
+the best quest reward and wearing rewards that are upgrades; instant quest
+text, single-option gossip and faster auto-loot; hiding combat error spam;
+flight map and death helpers, and releasing at once in battlegrounds.
+Requests from other players: accept summons, resurrections and friends' or
+guildmates' party invitations; decline other party invitations, guild
+invitations and duels (friends and guild excepted). Hold **Shift** to skip
+auto-accept, auto-turn-in, auto-sell, training or the flight helper once, or
+to answer a request yourself.
 
 ### Recorder
 
@@ -462,7 +465,8 @@ possible, so the claim is narrower and checked:
 > recorded play exists yet, so time parameters such as kill time and travel
 > detours keep their priors, and Forever's 30-60 content is not in the data.
 > Comparisons between routes are what the numbers support; absolute hours
-> are not. Recordings from the Recorder are what will calibrate them.
+> are not. Recordings from the Recorder are what will calibrate kill time
+> (`sim calibrate`); travel detours keep their priors even then.
 
 The whole method, every parameter and its known limitations are in
 [docs/SIMULATION.md](docs/SIMULATION.md).

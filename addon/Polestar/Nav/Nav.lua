@@ -282,6 +282,8 @@ end
 --   state: "none" | "instance" | "taxi" | "unknown" | "far" | "travel" | "arrived"
 --          | "instruction" (a route leg to act on here: fly, ride, hearth)
 --          | "search" (reached a spot of an area objective: look around here)
+--          | "nopos" (the client gives no player position here: the Deeprun
+--            Tram, a map of its own without a world map)
 --   distance/relAngle/dNorth/dWest are toward what the arrow points at: the
 --   current route leg's end while a travel route is active, else the target.
 --   An area target (`area`, yards: a spawn area) is reached anywhere inside
@@ -317,7 +319,14 @@ function Nav.Sample()
 	end
 	local pc, px, py
 	if C.GetPlayerWorldPosition then pc, px, py = C.GetPlayerWorldPosition() end
-	if not pc then return "unknown" end
+	if not pc then
+		-- No position, nothing to measure. A ride, flight or hearth on the
+		-- route is still what to do (the tram ride itself); else say so.
+		local T = Nav.travel
+		local leg = T and T.Active and T.Active() and T.CurrentLeg()
+		if leg and leg.kind ~= "walk" then return "instruction" end
+		return "nopos"
+	end
 
 	local T = Nav.travel
 	if T and T.Active and T.Active() then
@@ -508,14 +517,18 @@ end
 ns.RegisterCommand("way", function(rest)
 	local x, y, label = parseWay(rest or "")
 	if x and y and (x > 100 or y > 100) then x = nil end
-	local C = ns.Compat
-	local map = C and C.GetPlayerMapPosition and C.GetPlayerMapPosition()
-	if not (x and y and map) then
+	if not (x and y) then
 		if (rest or ""):match("^%s*$") then
 			Nav.ClearTarget()
 		else
 			ns.Print(L["Usage: /polestar way <x> <y> [label]"])
 		end
+		return
+	end
+	local C = ns.Compat
+	local map = C and C.GetPlayerMapPosition and C.GetPlayerMapPosition()
+	if not map then
+		ns.Print(L["No position here: the game gives none in instances and on some maps."])
 		return
 	end
 	Nav.SetTarget(map, x, y, label ~= "" and label or nil)

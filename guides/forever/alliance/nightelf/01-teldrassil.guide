@@ -35,6 +35,11 @@ next forever/alliance/02-westfall
 #   in to Sister Aquinne beside the Rut'theran portal.
 # - Flight to Auberdine (6342) is turned in at Laird on the Auberdine dock
 #   while changing boats, not on the later Darkshore visit.
+# - Dolanaar Delivery (2159) is taken from Porthannius when you leave
+#   Shadowglen for Dolanaar, not with the Aldrassil pickups before the cave:
+#   he stands by the path out of the glen, about 380 yards out of the way
+#   there and 65 on the way down to Dolanaar. 0.014 h sooner to 10 and to
+#   20 under the simulator.
 # - Added: The Enchanted Glade (937), Darkness in the Glade (98392) and The
 #   Oracle Tree (98398) from Sentinel Arynia Cloudsbreak at the Oracle Glade
 #   moonwell: every harpy lives around it. The chain's last steps go to
@@ -134,7 +139,6 @@ step Back at Aldrassil
   accept 457
   accept 4495                                 -- Dirania Silvershine, east of the tree
   accept 916                                  -- Gilshalan Windwalker, on the tree's ramp
-  accept 2159                                 -- Porthannius, by the path out of the glen
 
 step North to Shadowthread Cave
   tip Mangy Nightsabers and Thistle Boars roam north of Aldrassil, on the way to the cave. Iverron waits in the trees west of the cave mouth; Githyiss the Vile sits deep inside.
@@ -155,8 +159,13 @@ step Aldrassil
   accept 3521
   train class
 
+# Shadowthread Cave: "The eggs are at 57,26 / The cave is at 57,32"
+# (https://www.wowhead.com/classic/quest=917, comments).
+step Shadowthread Cave
+  goto 57.0,32.0 "Shadowthread Cave"
+
 step Webwood Egg and the antidote
-  tip The Webwood Eggs lie at the back of Shadowthread Cave. Hyacinth Mushrooms drop from Grells, Moonpetal Lilies grow by the ponds north of Aldrassil.
+  tip The Webwood Eggs lie at the back of Shadowthread Cave: take the central path, then left where it splits, up to the high ledge. Hyacinth Mushrooms drop from Grells, Moonpetal Lilies grow by the ponds north of Aldrassil.
   collect 5167 quest 917.1
   collect 10640 quest 3521.3                  -- Webwood Spiders
   collect 10639 quest 3521.1
@@ -171,7 +180,7 @@ step Aldrassil
   accept 3522
 
 step The moonwell and Iverron
-  tip The moonwell sits north of Aldrassil; Iverron is a little further north-west.
+  tip The moonwell sits north of Aldrassil; Iverron is a little further north-west. Iverron's Antidote lasts five minutes: fill the phial and go straight on to him.
   collect 5184 quest 921.1 @60.0,33.0         -- Use the Crystal Phial at the moonwell
   turnin 3522                                 -- Iverron
 
@@ -180,6 +189,10 @@ step Tenaron Stormgrip
   turnin 921
   accept 928
   accept 96630                                -- Lost Journal
+
+step Porthannius
+  tip Leave Shadowglen by the path south-east of Aldrassil: Porthannius stands beside it, where it goes down towards the road to Dolanaar.
+  accept 2159                                 -- Porthannius
 
 # ---------------------------------------------------------------- Dolanaar
 
@@ -261,8 +274,14 @@ step Dolanaar
 
 # ---------------------------------------------------------------- West: Fel Rock to Gnarlpine Hold
 
+# Fel Rock's mouth: "Cave entrance at 54,52", "The cave entrance is at:
+# 54,52; and he is inside the cave at: 51,50"
+# (https://www.wowhead.com/classic/quest=932, comments).
+step Fel Rock's mouth
+  goto 54.0,52.0 "Fel Rock"
+
 step Fel Rock
-  tip The cave in the hill just west of Dolanaar. Lord Melenas waits at the back.
+  tip Lord Melenas waits inside the cave, at the bottom or up on the ledge; keep to the right.
   collect 5221 quest 932.1                    -- Lord Melenas
 
 step The road to Darnassus

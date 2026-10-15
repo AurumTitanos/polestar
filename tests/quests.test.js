@@ -350,6 +350,30 @@ emit(sq.hoverObject(nil, "Bundle of Wood"))
 	assert.deepEqual(byName, ['?', 'Gathering Wood: | Not done']);
 });
 
+// Sapphires of Aku'Mai (6563): the sapphire drops from three objects that
+// share its name, so the name index met the one objective three times and
+// the tooltip of an object hovered without an id listed it three times.
+test('an item several objects of one name drop names its objective once on their tooltip', () => {
+	const [byName, byId] = run(`
+local d = Q._data
+d.objects[78], d.objects[79] = d.objects[77], d.objects[77]
+local r = d.items[772]
+local j = 3 + 2 * r[2]
+local item = {}
+for i = 1, j + 2 * r[j] do item[#item + 1] = r[i] end
+item[j] = r[j] + 2
+item[#item + 1], item[#item + 2], item[#item + 3], item[#item + 4] = 78, 100, 79, 100
+for i = j + 2 * r[j] + 1, #r do item[#item + 1] = r[i] end
+d.items[772] = item
+w.accept(60, { { text = "Large Candle: 0/8", type = "item", required = 8 } })
+stub.advance(0.3)
+emit(sq.hoverObject(nil, "Candle Crate"))
+emit(sq.hoverObject(78, "Candle Crate"))
+`, { setup: 'w.complete({ 783 })' });
+	assert.deepEqual(byName, ['?', 'Kobold Candles: | Large Candle 0/8']);
+	assert.deepEqual(byId, ['?', 'Kobold Candles: | Large Candle 0/8']);
+});
+
 test('an unchanged quest log costs no rebuild and no Pins call', () => {
 	const [first, after] = run(`
 w.accept(7, { { text = "Kobold Vermin slain: 0/10", type = "monster", required = 10 } })

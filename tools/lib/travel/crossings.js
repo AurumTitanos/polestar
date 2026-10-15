@@ -16,10 +16,11 @@
 // gitignored; built into the local data addon Polestar_Travel, never
 // committed or packaged) and zone changes in recorded play (learned paths,
 // written into TravelData.lua). Every entry is validated here; errors name
-// the entry.
+// the entry. `recordedChain` drafts a chain from recorded walks for a person
+// to check (`travel chain`); nothing uses a drafted chain unreviewed.
 
 const fs = require('node:fs');
-const { round } = require('./geo');
+const { round, placePoint } = require('./geo');
 const { packageVersion } = require('../dsl/project');
 const { header } = require('../generated');
 
@@ -276,6 +277,139 @@ function recordedCrossings(steps, frames) {
 	});
 }
 
+// --- approach chains from recorded walks ------------------------------------------
+//
+// A candidate approach chain for one target, from the recorded walks that
+// reach it, for a person to check in game before it goes into the crossings
+// file. Every pass a walk makes within REACH yards of the target gives two
+// approaches: the walk up to its closest point and, with `reverse`, the walk
+// after it, reversed (a way out is not always a way in: a drop down a cliff is
+// one way), each followed back `within` yards; a shorter one does not count. It leaves the straight line where it has walked WASTE yards more than
+// a straight walk to the target (the arrow's line) would have; from there to
+// the target is its chain, simplified (Douglas-Peucker, `tolerance` yards)
+// into nodes. Walks from different sides meet at the real mouth, so the
+// shortest chain is the candidate. An approach that keeps to the straight
+// line is reported but does not cancel the others: recordings have no height,
+// so a walk that followed the bad arrow onto the hill above a cave looks
+// straight too. `sessions` keeps only the walks of those sessions.
+const CHAIN = { reach: 30, within: 300, tolerance: 8, waste: 20, mouthRadius: 15, radius: 10 };
+
+const dist = (a, b) => Math.hypot(a.wx - b.wx, a.wy - b.wy);
+
+function segDist(p, a, b) {
+	const dx = b.wx - a.wx;
+	const dy = b.wy - a.wy;
+	const len2 = dx * dx + dy * dy;
+	const k = len2 ? Math.max(0, Math.min(1, ((p.wx - a.wx) * dx + (p.wy - a.wy) * dy) / len2)) : 0;
+	return Math.hypot(p.wx - (a.wx + k * dx), p.wy - (a.wy + k * dy));
+}
+
+// Douglas-Peucker over world points; a hop longer than a chain allows is split too.
+function simplify(pts, eps) {
+	const keep = new Set([0, pts.length - 1]);
+	const split = (i, j) => {
+		let far = -1;
+		let farD = eps;
+		for (let k = i + 1; k < j; k++) {
+			const d = segDist(pts[k], pts[i], pts[j]);
+			if (d > farD) {
+				farD = d;
+				far = k;
+			}
+		}
+		if (far < 0 && j - i > 1 && dist(pts[i], pts[j]) > LIMITS.hopYards) far = (i + j) >> 1;
+		if (far < 0) return;
+		keep.add(far);
+		split(i, far);
+		split(far, j);
+	};
+	split(0, pts.length - 1);
+	return [...keep].sort((a, b) => a - b).map((k) => pts[k]);
+}
+
+// way: walked points ending at the one closest to the target -> null (it
+// starts within `within` yards) or { yards, path } (path null: the walk
+// keeps to the straight line).
+function approach(way, target, within) {
+	let s = way.length - 1;
+	while (s >= 0 && dist(way[s], target) <= within) s--;
+	if (s < 0) return null;
+	const pts = way.slice(s);
+	const end = pts[pts.length - 1];
+	const walked = new Array(pts.length).fill(0); // yards walked from i to the end
+	for (let i = pts.length - 2; i >= 0; i--) walked[i] = walked[i + 1] + dist(pts[i], pts[i + 1]);
+	const waste = (i) => walked[i] - dist(pts[i], end); // never grows along the walk
+	let d = 0;
+	while (d < pts.length - 1 && waste(0) - waste(d + 1) <= CHAIN.waste) d++;
+	if (d === pts.length - 1) return { yards: 0, path: null };
+	return { yards: walked[d], path: pts.slice(d) };
+}
+
+// walks: paths.js recordedWalks; target: { map, x, y } (Era frame);
+// sessions: session ids to keep (all when unset); reverse: count ways out ->
+// { chain: a crossings-file chain entry or null, approaches: [{ session,
+// direction: 'in'|'out', yards, mouth: { map, x, y } | null }], nearest:
+// yards from the target to the closest breadcrumb on its continent, or null }.
+function recordedChain({ walks, target, frames, within = CHAIN.within, tolerance = CHAIN.tolerance, id, name, sessions, reverse = false }) {
+	const t = frames.toWorld(target.map, target.x, target.y);
+	if (!t) throw new Error(`no Era map frame for map ${target.map}`);
+	const place = (p) => {
+		const m = placePoint(frames, p.c, p.wx, p.wy, { prefer: [p.map] });
+		if (!m) throw new Error(`no zone map holds the recorded point (${round(p.wx, 1)}, ${round(p.wy, 1)})`);
+		return m;
+	};
+	const approaches = [];
+	let nearest = null;
+	let best = null;
+	const keep = sessions && new Set(sessions);
+	for (const { session, points } of walks) {
+		if (keep && !keep.has(session)) continue;
+		// Visits: runs of points within REACH, each at its closest point; a walk
+		// may come back. Each visit's way in starts where the last one ended.
+		const visits = [];
+		for (let i = 0; i < points.length; i++) {
+			if (points[i].c !== t.c) continue;
+			const d = dist(points[i], t);
+			if (nearest === null || d < nearest) nearest = d;
+			if (d > CHAIN.reach) continue;
+			const v = visits[visits.length - 1];
+			if (v && v.last === i - 1) {
+				v.last = i;
+				if (d < dist(points[v.at], t)) v.at = i;
+			} else visits.push({ first: i, last: i, at: i });
+		}
+		visits.forEach((v, k) => {
+			const from = k > 0 ? visits[k - 1].last : 0;
+			const to = k < visits.length - 1 ? visits[k + 1].first : points.length - 1;
+			const ways = [['in', points.slice(from, v.at + 1)]];
+			if (reverse) ways.push(['out', points.slice(v.at, to + 1).reverse()]);
+			for (const [direction, way] of ways) {
+				const a = approach(way, t, within);
+				if (!a) continue;
+				approaches.push({ session, direction, yards: Math.round(a.yards), mouth: a.path && place(a.path[0]) });
+				if (a.path && (!best || a.yards < best.yards)) best = a;
+			}
+		});
+	}
+	if (!best) return { chain: null, approaches, nearest };
+
+	const pts = simplify(best.path, tolerance);
+	const nodes = pts.map((p, i) => {
+		const hops = [pts[i - 1], pts[i + 1]].filter(Boolean).map((q) => dist(p, q));
+		const radius = Math.max(LIMITS.radiusMin, Math.min(i === 0 ? CHAIN.mouthRadius : CHAIN.radius, Math.floor(Math.min(...hops) / 2)));
+		// Unset captions take the addon's translated default ("Follow the path").
+		return { ...place(p), radius, ...(i === 0 && name ? { caption: `Go to ${name}` } : {}) };
+	});
+	const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+	const chain = {
+		id: id || (name && slug(name)) || `recorded-chain-${target.map}-${Math.round(target.x)}-${Math.round(target.y)}`,
+		...(name ? { name } : {}),
+		open: 'mouth',
+		nodes,
+	};
+	return { chain, approaches, nearest };
+}
+
 // --- Lua -----------------------------------------------------------------------
 
 function luaStr(s) {
@@ -414,6 +548,7 @@ module.exports = {
 	validateCrossings,
 	readCrossingsFile,
 	recordedCrossings,
+	recordedChain,
 	crossingsLua,
 	emitTravelAddon,
 	crossingCounts,

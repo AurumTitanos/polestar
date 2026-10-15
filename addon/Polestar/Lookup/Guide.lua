@@ -20,7 +20,7 @@
 --       holds title and steps (the rest as above); Lookup.BuildGuide and
 --       Lookup.Guide then build `kind` with it, whatever lookup.enabled says
 --       (the module gates itself), and its saved tabs come back after /reload.
---       Dungeons' "pickup" kind is one (Dungeons/Pickup.lua).
+--       Dungeons' "pickup", "handin" and "attune" kinds are three (Dungeons/Pickup.lua, Handin.lua, Attune.lua).
 --   Lookup.QuestChain(questId, player) -> { quest, ... }, truncated
 --       the quest after its open prerequisites, in the order they are done
 --   Lookup.QuestStep(quest, from) -> step   -- accept, objectives, turn-in
@@ -304,18 +304,21 @@ end
 
 local builders = {}
 
--- What the vendor asks before selling (Sources' purchase gates) comes first:
--- the standing, then the skill rank.
-local function purchaseSteps(item)
+-- What the vendor asks before selling, or the NPC before handing it out
+-- (Sources' purchase gates), comes first: the standing (Lookup.PurchaseRep,
+-- the one at that npc), then, to buy it, the skill rank.
+local function purchaseSteps(item, npcId, purchase)
 	local steps = {}
 	if type(item) ~= "table" then return steps end
-	if item.repFaction and item.repStanding then
-		local f = Codex().Faction(item.repFaction)
-		local name = f and f.name or (L["Faction"] .. " " .. item.repFaction)
+	local faction, standing = Lookup.PurchaseRep(item, npcId, purchase)
+	if faction then
+		local f = Codex().Faction(faction)
+		local name = f and f.name or (L["Faction"] .. " " .. faction)
 		steps[#steps + 1] = { title = name, goals = {
-			{ t = "rep", faction = item.repFaction, factionName = name, standing = item.repStanding },
+			{ t = "rep", faction = faction, factionName = name, standing = standing },
 		} }
 	end
+	if not purchase then return steps end
 	if item.reqSkill and item.reqSkillRank then
 		local name = Lookup.ProfessionName(item.reqSkill) or L["Profession"]
 		steps[#steps + 1] = { title = L[name], goals = {
@@ -328,10 +331,23 @@ end
 builders.vendor = function(ctx, row)
 	local npc = Codex().Npc(row.src.npc)
 	if not (npc and located(row)) then return nil, "nolocation" end
-	local steps = purchaseSteps(ctx.entity)
+	local steps = purchaseSteps(ctx.entity, npc.id, true)
 	steps[#steps + 1] = { title = npc.name, goals = {
 		at({ t = "goto" }, row),
 		at({ t = "buy", item = ctx.id, itemName = ctx.name, count = 1, npc = npc.id, npcName = npc.name }, row),
+	} }
+	return steps
+end
+
+-- An NPC hands it out: go, talk, have it.
+builders.gift = function(ctx, row)
+	local npc = Codex().Npc(row.src.npc)
+	if not (npc and located(row)) then return nil, "nolocation" end
+	local steps = purchaseSteps(ctx.entity, npc.id, false)
+	steps[#steps + 1] = { title = npc.name, goals = {
+		at({ t = "goto" }, row),
+		at({ t = "talk", npc = npc.id, npcName = npc.name, optional = true }, row),
+		{ t = "collect", item = ctx.id, itemName = ctx.name, count = 1 },
 	} }
 	return steps
 end

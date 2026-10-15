@@ -63,17 +63,18 @@ local function tabIds()
 end
 `;
 
-function run(script, { level = 21, race = 'Scourge', cls = 'WARLOCK', at = UNDERCITY, done = [1098], log = [1013], saved } = {}) {
+function run(script, { level = 21, race = 'Scourge', faction = 'Horde', cls = 'WARLOCK', at = UNDERCITY, done = [1098], log = [1013], ready = [], saved, codexPack = pack } = {}) {
 	return runAddon({
 		stubs: ['stub_world.lua'],
-		before: `${pack.stubLua}
+		before: `${codexPack.stubLua}
 local w = stub.world
 ${MAPS}
-w.level, w.race, w.raceName, w.faction = ${level}, ${JSON.stringify(race)}, ${JSON.stringify(race)}, "Horde"
+w.level, w.race, w.raceName, w.faction = ${level}, ${JSON.stringify(race)}, ${JSON.stringify(race)}, ${JSON.stringify(faction)}
 w.class, w.className = ${JSON.stringify(cls)}, ${JSON.stringify(cls)}
 ${at ? `w.moveTo(${at.join(', ')})` : ''}
 w.complete(${luaValue(done)})
-for _, q in ipairs(${luaValue(log)}) do w.onQuest(q, { 1 }) end`,
+for _, q in ipairs(${luaValue(log)}) do w.onQuest(q, { 1 }) end
+for _, q in ipairs(${luaValue(ready)}) do w.onQuest(q, {}) end`,
 		addons: [ADDON],
 		saved: saved ? { Polestar: saved } : undefined,
 		login: true,
@@ -84,13 +85,13 @@ for _, q in ipairs(${luaValue(log)}) do w.onQuest(q, { 1 }) end`,
 // From the Undercity: Bethor's errand there, on to Renferrel and Dalar in
 // Silverpine (the chain in its order, Dalar's quest once it is behind), then
 // the Barrens for the Warlock's quest, the entrance last with the quest
-// already in the log listed.
+// already in the log listed, and the way to the hand-in guide after the run.
 const FROM_UNDERCITY = [
 	{ title: 'Orders from the Undercity', goals: 'accept:1010 turnin:1010' },
 	{ title: 'The Dalaran Inquiry', goals: 'accept:1011 turnin:1011' },
 	{ title: 'Dalar Dawnweaver', goals: 'accept:1014' },
 	{ title: 'Doan Karhan', goals: 'accept:1740' },
-	{ title: 'Shadowfang Keep', goals: 'note goto' },
+	{ title: 'Shadowfang Keep', goals: 'note goto note' },
 ];
 
 test('a Horde Warlock: the quests that apply, open prerequisites first in chain order, the givers on a route from the Undercity, the entrance last', () => {
@@ -102,13 +103,14 @@ for i, q in ipairs(plan.carried) do carried[i] = q.id end
 local def = D.PickupGuide("${KEY}")
 local last = def.steps[#def.steps]
 emit({ take = take, carried = carried, title = def.title, steps = describe(def), note = last.goals[1].text,
-	entrance = { last.goals[2].map, last.goals[2].x, last.goals[2].y, last.goals[2].text } })`);
+	entrance = { last.goals[2].map, last.goals[2].x, last.goals[2].y, last.goals[2].text }, after = last.goals[3].text })`);
 	assert.deepEqual(out.take, [1740, 1014], 'not done 1098, Tauren-only 1999, Alliance 1806, follow-up 1016, carried 1013');
 	assert.deepEqual(out.carried, [1013]);
 	assert.equal(out.title, 'Shadowfang Keep: pick up the quests');
 	assert.deepEqual(out.steps, FROM_UNDERCITY);
 	assert.equal(out.note, 'In your log already: The Book of Ur');
 	assert.deepEqual(out.entrance, [1421, 44.8, 67.8, 'Enter Shadowfang Keep']);
+	assert.equal(out.after, "After the run: open this dungeon's page (/polestar dungeons Shadowfang Keep) and choose Hand in the quests.");
 });
 
 test('the route starts where the player stands; another class gets no class quest', () => {
@@ -116,6 +118,44 @@ test('the route starts where the player stands; another class gets no class ques
 	assert.deepEqual(barrens, [FROM_UNDERCITY[3], ...FROM_UNDERCITY.slice(0, 3), FROM_UNDERCITY[4]], 'Doan Karhan first from the Barrens');
 	const [mage] = run(`emit(describe(D.PickupGuide("${KEY}")))`, { cls: 'MAGE' });
 	assert.deepEqual(mage, [...FROM_UNDERCITY.slice(0, 3), FROM_UNDERCITY[4]]);
+});
+
+test("a quest several NPCs of both sides give (Tabetha's Task): the character's side's giver nearest the player, never the other side's, though the page names the first", () => {
+	const c = structuredClone(codex);
+	const i = structuredClone(inputs);
+	const npc = (id, name, faction, map, x, y) => ({ id, name, level: 50, levelMax: null, faction, rare: false, elite: false, boss: false, instance: null, roles: [], spawns: [{ map, x, y, f: 'e' }] });
+	c.npcs[9001] = npc(9001, 'Anastasia Hartwell', 'H', 1458, 70, 40);
+	c.npcs[9002] = npc(9002, 'Barrens Trainer', 'A', 1413, 60, 30);
+	c.npcs[9003] = npc(9003, 'Silverpine Trainer', 'A', 1421, 60, 60);
+	const quest = (id, title, givers) => ({
+		id, title, level: 25, minLevel: 18, faction: null, races: null, classes: null,
+		start: { npc: givers, object: [], item: [] }, end: { npc: givers, object: [] },
+		objectives: [], pre: [], zone: 1421, rewards: [], choices: [], preAny: [],
+	});
+	c.quests[90200] = quest(90200, "Tabetha's Task", [9001, 9002, 9003]);
+	c.quests[90201] = quest(90201, 'Alliance Errand', [9002]);
+	i.forever.quests[90200] = { area: 209 };
+	i.forever.quests[90201] = { area: 209 };
+	const page = buildJournal(i, c).dungeons[KEY].quests.find((q) => q.id === 90200);
+	assert.equal(page.start.name, 'Anastasia Hartwell', 'the page keeps the first giver');
+	const own = writeCodexPack(c, { extraFiles: emitJournal(buildJournal(i, c)) });
+	try {
+		const script = `
+local plan = D.PickupPlan("${KEY}")
+local g = {}
+for _, t in ipairs(plan.take) do if t.quest.id >= 90200 then g[#g + 1] = t.quest.id .. ":" .. t.giver.name end end
+local p = D.GiverTarget("${KEY}", 90200)
+emit({ take = g, target = p and p.name or false })`;
+		const human = { race: 'Human', faction: 'Alliance', cls: 'MAGE', codexPack: own };
+		const [barrens] = run(script, { ...human, at: BARRENS });
+		assert.deepEqual(barrens, { take: ["90200:Barrens Trainer", '90201:Barrens Trainer'], target: 'Barrens Trainer' });
+		const [silverpine] = run(script, { ...human, at: [1421, 50, 50] });
+		assert.deepEqual(silverpine.take, ['90200:Silverpine Trainer', '90201:Barrens Trainer'], 'the nearest of its side');
+		const [horde] = run(script, { cls: 'MAGE', at: BARRENS, codexPack: own });
+		assert.deepEqual(horde, { take: ['90200:Anastasia Hartwell'], target: 'Anastasia Hartwell' }, 'the Alliance trainer next door is not for the Horde, nor a quest only an Alliance NPC gives');
+	} finally {
+		own.cleanup();
+	}
 });
 
 test('PickUp opens the guide in a new tab and it plays to the end; the giver link points at the first prerequisite still to do', () => {
@@ -247,4 +287,94 @@ emit({ route = names(stops, order), big = ok })`);
 	// one stop instead of two trips.
 	assert.deepEqual(out.route, ['first link', 'second link', 'giver, open now', 'giver, after the chain']);
 	assert.equal(out.big, true);
+});
+
+// After the run (Dungeons/Handin.lua): Arugal Must Die is finished, The Book
+// of Ur is not; Return to Dalar opens when Arugal Must Die is turned in to
+// Dalar, who gives it.
+const AFTER_RUN = { done: [1098, 1740, 1011], log: [1013], ready: [1014] };
+
+test('after the run: a finished quest routes to its turn-in, the follow-up it opens is taken there, an unfinished one is a note', () => {
+	const [out] = run(`
+local plan = D.HandinPlan("${KEY}")
+local def = D.HandinGuide("${KEY}")
+local ids = function(list, f) local o = {} for i, x in ipairs(list) do o[i] = f(x) end return o end
+local last = def.steps[#def.steps]
+emit({ hand = ids(plan.hand, function(h) return h.quest.id end), ender = { plan.hand[1].ender.name, plan.hand[1].ender.map },
+	unfinished = ids(plan.unfinished, function(q) return q.id end),
+	follow = ids(D.HandinFollowUps(plan), function(f) return f.rec.id end),
+	title = def.title, steps = describe(def), note = last.goals[#last.goals].text, turnin = { last.goals[1].npcName, last.goals[1].map, last.goals[1].x } })`, AFTER_RUN);
+	assert.deepEqual(out.hand, [1014]);
+	assert.deepEqual(out.ender, ['Dalar Dawnweaver', 1421]);
+	assert.deepEqual(out.unfinished, [1013]);
+	assert.deepEqual(out.follow, [1016], 'Return to Dalar, given by the NPC Arugal Must Die is turned in to');
+	assert.equal(out.title, 'Shadowfang Keep: hand in the quests');
+	assert.deepEqual(out.steps, [{ title: 'Dalar Dawnweaver', goals: 'turnin:1014 accept:1016 note' }]);
+	assert.equal(out.note, 'Not finished yet: The Book of Ur');
+	assert.deepEqual(out.turnin, ['Dalar Dawnweaver', 1421, 44.2]);
+});
+
+test('after the run: a follow-up from a giver next door is a stop of its own; one far away, or one this character cannot take, is left out; a finished delivery is handed in', () => {
+	const [barrens, near, far, low, both] = run(`
+local function follow() local o = {} for i, f in ipairs(D.HandinFollowUps(D.HandinPlan("${KEY}"))) do o[i] = f.rec.id end return o end
+emit(follow())
+-- Held, so the Codex keeps this record while its giver is moved.
+local dalar = Polestar.Codex.Quest(1016)
+dalar.start.npc = { 1952 } -- High Executor Hadrec, next to Dalar
+emit(describe(D.HandinGuide("${KEY}")))
+dalar.start.npc = { 6247 } -- Doan Karhan, in the Barrens
+emit(#follow())
+dalar.start.npc = { 1938 }
+stub.world.level = 17
+emit(#follow())
+stub.world.level = 21
+stub.world.finish(1013)
+emit(describe(D.HandinGuide("${KEY}")))`, { ...AFTER_RUN, at: BARRENS });
+	assert.deepEqual(barrens, [1016], 'nearness is measured from the turn-in, not from where the player stands');
+	assert.deepEqual(near, [{ title: 'Dalar Dawnweaver', goals: 'turnin:1014' }, { title: 'High Executor Hadrec', goals: 'accept:1016 note' }]);
+	assert.equal(far, 0);
+	assert.equal(low, 0, 'Return to Dalar needs level 18');
+	assert.deepEqual(both.map((s) => s.goals).sort(), ['turnin:1013', 'turnin:1014 accept:1016']);
+});
+
+test('nothing to hand in: HandIn says so and builds no guide; the text names what is not finished', () => {
+	const [out] = run(`
+local before = tabIds()
+local id, why = D.HandIn("${KEY}")
+emit({ id = id or false, why = why or false, guide = Polestar.Guides.Get("lookup/handin/${KEY}") ~= nil, same = #tabIds() == #before,
+	text = D.HandinText(D.HandinPlan("${KEY}")) })
+stub.world.abandon(1013)
+emit(D.HandinText(D.HandinPlan("${KEY}")))`);
+	assert.deepEqual(out, { id: false, why: 'nothing', guide: false, same: true, text: 'Not finished yet: The Book of Ur.' });
+});
+
+test('HandIn takes the place of the pick-up guide once that one is at the entrance, comes back after /reload, and plays to the end', () => {
+	const [first, out] = run(`
+Polestar.Set("behavior.autoNextGuide", false)
+-- Return to Dalar is all that is left to pick up: its step, then the entrance.
+D.PickUp("${KEY}")
+Polestar.Engine.OpenTab("lookup/pickup/${KEY}")
+local early = { D.HandIn("${KEY}") }
+local kept = tabIds()
+stub.world.accept(1016, { 1 })
+stub.advance(0.6)
+local id = D.HandIn("${KEY}")
+local s = Polestar.CharState()
+emit({ early = early[1] or false, kept = kept, id = id or false, tabs = tabIds(), active = Polestar.Engine.GetGuide().id,
+	order = s.dungeonHandin and s.dungeonHandin["${KEY}"] or false, saved = s.tabs })
+stub.advance(0.6)
+${SIMULATE}`, { done: [1098, 1740, 1011, 1014], log: [], ready: [1013] });
+	assert.equal(first.early, 'lookup/handin/shadowfang-keep', 'built while the pick-up guide still has a quest to take');
+	assert.deepEqual(first.kept, ['lookup/pickup/shadowfang-keep', 'lookup/handin/shadowfang-keep'], 'then both stay open');
+	assert.equal(first.id, 'lookup/handin/shadowfang-keep');
+	assert.deepEqual(first.tabs, ['lookup/handin/shadowfang-keep'], 'at its last step the pick-up guide gives up its tab');
+	assert.equal(first.active, 'lookup/handin/shadowfang-keep');
+	assert.deepEqual(first.order, ['enpc2934']);
+	assert.ok(!out.stuck, `stuck: ${JSON.stringify(out.stuck)}`);
+	assert.equal(out.done, true);
+	assert.deepEqual(out.missing, {});
+	const saved = `PolestarCharDB = { schema = 1, tabs = ${luaValue(first.saved)}, activeTab = 1, dungeonHandin = { [${JSON.stringify(KEY)}] = ${luaValue(first.order)} } }`;
+	const [after] = run(`emit({ tabs = tabIds(), steps = describe(Polestar.Guides.Get("lookup/handin/${KEY}")) })`,
+		{ at: null, saved, done: [1098, 1740, 1011, 1014], log: [], ready: [1013] });
+	assert.deepEqual(after, { tabs: ['lookup/handin/shadowfang-keep'], steps: [{ title: "Keeper Bel'dugur", goals: 'turnin:1013' }] });
 });

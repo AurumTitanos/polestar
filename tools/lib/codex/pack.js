@@ -35,18 +35,22 @@
 //            status = r (retired: no longer obtainable) | n (no known source), right after the quality digit
 //            source = <type letter><f1>,<f2>,...,<from letters>
 //              v vendor npc,cost,limited   d drop npc,chance,instance   o object object,chance
-//              q quest quest,choice        c craft spell,skillLine,skill
+//              q quest quest,choice        g gift npc,spell (an NPC hands it out)   c craft spell,skillLine,skill
 //              r rep faction,standing,npc  p pvp rank,npc               n container item,chance
 //              w world minLevel,maxLevel
 //   npc      level;levelMax;faction;flags(r e b);instance;roles;loot;<spawns>...
 //            spawns = map,f,x,y,x,y...   (one group per map); loot = item,item,...
 //   object   treasure(1|empty);loot;<spawns>...
 //   quest    level;minLevel;faction;races;classes;zone;startNpc;startObject;startItem;
-//            endNpc;endObject;pre;rewards;choices;preAny;<objective>...
+//            endNpc;endObject;pre;rewards;choices;preAny;<objective>...[;<rep>]
 //            objective = <k|i|o|e><id>,<count>,<text>
+//            rep = r<faction>,<standing>: the standing its rewards need (an older
+//                  reader skips it: no objective kind is r)
 //   instance kind;forever(1|empty);areaId;map;entrance(map,x,y,f[,a]);levels;<boss>...
 //            a: approximate (the client's corpse point, not the way in)
-//            boss = name,npc,item,item...
+//            boss = name,ref,item,item...   ref = <npc> | o<object> (a chest boss), then
+//                   r|e|x when its role is rare|event|optional (none: an encounter);
+//                   an old pack's ref is the bare npc id, which still reads
 //   faction  side            spell  kind;item;class            zone, skill: names only
 
 const { header } = require('../generated');
@@ -64,6 +68,8 @@ const FROM = {
 	dungeons: 'd',
 	flbis: 'f',
 	journal: 'j',
+	guides: 'g',
+	curated: 'u',
 	recordings: 'l',
 	pfquest: 'p',
 	questie: 'q',
@@ -77,6 +83,7 @@ const SOURCE = {
 	drop: ['d', ['npc', 'chance', 'instance']],
 	object: ['o', ['object', 'chance']],
 	quest: ['q', ['quest', 'choice']],
+	gift: ['g', ['npc', 'spell']],
 	craft: ['c', ['spell', 'skillLine', 'skill']],
 	rep: ['r', ['faction', 'standing', 'npc']],
 	pvp: ['p', ['rank', 'npc']],
@@ -243,7 +250,8 @@ function encodeQuest(rec) {
 		if (!t) throw new Error(`codex pack: quest ${rec.id}: unknown objective type "${o.type}"`);
 		return `${t}${num(o.id)},${num(o.count)},${esc(o.text)}`;
 	});
-	return [...head, ...objectives].join(';');
+	const rep = rec.repFaction && rec.repStanding ? [`r${num(rec.repFaction)},${num(rec.repStanding)}`] : [];
+	return [...head, ...objectives, ...rep].join(';');
 }
 
 function encodeInstance(rec) {
@@ -256,8 +264,15 @@ function encodeInstance(rec) {
 		e ? [num(e.map), coord(e.x), coord(e.y), e.f || '', ...(e.approx ? ['a'] : [])].join(',') : '',
 		list(rec.levels),
 	];
-	const bosses = (rec.bosses || []).map((b) => [esc(b.name), num(b.npc), ...(b.items || []).map(num)].join(','));
+	const bosses = (rec.bosses || []).map((b) => [esc(b.name), bossRef(b), ...(b.items || []).map(num)].join(','));
 	return [...head, ...bosses].join(';');
+}
+
+const ROLE = { rare: 'r', event: 'e', optional: 'x' };
+function bossRef(b) {
+	const id = b.npc ? num(b.npc) : b.object ? `o${num(b.object)}` : '';
+	if (b.role && !ROLE[b.role]) throw new Error(`codex pack: boss ${b.name}: unknown role "${b.role}"`);
+	return `${id}${b.role ? ROLE[b.role] : ''}`;
 }
 
 function encodeSpell(rec) {

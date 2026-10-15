@@ -17,7 +17,15 @@
 //
 // facts = { maps: instanceMapsOf rows (journal.js), encounters: { mapId: [ { id, name, order } ] },
 //   recMin: { mapId: level }, entry: { mapId: level }, era: Set(mapId)|null, lfgNames: [normalised names] }
-// Instance = { key, name, kind, forever, areaId, map, entrance, levels: [entry, min, max], bosses: [ { name, npc, items } ] }
+// Instance = { key, name, kind, forever, areaId, map, entrance, levels: [entry, min, max], bosses: [ Boss ] }
+// Boss = { name, npc|null, items, object?, role? }: object a chest's object id
+//   (a chest boss: npc null, unless an encounter has both); role
+//   'rare' | 'event' | 'optional' on the bosses after the encounters (none on
+//   an encounter's).
+//
+// "Placed inside" an instance: npcs.json / objects.json `instances` (QuestieDB,
+// recordings), or Wowhead's `location` naming an area on the instance's map
+// (Map / AreaTable rows: instanceMapsOf's `inner`).
 //
 // Rules (facts only):
 //   which maps   Map InstanceType 1 (dungeon) / 2 (raid) named by an
@@ -30,11 +38,15 @@
 //                listed), by OrderIndex, one per name; "A and B" encounters
 //                name two NPCs. Each name is matched to npcs.json: a recorded
 //                encounter's NPCs first, then the same name among NPCs placed
-//                in that instance (npcs.json `instances`), then the same name
+//                in that instance, then the same name
 //                (without open-world spawns, elite, nearest the instance's
 //                level first), then one spawnless NPC whose name starts with
-//                it or is within two letters of it. No match keeps the boss
-//                without an NPC.
+//                it or is within two letters of it (of several, the one
+//                placed inside: Kirtonos the Herald, not its spell visual).
+//                An encounter matching no
+//                NPC takes the chest placed inside whose name ends with its
+//                name (The Seven: Chest of The Seven) as its object and loot;
+//                else it stays without an NPC.
 //   levels       entry: MapDifficulty's "at least level N" message; min:
 //                ContentTuning MinLevelSquish of the map's LFGDungeons entries
 //                (or MapDifficulty's); max: the highest boss level, at most 60.
@@ -50,11 +62,20 @@
 //                the Corpse point is as often a city or inn trigger, so they
 //                are not used.
 //   more bosses  after the encounters, by level: NPCs placed inside that the
-//                data or Wowhead ranks rare or boss, or that alone drop an
-//                item of quality 2 or better at 5% or more.
+//                data or Wowhead ranks rare or boss (Wowhead's boss flag too),
+//                or that alone drop an item of quality 2 or better at 5% or
+//                more; role rare when ranked rare, else event when pfQuest and
+//                QuestieDB know no static spawn of it (summoned or scripted:
+//                the Ring of Law's fighters, Theldren), else optional. Then
+//                the chests placed inside (no gathering node, mailbox or
+//                meeting stone) that hold more than one item and alone (one
+//                name, any of its ids) an item of quality 2 or better at 5% or
+//                more or at an unknown rate, role optional.
 //   loot         a boss's items: its items.json drops at MIN_LOOT% or more, or
 //                at an unknown rate (pfQuest reference loot tables, QuestieDB
-//                droppers), best chance first.
+//                droppers), and its Wowhead drops: its own table at any rate,
+//                the world-drop pool (`commondrop`) at MIN_LOOT% or more. Its
+//                own table first, then that pool, each best chance first.
 
 const fs = require('node:fs');
 const path = require('node:path');
@@ -235,28 +256,88 @@ function buildInstances(facts, ctx = {}) {
 	}
 	const spawnless = (n) => !Object.values(n.spawns || {}).some((s) => s && (s.pts || []).length);
 	const spawnlessNames = Object.keys(byName).filter((k) => byName[k].some((id) => spawnless(npcsIn[id])));
-	const lootOf = {}; // npc -> [[item, chance]]
+	// Wowhead's `commondrop` rows of an NPC: the world-drop pool it shares
+	// (books, world blues, gems), not its own loot table.
+	const whCommon = new Set(); // `${npc}|${item}`
+	for (const [npc, w] of Object.entries((ctx.wowhead && ctx.wowhead.npc) || {})) for (const d of w.drops || []) if (d.common) whCommon.add(`${npc}|${d.item}`);
+	const lootOf = {}; // npc -> [[item, chance, common]]
 	for (const [id, it] of Object.entries(itemsIn)) {
 		for (const [npc, chance] of Object.entries((it.drops && it.drops.npc) || {})) {
 			// null: a known dropper at an unknown rate (pfQuest reference loot, QuestieDB).
 			const c = chance === null ? null : Number(chance);
 			if (c !== null && !(c >= MIN_LOOT)) continue;
-			(lootOf[npc] = lootOf[npc] || []).push([Number(id), c]);
+			(lootOf[npc] = lootOf[npc] || []).push([Number(id), c, whCommon.has(`${npc}|${id}`)]);
 		}
 	}
 
-	// Wowhead's drops of an NPC (release build): loot our tables lack.
+	// Wowhead's drops of an NPC (release build): loot our tables lack. Its own
+	// table at any rate (a boss's recipes and rare pieces drop well under 1%:
+	// Thermaplugg's schematics, Dextren Ward's plans), the world-drop pool at
+	// MIN_LOOT% or more.
 	for (const [npc, w] of Object.entries((ctx.wowhead && ctx.wowhead.npc) || {})) {
 		for (const d of w.drops || []) {
 			const c = Math.round((d.count / d.outof) * 10000) / 100;
-			if (c >= MIN_LOOT) (lootOf[npc] = lootOf[npc] || []).push([d.item, c]);
+			if (!d.common || c >= MIN_LOOT) (lootOf[npc] = lootOf[npc] || []).push([d.item, c, d.common]);
 		}
 	}
 	// item -> npcs dropping it (any rate): an item one NPC alone drops is its own loot.
 	const droppers = {};
 	for (const [id, it] of Object.entries(itemsIn)) for (const npc of Object.keys((it.drops && it.drops.npc) || {})) (droppers[id] = droppers[id] || new Set()).add(Number(npc));
 	for (const [npc, w] of Object.entries((ctx.wowhead && ctx.wowhead.npc) || {})) for (const d of w.drops || []) if (!d.common) (droppers[d.item] = droppers[d.item] || new Set()).add(Number(npc));
+	// A boss's items from its [item, chance, common] rows: the best chance per
+	// item; its own table first (items no row puts in Wowhead's world-drop
+	// pool, so Onyxia's Sacks of Gems are not crowded out by world blues), then
+	// that pool, each best first (an unknown rate last), at most BOSS_LOOT_CAP.
+	const bossItems = (rows) => {
+		const loot = new Map(); // item -> { c, common }
+		for (const [item, c, common] of rows) {
+			const l = loot.get(item);
+			if (!l) loot.set(item, { c, common: !!common });
+			else {
+				if (c !== null && !(l.c >= c)) l.c = c;
+				if (!common) l.common = false;
+			}
+		}
+		return [...loot.entries()]
+			.sort((a, b) => a[1].common - b[1].common || (b[1].c ?? -1) - (a[1].c ?? -1) || a[0] - b[0])
+			.slice(0, BOSS_LOOT_CAP)
+			.map(([id]) => id);
+	};
 	const quality = ctx.quality || (() => null);
+	const objectsIn = ctx.objects || {};
+	const whNpc = (ctx.wowhead && ctx.wowhead.npc) || {};
+	const whObject = (ctx.wowhead && ctx.wowhead.object) || {};
+	// Objects: [item, chance] rows (items.json, Wowhead), and who else yields
+	// an item (npcs by id, objects by name: one chest has several ids).
+	const objLootOf = {};
+	const yielders = {}; // item -> Set('n<npc>' | 'o<object name>')
+	const objKey = (id) => `o${norm((objectsIn[id] && objectsIn[id].name) || (whObject[id] && whObject[id].name) || id)}`;
+	for (const [id, it] of Object.entries(itemsIn)) {
+		for (const npc of Object.keys((it.drops && it.drops.npc) || {})) (yielders[id] = yielders[id] || new Set()).add(`n${npc}`);
+		for (const [obj, chance] of Object.entries((it.drops && it.drops.object) || {})) {
+			(yielders[id] = yielders[id] || new Set()).add(objKey(obj));
+			const c = chance === null ? null : Number(chance);
+			if (c === null || c >= MIN_LOOT) (objLootOf[obj] = objLootOf[obj] || []).push([Number(id), c]);
+		}
+	}
+	for (const [npc, w] of Object.entries(whNpc)) for (const d of w.drops || []) if (!d.common) (yielders[d.item] = yielders[d.item] || new Set()).add(`n${npc}`);
+	for (const [obj, w] of Object.entries(whObject)) {
+		for (const d of w.drops || []) {
+			if (!d.common) (yielders[d.item] = yielders[d.item] || new Set()).add(objKey(obj));
+			const c = Math.round((d.count / d.outof) * 10000) / 100;
+			if (c >= MIN_LOOT) (objLootOf[obj] = objLootOf[obj] || []).push([d.item, c, !!d.common]);
+		}
+	}
+	// Wowhead's `location` (AreaTable ids) -> the instance map holding that area.
+	const mapOfArea = {};
+	for (const m of facts.maps || []) for (const a of m.inner || []) mapOfArea[a] = mapOfArea[a] || m.id;
+	const whMaps = (w) => new Set(((w && w.location) || []).map((a) => mapOfArea[a]).filter(Boolean));
+	const placedIn = (rec, w, mapId) => ((rec && rec.instances) || []).map(Number).includes(mapId) || whMaps(w).has(mapId);
+	const npcIds = [...new Set([...Object.keys(npcsIn), ...Object.keys(whNpc)])].map(Number).sort((a, b) => a - b);
+	const objectIds = [...new Set([...Object.keys(objectsIn), ...Object.keys(whObject)])].map(Number).sort((a, b) => a - b);
+	const npcName = (id) => (npcsIn[id] && npcsIn[id].name) || (whNpc[id] && whNpc[id].name) || null;
+	const objName = (id) => (objectsIn[id] && objectsIn[id].name) || (whObject[id] && whObject[id].name) || null;
+	const npcLevel = (id) => num(npcsIn[id] && (npcsIn[id].levelMax || npcsIn[id].level)) || num(whNpc[id] && whNpc[id].level && whNpc[id].level[1]);
 	const instances = {};
 	const bossInstance = {};
 	const npcInstance = {};
@@ -273,7 +354,7 @@ function buildInstances(facts, ctx = {}) {
 		const pick = (name) => {
 			const n = norm(name);
 			const ids = byName[n] || [];
-			const inside = ids.filter((id) => (npcsIn[id].instances || []).map(Number).includes(m.id));
+			const inside = ids.filter((id) => placedIn(npcsIn[id], whNpc[id], m.id));
 			if (inside.length) return inside.sort((a, b) => a - b)[0];
 			const elite = (id) => num(npcsIn[id].rank) >= 1;
 			const d = (id) => (level && num(npcsIn[id].level) ? Math.abs(num(npcsIn[id].level) - level) : 0);
@@ -286,9 +367,15 @@ function buildInstances(facts, ctx = {}) {
 			if (n.length < 6) return null;
 			const near = spawnlessNames.filter((k) => k.startsWith(n) || editWithin(k, n, 2));
 			const hits = [...new Set(near.flatMap((k) => byName[k].filter((id) => spawnless(npcsIn[id]))))];
-			return hits.length === 1 ? hits[0] : null;
+			if (hits.length === 1) return hits[0];
+			// Several (Kirtonos the Herald and its spell visual): the one placed inside.
+			const placed = hits.filter((id) => placedIn(npcsIn[id], whNpc[id], m.id));
+			return placed.length === 1 ? placed[0] : null;
 		};
 		const bosses = [];
+		// The objects placed inside (objects.json `instances`, Wowhead `location`).
+		// A gathering node, mailbox or meeting stone is never a boss.
+		const objectsInside = objectIds.filter((id) => objName(id) && !JUNK_NPC.test(objName(id)) && !((objectsIn[id] && objectsIn[id].roles) || []).some((r) => r !== 'chest') && placedIn(objectsIn[id], whObject[id], m.id));
 		for (const e of enc) {
 			const recNpcs = ((recEnc[e.id] && recEnc[e.id].npcs) || []).map(Number).filter((id) => npcsIn[id]);
 			let npcs = recNpcs;
@@ -301,38 +388,56 @@ function buildInstances(facts, ctx = {}) {
 				}
 			}
 			npcs = [...new Set(npcs)];
-			const loot = new Map();
-			for (const id of npcs) for (const [item, c] of lootOf[id] || []) if (!loot.has(item) || (c !== null && !(loot.get(item) >= c))) loot.set(item, c);
-			const items = [...loot.entries()].sort((a, b) => (b[1] ?? -1) - (a[1] ?? -1) || a[0] - b[0]).slice(0, BOSS_LOOT_CAP).map(([id]) => id);
-			bosses.push({ name: e.name, npc: npcs[0] ?? null, npcs, items, encounter: e.id });
+			// An encounter naming no NPC may name its chest (The Seven: Chest of The Seven).
+			const en = norm(e.name);
+			const object = npcs.length || en.length < 5 ? null : (objectsInside.find((id) => norm(objName(id)).endsWith(en) && (objLootOf[id] || []).length) ?? null);
+			const items = bossItems([...npcs.flatMap((id) => lootOf[id] || []), ...((object && objLootOf[object]) || [])]);
+			bosses.push({ name: e.name, npc: npcs[0] ?? null, npcs, object, items, encounter: e.id });
 			for (const id of npcs) bossInstance[id] = bossInstance[id] || key;
 		}
 		// Further bosses, after the encounters: NPCs placed inside (npcs.json
-		// `instances`) that the data or Wowhead ranks rare or boss, or that alone
-		// drop an item of quality 2 or better at OWN_LOOT% or more (the Ring of
-		// Law's fighters, rare spawns), by level.
+		// `instances`, Wowhead `location`) that the data or Wowhead ranks rare or
+		// boss, or that alone drop an item of quality 2 or better at OWN_LOOT% or
+		// more (the Ring of Law's fighters, rare spawns, summoned bosses), by
+		// level; then the chests placed inside that alone hold such an item (at
+		// OWN_LOOT% or more, or at an unknown rate).
+		// role: rare (ranked rare), event (no static spawn in pfQuest or
+		// QuestieDB: summoned or scripted), else optional.
 		const taken = new Set(bosses.flatMap((b) => b.npcs));
 		const extra = [];
-		for (const [id, n] of Object.entries(npcsIn)) {
-			const nid = Number(id);
-			if (taken.has(nid) || !(n.instances || []).map(Number).includes(m.id) || !n.name || JUNK_NPC.test(n.name)) continue;
-			const w = ctx.wowhead && ctx.wowhead.npc[id];
-			const ranked = [2, 3, 4].includes(num(n.rank)) || (w && ['boss', 'rare', 'rareelite'].includes(w.classification));
+		for (const nid of npcIds) {
+			const n = npcsIn[nid];
+			const w = whNpc[nid];
+			const name = npcName(nid);
+			if (taken.has(nid) || !name || JUNK_NPC.test(name) || !placedIn(n, w, m.id)) continue;
+			const rank = num(n && n.rank);
+			const rare = rank === 2 || rank === 4 || (w && ['rare', 'rareelite'].includes(w.classification));
+			const ranked = rare || rank === 3 || (w && (w.classification === 'boss' || w.boss));
 			// Its own loot: an item of quality 2+ that it alone drops, at 5% or more
 			// (a dungeon's trash drops its shared blues far more rarely).
-			const own = (lootOf[id] || []).some(([item, c]) => c !== null && c >= OWN_LOOT && (quality(item) ?? 0) >= 2 && droppers[item] && droppers[item].size === 1);
-			if (ranked || own) extra.push(nid);
+			const own = (lootOf[nid] || []).some(([item, c]) => c !== null && c >= OWN_LOOT && (quality(item) ?? 0) >= 2 && droppers[item] && droppers[item].size === 1);
+			if (!ranked && !own) continue;
+			const placed = n && ((n.instances || []).length || !spawnless(n));
+			extra.push({ id: nid, role: rare ? 'rare' : placed ? 'optional' : 'event' });
 		}
-		extra.sort((a, b) => num(npcsIn[a].level) - num(npcsIn[b].level) || a - b);
-		for (const id of extra) {
-			const loot = new Map();
-			for (const [item, c] of lootOf[id] || []) if (!loot.has(item) || (c !== null && !(loot.get(item) >= c))) loot.set(item, c);
-			const items = [...loot.entries()].sort((a, b) => (b[1] ?? -1) - (a[1] ?? -1) || a[0] - b[0]).slice(0, BOSS_LOOT_CAP).map(([i]) => i);
-			bosses.push({ name: npcsIn[id].name, npc: id, npcs: [id], items });
+		extra.sort((a, b) => npcLevel(a.id) - npcLevel(b.id) || a.id - b.id);
+		for (const { id, role } of extra) {
+			bosses.push({ name: npcName(id), npc: id, npcs: [id], object: null, items: bossItems(lootOf[id] || []), role });
 			bossInstance[id] = bossInstance[id] || key;
 		}
+		const chests = new Set(bosses.map((b) => b.object && objKey(b.object)).filter(Boolean));
+		for (const id of objectsInside) {
+			const k = objKey(id);
+			if (chests.has(k)) continue;
+			// Its own loot, and more than one item (one is a quest object: Doan's Strongbox).
+			const rows = objLootOf[id] || [];
+			const own = rows.some(([item, c]) => (c === null || c >= OWN_LOOT) && (quality(item) ?? 0) >= 2 && yielders[item] && yielders[item].size === 1);
+			if (!own || new Set(rows.map(([item]) => item)).size < 2) continue;
+			chests.add(k);
+			bosses.push({ name: objName(id), npc: null, npcs: [], object: id, items: bossItems(objLootOf[id] || []), role: 'optional' });
+		}
 		// Levels.
-		const bossLevels = bosses.flatMap((b) => b.npcs.map((id) => num(npcsIn[id].levelMax) || num(npcsIn[id].level))).filter((l) => l > 0);
+		const bossLevels = bosses.flatMap((b) => b.npcs.map(npcLevel)).filter((l) => l > 0);
 		const entry = (facts.entry && facts.entry[m.id]) || null;
 		// The finder's minimum, never below the level the game lets you in at.
 		const min = level && entry ? Math.max(level, entry) : level || null;
@@ -359,16 +464,17 @@ function buildInstances(facts, ctx = {}) {
 			map: m.id,
 			entrance,
 			levels,
-			bosses: bosses.map(({ name, npc, items }) => ({ name, npc, items })),
+			// The old shape { name, npc, items }, plus object (a chest boss) and role when set.
+			bosses: bosses.map(({ name, npc, object, items, role }) => ({ name, npc, items, ...(object ? { object } : {}), ...(role ? { role } : {}) })),
 		};
 	}
 	// Every NPC placed in an instance (bosses first).
 	const keyOfMap = {};
 	for (const inst of Object.values(instances)) keyOfMap[inst.map] = inst.key;
 	Object.assign(npcInstance, bossInstance);
-	for (const [id, n] of Object.entries(npcsIn)) {
+	for (const id of npcIds) {
 		if (npcInstance[id]) continue;
-		const k = (n.instances || []).map((x) => keyOfMap[x]).find(Boolean);
+		const k = [...((npcsIn[id] && npcsIn[id].instances) || []).map(Number), ...whMaps(whNpc[id])].map((x) => keyOfMap[x]).find(Boolean);
 		if (k) npcInstance[id] = k;
 	}
 	return { instances, bossInstance, npcInstance };

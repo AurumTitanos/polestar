@@ -1098,6 +1098,16 @@ end
 -- Render
 ---------------------------------------------------------------------------
 
+-- A finished dungeon pick-up guide whose dungeon has quests in the log ->
+-- the dungeon's key | nil.
+local function pickupKey(guide)
+	local lk, Dg = guide and guide.lookup, ns.Dungeons
+	if not (lk and lk.kind == "pickup" and Dg and Dg.HandinPlan and UI.DungeonsSection) then return nil end
+	local plan = Dg.HandinPlan(lk.id)
+	if not plan or #plan.hand + #plan.unfinished + #plan.inside + #plan.unplaced == 0 then return nil end
+	return lk.id
+end
+
 local function setEmpty(kind)
 	state = kind
 	local E, G = Engine(), ns.Guides
@@ -1109,7 +1119,7 @@ local function setEmpty(kind)
 		empty.Title:SetText(L["No guides shown"])
 		empty.Text:SetText(L["The guide packs are switched off. Turn one on under Options, Guide packs (/polestar packs)."])
 		W.SetButtonText(empty.Primary, L["Guide packs"])
-		empty.Primary.psAction = function() UI.ShowOptions(L["Guide packs"]) end
+		empty.Primary.psAction = function() UI.ShowOptions("guidepacks") end
 		empty.Primary:Show()
 	elseif kind == "noguides" then
 		empty.Title:SetText(L["No guides installed"])
@@ -1139,6 +1149,7 @@ local function setEmpty(kind)
 		local guide = E and E.GetGuide and E.GetGuide()
 		local nextGuide = guide and guide.next and G and G.Get and G.Get(guide.next)
 		local choiceFrom = guide and E.PendingRouteChoice and E.PendingRouteChoice()
+		local afterRun = not choiceFrom and pickupKey(guide)
 		empty.Title:SetText(L["Guide complete"])
 		if choiceFrom then
 			-- Several zones to continue in: the player picks (UI.RouteChoice).
@@ -1147,6 +1158,16 @@ local function setEmpty(kind)
 			empty.Primary.psAction = function() UI.ShowRouteChoice(choiceFrom) end
 			empty.Primary:Show()
 			W.SetButtonText(empty.Secondary, L["Browse guides"])
+			empty.Secondary.psAction = function() UI.ShowPicker() end
+			empty.Secondary:Show()
+		elseif afterRun then
+			-- A dungeon's pick-up guide ends at the entrance; after the run
+			-- its quests are handed in (Dungeons/Handin.lua).
+			empty.Text:SetText(L["After the run: a guide to where this dungeon's quests are turned in, and the follow-ups there."])
+			W.SetButtonText(empty.Primary, L["Hand in the quests"])
+			empty.Primary.psAction = function() UI.DungeonsSection.HandIn(afterRun) end
+			empty.Primary:Show()
+			W.SetButtonText(empty.Secondary, L["Choose a guide"])
 			empty.Secondary.psAction = function() UI.ShowPicker() end
 			empty.Secondary:Show()
 		elseif nextGuide then
@@ -1555,15 +1576,32 @@ function GF.ApplyAlpha(animate)
 	end
 end
 
+-- The corner the window is pinned by and that corner's y: the bottom-left
+-- with ui.growUp (a longer step pushes the top edge up), else the top-left
+-- (it pushes the bottom edge down). ui.pos holds that corner.
+local function pinCorner()
+	if ns.Get("ui.growUp") then return "BOTTOMLEFT", F:GetBottom() end
+	return "TOPLEFT", F:GetTop()
+end
+
 function GF.ApplyPosition()
 	if not F then return end
 	local pos = ns.Get("ui.pos")
 	F:ClearAllPoints()
 	if type(pos) == "table" and type(pos[1]) == "number" and type(pos[2]) == "number" then
-		F:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", pos[1], pos[2])
+		F:SetPoint(ns.Get("ui.growUp") and "BOTTOMLEFT" or "TOPLEFT", UIParent, "BOTTOMLEFT", pos[1], pos[2])
+	elseif ns.Get("ui.growUp") then
+		F:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -64, 240)
 	else
 		F:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -64, -240)
 	end
+end
+
+function GF.SavePosition()
+	if not F then return end
+	local l = F:GetLeft()
+	local _, y = pinCorner()
+	if l and y then ns.Set("ui.pos", { floor(l + 0.5), floor(y + 0.5) }) end
 end
 
 function GF.ApplyLock()
@@ -1584,18 +1622,19 @@ function GF.ApplyCompact()
 	GF.Layout()
 end
 
--- Scale about the top-left corner, so the window stays where the user put
+-- Scale about the pinned corner, so the window stays where the user put
 -- it, then repaint so 1px lines land on the new pixel grid.
 function GF.ApplyScale()
 	local new = ns.Get("ui.scale") or 1
 	local old = F:GetScale()
 	if old == new then return end
-	local l, t = F:GetLeft(), F:GetTop()
+	local l = F:GetLeft()
+	local corner, y = pinCorner()
 	F:SetScale(new)
-	if l and t and type(ns.Get("ui.pos")) == "table" then
+	if l and y and type(ns.Get("ui.pos")) == "table" then
 		F:ClearAllPoints()
-		F:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", l * old / new, t * old / new)
-		ns.Set("ui.pos", { floor(l * old / new + 0.5), floor(t * old / new + 0.5) })
+		F:SetPoint(corner, UIParent, "BOTTOMLEFT", l * old / new, y * old / new)
+		ns.Set("ui.pos", { floor(l * old / new + 0.5), floor(y * old / new + 0.5) })
 	end
 	Theme.Refresh()
 end
@@ -1610,6 +1649,8 @@ local APPLY = {
 	["ui.compact"] = function() GF.ApplyCompact() end,
 	["ui.width"] = function() GF.ApplyWidth() end,
 	["ui.pos"] = function() GF.ApplyPosition() end,
+	-- Re-pin by the other corner where the window stands now, so it does not jump.
+	["ui.growUp"] = function() GF.SavePosition() end,
 	["ui.upcoming"] = function() GF.Render() end,
 	["ui.upcomingOpen"] = function() GF.Render() end,
 	["ui.showNotes"] = function() GF.Render() end,
@@ -1632,10 +1673,7 @@ end
 -- Move and resize
 ---------------------------------------------------------------------------
 
-local function savePosition()
-	local l, t = F:GetLeft(), F:GetTop()
-	if l and t then ns.Set("ui.pos", { floor(l + 0.5), floor(t + 0.5) }) end
-end
+local savePosition = GF.SavePosition
 
 local function dragStart()
 	if ns.Get("ui.locked") then return end
@@ -1658,11 +1696,12 @@ end
 
 local function resizeStart(self)
 	if ns.Get("ui.locked") then return end
-	-- Grow from the left edge: pin the window by its top-left first.
-	local l, t = F:GetLeft(), F:GetTop()
-	if l and t then
+	-- Grow from the left edge: pin the window by its left corner first.
+	local l = F:GetLeft()
+	local corner, y = pinCorner()
+	if l and y then
 		F:ClearAllPoints()
-		F:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", l, t)
+		F:SetPoint(corner, UIParent, "BOTTOMLEFT", l, y)
 	end
 	self.psStartX = GetCursorPosition() / F:GetEffectiveScale()
 	self.psStartW = F:GetWidth()

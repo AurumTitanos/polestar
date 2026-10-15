@@ -112,13 +112,25 @@ local function missingPre(goal)
 end
 
 -- Quests a guide or any guide after it (via `next` and every route choice)
--- still needs: targets of non-accept goals (turn-ins, objectives) and
--- prerequisites (`pre`) of its accepts. Cached per guide.
+-- still needs at a character level: the prerequisites (`pre`, `preAll`) of
+-- every accept that is not grey at that level, and of every accept a needed
+-- quest's own accept is, down the chain (a grey Buzzbox 827 opens the Buzzbox
+-- quests that still give full experience). A quest's own turn-in and
+-- objectives are not a need: they go with its accept. Cached per guide and
+-- level.
 local chainNeedsCache = setmetatable({}, { __mode = "k" })
-local function chainNeeds(g)
-	local set = chainNeedsCache[g]
+local function chainNeeds(g, level)
+	local byLevel = chainNeedsCache[g]
+	if not byLevel then
+		byLevel = {}
+		chainNeedsCache[g] = byLevel
+	end
+	local set = byLevel[level]
 	if set then return set end
-	set = {}
+	local C = Compat()
+	-- Every accept down the chain: quest -> its prerequisite lists; open: the
+	-- quests whose accepts are not grey, needed as they are.
+	local pres, open = {}, {}
 	local seenIds, queue, head = {}, { g }, 1
 	while queue[head] and head <= 200 do
 		local cur = queue[head]
@@ -127,13 +139,16 @@ local function chainNeeds(g)
 			seenIds[cur.id] = true
 			for _, step in ipairs(cur.steps) do
 				for _, goal in ipairs(step.goals) do
-					if goal.quest and goal.t ~= "accept" then set[goal.quest] = true end
-					if goal.t == "accept" then
-						for _, key in ipairs({ "pre", "preAll" }) do
-							if type(goal[key]) == "table" then
-								for _, q in ipairs(goal[key]) do set[q] = true end
-							end
+					if goal.t == "accept" and goal.quest then
+						local list = pres[goal.quest]
+						if not list then
+							list = {}
+							pres[goal.quest] = list
 						end
+						for _, key in ipairs({ "pre", "preAll" }) do
+							if type(goal[key]) == "table" then list[#list + 1] = goal[key] end
+						end
+						if not (goal.qlvl and C.IsQuestTrivial(tonumber(goal.qlvl), level)) then open[#open + 1] = goal.quest end
 					end
 				end
 			end
@@ -143,20 +158,36 @@ local function chainNeeds(g)
 			end
 		end
 	end
-	chainNeedsCache[g] = set
+	set = {}
+	local walked = {}
+	while #open > 0 do
+		local q = table.remove(open)
+		if not walked[q] then
+			walked[q] = true
+			for _, list in ipairs(pres[q] or {}) do
+				for _, p in ipairs(list) do
+					set[p] = true
+					open[#open + 1] = p
+				end
+			end
+		end
+	end
+	byLevel[level] = set
 	return set
 end
 
 -- behavior.skipGrey: an accept for a quest already grey for the character,
--- not taken yet and not needed later in the guide or its chain, no longer
--- applies (status "na", never blocks, never auto-accepted).
+-- not taken yet and not a prerequisite of a quest later in the guide or its
+-- chain, no longer applies (status "na", never blocks, never auto-accepted);
+-- its turn-in and objectives go with it (orphaned).
 local function greySkipped(goal)
 	if goal.t ~= "accept" or not goal.qlvl or not ns.Get("behavior.skipGrey") then return false end
 	local C = Compat()
-	if not C.IsQuestTrivial(tonumber(goal.qlvl), player.level or 1) then return false end
+	local level = player.level or 1
+	if not C.IsQuestTrivial(tonumber(goal.qlvl), level) then return false end
 	local q = goal.quest
 	if C.IsOnQuest(q) or questDone(q) then return false end
-	return not chainNeeds(guide)[q]
+	return not chainNeeds(guide, level)[q]
 end
 
 -- Per guide: each goal's step index, and each quest's accept goals.
@@ -185,9 +216,9 @@ end
 
 -- A turn-in, complete or objective goal for a quest the character neither
 -- has nor has done, and that this guide does not (for this character) accept
--- at or before that step, in a step the player has not skipped: it was picked
--- up on another route, or skipped, so it cannot be done here and no longer
--- applies.
+-- at or before that step, in a step the player has not skipped, with an
+-- accept that is not left out as grey: it was picked up on another route, or
+-- skipped, so it cannot be done here and no longer applies.
 local function orphaned(goal)
 	local q = goal.quest
 	if not q or goal.t == "accept" or not guide then return false end
@@ -198,7 +229,7 @@ local function orphaned(goal)
 	if not s then return false end
 	local skipped = ns.CharState().skipped[guide.id]
 	for _, a in ipairs(l.accepts[q] or NONE) do
-		if a.s <= s and not (skipped and skipped[a.s]) and Guides.Matches(a.step.only, player) and Guides.Matches(a.goal.only, player) then
+		if a.s <= s and not (skipped and skipped[a.s]) and Guides.Matches(a.step.only, player) and Guides.Matches(a.goal.only, player) and not greySkipped(a.goal) then
 			return false
 		end
 	end
@@ -661,11 +692,11 @@ local function checked(s, g)
 	return m ~= nil and m[Own.key(s, g)] and true or false
 end
 
-local STANDINGS = { "Hated", "Hostile", "Unfriendly", "Neutral", "Friendly", "Honored", "Revered", "Exalted" }
+local STANDINGS = { L["Hated"], L["Hostile"], L["Unfriendly"], L["Neutral"], L["Friendly"], L["Honored"], L["Revered"], L["Exalted"] }
 
 -- Localized by the client's FACTION_STANDING_LABELn when present.
 local function standingName(n)
-	return _G["FACTION_STANDING_LABEL" .. tostring(n)] or (STANDINGS[n] and L[STANDINGS[n]]) or tostring(n)
+	return _G["FACTION_STANDING_LABEL" .. tostring(n)] or STANDINGS[n] or tostring(n)
 end
 
 -- "first aid" -> "First Aid", for goals that only carry a skill line ID.
@@ -1230,9 +1261,10 @@ local function unavailableText(u)
 	return L["Not offered by %s"]:format(a.npcName or a.objName or L["the quest giver"])
 end
 
+-- A translated pattern (L["from %s"]) filled with value; nil without one.
 local function fmt(pattern, value)
 	if not value then return nil end
-	return L[pattern]:format(value)
+	return pattern:format(value)
 end
 
 -- verb, subject, subjectKind, detail
@@ -1240,17 +1272,17 @@ local function describe(goal)
 	local t = goal.t
 	local C = Compat()
 	if t == "accept" then
-		return L["Accept"], questTitle(goal), "quest", fmt("from %s", goal.npcName or goal.objName or goal.itemName)
+		return L["Accept"], questTitle(goal), "quest", fmt(L["from %s"], goal.npcName or goal.objName or goal.itemName)
 	elseif t == "turnin" then
-		return L["Turn in"], questTitle(goal), "quest", fmt("at %s", goal.npcName or goal.objName)
+		return L["Turn in"], questTitle(goal), "quest", fmt(L["at %s"], goal.npcName or goal.objName)
 	elseif t == "complete" then
 		return L["Complete"], questTitle(goal), "quest", nil
 	elseif t == "kill" then
-		return L["Kill"], goal.target, "npc", goal.quest and fmt("for %s", questTitle(goal)) or nil
+		return L["Kill"], goal.target, "npc", goal.quest and fmt(L["for %s"], questTitle(goal)) or nil
 	elseif t == "collect" then
-		if goal.quest then return L["Collect"], goal.itemName, "item", fmt("for %s", questTitle(goal)) end
+		if goal.quest then return L["Collect"], goal.itemName, "item", fmt(L["for %s"], questTitle(goal)) end
 		local _, npcName = npcOf(goal)
-		return L["Collect"], goal.itemName, "item", fmt("from %s", npcName)
+		return L["Collect"], goal.itemName, "item", fmt(L["from %s"], npcName)
 	elseif t == "goto" then
 		local mapName = C.GetMapName(goal.map)
 		if goal.text then return L["Go to"], goal.text, "place", mapName end
@@ -1259,30 +1291,30 @@ local function describe(goal)
 	elseif t == "talk" then
 		return L["Talk to"], goal.npcName, "npc", nil
 	elseif t == "interact" then
-		return L["Click"], goal.objName, "object", goal.quest and fmt("for %s", questTitle(goal)) or nil
+		return L["Click"], goal.objName, "object", goal.quest and fmt(L["for %s"], questTitle(goal)) or nil
 	elseif t == "use" then
-		return L["Use"], goal.itemName, "item", goal.quest and fmt("for %s", questTitle(goal)) or nil
+		return L["Use"], goal.itemName, "item", goal.quest and fmt(L["for %s"], questTitle(goal)) or nil
 	elseif t == "sethome" then
 		local _, npcName = npcOf(goal)
-		if goal.location then return L["Set your home to"], goal.location, "place", fmt("at %s", npcName) end
+		if goal.location then return L["Set your home to"], goal.location, "place", fmt(L["at %s"], npcName) end
 		return L["Set your home at"], npcName or L["the nearest inn"], npcName and "npc" or "text", nil
 	elseif t == "hearth" then
 		return L["Hearth to"], goal.location, "place", nil
 	elseif t == "getfp" then
-		return L["Get the flight path at"], goal.location, "place", fmt("from %s", goal.npcName)
+		return L["Get the flight path at"], goal.location, "place", fmt(L["from %s"], goal.npcName)
 	elseif t == "fly" then
 		return L["Fly to"], goal.location, "place", nil
 	elseif t == "train" then
 		local _, npcName = npcOf(goal)
 		if goal.skillLine and rankCap(goal) then
 			local name = skillName(goal) or goal.skill
-			return L["Train"], name, "skill", fmt("at %s", npcName)
+			return L["Train"], name, "skill", fmt(L["at %s"], npcName)
 		end
 		if npcName then return L["Train at"], npcName, "npc", nil end
 		return L["Train at"], L["your trainer"], "text", nil
 	elseif t == "buy" then
 		local _, npcName = npcOf(goal)
-		return L["Buy"], goal.itemName, "item", fmt("from %s", npcName)
+		return L["Buy"], goal.itemName, "item", fmt(L["from %s"], npcName)
 	elseif t == "vendor" then
 		local _, npcName = npcOf(goal)
 		if npcName then return L["Sell and repair at"], npcName, "npc", nil end
@@ -1290,15 +1322,15 @@ local function describe(goal)
 	elseif t == "level" then
 		return L["Reach level"], tostring(goal.level), "level", nil
 	elseif t == "skill" then
-		return L["Raise"], goal.skill, "skill", fmt("to %d", goal.level)
+		return L["Raise"], goal.skill, "skill", fmt(L["to %d"], goal.level)
 	elseif t == "learn" then
 		local _, npcName = npcOf(goal)
-		return L["Learn"], goal.spellName, "spell", fmt("from %s", npcName)
+		return L["Learn"], goal.spellName, "spell", fmt(L["from %s"], npcName)
 	elseif t == "craft" then
 		local detail
 		if goal.untilSkill then
 			local name = skillName(goal)
-			detail = name and L["until %s %d"]:format(name, goal.untilSkill) or fmt("until skill %d", goal.untilSkill)
+			detail = name and L["until %s %d"]:format(name, goal.untilSkill) or fmt(L["until skill %d"], goal.untilSkill)
 		end
 		return L["Craft"], goal.spellName, "spell", detail
 	elseif t == "rep" then
@@ -2127,7 +2159,7 @@ end
 ---------------------------------------------------------------------------
 
 local classTrainers = { candidates = {} } -- a pseudo goal, so pickFor ranks them
-local trainerClasses = {} -- npc -> { classFile, ... }
+local trainerClasses = {} -- npc -> { [classFile] = true }, every class trainer
 local TRAIN_LOOKAHEAD = 4 -- applicable steps, from the current one
 
 function ns.RegisterClassTrainers(list)
@@ -2137,10 +2169,25 @@ function ns.RegisterClassTrainers(list)
 		if type(t) == "table" and type(t.npc) == "number" and type(t.map) == "number" and type(t.x) == "number"
 			and type(t.y) == "number" and type(t.classes) == "table" then
 			c[#c + 1] = t
-			trainerClasses[t.npc] = t.classes
 		end
 	end
 	picks[classTrainers] = nil
+end
+
+-- Every class trainer's npc id by class ({ WARRIOR = { 914, ... } }), not only
+-- the reminder's one per town: what Engine.IsClassTrainer answers from.
+function ns.RegisterClassTrainerIds(byClass)
+	if type(byClass) ~= "table" then return end
+	for cls, ids in pairs(byClass) do
+		if type(cls) == "string" and type(ids) == "table" then
+			for _, id in ipairs(ids) do
+				if type(id) == "number" then
+					trainerClasses[id] = trainerClasses[id] or {}
+					trainerClasses[id][cls] = true
+				end
+			end
+		end
+	end
 end
 
 -- The best class trainer for the character from where they stand, or nil.
@@ -2149,6 +2196,14 @@ function Engine.NearestClassTrainer()
 	if not player then refreshPlayer() end
 	local p = pickFor(classTrainers)
 	return p.list[p.i]
+end
+
+-- Whether `npc` is a class trainer of the character's class.
+function Engine.IsClassTrainer(npc)
+	local classes = npc and trainerClasses[npc]
+	if not classes then return false end
+	if not player then refreshPlayer() end
+	return classes[player.class] == true
 end
 
 -- The active guide sends the character to their class trainer soon.
@@ -2191,17 +2246,11 @@ end
 
 -- A trainer window of the character's class: trained at this level.
 local function noteClassTrainer(npc)
-	local classes = npc and trainerClasses[npc]
-	if not classes then return end
+	if not Engine.IsClassTrainer(npc) then return end
 	refreshPlayer()
-	for _, c in ipairs(classes) do
-		if c == player.class then
-			local s = ns.CharState()
-			s.classTrainLevel = player.level or 1
-			ns.Fire("CLASS_TRAINED", s.classTrainLevel)
-			return
-		end
-	end
+	local s = ns.CharState()
+	s.classTrainLevel = player.level or 1
+	ns.Fire("CLASS_TRAINED", s.classTrainLevel)
 end
 
 -- Fresh step state for a new guide in the loaded tab.

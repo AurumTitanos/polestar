@@ -8,6 +8,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { runAddon } = require('./helpers/lua');
+const { fakeLocale } = require('./helpers/locale');
 
 const ADDON = { name: 'Polestar', files: ['Core/Core.xml', 'Gear/Gear.xml'] };
 
@@ -38,12 +39,13 @@ const LEVELING = `{
 	npcs = {}, zones = { [12] = "Elwynn Forest" },
 }`;
 
-function run(script, { cls = 'WARRIOR', className = 'Warrior', classID = 1, level = 22, race = 'Troll', raceID = 8, faction = 'Horde', register = true } = {}) {
+function run(script, { cls = 'WARRIOR', className = 'Warrior', classID = 1, level = 22, race = 'Troll', raceID = 8, faction = 'Horde', register = true, locale = '' } = {}) {
 	return runAddon({
 		stubs: ['stub_world.lua', 'stub_gear.lua'],
 		before: `w = stub.world; g = stub.gear
 w.class, w.className, w.classID, w.level = "${cls}", "${className}", ${classID}, ${level}
-w.race, w.raceName, w.raceID, w.faction = "${race}", "${race}", ${raceID}, "${faction}"`,
+w.race, w.raceName, w.raceID, w.faction = "${race}", "${race}", ${raceID}, "${faction}"
+${locale}`,
 		addons: [ADDON],
 		login: true,
 		script: `G = Polestar.Gear
@@ -90,6 +92,14 @@ test('upgrade line: unusable items say why; class-restricted; the downgrade in r
 	assert.equal(mage, 'Polestar · Frost | armor you cannot wear');
 	assert.equal(clsOnly, 'Polestar · Arms | not for your class');
 	assert.equal(worn, false);
+});
+
+test('upgrade line: why an item is unusable is in the client language', () => {
+	const es = fakeLocale('esMX', { 'armor you cannot wear': 'armadura que no puedes llevar', 'not for your class': 'no es para tu clase' });
+	const [mage] = run('emit(line("item:9101"))', { cls: 'MAGE', className: 'Mage', classID: 8, locale: es });
+	const [cls] = run('emit(line("item:9150"))', { locale: es });
+	assert.equal(mage, 'Polestar · Frost | armadura que no puedes llevar');
+	assert.equal(cls, 'Polestar · Arms | no es para tu clase');
 });
 
 test('two-hand vs one-hand: a two-hander against main + off hand; a one-hander against a worn two-hander pairs with the best bag off-hand', () => {

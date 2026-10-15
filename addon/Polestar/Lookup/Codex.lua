@@ -11,6 +11,7 @@
 --   Codex.Load() -> loaded, reason   -- Data.Pack("Polestar_Codex"); fires CODEX_LOADED(meta) once
 --   Codex.IsLoaded() ; Codex.Meta()
 --   Codex.Item(id) / Npc(id) / Object(id) / Quest(id) / Instance(key) / Zone(id) / Faction(id)
+--   Codex.FollowUps(questId) -> { quest, ... }   -- the quests whose pre or preAny names it
 --   Codex.Spell(spellId) -> { id, kind, item, name, class } | nil
 --   Codex.Name(kind, id) -> name | nil   -- no decoding; "item" spans every item kind,
 --                                           "npc" npc + rare, "object" object + treasure
@@ -47,6 +48,7 @@ local chunks = {}
 local indexes = {} -- kind -> search blob
 local cache = {} -- group -> { [id] = record | false } (weak values)
 local roleCache = {} -- role -> { npcId, ... }
+local followUps = {} -- questId -> { follow-up questId, ... }
 local meta
 local announced = false
 local WEAK = { __mode = "v" }
@@ -116,8 +118,8 @@ local SPAN = { item = ITEM_GROUPS, npc = NPC_GROUPS, object = OBJECT_GROUPS }
 
 -- Same letters as FROM in tools/lib/codex/pack.js.
 local FROM = {
-	a = "atlasloot", c = "client", d = "dungeons", f = "flbis", j = "journal", l = "recordings",
-	p = "pfquest", q = "questie", r = "rarescanner", w = "wowhead", e = "forever",
+	a = "atlasloot", c = "client", d = "dungeons", f = "flbis", g = "guides", j = "journal", l = "recordings",
+	p = "pfquest", q = "questie", r = "rarescanner", u = "curated", w = "wowhead", e = "forever",
 }
 
 -- letter -> { type, fields }; same layout as SOURCE in pack.js.
@@ -126,6 +128,7 @@ local SOURCE = {
 	d = { "drop", { "npc", "chance", "instance" } },
 	o = { "object", { "object", "chance" } },
 	q = { "quest", { "quest", "choice" } },
+	g = { "gift", { "npc", "spell" } }, -- an NPC hands it out (casts a spell that creates it)
 	c = { "craft", { "spell", "skillLine", "skill" } },
 	r = { "rep", { "faction", "standing", "npc" } },
 	p = { "pvp", { "rank", "npc" } },
@@ -277,14 +280,24 @@ local function decodeQuest(group, id, s)
 	}
 	for i = 16, n do
 		local f = t[i]
-		local kind = OBJECTIVE[sub(f, 1, 1)]
+		local lead = sub(f, 1, 1)
+		local kind = OBJECTIVE[lead]
 		if kind then
 			local _, _, oid, count, text = find(f, "^.([^,]*),([^,]*),(.*)$")
 			rec.objectives[#rec.objectives + 1] = { type = kind, id = tonumber(oid), count = tonumber(count), text = unesc(text) }
+		elseif lead == "r" then
+			-- The standing its rewards need: r<faction>,<standing> (1..8, Hated..Exalted).
+			local _, _, fid, standing = find(f, "^r(%d+),(%d+)$")
+			rec.repFaction, rec.repStanding = tonumber(fid), tonumber(standing)
 		end
 	end
 	return rec
 end
+
+-- A boss's ref: <npc>, or o<object> for a chest boss, then r|e|x for its role
+-- (rare, event, optional; none: one of the instance's encounters). An older
+-- pack's ref is the bare npc id.
+local BOSS_ROLE = { r = "rare", e = "event", x = "optional" }
 
 local function decodeInstance(group, id, s)
 	local t, n = split(s, ";")
@@ -304,7 +317,11 @@ local function decodeInstance(group, id, s)
 		local b, m = split(t[i], ",")
 		local items = {}
 		for k = 3, m do items[#items + 1] = tonumber(b[k]) end
-		rec.bosses[#rec.bosses + 1] = { name = unesc(b[1]), npc = tonumber(b[2]), items = items }
+		local boss = { name = unesc(b[1]), items = items }
+		local _, _, o, ref, role = find(b[2] or "", "^(o?)(%d*)(%a?)$")
+		if o == "o" then boss.object = tonumber(ref) else boss.npc = tonumber(ref) end
+		boss.role = BOSS_ROLE[role or ""]
+		rec.bosses[#rec.bosses + 1] = boss
 	end
 	return rec
 end
@@ -348,6 +365,7 @@ function Codex.Register(group, names, recs, lo, hi)
 	}
 	cache[group] = nil
 	if group == "role" then roleCache = {} end
+	if group == "quest" then followUps = {} end
 end
 
 function Codex.RegisterIndex(kind, blob)
@@ -440,6 +458,40 @@ function Codex.Quest(id)
 	id = tonumber(id)
 	if not (id and ready()) then return nil end
 	return get("quest", id)
+end
+
+-- questId -> { quest, ... }: the quests whose `pre` or `preAny` names it, in
+-- pack order. One pass over the quest records per quest asked (the ids found
+-- are kept until the quest chunks change).
+function Codex.FollowUps(id)
+	id = tonumber(id)
+	if not (id and ready()) then return {} end
+	local ids = followUps[id]
+	if not ids then
+		ids = {}
+		local needle = tostring(id)
+		for _, c in ipairs(chunks.quest or {}) do
+			if c.recs then
+				for qid, s in gmatch(c.recs, "\n([^\t\n]*)\t([^\n]*)") do
+					if find(s, needle, 1, true) then
+						local t = split(s, ";")
+						local hit = false
+						for _, f in ipairs({ t[12], t[15] }) do
+							for _, p in ipairs(numbers(f)) do hit = hit or p == id end
+						end
+						if hit then ids[#ids + 1] = key(qid) end
+					end
+				end
+			end
+		end
+		followUps[id] = ids
+	end
+	local out = {}
+	for _, qid in ipairs(ids) do
+		local q = get("quest", qid)
+		if q then out[#out + 1] = q end
+	end
+	return out
 end
 
 function Codex.Instance(key)

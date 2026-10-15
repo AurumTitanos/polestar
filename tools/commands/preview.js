@@ -970,8 +970,12 @@ Polestar.UI.Picker.SetCategory("Leveling"); Polestar.UI.Picker.Select("forever/h
 	},
 	{
 		file: 'travel.svg',
-		title: 'Travel: the arrow (Arrow scale 160%) on a route into the next zone, its leg captioned ("Go to Westfall"), and the trail dots on the world map from the player to the zone crossing',
-		panels: [questScene(['PolestarNavArrow'], `Polestar.Set("nav.arrowScale", 1.6)\n${TRAVEL}`), questScene(['WorldMapFrame'], TRAVEL)],
+		title: 'Travel: the arrow (Arrow scale 160%) on a route into the next zone, its leg captioned ("Go to Westfall"), and the trail dots on the world map from the player to the zone crossing; then the arrow where the game gives no position (the Deeprun Tram)',
+		panels: [
+			questScene(['PolestarNavArrow'], `Polestar.Set("nav.arrowScale", 1.6)\n${TRAVEL}`),
+			questScene(['WorldMapFrame'], TRAVEL),
+			questScene(['PolestarNavArrow'], `Polestar.Set("nav.arrowScale", 1.6)\n${TRAVEL}\nstub.world.map = nil\nstub.advance(0.2)`),
+		],
 	},
 	{
 		file: 'dungeons.svg',
@@ -988,6 +992,14 @@ Polestar.UI.Picker.SetCategory("Leveling"); Polestar.UI.Picker.Select("forever/h
 			{ dungeons: true, roots: PICKER, script: dungeonsScene('Polestar.Dungeons.Open("wailing-caverns"); DS.SetTab("bosses")') },
 			{ dungeons: true, roots: PICKER, script: dungeonsScene('Polestar.Dungeons.Open("wailing-caverns"); DS.SetTab("map")') },
 			{ dungeons: true, roots: PICKER, script: dungeonsScene('Polestar.Dungeons.Open(); DS.SetFaction("All"); DS.SetBand("all")') },
+		],
+	},
+	{
+		file: 'dungeons-attune.svg',
+		title: 'The Attunement tab: Wailing Caverns\' attunement with the first quest done and the second in the log, and "Guide me through it"; the Deadmines\' keys with the filter on All',
+		panels: [
+			{ dungeons: true, roots: PICKER, script: dungeonsScene('done[90001] = true; log[90002] = true; Polestar.Dungeons.Open("wailing-caverns"); DS.SetTab("attune")') },
+			{ dungeons: true, roots: PICKER, script: dungeonsScene('DS.SetFaction("All"); Polestar.Dungeons.Open("deadmines"); DS.SetTab("attune")') },
 		],
 	},
 	{

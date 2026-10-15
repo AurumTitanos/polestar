@@ -237,10 +237,11 @@ function Compat.IsQuestTrivial(qlvl, level)
 	return qlvl <= greyLevel(level)
 end
 
-function Compat.GetItemCount(itemID)
+-- includeBank: the bank's too (a key left there still counts as owned).
+function Compat.GetItemCount(itemID, includeBank)
 	local fn = (C_Item and C_Item.GetItemCount) or GetItemCount
 	if not fn then return 0 end
-	return fn(itemID) or 0
+	return fn(itemID, includeBank and true or nil) or 0
 end
 
 -- The client's quality for an item (0 poor .. 7 heirloom), or nil while the

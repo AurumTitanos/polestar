@@ -7,6 +7,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { runAddon } = require('./helpers/lua');
+const { fakeLocale } = require('./helpers/locale');
 
 const NAV = { name: 'Polestar', files: ['Core/Init.lua', 'Nav/Nav.xml'] };
 
@@ -34,9 +35,10 @@ local function known(...)
 end
 `;
 
-function run(script, { flightYards } = {}) {
+function run(script, { flightYards, before } = {}) {
 	return runAddon({
 		stubs: ['stub_nav.lua'],
+		before,
 		addons: [NAV],
 		login: true,
 		script: `${PRELUDE}
@@ -45,6 +47,39 @@ nav.useTravelWorld(${flightYards || 'nil'})
 ${script}`,
 	}).emitted;
 }
+
+test('every leg caption is in the client language: flight, boat and tram', () => {
+	const [out] = run(
+		`
+		nav.place(0, 600)
+		known(1, 2)
+		target(0, -780, "Kobolds")
+		local flying = route()
+		nav.place(0, 0, 1)
+		target(-800, 100, "Docks quest")
+		local boat = route()
+		N.RegisterTravelData({ build = "test", taxi = {}, flights = {}, inns = {},
+			transports = { { id = "tram-test", kind = "tram", faction = 1, ab = 100, ba = 100, waitA = 30, waitB = 30,
+				a = { "Northgate", 0, 900, 0, 9000, 50, 5 }, b = { "Southgate", 0, -900, 0, 9000, 50, 95 } } } }, true)
+		nav.place(890, 0)
+		target(-950, 0, "Nightbane Shadow Weavers")
+		emit({ flying = flying, boat = boat, tram = route() })`,
+		{
+			before: fakeLocale('deDE', {
+				'Walk to the flight master': 'Geh zum Flugmeister',
+				'Fly to %s': 'Flieg nach %s',
+				'Walk to the boat': 'Geh zum Schiff',
+				'Take the boat to %s': 'Nimm das Schiff nach %s',
+				'Take the tram to %s': 'Nimm die Tiefenbahn nach %s',
+			}),
+		},
+	);
+	assert.deepEqual(out, {
+		flying: ['walk|Geh zum Flugmeister', 'fly|Flieg nach East Hold', 'walk|Kobolds'],
+		boat: ['walk|Geh zum Schiff', 'boat|Nimm das Schiff nach Testshire Docks', 'walk|Docks quest'],
+		tram: ['tram|Nimm die Tiefenbahn nach Southgate', 'walk|Nightbane Shadow Weavers'],
+	});
+});
 
 test('takes a known flight over a long walk, and walks when no flight is known', () => {
 	const [out] = run(`
@@ -354,6 +389,39 @@ test('the Hearthstone coming off cooldown mid-ride does not re-plan from the boa
 	assert.deepEqual(out.before, ['boat|Take the boat to Testshire Docks', 'walk|Q']);
 	assert.deepEqual(out.during, out.before, 'still on the boat leg');
 	assert.equal(out.leg, 1);
+});
+
+// Igotthis rode the Deeprun Tram toward Duskwood and the arrow vanished: the
+// tram is a map of its own (Map 369, no UiMap), so the client gives no player
+// position on the ride. The arrow keeps the ride's caption and glyph, and
+// points again on arrival.
+test('on the tram, with no player position, the arrow keeps the ride caption and resumes on arrival', () => {
+	const [out] = run(`
+		N.RegisterTravelData({ build = "test", taxi = {}, flights = {}, inns = {},
+			transports = { { id = "tram-test", kind = "tram", faction = 1, ab = 100, ba = 100, waitA = 30, waitB = 30,
+				a = { "Northgate", 0, 900, 0, 9000, 50, 5 }, b = { "Southgate", 0, -900, 0, 9000, 50, 95 } } } }, true)
+		local function snap()
+			return { A.frame:IsShown(), A.GetMode() or "hidden", A.distText:GetText(), A.labelText:GetText(), A.dial:IsShown(),
+				A.legIcon:IsShown(), (A.legIcon:GetTexture() or ""):match("[^\\\\]+$"), table.concat(route(), ", ") }
+		end
+		local r = {}
+		nav.place(890, 0)                          -- at the Northgate door
+		target(-950, 0, "Nightbane Shadow Weavers")
+		stub.advance(0.2); r.door = snap()
+		nav.player = nil                           -- through the portal: no position on the ride
+		stub.fire("ZONE_CHANGED_NEW_AREA")
+		stub.advance(1.2); r.riding = snap()
+		stub.advance(60); r.later = snap()
+		nav.place(-895, 0)                         -- out at Southgate
+		stub.fire("ZONE_CHANGED_NEW_AREA")
+		stub.advance(1.2); r.arrived = snap()
+		emit(r)`);
+	const RIDE = [true, 'instruction', 'Take the tram to Southgate', 'Nightbane Shadow Weavers', true, true, 'icon-boat',
+		'tram|Take the tram to Southgate, walk|Nightbane Shadow Weavers'];
+	assert.deepEqual(out.door, RIDE);
+	assert.deepEqual(out.riding, RIDE, 'the ride keeps its caption with no position');
+	assert.deepEqual(out.later, RIDE);
+	assert.deepEqual(out.arrived, [true, 'travel', '55 yd', 'Nightbane Shadow Weavers', true, false, 'icon-boat', 'walk|Nightbane Shadow Weavers']);
 });
 
 test('walk legs are priced unmounted, so a fast mount never swaps a flight for a straight swim', () => {

@@ -10,9 +10,9 @@ next forever/alliance/02-westfall
 # One visit, levels 1 to about 12.3, no grind stops.
 #
 # Flow: Coldridge Valley -> Kharanos (bind) and Steelgrill's Depot -> the
-# Grizzled Den and Gretchen's camp -> Rumbleshot and a short return to
-# Coldridge for Grund -> Brewnall Village and Frostmane Hold -> back east to
-# Kharanos and the depot -> Misty Pine Refuge -> Amberstill Ranch and the
+# Grizzled Den and Gretchen's camp -> Rumbleshot -> Brewnall Village and
+# Frostmane Hold -> back east to Kharanos and the depot -> Misty Pine
+# Refuge -> Amberstill Ranch and the
 # Gol'Bolar Quarry -> North Gate Outpost -> hearth to Kharanos -> Brewnall ->
 # South Gate Outpost -> Farsen above the quarry -> Old Icebeard's cave ->
 # Ironforge (training) and the tram to Stormwind.
@@ -20,6 +20,26 @@ next forever/alliance/02-westfall
 # Order changes against the export:
 # - Felix's parts and the Mornbrew errand (3361, 3364, 3365) are finished
 #   before leaving Coldridge Valley instead of walking back for Nori.
+# - Scalding Mornbrew Delivery (3364) is taken from Nori with "The Stolen
+#   Journal" (218) and run straight to Anvilmar: Durnan's Scalding Mornbrew
+#   (10439) vanishes after five minutes (ItemSparse DurationInInventory
+#   300 s), and the walk to Durnan is 1:05 by the addon's travel planner
+#   (travel route), about a minute in a recorded run. Taken on the first
+#   visit, it went cold during the troll cave and Grik'nir. Grik'nir comes
+#   after Anvilmar, so the journal and "Bring Back the Mug" (3365; Nori's Mug
+#   does not expire) are handed in on one visit to Grelin's camp.
+# - "Grund and Gozwin" (97277, from level 4) is done from Anvilmar while still
+#   in the valley and handed in on the way south to the troll cave, and "The
+#   Adventurer" (96628) is taken from Thalos on the way out, so the route no
+#   longer returns to Coldridge after Rumbleshot. The level 4 spells are
+#   trained in Anvilmar first: with them the Snow Leopard Prowler (level 6)
+#   is safe at level 4 for every class (done before leaving Coldridge on
+#   every Dwarf and Gnome class in the beta; recorded on a Gnome Mage and a
+#   Dwarf Rogue, about 3 minutes each).
+# - Supplies to Tannok (2160) is taken from Hands Springsprocket at the
+#   tunnel when you leave Coldridge Valley, beside Thalos, not on the first
+#   trogg hunt: about 250 yards out of the way there, 20 at the tunnel.
+#   0.010 h sooner to 10 and to 20 under the simulator.
 # - The Kharanos and depot pickups are grouped: the simulator shuttled between
 #   them several times. Beldin's "A Visitor to Dun Morogh" (96408) is taken at
 #   the depot on the way east after Brewnall instead of from the quarry.
@@ -37,8 +57,9 @@ next forever/alliance/02-westfall
 # Left out: "The Reports" (291) and "Stout to Kadrell" (414) are accepted by
 # the route but never turned in (the route goes to Westfall, not Ironforge's
 # senator or Loch Modan).
-# "The Adventurer" (96628) is kept as the export has it, taken from Thalos after
-# "The Great Outdoors": skip it if Thalos no longer offers it.
+# "The Adventurer" (96628) is taken from Thalos once "Senir's Observations"
+# (282) is handed in, and handed to Eric before "The Great Outdoors" (96608),
+# which it leads to: taken after it, Thalos no longer offers it.
 # "The Quarry's Smith" (95217) is optional: Frast Dokner offers it to
 # blacksmiths (QuestieDB lists Blacksmithing), and its Copper Bars come from
 # smelting Copper Ore or the trade vendors. The new export drops it.
@@ -134,10 +155,9 @@ step Anvilmar
   train class                                 -- Level 2 spells, inside Anvilmar
 
 step The troggs
-  tip Rockjaw Troggs and Burly Rockjaw Troggs dig all over the valley floor south of Anvilmar. Hands Springsprocket stands at the mouth of the tunnel to the east.
+  tip Rockjaw Troggs and Burly Rockjaw Troggs dig all over the valley floor south of Anvilmar.
   kill 707 quest 170                          -- Rockjaw Trogg
   kill 724 quest 170                          -- Burly Rockjaw Trogg
-  accept 2160                                 -- Hands Springsprocket, at the tunnel
 
 step Back to Anvilmar
   turnin 170                                  -- Balir Frosthammer
@@ -164,7 +184,6 @@ step Grelin Whitebeard
   turnin 234                                  -- Grelin Whitebeard
   accept 182
   level 4                                     -- A few Frostmane Troll Whelps if you are short
-  accept 3364 lvl 4                           -- Nori Pridedrift, next to him
 
 step The troll cave
   tip Frostmane Troll Whelps fill the slopes south and east of Grelin's camp.
@@ -176,6 +195,27 @@ step The troll cave
 step Grelin Whitebeard
   turnin 182
   accept 218
+  accept 3364                                 -- Nori Pridedrift: timed, five minutes to reach Durnan in Anvilmar
+
+step Anvilmar
+  tip The Scalding Mornbrew lasts five minutes: go straight north to Durnan Furcutter inside Anvilmar.
+  turnin 3364                                 -- Durnan Furcutter, inside Anvilmar
+  turnin 3361                                 -- Felix Whindlebolt
+  accept 3365
+  train class                                 -- Level 4 spells, before Gozwin's camp
+  turnin 1599 only Warlock                    -- Alamar Grimm: Summon Imp
+  accept 94373 only Shaman                    -- Teo Hammerstorm, inside Anvilmar
+
+# The troll cave's mouth, marked in game at 26.93,80.03 (PR #16); Wowhead
+# Classic comments put it "@ 26, 79", Grik'nir "in the cave @ 30, 80"
+# (https://www.wowhead.com/classic/npc=808).
+step Grund and Gozwin
+  tip Grund Drokda stands by Felix at the door of Anvilmar. Gozwin's camp is in the hills just north-west; the Snow Leopard Prowler prowls around it.
+  accept 97277                                -- Grund Drokda
+  collect 277976 quest 97277                  -- Gozwin's Mechanic's Log, in the camp
+  kill 269075 quest 97277                     -- Snow Leopard Prowler
+  turnin 97277                                -- Grund Drokda
+  goto 26.93,80.03 live "The troll cave"
 
 step Grik'nir the Cold
   tip Grik'nir the Cold sits at the back of the troll cave, east of Grelin's camp.
@@ -184,16 +224,7 @@ step Grik'nir the Cold
 step Grelin Whitebeard
   turnin 218
   accept 282
-
-step Anvilmar
-  turnin 3361                                 -- Felix Whindlebolt
-  turnin 3364                                 -- Durnan Furcutter, inside Anvilmar
-  accept 3365
-  turnin 1599 only Warlock                    -- Alamar Grimm: Summon Imp
-  accept 94373 only Shaman                    -- Teo Hammerstorm, inside Anvilmar
-
-step Nori Pridedrift
-  turnin 3365                                 -- Back at Grelin's camp
+  turnin 3365                                 -- Nori Pridedrift, next to him
   collect 264356 quest 94373.1 only Shaman    -- Iceclaw Bear Pendants, from the Frostmane Troll Whelps on the slopes above the camp
 
 step Call of Earth
@@ -207,14 +238,16 @@ step Call of Earth
   turnin 94375                                -- Teo Hammerstorm: Stoneskin Totem and your Earth Totem
 
 step The tunnel
-  tip Mountaineer Thalos guards the tunnel out of the valley, east of Anvilmar.
+  tip Mountaineer Thalos guards the tunnel out of the valley, east of Anvilmar; Hands Springsprocket stands beside him at its mouth.
   turnin 282                                  -- Mountaineer Thalos
   accept 420
+  accept 96628                                -- Mountaineer Thalos
+  accept 2160                                 -- Hands Springsprocket
 
 # ---------------------------------------------------------------- Kharanos
 
 step Kharanos
-  tip Follow the road through the tunnel and north-east to Kharanos. Senir Whitebeard, Eric Brighthammer and his campfire are outside the Thunderbrew Distillery; Tannok, Maxan and Ragnar are inside; Tharek Blackstone works the forge.
+  tip Follow the road through the tunnel and north-east to Kharanos. Kill the Crag Boars on the way: their ribs drop before you have Ragnar's quest and count toward it. Senir, Eric and his campfire are outside the Thunderbrew Distillery. Tannok, Maxan and Ragnar are inside. Tharek Blackstone works the forge.
   turnin 420                                  -- Senir Whitebeard
   turnin 2160                                 -- Tannok Frosthammer, in the distillery
   sethome "Thunderbrew Distillery"
@@ -226,6 +259,7 @@ step Kharanos
 
 step The Great Outdoors
   tip Sit by Eric's campfire (type /sit) and wait for the buff, then Gremlock Pilsnor in the distillery teaches you cooking.
+  turnin 96628                                -- Eric Brighthammer: The Adventurer
   accept 96608                                -- Eric Brighthammer
   complete 96608
   turnin 96608
@@ -284,15 +318,6 @@ step Rumbleshot's Ammo
   complete 5541
   turnin 5541                                 -- Hegnar Rumbleshot
 
-step Mountaineer Thalos
-  accept 96628                                -- Mountaineer Thalos, at the Coldridge tunnel
-
-step Grund and Gozwin
-  tip Grund Drokda stands in Coldridge Valley by Felix. Gozwin's camp is in the hills to the north-west of him; the Snow Leopard Prowler prowls around it.
-  accept 97277                                -- Grund Drokda
-  complete 97277
-  turnin 97277
-
 # ---------------------------------------------------------------- Brewnall Village
 
 step Frostmane Hold
@@ -330,7 +355,6 @@ step Kharanos
   turnin 310                                  -- The Unguarded Thunder Ale Barrel in the distillery
   accept 311
   turnin 287                                  -- Senir Whitebeard
-  turnin 96628                                -- Eric Brighthammer
   train class
 
 step Steelgrill's Depot

@@ -1,5 +1,5 @@
 'use strict';
-// node tools/polestar.js travel build | route
+// node tools/polestar.js travel build | route | chain
 
 const fs = require('node:fs');
 const path = require('node:path');
@@ -7,9 +7,14 @@ const { parseArgs } = require('node:util');
 const { buildTravel, writeTravel, TRAVEL_ADDON } = require('../lib/travel/build');
 const { ROOT, DATA, SOURCES } = require('../lib/paths');
 const { planRoute } = require('../lib/travel/route');
+const { recordedChain } = require('../lib/travel/crossings');
+const { recordedWalks } = require('../lib/travel/paths');
+const { Frames } = require('../lib/travel/geo');
+const { readRecordings } = require('../lib/data/recordings');
 
 const usage = `usage: node tools/polestar.js travel build [options]
        node tools/polestar.js travel route --from <map,x,y> --to <map,x,y> [options]
+       node tools/polestar.js travel chain --to <map,x,y> [options]
 
 build: the flight network (Blizzard Classic Era TaxiNodes/TaxiPath/TaxiPathNode
 via wago.tools), boats/zeppelins/tram (plus the ships WoW Forever added, from
@@ -44,7 +49,28 @@ and print the legs.
   --data <dir>         data/forever (map-frames, zones, travel.json)
   --lua <file>         TravelData.lua (default: addon/Polestar/Nav/TravelData.lua)
   --crossings-lua <f>  Polestar_Travel's Crossings.lua (default: addon/Polestar_Travel/Crossings.lua when built; "none" to skip)
-  --json               print the legs as JSON`;
+  --json               print the legs as JSON
+
+chain: a candidate approach chain (a cave, a climb) for the local crossings
+file, from the recorded walks that reach a target: where each walk leaves the
+straight line to the target, and the walked path from there simplified into
+nodes with radii and a first caption. Walks from several sides meet at the
+mouth, so the shortest chain is printed. A walk that keeps to the straight
+line is reported but does not stop the draft (recordings have no height: it
+may have followed the arrow onto the hill above a cave). Check it in game
+before using it.
+
+  --to <map,x,y>       the target (uiMapID, Era map percent)
+  --name <text>        the place ("Fargodeep Mine"): the chain's name, id and first caption
+  --id <id>            the chain's id (default: from --name, else recorded-chain-<map>-<x>-<y>)
+  --within <yd>        how far back from the target a walk is followed; shorter walks
+                       do not count (default 300)
+  --tolerance <yd>     how far the walk may stray from the line between two nodes (default 8)
+  --session <id>       draft from this session's walks only (repeatable)
+  --reverse            count each walk's way out, reversed, as a way in too
+  --data <dir>         data/forever (map-frames, zones)
+  --recordings <dir>   data/recordings
+  --json               print only the chain entry`;
 
 async function build(rest) {
 	const { values } = parseArgs({
@@ -152,15 +178,90 @@ function route(rest) {
 	return 0;
 }
 
+function yardsOption(v, flag, fallback) {
+	if (v === undefined) return fallback;
+	const n = Number(v);
+	if (!(n > 0)) throw new Error(`${flag} expects a number of yards`);
+	return n;
+}
+
+// One chain entry as the crossings file writes it: a node per line.
+function chainJson(chain) {
+	const flat = (o) => `{ ${Object.entries(o).map(([k, v]) => `${JSON.stringify(k)}: ${JSON.stringify(v)}`).join(', ')} }`;
+	const head = Object.entries(chain).filter(([k]) => k !== 'nodes').map(([k, v]) => `\t${JSON.stringify(k)}: ${JSON.stringify(v)},`);
+	return ['{', ...head, '\t"nodes": [', chain.nodes.map((n) => `\t\t${flat(n)}`).join(',\n'), '\t]', '}'].join('\n');
+}
+
+function chain(rest) {
+	const { values } = parseArgs({
+		args: rest,
+		options: {
+			to: { type: 'string' },
+			name: { type: 'string' },
+			id: { type: 'string' },
+			within: { type: 'string' },
+			tolerance: { type: 'string' },
+			data: { type: 'string' },
+			recordings: { type: 'string' },
+			json: { type: 'boolean' },
+			session: { type: 'string', multiple: true },
+			reverse: { type: 'boolean' },
+		},
+	});
+	const to = parsePoint(values.to, '--to');
+	const dataDir = path.resolve(values.data || DATA);
+	const read = (f) => {
+		const file = path.join(dataDir, f);
+		if (!fs.existsSync(file)) throw new Error(`missing ${file} (run: node tools/polestar.js data build)`);
+		return JSON.parse(fs.readFileSync(file, 'utf8'));
+	};
+	const frames = new Frames(read('map-frames.json').era, read('zones.json'));
+	const recordings = readRecordings(path.resolve(values.recordings || path.join(ROOT, 'data', 'recordings')));
+	const within = yardsOption(values.within, '--within', 300);
+	const { walks } = recordedWalks({ recordings, frames });
+	const result = recordedChain({ walks, target: to, frames, within, tolerance: yardsOption(values.tolerance, '--tolerance', 8), id: values.id, name: values.name, sessions: values.session, reverse: values.reverse });
+	const where = `${frames.name(to.map) || to.map} ${to.x}, ${to.y}`;
+	if (!result.approaches.length) {
+		const near = result.nearest === null ? 'none is on its continent' : `the nearest passes ${Math.round(result.nearest)} yd away`;
+		console.log(`no recorded walk reaches ${where} from ${within} yd or more (${near})`);
+		return 1;
+	}
+	if (!result.chain) {
+		const open = [...new Set(result.approaches.filter((a) => !a.mouth).map((a) => a.session))].sort();
+		console.log(`no chain needed for ${where}: every recorded walk reaches it on the straight line (${open.join(', ')})`);
+		return 0;
+	}
+	const straight = [...new Set(result.approaches.filter((a) => !a.mouth).map((a) => a.session))].sort();
+	if (straight.length) {
+		console.warn(`warning: ${straight.join(', ')} reach ${where} on the straight line; drafting from the walks that detour (pick sessions with --session)`);
+	}
+	if (values.json) {
+		console.log(chainJson(result.chain));
+		return 0;
+	}
+	const sessions = [...new Set(result.approaches.map((a) => a.session))].sort();
+	console.log(`approach chain candidate for ${where}: review it in game before use`);
+	console.log(`  ${result.approaches.length} walk(s) reach the target from ${within} yd or more (${sessions.join(', ')}); where each leaves the straight line:`);
+	const sorted = [...result.approaches].sort((a, b) => (a.mouth ? a.yards : Infinity) - (b.mouth ? b.yards : Infinity));
+	for (const a of sorted) {
+		const how = a.mouth ? `${a.mouth.map} ${a.mouth.x}, ${a.mouth.y}, then ${a.yards} yd of path to the target` : 'never (straight to the target)';
+		console.log(`    ${a.session}, walking ${a.direction === 'in' ? 'in' : 'out (reversed)'}: ${how}`);
+	}
+	console.log('  the shortest is below; check in game: the mouth, each radius and the captions');
+	console.log(chainJson(result.chain));
+	return 0;
+}
+
 module.exports = {
 	name: 'travel',
-	summary: 'Build the travel network (flights, boats, inns, learned paths) and test routes',
+	summary: 'Build the travel network (flights, boats, inns, learned paths), test routes and draft approach chains from recordings',
 	usage,
 	async run(argv) {
 		const [sub, ...rest] = argv;
 		try {
 			if (sub === 'build') return await build(rest);
 			if (sub === 'route') return route(rest);
+			if (sub === 'chain') return chain(rest);
 		} catch (err) {
 			console.error(err.message);
 			return 1;

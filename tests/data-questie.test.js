@@ -502,4 +502,22 @@ describe('QuestieDB frames', () => {
 		assert.equal(forever.read('objects')[1700].instances, undefined);
 		assert.match(forever.result.meta.sources.find((s) => /Forever client tables/.test(s.name)).name, /, Map\)/);
 	});
+
+	test("the Forever client's ItemSparse gives the items that vanish after a while their duration in seconds", async () => {
+		const sourcesDir = tmpdir('polestar-questie-');
+		fs.cpSync(path.join(FIX, 'sources', 'wago'), path.join(sourcesDir, 'wago'), { recursive: true });
+		const era = path.join(sourcesDir, 'wago', '1.15.9.11111');
+		const fv = path.join(sourcesDir, 'wago', '1.60.1.1');
+		fs.mkdirSync(fv);
+		for (const t of ['UiMap', 'UiMapAssignment', 'AreaTable']) fs.copyFileSync(path.join(era, `${t}.csv`), path.join(fv, `${t}.csv`));
+		// Item 50 lasts 15 minutes, 252665 never expires, 999999 is not an item we hold.
+		fs.writeFileSync(path.join(fv, 'ItemSparse.csv'), 'ID,Display_lang,DurationInInventory\n50,"Timed Thing",900\n252665,"Lasting Thing",0\n999999,"Elsewhere",300\n');
+		const { read, result } = await build({ sourcesDir, forever: true });
+		const items = read('items');
+		assert.equal(items[50].duration, 900);
+		assert.equal(items[252665].duration, undefined);
+		assert.equal(items[999999], undefined);
+		assert.equal(result.meta.counts.timedItems, 1);
+		assert.match(result.meta.sources.find((s) => /Forever client tables/.test(s.name)).name, /, ItemSparse\)/);
+	});
 });

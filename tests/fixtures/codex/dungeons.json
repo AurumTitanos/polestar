@@ -168,7 +168,11 @@
 						]
 					}
 				]
-			}
+			},
+			"90010": { "id": 90010, "name": "Ironclad Key", "quality": 1, "kind": "item", "spell": null, "reqLevel": null, "sources": [ { "type": "quest", "quest": 90005, "from": ["flbis"] } ] },
+			"90011": { "id": 90011, "name": "Smelting Key", "quality": 1, "kind": "item", "spell": null, "reqLevel": null, "sources": [ { "type": "drop", "npc": 639, "chance": 100, "instance": "deadmines", "from": ["questie"] } ] },
+			"90020": { "id": 90020, "name": "Serpent Scale", "quality": 1, "kind": "item", "spell": null, "reqLevel": null, "sources": [] },
+			"90021": { "id": 90021, "name": "Ironclad Ingot", "quality": 1, "kind": "item", "spell": null, "reqLevel": null, "sources": [] }
 		},
 		"npcs": {
 			"234": {
@@ -596,7 +600,13 @@
 				],
 				"choices": [],
 				"preAny": []
-			}
+			},
+			"90001": { "id": 90001, "title": "Rite of the Serpent", "level": 18, "minLevel": 15, "faction": "H", "races": null, "classes": null, "start": { "npc": [5770], "object": [], "item": [] }, "end": { "npc": [3448], "object": [] }, "objectives": [], "pre": [], "preAny": [], "rewards": [], "choices": [] },
+			"90002": { "id": 90002, "title": "The Serpent's Trial", "level": 20, "minLevel": 16, "faction": "H", "races": null, "classes": null, "start": { "npc": [3448], "object": [], "item": [] }, "end": { "npc": [3448], "object": [] }, "objectives": [ { "type": "item", "id": 90020, "count": 5, "text": "Serpent Scale" } ], "pre": [], "preAny": [90001], "rewards": [], "choices": [] },
+			"90003": { "id": 90003, "title": "Fang of the Serpent", "level": 20, "minLevel": 17, "faction": "H", "races": null, "classes": null, "start": { "npc": [3448], "object": [], "item": [] }, "end": { "npc": [5767], "object": [] }, "objectives": [], "pre": [], "preAny": [90002], "repFaction": 81, "repStanding": 5, "rewards": [], "choices": [] },
+			"90004": { "id": 90004, "title": "Fang of the Serpent", "level": 20, "minLevel": 17, "faction": "A", "races": null, "classes": null, "start": { "npc": [234], "object": [], "item": [] }, "end": { "npc": [234], "object": [] }, "objectives": [], "pre": [], "preAny": [], "rewards": [], "choices": [] },
+			"90005": { "id": 90005, "title": "The Ironclad Door", "level": 20, "minLevel": 17, "faction": "A", "races": null, "classes": null, "start": { "npc": [234], "object": [], "item": [] }, "end": { "npc": [234], "object": [] }, "objectives": [ { "type": "item", "id": 90021, "count": 1, "text": "Ironclad Ingot" } ], "pre": [90006], "preAny": [], "rewards": [90010], "choices": [] },
+			"90006": { "id": 90006, "title": "Ironclad Rumours", "level": 18, "minLevel": 15, "faction": "A", "races": null, "classes": null, "start": { "npc": [234], "object": [], "item": [] }, "end": { "npc": [234], "object": [] }, "objectives": [], "pre": [], "preAny": [], "rewards": [], "choices": [] }
 		},
 		"instances": {
 			"wailing-caverns": {
@@ -726,6 +736,15 @@
 		}
 	},
 	"inputs": {
+		"attunementTable": {
+			"attunements": [
+				{ "key": "deadmines", "id": "ironclad-a", "name": "Ironclad Key", "kind": "key", "need": "one", "faction": "A", "item": 90010, "goal": [90005], "note": "Opens the Ironclad Cove's door." },
+				{ "key": "deadmines", "id": "smelting-key", "name": "Smelting Key", "kind": "key", "need": "one", "item": 90011, "note": "Opens the smelter." },
+				{ "key": "wailing-caverns", "id": "fang", "name": "Fang of the Serpent", "kind": "attunement", "need": "each", "goal": [90003, 90004], "any": true, "note": "Lets you take the serpent's path." },
+				{ "key": "wailing-caverns", "id": "missing", "name": "Missing", "kind": "attunement", "goal": [99999] }
+			],
+			"removed": []
+		},
 		"forever": {
 			"mapFrames": {
 				"forever": {
@@ -779,7 +798,21 @@
 					"xp": 2350,
 					"reputation": {
 						"faction": 81,
-						"value": 250
+						"value": 3000
+					},
+					"wowhead": {
+						"zone": 718,
+						"type": 81,
+						"side": 2,
+						"choices": [],
+						"items": [],
+						"money": 0,
+						"rep": [
+							[
+								81,
+								250
+							]
+						]
 					}
 				},
 				"959": {
@@ -791,7 +824,21 @@
 				},
 				"1490": {},
 				"6981": {
-					"area": 718
+					"area": 718,
+					"wowhead": {
+						"zone": 718,
+						"type": 81,
+						"side": 3,
+						"choices": [],
+						"items": [
+							[
+								5180,
+								2
+							]
+						],
+						"money": 0,
+						"rep": []
+					}
 				}
 			},
 			"dungeons": {

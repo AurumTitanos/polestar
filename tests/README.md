@@ -33,7 +33,7 @@ not the layer. They fall into these layers:
 | Addon modules | The addon's own Lua under Lua 5.1, against the fake client, through `helpers/lua.js` | `core.test.js`, `engine*.test.js`, `nav*.test.js`, `quests*.test.js`, `gear*.test.js`, `maps*.test.js`, `qol.test.js`, `lookup*.test.js`, `dungeons-*.test.js`, `ui*.test.js`, `rares.test.js`, `recorder*.test.js` |
 | End to end | A guide compiled by the real compiler and played in the whole addon | `e2e.test.js`, `guides.test.js` (every authored guide, every class), `playtest.test.js`, `acceptance-packs.test.js` |
 | Static and docs | Checks over files rather than behaviour at run time | `syntax.test.js` (every addon file compiles, no stray globals, every file loaded by a manifest), `guides-parse.test.js` (every guide parses, and `Polestar_Guides` holds exactly those guides), `media-refs.test.js` (every texture in `Media` is named by the addon), `svg-assets.test.js` (every committed SVG is well-formed for a browser: no `--` in a comment), `wording.test.js` (the addon, the guides, every doc and the pack template name no other guide product), `docs-packs.test.js` (the pack docs name every verb and key), `docs-cheatsheet.test.js`, `packs-parity.test.js` (lint and the runtime refuse the same guides), `text-fit.test.js` (text stays inside its window) |
-| Performance | The whole addon with every module on, against CPU budgets | `perf.test.js` |
+| Performance | CPU budgets: the whole addon with every module on, and the Recorder while it records | `perf.test.js`, `recorder-perf.test.js` |
 
 ## The fake client: tests/lua
 
@@ -71,6 +71,7 @@ modules meet. New client APIs go in the stub of the module that needs them;
 | `helpers/dsl.js` | The toolchain tests' helpers: the fixture reference data (`DATA_DIR`, `fixtureData`), `compile` of guide text, `writeTestPack` |
 | `helpers/cli.js` | `polestar(args, { cwd, env, input })` runs the command line as a child process; `quiet(fn)` runs a command in-process with its output captured; `fakeAddons` lays out addon folders for pack and install tests |
 | `helpers/data.js` | `needs(...files)`: the one skip reason for a test that reads `data/forever` when those files are not built |
+| `helpers/locale.js` | `fakeLocale(locale, strings)`: Lua for `runAddon`'s `before` that makes `GetLocale()` return `locale` and fills `Polestar.L` with `strings` right after `Core/Init.lua`, where a locale file loads |
 | `helpers/tmp.js` | `tmpdir()`: a fresh temporary folder, removed when the test process exits |
 | `helpers/codex.js` | `writeCodexPack`, `sampleCodex`: a loadable `Polestar_Codex` built from a Codex object such as `fixtures/codex/sample.json` |
 | `helpers/packs.js` | `TEST_PACK`, `TEST_SOURCE`: the Lua lines that register the test guide pack and make it the suggestion source |
@@ -95,10 +96,11 @@ CI, they skip; everything else runs.
 
 | Local input | Built by | Tests that use it |
 |---|---|---|
-| `data/forever/*.json` (reference data) | `data build` and the other data commands | `guides.test.js`, `engine-placement.test.js`, `perf.test.js`, `acceptance-packs.test.js`, `playtest.test.js`, `play.test.js`, `play-pack.test.js`, `play-start.test.js`, `new.test.js`, `dev.test.js`, `dsl.test.js`, `maps-zonelevels.test.js`, `profession-gathering.test.js`, `questdb.test.js` |
+| `data/forever/*.json` (reference data) | `data build` and the other data commands | `guides.test.js`, `guides-caves.test.js` and `guides-reported.test.js` (player-reported guide fixes, one case per report), `lint-timed.test.js` (the old and fixed orders of timed quest items, every guide in time; needs item durations), `engine-placement.test.js`, `perf.test.js`, `acceptance-packs.test.js`, `playtest.test.js`, `play.test.js`, `play-pack.test.js`, `play-start.test.js`, `new.test.js`, `dev.test.js`, `dsl.test.js`, `maps-zonelevels.test.js`, `profession-gathering.test.js`, `questdb.test.js` |
 | Client map tables cached in `data/sources/wago` | `exploration build` | `exploration.test.js` |
 | `addon/Polestar_QuestDB` | `questdb build` | `questdb.test.js`, `quests.test.js` |
 | `addon/Polestar_Codex` | `codex build` | `lookup-codex.test.js` (release-safe, and Lookup, Dungeons and Rares read it in game) |
+| `data/forever/codex/*.json` | `codex build` | `dungeons-attune.test.js` (the real attunement chains) |
 | `addon/Polestar_ItemDB/Items.lua` | `itemdb build` (committed, so present on a clone) | `itemdb.test.js` |
 | `data/local/crossings.json`, `addon/Polestar_Travel` | the local crossings file, `travel build` | `travel-crossings.test.js`, `nav-crossings.test.js` |
 | Installed addons in the game's AddOns folder | the game client | `consume.test.js` |
