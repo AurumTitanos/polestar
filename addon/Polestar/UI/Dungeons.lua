@@ -319,6 +319,16 @@ local function canGuide(p)
 	return type(p) == "table" and p.map and p.x and p.y and ns.Nav and true or false
 end
 
+-- Where a page quest starts for this character: its giver of the
+-- character's side nearest `from` when several NPCs give it
+-- (Dungeons.Giver), else the page's own start.
+local function startOf(q, from)
+	local s = q.start
+	local Dg = D()
+	if not s or s.inside or s.kind == "item" or q.startItem or not Dg.Giver then return s end
+	return Dg.Giver(q, from) or s
+end
+
 local function guideTo(self)
 	local p = self.psPoint
 	local Dg = D()
@@ -1298,7 +1308,7 @@ local function paintQuest(b, q, p, top, plevel, key)
 	-- Starts and ends, side by side.
 	local y = p.starts
 	local half = floor((VW - 16) / 2)
-	local s = q.start
+	local s = startOf(q, ns.PlayerPoint())
 	if q.startItem and not (s and s.kind == "item") then s = { kind = "item", name = q.startItem.name, map = s and s.map, x = s and s.x, y = s and s.y, f = s and s.f, inside = s and s.inside } end
 	labelAt(b.StartLabel, y + 4)
 	b.StartPin:ClearAllPoints()
@@ -1380,7 +1390,7 @@ local function paintQuest(b, q, p, top, plevel, key)
 			if cs == "done" then W.Color(r.Title, "textMuted") else paintRGB(r.Title, difficulty(cq.level, plevel)) end
 			local sub = {}
 			if cq.level then sub[#sub + 1] = format(L["Level %d"], cq.level) end
-			local st = cq.start
+			local st = startOf(cq, ns.PlayerPoint())
 			if st and st.name then
 				local z = st.inside and L["inside the dungeon"] or mapName(st.map)
 				sub[#sub + 1] = z and format(L["%s, %s"], st.name, z) or st.name
@@ -1553,7 +1563,7 @@ local function renderMap(key, d, f)
 		-- The quest givers on the entrance's zone, one marker per giver.
 		local byGiver, order = {}, {}
 		for _, q in ipairs(D().Quests(key, side)) do
-			local s = q.start
+			local s = startOf(q, e)
 			if s and s.map == e.map and s.x and s.y and not s.inside then
 				local id = (s.kind or "") .. tostring(s.id or s.name)
 				local gq = byGiver[id]

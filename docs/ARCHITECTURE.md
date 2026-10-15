@@ -1463,7 +1463,13 @@ list), not done, not in the log (those are `carried`), open by
 max(level, the dungeon's lowest level), picked up outside from an NPC or object
 (not from an item, not inside), and not a follow-up of another quest of the
 page; each with its open prerequisites (`Lookup.QuestChain`: all of `pre`, one
-of `preAny` this character can take, in the order they are done).
+of `preAny` this character can take, in the order they are done). The giver
+is `Dungeons.Giver(pq, from)`: the page keeps one (the Codex's first), so a
+quest several NPCs give goes to the one of the character's side nearest the
+player (`Lookup.QuestEnd`, which takes an NPC of the other side only when no
+other is known and marks it `hostile`; Tabetha's Task: the mage trainers of
+both sides), never to one of the other side; the quest card and the map's
+giver markers show the same giver.
 `Dungeons.PickupGuide(key)` orders them as the cheapest path by
 `ns.TravelCost` from where the player stands, through every stop, to the
 entrance (`Dungeons.PlanStops(stops, from, finish, travel) -> order, cost`:

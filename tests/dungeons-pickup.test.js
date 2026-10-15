@@ -63,13 +63,13 @@ local function tabIds()
 end
 `;
 
-function run(script, { level = 21, race = 'Scourge', cls = 'WARLOCK', at = UNDERCITY, done = [1098], log = [1013], ready = [], saved } = {}) {
+function run(script, { level = 21, race = 'Scourge', faction = 'Horde', cls = 'WARLOCK', at = UNDERCITY, done = [1098], log = [1013], ready = [], saved, codexPack = pack } = {}) {
 	return runAddon({
 		stubs: ['stub_world.lua'],
-		before: `${pack.stubLua}
+		before: `${codexPack.stubLua}
 local w = stub.world
 ${MAPS}
-w.level, w.race, w.raceName, w.faction = ${level}, ${JSON.stringify(race)}, ${JSON.stringify(race)}, "Horde"
+w.level, w.race, w.raceName, w.faction = ${level}, ${JSON.stringify(race)}, ${JSON.stringify(race)}, ${JSON.stringify(faction)}
 w.class, w.className = ${JSON.stringify(cls)}, ${JSON.stringify(cls)}
 ${at ? `w.moveTo(${at.join(', ')})` : ''}
 w.complete(${luaValue(done)})
@@ -118,6 +118,44 @@ test('the route starts where the player stands; another class gets no class ques
 	assert.deepEqual(barrens, [FROM_UNDERCITY[3], ...FROM_UNDERCITY.slice(0, 3), FROM_UNDERCITY[4]], 'Doan Karhan first from the Barrens');
 	const [mage] = run(`emit(describe(D.PickupGuide("${KEY}")))`, { cls: 'MAGE' });
 	assert.deepEqual(mage, [...FROM_UNDERCITY.slice(0, 3), FROM_UNDERCITY[4]]);
+});
+
+test("a quest several NPCs of both sides give (Tabetha's Task): the character's side's giver nearest the player, never the other side's, though the page names the first", () => {
+	const c = structuredClone(codex);
+	const i = structuredClone(inputs);
+	const npc = (id, name, faction, map, x, y) => ({ id, name, level: 50, levelMax: null, faction, rare: false, elite: false, boss: false, instance: null, roles: [], spawns: [{ map, x, y, f: 'e' }] });
+	c.npcs[9001] = npc(9001, 'Anastasia Hartwell', 'H', 1458, 70, 40);
+	c.npcs[9002] = npc(9002, 'Barrens Trainer', 'A', 1413, 60, 30);
+	c.npcs[9003] = npc(9003, 'Silverpine Trainer', 'A', 1421, 60, 60);
+	const quest = (id, title, givers) => ({
+		id, title, level: 25, minLevel: 18, faction: null, races: null, classes: null,
+		start: { npc: givers, object: [], item: [] }, end: { npc: givers, object: [] },
+		objectives: [], pre: [], zone: 1421, rewards: [], choices: [], preAny: [],
+	});
+	c.quests[90200] = quest(90200, "Tabetha's Task", [9001, 9002, 9003]);
+	c.quests[90201] = quest(90201, 'Alliance Errand', [9002]);
+	i.forever.quests[90200] = { area: 209 };
+	i.forever.quests[90201] = { area: 209 };
+	const page = buildJournal(i, c).dungeons[KEY].quests.find((q) => q.id === 90200);
+	assert.equal(page.start.name, 'Anastasia Hartwell', 'the page keeps the first giver');
+	const own = writeCodexPack(c, { extraFiles: emitJournal(buildJournal(i, c)) });
+	try {
+		const script = `
+local plan = D.PickupPlan("${KEY}")
+local g = {}
+for _, t in ipairs(plan.take) do if t.quest.id >= 90200 then g[#g + 1] = t.quest.id .. ":" .. t.giver.name end end
+local p = D.GiverTarget("${KEY}", 90200)
+emit({ take = g, target = p and p.name or false })`;
+		const human = { race: 'Human', faction: 'Alliance', cls: 'MAGE', codexPack: own };
+		const [barrens] = run(script, { ...human, at: BARRENS });
+		assert.deepEqual(barrens, { take: ["90200:Barrens Trainer", '90201:Barrens Trainer'], target: 'Barrens Trainer' });
+		const [silverpine] = run(script, { ...human, at: [1421, 50, 50] });
+		assert.deepEqual(silverpine.take, ['90200:Silverpine Trainer', '90201:Barrens Trainer'], 'the nearest of its side');
+		const [horde] = run(script, { cls: 'MAGE', at: BARRENS, codexPack: own });
+		assert.deepEqual(horde, { take: ['90200:Anastasia Hartwell'], target: 'Anastasia Hartwell' }, 'the Alliance trainer next door is not for the Horde, nor a quest only an Alliance NPC gives');
+	} finally {
+		own.cleanup();
+	}
 });
 
 test('PickUp opens the guide in a new tab and it plays to the end; the giver link points at the first prerequisite still to do', () => {

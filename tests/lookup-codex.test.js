@@ -211,3 +211,38 @@ emit({ take = take, pages = pages })`,
 	const stray = ['naxxramas:8921', 'zulgurub:8921', 'blackwing-lair:9121', 'blackwing-lair:9122'];
 	assert.deepEqual(out.pages.filter((p) => stray.includes(p)), [], "The Ectoplasmic Distiller (Mux, Tanaris) and The Dread Citadel (Dosantos, Light's Hope) are on no raid page through a boss's stray essence or crystal");
 });
+
+// Tabetha's Task (2861) for Zul'Farrak: the mage trainers of both sides give
+// it; the page names the first, Anastasia Hartwell in the Undercity.
+function tabetha(race, faction, at) {
+	return runAddon({
+		stubs: ['stub_world.lua'],
+		before: `${packLua()}
+local w = stub.world
+${mapsLua()}
+w.race, w.raceName, w.class, w.className, w.faction = ${luaValue(race)}, ${luaValue(race)}, "MAGE", "MAGE", ${luaValue(faction)}
+w.level = 44
+w.moveTo(${at.join(', ')})`,
+		addons: ['Polestar'],
+		script: `
+stub.login()
+local D = Polestar.Dungeons
+D.Load()
+local giver
+for _, t in ipairs(D.PickupPlan("zulfarrak").take) do
+	if t.quest.id == 2861 then giver = t.giver end
+end
+local target = D.GiverTarget("zulfarrak", 2861)
+local npc = giver and Polestar.Codex.Npc(giver.id)
+emit({ giver = giver and giver.name or false, map = giver and giver.map or false, side = npc and npc.faction or false, target = target and target.name or false })`,
+	}).emitted[0];
+}
+
+test("Tabetha's Task: a level 44 Alliance mage in Stormwind is sent to an Alliance mage trainer in Stormwind, a Horde one in the Undercity to Anastasia Hartwell", { skip }, () => {
+	const human = tabetha('Human', 'Alliance', [1453, 50, 60]);
+	assert.equal(human.side, 'A', `an Alliance giver: ${JSON.stringify(human)}`);
+	assert.equal(human.map, 1453, 'in Stormwind');
+	assert.equal(human.target, human.giver, "the quest card's link goes there too");
+	const undead = tabetha('Scourge', 'Horde', [1458, 66, 44]);
+	assert.deepEqual({ ...undead, map: [1420, 1458].includes(undead.map) }, { giver: 'Anastasia Hartwell', map: true, side: 'H', target: 'Anastasia Hartwell' }, 'in the Undercity (the Codex also places her on its Tirisfal Glades map)');
+});

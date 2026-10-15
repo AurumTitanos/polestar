@@ -20,6 +20,13 @@
 --       where to go for the quest: the giver of its first open prerequisite
 --       (its turn-in, turnIn true, when that one is in the log), firstTitle
 --       its title; else the quest's own giver
+--   Dungeons.Giver(pq, from, rec?) -> point | nil
+--       a page quest's giver for this character: nil when an item starts it
+--       or it starts inside. The page keeps one giver; a quest several NPCs
+--       give (Tabetha's Task: the mage trainers of both sides) goes to the
+--       one of the character's side nearest `from` (Lookup.QuestEnd), never
+--       to one of the other side; the page's place when it is the only one.
+--       rec: the Codex quest (default: read now)
 --
 -- Route: the cheapest path from where the player stands, through the
 -- prerequisite quests (each after the one before it in its chain; after one,
@@ -64,21 +71,32 @@ local function endPoint(e)
 	return { kind = e.npc and "npc" or "object", id = e.npc or e.object, name = e.name, map = s.map, x = s.x, y = s.y, f = s.f }
 end
 
--- A page quest's giver outside the dungeon -> point | nil (from an item,
--- inside, or nowhere known). The page's own place first (DungeonJournal),
--- else the Codex giver nearest `from`.
-local function giverOf(pq, rec, from)
+-- Whether an NPC point is one the character may talk to (Lookup.SideOK on
+-- the Codex NPC's faction; objects and unknown NPCs are).
+local function sideOK(pt, p)
+	if pt.kind ~= "npc" then return true end
+	local npc = ns.Codex and ns.Codex.Npc(pt.id)
+	return not npc or LK().SideOK(npc.faction, p)
+end
+
+function Dungeons.Giver(pq, from, rec)
 	local s = pq.start
 	if pq.startItem or pq.inside or (s and (s.kind == "item" or s.inside)) then return nil end
-	if s and (s.kind == "npc" or s.kind == "object") and s.id and located(s) then
-		return { kind = s.kind, id = s.id, name = s.name, map = s.map, x = s.x, y = s.y, f = s.f }
+	local Lk = LK()
+	rec = rec or (ns.Codex and ns.Codex.Quest(pq.id))
+	local st = rec and rec.start
+	if st and st.item and st.item[1] then return nil end
+	local p = Lk.PlayerInfo()
+	local page = s and (s.kind == "npc" or s.kind == "object") and s.id and located(s) and sideOK(s, p)
+		and { kind = s.kind, id = s.id, name = s.name, map = s.map, x = s.x, y = s.y, f = s.f } or nil
+	local givers = st and (#(st.npc or {}) + #(st.object or {})) or 0
+	if page and givers <= 1 then return page end
+	if givers > 0 then
+		local e = Lk.QuestEnd(st, from, p)
+		if e and e.hostile then return nil end
+		if e then return endPoint(e) end
 	end
-	if rec then
-		local st = rec.start
-		if st and st.item and st.item[1] then return nil end
-		return endPoint(LK().QuestEnd(st, from))
-	end
-	return nil
+	return page
 end
 
 local function hasClass(list, class)
@@ -125,7 +143,7 @@ function Dungeons.PickupPlan(key)
 			elseif ((rec and rec.minLevel) or pq.minLevel or 1) > reach then
 				plan.later = plan.later + 1
 			else
-				local giver = giverOf(pq, rec, from)
+				local giver = Dungeons.Giver(pq, from, rec)
 				local pre, ok = {}, giver ~= nil
 				if ok and rec then
 					local chain, truncated = Lk.QuestChain(pq.id, p)
@@ -463,7 +481,8 @@ end
 ---------------------------------------------------------------------------
 
 -- A quest of the chain -> where to go for it, turnIn: its turn-in when it is
--- in the log, else its giver (the page's record first).
+-- in the log, else its giver (Dungeons.Giver for a page quest; an item that
+-- starts it where the page places one).
 local function chainPoint(key, id, rec, from)
 	local Lk = LK()
 	local cq = Dungeons.Quest(key, id)
@@ -473,8 +492,14 @@ local function chainPoint(key, id, rec, from)
 		if cq and located(cq.finish) then return cq.finish, true end
 		return nil
 	end
-	if cq and located(cq.start) and not cq.start.inside then return cq.start, false end
-	return rec and endPoint(Lk.QuestEnd(rec.start, from)) or nil, false
+	if cq then
+		local g = Dungeons.Giver(cq, from, rec)
+		if g then return g, false end
+		local s = cq.start
+		if located(s) and not s.inside and (s.kind == "item" or cq.startItem) then return s, false end
+	end
+	local e = rec and Lk.QuestEnd(rec.start, from)
+	return e and not e.hostile and endPoint(e) or nil, false
 end
 
 function Dungeons.GiverTarget(key, questId)
@@ -500,6 +525,9 @@ function Dungeons.GiverTarget(key, questId)
 			end
 		end
 	end
-	if located(pq.start) then return pq.start, pq.start.name end
+	local g = Dungeons.Giver(pq, ns.PlayerPoint())
+	if g then return g, g.name end
+	local s = pq.start
+	if located(s) and (s.inside or s.kind == "item" or pq.startItem) then return s, s.name end
 	return nil
 end

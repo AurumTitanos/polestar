@@ -38,6 +38,11 @@
   and an item a boss drops only rarely by Wowhead's count no longer ties a
   quest to it: The Ectoplasmic Distiller left Naxxramas and Zul'Gurub, The
   Dread Citadel left Blackwing Lair (thanks kp)
+- A dungeon quest several NPCs give goes to the nearest one of your side:
+  Tabetha's Task for Zul'Farrak sent Alliance mages to Anastasia Hartwell in
+  the Undercity; now the pick-up guide, the quest's card and Lookup send
+  them to an Alliance mage trainer, and Lookup marks a quest only the other
+  side's NPCs give as that side's.
 - Quests Forever renamed carry their Forever names in the guides: Chastise
   (once A Lack of Fear), Dark Sacrifice (once Devouring Plague), Look to the
   Stars, Onu is Meditating and the others Wowhead Forever lists as renamed.

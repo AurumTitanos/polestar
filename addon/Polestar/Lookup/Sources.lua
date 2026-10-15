@@ -173,26 +173,37 @@ local function objectSpawn(objectId, from)
 	return obj, s, t
 end
 
--- The quest giver (or turn-in) nearest to the player:
--- -> { npc|object, name, spawn, travel } | nil
-local function questEnd(ends, from)
+-- The quest giver (or turn-in) nearest to the player, of the character's side
+-- (an NPC of the other faction only when no other is known, then marked
+-- `hostile` with its `faction`: Tabetha's Task is given by the mage trainers
+-- of both sides): -> { npc|object, name, spawn, travel, hostile, faction }
+-- | nil. p: Lookup.PlayerInfo() (default: read now).
+local function closer(best, c)
+	if not best or (c.travel and (not best.travel or c.travel < best.travel)) then return c end
+	return best
+end
+
+local function questEnd(ends, from, p)
 	if type(ends) ~= "table" then return nil end
-	local best
+	p = p or playerInfo()
+	local best, other
 	for _, id in ipairs(ends.npc or {}) do
 		local npc, s, t = npcSpawn(id, from)
-		if npc and s and (not best or (t and (not best.travel or t < best.travel))) then
-			best = { npc = npc.id, name = npc.name, spawn = s, travel = t }
+		if npc and s then
+			local c = { npc = npc.id, name = npc.name, spawn = s, travel = t }
+			if sideOK(npc.faction, p) then best = closer(best, c) else c.faction = npc.faction; other = closer(other, c) end
 		end
 	end
 	for _, id in ipairs(ends.object or {}) do
 		local obj, s, t = objectSpawn(id, from)
-		if obj and s and (not best or (t and (not best.travel or t < best.travel))) then
-			best = { object = obj.id, name = obj.name, spawn = s, travel = t }
-		end
+		if obj and s then best = closer(best, { object = obj.id, name = obj.name, spawn = s, travel = t }) end
 	end
-	return best
+	if best then return best end
+	if other then other.hostile = true end
+	return other
 end
 Lookup.QuestEnd = questEnd
+Lookup.SideOK = sideOK
 
 ---------------------------------------------------------------------------
 -- Effort
@@ -393,13 +404,14 @@ builders.quest = function(src, p, from)
 		r.detail = L["Quest"]
 		return r
 	end
-	local giver = questEnd(q.start, from)
-	local finish = questEnd(q["end"], nil)
+	local giver = questEnd(q.start, from, p)
+	local finish = questEnd(q["end"], nil, p)
 	if giver then place(r, giver.spawn, giver.travel) end
 	r.detail = detail(src.choice and L["Quest reward choice"] or L["Quest reward"], r.zone)
 	r.effort = questEffort(q, p)
 	local why, text = questBlock(q, p)
 	if why then block(r, why, text) end
+	if giver and giver.hostile then block(r, "faction", sideText(giver.faction)) end
 	if q.repFaction and q.repStanding then repGate(r, q.repFaction, q.repStanding) end
 	local startsFromItem = q.start and q.start.item and #q.start.item > 0
 	r.guideable = (giver ~= nil or startsFromItem) and finish ~= nil
@@ -635,8 +647,8 @@ end
 local function questRows(q, p, from)
 	local list = {}
 	local why, text = questBlock(q, p)
-	local giver = questEnd(q.start, from)
-	local finish = questEnd(q["end"], from)
+	local giver = questEnd(q.start, from, p)
+	local finish = questEnd(q["end"], from, p)
 	if giver then
 		local r = newRow(nil, "start")
 		r.label = giver.name
@@ -644,6 +656,7 @@ local function questRows(q, p, from)
 		r.detail = detail(L["Starts the quest"], r.zone)
 		r.effort = questEffort(q, p)
 		if why then block(r, why, text) end
+		if giver.hostile then block(r, "faction", sideText(giver.faction)) end
 		r.guideable = finish ~= nil
 		list[#list + 1] = r
 	end
