@@ -872,6 +872,32 @@ test('the arrow takes the mouse on its dial only, and the hover wash sits behind
 	assert.equal(out.mouse, true, 'the arrow is still movable');
 });
 
+test('without the dial, the text under it takes the mouse and the hover wash', () => {
+	const [out] = run(`
+		local seen = {}
+		local function snap(tag)
+			local l, r, t, b = A.frame:GetHitRectInsets()
+			local _, rel = A.mover:GetPoint(1)
+			seen[#seen + 1] = { tag, A.GetMode() or "hidden", A.dial:IsShown(), { l, r, t, b }, rel == A.dial }
+		end
+		target(100, 0, "Nightbane Shadow Weavers")
+		stub.advance(0.1); snap("travel")
+		nav.place(0, 0, 1)                 -- other continent
+		stub.advance(0.1); snap("far")
+		nav.player = nil
+		stub.advance(0.1); snap("no position")
+		nav.place(0, 0, 0)
+		stub.advance(0.1); snap("back")
+		emit(seen)`);
+	// The frame is 200 wide and 64 + 52 tall: the dial at its top, the text under it.
+	assert.deepEqual(out, [
+		['travel', 'travel', true, [68, 68, 0, 52], true],
+		['far', 'far', false, [0, 0, 64, 0], false],
+		['no position', 'nopos', false, [0, 0, 64, 0], false],
+		['back', 'travel', true, [68, 68, 0, 52], true],
+	]);
+});
+
 test('settings apply live: scale, alpha, visibility, pins, position and Blizzard waypoint; the arrow is always movable', () => {
 	const [out] = run(`
 		local r = {}

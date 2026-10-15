@@ -66,9 +66,6 @@ frame:SetFrameStrata("MEDIUM")
 frame:SetClampedToScreen(true)
 frame:SetMovable(true)
 frame:EnableMouse(true) -- always movable: drag the arrow anywhere
--- Only the dial takes the mouse: the text under it would otherwise catch
--- drags meant for the world, more so at a large scale.
-frame:SetHitRectInsets((WIDTH - DIAL) / 2, (WIDTH - DIAL) / 2, 0, TEXT_H)
 frame:RegisterForDrag("LeftButton")
 frame:Hide()
 
@@ -76,11 +73,27 @@ local dial = CreateFrame("Frame", nil, frame)
 dial:SetSize(DIAL, DIAL)
 dial:SetPoint("TOP", frame, "TOP", 0, 0)
 
--- Shown behind the dial while hovering it, so it reads as movable.
+-- Shown behind the part that takes the mouse while hovering it, so it reads
+-- as movable.
 local mover = frame:CreateTexture(nil, "BACKGROUND", nil, -8)
-mover:SetAllPoints(dial)
 mover:SetColorTexture(Nav.Wash("mover"))
 mover:Hide()
+
+-- Only the dial takes the mouse: the text under it would otherwise catch
+-- drags meant for the world, more so at a large scale. Without the dial
+-- (another continent, no position) the text is all there is, so it does.
+local function grabArea(onDial)
+	local side = onDial and (WIDTH - DIAL) / 2 or 0
+	frame:SetHitRectInsets(side, side, onDial and 0 or DIAL, onDial and TEXT_H or 0)
+	mover:ClearAllPoints()
+	if onDial then
+		mover:SetAllPoints(dial)
+	else
+		mover:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, -DIAL)
+		mover:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, 0)
+	end
+end
+grabArea(true)
 
 local glow = dial:CreateTexture(nil, "BACKGROUND")
 glow:SetTexture(MEDIA .. "arrow-glow")
@@ -204,6 +217,7 @@ local function setMode(m)
 	mode = m
 	local travel, done, act = m == "travel", m == "arrived" or m == "search", m == "instruction"
 	dial:SetShown(travel or done or act)
+	grabArea(travel or done or act)
 	showArrow(travel)
 	ring:SetShown(done)
 	halo:SetShown(done or act)

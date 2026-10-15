@@ -181,6 +181,10 @@
   Ironforge), anywhere else without a position it says "No position here"
   over the step, and it points again as soon as you step off (thanks
   Igotthis).
+- The arrow takes the mouse on the arrow itself, not on the distance and
+  label under it, so a large arrow no longer catches drags meant for the
+  world, and the hover wash sits behind the arrow only. When there is no
+  arrow to show (another continent, no position), the text takes the mouse.
 - Teldrassil, Dun Morogh and Mulgore: the starting glens no longer send you
   off for one delivery quest and back. Dolanaar Delivery and Supplies to
   Tannok are taken on the way out of Shadowglen and Coldridge Valley, by the
@@ -279,9 +283,6 @@
   the step's other goals' regions are fainter, on the world map. If the first
   camp is crowded, the next one is in sight; the next-spot button, or a click
   on a camp's mark on the world map, moves the arrow there (thanks Pynte).
-- The arrow takes the mouse on the arrow itself, not on the distance and
-  label under it, so a large arrow no longer catches drags meant for the
-  world, and the hover wash sits behind the arrow only.
 
 ### For guide authors
 
