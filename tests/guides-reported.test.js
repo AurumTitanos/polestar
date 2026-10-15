@@ -51,6 +51,8 @@ const is = (t, quest) => (g) => g.t === t && g.quest === quest;
 const located = ({ goal }) => goal.map != null && goal.x != null;
 // Goals every character of the guide does (no `only` on the goal or its step).
 const everyone = ({ step, goal }) => !step.only && !goal.only;
+// Goals a character of this class does (an `only` naming classes on the goal or its step must list it).
+const forClass = (cls) => ({ step, goal }) => [step.only, goal.only].every((o) => !o || !o.classes || o.classes.includes(cls));
 
 // Yards between two compiled points on one map (Era frame).
 function yards(a, b) {
@@ -92,7 +94,8 @@ const CAVES = [
 	{ cave: 'the Burning Blade Coven (the pick)', guide: DUROTAR, target: (g) => g.t === 'collect' && g.item === 16332, mouth: { map: 1411, x: 45, y: 56 } },
 	{ cave: 'the Burning Blade Coven (Yarrog)', guide: DUROTAR, target: (g) => g.t === 'collect' && g.item === 4859, mouth: { map: 1411, x: 45, y: 56 } },
 	{ cave: 'Skull Rock', guide: DUROTAR, target: (g) => g.t === 'collect' && g.item === 4871, mouth: { map: 1411, x: 55, y: 10 } },
-	{ cave: 'the Coldridge troll cave', guide: DUN_MOROGH, target: (g) => g.t === 'collect' && g.item === 2004, mouth: { map: 1426, x: 26, y: 79 } },
+	// The troll cave's mouth as marked in game (thmastin, PR #16); Wowhead's comments put it at 26,79.
+	{ cave: 'the Coldridge troll cave', guide: DUN_MOROGH, target: (g) => g.t === 'collect' && g.item === 2004, mouth: { map: 1426, x: 26.93, y: 80.03 } },
 	{ cave: 'the Jasperlode Mine', guide: ELWYNN, target: (g) => g.t === 'complete' && g.quest === 76, mouth: { map: 1429, x: 61.6, y: 54.1 } },
 	{ cave: 'Shadowthread Cave', guide: TELDRASSIL, target: (g) => g.t === 'collect' && g.item === 5167, mouth: { map: 1438, x: 57, y: 32 } },
 	{ cave: 'Fel Rock', guide: TELDRASSIL, target: (g) => g.t === 'collect' && g.item === 5221, mouth: { map: 1438, x: 54, y: 52 } },
@@ -147,4 +150,46 @@ test(`${MULGORE}: A Task Unfinished at Antur Fallow starts the cougar hunt, with
 	assert.equal(list[take].step, list[hunt].step, "Antur's quest opens the hunt's step: the hunt starts at his end of the camp");
 	assert.deepEqual(list.slice(take + 1, hunt).filter(located).filter(everyone).map(({ goal }) => `${goal.t} ${goal.quest}`), [], 'the hunt follows Antur straight away');
 	assert.ok(hunt < at(list, 'turnin 750', is('turnin', 750)), 'the hunt ends at Grull');
+});
+
+// --- Bandarion Keep (Mike_, 0.2.3): Hilda the Breaker and Ephram Barbaro offer their quests to Paladins only.
+
+test(`${TIRISFAL}: Mike_'s report: only Paladins are sent to Hilda the Breaker and Ephram Barbaro at Bandarion Keep`, { skip }, () => {
+	const list = goals(TIRISFAL);
+	const keep = [246389, 259190]; // Hilda the Breaker, Ephram Barbaro
+	const mage = list.filter(forClass('MAGE'));
+	assert.deepEqual(mage.filter(({ goal }) => keep.includes(goal.npc)).map(({ goal }) => `${goal.t} ${goal.quest} (${goal.npcName})`), [], 'a Mage meets neither giver');
+	assert.deepEqual(mage.filter(({ goal }) => goal.quest === 99152 || goal.quest === 99153).map(({ goal }) => `${goal.t} ${goal.quest}`), [], 'nor any goal of their quests');
+	// The Shadowvale elixir bottles stay for everyone (at asserts the goal is there).
+	at(mage, 'collect 268801 (Bottle of Whispering Elixir)', (g) => g.t === 'collect' && g.quest === 95314);
+	const paladin = list.filter(forClass('PALADIN'));
+	for (const q of [99152, 99153]) {
+		const take = at(paladin, `accept ${q} for a Paladin`, is('accept', q));
+		assert.ok(keep.includes(paladin[take].goal.npc), `a Paladin takes ${q} at the keep`);
+		assert.ok(take < at(paladin, `turnin ${q} for a Paladin`, is('turnin', q)));
+	}
+});
+
+// --- Coldridge Valley (thmastin, PR #16): the valley is never walked back to.
+
+test(`${DUN_MOROGH}: thmastin's report: Grik'nir comes after Anvilmar, and the journal and Nori's mug are handed in on one camp visit`, { skip }, () => {
+	const list = goals(DUN_MOROGH);
+	const griknir = at(list, "Grelin Whitebeard's Journal (Grik'nir)", (g) => g.t === 'collect' && g.item === 2004);
+	assert.ok(at(list, 'turnin 3364 (Scalding Mornbrew Delivery, Anvilmar)', is('turnin', 3364)) < griknir, 'Anvilmar comes before Grik\'nir');
+	const journal = at(list, 'turnin 218 (The Stolen Journal)', is('turnin', 218));
+	const mug = at(list, 'turnin 3365 (Bring Back the Mug)', is('turnin', 3365));
+	assert.ok(griknir < journal && griknir < mug, 'both are handed in after Grik\'nir');
+	assert.equal(list[journal].step, list[mug].step, 'the journal and the mug are handed in on one visit to Grelin\'s camp');
+	// Grund and Gozwin is done in the valley, before the troll cave, not on a return after Rumbleshot.
+	assert.ok(at(list, 'turnin 97277 (Grund and Gozwin)', is('turnin', 97277)) < griknir, 'Grund and Gozwin is handed in before the troll cave');
+});
+
+test(`${DUN_MOROGH}: thmastin's report: The Adventurer is taken from Thalos at the tunnel and turned in at Eric before The Great Outdoors`, { skip }, () => {
+	const list = goals(DUN_MOROGH);
+	const take = at(list, 'accept 96628 (The Adventurer)', is('accept', 96628));
+	const thalos = at(list, 'turnin 282 (Senir\'s Observations, Thalos)', is('turnin', 282));
+	assert.equal(list[take].step, list[thalos].step, 'taken at the tunnel, on the way out of the valley');
+	const give = at(list, 'turnin 96628 (The Adventurer)', is('turnin', 96628));
+	assert.equal(list[give].goal.npcName, 'Eric Brighthammer', 'turned in at Eric');
+	assert.ok(give < at(list, 'accept 96608 (The Great Outdoors)', is('accept', 96608)), 'before The Great Outdoors, which it leads to');
 });

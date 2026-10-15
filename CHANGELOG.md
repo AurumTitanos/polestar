@@ -279,10 +279,11 @@
   Thornslash and through the mouths of the Burning Blade Coven, Skull Rock,
   the Coldridge troll cave, the Jasperlode Mine, Shadowthread Cave, Fel Rock
   and Night Web's Hollow, Dolanaar Delivery and Supplies to Tannok on the way
-  out of the starting glens, Antur Fallow starting the cougar hunt), and
-  `tests/lint-timed.test.js` checks the timed-item rule on the old and fixed
-  orders and on every guide. A data mistake behind a guide fix belongs in
-  `tools/lib/data/corrections.json` too, so the simulator sees it.
+  out of the starting glens, Antur Fallow starting the cougar hunt, Bandarion
+  Keep's quests for Paladins only, Coldridge Valley without walking back),
+  and `tests/lint-timed.test.js` checks the timed-item rule on the old and
+  fixed orders and on every guide. A data mistake behind a guide fix belongs
+  in `tools/lib/data/corrections.json` too, so the simulator sees it.
 - `tools/lib/codex/attunements.json`: a cited table naming each attunement's
   goal (the quests that end it, or the key item) per instance;
   `tools/lib/codex/attunements.js` builds the steps from the Codex's quest
