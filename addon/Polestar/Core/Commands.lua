@@ -1,6 +1,7 @@
--- Guide slash commands and key binding labels. Init.lua owns the /polestar
--- dispatcher and the show/hide/guides/options/debug commands; Bindings.xml
--- (addon root) calls into the functions below.
+-- Slash commands and key binding labels. Init.lua owns the /polestar
+-- dispatcher; every command registers here or in its module, after the
+-- locale file, so its help line is read in the client's language.
+-- Bindings.xml (addon root) calls into the functions below.
 
 local ADDON, ns = ...
 
@@ -30,6 +31,15 @@ local function needGuide()
 	ns.Print(L["No guide selected. Use /polestar guides to pick one."])
 	return false
 end
+
+ns.RegisterCommand("show", function() ns.Fire("SHOW_FRAME") end, L["Show the guide window"])
+ns.RegisterCommand("hide", function() ns.Fire("HIDE_FRAME") end, L["Hide the guide window"])
+ns.RegisterCommand("guides", function() ns.Fire("SHOW_PICKER") end, L["Choose a guide"])
+ns.RegisterCommand("options", function(rest) ns.Fire("SHOW_OPTIONS", rest ~= "" and rest or nil) end, L["Open settings"])
+ns.RegisterCommand("debug", function()
+	ns.debug = not ns.debug
+	ns.Print(L["Debug output"], ns.debug and L["on"] or L["off"])
+end, L["Toggle debug output"])
 
 ns.RegisterCommand("next", function()
 	if needGuide() then Engine.Next() end

@@ -181,6 +181,11 @@
   every table the Codex reads is used. `meta.json` records the build;
   `codex parity` and `codex wowhead` read the client tables of the build the
   Codex was made from.
+- Translations: `/polestar help` prints every line in the client's language,
+  the show, hide, guides, options and debug commands' too: Init.lua, which
+  loads before the locale file, registered them in English; they register
+  in Core/Commands.lua now. `tests/helpers/locale.js` fakes a translation in
+  the addon's tests.
 
 ## 0.2.3 (2026-10-14)
 

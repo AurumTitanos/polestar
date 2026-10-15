@@ -189,7 +189,8 @@ Polestar.RegisterCommand(name, fn(argString), help)
 ```
 
 `/polestar` and `/pole`. No argument fires `TOGGLE_FRAME`. `help` lists
-registered commands. Core registers: `guides`, `options`, `show`, `hide`,
+registered commands with their `help` lines (already translated:
+`L["..."]`). Core registers (Core/Commands.lua): `guides`, `options`, `show`, `hide`,
 `next`, `prev` (look at the next/previous step; nothing changes), `skip`
 (skip the step shown, for good), `reset` (clear ticks, latches, skips and
 the saved view for the current guide), `guide <id>`, `status`, `tabs`,
@@ -223,7 +224,12 @@ the game's error handler: wrapping it would shift the stack the game and
 
 ### Localisation
 
-`Polestar.L[key]` (enUS only for now; missing keys return the key).
+`Polestar.L[key]`: a key is the English text, and a missing key returns
+itself, so a client without a translation reads English. A locale file
+(`Locales/<locale>.lua`, loaded right after `Core/Init.lua`) fills `L` for its
+client, so every file after it may read `L` at load; Init.lua, which loads
+before it, reads `L` only when it prints (the commands register in
+Core/Commands.lua).
 
 ### Compat — every client API call goes through here
 

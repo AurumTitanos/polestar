@@ -4,6 +4,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { runAddon } = require('./helpers/lua');
+const { fakeLocale } = require('./helpers/locale');
 
 const CORE = { name: 'Polestar', files: ['Core/Init.lua'] };
 
@@ -133,6 +134,36 @@ test('slash command: bare toggles the frame, names dispatch with the rest of the
 			emit({ got = got, mentionsUnknown = printed:find("nope", 1, true) ~= nil, listsGoto = printed:find("/polestar goto", 1, true) ~= nil })`,
 	}).emitted;
 	assert.deepEqual(out, { got: ['toggle', 'goto:12 extra'], mentionsUnknown: true, listsGoto: true });
+});
+
+test('/polestar help prints each line in the client language, Core\'s own commands too', () => {
+	const [out] = runAddon({
+		stubs: ['stub_world.lua'],
+		before: fakeLocale('deDE', {
+			Commands: 'Befehle',
+			'Show the guide window': 'Guide-Fenster anzeigen',
+			'Open settings': 'Einstellungen öffnen',
+			'Toggle debug output': 'Debug-Ausgabe umschalten',
+			'Look at the step before': 'Vorherigen Schritt ansehen',
+		}),
+		addons: [{ name: 'Polestar', files: ['Core/Core.xml'] }],
+		script: `
+			SlashCmdList.POLESTAR("help")
+			local lines = {}
+			for _, m in ipairs(stub.messages) do
+				local name, help = m:match("/polestar (%S+)  |cff8a8f98(.*)|r$")
+				if name then lines[name] = help end
+			end
+			emit({ title = stub.messages[1]:find("Befehle", 1, true) ~= nil, show = lines.show, options = lines.options, debug = lines.debug, prev = lines.prev, hide = lines.hide })`,
+	}).emitted;
+	assert.deepEqual(out, {
+		title: true,
+		show: 'Guide-Fenster anzeigen',
+		options: 'Einstellungen öffnen',
+		debug: 'Debug-Ausgabe umschalten',
+		prev: 'Vorherigen Schritt ansehen',
+		hide: 'Hide the guide window',
+	});
 });
 
 test('registering an event the client does not know returns false instead of erroring', () => {
