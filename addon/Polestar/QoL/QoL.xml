@@ -5,6 +5,7 @@
 	<Script file="Hearth.lua"/>
 	<Script file="XP.lua"/>
 	<Script file="Vendor.lua"/>
+	<Script file="Buy.lua"/>
 	<Script file="Rewards.lua"/>
 	<Script file="Flight.lua"/>
 	<Script file="Death.lua"/>

@@ -129,6 +129,12 @@
   bloodmages' beasts, and Horde Warriors in the Barrens gather the Twitching
   Antennae (fifteen minutes) on the way back from Gann Stonespire and hearth
   to Ruga at once. Teldrassil says Iverron's Antidote lasts five minutes.
+- A step that asks you to buy something can buy it for you at a merchant
+  that sells it, after selling greys and repairing: Options, Quality of
+  Life, Vendors, Buy for the guide (off by default; Shift skips). Only what
+  your bags still lack, and only for money. Optional buys, like a second
+  mount colour, are left to you, and so is anything over 50g: the chat says
+  what it left (thanks CDVolvik).
 
 ### For guide authors
 
