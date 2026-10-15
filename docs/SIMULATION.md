@@ -573,3 +573,39 @@ node tools/polestar.js sim consensus --faction horde && node tools/polestar.js s
 ```
 
 then re-export (`sim export`) the starts the guides follow.
+
+### Keeping the guides' fixes
+
+The guides are hand-written from the exports, and a refresh re-applies a new
+route to them. It keeps every fix a guide's header documents (its "Order
+changes against the export", "Deviations from the export" or "Local order
+fixed by hand" list): those orders answer player reports and things the
+model does not see, such as a cave's mouth, a quest item that vanishes
+after a while, or a delivery that belongs on the way out of a starting
+glen. A refresh that changes such a stretch changes the header too, and
+says why the new order still holds.
+
+Two checks enforce it:
+
+- `tests/guides-reported.test.js` (and `tests/guides-caves.test.js` for
+  cave mouths) pins each player-reported fix on the compiled guide: goal
+  order and where the arrow leads, one case per report. A refresh that
+  undoes one fails the suite.
+- Lint warns when a guide carries a timed quest item (items.json
+  `duration`, the Forever client's ItemSparse DurationInInventory) longer
+  than it lasts: from the goal that gets it (an `accept` that hands it
+  over, a `collect`, a `buy`) to each later goal that spends it (a `turnin`
+  that needs it, a `use`), timed from the latest goal that got more of it.
+  The time is this model's (§2, at the priors): the straight line × the
+  detour factor at run (or mounted) speed, flights from travel.json plus
+  `flightOverhead`, the hearthstone cast, `talkSec` and `interactSec`, and
+  kill time with the walk between mobs of the goal's spawn areas for kills
+  and drops; other characters' and `optional` goals, grinding and legs
+  across continents are left out, so the estimate errs short
+  (`tools/lib/dsl/timed.js`).
+
+When a guide is wrong because the data is (a giver, a spawn, a drop chance),
+the fix belongs in `tools/lib/data/corrections.json` as well as in the
+guide: the simulator builds its world from the data, so only a corrected
+record keeps the next search, export and refresh from reproducing the
+mistake.

@@ -151,6 +151,17 @@
   raid quests and from instance maps, and the new `group [N]` modifier
   (`kill 1234 group 3`) says it outright. A guide with group content on its
   route carries `group = true`. `compile` now writes format 2 for every pack.
+- Lint warns when a guide carries a quest item that vanishes after a while
+  longer than it lasts: `item 10439 (Durnan's Scalding Mornbrew) lasts 5
+  minutes, but the route takes about 11:29 from here to the turnin that
+  spends it`. It times each goal that spends the item (a `turnin` that
+  needs it, a `use`) from the latest goal that got it (an `accept` that hands
+  it over, a `collect`, a `buy`; `buy x2` serves two turn-ins) with the
+  simulator's travel and kill times over the guide's own goals and places.
+  It flags the orders the Dun Morogh, Blasted Lands and Barrens fixes
+  replaced and the Western Plaguelands Arcane Quickeners. `data build` now
+  reads the Forever client's ItemSparse for it: items.json gives such items
+  a `duration` in seconds (101 today).
 
 ### For contributors
 
@@ -187,6 +198,18 @@
   every table the Codex reads is used. `meta.json` records the build;
   `codex parity` and `codex wowhead` read the client tables of the build the
   Codex was made from.
+- A route refresh keeps every fix a guide's header documents
+  (docs/SIMULATION.md, "Keeping the guides' fixes"; CONTRIBUTING.md, "Fixing
+  a guide"): `tests/guides-reported.test.js` pins each player-reported fix on
+  the compiled guide by behaviour, one case per report (Durotar's Sting of
+  the Scorpid taken to Sarkoth, the arrow through the Den's mouth to Kzan
+  Thornslash and through the mouths of the Burning Blade Coven, Skull Rock,
+  the Coldridge troll cave, the Jasperlode Mine, Shadowthread Cave, Fel Rock
+  and Night Web's Hollow, Dolanaar Delivery and Supplies to Tannok on the way
+  out of the starting glens, Antur Fallow starting the cougar hunt), and
+  `tests/lint-timed.test.js` checks the timed-item rule on the old and fixed
+  orders and on every guide. A data mistake behind a guide fix belongs in
+  `tools/lib/data/corrections.json` too, so the simulator sees it.
 
 ## 0.2.3 (2026-10-14)
 

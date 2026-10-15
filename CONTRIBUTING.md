@@ -80,7 +80,16 @@ git grep "accept 184"
 - The comments at the top of a leveling guide explain the route's choices
   (where it comes from, the flow through the zone, what it leaves out). Read
   them before moving steps around, and update them when a fix changes the
-  route.
+  route: a later route refresh keeps every fix they document (see
+  [docs/SIMULATION.md](docs/SIMULATION.md), "Refresh").
+- A fix for a player's report gets a case in `tests/guides-reported.test.js`
+  (or `tests/guides-caves.test.js` for a cave mouth) that checks what the
+  player sees, the goal order or where the arrow leads, not the guide's
+  wording, so a refresh that undoes it fails the suite. A quest item that
+  vanishes after a while is checked by lint itself (`item ... lasts ...`).
+- When the guide is wrong because the data is (a giver, a spawn, a drop),
+  fix the data in `tools/lib/data/corrections.json` too, so the simulator and
+  the next route refresh see it.
 - Check your change:
 
   ```sh

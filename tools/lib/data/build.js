@@ -60,6 +60,20 @@ function applyCorrections(tables) {
 	return n;
 }
 
+// ItemSparse rows -> `duration` (seconds an item lasts once looted, its
+// DurationInInventory) on the items we hold. -> how many items got one.
+function itemDurations(rows, items) {
+	let n = 0;
+	for (const r of rows || []) {
+		const seconds = Number(r.DurationInInventory);
+		const it = items[Number(r.ID)];
+		if (!it || !(seconds > 0)) continue;
+		it.duration = seconds;
+		n++;
+	}
+	return n;
+}
+
 const { ROOT } = require('../paths');
 // Always written; races.json too when the Forever client tables include ChrRaces, ChrClasses and CharBaseInfo.
 const FILES = ['quests', 'npcs', 'objects', 'items', 'zones', 'map-frames', 'factions', 'instances', 'meta'];
@@ -234,6 +248,9 @@ async function buildData(options = {}) {
 		recordings,
 		{ spawnOptions, liveMaps: live },
 	);
+	// Items that vanish a while after they are looted (the Forever client's
+	// ItemSparse DurationInInventory, seconds): the timed-item lint reads them.
+	const durations = itemDurations(ft && ft.ItemSparse, norm.items);
 
 	const sources = [
 		{ name: 'pfQuest', url: REPO, revision: pf.revision, license: license.license, copyright: license.copyright, notice: license.notice },
@@ -281,10 +298,10 @@ async function buildData(options = {}) {
 	}
 	if (fwago) {
 		sources.push({
-			name: `World of Warcraft: Forever client tables (UiMap, UiMapAssignment, AreaTable${races ? ', ChrRaces, ChrClasses, CharBaseInfo' : ''}${fwago.tables.Faction ? ', Faction' : ''}${fwago.tables.Map ? ', Map' : ''}${fwago.tables.QuestV2 ? ', QuestV2' : ''}) via wago.tools`,
+			name: `World of Warcraft: Forever client tables (UiMap, UiMapAssignment, AreaTable${races ? ', ChrRaces, ChrClasses, CharBaseInfo' : ''}${fwago.tables.Faction ? ', Faction' : ''}${fwago.tables.Map ? ', Map' : ''}${fwago.tables.ItemSparse ? ', ItemSparse' : ''}${fwago.tables.QuestV2 ? ', QuestV2' : ''}) via wago.tools`,
 			url: `https://wago.tools/db2?build=${fwago.build}`,
 			revision: `${fwago.product} ${fwago.build}`,
-			license: 'Blizzard Entertainment game client data; factual map geometry, names and race/class combinations only',
+			license: `Blizzard Entertainment game client data; factual map geometry, names${fwago.tables.ItemSparse ? ', item durations' : ''} and race/class combinations only`,
 			copyright: 'World of Warcraft (c) Blizzard Entertainment, Inc.',
 			tables: Object.values(fwago.urls),
 		});
@@ -329,6 +346,7 @@ async function buildData(options = {}) {
 			...(fmaps ? { foreverMapFrames: Object.keys(fmaps.frames).length } : {}),
 			factions: Object.keys(factions).length,
 			...(races ? { races: Object.keys(races).length } : {}),
+			...(fwago && fwago.tables.ItemSparse ? { timedItems: durations } : {}),
 			recorderOnlyFactions: rec.recorderOnlyFactions,
 			eraSpawnPoints: countPoints(norm.npcs, 'e') + countPoints(norm.objects, 'e'),
 			liveSpawnPoints: countPoints(norm.npcs, 'l') + countPoints(norm.objects, 'l'),
