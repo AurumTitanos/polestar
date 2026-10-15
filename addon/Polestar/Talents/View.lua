@@ -194,13 +194,13 @@ local function statusText(c)
 		return format(n == 1 and L["1 point is spent outside this plan. Its marks on the talent frame show where; a respec puts you back on it."] or L["%d points are spent outside this plan. Its marks on the talent frame show where; a respec puts you back on it."], n), "warning"
 	end
 	if s.status == "behind" then
-		if s.unspent == 1 then return format(L["1 point to spend. Next: %s."], T.PickText(data, nxt)), "accent" end
-		return format(L["%d points to spend. Next: %s."], s.unspent, T.PickText(data, nxt)), "accent"
+		if s.unspent == 1 then return format(L["1 point to spend. Next: %s."], T.PickText(data, nxt, c.valid)), "accent" end
+		return format(L["%d points to spend. Next: %s."], s.unspent, T.PickText(data, nxt, c.valid)), "accent"
 	end
 	if s.status == "capped" then
 		return format(L["On plan up to the level cap (%d). The rest is planned ahead for when the cap rises."], s.cap), "text"
 	end
-	return format(L["On plan. Next at level %d: %s."], nxt.level, T.PickText(data, nxt)), "text"
+	return format(L["On plan. Next at level %d: %s."], nxt.level, T.PickText(data, nxt, c.valid)), "text"
 end
 
 local REASONS = {
@@ -241,7 +241,7 @@ local function renderList(build, c)
 		r.Selected:SetShown(isNext or false)
 		r.Bar:SetShown(isNext or false)
 		r.Level:SetText(tostring(p.level))
-		r.Title:SetText(n.name)
+		r.Title:SetText(T.NodeName(build.data, p.node, c and c.valid))
 		W.Color(r.Title, isNext and "accent" or ((done or ahead) and "textMuted" or "text"))
 		r.Sub:SetText(format("%d/%d", p.rank, n.max))
 		r.Title:SetWidth(max(40, min(LIST_W - ROW_X * 2 - TEXT_X - 50, floor(r.Title:GetStringWidth() + 1))))

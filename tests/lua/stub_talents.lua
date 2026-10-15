@@ -5,7 +5,7 @@
 --   local TS = stub.talents
 --   TS.class, TS.level, TS.cap, TS.config        -- the player (PALADIN, 30, 30, 7)
 --   TS.useSnapshot(data)                         -- the live tree = Builds.lua's nodes
---   TS.nodes[id] = { max = 3, name = "..." }     -- edit the live tree
+--   TS.nodes[id] = { max = 3, spell = 123, name = "..." } -- edit the live tree (the client's language)
 --   TS.learn(build, n)                           -- learned ranks: the plan's first n picks
 --   TS.ranks[id], TS.staged[id]                  -- learned / shown in the frame (staged falls back to learned)
 --   TS.openFrame()                               -- PlayerSpellsFrame.TalentsFrame, a button per live node
@@ -22,7 +22,7 @@ function GetMaxLevelForPlayerExpansion() return TS.cap end
 
 function TS.useSnapshot(data)
 	TS.nodes = {}
-	for id, n in pairs(data.nodes) do TS.nodes[id] = { max = n.max, name = n.name } end
+	for id, n in pairs(data.nodes) do TS.nodes[id] = { max = n.max, spell = n.spell, name = n.name } end
 end
 
 function TS.learn(build, n)
@@ -48,7 +48,7 @@ function C_Traits.GetNodeInfo(config, id)
 	return { ID = id, activeRank = r, currentRank = TS.staged[id] or r, maxRanks = n.max, entryIDs = { id } }
 end
 function C_Traits.GetEntryInfo(_, entry) return { definitionID = entry } end
-function C_Traits.GetDefinitionInfo(def) return TS.nodes[def] and { overrideName = TS.nodes[def].name } end
+function C_Traits.GetDefinitionInfo(def) return TS.nodes[def] and { spellID = TS.nodes[def].spell, overrideName = TS.nodes[def].name } end
 
 local callbacks = {}
 EventRegistry = {}

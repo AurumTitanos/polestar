@@ -109,7 +109,7 @@ emit(at(51, 60, 60))`);
 
 // ------------------------------------------------------------ the live tree
 
-test('Validate: a moved node is found by name and rank count; a missing one makes the plan out of date', () => {
+test('Validate: a moved node is found by spell and rank count; a missing one makes the plan out of date', () => {
 	const outs = run(`
 local soc
 for id, n in pairs(data.nodes) do if n.name == "Seal of Command" then soc = id end end
@@ -125,6 +125,20 @@ emit({ why = why, state = c.state ~= nil })`);
 	assert.deepEqual(outs[0], { ok: true, moved: 1, to: true });
 	assert.deepEqual(outs[1], { ok: false, missing: ['Seal of Command'] });
 	assert.deepEqual(outs[2], { why: 'stale', state: false }, 'no guessing: no state, no marks');
+});
+
+test('Validate: a non-English client matches by spell ID and shows its own names', () => {
+	const outs = run(`
+for id, n in pairs(TS.nodes) do n.name = "es:" .. n.name end
+local soc
+for id, n in pairs(data.nodes) do if n.name == "Seal of Command" then soc = id end end
+TS.nodes[soc + 90000], TS.nodes[soc] = TS.nodes[soc], nil
+local b = plan("retribution")
+TS.learn(b, 20)
+stub.login()
+local c, why = T.Current()
+emit({ why = why, ok = c.valid.ok, moved = c.valid.moved, missing = #c.valid.missing, next = T.PickText(c.data, c.state.next, c.valid), soc = T.NodeName(c.data, soc, c.valid) })`);
+	assert.deepEqual(outs[0], { ok: true, moved: 1, missing: 0, next: 'es:Seal of Command 1/1', soc: 'es:Seal of Command' });
 });
 
 test('ActiveBuild: the chosen plan, else the spec with the most points; Choose("auto") follows again', () => {
