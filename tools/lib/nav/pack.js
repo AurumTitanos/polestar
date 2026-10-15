@@ -930,7 +930,8 @@ function encodeMaps(cg, hpa) {
 				const list = (nbrs.get(c) || []).sort((p, q) => p[0] - q[0] || p[1][0] - q[1][0] || p[1][1] - q[1][1]);
 				maxDegree = Math.max(maxDegree, list.length);
 				if (list.length >= 64) throw new Error(`pack: entrance ${c} has ${list.length} edges (at most 63)`);
-				rec += enc(lcell(c), 3) + enc(layerOf(c), 1) + enc(comp.get(c), 2) + enc(list.length, 1);
+				// The entrance's local cell (a floor's own cell, gen_nav.py lcell(cell_of(c))) and its layer.
+				rec += enc(lcell(cg.cellOf(c)), 3) + enc(layerOf(c), 1) + enc(comp.get(c), 2) + enc(list.length, 1);
 				for (const [m, d] of list) {
 					const km = cg.clusterOfCell(cg.cellOf(m));
 					const dx = Math.floor(km / NY) - kx;

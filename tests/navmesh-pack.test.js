@@ -145,7 +145,8 @@ test('pack: round trip through the decoder: cells, flags, heights, floors and gr
 			}
 			const graph = S.decodeGraph(D, k);
 			for (const e of graph) {
-				assert.ok(S.surface(dc.C, dc.val, dc.z, dc.at, e.cell >= cells * cells ? dc.at.get(e.cell) : e.cell, e.layer, 0) !== null, 'an entrance stands on a surface');
+				assert.ok(e.cell < cells * cells, `an entrance names its local cell (${e.cell})`);
+				assert.ok(S.surface(dc.C, dc.val, dc.z, dc.at, e.cell, e.layer, 0) !== null, 'an entrance stands on a surface');
 				for (const edge of e.edges) assert.ok(edge.costs[0] >= edge.costs[1] && edge.costs[1] > 0, 'swimming costs at least walking on water');
 			}
 		}
@@ -193,4 +194,46 @@ test('pack: blocks fit the client\'s 16 KB inflate buffer, parts stay under 512 
 	let bytes = cap * 48 + 320 + cl.at.size * 64;
 	for (const l of cl.links.values()) bytes += 128 + l.length * 32;
 	assert.ok(bytes / 1024 <= 24576 / 8, `${(bytes / 1024).toFixed(0)} KB per cluster`);
+});
+
+test('pack: a floor across a tile border is an entrance on its own cell and layer, and a route climbs onto it (SpfUpstream: Path.lua:185 trace(R, nil))', async () => {
+	// A platform 10 yd up across the border of tiles 32 and 33 (west to east), over flat ground, a ramp onto it in tile 32.
+	const a = new Scene({ col: 32 });
+	const b = new Scene({ col: 33 });
+	a.box(480, 200, 9.5, ADT, 260, 10, 1).quad([460, 220, 0], [480, 220, 10], [480, 240, 10], [460, 240, 0], 1);
+	b.box(0, 200, 9.5, 40, 260, 10, 1);
+	const dir = await gridOf(a, b);
+	for (const cells of [67, 128]) {
+		const D = S.loadPack(await packNav({ dir, cells }), 0);
+		const C2 = cells * cells;
+		let floorEntrances = 0;
+		let onPlatform = 0;
+		for (let k = 0; k < D.nx * D.ny; k++) {
+			if (!D.graph[k + 1]) continue;
+			const dc = S.decodeCluster(D, k);
+			for (const e of S.decodeGraph(D, k)) {
+				assert.ok(e.cell < C2, `entrance cell ${e.cell} is a local cell (${cells} cells)`);
+				const node = S.surface(dc.C, dc.val, dc.z, dc.at, e.cell, e.layer, 0);
+				assert.ok(node !== null, `entrance ${e.cell}:${e.layer} decodes to a node`);
+				if (e.layer > 0) {
+					floorEntrances++;
+					assert.ok(node >= C2 && dc.at.get(node) === e.cell, 'a floor entrance is a floor of its cell');
+				}
+				if (Math.abs(dc.z[node] - 10) <= 1) {
+					onPlatform++;
+				}
+			}
+		}
+		assert.ok(floorEntrances > 0, `stacked surfaces cross the border through floor entrances (${cells} cells)`);
+		assert.ok(onPlatform > 0, `the platform crosses the border (${cells} cells)`);
+		// From the ground west of the ramp up onto the platform's floor at the border, inside tile 32's cluster.
+		const ground = a.world(400, 230);
+		const edge = a.world(ADT - 2, 230);
+		const g = S.locate(D, ground.wx, ground.wy);
+		const p = S.locate(D, edge.wx, edge.wy);
+		const dc = S.decodeCluster(D, g.k);
+		const top = S.surface(dc.C, dc.val, dc.z, dc.at, p.lc, -1, 10);
+		assert.ok(Math.abs(dc.z[top] - 10) <= 1);
+		assert.ok(S.reach(dc, g.lc).has(top), `up the ramp onto the platform at the border (${cells} cells)`);
+	}
 });
