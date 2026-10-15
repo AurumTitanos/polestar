@@ -246,15 +246,22 @@ table of labels holds `L["Home"]`, not `"Home"` translated later through
 (a guide's category, a faction, race and class names, profession and spec
 names, the release stage).
 
-### Compat — every client API call goes through here
+### Compat — the client's game data goes through here
 
-UI, Nav and Engine never call quest/map/unit client APIs directly; they call
-`Polestar.Compat`. Three exceptions call the client themselves: Nav's
-Blizzard user waypoint (`C_Map.SetUserWaypoint`, `C_SuperTrack`;
-`Nav/Bridges.lua`), the zone art's map art layers (`UI/ZoneArt.lua`) and the
-class name in the options (`UnitClass`, `UI/Options.lua`). That keeps
-Forever specifics in one file and lets other modules' tests replace Compat
-with a fake.
+UI, Nav and Engine read the client's quests, map, units and items through
+`Polestar.Compat`, with these exceptions that call the client themselves:
+Nav's Blizzard user waypoint (`C_Map`, `C_SuperTrack`; `Nav/Bridges.lua`),
+the minimap's radius, shape, rotation and indoors state (`Nav/Pins.lua`),
+the run speed, taxi nodes and hearthstone cooldown (`GetUnitSpeed`,
+`C_TaxiMap`, item cooldown; `Nav/Travel.lua`), the zone art's map art
+layers and exploration (`UI/ZoneArt.lua`), the class name in the options
+(`UnitClass`, `UI/Options.lua`), quest level colours
+(`GetQuestDifficultyColor`, `UI/Dungeons.lua`) and item names, icons,
+quality colours and links (`C_Item`; `UI/Dungeons.lua`, `UI/GearPick.lua`,
+`UI/Lookup.lua`). Frame and system calls (`GetTime`, `C_Timer`,
+`InCombatLockdown`, the cursor, CVars, addon loading, the build and locale)
+are not routed either. Routing the rest keeps Forever specifics in few
+places and lets other modules' tests replace Compat with a fake.
 
 Coordinates: map percent `x, y` in **0–100**. World coordinates follow
 `C_Map.GetWorldPosFromMapPos`: `wx` is the north–south axis (larger is north),
