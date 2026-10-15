@@ -48,7 +48,10 @@ is installed. The contract the tools write to is in
 ### Building data
 
 These need the game client's tables, installed addons or other local
-sources, so they run on a maintainer's machine, never in CI.
+sources, so they run on a maintainer's machine, never in Polestar's CI. A
+pack's CI (the template's `pack.yml`) runs
+`data build --no-web-xp --no-wowhead`: pfQuest and the client tables,
+without QuestieDB.
 
 | Command | What it does |
 |---|---|
