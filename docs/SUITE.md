@@ -43,8 +43,8 @@ GPL-3.0; each input keeps its own licence, and the rules follow it:
 |---|---|
 | MIT (pfQuest, ForeverLevelingBiS, wowsims) | Derived data, with attribution (THIRD_PARTY.md) |
 | QuestieDB (no licence file; its maintainers ask that it be treated as all rights reserved) | Facts only, credited, in the shipped packs (the compiled guides, `Polestar_QuestDB`, `Polestar_Codex`); `data build --no-questie` builds without them if the maintainers ask |
-| Web sources (Wowhead's Forever database, warcraft.wiki.gg, the Forever databases) | Facts only, each with its source: corrections, `entrances.json`, `repgates.json`, the Wowhead caches |
-| GPL-2.0, no licence or All Rights Reserved addons (AtlasLoot, DungeonJournal, RareScanner) | Nothing: the importer code only, read by `codex build --local-extras` for the parity comparison; its output stays local and `pack` refuses it |
+| Web sources (Wowhead's Forever database, warcraft.wiki.gg, the Forever databases) | Facts only, each with its source: corrections, `entrances.json`, `repgates.json`, `journal-quests.json`, the Wowhead caches (incl. its dungeon and raid quest lists) |
+| GPL-2.0, no licence or All Rights Reserved addons (AtlasLoot, DungeonJournal, RareScanner, Attune) | Nothing: the importer code only, read by `codex build --local-extras` for the parity comparison (Attune: by `codex attune`, the local comparison of dungeon quests); its output stays local and `pack` refuses it |
 
 Always facts (ids, names, levels, coordinates, drop rates, sources, rewards),
 never another addon's prose, art or code. Every output records its sources and

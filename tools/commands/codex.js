@@ -1,5 +1,5 @@
 'use strict';
-// node tools/polestar.js codex build|parity|wowhead [options]
+// node tools/polestar.js codex build|parity|wowhead|attune [options]
 
 const path = require('node:path');
 const { parseArgs } = require('node:util');
@@ -7,6 +7,7 @@ const { parseArgs } = require('node:util');
 const usage = `usage: node tools/polestar.js codex build [options]
        node tools/polestar.js codex parity [--ours <dir>] [--against <dir>]
        node tools/polestar.js codex wowhead [--delay <ms>] [--limit <n>] [--max-age <days>] [--dry-run]
+       node tools/polestar.js codex attune [--addons <dir>] [--ours <dir>]
 
 Builds Lookup's Codex: every item, mount, pet, recipe, NPC, rare, quest,
 zone, dungeon and treasure, with where each item comes from, and the
@@ -48,6 +49,12 @@ settled: no reason, not "not in Forever") or Forever's own (new or updated:
 one Forever left as in Classic keeps its page). Both are cached under
 data/sources/wowhead/codex/ (a release \`codex build\` reads that cache;
 tools/lib/codex/wowhead.js).
+
+\`codex attune\` compares the built Dungeons journal (--ours, default
+data/forever/codex) with the installed Attune addon (no licence: read on
+this machine only, never in a build): each dungeon's quests per side and
+every journal quest's rewards, written to data/local/dungeon-quests-audit.md
+(and .json).
 
   --ours <dir>       parity: the release build (default data/forever/codex)
   --against <dir>    parity: the internal build (default data/local/codex-extras)
@@ -205,11 +212,45 @@ async function runWowhead(rest) {
 	return res.failed.length || lists.failed.length ? 1 : 0;
 }
 
+async function runAttune(rest) {
+	let values;
+	try {
+		({ values } = parseArgs({ args: rest, options: { addons: { type: 'string' }, ours: { type: 'string' } }, strict: true }));
+	} catch (err) {
+		return fail(err.message);
+	}
+	const fs = require('node:fs');
+	const { ROOT } = require('../lib/paths');
+	const { readAttune } = require('../lib/consume/attune');
+	const { resolveAddonsDir } = require('../lib/addons');
+	const { auditDungeonQuests } = require('../lib/codex/questaudit');
+	const ours = path.resolve(values.ours || path.join(ROOT, 'data', 'forever', 'codex'));
+	const read = (f) => JSON.parse(fs.readFileSync(f, 'utf8'));
+	if (!fs.existsSync(path.join(ours, 'journal.json'))) return fail(`no Codex build in ${ours}`);
+	const attune = readAttune(values.addons ? path.resolve(values.addons) : resolveAddonsDir());
+	if (!attune.attunes.length) return fail(`Attune not read: ${attune.meta.warnings.join('; ')}`);
+	const journal = read(path.join(ours, 'journal.json'));
+	const quests = read(path.join(ours, 'quests.json'));
+	const forever = read(path.join(ROOT, 'data', 'forever', 'quests.json'));
+	const meta = fs.existsSync(path.join(ours, 'meta.json')) ? read(path.join(ours, 'meta.json')) : {};
+	const out = path.join(ROOT, 'data', 'local');
+	fs.mkdirSync(out, { recursive: true });
+	const audit = auditDungeonQuests({ journal, attune, quests, forever, build: meta.build || null });
+	fs.writeFileSync(path.join(out, 'dungeon-quests-audit.md'), audit.markdown);
+	fs.writeFileSync(path.join(out, 'dungeon-quests-audit.json'), `${JSON.stringify({ rows: audit.rows, rewards: audit.rewards }, null, '\t')}\n`);
+	const files = ['data/local/dungeon-quests-audit.md', 'data/local/dungeon-quests-audit.json'];
+	const attuneOnly = audit.rows.reduce((n, r) => n + r.attuneOnly.length, 0);
+	console.log(`Attune ${attune.meta.version}: ${audit.rows.length} dungeon groups, ${attuneOnly} quests only Attune lists; rewards ${audit.rewards.match} / ${audit.rewards.checked} match`);
+	console.log(`wrote ${files.join(', ')}`);
+	return 0;
+}
+
 async function run(argv) {
 	const [sub, ...rest] = argv;
 	if (sub === 'build') return runBuild(rest);
 	if (sub === 'parity') return runParity(rest);
 	if (sub === 'wowhead') return runWowhead(rest);
+	if (sub === 'attune') return runAttune(rest);
 	return fail(sub ? `unknown subcommand "${sub}"` : 'missing subcommand');
 }
 

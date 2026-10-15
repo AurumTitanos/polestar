@@ -1354,14 +1354,30 @@ pack as `Dungeons1.lua` (a summary table per dungeon for the list, and the page
 as Lua source compiled only when opened): the quests QuestieDB files under the
 instance's areas (the areas on the instance's map and the outdoor areas of its
 name, as the solo filter's instance classification reads them,
-`tools/lib/sim/solo.js`) or whose objectives or starting item point into it
-(plus, with `--local-extras`, `dungeons.json`'s), each with giver and ender
-and their positions, our own objective line, chain, rewards (items with
-quality and choice from recordings and ForeverLevelingBiS, XP from
-`quests.json`, money, reputation) and, with `--local-extras`, DungeonJournal's
-audited shareability; bosses in kill order with the quests tied to them;
-entrances from the Codex, else the client's Map table (the corpse point, placed
-on its zone). No loot tables. Runtime: `addon/Polestar/Dungeons/Dungeons.lua`
+`tools/lib/sim/solo.js`), whose objectives or starting item point into it,
+that Wowhead Forever's dungeon and raid quest lists place in it (`quests.json`'s
+`wowhead.zone`, counted only when QuestieDB's Forever store has the quest,
+which keeps out `<UNUSED>`, `<NYI>` and retired quests), whose start item drops
+or lies inside one instance (that page too, even when the quest has an area),
+or that end its story (a follow-up with the same title, no objectives, taken
+where the quest ends: Hidden Enemies, The Lord of Blackrock); plus, with
+`--local-extras`, `dungeons.json`'s. An objective item that is sold, crafted,
+or dropped or held outside every instance ties no quest to a dungeon (the
+false-positive rule: Murloc Poachers, Craftsman's Writs). What no rule can
+catch is in the cited table `tools/lib/codex/journal-quests.json` (Shards of
+the Felvine). Each quest has giver and ender and their positions, our own
+objective line, chain (every prerequisite and breadcrumb of the quest's side,
+all of `pre` and `preAny`, oldest first, at most 20), rewards (items with
+quality, count and choice from recordings and ForeverLevelingBiS, else
+Wowhead's list rewards, choice versus fixed as Wowhead files them; XP from
+`quests.json`; money, else Wowhead's; reputation from Wowhead's rewards, its
+"+1" placeholders left out, never the standing a quest asks for) and, with
+`--local-extras`, DungeonJournal's audited shareability; bosses in kill order
+with the quests tied to them; entrances from the Codex, else the client's Map
+table (the corpse point, placed on its zone). No loot tables. `codex attune` writes the local comparison with
+the Attune addon (`tools/lib/codex/questaudit.js`,
+`tools/lib/consume/attune.js`; `data/local/dungeon-quests-audit.md` and
+`.json`). Runtime: `addon/Polestar/Dungeons/Dungeons.lua`
 (`Polestar.Dungeons`: List, Get, Entrance, Quests, Quest, Bosses, Open,
 GuideTo, GuideToPoint, ShowOnMap; `SHOW_DUNGEON`). `dungeons build` writes no
 guides.
@@ -2022,7 +2038,10 @@ built.
   is `{ type: vendor|drop|object|quest|craft|rep|pvp|
   container|world, from, ... }`), `npcs.json`, `objects.json`, `quests.json`
   (with `pre` = every blocking prerequisite, `preAny`, rewards from recordings
-  and ForeverLevelingBiS), `instances.json`, `zones.json`, `factions.json`,
+  and ForeverLevelingBiS, and `wowhead` on each quest Wowhead Forever's zone,
+  dungeon and raid lists carry: `{ zone, type, side, choices, items, money,
+  rep }`, the zone or instance category and the list's rewards, read by the
+  journal), `instances.json`, `zones.json`, `factions.json`,
   `spells.json` (mount and pet aura spell → item, class), `frames.json` (Era
   bounds for the pack's maps), `journal.json` (the Dungeons pages).
   An item's `status` is `nosource` without a source, and `retired` for a mount
@@ -2056,7 +2075,7 @@ built.
   lists what only play can fill and the Recorder event that fills it
   (Forever instances and their entrances: `enter`, `encounter`; Forever
   rares: `rare`, `slain` + `drop`; quest givers, enders, rewards: `accept`,
-  `turnin`). On 2026-10-14 (Forever client 1.60.1.70338, the same
+  `turnin`). On 2026-10-15 (Forever client 1.60.1.70374, the same
   `data/forever`):
 
   | Kind | Internal | Release matching | Match |
@@ -2064,36 +2083,36 @@ built.
   | instances | 44 | 37 | 84.1% |
   | instance levels | 29 | 29 | 100.0% |
   | instance entrances | 14 | 13 | 92.9% |
-  | bosses | 373 | 272 | 72.9% |
-  | bosses with loot | 265 | 262 | 98.9% |
-  | boss loot items | 2164 | 1862 | 86.0% |
-  | drop chances | 20707 | 17129 | 82.7% |
-  | rares | 413 | 387 | 93.7% |
-  | rare positions | 363 | 357 | 98.3% |
-  | rare levels | 387 | 387 | 100.0% |
-  | rare loot | 14223 | 14188 | 99.8% |
+  | bosses | 373 | 333 | 89.3% |
+  | bosses with loot | 326 | 324 | 99.4% |
+  | boss loot items | 2306 | 1977 | 85.7% |
+  | drop chances | 20707 | 17533 | 84.7% |
+  | rares | 413 | 411 | 99.5% |
+  | rare positions | 387 | 384 | 99.2% |
+  | rare levels | 406 | 406 | 100.0% |
+  | rare loot | 51604 | 50787 | 98.4% |
   | treasures | 65 | 60 | 92.3% |
   | treasure positions | 31 | 31 | 100.0% |
-  | treasure loot | 1548 | 1548 | 100.0% |
-  | items with a source | 15967 | 15901 | 99.6% |
-  | items: drop | 8806 | 8666 | 98.4% |
-  | items: quest | 2092 | 2091 | 100.0% |
+  | treasure loot | 4502 | 4498 | 99.9% |
+  | items with a source | 16205 | 16187 | 99.9% |
+  | items: drop | 8806 | 8743 | 99.3% |
+  | items: quest | 2429 | 2429 | 100.0% |
   | items: vendor | 2248 | 2248 | 100.0% |
   | items: object | 3288 | 3287 | 100.0% |
-  | items: world | 4152 | 4145 | 99.8% |
+  | items: world | 4152 | 4150 | 100.0% |
   | items: craft | 1797 | 1797 | 100.0% |
   | items: container | 2095 | 2095 | 100.0% |
   | tabards | 40 | 40 | 100.0% |
-  | mounts | 135 | 134 | 99.3% |
-  | items: rep | 689 | 682 | 99.0% |
-  | pets | 89 | 87 | 97.8% |
-  | items: pvp | 763 | 451 | 59.1% |
-  | journal quests | 929 | 880 | 94.7% |
-  | quest givers | 641 | 628 | 98.0% |
-  | quest enders | 680 | 671 | 98.7% |
-  | quest rewards | 552 | 547 | 99.1% |
-  | quest XP | 731 | 722 | 98.8% |
-  | quest chains | 489 | 469 | 95.9% |
+  | mounts | 136 | 136 | 100.0% |
+  | items: rep | 980 | 975 | 99.5% |
+  | pets | 90 | 90 | 100.0% |
+  | items: pvp | 763 | 763 | 100.0% |
+  | journal quests | 833 | 823 | 98.8% |
+  | quest givers | 582 | 568 | 97.6% |
+  | quest enders | 618 | 608 | 98.4% |
+  | quest XP | 698 | 689 | 98.7% |
+  | quest chains | 481 | 474 | 98.5% |
+  | quest rewards | 582 | 577 | 99.1% |
 
   The gaps: seven Forever instances AtlasLoot lists ahead of release are not
   in the client (no `Map` row); the Hall of Thanes' entrance stays
@@ -2135,7 +2154,7 @@ built.
   Wowhead Forever's spell page, `codex wowhead` fetching those of items ours
   has no source for) hands it out: a `gift { npc, spell }` source (Duke
   Hydraxis's Aqual and Eternal Quintessence). 26 Forever rares no
-  database ranks yet. The 455 confirmed drop chances the release lacks are
+  database ranks yet. The 251 confirmed drop chances the release lacks are
   all cut by an item's 10-dropper cap (the internal build keeps AtlasLoot's
   instance trash past it; every dropper of every item would be 1.6 million
   sources against 74 thousand).

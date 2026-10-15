@@ -779,7 +779,21 @@
 					"xp": 2350,
 					"reputation": {
 						"faction": 81,
-						"value": 250
+						"value": 3000
+					},
+					"wowhead": {
+						"zone": 718,
+						"type": 81,
+						"side": 2,
+						"choices": [],
+						"items": [],
+						"money": 0,
+						"rep": [
+							[
+								81,
+								250
+							]
+						]
 					}
 				},
 				"959": {
@@ -791,7 +805,21 @@
 				},
 				"1490": {},
 				"6981": {
-					"area": 718
+					"area": 718,
+					"wowhead": {
+						"zone": 718,
+						"type": 81,
+						"side": 3,
+						"choices": [],
+						"items": [
+							[
+								5180,
+								2
+							]
+						],
+						"money": 0,
+						"rep": []
+					}
 				}
 			},
 			"dungeons": {

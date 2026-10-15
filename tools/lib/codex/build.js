@@ -807,6 +807,26 @@ function mergeCodex(inputs) {
 		}
 	}
 	for (const [id, x] of Object.entries(dungeonItems)) if (!names[id]) names[id] = x.name;
+	// Wowhead Forever's quest lists (quests.json `wowhead`, data build), last:
+	// the reward items no recording, ForeverLevelingBiS or dungeons.json row
+	// names, each as Wowhead files it (one of `choices`, or every one of
+	// `items`). Its lists carry most dungeon quests' rewards these lack.
+	for (const [qid, q] of Object.entries(fv.quests || {})) {
+		const w = q.wowhead;
+		if (!w) continue;
+		const have = questRewards[qid];
+		const known = (it) => have && (have.rewards.has(it) || have.choices.has(it));
+		for (const [list, choice] of [
+			[w.choices || [], true],
+			[w.items || [], false],
+		]) {
+			for (const [it] of list) {
+				if (known(it)) continue;
+				reward(qid, it, choice);
+				add(it, { type: 'quest', quest: Number(qid), choice: choice || null, from: ['wowhead'] });
+			}
+		}
+	}
 	if (flb) {
 		for (const [id, it] of Object.entries(flb.items || {})) {
 			if (it.name && !names[id]) names[id] = it.name;
@@ -1499,7 +1519,7 @@ async function buildCodex(opts = {}) {
 	const extraFiles = [];
 	// The Dungeons journal (tools/lib/codex/journal.js) rides in this pack.
 	const { buildJournal, emitJournal } = require('./journal');
-	const journal = buildJournal(inputs, codex);
+	const { warnings: journalWarnings = [], ...journal } = buildJournal(inputs, codex);
 	extraFiles.push(...emitJournal(journal));
 	// Parity with the last --local-extras build (tools/lib/codex/parity.js):
 	// a release build records the match per kind; without that build, none.
@@ -1528,7 +1548,7 @@ async function buildCodex(opts = {}) {
 	const out = { meta, items: codex.items, npcs: codex.npcs, objects: codex.objects, quests: codex.quests, instances: codex.instances, zones: codex.zones, factions: codex.factions, spells: codex.spells, frames };
 	out.journal = journal;
 	for (const [name, value] of Object.entries(out)) writeAtomic(path.join(outDir, `${name}.json`), `${JSON.stringify(sortKeysDeep(value), null, '\t')}\n`);
-	return { codex: out, files, outDir, packDir, bytes, memory, parity, warnings: [...(inputs.warnings || []), ...mergeWarnings], ms: Date.now() - t0 };
+	return { codex: out, files, outDir, packDir, bytes, memory, parity, warnings: [...(inputs.warnings || []), ...mergeWarnings, ...journalWarnings], ms: Date.now() - t0 };
 }
 
 // What checks an internal-only fact (tools/lib/codex/parity.js): Wowhead's

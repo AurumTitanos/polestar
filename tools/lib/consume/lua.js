@@ -91,7 +91,8 @@ function readAddonLua({ files = [], addonName = 'Addon', prelude = '', expr, rew
 		const loads = files.map((file, i) => {
 			let src = fs.readFileSync(file, 'latin1');
 			if (src.charCodeAt(0) === 27) throw new Error(`${file}: precompiled Lua is not accepted`);
-			src = src.replace(/^\uFEFF/, '').replace(GETFENV, 'POLESTAR_G');
+			// Read as latin1, a UTF-8 byte order mark is the three characters ï»¿.
+			src = src.replace(/^(\uFEFF|\u00EF\u00BB\u00BF)/, '').replace(GETFENV, 'POLESTAR_G');
 			if (rewrite) src = rewrite(src, file);
 			const copy = path.join(dir, `${String(i).padStart(4, '0')}-${path.basename(file)}`);
 			fs.writeFileSync(copy, src, 'latin1');

@@ -308,7 +308,8 @@ test('Quests: one block per quest with state, level, flags, objective, start and
 	assert.deepEqual(out.chain, ['Nara Wildmane']);
 	assert.match(out.chainSub[0], /^Level 20  \u00b7  Tonga Runetotem, The Barrens$/);
 	assert.match(out.chainGlyph, /check$/, 'a done chain quest is checked');
-	assert.ok(out.tiles.includes('Crescent Staff') && out.tiles.includes('Wingblade') && out.tiles.includes('Necklace of Calisea'));
+	assert.ok(out.tiles.includes('Crescent Staff') && out.tiles.includes('Wingblade'));
+	assert.ok(out.tiles.includes('2 x Necklace of Calisea'), 'a reward given twice says how many');
 	assert.ok(out.chips.includes('2,350 XP'));
 	assert.ok(out.chips.some((c) => /^\+250 /.test(c)), 'reputation');
 	assert.ok(out.chips.some((c) => /^\d+s$/.test(c) || /\d+g/.test(c)), 'money');

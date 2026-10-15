@@ -1157,7 +1157,9 @@ local function placeTiles(b, n0, items, choice, y)
 				Theme.Border(t.Well, ir, ig, ib, 0.6)
 				W.Color(t.Name, "item")
 			end
-			t.Name:SetText(it.name or (L["Item"] .. " " .. tostring(it.id)))
+			local name = it.name or (L["Item"] .. " " .. tostring(it.id))
+			if (it.count or 1) > 1 then name = format(L["%d x %s"], it.count, name) end
+			t.Name:SetText(name)
 			t:Show()
 			n = n + 1
 		end

@@ -4,6 +4,24 @@
 
 ### For players
 
+- The Dungeons journal lists the dungeon quests it missed and drops ones that
+  were not: each quest's chain now holds every prerequisite and breadcrumb
+  (Nathanos Blightcaller's errands before Ramstein, Speak with Shoni before
+  Underground Assault, Alba Fairmoon's Toxic Soil chain before Destruction in
+  Deadmines, Rethiel's Wetlands chain before Horrors in the Highland, Magus
+  Voidglare's quests before Blood in the Streets); the instance Wowhead
+  Forever files a quest under counts (An Ancient Grudge in the Hall of Thanes,
+  now for both sides); a quest whose start item drops or lies inside is on
+  that dungeon's page too (An Unholy Alliance on Razorfen Kraul's, the
+  Treaty of Understanding on the Hall of Thanes'); the report back that ends
+  a dungeon quest's story is on its page (Hidden Enemies, The Lord of
+  Blackrock, The Platinum Discs); Shards of the Felvine is on Dire Maul's.
+  Quests whose items are sold, crafted or found outside (Murloc Poachers,
+  Craftsman's Writs, Desert Survival Kits) left the pages. (thanks Shockp)
+- Dungeon quest rewards: the reputation a quest gives (pages showed the
+  standing some quests ask for, such as +3000), the money, the rewards of
+  108 quests that showed none, how many of an item ("5 x"), and Deviate
+  Hides gives both of its items now (thanks Shockp)
 - Quests Forever renamed carry their Forever names in the guides: Chastise
   (once A Lack of Fear), Dark Sacrifice (once Devouring Plague), Look to the
   Stars, Onu is Meditating and the others Wowhead Forever lists as renamed.
