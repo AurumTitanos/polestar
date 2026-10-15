@@ -75,6 +75,7 @@ test('buildTalents: the Lua names its rule, the snapshot and each plan, notes by
 	assert.deepEqual(r.errors, []);
 	assert.match(r.lua, /^-- H\n/);
 	assert.match(r.lua, /prereq = "full"/);
+	assert.match(buildTalents(src, tables(), { header: '-- H', prereq: 'started' }).lua, /prereq = "started"/, 'the rule it checked with');
 	assert.match(r.lua, /\[1\] = \{ 11, 3, 121, 1, 1, 1, "Alpha" \},/);
 	assert.match(r.lua, /\[3\] = \{ \{ 50, 3 \} \},/);
 	assert.match(r.lua, /edges = \{ \{ 1, 2 \} \},/);

@@ -162,9 +162,9 @@ function luaStr(s) {
 	return `"${String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')}"`;
 }
 
-function emitLua(header, facts, source, builds) {
+function emitLua(header, facts, source, builds, prereq = PREREQ_RULE) {
 	const L = [header, '', 'local ADDON, ns = ...', 'local T = ns.Talents', '', 'T.Register({'];
-	L.push(`\tclass = ${luaStr(source.class)}, tree = ${facts.treeID}, prereq = ${luaStr(PREREQ_RULE)},`);
+	L.push(`\tclass = ${luaStr(source.class)}, tree = ${facts.treeID}, prereq = ${luaStr(prereq)},`);
 	L.push(`\tsource = ${luaStr(source.source)}, url = ${luaStr(source.sourceUrl)},`);
 	L.push(`\tsummary = ${luaStr(source.summary)},`);
 	L.push(`\tspecs = { ${source.order.map(luaStr).join(', ')} },`);
@@ -213,7 +213,7 @@ function buildTalents(source, tables, { header, prereq = PREREQ_RULE } = {}) {
 		if (!r.errors.length) errors.push(...replay(facts, r.picks, { prereq }).map((e) => `${b.key} ${e}`));
 		builds.push({ ...b, picks: r.picks, notes: r.notes });
 	}
-	return { facts, builds, errors, lua: emitLua(header || '-- Talents', facts, source, builds) };
+	return { facts, builds, errors, lua: emitLua(header || '-- Talents', facts, source, builds, prereq) };
 }
 
 module.exports = { PREREQ_RULE, TABLES, CLASSES, FIRST_LEVEL, treeFacts, resolveBuild, replay, buildTalents, emitLua };
