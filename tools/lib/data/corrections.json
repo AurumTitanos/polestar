@@ -13,11 +13,139 @@
 			},
 			"note": "The Binding (Warlock voidwalker, after 1501) is open to Orc, Undead and Troll Warlocks: Wowhead Forever https://www.wowhead.com/forever/quest=1504 lists Races [race=2], [race=5], [race=8] (checked 2026-10-14). The merged data has races 2 (Orc only)."
 		},
+		"92434": {
+			"set": {
+				"pre": [
+					545,
+					93680
+				],
+				"preAny": []
+			},
+			"note": "Blood in the Streets (City of Dalaran, Horde) opens after Magus Wordeen Voidglare's other quests, Prison Break In 544 -> Dalaran Patrols 545 and Key to the City 93680: a Wowhead Forever comment on https://www.wowhead.com/forever/quest=92434 (2026-10-05: \"You need to complete all of Magus Wordeen Voidglare's other quests to start this quest\"), checked 2026-10-15. QuestieDB 1.0.5 has no prerequisite."
+		},
+		"92458": {
+			"set": {
+				"breadcrumbs": [
+					92432
+				]
+			},
+			"note": "Heart of Disruption (City of Dalaran, Alliance) has An Alarming Request 92432 as its breadcrumb: a Wowhead Forever comment on https://www.wowhead.com/forever/quest=92432 (2026-10-03, \"Leads To: Heart of Disruption\" quest=92458), checked 2026-10-15."
+		},
 		"92479": {
 			"set": {
 				"classes": 4
 			},
 			"note": "A Scribbled Letter is the Human Hunter letter: it ends at Tordrin Sternblade 248415 <Hunter Trainer> in Northshire (Wowhead Forever npc=248415, checked 2026-10-12). QuestieDB 1.0.5 has requiredClasses 1 (Warrior)."
+		},
+		"92744": {
+			"set": {
+				"pre": [
+					92742
+				],
+				"preAny": [
+					92742
+				]
+			},
+			"note": "Murloc Gills (92744) is step 2 of Alba Fairmoon's Westfall storyline \"Toxic Soil\" 92742 -> 92744 -> 92745 -> 92747 -> 92748 -> 92749 -> 92750 -> 92751 -> 92752 -> 92753 -> 92819 (foreverchanges.pro https://foreverchanges.pro/quest/92753 Storyline box, from Wowhead's Forever database, checked 2026-10-15). QuestieDB 1.0.5 has no chain links for it."
+		},
+		"92745": {
+			"set": {
+				"pre": [
+					92744
+				],
+				"preAny": [
+					92744
+				]
+			},
+			"note": "The State of the Mines (92745) is step 3 of Alba Fairmoon's Westfall storyline \"Toxic Soil\" 92742 -> 92744 -> 92745 -> 92747 -> 92748 -> 92749 -> 92750 -> 92751 -> 92752 -> 92753 -> 92819 (foreverchanges.pro https://foreverchanges.pro/quest/92753 Storyline box, from Wowhead's Forever database, checked 2026-10-15). QuestieDB 1.0.5 has no chain links for it."
+		},
+		"92747": {
+			"set": {
+				"pre": [
+					92745
+				],
+				"preAny": [
+					92745
+				]
+			},
+			"note": "Moonbrook Espionage (92747) is step 4 of Alba Fairmoon's Westfall storyline \"Toxic Soil\" 92742 -> 92744 -> 92745 -> 92747 -> 92748 -> 92749 -> 92750 -> 92751 -> 92752 -> 92753 -> 92819 (foreverchanges.pro https://foreverchanges.pro/quest/92753 Storyline box, from Wowhead's Forever database, checked 2026-10-15). QuestieDB 1.0.5 has no chain links for it."
+		},
+		"92748": {
+			"set": {
+				"pre": [
+					92747
+				],
+				"preAny": [
+					92747
+				]
+			},
+			"note": "Explosive Consultation (92748) is step 5 of Alba Fairmoon's Westfall storyline \"Toxic Soil\" 92742 -> 92744 -> 92745 -> 92747 -> 92748 -> 92749 -> 92750 -> 92751 -> 92752 -> 92753 -> 92819 (foreverchanges.pro https://foreverchanges.pro/quest/92753 Storyline box, from Wowhead's Forever database, checked 2026-10-15). QuestieDB 1.0.5 has no chain links for it."
+		},
+		"92749": {
+			"set": {
+				"pre": [
+					92748
+				],
+				"preAny": [
+					92748
+				]
+			},
+			"note": "A Dynamite Plan (92749) is step 6 of Alba Fairmoon's Westfall storyline \"Toxic Soil\" 92742 -> 92744 -> 92745 -> 92747 -> 92748 -> 92749 -> 92750 -> 92751 -> 92752 -> 92753 -> 92819 (foreverchanges.pro https://foreverchanges.pro/quest/92753 Storyline box, from Wowhead's Forever database, checked 2026-10-15). QuestieDB 1.0.5 has no chain links for it."
+		},
+		"92750": {
+			"set": {
+				"pre": [
+					92749
+				],
+				"preAny": [
+					92749
+				]
+			},
+			"note": "Detonation at a Distance (92750) is step 7 of Alba Fairmoon's Westfall storyline \"Toxic Soil\" 92742 -> 92744 -> 92745 -> 92747 -> 92748 -> 92749 -> 92750 -> 92751 -> 92752 -> 92753 -> 92819 (foreverchanges.pro https://foreverchanges.pro/quest/92753 Storyline box, from Wowhead's Forever database, checked 2026-10-15). QuestieDB 1.0.5 has no chain links for it."
+		},
+		"92751": {
+			"set": {
+				"pre": [
+					92750
+				],
+				"preAny": [
+					92750
+				]
+			},
+			"note": "Detonation at a Distance (92751) is step 8 of Alba Fairmoon's Westfall storyline \"Toxic Soil\" 92742 -> 92744 -> 92745 -> 92747 -> 92748 -> 92749 -> 92750 -> 92751 -> 92752 -> 92753 -> 92819 (foreverchanges.pro https://foreverchanges.pro/quest/92753 Storyline box, from Wowhead's Forever database, checked 2026-10-15). QuestieDB 1.0.5 has no chain links for it."
+		},
+		"92752": {
+			"set": {
+				"pre": [
+					92751
+				],
+				"preAny": [
+					92751
+				]
+			},
+			"note": "Explosive Consultation (92752) is step 9 of Alba Fairmoon's Westfall storyline \"Toxic Soil\" 92742 -> 92744 -> 92745 -> 92747 -> 92748 -> 92749 -> 92750 -> 92751 -> 92752 -> 92753 -> 92819 (foreverchanges.pro https://foreverchanges.pro/quest/92753 Storyline box, from Wowhead's Forever database, checked 2026-10-15). QuestieDB 1.0.5 has no chain links for it."
+		},
+		"92753": {
+			"set": {
+				"pre": [
+					92752
+				],
+				"preAny": [
+					92752
+				]
+			},
+			"note": "Destruction in Deadmines (92753) is step 10 of Alba Fairmoon's Westfall storyline \"Toxic Soil\" 92742 -> 92744 -> 92745 -> 92747 -> 92748 -> 92749 -> 92750 -> 92751 -> 92752 -> 92753 -> 92819 (foreverchanges.pro https://foreverchanges.pro/quest/92753 Storyline box, from Wowhead's Forever database, checked 2026-10-15). QuestieDB 1.0.5 has no chain links for it."
+		},
+		"92819": {
+			"set": {
+				"pre": [
+					92753
+				],
+				"preAny": [
+					92753
+				]
+			},
+			"note": "Destruction in Deadmines (92819) is step 11 of Alba Fairmoon's Westfall storyline \"Toxic Soil\" 92742 -> 92744 -> 92745 -> 92747 -> 92748 -> 92749 -> 92750 -> 92751 -> 92752 -> 92753 -> 92819 (foreverchanges.pro https://foreverchanges.pro/quest/92753 Storyline box, from Wowhead's Forever database, checked 2026-10-15); a Wowhead Forever comment on quest=92753 (2026-10-01) says to leave the Deadmines by the back door and continue with Alba Fairmoon at the exit. QuestieDB 1.0.5 has no chain links for it."
 		},
 		"94373": {
 			"set": {
@@ -60,6 +188,44 @@
 				]
 			},
 			"note": "Unwelcome Guests (Barrens): Wowhead Forever https://www.wowhead.com/forever/quest=95508 lists one objective \"Assist Walton\" (1), credited by npc=261367 Terry Longdrink (level 19, hostile to the Horde, at The Barrens 41.8,11.4; https://www.wowhead.com/forever/npc=261367), checked 2026-10-13. QuestieDB 1.0.5 has no objectives."
+		},
+		"95646": {
+			"set": {
+				"pre": [
+					275
+				],
+				"preAny": [
+					275
+				]
+			},
+			"note": "Horrors in the Highland (Excavation Site: Wetlands) is offered by Rethiel the Greenwarden only after his Wetlands chain The Greenwarden 463 -> Tramping Paws 276 -> Fire Taboo 277 -> Blisters on the Land 275: two Wowhead Forever comments on https://www.wowhead.com/forever/quest=95646 (2026-10-02, \"Prerequisites ... 1. The Greenwarden 2. Tramping Paws 3. Fire Taboo 4. Blisters on The Land\" and \"you must do the previous 3 quests from the Greenwarden before he offers this one\"), checked 2026-10-15. QuestieDB 1.0.5 has no prerequisite."
+		},
+		"96395": {
+			"set": {
+				"races": null,
+				"start": {
+					"npc": [
+						265002
+					],
+					"object": [],
+					"item": []
+				},
+				"end": {
+					"npc": [
+						265002
+					],
+					"object": []
+				}
+			},
+			"note": "An Ancient Grudge (The Hall of Thanes) is open to both sides and starts and ends inside with the Ghostly Attendant 265002: Wowhead Forever https://www.wowhead.com/forever/quest=96395 Quick Facts \"Type: Dungeon\", \"Side: None\" (its list row side 0), and two comments (\"Quest starts and ends inside the dungeon\", 2026-09-21; \"The NPC that gives this quest [npc=265002 Ghostly Attendant] is located within the Hall of Thanes\", 2026-10-04), checked 2026-10-15. QuestieDB 1.0.5 has no giver or ender and an Alliance race mask."
+		},
+		"96984": {
+			"set": {
+				"breadcrumbs": [
+					92434
+				]
+			},
+			"note": "Heart of Disruption (City of Dalaran, Horde) has Blood in the Streets 92434 as its breadcrumb: Wowhead Forever comments on https://www.wowhead.com/forever/quest=96984 (\"Breadcrumb: Blood in the Streets\") and quest=92434 (\"Leads To: Heart of Disruption\"), 2026-10-03, checked 2026-10-15."
 		},
 		"97485": {
 			"set": {

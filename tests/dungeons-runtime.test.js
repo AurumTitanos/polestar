@@ -50,7 +50,14 @@ test('zonePoint: the preferred zone holding the point, else the frame it sits ne
 });
 
 test('chainOf and objectiveText', () => {
-	assert.deepEqual(chainOf({ 3: { pre: [2] }, 2: { pre: [1] }, 1: { pre: [3] } }, 3), [1, 2]);
+	// Every prerequisite, depth first, oldest first; cycles stop.
+	assert.deepEqual(chainOf({ 3: { pre: [2] }, 2: { pre: [1] }, 1: { pre: [3] } }, {}, 3), [1, 2]);
+	// All of `pre`/`preAll` and each `preAny` alternative, not only the first
+	// (The Call to Command needs Duskwing and The Corpulent One), and the
+	// breadcrumbs; the other side's are left out.
+	const quests = { 6144: { pre: [6135, 6136] }, 6135: { pre: [6022] }, 6136: { preAny: [6042, 6133] }, 6022: {}, 6042: {}, 6133: { faction: 'A' } };
+	assert.deepEqual(chainOf(quests, { 6144: { breadcrumbs: [5961] }, 5961: {} }, 6144, 'H'), [6022, 6135, 6042, 6136, 5961]);
+	assert.deepEqual(chainOf(quests, {}, 6144, null), [6022, 6135, 6042, 6133, 6136]);
 	const names = { npc: (id) => ({ 1: 'Kresh' })[id], item: (id) => ({ 2: 'Deviate Hide' })[id], object: () => 'Ancient Chest' };
 	assert.equal(
 		objectiveText([{ type: 'item', id: 2, count: 20 }, { type: 'kill', id: 1, count: 1 }, { type: 'object', id: 3 }, { type: 'event', text: 'Escort Muyoh' }], names),
@@ -61,7 +68,7 @@ test('chainOf and objectiveText', () => {
 
 test('buildJournal: pages with quests from DungeonJournal, area and objectives; chains, rewards, bosses with tied quests, entrances', () => {
 	const j = buildJournal(inputs, codex);
-	assert.deepEqual(j.meta, { schema: 2, counts: { dungeons: 3, quests: 5, entrances: 2 } });
+	assert.deepEqual(j.meta, { schema: 2, counts: { dungeons: 3, quests: 5, entrances: 2, attunements: 3 } });
 	const wc = j.dungeons['wailing-caverns'];
 	assert.equal(wc.zoneName, 'The Barrens');
 	assert.equal(wc.players, 10);

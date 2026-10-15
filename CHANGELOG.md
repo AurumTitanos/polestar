@@ -8,6 +8,24 @@
   As Above, So Below and The One That Got Away: Hilda the Breaker and Ephram
   Barbaro offer them to Paladins only. Other classes still collect the
   Shadowvale elixir bottles (thanks Mike_).
+- The Dungeons journal lists the dungeon quests it missed and drops ones that
+  were not: each quest's chain now holds every prerequisite and breadcrumb
+  (Nathanos Blightcaller's errands before Ramstein, Speak with Shoni before
+  Underground Assault, Alba Fairmoon's Toxic Soil chain before Destruction in
+  Deadmines, Rethiel's Wetlands chain before Horrors in the Highland, Magus
+  Voidglare's quests before Blood in the Streets); the instance Wowhead
+  Forever files a quest under counts (An Ancient Grudge in the Hall of Thanes,
+  now for both sides); a quest whose start item drops or lies inside is on
+  that dungeon's page too (An Unholy Alliance on Razorfen Kraul's, the
+  Treaty of Understanding on the Hall of Thanes'); the report back that ends
+  a dungeon quest's story is on its page (Hidden Enemies, The Lord of
+  Blackrock, The Platinum Discs); Shards of the Felvine is on Dire Maul's.
+  Quests whose items are sold, crafted or found outside (Murloc Poachers,
+  Craftsman's Writs, Desert Survival Kits) left the pages. (thanks Shockp)
+- Dungeon quest rewards: the reputation a quest gives (pages showed the
+  standing some quests ask for, such as +3000), the money, the rewards of
+  108 quests that showed none, how many of an item ("5 x"), and Deviate
+  Hides gives both of its items now (thanks Shockp)
 - Quests Forever renamed carry their Forever names in the guides: Chastise
   (once A Lack of Fear), Dark Sacrifice (once Devouring Plague), Look to the
   Stars, Onu is Meditating and the others Wowhead Forever lists as renamed.
@@ -139,6 +157,18 @@
   bought on the stop right before Felstone Field's cauldron and two on the
   one before the Writhing Haunt's and Dalson's Tears', and the steps say
   they last 30 minutes.
+- Dungeons: an Attunement tab (Keys where each is a key) on the pages of
+  Molten Core (Attunement to the Core, and Aqual Quintessence for the runes),
+  Onyxia's Lair (the Drakefire Amulet, each side's chain), Blackwing Lair
+  (Blackhand's Command), Naxxramas (the Dread Citadel quest your Argent Dawn
+  standing allows), Scholomance (the Skeleton Key), Blackrock Depths (the
+  Shadowforge and Prison Cell keys), Stratholme, Dire Maul, Gnomeregan,
+  Scarlet Monastery and the City of Dalaran (the Horde's Dalaran Sewer Key).
+  Each shows what it opens and who needs it, whether you hold the key, and
+  every step with your progress: done, in your log, open now, waiting on an
+  earlier step, too low or short of standing. "Guide me through it" opens a
+  guide through what is left, from where you stand. Forever took the Seal of
+  Ascension out, so Upper Blackrock Spire has no key (thanks Shockp).
 
 ### For guide authors
 
@@ -214,6 +244,13 @@
   `tests/lint-timed.test.js` checks the timed-item rule on the old and fixed
   orders and on every guide. A data mistake behind a guide fix belongs in
   `tools/lib/data/corrections.json` too, so the simulator sees it.
+- `tools/lib/codex/attunements.json`: a cited table naming each attunement's
+  goal (the quests that end it, or the key item) per instance;
+  `tools/lib/codex/attunements.js` builds the steps from the Codex's quest
+  chains and item sources into the journal pages (`attunement`), and
+  `auditReport` compares them with the Attune addon's for the local
+  `data/local/attunements-audit.md` (thanks Shockp).
+- `preview` renders the Attunement tab (`docs/preview/dungeons-attune.svg`).
 
 ## 0.2.3 (2026-10-14)
 

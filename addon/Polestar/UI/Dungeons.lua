@@ -19,7 +19,8 @@
 -- while there are quests to pick up and none to hand in: a guide built by
 -- Dungeons.PickUp), each in a new tab, "Guide me to the entrance" (primary
 -- otherwise, with "Nothing to pick up" saying why) and "Show on map"; the
--- tab row holds Quests, Bosses and Map.
+-- tab row holds Quests, Attunement (Keys when each is a key, on pages that
+-- have one), Bosses and Map.
 --   Quests: one block per quest, hairlines between: the name in its
 --   difficulty colour (lifted to 4.5:1 on the ground), this character's
 --   state (done, in the log, ready, too low), level and requirement,
@@ -31,6 +32,12 @@
 --   and the rewards (item icons in quality borders, "Choose one", XP, money,
 --   reputation). Item hover shows the game's tooltip (Gear adds its upgrade
 --   line there); modified clicks link or try it on.
+--   Attunement: per attunement or key (Dungeons.Attunements) its name, this
+--   character's state (Done, "Not in your bags" for a key whose chain is
+--   done, n of m done), the facts (kind, who needs it, level, side), our
+--   note, the item with whether it is owned, "Guide me through it" (a guide
+--   built by Dungeons.Attune, in a new tab) and one row per step with its
+--   state glyph (Dungeons.AttunementState); a click sets the arrow there.
 --   Bosses: kill order, name, level and the quests each one serves; a chest
 --   boss says Chest, the bosses after the encounters say Rare, Event or
 --   Optional.
@@ -80,6 +87,7 @@ local tab = "quests"
 local filter = ""
 local root, hub, home, pg, segs
 local cards, heads, blocks, bossRows, ties, givers = {}, {}, {}, {}, {}, {}
+local atts, attSteps = {}, {} -- the Attunement tab: one head per attunement, one row per step
 local listCache
 local shown = {} -- what the last render put up, for tests and the preview
 
@@ -537,6 +545,60 @@ local function tie(i)
 	t.psTip = L["Show the quest"]
 	ties[i] = t
 	return t
+end
+
+-- An attunement's head on the Attunement tab: state glyph, name, state
+-- chip, facts, our note, the item with whether it is owned, and "Guide me
+-- through it".
+local function attHead(i)
+	local h = atts[i]
+	if h then return h end
+	h = CreateFrame("Frame", nil, pg.Body)
+	h.Tiles = {}
+	h.Glyph = W.Tex(h, "ARTWORK", "icon-dungeon", "dungeon")
+	h.Glyph:SetSize(14, 14)
+	h.Glyph:SetPoint("CENTER", h, "TOPLEFT", GUT, -30)
+	h.Title = W.Text(h, "title", "quest")
+	h.Title:SetPoint("LEFT", h, "TOPLEFT", PAD, -30)
+	h.State = W.Chip(h)
+	h.State:SetPoint("LEFT", h.Title, "RIGHT", 10, 0)
+	h.Meta = W.Text(h, "small", "textMuted")
+	h.Meta:SetPoint("TOPLEFT", h, "TOPLEFT", PAD, -46)
+	h.Note = W.Text(h, "note", "textDim")
+	h.Note:SetWordWrap(true)
+	h.Note:SetJustifyV("TOP")
+	h.Note:SetJustifyH("LEFT")
+	h.Note:SetPoint("TOPLEFT", h, "TOPLEFT", PAD, -66)
+	h.Owned = W.Text(h, "small", "textMuted")
+	h.Guide = W.Button(h, L["Guide me through it"], function(self) DS.Attune(self.psAtt) end, { height = 28, icon = "icon-goto" })
+	h.Guide:SetPoint("RIGHT", h, "TOPRIGHT", -(PAD - 12), -30)
+	h.Rule = W.Divider(h)
+	h.Rule:SetPoint("BOTTOMLEFT", h, "BOTTOMLEFT", PAD, 0)
+	h.Rule:SetPoint("BOTTOMRIGHT", h, "BOTTOMRIGHT", -PAD, 0)
+	atts[i] = h
+	return h
+end
+
+-- One step of an attunement: its state glyph in the gutter, what to do and
+-- where; a click sets the arrow there.
+local function attStep(i)
+	local r = attSteps[i]
+	if r then return r end
+	r = CreateFrame("Button", nil, pg.Body)
+	r:SetHeight(TIE_H)
+	W.Hover(r)
+	r.Glyph = W.Tex(r, "ARTWORK", "circle", "textMuted")
+	r.Glyph:SetSize(12, 12)
+	r.Glyph:SetPoint("CENTER", r, "LEFT", GUT, 0)
+	r.Text = W.Text(r, "label", "text")
+	r.Text:SetPoint("LEFT", r, "LEFT", PAD, 0)
+	r.Sub = W.Text(r, "small", "textMuted")
+	r.Sub:SetPoint("LEFT", r.Text, "RIGHT", 10, 0)
+	r:SetScript("OnClick", guideTo)
+	r:SetScript("OnEnter", W.SimpleTip)
+	r:SetScript("OnLeave", W.HideTip)
+	attSteps[i] = r
+	return r
 end
 
 -- A place marker on a painting: a dark well under a ring and dot.
@@ -1157,7 +1219,9 @@ local function placeTiles(b, n0, items, choice, y)
 				Theme.Border(t.Well, ir, ig, ib, 0.6)
 				W.Color(t.Name, "item")
 			end
-			t.Name:SetText(it.name or (L["Item"] .. " " .. tostring(it.id)))
+			local name = it.name or (L["Item"] .. " " .. tostring(it.id))
+			if (it.count or 1) > 1 then name = format(L["%d x %s"], it.count, name) end
+			t.Name:SetText(name)
 			t:Show()
 			n = n + 1
 		end
@@ -1524,7 +1588,223 @@ local function renderMap(key, d, f)
 	return 24 + MAP_H + 14 + pg.MapNote:GetStringHeight() + 24
 end
 
-local TABS = { { key = "quests" }, { key = "bosses" }, { key = "map" } }
+---------------------------------------------------------------------------
+-- Attunement: what lets a character in or opens the doors, with this
+-- character's progress (Dungeons/Attune.lua) and "Guide me through it"
+---------------------------------------------------------------------------
+
+local ATT_GLYPH = {
+	done = { "check", "success" }, ready = { "icon-turnin", "success" }, log = { "icon-turnin", "quest" },
+	open = { "icon-accept", "quest" }, locked = { "circle", "textMuted" }, level = { "lock", "textMuted" },
+	rep = { "lock", "textMuted" }, na = { "circle", "textMuted" }, skip = { "circle", "textMuted" },
+}
+-- An open step that is no quest wears its own verb's glyph.
+local ITEM_GLYPH = { drop = "icon-kill", object = "icon-interact", rep = "icon-rep", gift = "icon-talk" }
+local ATT_KIND = { attunement = "Attunement", key = "Key", item = "Item" }
+
+local function colored(token, text)
+	return "|c" .. Theme.Hex(token) .. (text or L["Not known"]) .. "|r"
+end
+
+local function standingName(n)
+	local S = ns.Lookup and ns.Lookup.STANDINGS
+	return L[(S and S[n]) or "Neutral"]
+end
+
+-- A step -> its line and the point its click sets the arrow to.
+local function stepLine(s, plevel)
+	if s.kind == "quest" then
+		return "|c" .. hexOf(difficulty(s.level, plevel)) .. (s.title or "") .. "|r", s.start
+	elseif s.kind == "drop" then
+		return format(L["%s from %s"], colored("item", s.item.name), colored("npc", s.npc and s.npc.name)), s.npc
+	elseif s.kind == "object" then
+		return format(L["%s from %s"], colored("item", s.item.name), colored("object", s.object and s.object.name)), s.object
+	elseif s.kind == "rep" then
+		return format(L["Reach %s with %s"], standingName(s.standing), colored("faction", s.name)), nil
+	elseif s.kind == "gift" then
+		return format(L["%s gives you %s"], colored("npc", s.npc and s.npc.name), colored("item", s.item.name)), s.npc
+	end
+	return "", nil
+end
+
+-- The words after a step: its state, then where (a quest's giver, a drop's chance and instance).
+local function stepSub(s, state)
+	local t = {}
+	if state == "done" then t[#t + 1] = L["Done"]
+	elseif state == "ready" then t[#t + 1] = L["Ready to turn in"]
+	elseif state == "log" then t[#t + 1] = L["In your log"]
+	elseif state == "locked" then t[#t + 1] = L["After the steps before it"]
+	elseif state == "level" then t[#t + 1] = format(L["From level %d"], s.minLevel or 0)
+	elseif state == "rep" and s.rep then t[#t + 1] = format(L["Needs %s with %s"], standingName(s.rep.standing), s.rep.name or L["Not known"])
+	elseif state == "skip" then t[#t + 1] = L["Not needed"]
+	end
+	if s.kind == "quest" and s.start then
+		t[#t + 1] = pointText(s.start)
+	elseif (s.kind == "drop" or s.kind == "object") and s.chance then
+		t[#t + 1] = format(L["%d%% chance"], floor(s.chance + 0.5))
+	end
+	if s.kind == "drop" and s.instance then
+		local inst = D().Get(s.instance)
+		if inst then t[#t + 1] = format(L["inside %s"], inst.name) end
+	end
+	return concat(t, DOT)
+end
+
+local function located(p)
+	return type(p) == "table" and p.map ~= nil and p.x ~= nil and p.y ~= nil
+end
+
+local function renderAttune(key, f, plevel)
+	local side = SIDE[f]
+	local MW = mainWidth()
+	local Dg = D()
+	local mineCode = SIDE[UI.PlayerFaction() or ""]
+	local list_ = Dg.Attunements(key, side)
+	local y, nr = 0, 0
+	shown.attune = {}
+	for i, a in ipairs(list_) do
+		local st = Dg.AttunementState(a)
+		local h = attHead(i)
+		h:ClearAllPoints()
+		h:SetPoint("TOPLEFT", pg.Body, "TOPLEFT", 0, -y)
+		h:SetWidth(MW)
+		W.Color(h.Title, a.kind == "attunement" and "quest" or "item")
+		h.Title:SetText(a.name or "")
+		-- This character's state: the other side's attunement has none.
+		local mine = not a.faction or a.faction == mineCode
+		local total, did = 0, 0
+		for _, e in ipairs(st.steps) do
+			if e.state ~= "na" and e.state ~= "skip" then
+				total = total + 1
+				if e.state == "done" then did = did + 1 end
+			end
+		end
+		local glyph, chipText = { "icon-dungeon", "dungeon" }, nil
+		if not mine then
+			h.State:Hide()
+		elseif st.done then
+			chipText = L["Done"]
+			W.SetChip(h.State, chipText, "success")
+			glyph = { "check", "success" }
+		elseif st.goalDone and a.item then
+			chipText = L["Not in your bags"]
+			W.SetChip(h.State, chipText, "warning")
+		elseif did > 0 then
+			chipText = format(L["%d of %d done"], did, total)
+			W.SetChip(h.State, chipText)
+		else
+			h.State:Hide()
+		end
+		h.Glyph:SetTexture(Theme.Media(glyph[1]))
+		W.Color(h.Glyph, glyph[2])
+		local facts = { L[ATT_KIND[a.kind] or "Attunement"] }
+		facts[#facts + 1] = a.need == "one" and L["One in the group is enough"] or L["Everyone entering needs it"]
+		if a.level then facts[#facts + 1] = format(L["From level %d"], a.level) end
+		if a.faction == "A" then facts[#facts + 1] = L["Alliance only"] elseif a.faction == "H" then facts[#facts + 1] = L["Horde only"] end
+		h.Meta:SetText(concat(facts, DOT))
+		local hy = 66
+		if a.note then
+			h.Note:SetWidth(MW - PAD * 2)
+			h.Note:SetText(a.note)
+			h.Note:Show()
+			hy = hy + floor(h.Note:GetStringHeight() + 0.5)
+		else
+			h.Note:Hide()
+		end
+		-- The item it gives (a key, the amulet), and whether it is owned.
+		local t = h.Tiles[1]
+		if a.item then
+			t = tile(h, 1)
+			hy = hy + 10
+			t:ClearAllPoints()
+			t:SetPoint("TOPLEFT", h, "TOPLEFT", PAD, -hy)
+			t.psID = a.item.id
+			local icon = itemIcon(a.item.id)
+			if icon then
+				t.Icon:SetTexture(icon)
+				t.Icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+				W.Uncolor(t.Icon)
+				t.Icon:SetVertexColor(1, 1, 1, 1)
+			else
+				t.Icon:SetTexture(Theme.Media("icon-collect"))
+				t.Icon:SetTexCoord(0, 1, 0, 1)
+				W.Color(t.Icon, "textMuted")
+			end
+			local qr, qg, qb = qualityRaw(a.item.quality)
+			if qr then
+				Theme.Border(t.Well, qr, qg, qb, 0.9)
+				paintRGB(t.Name, lift(qr, qg, qb))
+			else
+				local ir, ig, ib = Theme.Wash("border")
+				Theme.Border(t.Well, ir, ig, ib, 0.6)
+				W.Color(t.Name, "item")
+			end
+			t.Name:SetText(a.item.name or (L["Item"] .. " " .. tostring(a.item.id)))
+			t:Show()
+			h.Owned:ClearAllPoints()
+			h.Owned:SetPoint("LEFT", t, "RIGHT", 12, 0)
+			if mine then
+				h.Owned:SetText(st.owned and L["You have it"] or L["Not in your bags or bank"])
+				W.Color(h.Owned, st.owned and "success" or "textMuted")
+				h.Owned:Show()
+			else
+				h.Owned:Hide()
+			end
+			hy = hy + TILE_H
+		else
+			if t then t:Hide() end
+			h.Owned:Hide()
+		end
+		-- "Guide me through it": while something is left for this character.
+		local can = mine and not st.done and st.left > 0 and Dg.Attune ~= nil and ns.Lookup ~= nil
+		h.Guide:SetShown(can)
+		h.Guide.psAtt = a.id
+		h.Guide.psTip = L["Guide me through it"]
+		h.Guide.psTipLines = { st.left == 1 and L["A guide through the 1 step left, from where you stand."]
+			or format(L["A guide through the %d steps left, from where you stand."], st.left), L["It opens in a new tab."] }
+		hy = hy + 12
+		-- The steps, this side's only.
+		local states = {}
+		for _, e in ipairs(st.steps) do
+			local s = e.step
+			if not side or not s.faction or s.faction == side then
+				nr = nr + 1
+				local r = attStep(nr)
+				r:ClearAllPoints()
+				r:SetPoint("TOPLEFT", pg.Body, "TOPLEFT", 0, -(y + hy))
+				r:SetWidth(MW - PAD)
+				local state = mine and e.state or "na"
+				local g = ATT_GLYPH[state] or ATT_GLYPH.na
+				local gname = (state == "open" and ITEM_GLYPH[s.kind]) or g[1]
+				r.Glyph:SetTexture(Theme.Media(gname))
+				r.Glyph:SetSize(gname == "circle" and 6 or 12, gname == "circle" and 6 or 12)
+				W.Color(r.Glyph, (state == "open" and ITEM_GLYPH[s.kind]) and "textDim" or g[2])
+				local text, point = stepLine(s, plevel)
+				r.Text:SetText(text)
+				r.Sub:SetText(stepSub(s, mine and e.state or nil))
+				r.psPoint = located(point) and point or nil
+				r.psLabel = point and point.name or nil
+				r.psTip = r.psPoint and L["Set the arrow here"] or nil
+				r:Show()
+				states[#states + 1] = state
+				hy = hy + TIE_H
+			end
+		end
+		hy = hy + 14
+		h:SetHeight(hy)
+		h:Show()
+		shown.attune[i] = { id = a.id, done = st.done, chip = chipText, guide = can, owned = st.owned, states = states }
+		y = y + hy
+	end
+	hidePool(atts, #list_ + 1)
+	hidePool(attSteps, nr + 1)
+	if #list_ == 0 then
+		y = emptyPage(L["Nothing to unlock"], L["Nothing the sources Polestar reads names opens this dungeon's way in or its doors."], 28)
+	end
+	return y + 16
+end
+
+local TABS = { { key = "quests" }, { key = "attune" }, { key = "bosses" }, { key = "map" } }
 
 local function renderPage(key, plevel)
 	local d = D().Get(key)
@@ -1539,11 +1819,18 @@ local function renderPage(key, plevel)
 	local side = SIDE[f]
 	local nq = #D().Quests(key, side)
 	local nb = #D().Bosses(key)
-	local list_ = {
-		{ key = "quests", label = nq > 0 and (L["Quests"] .. "  " .. nq) or L["Quests"] },
-		{ key = "bosses", label = nb > 0 and (L["Bosses"] .. "  " .. nb) or L["Bosses"] },
-		{ key = "map", label = L["Map"] },
-	}
+	local att = D().Attunements(key, side)
+	if tab == "attune" and #att == 0 then tab = "quests" end
+	local list_ = { { key = "quests", label = nq > 0 and (L["Quests"] .. "  " .. nq) or L["Quests"] } }
+	if #att > 0 then
+		-- "Keys" when every one is a key, else "Attunement".
+		local keys = true
+		for _, a in ipairs(att) do keys = keys and a.kind == "key" end
+		local word = keys and L["Keys"] or L["Attunement"]
+		list_[#list_ + 1] = { key = "attune", label = #att > 1 and (word .. "  " .. #att) or word }
+	end
+	list_[#list_ + 1] = { key = "bosses", label = nb > 0 and (L["Bosses"] .. "  " .. nb) or L["Bosses"] }
+	list_[#list_ + 1] = { key = "map", label = L["Map"] }
 	W.ShellTabs(hub, list_, tab, function(k) DS.SetTab(k) end)
 	-- Hide what the other tabs put up.
 	pg.EmptyTitle:Hide()
@@ -1553,6 +1840,7 @@ local function renderPage(key, plevel)
 		qpass.key = nil
 	end
 	if tab ~= "bosses" then hidePool(bossRows); hidePool(ties) end
+	if tab ~= "attune" then hidePool(atts); hidePool(attSteps) end
 	if tab ~= "map" then
 		pg.MapArt:Hide()
 		pg.MapNote:Hide()
@@ -1561,6 +1849,8 @@ local function renderPage(key, plevel)
 	local h
 	if tab == "bosses" then
 		h = renderBosses(key, f, plevel)
+	elseif tab == "attune" then
+		h = renderAttune(key, f, plevel)
 	elseif tab == "map" then
 		h = renderMap(key, d, f)
 	else
@@ -1738,6 +2028,18 @@ function DS.HandIn(key)
 	return openPlanned(Dg.HandIn, key, function() return Dg.HandinText(Dg.HandinPlan(key)) end)
 end
 
+-- An attunement's guide (Dungeons.Attune), from the page's Attunement tab;
+-- nothing left says so instead.
+function DS.Attune(id)
+	local Dg = D()
+	if not (page and id and Dg and Dg.Attune) then return nil end
+	return openPlanned(function(key)
+		local gid, reason = Dg.Attune(key, id)
+		if reason == "done" then reason = "nothing" end
+		return gid, reason
+	end, page, function() return L["Nothing is left to do for it."] end)
+end
+
 function DS.ShowOnMap()
 	local Dg = D()
 	if page and Dg then Dg.ShowOnMap(page) end
@@ -1776,6 +2078,7 @@ function DS.Page() return page end
 function DS.Tab() return tab end
 function DS.Shown() return shown end
 DS.cards, DS.blocks, DS.bossRows, DS.ties, DS.givers = cards, blocks, bossRows, ties, givers
+DS.atts, DS.attSteps = atts, attSteps
 function DS.Frames() return root, home, pg, segs end
 
 ns.On("SHOW_DUNGEON", function(key) DS.Show(key) end)
@@ -1789,6 +2092,13 @@ local function questsChanged()
 end
 for _, ev in ipairs({ "QUEST_ACCEPTED", "QUEST_REMOVED", "QUEST_TURNED_IN", "PLAYER_LEVEL_UP" }) do
 	ns.RegisterEvent(ev, questsChanged)
+end
+-- A key picked up or a standing reached changes the Attunement tab only.
+local function ownedChanged()
+	if tab == "attune" and root and root:IsVisible() and page then DS.Render() end
+end
+for _, ev in ipairs({ "BAG_UPDATE_DELAYED", "UPDATE_FACTION" }) do
+	ns.RegisterEvent(ev, ownedChanged)
 end
 
 if UI.RegisterSection then

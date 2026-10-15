@@ -258,7 +258,7 @@ Compat.GetQuestObjectives(questID)     -> { { text, type, finished, numFulfilled
 Compat.GetQuestTitle(questID)          -> string | nil (client cache; may be nil)
 Compat.GetOfferedQuests(source)        -> { questID, ... } | nil   (source "gossip" | "greeting" | "detail")
 Compat.IsQuestTrivial(qlvl, level)     -> bool   (grey for that level)
-Compat.GetItemCount(itemID)            -> number
+Compat.GetItemCount(itemID, includeBank) -> number   (includeBank: the bank's too)
 Compat.GetItemQuality(itemID)          -> 0..7 | nil (nil while not cached)
 Compat.ItemQualityHex(quality)         -> "ffrrggbb" | nil
 Compat.GetBindLocation()               -> string | nil
@@ -1324,7 +1324,7 @@ Polestar.Lookup.QuestStep(quest, from) -> step         -- accept, objectives, tu
   the quartermaster). It is registered in pack `lookup`, category `Lookup`, id
   `lookup/<kind>/<id>`, never saved, and opened in a new tab
   (`Engine.OpenTab`); a saved tab holding one is rebuilt at `ADDON_LOADED`.
-  A planner kind (`RegisterPlanner`, letters only; Dungeons' `pickup` and `handin`) is
+  A planner kind (`RegisterPlanner`, letters only; Dungeons' `pickup`, `handin` and `attune`) is
   built by its module's `build(id)` through the same `BuildGuide`/`Guide`
   path (no curated guide, not gated by `lookup.enabled`), registered and
   reopened the same way.
@@ -1354,14 +1354,31 @@ pack as `Dungeons1.lua` (a summary table per dungeon for the list, and the page
 as Lua source compiled only when opened): the quests QuestieDB files under the
 instance's areas (the areas on the instance's map and the outdoor areas of its
 name, as the solo filter's instance classification reads them,
-`tools/lib/sim/solo.js`) or whose objectives or starting item point into it
-(plus, with `--local-extras`, `dungeons.json`'s), each with giver and ender
-and their positions, our own objective line, chain, rewards (items with
-quality and choice from recordings and ForeverLevelingBiS, XP from
-`quests.json`, money, reputation) and, with `--local-extras`, DungeonJournal's
-audited shareability; bosses in kill order with the quests tied to them;
-entrances from the Codex, else the client's Map table (the corpse point, placed
-on its zone). No loot tables. Runtime: `addon/Polestar/Dungeons/Dungeons.lua`
+`tools/lib/sim/solo.js`), whose objectives or starting item point into it,
+that Wowhead Forever's dungeon and raid quest lists place in it (`quests.json`'s
+`wowhead.zone`, counted only when QuestieDB's Forever store has the quest,
+which keeps out `<UNUSED>`, `<NYI>` and retired quests), whose start item drops
+or lies inside one instance (that page too, even when the quest has an area),
+or that end its story (a follow-up with the same title, no objectives, taken
+where the quest ends: Hidden Enemies, The Lord of Blackrock); plus, with
+`--local-extras`, `dungeons.json`'s. An objective item that is sold, crafted,
+or dropped or held outside every instance ties no quest to a dungeon (the
+false-positive rule: Murloc Poachers, Craftsman's Writs). What no rule can
+catch is in the cited table `tools/lib/codex/journal-quests.json` (Shards of
+the Felvine). Each quest has giver and ender and their positions, our own
+objective line, chain (every prerequisite and breadcrumb of the quest's side,
+all of `pre` and `preAny`, oldest first, at most 20), rewards (items with
+quality, count and choice from recordings and ForeverLevelingBiS, else
+Wowhead's list rewards, choice versus fixed as Wowhead files them; XP from
+`quests.json`; money, else Wowhead's; reputation from Wowhead's rewards, its
+"+1" placeholders left out, never the standing a quest asks for) and, with
+`--local-extras`, DungeonJournal's audited shareability; bosses in kill order
+with the quests tied to them; entrances from the Codex, else the client's Map
+table (the corpse point, placed on its zone); and the page's `attunement`
+list (below). No loot tables. `codex attune` writes the local comparison with
+the Attune addon (`tools/lib/codex/questaudit.js`,
+`tools/lib/consume/attune.js`; `data/local/dungeon-quests-audit.md` and
+`.json`, then the attunements report). Runtime: `addon/Polestar/Dungeons/Dungeons.lua`
 (`Polestar.Dungeons`: List, Get, Entrance, Quests, Quest, Bosses, Open,
 GuideTo, GuideToPoint, ShowOnMap; `SHOW_DUNGEON`). `dungeons build` writes no
 guides.
@@ -1424,6 +1441,32 @@ guide in the tab of the dungeon's pick-up guide when that one is finished or
 at its last step (its job ends at the entrance), else in a new tab. A
 finished pick-up guide's "Guide complete" panel (UI/GuideFrame.lua) offers
 "Hand in the quests" while the dungeon has quests in the log.
+
+Attunements and keys (`addon/Polestar/Dungeons/Attune.lua`, planner kind
+`attune`, `lookup/attune/<key>:<id>`). A page's `attunement` list (Codex,
+"Dungeons and raids": `tools/lib/codex/attunements.js`) is read by
+`Dungeons.Attunements(key, faction)` (faction "A" | "H" | nil: the entries
+of that side and the side-free ones). `Dungeons.AttunementState(a)` gives
+this character's state per step: a quest `done`, `ready`, `log`, `open`,
+`locked` (a step it waits on, `after` all, `afterAny` one, is not done),
+`level`, `rep` (the quest's standing, `Compat.GetFactionStanding`), `na`
+(faction, race or class through `Lookup.QuestBlock`) or `skip` (an
+alternative not taken: of `any` goals the one whose standing fits best, the
+highest first; a `preAny` sibling of a done one); a drop, chest or gift is
+`done` once its item is owned (`Compat.GetItemCount(id, true)`, the bank
+included) or the quest it starts is taken; a standing once reached. The
+attunement is `done` when its item is owned (a key, the Drakefire Amulet,
+Aqual Quintessence) or, item-less, when its goals are done (one of them with
+`any`); `goalDone` with no item says the key was lost. `Dungeons.AttuneGuide(key, id)`
+makes a stop per quest still to do (`Lookup.QuestStep`, with any open
+prerequisite `Lookup.QuestChain` finds that the list lacks), each after the
+stops it waits on, ordered by `Dungeons.OrderStops` from where the player
+stands with no fixed end (`CharState().dungeonAttune["<key>:<id>"]`); a drop
+or chest is a collect step at its NPC or object (inside an instance: at its
+entrance, with a note naming it), a standing a rep step, a gift a talk step,
+each after the quest before it in the list; the last step holds the note and
+the entrance. Nothing left: nil, "done". `Dungeons.Attune(key, id)` opens it
+in a new tab.
 
 ## UI — guide window, hub and options
 
@@ -1599,7 +1642,8 @@ Reading flow: `docs/DESIGN.md` ("Intent" and "The Guide Window").
   and "Show on map" (`Dungeons.ShowOnMap`); with nothing to pick up or hand
   in, "Nothing to pick up" (shown while the page has quests for this side)
   says why in its tooltip and, clicked, in chat (`DS.NothingText`); no guide
-  is built. Tabs Quests n, Bosses n, Map. Quests: a block per quest planned from the
+  is built. Tabs Quests n, Attunement (Keys when each is a key; only on pages
+  with one for the filter's side), Bosses n, Map. Quests: a block per quest planned from the
   data (the objective measured on one shared string) so only the blocks in
   view are drawn (`DS.PaintQuests` on scroll): the title in the client's
   difficulty colour (`GetQuestDifficultyColor`, else `QuestDifficultyColors`
@@ -1614,11 +1658,22 @@ Reading flow: `docs/DESIGN.md` ("Intent" and "The Guide Window").
   SetHyperlink`, where Gear adds its upgrade line; modified clicks through
   `HandleModifiedItemClick`), XP, money and reputation chips. Bosses: kill
   order, name, level, each tied quest ("Kill it for", "Drops X for", "Drops X,
-  which starts", "Part of"), a line opening the quest. Map: the entrance and
+  which starts", "Part of"), a line opening the quest. Attunement
+  (`Dungeons.Attunements`, `Dungeons.AttunementState`): per entry a head
+  (state glyph, the name in quest or item colour, a chip: Done, "Not in your
+  bags" for a key whose chain is done, "n of m done"; the facts: kind, who
+  needs it, level, side; our note; the item tile with "You have it" or "Not
+  in your bags or bank"; "Guide me through it" while something is left, which
+  opens `Dungeons.Attune` in a new tab as the pick-up guide does) and a row per
+  step of the filter's side (state glyph, the quest in its difficulty colour
+  or what drops it, its state, giver and zone or chance and instance; a click
+  sets the arrow there); the other side's entries carry no state. Map: the entrance and
   the quest givers on its zone painting. Blocks, rows, tiles, chips and cards
   are pooled; quest states refresh on QUEST_ACCEPTED, QUEST_REMOVED,
-  QUEST_TURNED_IN and PLAYER_LEVEL_UP. `UI.DungeonsSection` exposes
-  `Open`, `Home`, `SetBand`, `SetTab`, `SetFaction`, `ShowQuest`, `Shown`
+  QUEST_TURNED_IN and PLAYER_LEVEL_UP, the Attunement tab also on
+  BAG_UPDATE_DELAYED and UPDATE_FACTION. `UI.DungeonsSection` exposes
+  `Open`, `Home`, `SetBand`, `SetTab`, `SetFaction`, `ShowQuest`, `Attune`, `Shown`
+  (`shown.attune`: per entry its id, done, chip, guide, owned and step states)
   for tests and the preview.
 - **Zone art** (`UI/ZoneArt.lua`): `UI.ZoneArt.Create(parent, width, height
   [, fadeColor])` and `UI.ZoneArt.Paint(art, uiMapID, focusX, focusY, index) ->
@@ -2001,6 +2056,40 @@ built.
   or `o<object>`, then `r`/`e`/`x` for the role (an old pack's bare npc id
   still reads), and the Dungeons Bosses tab says Chest and the role beside
   the level.
+- Attunements and keys (`tools/lib/codex/attunements.js`, release-safe):
+  the cited table `tools/lib/codex/attunements.json` names per Codex instance
+  each attunement's goal only (the quests that end it, one of them with
+  `any`, or the key item), whether everyone entering needs it or one in the
+  group, and our one-line note, each entry with its public sources (Wowhead
+  Forever, warcraft.wiki.gg). The steps come from the Codex: every
+  prerequisite of a goal (all of `pre`, the `preAny` of the entry's side),
+  oldest first, each with `after`/`afterAny`; a quest only an item starts
+  gets that item's drops before it (Blackhand's Command from the Scarshield
+  Quartermaster); an item goal adds the item's own sources (a dropped key's
+  drops and chests, best chance first, three at most; Aqual Quintessence's
+  standing and the NPC handing it out). `links` add a prerequisite our quest
+  data lacks, with its source (Forever's City of Dalaran: Blood in the
+  Streets after Dalaran Patrols and Key to the City, Heart of Disruption
+  after it). `removed` lists what Forever took out, with its evidence (the
+  Seal of Ascension: 4743 no longer rewards it, no Forever `ItemSparse`
+  row), read only by the local comparison. Covered: Molten Core (Attunement
+  to the Core; Aqual Quintessence), Onyxia's Lair (the Drakefire Amulet,
+  each side's chain), Blackwing Lair (Blackhand's Command), Naxxramas (one
+  of the three Dread Citadel quests), Scholomance (the Skeleton Key, each
+  side), Blackrock Depths (the Shadowforge and Prison Cell keys), Stratholme
+  (Key to the City), Dire Maul (Crescent Key), Gnomeregan (Workshop Key),
+  Scarlet Monastery (The Scarlet Key), the City of Dalaran (the Horde's
+  Dalaran Sewer Key). A goal the Codex lacks drops its entry with a warning
+  (`codex build` prints it); an instance the build lacks has none. The
+  journal puts each list on its page as `attunement` and counts them
+  (`meta.counts.attunements`, the summary's `attune = { A, H }`).
+  `auditReport(journal, attune, codex)` writes the local comparison with
+  Attune (`codex attune`, `data/local/attunements-audit.md`): per Attune
+  entry the attunement of ours sharing most quests, the quests only one side
+  lists and why ours has or lacks them (in our chain, a follow-up of our
+  goal, not a prerequisite in our data, not in our Codex), then our verdicts
+  on which source is right, kept in `data/local/attunements-verdicts.md` so
+  a rerun keeps them.
 - Rares and treasures: NPCs ranked rare (4) or rare elite (2) in `npcs.json`
   (pfQuest, QuestieDB, recordings), with their spawns and loot; treasures are
   objects with the `chest` role, with their loot. Loot (`Codex.Loot`, where
@@ -2022,7 +2111,10 @@ built.
   is `{ type: vendor|drop|object|quest|craft|rep|pvp|
   container|world, from, ... }`), `npcs.json`, `objects.json`, `quests.json`
   (with `pre` = every blocking prerequisite, `preAny`, rewards from recordings
-  and ForeverLevelingBiS), `instances.json`, `zones.json`, `factions.json`,
+  and ForeverLevelingBiS, and `wowhead` on each quest Wowhead Forever's zone,
+  dungeon and raid lists carry: `{ zone, type, side, choices, items, money,
+  rep }`, the zone or instance category and the list's rewards, read by the
+  journal), `instances.json`, `zones.json`, `factions.json`,
   `spells.json` (mount and pet aura spell → item, class), `frames.json` (Era
   bounds for the pack's maps), `journal.json` (the Dungeons pages).
   An item's `status` is `nosource` without a source, and `retired` for a mount
@@ -2056,7 +2148,7 @@ built.
   lists what only play can fill and the Recorder event that fills it
   (Forever instances and their entrances: `enter`, `encounter`; Forever
   rares: `rare`, `slain` + `drop`; quest givers, enders, rewards: `accept`,
-  `turnin`). On 2026-10-14 (Forever client 1.60.1.70338, the same
+  `turnin`). On 2026-10-15 (Forever client 1.60.1.70374, the same
   `data/forever`):
 
   | Kind | Internal | Release matching | Match |
@@ -2064,36 +2156,36 @@ built.
   | instances | 44 | 37 | 84.1% |
   | instance levels | 29 | 29 | 100.0% |
   | instance entrances | 14 | 13 | 92.9% |
-  | bosses | 373 | 272 | 72.9% |
-  | bosses with loot | 265 | 262 | 98.9% |
-  | boss loot items | 2164 | 1862 | 86.0% |
-  | drop chances | 20707 | 17129 | 82.7% |
-  | rares | 413 | 387 | 93.7% |
-  | rare positions | 363 | 357 | 98.3% |
-  | rare levels | 387 | 387 | 100.0% |
-  | rare loot | 14223 | 14188 | 99.8% |
+  | bosses | 373 | 333 | 89.3% |
+  | bosses with loot | 326 | 324 | 99.4% |
+  | boss loot items | 2306 | 1977 | 85.7% |
+  | drop chances | 20707 | 17533 | 84.7% |
+  | rares | 413 | 411 | 99.5% |
+  | rare positions | 387 | 384 | 99.2% |
+  | rare levels | 406 | 406 | 100.0% |
+  | rare loot | 51604 | 50787 | 98.4% |
   | treasures | 65 | 60 | 92.3% |
   | treasure positions | 31 | 31 | 100.0% |
-  | treasure loot | 1548 | 1548 | 100.0% |
-  | items with a source | 15967 | 15901 | 99.6% |
-  | items: drop | 8806 | 8666 | 98.4% |
-  | items: quest | 2092 | 2091 | 100.0% |
+  | treasure loot | 4502 | 4498 | 99.9% |
+  | items with a source | 16205 | 16187 | 99.9% |
+  | items: drop | 8806 | 8743 | 99.3% |
+  | items: quest | 2429 | 2429 | 100.0% |
   | items: vendor | 2248 | 2248 | 100.0% |
   | items: object | 3288 | 3287 | 100.0% |
-  | items: world | 4152 | 4145 | 99.8% |
+  | items: world | 4152 | 4150 | 100.0% |
   | items: craft | 1797 | 1797 | 100.0% |
   | items: container | 2095 | 2095 | 100.0% |
   | tabards | 40 | 40 | 100.0% |
-  | mounts | 135 | 134 | 99.3% |
-  | items: rep | 689 | 682 | 99.0% |
-  | pets | 89 | 87 | 97.8% |
-  | items: pvp | 763 | 451 | 59.1% |
-  | journal quests | 929 | 880 | 94.7% |
-  | quest givers | 641 | 628 | 98.0% |
-  | quest enders | 680 | 671 | 98.7% |
-  | quest rewards | 552 | 547 | 99.1% |
-  | quest XP | 731 | 722 | 98.8% |
-  | quest chains | 489 | 469 | 95.9% |
+  | mounts | 136 | 136 | 100.0% |
+  | items: rep | 980 | 975 | 99.5% |
+  | pets | 90 | 90 | 100.0% |
+  | items: pvp | 763 | 763 | 100.0% |
+  | journal quests | 833 | 823 | 98.8% |
+  | quest givers | 582 | 568 | 97.6% |
+  | quest enders | 618 | 608 | 98.4% |
+  | quest XP | 698 | 689 | 98.7% |
+  | quest chains | 481 | 474 | 98.5% |
+  | quest rewards | 582 | 577 | 99.1% |
 
   The gaps: seven Forever instances AtlasLoot lists ahead of release are not
   in the client (no `Map` row); the Hall of Thanes' entrance stays
@@ -2135,7 +2227,7 @@ built.
   Wowhead Forever's spell page, `codex wowhead` fetching those of items ours
   has no source for) hands it out: a `gift { npc, spell }` source (Duke
   Hydraxis's Aqual and Eternal Quintessence). 26 Forever rares no
-  database ranks yet. The 455 confirmed drop chances the release lacks are
+  database ranks yet. The 251 confirmed drop chances the release lacks are
   all cut by an item's 10-dropper cap (the internal build keeps AtlasLoot's
   instance trash past it; every dropper of every item would be 1.6 million
   sources against 74 thousand).

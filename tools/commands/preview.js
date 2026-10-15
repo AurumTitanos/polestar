@@ -995,6 +995,14 @@ Polestar.UI.Picker.SetCategory("Leveling"); Polestar.UI.Picker.Select("forever/h
 		],
 	},
 	{
+		file: 'dungeons-attune.svg',
+		title: 'The Attunement tab: Wailing Caverns\' attunement with the first quest done and the second in the log, and "Guide me through it"; the Deadmines\' keys with the filter on All',
+		panels: [
+			{ dungeons: true, roots: PICKER, script: dungeonsScene('done[90001] = true; log[90002] = true; Polestar.Dungeons.Open("wailing-caverns"); DS.SetTab("attune")') },
+			{ dungeons: true, roots: PICKER, script: dungeonsScene('DS.SetFaction("All"); Polestar.Dungeons.Open("deadmines"); DS.SetTab("attune")') },
+		],
+	},
+	{
 		file: 'dungeons-small.svg',
 		title: 'The hub at its smallest (menu scale 0.7): Wailing Caverns, Quests; without the Codex pack',
 		panels: [

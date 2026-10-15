@@ -2,4 +2,5 @@
 	<Script file="Dungeons.lua"/>
 	<Script file="Pickup.lua"/>
 	<Script file="Handin.lua"/>
+	<Script file="Attune.lua"/>
 </Ui>

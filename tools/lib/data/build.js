@@ -19,7 +19,7 @@ const { DEFAULTS: SPAWN_DEFAULTS } = require('./spawns');
 const { readQuestie, REPO: QUESTIEDB_REPO, QUESTIE_REPO } = require('./questie');
 const { applyQuestie } = require('./questie-merge');
 const { loadWebXp, WFT, FC } = require('./webxp');
-const { loadZoneQuests, applyChangeNotes, fillWowheadXp, BASE: WOWHEAD } = require('./wowhead');
+const { loadZoneQuests, applyChangeNotes, fillWowheadXp, applyWowheadFacts, BASE: WOWHEAD } = require('./wowhead');
 const CORRECTIONS = require('./corrections.json');
 
 // tools/lib/data/corrections.json: quests `set` fields; items `removeDrops`/`removeVendors`; npcs/objects `set`
@@ -216,7 +216,7 @@ async function buildData(options = {}) {
 	if (qz && options.wowhead) {
 		const zl = await loadZoneQuests({ sourcesDir, zones, offline, fetchImpl: options.fetchImpl, log });
 		warnings.push(...zl.warnings);
-		wh = { zl, changed: applyChangeNotes(norm.quests, zl.rows), xpFilled: 0 };
+		wh = { zl, changed: applyChangeNotes(norm.quests, zl.rows), facts: applyWowheadFacts(norm.quests, zl.rows), xpFilled: 0 };
 	}
 	if (qz) qstats.corrections = applyCorrections(norm);
 
@@ -292,7 +292,7 @@ async function buildData(options = {}) {
 			name: 'Wowhead Forever database: zone quest lists (XP, levels, Forever change notes)',
 			url: WOWHEAD,
 			revision: `${wh.zl.rows.size} listed quests${wh.zl.fetchedAt ? ` read ${wh.zl.fetchedAt}` : ''}; cache ${path.relative(root, wh.zl.file)}`,
-			license: 'Public web pages; facts (ids, XP, levels) only, used locally',
+			license: 'Public web pages; facts (ids, XP, levels, instance categories, rewards) only, used locally',
 			copyright: null,
 		});
 	}
@@ -380,6 +380,7 @@ async function buildData(options = {}) {
 						questXpFromWeb: webxp ? webxp.xp.size : 0,
 						questXpFromWowhead: wh ? wh.xpFilled : 0,
 						wowheadChanged: wh ? wh.changed : null,
+						wowheadFacts: wh ? wh.facts : 0,
 						prereqsCleaned: qstats.prereqsCleaned,
 						reverseLinks: qstats.reverseLinks,
 						itemsRegainedEntries: qstats.itemsRegainedEntries,

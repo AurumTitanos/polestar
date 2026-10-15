@@ -807,6 +807,26 @@ function mergeCodex(inputs) {
 		}
 	}
 	for (const [id, x] of Object.entries(dungeonItems)) if (!names[id]) names[id] = x.name;
+	// Wowhead Forever's quest lists (quests.json `wowhead`, data build), last:
+	// the reward items no recording, ForeverLevelingBiS or dungeons.json row
+	// names, each as Wowhead files it (one of `choices`, or every one of
+	// `items`). Its lists carry most dungeon quests' rewards these lack.
+	for (const [qid, q] of Object.entries(fv.quests || {})) {
+		const w = q.wowhead;
+		if (!w) continue;
+		const have = questRewards[qid];
+		const known = (it) => have && (have.rewards.has(it) || have.choices.has(it));
+		for (const [list, choice] of [
+			[w.choices || [], true],
+			[w.items || [], false],
+		]) {
+			for (const [it] of list) {
+				if (known(it)) continue;
+				reward(qid, it, choice);
+				add(it, { type: 'quest', quest: Number(qid), choice: choice || null, from: ['wowhead'] });
+			}
+		}
+	}
 	if (flb) {
 		for (const [id, it] of Object.entries(flb.items || {})) {
 			if (it.name && !names[id]) names[id] = it.name;
@@ -1467,6 +1487,10 @@ function sourcesMeta(inputs) {
 	if (ne && !inputs.atlasloot) out.push({ name: 'Curated instance entrances (tools/lib/codex/entrances.json): QuestieDB Forever dungeon table, warcraft.wiki.gg, Wowhead Forever', version: `${ne} entrances`, licence: 'Facts only (coordinates), each entry with its source' });
 	const nr = Object.keys(inputs.repTable || {}).length;
 	if (nr) out.push({ name: 'Curated reputation gates (tools/lib/codex/repgates.json): warcraft.wiki.gg, Wowhead Classic reputation guides, QuestieDB', version: `${nr} items`, licence: 'Facts only (standings), each row with its source' });
+	const na = (inputs.attunementTable || require('./attunements').loadAttunementTable()).attunements.length;
+	if (na) out.push({ name: 'Curated attunement goals (tools/lib/codex/attunements.json): Wowhead Forever, warcraft.wiki.gg', version: `${na} attunements`, licence: 'Facts only (quest and item ids), each entry with its sources' });
+	const nj = (inputs.journalQuests || require('./journal').loadJournalQuests()).length;
+	if (nj) out.push({ name: 'Curated Dungeons journal quests (tools/lib/codex/journal-quests.json): Wowhead Forever', version: `${nj} quests`, licence: 'Facts only (quest ids and instances), each row with its source' });
 	if (inputs.client) out.push({ name: 'World of Warcraft: Forever client tables via wago.tools', version: inputs.client.build, licence: 'Blizzard Entertainment game data, facts only' });
 	if (inputs.client && inputs.client.eraBuild) out.push({ name: 'World of Warcraft Classic Era client item tables via wago.tools (items missing from the Forever tables)', version: inputs.client.eraBuild, licence: 'Blizzard Entertainment game data, facts only' });
 	return out;
@@ -1499,7 +1523,7 @@ async function buildCodex(opts = {}) {
 	const extraFiles = [];
 	// The Dungeons journal (tools/lib/codex/journal.js) rides in this pack.
 	const { buildJournal, emitJournal } = require('./journal');
-	const journal = buildJournal(inputs, codex);
+	const { warnings: journalWarnings = [], ...journal } = buildJournal(inputs, codex);
 	extraFiles.push(...emitJournal(journal));
 	// Parity with the last --local-extras build (tools/lib/codex/parity.js):
 	// a release build records the match per kind; without that build, none.
@@ -1528,7 +1552,7 @@ async function buildCodex(opts = {}) {
 	const out = { meta, items: codex.items, npcs: codex.npcs, objects: codex.objects, quests: codex.quests, instances: codex.instances, zones: codex.zones, factions: codex.factions, spells: codex.spells, frames };
 	out.journal = journal;
 	for (const [name, value] of Object.entries(out)) writeAtomic(path.join(outDir, `${name}.json`), `${JSON.stringify(sortKeysDeep(value), null, '\t')}\n`);
-	return { codex: out, files, outDir, packDir, bytes, memory, parity, warnings: [...(inputs.warnings || []), ...mergeWarnings], ms: Date.now() - t0 };
+	return { codex: out, files, outDir, packDir, bytes, memory, parity, warnings: [...(inputs.warnings || []), ...mergeWarnings, ...journalWarnings], ms: Date.now() - t0 };
 }
 
 // What checks an internal-only fact (tools/lib/codex/parity.js): Wowhead's
