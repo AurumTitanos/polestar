@@ -619,7 +619,30 @@ class("forever/collectibles/mounts/neutral/warlock-felsteed", "Warlock Felsteed"
 	{ title = "Gorzeeki Wildeyes", goals = { G("note", { text = "Step 1", status = "pending" }) } },
 })
 local DREADSTEED = "forever/collectibles/mounts/neutral/warlock-dreadsteed"
+uistub.guides[DREADSTEED].reward = { { spell = 23161, spellName = "Summon Dreadsteed" } }
+uistub.guides[DREADSTEED].why = "Your epic mount at 60: summoned anywhere, with no gold spent on an epic horse."
+uistub.guides["forever/collectibles/mounts/neutral/warlock-felsteed"].reward = { { spell = 5784, spellName = "Summon Felsteed" } }
 uistub.player.class, uistub.player.level = "WARLOCK", 60`;
+// Class guides (`reward`, `why`): what the chain gives leads the details, a
+// choice of rare items and a demon minion beside the mount. Rewards and why
+// lines as the shipped warlock guides have them; steps written for the preview.
+const CLASS_GUIDES = `${GROUP_GUIDES}
+class("forever/class/warlock/impsys-request", "An Imp's Request", true, {
+	{ title = "Impsy", goals = { G("note", { text = "Step 1", status = "pending" }) } },
+	{ title = "The Sunken Temple", goals = { G("note", { text = "Step 2", status = "pending" }) } },
+})
+local IMPSY = uistub.guides["forever/class/warlock/impsys-request"]
+IMPSY.minLevel, IMPSY.maxLevel, IMPSY.zone, IMPSY.zoneName = 50, 54, 1448, "Felwood"
+IMPSY.reward = { { item = 20536, itemName = "Soul Harvester", quality = 3, choice = true }, { item = 20534, itemName = "Abyss Shard", quality = 3, choice = true },
+	{ item = 20530, itemName = "Robes of Servitude", quality = 3, choice = true } }
+IMPSY.why = "A staff, off-hand or robe for your 50s; Impsy's own errand, not a step of the Dreadsteed chain."
+class("forever/class/warlock/incubus-horde", "Incubus (Horde)", nil, {
+	{ title = "Devourer of Souls", goals = { G("note", { text = "Step 1", status = "pending" }) } },
+})
+local INCUBUS = uistub.guides["forever/class/warlock/incubus-horde"]
+INCUBUS.minLevel, INCUBUS.maxLevel, INCUBUS.faction, INCUBUS.zone, INCUBUS.zoneName = 20, 28, "Horde", 1454, "Orgrimmar"
+INCUBUS.reward = { { text = "Summon Incubus" }, { item = 22243, itemName = "Small Soul Pouch", quality = 2 } }
+INCUBUS.why = "A second seducer demon, the male sayaad, and a soul shard bag to carry your shards."`;
 const SCENES = [
 	{
 		file: 'guide.svg',
@@ -716,6 +739,27 @@ uistub.update()`,
 				roots: PICKER,
 				script: pickerScene(`${GROUP_GUIDES}; uistub.openTabs({ { DREADSTEED, 2 } }, 1); Polestar.UI.ShowPicker(); Polestar.UI.Picker.SetCategory("Class")
 Polestar.UI.Picker.Select(DREADSTEED)`),
+			},
+		],
+	},
+	{
+		file: 'picker-class.svg',
+		title: 'Class guides in the guide menu: the details lead with what the chain gives and why (a mount spell; a choice of rare items; a demon and its soul bag)',
+		panels: [
+			{
+				roots: PICKER,
+				script: pickerScene(`${CLASS_GUIDES}; Polestar.UI.ShowPicker(); Polestar.UI.Picker.SetCategory("Class")
+Polestar.UI.Picker.Select(DREADSTEED)`),
+			},
+			{
+				roots: PICKER,
+				script: pickerScene(`${CLASS_GUIDES}; Polestar.UI.ShowPicker(); Polestar.UI.Picker.SetCategory("Class")
+Polestar.UI.Picker.Select("forever/class/warlock/impsys-request")`),
+			},
+			{
+				roots: PICKER,
+				script: pickerScene(`${CLASS_GUIDES}; Polestar.Set("ui.pickerFaction", "All"); Polestar.UI.ShowPicker(); Polestar.UI.Picker.SetCategory("Class")
+Polestar.UI.Picker.Select("forever/class/warlock/incubus-horde")`),
 			},
 		],
 	},
