@@ -15,6 +15,7 @@
 --   p.noUnitQuestAPI()                -- a client without C_QuestLog.IsUnitOnQuest
 --   p.connect("Ana", false)          -- UNIT_CONNECTION: offline / back online
 --   p.questLogChanged("Ana")          -- UNIT_QUEST_LOG_CHANGED for her unit
+--   p.secretNames = true              -- UnitName gives party units' names as secret values
 
 local party = { members = {}, sent = {}, result = 0, onQuest = {}, inRaid = false, prefixes = {} }
 stub.party = party
@@ -85,9 +86,15 @@ function UnitIsConnected(unit)
 	return m and m.online or false
 end
 
+-- UnitDocumentation.lua UnitName: SecretWhenUnitNameIdentityRestricted.
+-- A userdata, so concatenating or ordering it fails as a secret would.
+party.SECRET = newproxy(true)
+function issecretvalue(v) return v == party.SECRET end
+
 local playerName = UnitName
 function UnitName(unit)
 	local m = memberOf(unit)
+	if m and party.secretNames then return party.SECRET, m.realm and party.SECRET end
 	if m then return m.name, m.realm end
 	return playerName(unit)
 end

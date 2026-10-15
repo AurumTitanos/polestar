@@ -469,6 +469,24 @@ emit(#P.Members())`, LIVE);
 	assert.equal(n, 0);
 });
 
+test('party: while the client keeps party names secret, the roster and what members sent stay as they were', () => {
+	const [during, missing, after] = run(`${SENT}${MEMBERS}
+p.join("Ana")
+p.join("Ben")
+p.receive("Ana-TestRealm", "1|33:5/8")
+p.secretNames = true
+stub.fire("GROUP_ROSTER_UPDATE")
+p.receive("Ana-TestRealm", "1|33:6/8")
+emit(members())
+emit(#P.Missing(33))
+p.secretNames = false
+p.leave("Ben")
+emit(members())`, LIVE);
+	assert.deepEqual(during, ['Ana 33:6/8']);
+	assert.equal(missing, 0, 'a member whose name is secret is not named');
+	assert.deepEqual(after, ['Ana 33:6/8']);
+});
+
 test('party: turning sharing off tells the party to forget your counts; on again, it resyncs', () => {
 	const [off, on, showOn] = run(`${SENT}
 w.onQuest(33, { 8 })

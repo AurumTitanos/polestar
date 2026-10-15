@@ -265,9 +265,11 @@ local function forgetAll()
 end
 
 -- The roster key a party unit's messages arrive under: chat senders carry
--- the normalized realm (no spaces or hyphens); nil while the name is unknown.
+-- the normalized realm (no spaces or hyphens); nil while the name is unknown,
+-- false while the client keeps it secret (identity restricted).
 local function memberKey(unit)
 	local name, realm = UnitName(unit)
+	if ns.Compat.IsSecret(name) or ns.Compat.IsSecret(realm) then return false end
 	if not name or name == "" or name == UNKNOWNOBJECT then return nil end
 	if realm and realm ~= "" then return name .. "-" .. realm:gsub("[%s%-]", ""), name end
 	return name, name
@@ -284,6 +286,8 @@ local function readRoster(asks)
 	for i = 1, n do
 		local unit = "party" .. i
 		local key, short = memberKey(unit)
+		-- A secret name: keep the roster as it was until the next roster event.
+		if key == false then return end
 		if key and not (UnitIsConnected and not UnitIsConnected(unit)) then
 			now[key] = short
 			if not roster[key] then gained = true end
