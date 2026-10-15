@@ -1,0 +1,55 @@
+guide forever/class/warlock/incubus-alliance
+title Incubus (Alliance)
+category Class
+class Warlock
+folder Warlock
+faction Alliance
+levels 20-25
+zone Stormwind City
+keywords Summon Incubus, sayaad, What Is Love?, Wooden Figurine, Devourer of Souls, Gakin the Darkbinder, Takar the Seer, The Binding, Warlock, class pet
+reward spell 713 "Summon Incubus"
+reward item 22243
+why A second seducer demon, the male sayaad, and a soul shard bag to carry your shards.
+
+# The incubus for Alliance warlocks: Devourer of Souls (1716) from Gakin
+# the Darkbinder to Takar the Seer in the Barrens, What Is Love? (65602, the
+# Wooden Figurine in Ashenvale) and The Binding (65603) back in the
+# Slaughtered Lamb.
+# Sources: quests.json, npcs.json, objects.json and items.json (Questie 12.1.0
+# and Questie-Forever) for the givers, the figurine and the summoning circle;
+# Wowhead Forever's Warlock class page
+# (data/local/quest-audit/wowhead-class-quests.json): Forever gives the chain
+# level 20 and lists a Small Soul Pouch as The Binding's reward. Forever's
+# data does not list the spell; in Classic it is Summon Incubus (Wowpedia,
+# "The Binding (Incubus, Stormwind)"), and Wowpedia ("Incubus (warlock
+# minion)") describes the incubus as the male sayaad, the succubus's
+# counterpart. Wowpedia is Classic-only: neither point is confirmed in Forever.
+# The leveling guides teach the succubus from the same Devourer of Souls
+# (Heartswood 1738, The Binding 1739: 04-redridge-mountains,
+# 07-thousand-needles, 30-40/02-desolace, 30-40/05-arathi-highlands). Takar
+# offers What Is Love? beside Heartswood, so a warlock on that route can take
+# both; the accept and turn-in below tick off if you already have them.
+
+step Devourer of Souls
+  tip At 20 Gakin the Darkbinder, in the cellar of the Slaughtered Lamb in the Mage Quarter, sends you to Takar the Seer in the Barrens.
+  level 20
+  accept 1716                         -- Gakin the Darkbinder
+
+step Takar the Seer
+  zone The Barrens
+  tip Takar the Seer camps in the southern Barrens, east of the road north-east of Camp Taurajo: come in from the east and keep clear of the Horde guards.
+  turnin 1716                         -- Takar the Seer
+  accept 65602
+
+step Wooden Figurine
+  zone Ashenvale
+  tip From Astranaar take the road west to Maestra's Post: the figurine lies in a house among the trees north of the post.
+  collect 190309 quest 65602.1        -- Wooden Figurine
+
+step The Binding
+  zone Stormwind City
+  tip Back to Gakin in the Slaughtered Lamb. Place the figurine at the summoning circle in the crypt below him and defeat the incubus it calls.
+  turnin 65602                        -- Gakin the Darkbinder
+  accept 65603
+  kill 185335 quest 65603.1           -- Summoned Incubus
+  turnin 65603                        -- Gakin the Darkbinder: he binds the incubus to you

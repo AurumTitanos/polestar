@@ -1,0 +1,154 @@
+guide forever/class/druid/cure-poison
+title Cure Poison
+category Class
+folder Druid
+keywords Cure Poison, Lessons Anew, The Principal Source, Gathering the Cure, Curing the Sick, Power over Poison, Sickly Deer, Sickly Gazelle, Moonglade, class quest
+reward spell 8946 "Cure Poison"
+reward item 15866
+why Cure Poison is no longer trained in Forever: this chain teaches it, with a medicine bag on the way.
+class Druid
+levels 14-20
+zone Moonglade
+
+# Cure Poison: in Forever the spell is no longer trained, Power over Poison
+# (6125 Night Elf, 6130 Tauren) rewards it (Wowhead Forever's druid class
+# page: "Rewards: adds Cure Poison").
+# - Night Elves: Lessons Anew (6121, Mathrengyl Bearwalker) -> Dendrite
+#   Starblaze in Moonglade -> The Principal Source (6122: fill the sampler at
+#   Cliffspring Falls) -> Alanndarian Nightsong in Auberdine: Gathering the
+#   Cure (6123: 5 Earthroot, 12 Lunar Fungus) and Curing the Sick (6124: ten
+#   Sickly Deer) -> Dendrite -> Power over Poison (6125) back to Mathrengyl.
+# - Tauren: Lessons Anew (6126, Turak Runetotem) -> Dendrite -> The Principal
+#   Source (6127: Dreadmist Peak) -> Tonga Runetotem at the Crossroads:
+#   Gathering the Cure (6128: 5 Earthroot, 5 Kodo Horns) and Curing the Sick
+#   (6129: ten Sickly Gazelles) -> Dendrite -> Power over Poison (6130) back
+#   to Turak.
+# Earthroot needs Herbalism to pick (the quest text says so); herb vendors
+# sell it in limited stock (Wowhead Forever, item 2449: Maria Lumere in
+# Stormwind six at a time, Hula'mahi at the Crossroads three), else the
+# Auction House.
+# Skyborne: Forever added Lessons Anew givers beside both Skyborne landings
+# (Alfina Nightgaze west of Dalaran, Hana Lighthoof in northern Mulgore), but
+# the data offers the rest of the chain to Night Elves and Tauren only, so
+# Skyborne steps are left out until the data has them.
+# Sources: quests.json, npcs.json, objects.json and items.json (Questie
+# 12.1.0, Forever); Wowhead Forever quest 6123 (the Lunar Fungal Blooms grow in
+# the moonkin caves east of Auberdine) and item 2449 (Earthroot vendors).
+
+# ---------------------------------------------------------------- Night Elves
+
+step Lessons Anew
+  only NightElf
+  zone Darnassus
+  tip Mathrengyl Bearwalker stands in the Cenarion Enclave.
+  level 14
+  accept 6121 npc 4217                  -- Mathrengyl Bearwalker
+
+step Dendrite Starblaze
+  only NightElf
+  zone Moonglade
+  tip Cast Teleport: Moonglade. Dendrite Starblaze is in Nighthaven. Then fly to Auberdine.
+  turnin 6121                           -- Dendrite Starblaze
+  accept 6122
+  fly "Auberdine"
+
+step Cliffspring Falls
+  only NightElf
+  zone Darkshore
+  tip Ride north-east from Auberdine to Cliffspring Falls and fill the Empty Cliffspring Falls Sampler at the mouth of the cave by the falls.
+  collect 15845 quest 6122.1            -- Filled Cliffspring Falls Sampler
+
+step Alanndarian Nightsong
+  only NightElf
+  tip Back in Auberdine.
+  turnin 6122                           -- Alanndarian Nightsong
+  accept 6123
+
+step Lunar Fungus and Earthroot
+  only NightElf
+  tip The Lunar Fungal Blooms grow in the moonkin caves in the hills just east of Auberdine; the moonkin there are irritable. Earthroot needs Herbalism: herbalists pick it all over Darkshore, anyone else buys it from Maria Lumere (Alchemy Supplies) in Stormwind or on the Auction House.
+  collect 15851 x12 quest 6123.2        -- Lunar Fungus
+  collect 2449 x5 quest 6123.1          -- Earthroot
+
+step Alanndarian Nightsong
+  only NightElf
+  turnin 6123                           -- Alanndarian Nightsong
+  accept 6124
+
+step Sickly Deer
+  only NightElf
+  tip Use the Curative Animal Salve on Sickly Deer. They roam Darkshore from the Cliffspring River in the north to the Ashenvale border in the south.
+  kill 12298 quest 6124.1               -- Sickly Deer: use the salve on them
+
+step Curing the Sick
+  only NightElf
+  zone Moonglade
+  tip Cast Teleport: Moonglade and see Dendrite Starblaze, then fly to Rut'theran Village and take the portal up to Darnassus.
+  turnin 6124                           -- Dendrite Starblaze
+  accept 6125
+  fly "Rut'theran Village"
+
+step Power over Poison
+  only NightElf
+  zone Darnassus
+  turnin 6125                           -- Mathrengyl Bearwalker: Cure Poison
+
+# ---------------------------------------------------------------- Tauren
+
+step Lessons Anew
+  only Tauren
+  zone Thunder Bluff
+  tip Turak Runetotem stands on Elder Rise.
+  level 14
+  accept 6126 npc 3033                  -- Turak Runetotem
+
+step Dendrite Starblaze
+  only Tauren
+  zone Moonglade
+  tip Cast Teleport: Moonglade. Dendrite Starblaze is in Nighthaven. Bunthen Plainswind flies druids to Thunder Bluff; fly on to the Crossroads from there.
+  turnin 6126                           -- Dendrite Starblaze
+  accept 6127
+  fly "Thunder Bluff"
+
+step Dreadmist Peak
+  only Tauren
+  zone The Barrens
+  tip From the Crossroads ride north to Dreadmist Peak and fill the Empty Dreadmist Peak Sampler at the Dreadmist Peak Pool.
+  fly "Crossroads"
+  collect 15843 quest 6127.1            -- Filled Dreadmist Peak Sampler
+
+step Tonga Runetotem
+  only Tauren
+  tip Tonga Runetotem stands in the Crossroads. No Herbalism? Hula'mahi, a few steps away, sells Earthroot, three at a time until he restocks.
+  turnin 6127                           -- Tonga Runetotem
+  accept 6128
+  buy 2449 x5 npc 3490 optional         -- Earthroot; herbalists pick it on the plains
+
+step Earthroot and Kodo Horns
+  only Tauren
+  tip Lost Barrens Kodos roam the plains north and west of the Crossroads and around the Stagnant Oasis; each drops a horn. Herbalists find Earthroot all over the northern Barrens.
+  collect 15852 x5 quest 6128.2         -- Kodo Horn
+  collect 2449 x5 quest 6128.1          -- Earthroot
+
+step Tonga Runetotem
+  only Tauren
+  turnin 6128                           -- Tonga Runetotem
+  accept 6129
+
+step Sickly Gazelles
+  only Tauren
+  tip Use the Curative Animal Salve on Sickly Gazelles: they graze north of the road that runs east and west through the Crossroads.
+  kill 12296 quest 6129.1               -- Sickly Gazelle: use the salve on them
+
+step Curing the Sick
+  only Tauren
+  zone Moonglade
+  tip Cast Teleport: Moonglade and see Dendrite Starblaze, then take Bunthen Plainswind's flight to Thunder Bluff.
+  turnin 6129                           -- Dendrite Starblaze
+  accept 6130
+  fly "Thunder Bluff"
+
+step Power over Poison
+  only Tauren
+  zone Thunder Bluff
+  turnin 6130                           -- Turak Runetotem: Cure Poison

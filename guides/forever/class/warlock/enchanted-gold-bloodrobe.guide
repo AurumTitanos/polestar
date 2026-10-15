@@ -1,0 +1,110 @@
+guide forever/class/warlock/enchanted-gold-bloodrobe
+title Enchanted Gold Bloodrobe
+category Class
+class Warlock
+folder Warlock
+levels 31-38
+zone The Barrens
+keywords In Search of Menara Voidrender, Components for the Enchanted Gold Bloodrobe, Fine Gold Thread, The Completed Robe, Menara Voidrender, Xizk Goodstitch, Robes of Arcana, Gold Bar, Hatefury Blood, Lesser Infernal Stone, Smoldering Coal, Warlock, class armor
+reward item 6900
+why A rare cloth robe for your 30s, which Menara Voidrender makes from the parts you bring her.
+
+# The Enchanted Gold Bloodrobe: In Search of Menara Voidrender (4736-4739)
+# from your trainer to Menara in Ratchet, then Components for the Enchanted
+# Gold Bloodrobe (1796, 4781, 4782, 4783, 4784), Fine Gold Thread (4785) from
+# Xizk Goodstitch in Booty Bay and The Completed Robe (4786).
+# Sources: quests.json, npcs.json and items.json (Questie 12.1.0 and
+# Questie-Forever) for the givers, drops and spawns; professions.json for
+# Robes of Arcana (Tailoring) and Gold Bar (Mining, Smelt Gold); Wowhead's
+# Classic quest page (wowhead.com/classic/quest=4786) for waiting while Menara
+# finishes the robe; Wowhead Forever's Warlock class page
+# (data/local/quest-audit/wowhead-class-quests.json): every quest of the chain
+# unchanged in Forever.
+# Robes of Arcana and a Gold Bar have no place to fetch them: tailors and
+# miners make them, everyone else buys them at the Auction House. The Soul
+# Shard is one of your own.
+# Based on data, not play: the beta caps at level 30 until launch on
+# 4 November, and the chain starts at 31, so it has not been checked in game.
+
+step In Search of Menara Voidrender (Stormwind)
+  only Human
+  zone Stormwind City
+  tip At 31 Demisette Cloyce in the Slaughtered Lamb, in the Mage Quarter, sends you to Menara Voidrender in Ratchet.
+  level 31
+  accept 4738                         -- Demisette Cloyce
+
+step In Search of Menara Voidrender (Ironforge)
+  only Gnome
+  zone Ironforge
+  tip At 31 Briarthorn in Ironforge sends you to Menara Voidrender in Ratchet.
+  level 31
+  accept 4736                         -- Briarthorn
+
+step In Search of Menara Voidrender (Orgrimmar)
+  only Orc,Troll
+  zone Orgrimmar
+  tip At 31 Zevrost in the Cleft of Shadow sends you to Menara Voidrender in Ratchet.
+  level 31
+  accept 4737                         -- Zevrost
+
+step In Search of Menara Voidrender (Undercity)
+  only Undead
+  zone Undercity
+  tip At 31 Kaal Soulreaper in the Magic Quarter sends you to Menara Voidrender in Ratchet. The zeppelin from Tirisfal Glades flies to Durotar.
+  level 31
+  accept 4739                         -- Kaal Soulreaper
+
+step Menara Voidrender
+  zone The Barrens
+  tip Menara Voidrender stands in the tower on the hill above Ratchet, beside Strahad Farsan.
+  turnin 4738 only Human              -- Menara Voidrender
+  turnin 4736 only Gnome              -- Menara Voidrender
+  turnin 4737 only Orc,Troll          -- Menara Voidrender
+  turnin 4739 only Undead             -- Menara Voidrender
+  accept 1796
+
+step Robes of Arcana
+  tip Bring Menara a Robes of Arcana: tailors sew it from a pattern that drops; otherwise buy one at the Auction House. Her next errand needs a Gold Bar: smelted from Gold Ore, or from the Auction House.
+  turnin 1796                         -- Menara Voidrender
+  accept 4781
+
+step Xizk Goodstitch
+  zone Stranglethorn Vale
+  tip Xizk Goodstitch sells tailoring supplies in Booty Bay. Bring him the Gold Bar.
+  turnin 4781                         -- Xizk Goodstitch
+  accept 4782
+
+step Back to Menara
+  zone The Barrens
+  turnin 4782                         -- Menara Voidrender
+  accept 4783
+
+step Desolace demons
+  zone Desolace
+  tip The Hatefury satyrs of Sargeron, in north-eastern Desolace, carry the blood; the Lesser Infernals of Mannoroc Coven, in the south, the stone.
+  collect 6989 quest 4783.1           -- Vials of Hatefury Blood
+  collect 6990 quest 4783.2           -- Lesser Infernal Stone
+
+step Menara again
+  zone The Barrens
+  turnin 4783                         -- Menara Voidrender
+  accept 4784
+
+step Fine Gold Thread
+  zone Stranglethorn Vale
+  tip Xizk Goodstitch in Booty Bay has the thread for you.
+  accept 4785                         -- Xizk Goodstitch
+  turnin 4785
+
+step Smoldering Coal
+  zone Arathi Highlands
+  tip The Burning Exiles, fire elementals in western Arathi Highlands, drop the coal.
+  collect 6991 quest 4784.2           -- Smoldering Coal
+
+step The Completed Robe
+  zone The Barrens
+  tip Back to Menara with the thread, the coal and a Soul Shard. Wait while she completes the robe, then speak to her again.
+  turnin 4784                         -- Menara Voidrender
+  accept 4786
+  complete 4786                       -- Wait for the robe
+  turnin 4786                         -- Menara Voidrender: Enchanted Gold Bloodrobe

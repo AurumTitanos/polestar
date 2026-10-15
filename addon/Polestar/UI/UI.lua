@@ -18,6 +18,7 @@ local format, type = string.format, type
 ns.RegisterDefaults("ui", {
 	shown = true,
 	locked = false,
+	growUp = false, -- pin the guide window by its bottom edge, so it grows upward
 	compact = false,
 	style = "standard", -- "standard" | "transparent"
 	scale = 1,
@@ -27,7 +28,7 @@ ns.RegisterDefaults("ui", {
 	upcoming = 0, -- Up next is off by default (the reading flow names the next person instead)
 	upcomingOpen = false, -- when on, upcoming steps start listed instead of collapsed
 	showNotes = true,
-	combat = "fade", -- "show" | "fade" | "hide"
+	combat = "show", -- "show" | "fade" | "hide"; steady by default, a fade on every pull distracts
 	reduceMotion = false,
 	font = "game", -- "game" (the client's own font, the default) | "inter" (EllesmereUI's while matchFont is on)
 	scheme = "dusk", -- "dusk" | "night" | "graphite" | "ellesmere" (Polestar.Theme.SCHEMES)
@@ -296,24 +297,46 @@ function UI.AreaLine(goal)
 end
 
 -- Creature ranks as the client names them.
-local RANK = { [1] = "elite", [2] = "rare elite", [3] = "boss", [4] = "rare" }
+local RANK = { [1] = L["elite"], [2] = L["rare elite"], [3] = L["boss"], [4] = L["rare"] }
 
 -- "Aean Swiftriver (rare elite)": a source's name with its rank.
 local function sourceName(src)
 	local rank = RANK[src.rank]
-	return rank and (src.name .. " (" .. L[rank] .. ")") or src.name
+	return rank and (src.name .. " (" .. rank .. ")") or src.name
 end
 
 -- Where a collected item comes from, when one source has it (the goal's
 -- `source`): "Kill Aean Swiftriver (rare elite)" for an enemy, "From <name>"
 -- for a friend or an object. An object named as the item is the item lying
--- there: nothing to add.
+-- there: nothing to add. Nil when the goal's text already names the source
+-- ("Kill Grell or Grellkin for Fel Moss"); this line serves author text.
 function UI.SourceLine(goal)
 	local src = goal.source
-	if goal.t ~= "collect" or type(src) ~= "table" or type(src.name) ~= "string" then return nil end
+	if goal.t ~= "collect" or type(src) ~= "table" or type(src.name) ~= "string" or src.inText then return nil end
 	if goal.status == "done" or goal.status == "skipped" then return nil end
 	if src.kind == "object" and src.name == goal.subject then return nil end
-	return format(src.enemy and L["Kill %s"] or L["From %s"], sourceName(src))
+	local who = sourceName(src)
+	if type(src.also) == "string" then who = format(L["%s or %s"], who, src.also) end
+	return format(src.enemy and L["Kill %s"] or L["From %s"], who)
+end
+
+-- Group content (the goal's `party`, the compiled `group`): "Elite: group
+-- advised", "Rare elite: group advised", "Boss: group advised", "Dungeon:
+-- Dire Maul", "Raid: Molten Core", "Group of 3 advised" or "Group advised",
+-- in the dungeon colour. Nil once the goal is done or skipped.
+local ELITE_LINE = { [1] = L["Elite: group advised"], [2] = L["Rare elite: group advised"], [3] = L["Boss: group advised"] }
+function UI.GroupLine(goal)
+	local p = goal.party
+	if type(p) ~= "table" or goal.status == "done" or goal.status == "skipped" then return nil end
+	local text
+	if p.kind == "elite" then
+		text = ELITE_LINE[p.rank] or ELITE_LINE[1]
+	elseif (p.kind == "dungeon" or p.kind == "raid") and type(p.name) == "string" then
+		text = format(p.kind == "raid" and L["Raid: %s"] or L["Dungeon: %s"], p.name)
+	elseif p.kind == "group" then
+		text = type(p.size) == "number" and format(L["Group of %d advised"], p.size) or L["Group advised"]
+	end
+	return text and ("|c" .. Theme.Hex("dungeon") .. text .. "|r") or nil
 end
 
 -- How to get the item a quest starts from, on the quest's one line (the
@@ -348,20 +371,24 @@ function UI.ReadingGoal(view, goal)
 	if not a then return goal end
 	return setmetatable({
 		t = a.t, text = a.text, verb = a.verb, subject = a.subject, subjectKind = a.subjectKind,
-		quest = a.quest, note = a.note or false, optional = a.optional, progress = false, source = false,
+		quest = a.quest, note = a.note or false, optional = a.optional, progress = false, source = false, party = a.party,
 	}, { __index = goal })
 end
 
 -- The one line under a goal in the reading flow, only when it changes what
--- the player does: why a quest is unavailable, how to get the item a quest
--- starts from, whom an item is got from, that an area objective's mobs are
--- all over its area, which mobs a farm spot is, where a chosen
--- trainer/vendor is, the goal's own note, and an open turn-in's rewards. The
--- rest of the detail ("for Kobold Camp Cleanup") lives in the tooltip.
+-- the player does: why a quest is unavailable, that the goal needs a group,
+-- how to get the item a quest starts from, whom an item is got from, that an
+-- area objective's mobs are all over its area, which mobs a farm spot is,
+-- where a chosen trainer/vendor is, the goal's own note, and an open
+-- turn-in's rewards. The rest of the detail ("for Kobold Camp Cleanup")
+-- lives in the tooltip.
 -- `shownMap`: a zone the window already names above (the person's), not repeated.
-function UI.GoalSubline(goal, shownMap)
+-- `noParty`: the group line already shows on a goal above (said once per card).
+function UI.GoalSubline(goal, shownMap, noParty)
 	if goal.unavailable then return UI.GoalDetail(goal) end
 	local parts = {}
+	local party = not noParty and UI.GroupLine(goal)
+	if party then parts[#parts + 1] = party end
 	local starter = UI.StarterLine(goal)
 	if starter then parts[#parts + 1] = starter end
 	local source = UI.SourceLine(goal)

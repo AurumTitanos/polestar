@@ -76,7 +76,7 @@ function Lookup.ProfessionName(line)
 	return C and C.IsLoaded() and C.Name("skill", line) or nil
 end
 
-local STANDINGS = { "Hated", "Hostile", "Unfriendly", "Neutral", "Friendly", "Honored", "Revered", "Exalted" }
+local STANDINGS = { L["Hated"], L["Hostile"], L["Unfriendly"], L["Neutral"], L["Friendly"], L["Honored"], L["Revered"], L["Exalted"] }
 Lookup.STANDINGS = STANDINGS
 
 -- Era quest masks (ChrRaces / ChrClasses bits). A race or class missing
@@ -173,26 +173,37 @@ local function objectSpawn(objectId, from)
 	return obj, s, t
 end
 
--- The quest giver (or turn-in) nearest to the player:
--- -> { npc|object, name, spawn, travel } | nil
-local function questEnd(ends, from)
+-- The quest giver (or turn-in) nearest to the player, of the character's side
+-- (an NPC of the other faction only when no other is known, then marked
+-- `hostile` with its `faction`: Tabetha's Task is given by the mage trainers
+-- of both sides): -> { npc|object, name, spawn, travel, hostile, faction }
+-- | nil. p: Lookup.PlayerInfo() (default: read now).
+local function closer(best, c)
+	if not best or (c.travel and (not best.travel or c.travel < best.travel)) then return c end
+	return best
+end
+
+local function questEnd(ends, from, p)
 	if type(ends) ~= "table" then return nil end
-	local best
+	p = p or playerInfo()
+	local best, other
 	for _, id in ipairs(ends.npc or {}) do
 		local npc, s, t = npcSpawn(id, from)
-		if npc and s and (not best or (t and (not best.travel or t < best.travel))) then
-			best = { npc = npc.id, name = npc.name, spawn = s, travel = t }
+		if npc and s then
+			local c = { npc = npc.id, name = npc.name, spawn = s, travel = t }
+			if sideOK(npc.faction, p) then best = closer(best, c) else c.faction = npc.faction; other = closer(other, c) end
 		end
 	end
 	for _, id in ipairs(ends.object or {}) do
 		local obj, s, t = objectSpawn(id, from)
-		if obj and s and (not best or (t and (not best.travel or t < best.travel))) then
-			best = { object = obj.id, name = obj.name, spawn = s, travel = t }
-		end
+		if obj and s then best = closer(best, { object = obj.id, name = obj.name, spawn = s, travel = t }) end
 	end
-	return best
+	if best then return best end
+	if other then other.hostile = true end
+	return other
 end
 Lookup.QuestEnd = questEnd
+Lookup.SideOK = sideOK
 
 ---------------------------------------------------------------------------
 -- Effort
@@ -243,6 +254,17 @@ local function detail(kindLabel, where)
 end
 
 local function levelText(n) return L["Requires level"] .. " " .. n end
+
+-- A standing the row needs (a vendor's or a quest's): unmet, the row is
+-- unavailable and costs the grind.
+local function repGate(r, faction, need)
+	local have = tonumber((ns.Compat.GetFactionStanding(faction))) or 4
+	if have >= need then return end
+	local f = Codex().Faction(faction)
+	local name = f and f.name or (L["Faction"] .. " " .. faction)
+	r.effort = (r.effort or 0) + (need - have) * REP_STANDING
+	block(r, "reputation", L["Requires"] .. " " .. (STANDINGS[need] or "") .. " (" .. name .. ")")
+end
 
 -- Quest availability for this character: why, text | nil
 local function questBlock(q, p)
@@ -302,6 +324,18 @@ builders.vendor = function(src, p, from)
 	r.detail = detail(L["Vendor"], r.zone)
 	r.price = src.cost
 	if src.limited then r.effort = LIMITED_RESTOCK end
+	if npc and not sideOK(npc.faction, p) then block(r, "faction", sideText(npc.faction)) end
+	r.guideable = npc ~= nil and located(r)
+	return r
+end
+
+-- An NPC hands it out (casts the spell that creates it: Duke Hydraxis's Aqual Quintessence).
+builders.gift = function(src, p, from)
+	local r = newRow(src, "gift")
+	local npc, s, t = npcSpawn(src.npc, from)
+	r.label = npc and npc.name or L["Given by an NPC"]
+	place(r, s, t)
+	r.detail = detail(L["Given by an NPC"], r.zone)
 	if npc and not sideOK(npc.faction, p) then block(r, "faction", sideText(npc.faction)) end
 	r.guideable = npc ~= nil and located(r)
 	return r
@@ -370,13 +404,15 @@ builders.quest = function(src, p, from)
 		r.detail = L["Quest"]
 		return r
 	end
-	local giver = questEnd(q.start, from)
-	local finish = questEnd(q["end"], nil)
+	local giver = questEnd(q.start, from, p)
+	local finish = questEnd(q["end"], nil, p)
 	if giver then place(r, giver.spawn, giver.travel) end
 	r.detail = detail(src.choice and L["Quest reward choice"] or L["Quest reward"], r.zone)
 	r.effort = questEffort(q, p)
 	local why, text = questBlock(q, p)
 	if why then block(r, why, text) end
+	if giver and giver.hostile then block(r, "faction", sideText(giver.faction)) end
+	if q.repFaction and q.repStanding then repGate(r, q.repFaction, q.repStanding) end
 	local startsFromItem = q.start and q.start.item and #q.start.item > 0
 	r.guideable = (giver ~= nil or startsFromItem) and finish ~= nil
 	return r
@@ -438,7 +474,7 @@ builders.rep = function(src, p, from)
 	local f = src.faction and C.Faction(src.faction)
 	r.label = f and f.name or L["Reputation"]
 	r.standing = src.standing
-	r.detail = detail(L["Reputation"], src.standing and L[STANDINGS[src.standing] or ""] or nil)
+	r.detail = detail(L["Reputation"], src.standing and (STANDINGS[src.standing] or "") or nil)
 	local npc, s, t
 	if src.npc then npc, s, t = npcSpawn(src.npc, from) end
 	place(r, s, t)
@@ -450,7 +486,7 @@ builders.rep = function(src, p, from)
 	local need = src.standing or 1
 	if have < need then
 		r.effort = (need - have) * REP_STANDING
-		block(r, "reputation", L["Requires"] .. " " .. L[STANDINGS[need] or ""] .. " (" .. L[STANDINGS[have] or ""] .. ")")
+		block(r, "reputation", L["Requires"] .. " " .. (STANDINGS[need] or "") .. " (" .. (STANDINGS[have] or "") .. ")")
 	end
 	r.guideable = src.faction ~= nil and src.standing ~= nil and f ~= nil
 	return r
@@ -510,23 +546,45 @@ end
 -- Entities
 ---------------------------------------------------------------------------
 
--- What a vendor asks before selling the item: a standing with a faction
--- (item.repFaction / repStanding) and a skill rank (item.reqSkill /
--- reqSkillRank). Unmet: the purchase row is unavailable and costs the grind.
+-- What a vendor asks before selling the item, or an NPC before handing it
+-- out: a standing with a faction (purchaseRep) and, to buy it, a skill rank
+-- (item.reqSkill / reqSkillRank). Unmet: the row is unavailable and costs
+-- the grind.
 local PURCHASE = { vendor = true, pvp = true }
 
-local function purchaseGates(item, r)
-	local C = Codex()
-	if item.repFaction and item.repStanding then
-		local have = tonumber((ns.Compat.GetFactionStanding(item.repFaction))) or 4
-		local need = item.repStanding
-		if have < need then
-			local f = C.Faction(item.repFaction)
-			local name = f and f.name or (L["Faction"] .. " " .. item.repFaction)
-			r.effort = (r.effort or 0) + (need - have) * REP_STANDING
-			block(r, "reputation", L["Requires"] .. " " .. L[STANDINGS[need] or ""] .. " (" .. name .. ")")
+local function factionSide(id)
+	local f = Codex().Faction(id)
+	return f and (f.side == "Alliance" and "A" or f.side == "Horde" and "H") or nil
+end
+
+-- The standing a row at npcId asks -> faction, standing | nil: a reputation
+-- source standing at that npc (the Codex's cited gate table, a guide's
+-- gate), else, to buy it, the item's own (item.repFaction / repStanding)
+-- unless that is the other side's faction and a gate of the npc's side
+-- exists (Alterac Valley wares both sides' supply officers sell).
+local function purchaseRep(item, npcId, purchase)
+	if type(item) ~= "table" then return nil end
+	local npc = npcId and Codex().Npc(npcId)
+	local side = npc and npc.faction
+	local ofSide
+	for _, s in ipairs(item.sources or {}) do
+		if s.type == "rep" and s.faction and s.standing and s.npc then
+			if s.npc == npcId then return s.faction, s.standing end
+			if side and not ofSide and factionSide(s.faction) == side then ofSide = s end
 		end
 	end
+	if not (purchase and item.repFaction and item.repStanding) then return nil end
+	local own = factionSide(item.repFaction)
+	if ofSide and own and own ~= side then return ofSide.faction, ofSide.standing end
+	return item.repFaction, item.repStanding
+end
+Lookup.PurchaseRep = purchaseRep
+
+local function purchaseGates(item, r)
+	local purchase = PURCHASE[r.type] or false
+	local faction, standing = purchaseRep(item, r.src and r.src.npc, purchase)
+	if faction then repGate(r, faction, standing) end
+	if not purchase then return end
 	if item.reqSkill and item.reqSkillRank then
 		local rank = ns.Compat.GetSkillRank(item.reqSkill)
 		if not rank or rank < item.reqSkillRank then
@@ -558,7 +616,7 @@ local function itemSources(id, p, from)
 		elseif item.reqLevel and item.reqLevel > p.level then
 			block(r, "level", levelText(item.reqLevel))
 		end
-		if PURCHASE[r.type] then purchaseGates(item, r) end
+		if PURCHASE[r.type] or r.type == "gift" then purchaseGates(item, r) end
 		-- Retired stock (item.status, from codex build): listed by the Era
 		-- databases, no longer handed out. Shown for the record, never guided.
 		if item.status == "retired" then
@@ -589,8 +647,8 @@ end
 local function questRows(q, p, from)
 	local list = {}
 	local why, text = questBlock(q, p)
-	local giver = questEnd(q.start, from)
-	local finish = questEnd(q["end"], from)
+	local giver = questEnd(q.start, from, p)
+	local finish = questEnd(q["end"], from, p)
 	if giver then
 		local r = newRow(nil, "start")
 		r.label = giver.name
@@ -598,6 +656,7 @@ local function questRows(q, p, from)
 		r.detail = detail(L["Starts the quest"], r.zone)
 		r.effort = questEffort(q, p)
 		if why then block(r, why, text) end
+		if giver.hostile then block(r, "faction", sideText(giver.faction)) end
 		r.guideable = finish ~= nil
 		list[#list + 1] = r
 	end
@@ -683,6 +742,9 @@ local function sourceLine(src)
 	elseif t == "quest" then
 		local q = src.quest and C.Quest(src.quest)
 		return detail(L["Quest reward"], q and q.zone and zoneName(q.zone))
+	elseif t == "gift" then
+		local npc = src.npc and C.Npc(src.npc)
+		return detail(L["Given by an NPC"], npc and firstZone(npc.spawns))
 	elseif t == "craft" then
 		local name = Lookup.ProfessionName(src.skillLine)
 		return name and detail(L["Crafted"], L[name]) or L["Crafted"]

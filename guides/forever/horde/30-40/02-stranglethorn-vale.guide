@@ -8,6 +8,10 @@ next forever/horde/30-40/03-arathi-highlands
 # Consensus route (Horde Tauren export), visit 24 (Stranglethorn Vale
 # 32.9-37.4), plus the export's earlier Stranglethorn stop (visit 17,
 # level 30.4), shared by every Horde start. Era + known Forever quests only.
+# The October refresh's export (visit 22, 32.9-37.4) has the same quests,
+# with the 30.4 stop already folded in; no Forever-only quest is picked
+# here. (Forever above 30 cannot be checked in game until launch on 4
+# November: this guide follows the data, not play.)
 #
 # Flow: the Undercity (where the previous guide ends) -> zeppelin to Grom'gol
 # (flight path, bind) -> Nesingwary's camp -> young tigers and panthers ->
@@ -35,10 +39,10 @@ next forever/horde/30-40/03-arathi-highlands
 #
 # Deviations from the export:
 # - Welcome to the Jungle (583), Tiger Mastery (185) and Panther Mastery
-#   (190) come from the export's first Stranglethorn stop at 30.4, merged
-#   here: the same camp, without the zeppelin round trip from Orgrimmar. The
-#   Booty Bay flight path from that stop is taken on the first Booty Bay
-#   visit.
+#   (190) come from the old export's first Stranglethorn stop at 30.4,
+#   merged here, as the refreshed export now does: the same camp, without
+#   the zeppelin round trip from Orgrimmar. The Booty Bay flight path from
+#   that stop is taken on the first Booty Bay visit.
 # - One Grom'gol bind for most of the visit: the export's Booty Bay binds
 #   are each replaced before use. The second hearth is replaced by the short
 #   ride from the Bloodscalp village to Grom'gol.
@@ -56,15 +60,15 @@ next forever/horde/30-40/03-arathi-highlands
 #   visit; they are at the start of forever/horde/30-40/03-arathi-highlands,
 #   where you are actually in Hammerfall.
 #
-# Class quests: Shamans and Warlocks make one hop to Kalimdor from Grom'gol
-# once they are bound there: the zeppelin to Orgrimmar, then a flight to
-# Ratchet (Shaman: the Shard of Water to Islen Waterseer, Call of Water 96:
-# your Water Totem) or to Freewind Post (Warlock: the Tattered Manuscript in
-# the Damaged Chest north of the post, Tome of the Cabal 1803), and the hearth
-# back. Both quests started in forever/horde/30-40/01-desolace.
+# Class quests: Shamans make one hop to Kalimdor from Grom'gol once they are
+# bound there: the zeppelin to Orgrimmar, a flight to Ratchet (the Shard of
+# Water to Islen Waterseer, Call of Water 96: your Water Totem) and the
+# hearth back. The quest started in forever/horde/30-40/01-desolace. The
+# Warlock Felhunter's Damaged Chest stop (1803) moved with the rest of the
+# chain to forever/class/warlock/felhunter-horde.
 #
-# Class training: Shamans and Warlocks train in Orgrimmar on their hop (about
-# 33); otherwise none in Stranglethorn: the guide stays between Grom'gol and
+# Class training: Shamans train in Orgrimmar on their hop (about 33);
+# otherwise none in Stranglethorn: the guide stays between Grom'gol and
 # Booty Bay. You train next at about 37.5 at the start of the next guide, on
 # the way through the Undercity (Hunters and Shamans in Orgrimmar, Druids in
 # Thunder Bluff), and again in Orgrimmar at about 39.
@@ -90,7 +94,7 @@ step Grom'gol Base Camp
   accept 581                          -- Nimboya
 
 step Orgrimmar
-  only Shaman,Warlock
+  only Shaman
   zone Orgrimmar
   tip Take the Orgrimmar zeppelin from the tower on the west side of Grom'gol and train in the city before you fly on.
   train class
@@ -102,15 +106,8 @@ step Islen Waterseer
   fly "Ratchet"
   turnin 96                           -- Islen Waterseer: Healing Stream Totem and your Water Totem
 
-step Damaged Chest
-  only Warlock
-  zone Thousand Needles
-  tip Take the Orgrimmar zeppelin from the tower on the west side of Grom'gol and fly to Freewind Post. The Damaged Chest lies in the canyon north of the post.
-  fly "Freewind Post"
-  collect 6997 quest 1803.2
-
 step Back to Grom'gol
-  only Shaman,Warlock
+  only Shaman
   zone Stranglethorn Vale
   hearth "Grom'gol Base Camp"
 

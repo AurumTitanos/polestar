@@ -28,10 +28,12 @@ Before the first `step`. `guide`, `title`, `levels` and `zone` are required.
 | `race <Race>, ...` | Only these races (Conditions) |
 | `class <Class>, ...` | Only these classes |
 | `next <id>, ...` | The guide that follows. Several ids: the player chooses, the first is the default; each must suit this guide's characters (`polestar find <zone> --kind guide --race <Race>`) |
-| `category <Category>` | `Leveling` (default), `Professions`, `Reputation`, `Legacy`, `Exploration`, `Collectibles`, `Dungeons` |
+| `category <Category>` | `Leveling` (default), `Class`, `Professions`, `Reputation`, `Legacy`, `Exploration`, `Collectibles`, `Dungeons` |
 | `folder <text>` | The guide menu folder to list it under |
 | `keywords <word>, ...` | Extra words the guide menu search matches |
 | `collects <item>, ...` | Item ids the guide obtains |
+| `reward item <item> ...` / `reward spell <id> "Name"` / `reward text <words>` | Repeatable: what the guide's goal gives, first in the guide menu's details (several items on one line: a choice of one). Lint warns on a `Class` guide without it |
+| `why <text>` | One short line in the guide menu's details: why the goal is worth doing (lint warns on a `Class` guide without it) |
 | `author <name>` | Default: `pack.json`'s author |
 | `version <N>` | A whole number, raised when the guide changes (default 1) |
 | `coords era` / `coords live` | The map frame of typed coordinates (default `era`) |
@@ -53,7 +55,7 @@ every goal in it that is not `optional` is; its goals are open together.
 ## Goals
 
 `<verb> <arguments> <modifiers> [-- note]`. Every goal also takes
-`optional`, `only`, `"text"` and, except where the last column says
+`optional`, `only`, `"text"`, `group` and, except where the last column says
 otherwise, the place modifiers `@x,y`, `map`, `r`, `era` / `live`.
 
 | Line | What it does | Also takes |
@@ -75,7 +77,7 @@ otherwise, the place modifiers `@x,y`, `map`, `r`, `era` / `live`.
 | `buy <item> ["Name"]` | Buy an item; `nearest` picks the closest vendor selling it | `npc`, `xN`, `nearest` |
 | `vendor nearest` / `vendor <npc>` | Sell and repair | `npc` |
 | `level <N>` | Reach level N, grinding if need be | no place modifiers |
-| `note <text>` | A line of information; never holds the step. With `only`, quote the text | no `"text"` |
+| `note <text>` | A line of information; never holds the step. With `only`, quote the text | no `"text"`, no `group` |
 | `skill <Profession> <N>` | Reach skill N (`"First Aid"` quoted) | |
 | `learn <spell> ["Name"]` | Learn a recipe or spell | `npc`, `item`, `nearest` |
 | `craft <spell> ["Name"]` | Craft a recipe | `xN`, `until` |
@@ -104,6 +106,7 @@ After the arguments, in any order.
 | `"text"` | Right after an id: the name or title, for content missing from the data; later: the text players see |
 | `lvl <N>` | On `accept`: the level the quest needs |
 | `optional` | Never holds the step |
+| `group [N]` | Needs a group (of N players, 2-40); the guide window says so. Elites, dungeon and raid quests are found from the data without it |
 | `only <condition>, ...` | The goal is only for matching characters |
 | `nearest` | The closest vendor, trainer or drop place, picked in game |
 | `until <N>` | On `craft`: until the profession reaches N |

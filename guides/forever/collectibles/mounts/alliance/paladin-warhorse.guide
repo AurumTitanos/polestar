@@ -1,8 +1,10 @@
 guide forever/collectibles/mounts/alliance/paladin-warhorse
 title Paladin Warhorse
-category Collectibles
-folder Mounts · Class
+category Class
+folder Paladin
 keywords Summon Warhorse, Tome of Nobility, Paladin, Duthorian Rall, class mount
+reward spell 13819 "Summon Warhorse"
+why Your first mount at 40, summoned at will: a paladin buys no horse.
 faction Alliance
 class Paladin
 levels 40-60

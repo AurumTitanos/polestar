@@ -39,9 +39,11 @@ register(QUESTING, L["Buttons"], L["Action buttons"], {
 
 register(QUESTING, L["Rewards & gear"], L["Quest rewards"], {
 	{ kind = "toggle", key = "qol.rewardHighlight", label = L["Mark quest rewards"],
-		help = L["On the reward choices, a green arrow marks each upgrade for your spec (with Gear advice on), a thin frame in your accent colour the one to take, and a coin the one that sells for most when none is an upgrade."] },
+		help = L["On the reward choices, a green arrow marks each upgrade for your spec (with Gear advice on), a thin frame in your accent colour the one to take, and a coin the one that sells for most."] },
 	{ kind = "toggle", key = "qol.rewardAutoPick", label = L["Take the best reward"],
 		help = L["Chooses that reward for you when you complete the quest. Hold Shift to choose yourself."] },
+	{ kind = "toggle", key = "qol.rewardEquip", label = L["Wear reward upgrades"],
+		help = L["Puts on what a turn-in gives when it is an upgrade for your spec (with Gear advice on), once it reaches your bags and you are out of combat. Hold Shift at the turn-in to skip."] },
 })
 
 register(QUESTING, L["Quests"], L["Faster questing"], {
@@ -95,6 +97,13 @@ register(QOL, L["Vendors"], L["Merchants"], {
 		help = help("autoRepair", L["Repairs all gear at merchants who can, when you can afford it. Hold Shift to skip."]) },
 	{ kind = "toggle", key = "qol.repairGuild", label = L["Guild bank first"], disabled = repairOff,
 		help = help("repairGuild", L["When your guild rank may, the guild bank pays for repairs and your money covers the rest."]) },
+	{ kind = "toggle", key = "qol.buyGoals", label = L["Buy for the guide"],
+		help = L["When the step asks you to buy something and the merchant sells it, buys what you still need after selling and repairing. Optional buys and anything over 50g are left to you. Hold Shift to skip."] },
+})
+
+register(QOL, L["Vendors"], L["Trainers"], {
+	{ kind = "toggle", key = "qol.trainAll", label = L["Learn new spells"],
+		help = L["Learns every spell a class trainer offers that you can afford, and prints the total. Profession trainers are left alone. Hold Shift to skip."] },
 })
 
 register(QOL, L["Trackers"], L["Experience"], {

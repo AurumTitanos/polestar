@@ -212,7 +212,7 @@ local function entry(o)
 		scale = num(o.scale), strata = str(o.strata), level = num(o.level), layer = str(o.layer), sublayer = num(o.sublayer),
 		texture = (type(o.texture) == "string" or type(o.texture) == "number") and o.texture or nil, color = copy(o.color),
 		vertexColor = copy(o.vertexColor), texCoord = copy(o.texCoord), gradient = o.gradient, desaturation = o.desaturation,
-		rotation = o.rotation, blend = o.blend,
+		rotation = o.rotation, blend = o.blend, vertexOffset = copy(o.vertexOffset),
 	}
 	if o.kind == "FontString" then
 		e.text = o.text
@@ -231,6 +231,7 @@ local function entry(o)
 		e.checked = o.checked
 		e.checkedTexture = idOf(o.checkedTexture)
 		e.thumbTexture = idOf(o.thumbTexture)
+		e.mask = idOf(o.mask)
 		e.value, e.minValue, e.maxValue = o.value, o.minValue, o.maxValue
 		e.euiSkin = o.euiSkin
 		e.euiOpts = o.euiOpts

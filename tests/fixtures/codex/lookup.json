@@ -40,7 +40,8 @@
     "7004": { "id": 7004, "title": "Alliance Errand", "level": 15, "minLevel": 10, "faction": "A", "races": null, "classes": null, "start": { "npc": [5001], "object": [], "item": [] }, "end": { "npc": [5001], "object": [] }, "objectives": [], "pre": [], "preAny": [], "zone": 9001, "rewards": [], "choices": [] },
     "7005": { "id": 7005, "title": "High Peril", "level": 32, "minLevel": 30, "faction": "A", "races": null, "classes": null, "start": { "npc": [5008], "object": [], "item": [] }, "end": { "npc": [5008], "object": [] }, "objectives": [], "pre": [], "preAny": [], "zone": 9001, "rewards": [8002], "choices": [] },
     "7006": { "id": 7006, "title": "Orcish Rite", "level": 18, "minLevel": 10, "faction": null, "races": 2, "classes": null, "start": { "npc": [5008], "object": [], "item": [] }, "end": { "npc": [5008], "object": [] }, "objectives": [], "pre": [], "preAny": [], "zone": 9001, "rewards": [8003], "choices": [] },
-    "7007": { "id": 7007, "title": "Strange Rite", "level": 18, "minLevel": 10, "faction": null, "races": 512, "classes": null, "start": { "npc": [5008], "object": [], "item": [] }, "end": { "npc": [5008], "object": [] }, "objectives": [], "pre": [], "preAny": [], "zone": 9001, "rewards": [8003], "choices": [] }
+    "7007": { "id": 7007, "title": "Strange Rite", "level": 18, "minLevel": 10, "faction": null, "races": 512, "classes": null, "start": { "npc": [5008], "object": [], "item": [] }, "end": { "npc": [5008], "object": [] }, "objectives": [], "pre": [], "preAny": [], "zone": 9001, "rewards": [8003], "choices": [] },
+    "7008": { "id": 7008, "title": "The Wardens' Commission", "level": 20, "minLevel": 15, "faction": "A", "races": null, "classes": null, "start": { "npc": [5007], "object": [], "item": [] }, "end": { "npc": [5007], "object": [] }, "objectives": [], "pre": [], "preAny": [], "zone": 9001, "rewards": [8018], "choices": [], "repFaction": 9100, "repStanding": 6 }
   },
   "instances": {
     "ashen_crypt": { "key": "ashen_crypt", "name": "Ashen Crypt", "kind": "dungeon", "forever": true, "areaId": null, "map": null, "entrance": { "map": 9001, "x": 30, "y": 70, "f": "e" }, "levels": [18, 20, 26], "bosses": [{ "name": "Lord Ashcroft", "npc": 5013, "items": [8008] }] }
@@ -83,6 +84,7 @@
     "8014": { "id": 8014, "name": "Gnash's Fang", "quality": 2, "kind": "item", "spell": null, "reqLevel": null, "sources": [{ "type": "drop", "npc": 5011, "chance": 25, "from": ["rarescanner"] }] },
     "8015": { "id": 8015, "name": "Mystery Box Prize", "quality": 1, "kind": "item", "spell": null, "reqLevel": null, "sources": [{ "type": "world", "minLevel": 10, "maxLevel": 30, "from": ["wowhead"] }] },
     "8016": { "id": 8016, "name": "Warden Charger Reins", "quality": 4, "kind": "mount", "spell": null, "reqLevel": null, "repFaction": 9100, "repStanding": 8, "sources": [{ "type": "vendor", "npc": 5007, "cost": 800000, "from": ["client"] }] },
-    "8017": { "id": 8017, "name": "Pattern: Vale Cloak", "quality": 2, "kind": "recipe", "spell": null, "reqLevel": null, "reqSkill": 197, "reqSkillRank": 125, "sources": [{ "type": "vendor", "npc": 5001, "cost": 2000, "from": ["client"] }] }
+    "8017": { "id": 8017, "name": "Pattern: Vale Cloak", "quality": 2, "kind": "recipe", "spell": null, "reqLevel": null, "reqSkill": 197, "reqSkillRank": 125, "sources": [{ "type": "vendor", "npc": 5001, "cost": 2000, "from": ["client"] }] },
+    "8018": { "id": 8018, "name": "Commission Band", "quality": 3, "kind": "item", "spell": null, "reqLevel": null, "sources": [{ "type": "quest", "quest": 7008, "from": ["questie"] }] }
   }
 }

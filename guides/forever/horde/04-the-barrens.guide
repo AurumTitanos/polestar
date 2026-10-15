@@ -63,11 +63,20 @@ next forever/horde/05-stonetalon-mountains
 # Foothills (493, from Silverpine) and Rilli Greasygob (3923).
 #
 # Class quests (training trip at 20): Warrior Speak with Ruga / Trial at the
-# Field of Giants / Speak with Thun'grim (1823-1825); Shaman Call of Water
+# Field of Giants / Speak with Thun'grim (1823-1825); the Twitching Antennae
+# vanish 15 minutes after they drop (ItemSparse 7119, 900 s), so Warriors
+# gather them at the Field of Giants after Gann's last turn-in and hearth to
+# Ruga at once, not on the first pass before the hour-long southern loop.
+# Brutal Armor (1838 onwards) is in the Warrior class guide Brutal Armor.
+# Shaman Call of Water
 # (1528, 1530, 1535; 1536 waits at the Spring Well beside Tarren Mill); Warlock
-# succubus chain (1507-1513, The Binding on the last Orgrimmar trip); Troll
-# Priest Shadowguard (5680, Ur'kyo); Undead Priest Devouring Plague (5646,
-# Ur'kyo to Aelthalyste in the Undercity, about 25); Rogue The Shattered
+# succubus chain (1507-1513, The Binding on the last Orgrimmar trip). The
+# incubus (Love Hurts 65601, Wish You Were Here 65610, The Binding 65604,
+# Forever) is left out: Wish You Were Here's scarf drops at about 1 in 20 from
+# the bog beasts of Fallen Sky Lake, off the Ashenvale route; see
+# forever/class/warlock/incubus-horde. Troll Priest Shadowguard (5680,
+# Ur'kyo); Undead Priest Dark Sacrifice (5646, Ur'kyo to Aelthalyste in the
+# Undercity, about 25; Forever renamed Devouring Plague); Rogue The Shattered
 # Salute / Deep Cover / Mission: Possible But Not Probable (2460, 2458, 2478
 # optional) and, if Gallywix falls, Hinott's Assistance (2479, optional:
 # Serge Hinott in Tarren Mill teaches Poisons). Tauren Druids open the Sludge
@@ -76,6 +85,12 @@ next forever/horde/05-stonetalon-mountains
 # Great Cat Spirit or, for Skyborne, the Windborne one, 98341; 98362);
 # Skyborne hand Turak's Moonglade welcome (94913) to Dendrite on the same
 # trip, Tauren finish Aquatic Form (30, 31).
+# Tauren Druids finish Cure Poison (6127-6130): Dreadmist Peak and Tonga
+# Runetotem before the level-20 grind, Kodo Horns and Earthroot on the
+# north-west loop, Sickly Gazelles on the way to Verog, Power over Poison on
+# the Cat Form trip. Forever rewards Cure Poison only through it.
+# Shamans off this route: forever/class/shaman/call-of-water-horde does the
+# whole Call of Water chain at 20-23.
 #
 # Class training: Orgrimmar at 20 and 23 for everyone but Druids and
 # Paladins. Druids train in Thunder Bluff at 20 and 23; Paladins in Thunder
@@ -143,6 +158,14 @@ step The Crossroads
   accept 868                          -- Korran: the eggs are in the Field of Giants, later
   turnin 98024 only Skyborne          -- Thork, at the top of the tower
 
+step Dreadmist Peak
+  only Tauren,Druid
+  tip Ride north from the Crossroads to Dreadmist Peak and fill the Empty Dreadmist Peak Sampler at the Dreadmist Peak Pool, then back to Tonga Runetotem in the Crossroads. No Herbalism? Hula'mahi beside him sells Earthroot, three at a time until he restocks.
+  collect 15843 quest 6127.1 @48.4,18.9 -- Filled Dreadmist Peak Sampler
+  turnin 6127                         -- Tonga Runetotem
+  accept 6128
+  buy 2449 x5 npc 3490 optional       -- Earthroot from Hula'mahi; herbalists pick it on the plains
+
 step Level 20
   tip The level-20 class quests in Orgrimmar (Sorek, Searn Firewarder, the Warlock and Rogue trainers) are only offered from level 20, so finish the level here before you fly. The Thunderhawk Hatchlings (18) on the plains south-west of the Crossroads and the Kolkar (14-15) at the Stagnant Oasis are the nearest mobs worth killing; you need well under a level.
   level 20                            -- grind on Thunderhawk Hatchlings south-west of the Crossroads
@@ -204,6 +227,8 @@ step Regthar Deathgate
 step Barak Kodobane
   tip Barak stands in the Kolkar camp north-west of Regthar.
   collect 5022 quest 850.1
+  collect 15852 x5 quest 6128.2 only Tauren,Druid -- Kodo Horn: Lost Barrens Kodos on the plains around the Kolkar camp
+  collect 2449 x5 quest 6128.1 only Tauren,Druid -- Earthroot: herbalists pick it here
 
 step Regthar Deathgate
   turnin 850
@@ -281,12 +306,15 @@ step Boulder Lode Mine
 step Hearth to the Crossroads
   hearth "The Crossroads"
   turnin 876                          -- Darsok Swiftdagger
+  turnin 6128 only Tauren,Druid       -- Tonga Runetotem
+  accept 6129 only Tauren,Druid       -- He gives you the Curative Animal Salve
 
 # ---------------------------------------------------------------- South: Verog, Camp Taurajo, the Bristlebacks
 
 step Verog the Dervish
   tip Verog walks among the Kolkar at the Stagnant Oasis south-east of the Crossroads.
   collect 5023 quest 851.1
+  kill 12296 quest 6129.1 only Tauren,Druid -- Sickly Gazelle: use the Curative Animal Salve on them; they roam the plains all around the Crossroads
 
 step Camp Taurajo
   tip Follow the Gold Road south to Camp Taurajo.
@@ -393,7 +421,6 @@ step Jorn Skyseer
 step Field of Giants
   tip South of Camp Taurajo the Silithid Mounds dot the Field of Giants; the eggs lie in them, and Silithid Swarmers come out to defend them. Silithid Harvesters are rare: if you see one, kill it for its head.
   collect 5058 quest 868.1
-  collect 7119 quest 1824.1 only Warrior -- Twitching Antennae from the silithid
   collect 5138 optional               -- Harvester's Head
   accept 897 optional
 
@@ -449,6 +476,11 @@ step The flying machine
 step Gann Stonespire
   turnin 849
 
+step Twitching Antennae
+  only Warrior
+  tip The antennae vanish fifteen minutes after they drop, so gather them now, on the way back north: kill the Silithid Swarmers and Creepers at the Field of Giants' mounds until you have five, then hearth to Camp Taurajo straight away.
+  collect 7119 quest 1824.1           -- Twitching Antennae from the silithid
+
 # ---------------------------------------------------------------- Back north
 
 step Camp Taurajo
@@ -474,7 +506,7 @@ step Thun'grim Firegaze
   only Warrior
   tip Thun'grim camps beside the road east of the Crossroads.
   turnin 1825
-  note He offers Brutal Armor next: level 30, with pieces all over Kalimdor and the Eastern Kingdoms. Leave it.
+  note He offers Brutal Armor next (1838, level 30): it needs Razorfen Kraul and sends you all over Kalimdor and the Eastern Kingdoms. The Warrior class guide Brutal Armor covers it.
 
 # ---------------------------------------------------------------- Orgrimmar at 23
 
@@ -522,6 +554,8 @@ step Moonglade
   collect 15885 quest 30.1 only Tauren -- Pendant of the Sea Lion: use a half at the Shrine of Remulos
   turnin 30 only Tauren               -- Dendrite Starblaze
   accept 31 only Tauren
+  turnin 6129 only Tauren             -- Dendrite Starblaze
+  accept 6130 only Tauren
   turnin 94913 only Skyborne          -- Dendrite Starblaze: the welcome from Turak
   turnin 98340                        -- Dendrite Starblaze
   accept 98405 only Tauren
@@ -558,6 +592,7 @@ step Turak Runetotem
   zone Thunder Bluff
   fly "Thunder Bluff"                 -- Bunthen Plainswind in Nighthaven flies druids there
   turnin 31 only Tauren               -- Turak Runetotem: Aquatic Form
+  turnin 6130 only Tauren             -- Turak Runetotem: Cure Poison
   turnin 98362                        -- Turak Runetotem: Cat Form
 
 step Back to the Crossroads

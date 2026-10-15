@@ -15,6 +15,10 @@
 # - The Andorhal watchtowers (5097) are followed straight by the Felstone Field key (5216). A cauldron's own task
 #   (5218, 5221, 5224) only appears once its Return to Chillwind Camp is handed in: Felstone's is done on the way
 #   to Dalson's Tears, the Writhing Haunt's and Dalson's after the third camp stop, in one northward sweep.
+# - The Arcane Quickeners (13320) are bought one camp stop before their cauldrons, one for Felstone's (5218) and
+#   two for the Writhing Haunt's and Dalson's (5224, 5221), not four at the first stop: they vanish 30 minutes
+#   after purchase (ItemSparse DurationInInventory 1800 s), and four bought at the first stop had to last to
+#   Dalson's, about 40 minutes under the simulator's travel and kill times (10 and 16 minutes now).
 # - Dropped: Gahrron's Withering Cauldron (5227): one small quest that needs a ride back from the camp to the
 #   eastern border after Return to Chillwind Camp (5226).
 # - Dropped the Azshara visit: A Crew Under Fire (3382), the Sacred Highborne Writings for Fragments of the Past
@@ -37,7 +41,9 @@
 # (4493), Volcanic Activity (4502), The Sunken Temple (3445), Cleansed Water Returns to Felwood (5159),
 # A Reliquary of Purity (5527), Wasteland (1124), Meet at the Grave (3912), A Plague Upon
 # Thee (5903), Of Forgotten Memories (5781).
-# No class quests in this stretch. Druids train in Darnassus (Ironforge, where the next guide trains, has no druid
+# Class quests: Paladins' Forging the Mightstone (8414-8416, 8418, Chillwind Camp
+# and the Sunken Temple) is the Class guide
+# forever/class/paladin/holy-mightstone. Druids train in Darnassus (Ironforge, where the next guide trains, has no druid
 # trainer).
 guide forever/alliance/50-60/04-western-plaguelands
 title Western Plaguelands, Eastern Plaguelands & Feralas
@@ -108,7 +114,7 @@ step Janice Felstone
 # ---------------------------------------------------------------- The cauldrons
 
 step Chillwind Camp
-  tip Ride back south to the camp. Buy the Arcane Quickeners for the cauldrons from Alchemist Arbington.
+  tip Ride back south to the camp.
   turnin 5402                         -- Argent Officer Pureheart
   turnin 5403
   turnin 5092                         -- Commander Ashlam Valorfist
@@ -116,7 +122,6 @@ step Chillwind Camp
   accept 5215
   turnin 5215                         -- High Priestess MacDonnell
   accept 5216
-  buy 13320 x4                        -- Arcane Quickener, from Alchemist Arbington
 
 step The Andorhal watchtowers
   tip Use the Beacon Torch at the foot of each of the four watchtowers around the edge of Andorhal, north of the camp.
@@ -132,9 +137,11 @@ step Felstone Field cauldron
   accept 5217
 
 step Chillwind Camp
+  tip Buy one Arcane Quickener from Alchemist Arbington for Felstone's cauldron, right before you go: the quickeners vanish after 30 minutes.
   turnin 5097                         -- Commander Ashlam Valorfist
   turnin 5217                         -- High Priestess MacDonnell
   accept 5219
+  buy 13320                           -- Arcane Quickener, from Alchemist Arbington
 
 step Felstone Field cauldron
   tip The cauldron now offers its own task; the skeletons around it drop Osseous Agitators.
@@ -161,12 +168,14 @@ step Writhing Haunt cauldron
   level 55                            -- grind on Freezing Ghoul at the Writhing Haunt, Western Plaguelands
 
 step Chillwind Camp
+  tip Buy two more Arcane Quickeners for the Writhing Haunt's and Dalson's cauldrons, and ride straight there: they vanish after 30 minutes.
   turnin 5223                         -- High Priestess MacDonnell
   accept 5225
   accept 5533                         -- Commander Ashlam Valorfist
   accept 211 optional                 -- Araj the Summoner is a level 61 elite
   turnin 5533                         -- Alchemist Arbington
   accept 5537
+  buy 13320 x2                        -- Arcane Quickener, from Alchemist Arbington
 
 step Writhing Haunt cauldron
   tip Back north to the Writhing Haunt: the cauldron offers its own task now. The ghouls nearby drop Somatic Intensifiers.

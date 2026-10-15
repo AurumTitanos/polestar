@@ -139,6 +139,8 @@ test('Home: All dungeons groups by band; the faction filter changes the counts; 
 
 test('A page: the painting header with the name, facts and actions; tabs with counts; Guide me and Show on map act', () => {
 	const [out] = run(`
+		-- Nothing in the log: the hand-in stays away, so "Show on map" keeps its place among three actions.
+		log[914] = nil
 		Polestar.Dungeons.Open("wailing-caverns")
 		local _, _, pg = DS.Frames()
 		local head = { pg.Title:GetText(), pg.Sub:GetText(), pg.GoQuiet:IsShown(), pg.MapBtn:IsShown(), pg.Back:IsShown(), pg.Forever:IsShown(),
@@ -152,7 +154,7 @@ test('A page: the painting header with the name, facts and actions; tabs with co
 			back = (function() DS.Home() return { DS.Page() or false, PolestarPicker.Title:GetAlpha(), PolestarPicker.Band:IsShown(), pg:IsShown() } end)() })`);
 	assert.deepEqual(out.head, ['Wailing Caverns', 'Levels 17\u201324  \u00b7  The Barrens  \u00b7  10 players  \u00b7  4 bosses', true, true, true, false,
 		'Wailing Caverns', 0, false, true]);
-	assert.deepEqual(out.tabs, ['Quests  4', 'Bosses  4', 'Map']);
+	assert.deepEqual(out.tabs, ['Quests  4', 'Attunement', 'Bosses  4', 'Map'], 'the fixture gives Wailing Caverns an attunement');
 	assert.deepEqual(out.nav, [1413, 46, 36.4, 'Wailing Caverns']);
 	assert.equal(out.map, 1413);
 	assert.deepEqual(out.back, [false, 1, true, false]);
@@ -187,6 +189,72 @@ test('A page with quests to pick up: "Pick up the quests" is the primary action,
 	assert.match(none.tip[0], /^Nothing to pick up before the run/);
 	assert.deepEqual(none.printed, [none.tip[0]], 'the action says so');
 	assert.equal(none.tabs, 0, 'and opens no guide');
+});
+
+test('"Hand in the quests" shows only while one of the page\'s quests is in the log, leads once one is finished, and opens the hand-in guide; nothing finished says what is open', () => {
+	const [open, gone, ready, done2] = run(`
+		local printed = {}
+		Polestar.Print = function(...) printed[#printed + 1] = table.concat({ ... }, " ") end
+		Polestar.Dungeons.Open("wailing-caverns")
+		local _, _, pg = DS.Frames()
+		local function shown(b) return b:IsShown() and b.Label:GetText() or false end
+		local function corner() for _, b in ipairs({ pg.HandIn, pg.HandInQuiet, pg.Pickup, pg.PickupQuiet, pg.Go, pg.PickupNone, pg.GoQuiet, pg.MapBtn }) do
+			if b:IsShown() then local p = { b:GetPoint(1) } if p[1] == "BOTTOMRIGHT" then return b.Label:GetText() end end end end
+		-- Leaders of the Fang is in the log, its gems still to get.
+		pg.HandInQuiet:Click()
+		emit({ lead = shown(pg.HandIn), quiet = shown(pg.HandInQuiet), corner = corner(), tip = pg.HandInQuiet.psTipLines, printed = printed,
+			tabs = #Polestar.Engine.GetTabs(), fits = pg.Sub:GetWidth() > 0, map = pg.MapBtn:IsShown(), go = shown(pg.GoQuiet) })
+		log[914] = nil
+		DS.Render()
+		emit({ lead = shown(pg.HandIn), quiet = shown(pg.HandInQuiet) })
+		log[914] = true
+		Polestar.Compat.IsQuestReadyForTurnIn = function(id) return id == 914 end
+		local asked = {}
+		Polestar.Dungeons.HandIn = function(key) asked[#asked + 1] = key return "lookup/handin/" .. key end
+		DS.Render()
+		emit({ lead = shown(pg.HandIn), quiet = shown(pg.HandInQuiet), pickup = shown(pg.Pickup), pickupQuiet = shown(pg.PickupQuiet),
+			corner = corner(), tip = pg.HandIn.psTipLines, fits = pg.Sub:GetWidth() > 0 })
+		pg.HandIn:Click()
+		emit({ asked = asked, hub = PolestarPicker:IsShown() })`);
+	assert.deepEqual([open.lead, open.quiet, open.corner], [false, 'Hand in the quests', 'Pick up the quests'], 'beside "Pick up the quests", which leads');
+	assert.deepEqual(open.tip, ['Not finished yet: Leaders of the Fang.']);
+	assert.deepEqual(open.printed, [open.tip[0]], 'the action says so');
+	assert.equal(open.tabs, 0, 'and opens no guide');
+	assert.deepEqual([open.go, open.map], ['Guide me to the entrance', false], 'three actions at most: "Show on map" gives way');
+	assert.equal(open.fits, true, 'the facts keep their room');
+	assert.deepEqual(gone, { lead: false, quiet: false }, 'nothing in the log: no hand-in');
+	assert.deepEqual([ready.lead, ready.quiet, ready.pickup, ready.pickupQuiet, ready.corner],
+		['Hand in the quests', false, false, 'Pick up the quests', 'Hand in the quests']);
+	assert.deepEqual(ready.tip, ['A guide to where the 1 finished quest here is turned in, and the follow-ups it opens there.', 'It opens in a new tab.']);
+	assert.equal(ready.fits, true);
+	assert.deepEqual(done2, { asked: ['wailing-caverns'], hub: false }, 'the guide opens and the hub steps aside');
+});
+
+test('A finished pick-up guide offers the hand-in while the dungeon\'s quests are in the log', () => {
+	const [offer, none] = run(`
+		local GF = Polestar.UI.GuideFrame
+		local id = "lookup/pickup/wailing-caverns"
+		uistub.guides[id] = { id = id, pack = "lookup", title = "Wailing Caverns: pick up the quests", category = "Lookup",
+			lookup = { kind = "pickup", id = "wailing-caverns" }, steps = { { title = "Wailing Caverns", goals = { { t = "note", text = "n" } } } } }
+		local asked = {}
+		Polestar.Dungeons.HandIn = function(key) asked[#asked + 1] = key return "lookup/handin/" .. key end
+		uistub.setGuide(id)
+		uistub.complete()
+		local e = GF.parts.empty
+		local function state() return { title = e.Title:GetText(), text = e.Text:GetText(), primary = e.Primary:IsShown() and e.Primary.Label:GetText() or false,
+			secondary = e.Secondary:IsShown() and e.Secondary.Label:GetText() or false } end
+		local s = state()
+		e.Primary:Click()
+		s.asked = asked
+		emit(s)
+		log[914] = nil
+		uistub.complete()
+		emit(state())`);
+	assert.deepEqual(offer, {
+		title: 'Guide complete', text: "After the run: a guide to where this dungeon's quests are turned in, and the follow-ups there.",
+		primary: 'Hand in the quests', secondary: 'Choose a guide', asked: ['wailing-caverns'],
+	});
+	assert.equal(none.primary, 'Choose a guide', 'nothing in the log: the usual end');
 });
 
 test('Quests: the giver line is a link; with a prerequisite still to do it points at that one', () => {
@@ -240,7 +308,8 @@ test('Quests: one block per quest with state, level, flags, objective, start and
 	assert.deepEqual(out.chain, ['Nara Wildmane']);
 	assert.match(out.chainSub[0], /^Level 20  \u00b7  Tonga Runetotem, The Barrens$/);
 	assert.match(out.chainGlyph, /check$/, 'a done chain quest is checked');
-	assert.ok(out.tiles.includes('Crescent Staff') && out.tiles.includes('Wingblade') && out.tiles.includes('Necklace of Calisea'));
+	assert.ok(out.tiles.includes('Crescent Staff') && out.tiles.includes('Wingblade'));
+	assert.ok(out.tiles.includes('2 x Necklace of Calisea'), 'a reward given twice says how many');
 	assert.ok(out.chips.includes('2,350 XP'));
 	assert.ok(out.chips.some((c) => /^\+250 /.test(c)), 'reputation');
 	assert.ok(out.chips.some((c) => /^\d+s$/.test(c) || /\d+g/.test(c)), 'money');
@@ -355,7 +424,7 @@ test('Speed: pages reuse pooled frames, only cards in view are painted, open and
 	for (const k of ['tHome', 'tOpen', 'tTabs', 'tBig']) assert.ok(out[k] < 0.25, `${k} ${out[k]}s`);
 });
 
-test('Without the Codex pack: an empty state that says to reinstall or enable it; leaving the section restores the header', () => {
+test('Without the Codex pack: an empty state that says where to get the release; leaving the section restores the header', () => {
 	const [out] = run(`
 		Polestar.Dungeons.Open("wailing-caverns")
 		local _, home = DS.Frames()
@@ -363,7 +432,7 @@ test('Without the Codex pack: an empty state that says to reinstall or enable it
 		P.ShowSection("Guides")
 		emit({ empty = empty, title = PolestarPicker.Title:GetAlpha(), band = PolestarPicker.Band:IsShown(), segs = segs() })`, { withPack: false });
 	assert.equal(out.empty[0], 'missing');
-	assert.equal(out.empty[2], 'The Polestar_Codex addon is missing or disabled: reinstall Polestar or enable it in the AddOns list, then /reload.');
+	assert.match(out.empty[2], /not installed.*Releases page.*not "Source code"/, 'points at the release download, not the source zip');
 	assert.equal(out.empty[3], true);
 	assert.equal(out.title, 1);
 	assert.equal(out.band, true);

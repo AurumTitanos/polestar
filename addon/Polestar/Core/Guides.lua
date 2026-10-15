@@ -201,9 +201,10 @@ local function checkGoal(goal)
 	if goal.count ~= nil and not isNum(goal.count) then return "bad count" end
 	if goal.text ~= nil and type(goal.text) ~= "string" then return "bad text" end
 	if goal.t == "rep" and (goal.standing < 1 or goal.standing > 8) then return "standing outside 1-8" end
-	for _, key in ipairs({ "skillLine", "untilSkill", "criteria", "level" }) do
+	for _, key in ipairs({ "skillLine", "untilSkill", "criteria", "level", "profLine", "profRank" }) do
 		if goal[key] ~= nil and not isNum(goal[key]) then return "bad " .. key end
 	end
+	if goal.profName ~= nil and not isStr(goal.profName) then return "bad profName" end
 	if goal.reagents ~= nil then
 		if type(goal.reagents) ~= "table" then return "bad reagents" end
 		for i = 1, #goal.reagents do
@@ -233,8 +234,9 @@ local function checkGoal(goal)
 		end
 	end
 	if goal.spread ~= nil and not (goal.spread == true and goal.spots ~= nil) then return "bad spread" end
-	-- A collect's dominant source: its name, kind, rank and faction.
+	-- A collect's dominant source: its name (and a second's), kind, rank and faction.
 	if goal.from ~= nil and not isStr(goal.from) then return "bad from" end
+	if goal.fromAlso ~= nil and not isStr(goal.fromAlso) then return "bad fromAlso" end
 	if goal.fromKind ~= nil and goal.fromKind ~= "npc" and goal.fromKind ~= "object" then return "bad fromKind" end
 	if goal.fromRank ~= nil and not isNum(goal.fromRank) then return "bad fromRank" end
 	if goal.fromFaction ~= nil and goal.fromFaction ~= "A" and goal.fromFaction ~= "H" and goal.fromFaction ~= "AH" then
@@ -283,6 +285,15 @@ local function validate(def)
 			if not isNum(def.collects[i]) then return "bad collects" end
 		end
 	end
+	-- reward = { { item, itemName?, quality?, choice? } | { spell, spellName } | { text } }
+	if def.reward ~= nil then
+		if type(def.reward) ~= "table" then return "bad reward" end
+		for i = 1, #def.reward do
+			local r = def.reward[i]
+			if type(r) ~= "table" or not (isNum(r.item) or isNum(r.spell) or isStr(r.text)) then return "bad reward " .. i end
+		end
+	end
+	if def.why ~= nil and not isStr(def.why) then return "bad why" end
 	for _, key in ipairs({ "races", "classes", "nextChoices", "pros", "cons", "keywords" }) do
 		local list = def[key]
 		if list ~= nil then
@@ -312,7 +323,8 @@ Guides.Validate = validate
 -- recorded on the pack's record (problems) and printed by ns.Debug.
 ---------------------------------------------------------------------------
 
-Guides.FORMATS = { [1] = true }
+-- Every format Polestar has shipped (docs/PACK_FORMAT.md, "Versioning").
+Guides.FORMATS = { [1] = true, [2] = true }
 Guides.RESERVED = { guides = true, forever = true, lookup = true, draft = true, polestar = true }
 local OFFICIAL_ADDON = "Polestar_Guides"
 local REQUIRED_META = { "addon", "title", "author", "version", "license" }

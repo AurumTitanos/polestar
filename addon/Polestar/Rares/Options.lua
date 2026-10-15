@@ -16,7 +16,7 @@ local function soundOff() return alertsOff() or not Rares.Get("sound") end
 
 local function sounds()
 	local out = {}
-	for i, s in ipairs(Rares.SOUNDS) do out[i] = { value = s.value, label = L[s.label] } end
+	for i, s in ipairs(Rares.SOUNDS) do out[i] = { value = s.value, label = s.label } end
 	return out
 end
 

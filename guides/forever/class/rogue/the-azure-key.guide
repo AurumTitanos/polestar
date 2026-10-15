@@ -1,0 +1,77 @@
+guide forever/class/rogue/the-azure-key
+title The Azure Key
+category Class
+class Rogue
+folder Rogue
+levels 50-52
+zone Alterac Mountains
+keywords The Azure Key, A Simple Request, Sealed Azure Bag, Encoded Fragments, Lord Jorach Ravenholdt, Ravenholdt Manor, Archmage Xylem, Timbermaw Shaman, Forest Ooze, Morphaz, Sunken Temple, Temple of Atal'Hakkar, Azshara, Rogue, class quest
+reward text Ravenholdt reputation
+why Ravenholdt reputation and experience at 50; Forever removed the Classic item choice.
+
+# The level 52 Rogue class chain: A Simple Request (8233) from your class
+# leaders to Lord Jorach Ravenholdt, then Sealed Azure Bag (8234) and Encoded
+# Fragments (8235) with Archmage Xylem in Azshara, and The Azure Key (8236)
+# from Morphaz in the Sunken Temple back to Lord Ravenholdt.
+# Forever change (Wowhead Forever's Rogue class page,
+# data/local/quest-audit/wowhead-class-quests.json): The Azure Key no longer
+# offers its reward choices (Duskbat Drape, Ebon Mask, Whisperwalk Boots); the
+# chain pays experience, money and Ravenholdt reputation only.
+# Sources: quests.json, npcs.json and items.json for the givers, drops and
+# spawns; travel.json for the flight points; the quest text of The Azure Key
+# (foreverchanges.pro/quest/8236) for Morphaz's lair. Morphaz has no spawn in
+# the data: he is an elite boss inside the Sunken Temple, a dungeon; the
+# entrance point is the one alliance/40-50/07-un-goro-crater uses for the
+# temple (Swamp of Sorrows 69.9,53.6), which matches the point from a comment
+# on Wowhead's Sunken Temple zone page (wowhead.com/zone=1477) used by
+# class/hunter/the-hunters-charm.
+# Based on data, not play: the beta caps at level 30 until launch on
+# 4 November, so nothing here has been checked in game.
+
+step A Simple Request (Alliance)
+  only Alliance
+  zone Stormwind City
+  tip At 50 Osborne the Night Man in Stormwind's Old Town has it; so do Syurna in Darnassus and Hulfdan Blackbeard and Fenthwick in Ironforge.
+  level 50
+  accept 8233 npc 918                         -- Osborne the Night Man
+
+step A Simple Request (Horde)
+  only Horde
+  zone Orgrimmar
+  tip At 50 Ormok in the Cleft of Shadow has it; so does Miles Dexter in the Undercity's Rogues' Quarter.
+  level 50
+  accept 8233 npc 3328                        -- Ormok
+
+step Lord Jorach Ravenholdt
+  zone Alterac Mountains
+  tip Ravenholdt Manor hides in the hills east of Tarren Mill, up a path into the Alterac Mountains. Horde fly to Tarren Mill, Alliance to Southshore.
+  turnin 8233                                 -- Lord Jorach Ravenholdt
+  accept 8234
+
+step Sealed Azure Bag
+  zone Azshara
+  tip Alliance fly to Talrendis Point, Horde to Valormok. The Timbermaw Shamans in Azshara's northern hills drop the bag, about one in thirty.
+  getfp "Talrendis Point" only Alliance
+  getfp "Valormok" only Horde
+  collect 19775 quest 8234.1                  -- Sealed Azure Bag: Timbermaw Shaman
+
+step Archmage Xylem
+  turnin 8234                                 -- Archmage Xylem
+  accept 8235
+
+step Encoded Fragments
+  tip The Forest Oozes of southern Azshara drop the fragments.
+  collect 20023 quest 8235.1                  -- Encoded Fragment: Forest Ooze
+
+step Back to Xylem
+  turnin 8235                                 -- Archmage Xylem
+  accept 8236
+
+step Morphaz in the Sunken Temple
+  zone Swamp of Sorrows
+  tip Morphaz, a green drake, is an elite boss deep in the Sunken Temple, a level 50 dungeon: bring a group of five. The temple stands in the Pool of Tears; swim down to the entrance. Horde: fly to Stonard; Alliance: fly to Nethergarde Keep and ride on.
+  collect 20022 quest 8236.1 @69.9,53.6       -- Azure Key: Morphaz, inside the temple
+
+step Lord Ravenholdt
+  zone Alterac Mountains
+  turnin 8236                                 -- Lord Jorach Ravenholdt: no item choices in Forever

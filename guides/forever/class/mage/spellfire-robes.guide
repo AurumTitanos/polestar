@@ -1,0 +1,76 @@
+guide forever/class/mage/spellfire-robes
+title Spellfire Robes
+category Class
+class Mage
+folder Mage
+faction Horde
+levels 15-18
+zone Undercity
+keywords Anastasia Hartwell, Report to Anastasia, Investigate the Alchemist Shop, Gathering Materials, Josef Gregorian, Rift Spawn, Dalaran Mana Gem, Ambermill, Silverpine Forest, Lesser Spellfire Robes, Mage, class robe
+reward item 7510
+why A robe at 15 for Horde mages, from the Undercity and Silverpine Forest.
+
+# The Horde mage robe at 15: Report to Anastasia (1959), Investigate the
+# Alchemist Shop (1960), Gathering Materials (1961) and Spellfire Robes (1962).
+# Sources: quests.json, npcs.json, objects.json and items.json for the chain,
+# the coffers behind Anastasia, the Rift Spawn in the Apothecarium and the
+# Dalaran mages at Ambermill (the Ambermill Strongbox marks the town);
+# Wowhead Forever's Mage class page
+# (data/local/quest-audit/wowhead-class-quests.json, all four unchanged) and
+# quest pages (https://www.wowhead.com/forever/quest=1959, 1960, 1961 and 1962,
+# checked 2026-10-14) for the races, givers and the reward (Lesser Spellfire
+# Robes); the quest texts for the Apothecarium and the tailor's shop.
+# Wowhead Forever lists Orc, Undead and Troll mages for 1959-1961; our data
+# leaves Orcs out of 1959 and 1960. Investigate the Alchemist Shop needs Report
+# to Anastasia first (quests.json): Cain Firesong in Brill, Uthel'nay in
+# Orgrimmar, Thurston Xane in Thunder Bluff and Un'Thuwa in Sen'jin give it.
+# Not in a leveling guide: the Horde routes pass the Undercity and Silverpine
+# at these levels only on some starts, and the chain needs two Undercity visits.
+
+step Uthel'nay (Orgrimmar)
+  only Orc,Troll
+  zone Orgrimmar
+  tip Uthel'nay is one of Orgrimmar's mage trainers. Then take the zeppelin to Tirisfal Glades from the tower outside Orgrimmar's main gate.
+  level 15
+  accept 1959 npc 7311                        -- Uthel'nay
+
+step Cain Firesong (Brill)
+  only Undead
+  zone Tirisfal Glades
+  tip Cain Firesong is the Brill mage trainer.
+  level 15
+  accept 1959 npc 2128                        -- Cain Firesong
+
+step Anastasia Hartwell
+  zone Undercity
+  tip Anastasia Hartwell stands in the Magic Quarter. The Chest of Containment Coffers and the Cantation of Manifestation lie behind her.
+  turnin 1959                                 -- Anastasia Hartwell
+  accept 1960
+  collect 7247 quest 1960.2                   -- Chest of Containment Coffers
+  collect 7308 quest 1960.3                   -- Cantation of Manifestation
+
+step The alchemist shop
+  tip Algernon's alchemist shop is in the Apothecarium. Use the Cantation of Manifestation there to make the Rift Spawn visible, subdue one with your spells, then use the Chest of Containment Coffers to throw down a coffer and capture it.
+  use 7308 optional @53.2,74.5                -- Cantation of Manifestation
+  kill 6492 optional                          -- Rift Spawn
+  collect 7292 quest 1960.1 @53.2,74.5        -- Filled Containment Coffer
+
+step Back to Anastasia Hartwell
+  turnin 1960                                 -- Anastasia Hartwell
+  accept 1961
+
+step Linen Cloth
+  tip Humanoids drop Linen Cloth; the Undercity Auction House sells it.
+  collect 2589 quest 1961.1                   -- Linen Cloth
+
+step Ambermill
+  zone Silverpine Forest
+  tip Leave the Undercity and follow the road south through Silverpine Forest. The Dalaran mages hold Ambermill, south-east of the Sepulcher; every Dalaran Apprentice, Mage, Protector, Warder, Conjuror, Watcher and Wizard can drop a Dalaran Mana Gem.
+  collect 7293 quest 1961.2                   -- Dalaran Mana Gem
+
+step Josef Gregorian
+  zone Undercity
+  tip Back to the Undercity. Josef Gregorian, Victor Ward and Rhiannon Davis keep the tailor's shop.
+  turnin 1961                                 -- Josef Gregorian
+  accept 1962 npc 11049                       -- Rhiannon Davis
+  turnin 1962                                 -- Lesser Spellfire Robes

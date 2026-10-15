@@ -1,0 +1,96 @@
+guide forever/class/rogue/plundering-the-plunderers
+title Plundering the Plunderers
+category Class
+class Rogue
+folder Rogue
+faction Horde
+levels 16-20
+zone Orgrimmar
+keywords Plundering the Plunderers, Find the Shattered Hand, To Orgrimmar!, Shenthul, Zando'zan, Wrenix of Ratchet, Wrenix the Wretched, Gizmotronic Apparatus, E.C.A.C., Thieves' Tools, Southsea Treasure, Polly, Thistle Tea, Fenwick Thatros, Tools of the Trade, Ambermill Strongbox, Dalaran Status Report, Mennet Carkad, Rogue, lockpicking quest
+reward item 7676
+why Ten Thistle Tea, the rogue energy drink, from the Horde lockpicking jobs at 16.
+
+# The Horde Rogue level 16 quests:
+# - Find the Shattered Hand (2378, Undead, from Mennet Carkad in the
+#   Undercity) or To Orgrimmar! (2380, from Kaplak in Razor Hill) to
+#   Shenthul in Orgrimmar's Cleft of Shadow, then Zando'zan (2379), Wrenix of
+#   Ratchet (2382) and Plundering the Plunderers (2381, ten Thistle Tea).
+# - Undead only: Fenwick Thatros and Tools of the Trade (1998, 1999) for
+#   Mennet Carkad, in Silverpine Forest.
+# Sources: Wowhead Forever's Rogue class page
+# (data/local/quest-audit/wowhead-class-quests.json) for which quests Forever
+# has, the rewards and Forever's changes (none for these quests);
+# quests.json, npcs.json, objects.json and items.json for the givers, drops,
+# vendors and places; travel.json for the inns and flight points.
+# The two breadcrumbs exclude one another. To Orgrimmar!'s race mask takes
+# any Horde race, so Orcs, Trolls and Skyborne take it from Kaplak.
+# The leveling guides leave these out: they teach no spell.
+
+# ---------------------------------------------------------------- To Shenthul
+
+step To Orgrimmar!
+  only Orc,Troll,Skyborne
+  zone Durotar
+  tip At 16 Kaplak, the rogue trainer in Razor Hill, sends you to Shenthul in Orgrimmar.
+  level 16
+  accept 2380                                 -- Kaplak
+
+step Find the Shattered Hand
+  only Undead
+  zone Undercity
+  tip At 16 Mennet Carkad in the Rogues' Quarter sends you to Shenthul in Orgrimmar. Take Fenwick Thatros from him too; it is done in Silverpine Forest at the end of this guide.
+  level 16
+  accept 2378                                 -- Mennet Carkad
+  accept 1998
+
+step Shenthul and Zando'zan
+  zone Orgrimmar
+  tip Undead take the zeppelin from the towers outside the Undercity to Durotar. Shenthul and Zando'zan stand in the Cleft of Shadow, the canyon under the Valley of Strength.
+  turnin 2380 only Orc,Troll,Skyborne         -- Shenthul
+  turnin 2378 only Undead
+  accept 2379
+  turnin 2379                                 -- Zando'zan
+  accept 2382
+
+# ---------------------------------------------------------------- Ratchet
+
+step Wrenix the Wretched
+  zone The Barrens
+  tip Fly or ride to Ratchet on the Barrens coast. Wrenix stands in town with his Gizmotronic Apparatus: buy an E.C.A.C. and Thieves' Tools from the apparatus before you go.
+  getfp "Ratchet" optional
+  turnin 2382                                 -- Wrenix the Wretched
+  accept 2381
+  buy 7970 x1 npc 7166                        -- E.C.A.C.: Wrenix's Gizmotronic Apparatus
+  buy 5060 x1 npc 7166                        -- Thieves' Tools
+
+step Southsea Treasure
+  tip South along the coast from Ratchet, at the Southsea pirates' camp. If an unusually hostile parrot attacks you, use the E.C.A.C. on it (the quest's own advice).
+  collect 7968 quest 2381.1                   -- Southsea Treasure
+
+step Back to Wrenix
+  turnin 2381 reward 7676                     -- Wrenix the Wretched: ten Thistle Tea
+
+# ---------------------------------------------------------------- Undead: Silverpine Forest
+
+step Fenwick Thatros
+  only Undead
+  zone Silverpine Forest
+  tip Take the zeppelin from Orgrimmar to the Undercity and ride south into Silverpine. Fenwick Thatros stands north-east of the Sepulcher.
+  collect 7306 quest 1998.1                   -- Fenwick's Head: Fenwick Thatros
+
+step Mennet Carkad
+  only Undead
+  zone Undercity
+  turnin 1998                                 -- Mennet Carkad, Rogues' Quarter
+  accept 1999
+
+step Ambermill
+  only Undead
+  zone Silverpine Forest
+  tip The Kirin Tor keep their reports at Ambermill, in south-east Silverpine: pick the lock on the Ambermill Strongbox.
+  collect 7309 quest 1999.1                   -- Dalaran Status Report: Ambermill Strongbox
+
+step Back to Mennet
+  only Undead
+  zone Undercity
+  turnin 1999                                 -- Mennet Carkad, Rogues' Quarter

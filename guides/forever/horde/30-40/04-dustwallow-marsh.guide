@@ -5,9 +5,12 @@ levels 39-41
 zone Dustwallow Marsh
 next forever/horde/40-50/01-stranglethorn-vale
 
-# Consensus route (Horde, simulator export consensus-horde-tauren), visits
-# 29-30: Dustwallow Marsh 39.2-39.8 and Desolace 39.8-40.2. Shared by every
-# Horde start. Era + known Forever quests only.
+# Consensus route (Horde, simulator export consensus-horde-tauren). Written
+# from an earlier export's visits 29-30 (Dustwallow Marsh 39.2-39.8, Desolace
+# 39.8-40.2); the October refresh's export has the same two stays as visits
+# 25 (Dustwallow 38.5-39.1) and 29 (Desolace 40.4-40.9), with the Badlands
+# and the Swamp of Sorrows between them; this guide keeps the two together.
+# Shared by every Horde start. Era + known Forever quests only.
 #
 # Flow: Ratchet -> fly to Camp Taurajo -> the Shady Rest Inn -> Brackenwall
 # Village (flight path) -> the Quagmire (Ogron) -> Witch
@@ -15,9 +18,10 @@ next forever/horde/40-50/01-stranglethorn-vale
 # Theramore Infiltrators and the Darkmist Cavern -> Brackenwall -> Jarl ->
 # Brackenwall -> hearth to Ratchet -> fly to
 # Shadowprey Village (bind) -> the Valley of Spears escort -> the Kodo
-# Graveyard -> the Gizelton caravan -> Kormek's Hut -> the Kodo Graveyard ->
-# Kormek's Hut -> Thunder Axe Fortress -> Ethel Rethor and the Slitherblade
-# coast -> Shadowprey -> Mannoroc Coven -> hearth to Shadowprey.
+# Graveyard -> the Gizelton caravan -> Ghost Walker Post -> Kormek's Hut ->
+# the Kodo Graveyard -> Kormek's Hut -> Thunder Axe Fortress -> Ethel Rethor
+# and the Slitherblade coast -> the Valley of Spears -> Shadowprey ->
+# Mannoroc Coven -> Ghost Walker Post -> hearth to Shadowprey.
 #
 # Deviations from the export:
 # - The Shady Rest pick-ups (Suspicious Hoofprints 1268, The Black Shield
@@ -39,6 +43,18 @@ next forever/horde/40-50/01-stranglethorn-vale
 #   dirt gives up The Severed Head (1239), so the second Jarl visit ends with
 #   a ride back to Brackenwall. The Troll Witchdoctor (1240) goes to Grom'gol
 #   in forever/horde/40-50/01-stranglethorn-vale.
+# - Added in the October refresh, from the new consensus (Forever above 30
+#   cannot be checked in game until launch on 4 November: these come from
+#   the data, not from play):
+#   - The Kolkar of Desolace (1362): taken from Regthar Deathgate in
+#     forever/horde/30-40/03-arathi-highlands and handed to Felgur Twocuts at
+#     Ghost Walker Post, beside Smeed's camp where the caravan ends.
+#   - Carved Centaur Totems (93225, new in Forever): Gurda Wildmane at Ghost
+#     Walker Post. The quest text says any centaur clan; the data's drop
+#     list names only the Maraudine (Questie Forever), so the totems are
+#     taken in the Valley of Spears on the ride from Ethel Rethor back to
+#     Shadowprey, and handed in on a ride north from Mannoroc Coven before
+#     the hearth.
 #
 # Class quests: none; Shamans handed Brine their waterskin (1536) in
 # forever/horde/06-hillsbrad-foothills.
@@ -46,6 +62,16 @@ next forever/horde/40-50/01-stranglethorn-vale
 # Left out: Claim Rackmore's Treasure! (6161): its two keys come from the
 # north coast naga and the crabs by Shadowprey, and the chest sits on
 # Ranazjar Isle in the far north, a crossing of the whole zone for one quest.
+# The centaur clan chains, Classic and Forever, which the new consensus
+# takes at 40: Ongeku (1373), Khan Jehn (1374), A Conqueror's Crown (92743),
+# Valley of Bones (93034), Ravaging Ravagers (93035), Facing the Truth
+# (93041), Outing Outcasts (93037) and Forever's Khan Jehn (93128). The
+# Classic steps need Friendly with the Magram or Gelkis, and from Valley of
+# Bones on Honored (wowf.io, "Magram Quest Chain (Khan Jehn)"), earned only
+# by killing the rival clan (see forever/horde/30-40/01-desolace); since the
+# 8 October beta notes, Valley of Bones and its follow-ups need level 35. The
+# Conqueror's Crown comes from the Badlands, which the data cannot place,
+# and Nerlokh stands in the new Shen'dralas zone south of Desolace.
 # Marg Speaks (1261) and Report to Zor (1262): Marg's note in Grom'gol is
 # offered only after The Troll Witchdoctor (1240), which now comes after this
 # guide, and the Jeweled Pendant drops one crab in twenty.
@@ -168,6 +194,11 @@ step Scrabblescrew's Camp
   tip The caravan ends at Smeed's camp on the east side of the Kodo Graveyard.
   turnin 5943
 
+step Ghost Walker Post
+  tip Felgur Twocuts and Gurda Wildmane stand in the post just west of Smeed's camp.
+  turnin 1362                         -- Felgur Twocuts
+  accept 93225                        -- Gurda Wildmane
+
 step Kormek's Hut
   tip Ride north up the road to the hut by the road north of the graveyard.
   accept 5501                         -- Bibbly F'utzbuckle
@@ -203,8 +234,12 @@ step Slitherblade coast
 step Azore Aldamort
   turnin 6027
 
+step Maraudine totems
+  tip Ride south from Ethel Rethor into the Valley of Spears. The Maraudine Scouts, Wranglers, Maulers, Windchasers and Marauders (36-39) drop the Carved Centaur Totems.
+  collect 254432 x5 quest 93225.1
+
 step Shadowprey Village
-  tip Ride south down the coast back to Shadowprey.
+  tip Ride on south-west to Shadowprey.
   turnin 5381                         -- Taiga Wisemane
   accept 5581
   turnin 6143                         -- Drulzegar Skraghook
@@ -213,6 +248,10 @@ step Portals of the Legion
   tip Ride east to Mannoroc Coven. Use the Rod of Banishing by each demon portal to close six of them.
   goto 52.0,78.0 "Mannoroc Coven"
   complete 5581
+
+step Ghost Walker Post
+  tip Ride north from the coven to Gurda Wildmane at Ghost Walker Post.
+  turnin 93225                        -- Gurda Wildmane
 
 step Hearth to Shadowprey
   hearth "Shadowprey Village"

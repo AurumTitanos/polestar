@@ -150,6 +150,17 @@ test('sources: a vendor that sells only at a standing or a skill rank', () => {
 	assert.deepEqual(pick(patternOk, ['available', 'effort']), [{ available: true, effort: 0 }]);
 });
 
+test('sources: a quest whose rewards need a standing (QuestieDB requiredMinRep) gates its reward row', () => {
+	const script = `emit((rows("item", 8018)))`;
+	const [band] = run(script);
+	const [bandOk] = run(script, { setup: 'w.setRep(9100, "Vale Wardens", 6, 0, 0, 12000)' });
+	assert.deepEqual(pick(band, ['type', 'label', 'available', 'why', 'whyText']), [
+		{ type: 'quest', label: "The Wardens' Commission", available: false, why: 'reputation', whyText: 'Requires Honored (Vale Wardens)' },
+	]);
+	assert.ok(band[0].effort >= 2 * 14400, 'the missing standings cost the grind');
+	assert.deepEqual(pick(bandOk, ['available', 'why']), [{ available: true, why: undefined }]);
+});
+
 test('sources: a better drop chance ranks first; race, class and unknown races', () => {
 	const [tusk, totem, charger] = run(`emit((rows("item", 8004))); emit((rows("item", 8003))); emit((rows("mount", 8011)))`);
 	assert.deepEqual(pick(tusk, ['label', 'chance']), [{ label: 'Bristle Boar', chance: 50 }, { label: 'Thornback Boar', chance: 5 }]);
@@ -470,43 +481,66 @@ test('search: one-letter queries read name prefixes only, capped; paging with of
 	assert.deepEqual(lazy, { before: 0, after: 1, s1: 'Sub 100030' });
 });
 
-test('search: a keystroke over 25,000 indexed names takes under 4 ms', () => {
-	const [timing] = run(`
+// Search speed without pinning one machine's: a keystroke is timed against
+// the same run's cost of scanning every name once (one plain find over each
+// index, what any search must do), and 25,000 names against 2,500. A search
+// rebuilding its index per keystroke (a Lua pass over every line) costs far
+// more than a few C scans; a quadratic one grows ~100x over 10x the names.
+// Each figure is the median of several batches, each batch long enough for
+// a coarse os.clock (Windows: 1 ms).
+test('search: a keystroke costs a few scans of the names and grows linearly from 2,500 to 25,000', () => {
+	const [small, large] = run(`
 		local syll = { "ka", "lo", "mi", "ra", "tor", "vel", "shi", "dun", "gar", "eth", "ul", "bri", "sta", "zor", "nim", "pe" }
-		local seed = 7
-		local function rnd(n) seed = (seed * 1103515245 + 12345) % 2147483648; return seed % n + 1 end
-		local function word() local s = ""; for _ = 1, rnd(3) + 1 do s = s .. syll[rnd(#syll)] end return s:sub(1, 1):upper() .. s:sub(2) end
-		local plan = { item = 15000, npc = 6000, quest = 3800, mount = 200 }
-		local blobs, names = {}, {}
-		for kind, n in pairs(plan) do
-			local lines = {}
-			names[kind] = {}
-			for i = 1, n do
-				local name = word() .. " " .. word() .. (rnd(3) == 1 and (" " .. word()) or "")
-				names[kind][i] = name
-				lines[i] = "\\2" .. Polestar.Search.Fold(name):sub(2) .. "\\1" .. i .. ",2,," .. #name .. "\\n"
+		local queries = { "k", "ka", "tor", "torvel", "mi ra", "shidun", "zz", "gar eth", "Velka", "a", "nimpe sta", "ulbri" }
+		local function median(fn, batches)
+			local t = {}
+			for b = 1, batches do
+				local c = os.clock()
+				fn()
+				t[b] = os.clock() - c
 			end
-			blobs[kind] = table.concat(lines)
+			table.sort(t)
+			return t[math.ceil(batches / 2)]
 		end
-		local none = function() return nil end
-		Polestar.Codex = { IsLoaded = function() return true end, Load = function() return true end,
-			Index = function(kind) return blobs[kind] end,
-			Name = function(kind, id) return names[kind] and names[kind][id] end,
-			Item = none, Npc = none, Quest = none, Object = none, Instance = none, Zone = none, Faction = none, Spell = none }
-		Polestar.Search.Query("warmup", { subtitles = false })
-		local worst, total, n = 0, 0, 0
-		for _, text in ipairs({ "k", "ka", "tor", "torvel", "mi ra", "shidun", "zz", "gar eth", "Velka", "a", "nimpe sta", "ulbri" }) do
-			for _ = 1, 3 do
-				local t = os.clock()
-				Polestar.Search.Query(text, { subtitles = false })
-				local dt = os.clock() - t
-				if dt > worst then worst = dt end
-				total, n = total + dt, n + 1
+		local function measure(scale)
+			local seed = 7
+			local function rnd(n) seed = (seed * 1103515245 + 12345) % 2147483648; return seed % n + 1 end
+			local function word() local s = ""; for _ = 1, rnd(3) + 1 do s = s .. syll[rnd(#syll)] end return s:sub(1, 1):upper() .. s:sub(2) end
+			local plan = { item = 15000 * scale, npc = 6000 * scale, quest = 3800 * scale, mount = 200 * scale }
+			local blobs, names = {}, {}
+			for kind, n in pairs(plan) do
+				local lines = {}
+				names[kind] = {}
+				for i = 1, n do
+					local name = word() .. " " .. word() .. (rnd(3) == 1 and (" " .. word()) or "")
+					names[kind][i] = name
+					lines[i] = "\\2" .. Polestar.Search.Fold(name):sub(2) .. "\\1" .. i .. ",2,," .. #name .. "\\n"
+				end
+				blobs[kind] = table.concat(lines)
 			end
+			local none = function() return nil end
+			Polestar.Codex = { IsLoaded = function() return true end, Load = function() return true end,
+				Index = function(kind) return blobs[kind] end,
+				Name = function(kind, id) return names[kind] and names[kind][id] end,
+				Item = none, Npc = none, Quest = none, Object = none, Instance = none, Zone = none, Faction = none, Spell = none }
+			Polestar.Search.Query("warmup", { subtitles = false })
+			-- The batches: every query 4 times; 40 scans of every index.
+			local keys = median(function()
+				for _ = 1, 4 do for _, text in ipairs(queries) do Polestar.Search.Query(text, { subtitles = false }) end end
+			end, 7) / (4 * #queries)
+			local scan = median(function()
+				for _ = 1, 40 do for _, blob in pairs(blobs) do string.find(blob, "\\2qqqq", 1, true) end end
+			end, 7) / 40
+			return { key = keys * 1000, scan = scan * 1000 }
 		end
-		emit({ worst = worst * 1000, mean = total / n * 1000 })
+		emit(measure(0.1))
+		emit(measure(1))
 	`, { withPack: false });
-	assert.ok(timing.worst < 4, `slowest query ${timing.worst.toFixed(2)} ms (mean ${timing.mean.toFixed(2)} ms)`);
+	const ms = (t) => `keystroke ${t.key.toFixed(3)} ms, one scan ${t.scan.toFixed(3)} ms`;
+	// Here (Linux, lua5.1): a keystroke ~3 scans, 25,000 names ~2.5x 2,500;
+	// a Lua pass over every line alone costs ~35 scans.
+	assert.ok(large.key < 12 * Math.max(large.scan, 0.01), `25,000 names: ${ms(large)}: more than 12 scans a keystroke`);
+	assert.ok(large.key < 15 * Math.max(small.key, 0.01), `25,000 names ${ms(large)} vs 2,500 ${ms(small)}: grows faster than the names`);
 });
 
 // ---------------------------------------------------------------------------

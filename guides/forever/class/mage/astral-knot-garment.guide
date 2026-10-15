@@ -1,0 +1,67 @@
+guide forever/class/mage/astral-knot-garment
+title Astral Knot Garment
+category Class
+class Mage
+folder Mage
+faction Alliance
+race Human,Gnome
+levels 26-30
+zone Stormwind City
+keywords High Sorcerer Andromath, Ur's Treatise on Shadow Magic, Tower of Ilgalar, Redridge Mountains, Pristine Spider Silk, Carrion Recluse, Duskwood, Wynne Larson, Astral Knot Robe, Astral Knot Blouse, Mage, class robe
+reward item 7511 9516
+why A robe or a blouse for Human and Gnome mages in their late 20s.
+
+# The Alliance mage robe at 26: High Sorcerer Andromath (1939), Ur's Treatise
+# on Shadow Magic (1938), Pristine Spider Silk (1940) and Astral Knot Garment
+# (1942).
+# Sources: quests.json, npcs.json, objects.json and items.json for the chain,
+# the treatise in the Tower of Ilgalar and the spiders that drop the silk;
+# Wowhead Forever's Mage class page
+# (data/local/quest-audit/wowhead-class-quests.json, all four unchanged) and
+# quest pages (https://www.wowhead.com/forever/quest=1939, 1938, 1940 and 1942,
+# checked 2026-10-14) for the races (Human and Gnome only: Skyborne mages have
+# no level 26 robe quest) and the reward choice; the quest texts for the
+# tower's library and the carrion recluses.
+# Bink in Ironforge and Jennea Cannon in Stormwind give the breadcrumb.
+
+step Bink (Ironforge)
+  only Gnome
+  zone Ironforge
+  tip Bink teaches mages in Ironforge's Mystic Ward. Take the Deeprun Tram from Tinker Town to Stormwind afterwards.
+  level 26
+  accept 1939 npc 5144                        -- Bink
+
+step Jennea Cannon (Stormwind)
+  only Human
+  zone Stormwind City
+  tip Jennea Cannon stands in the Wizard's Sanctum, the tower of the Mage Quarter.
+  level 26
+  accept 1939 npc 5497                        -- Jennea Cannon
+
+step High Sorcerer Andromath
+  zone Stormwind City
+  tip High Sorcerer Andromath is in the Wizard's Sanctum too.
+  turnin 1939                                 -- High Sorcerer Andromath
+  accept 1938
+
+step The Tower of Ilgalar
+  zone Redridge Mountains
+  tip Ride east through Elwynn Forest into Redridge. The fallen mage's tower of Ilgalar stands in the east of the zone; the treatise is in his library.
+  collect 7266 quest 1938.1                   -- Ur's Treatise on Shadow Magic
+
+step Back to Andromath
+  zone Stormwind City
+  turnin 1938                                 -- High Sorcerer Andromath
+  accept 1940
+
+step Carrion Recluses
+  zone Duskwood
+  tip Carrion Recluses lurk in the woods of western Duskwood and each one drops the silk. The Black Widow Hatchlings further east drop it now and then.
+  collect 7267 quest 1940.1                   -- Pristine Spider Silk
+
+step Wynne Larson
+  zone Stormwind City
+  tip Wynne Larson works at Larson Clothiers in the Mage Quarter.
+  turnin 1940                                 -- Wynne Larson
+  accept 1942
+  turnin 1942 choose 7511 9516                -- Astral Knot Garment

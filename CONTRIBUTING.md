@@ -44,6 +44,25 @@ level, the versions and any errors Polestar caught. Add what is wrong.
 - Your Polestar version (shown at the foot of the Options sidebar and in the
   game's AddOns list).
 
+## How a report is handled
+
+A report is a lead, not a verdict: players are sometimes on an old version,
+have an incomplete install, misread a step or meet another addon's lines. Each
+report goes through the same steps before anything changes:
+
+1. **Check the version and install.** The report's first line names the
+   Polestar version. Is the step still the same on the coming release?
+2. **Reproduce it.** In the data (`data/forever/*.json`, the compiled guide),
+   in the test client (`tests/`, see tests/README.md) or in the game. A
+   report that can't be reproduced gets an answer saying so, and why.
+3. **Check it against the sources.** The game's own data, Wowhead's Forever
+   database, recordings. A player's memory of Classic is not a source: Forever
+   changed many quests.
+4. **Fix it only if it is real,** with a test that fails before the fix and
+   passes after it (or, for a guide, lint and `playtest`).
+5. **Credit the reporter** in CHANGELOG.md, "(thanks <name>)", and tell them
+   which release carries the fix.
+
 ## Fixing a guide
 
 Each guide's title leads to its file: the leveling guides live under
@@ -61,7 +80,16 @@ git grep "accept 184"
 - The comments at the top of a leveling guide explain the route's choices
   (where it comes from, the flow through the zone, what it leaves out). Read
   them before moving steps around, and update them when a fix changes the
-  route.
+  route: a later route refresh keeps every fix they document (see
+  [docs/SIMULATION.md](docs/SIMULATION.md), "Refresh").
+- A fix for a player's report gets a case in `tests/guides-reported.test.js`
+  (or `tests/guides-caves.test.js` for a cave mouth) that checks what the
+  player sees, the goal order or where the arrow leads, not the guide's
+  wording, so a refresh that undoes it fails the suite. A quest item that
+  vanishes after a while is checked by lint itself (`item ... lasts ...`).
+- When the guide is wrong because the data is (a giver, a spawn, a drop),
+  fix the data in `tools/lib/data/corrections.json` too, so the simulator and
+  the next route refresh see it.
 - Check your change:
 
   ```sh
@@ -119,11 +147,47 @@ command.
 
 ## Commits and pull requests
 
+- Open pull requests against `next`, the next release in progress (the
+  repository's default branch). `main` is the latest release: it moves only
+  when a release is made, by merging `next` into it.
 - One change per commit.
 - Plain messages that describe the change for the players or authors it
   affects (for example "Westfall: turn in at Sentinel Hill before the farms"), not
   how it was made.
 - Behaviour changes come with tests that show the behaviour.
+- A change goes into CHANGELOG.md under the coming release. A fix for a
+  reported bug (Discord, an issue, the in-game report) credits the person
+  who reported it at the end of its entry, by the name they reported under:
+  "(thanks Tom)". A contribution credits its author the same way.
+
+## How a pull request is reviewed
+
+Every pull request is read for safety **before any of its code is run**:
+its tests run Node tools on the maintainer's machine and Lua in the test
+client, so running them is already trusting them. The diff is read in full,
+generated files included, and the pull request waits while anything below is
+unexplained.
+
+- **Money and items leaving the player.** Any use of the mailbox
+  (`SendMail`, `SetSendMailMoney`, `SetSendMailCOD`, items attached to a
+  mail), trade (`SetTradeMoney`, `AcceptTrade`), the auction house, the guild
+  bank, or buying, learning and repairing beyond what the pull request says
+  it does, and any hard-coded character or realm name. The known scam is an
+  addon that mails gold to someone when the mailbox opens.
+- **Code that acts on its own or hides what it does.** `loadstring`,
+  `RunScript` or other dynamic code, obfuscated or encoded text, addon
+  messages and chat sent without the player asking, hooks on secure
+  functions, slash commands that do something other than what they say.
+- **The toolchain.** New dependencies or install scripts, `child_process`,
+  network access to hosts the project does not already use (wago.tools,
+  Wowhead), reading or writing outside the repository (the home folder,
+  tokens, other addons' saved data), changes to `.github/workflows`.
+- **Data and guides.** Executable code or links hidden in data, guide or
+  locale files.
+
+Then the change is reviewed for correctness (tests, the game's limits,
+Options toggles off by default for anything that spends, equips or acts for
+the player) and merged into `next`.
 
 ## Licence
 

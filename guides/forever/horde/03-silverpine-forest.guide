@@ -14,10 +14,10 @@ next forever/horde/04-the-barrens
 # and back -> north loop: the Dead Field, Malden's Orchard, Erland's escort,
 # worg hearts, murloc eyes -> hearth -> the Decrepit Ferry and back -> north
 # again: Quinn, Ivar the Foul, then Fenris Isle -> the Sepulcher -> south
-# loop: Ambermill, the Moonrage, the refugees -> hearth -> grind to 19 on the
-# lake shore -> zeppelin to Orgrimmar: the city's own quests, training. The
-# guide ends in Orgrimmar, in the Valley of Wisdom; the next one flies to
-# Ratchet from Doras in the Valley of Strength.
+# loop: Ambermill, the Moonrage, the refugees, Beren's Peril -> hearth ->
+# grind to 19 on the lake shore -> zeppelin to Orgrimmar: the city's own
+# quests, training. The guide ends in Orgrimmar, in the Valley of Wisdom;
+# the next one flies to Ratchet from Doras in the Valley of Strength.
 #
 # Deviations from the export:
 # - Westfall (the lighthouse: Keeper of the Flame 103, The Coastal Menace 104,
@@ -32,6 +32,15 @@ next forever/horde/04-the-barrens
 # - The grind to 19 uses the Vile Fin Lakestalkers on Silverpine's own shore
 #   of Lordamere Lake, a short walk from the Sepulcher; the export's camp is
 #   the same murlocs across the lake by Dalaran, in Alterac Mountains.
+# - Added from the new consensus route: Beren's Peril (516, Shadow Priest
+#   Allister): its Ravenclaw undead (19-20) stand just north-east of the
+#   refugees, so it rides on the south loop and the hearth back; the export
+#   does it on a second Silverpine visit at about 21, which this route does
+#   not make. Its XP shortens the lake-shore grind.
+# - Not taken: the Offering Stone quests at Beren's Peril (95883-95885, Forever)
+#   need level 20 and the route is there at about 18.5;
+#   forever/horde/05-stonetalon-mountains takes them on its ride through
+#   Silverpine to Tarren Mill.
 #
 # Optional: Resting in Pieces and The Hidden Niche (460, 461): A Talking Head
 # is a rare drop from the Rot Hide gnolls, and the Dusty Shelf stands inside
@@ -40,7 +49,16 @@ next forever/horde/04-the-barrens
 # which the route does not run, so Dalar may not offer it.
 #
 # Skyborne: Welcome to Azeroth (95350) is turned in to Thrall in Grommash
-# Hold, and Journey to the Crossroads (98024) taken on to Thork.
+# Hold, and Journey to the Crossroads (98024) taken on to Thork. Exploring the
+# Horde (93739, Forever, Skyborne only, follows 95350) is taken from Thrall
+# there too: Nazgrel and Vol'jin stand in Grommash Hold, Sylvanas is visited
+# on the Undercity stop of forever/horde/05-stonetalon-mountains, Cairne on
+# the Thunder Bluff stop of forever/horde/07-ashenvale, and Thrall takes it
+# back on the Orgrimmar stop of forever/horde/30-40/01-desolace. It is
+# optional throughout: a tour for 1150 XP, spread over four guides. The
+# simulator charges Skyborne 0.3 h to level 20 (0.2 h to 60) for it; in game
+# the four leaders are conversations on stops the route makes anyway, so it
+# stays as orientation.
 #
 # Dropped: A Recipe For Death (447), Zinge's Delivery (1359), The Engraved
 # Ring (440), Rot Hide Origins (444) and Hidden Enemies (5726): the route never
@@ -51,17 +69,23 @@ next forever/horde/04-the-barrens
 # Dalaran casters in the middle of the town at about level 18.5.
 #
 # Carried on: Journey to Hillsbrad Foothills (493, Tarren Mill, later guide).
-# Class quests: Hunters from Durotar hand Training the Beast (6081) to Ormak
-# Grimshot and Troll Priests Hex of Weakness (5654) to Ur'kyo on the first
-# Orgrimmar stop. Tauren Druids start Aquatic Form on their Thunder Bluff
-# training stop (A Lesson to Learn 27, Trial of the Lake 28 in Moonglade) and
-# open the Strange Lockbox on the coast west of the Dead Field for Trial of
-# the Sea Lion (30); the chain ends at their Thunder Bluff training at about
-# 23 (forever/horde/04-the-barrens).
+# Class quests: Troll Priests hand Hex of Weakness (5654) to Ur'kyo on the first
+# Orgrimmar stop. Orc and Troll Hunters hand in Training the Beast (6081:
+# Beast Training) at the end of forever/horde/orc-troll/01-durotar now, so
+# they have the spell from 10. Tauren Druids start Aquatic Form on their
+# Thunder Bluff training stop (A Lesson to Learn 27, Trial of the Lake 28 in
+# Moonglade) and open the Strange Lockbox on the coast west of the Dead Field
+# for Trial of the Sea Lion (30); the chain ends at their Thunder Bluff
+# training at about 23 (forever/horde/04-the-barrens). Tauren Druids also take
+# Lessons Anew (6126) from Turak and The Principal Source (6127) from Dendrite
+# on the same trip: Cure Poison, finished in the next guide.
 #
 # Class training: Orgrimmar at 16 and 19 for everyone but Druids and
 # Paladins (no trainer of theirs there). Druids fly to Thunder Bluff at 16;
 # Paladins train in Brill on both zeppelin landings in Tirisfal Glades.
+# Undead Paladins from 18: Danitha Morr at Bandarion Keep (Tirisfal) starts
+# their Silverpine chain (91858-91862, 96204, 95034: the Sepulcher, Fenris
+# Isle, Lumina Windsinger), the Class guide forever/class/paladin/lumina-windsinger.
 
 # ---------------------------------------------------------------- Orgrimmar and the zeppelin
 
@@ -72,10 +96,9 @@ step To Orgrimmar
   train class only Warrior,Hunter,Rogue,Priest,Shaman,Mage,Warlock
 
 step Orgrimmar class quests
-  only Hunter,Priest
+  only Priest
   zone Orgrimmar
-  tip Ormak Grimshot stands in the Valley of Honor, Ur'kyo in the Valley of Spirits on the city's west side.
-  turnin 6081 only Hunter,Orc,Troll   -- Ormak Grimshot: Beast Training
+  tip Ur'kyo stands in the Valley of Spirits on the city's west side.
   turnin 5654 only Troll,Priest       -- Ur'kyo: Hex of Weakness
 
 step Thunder Bluff
@@ -85,12 +108,15 @@ step Thunder Bluff
   fly "Thunder Bluff"
   train class
   accept 27 only Tauren               -- Turak Runetotem
+  accept 6126 only Tauren             -- Turak Runetotem: Lessons Anew
 
 step Trial of the Lake
   only Tauren,Druid
   zone Moonglade
   tip Cast Teleport: Moonglade; Dendrite Starblaze is in Nighthaven. The Shrine Baubles lie on the bed of Lake Elune'ara and fade within minutes: swim one straight to the Shrine of Remulos on the north-west shore, use it there and speak to Tajarri.
   turnin 27                           -- Dendrite Starblaze
+  turnin 6126
+  accept 6127                         -- The Principal Source: Dreadmist Peak, next guide
   accept 28
   complete 28
   turnin 28                           -- Tajarri, at the Shrine of Remulos
@@ -216,6 +242,7 @@ step The Sepulcher
   tip Swim back and follow the road west to the Sepulcher.
   turnin 443                          -- Apothecary Renferrel
   accept 95981                        -- Shadow Priest Allister
+  accept 516                          -- Shadow Priest Allister: Beren's Peril, on the south loop
   accept 98298 optional               -- Dalar Dawnweaver: take it if he offers it; it may follow his Arugal's Folly series, which the route does not run
   accept 98299
 
@@ -236,12 +263,18 @@ step The refugees
   kill 2054 quest 98299.2
   kill 2053 quest 98299.1
 
+step Beren's Peril
+  tip North-east of the refugees, the Ravenclaw Drudgers and Guardians haunt the ruins of Beren's Peril in the south-east of the forest.
+  kill 1974 quest 516.1
+  kill 1973 quest 516.2
+
 step Hearth to the Sepulcher
   hearth "The Sepulcher"
   turnin 479                          -- Shadow Priest Allister
   turnin 95981
   turnin 98298 optional               -- Dalar Dawnweaver
   turnin 98299
+  turnin 516
 
 step Lordamere Lake shore
   tip The Vile Fin Lakestalkers and Oracles sit on the lake shore south of the Decrepit Ferry, east of the Sepulcher.
@@ -273,7 +306,7 @@ step Valley of Strength
 
 step Cleft of Shadow
   tip The Cleft of Shadow is the canyon under the Valley of Strength; Neeru Fireblade stands at its far end.
-  turnin 832 only Orc,Troll,Tauren    -- Neeru Fireblade
+  turnin 832 only Orc,Troll           -- Neeru Fireblade
 
 step The Drag
   tip Kor'geld and Yelmak run the alchemy shop in the Drag; Whuut is next door.
@@ -297,4 +330,7 @@ step Valley of Wisdom
   turnin 97249                        -- Migi
   turnin 95350 only Skyborne          -- Thrall, inside Grommash Hold
   accept 98024 only Skyborne          -- Keep it: Thork at the Crossroads
+  accept 93739 only Skyborne optional -- Thrall: Exploring the Horde, a tour of the Horde's leaders
+  kill 3230 quest 93739.1 only Skyborne optional -- Speak with Nazgrel, in Grommash Hold
+  kill 10540 quest 93739.2 only Skyborne optional -- Speak with Vol'jin, in Grommash Hold
   train class only Warrior,Hunter,Rogue,Priest,Shaman,Mage,Warlock

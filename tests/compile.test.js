@@ -64,7 +64,7 @@ test('the compiled pack loads under Lua 5.1 with Core/Init.lua and round-trips t
 		{
 			addon: 'Polestar_Guides',
 			id: 'guides',
-			format: 1,
+			format: 2,
 			title: 'Polestar Guides',
 			author: 'Polestar',
 			version: manifest.version,

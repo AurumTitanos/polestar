@@ -3,7 +3,7 @@
 // line numbers; filling from reference data happens in resolve.js.
 //
 // parseGuide(text, file, diag) -> guide | null
-//   guide = { file, id, line, header: { ... }, lines: { <headerKey>: line, pros: [line], cons: [line] }, steps: [step] }
+//   guide = { file, id, line, header: { ... }, lines: { <headerKey>: line, pros: [line], cons: [line], rewards: [line] }, steps: [step] }
 //   step  = { line, title, only, tip, goals: [goal] }
 //   goal  = { line, verb, zone, note, ...positional/modifier fields }
 // `zone` on a goal is the zone spec in effect ({ name } | { map }, with line),
@@ -18,11 +18,12 @@ const INT_RE = /^\d+$/;
 const NUM_RE = /^-?\d+(?:\.\d+)?$/;
 const COORD_RE = /^(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)$/;
 
-const HEADER_KEYS = ['guide', 'title', 'levels', 'zone', 'faction', 'race', 'class', 'next', 'category', 'folder', 'keywords', 'collects', 'author', 'version', 'coords', 'pitch', 'pro', 'con'];
+const HEADER_KEYS = ['guide', 'title', 'levels', 'zone', 'faction', 'race', 'class', 'next', 'category', 'folder', 'keywords', 'collects', 'reward', 'why', 'author', 'version', 'coords', 'pitch', 'pro', 'con'];
 // Lines inside a step that are not goals.
 const STEP_KEYS = ['zone', 'only', 'tip'];
 
-const COMMON = ['text', 'optional', 'only'];
+// `group [N]`: the goal needs a group (of N players), shown in the guide window.
+const COMMON = ['text', 'optional', 'only', 'group'];
 // `frame` = the `era` / `live` modifiers: which map frame explicit coordinates are in.
 const COORDS = ['at', 'map', 'r', 'frame'];
 const MODS = {
@@ -53,8 +54,11 @@ const MODS = {
 	achieve: [...COMMON, ...COORDS, 'criteria'],
 };
 const VERBS = Object.keys(MODS);
-const MOD_LABEL = { at: '@x,y', count: 'xN', text: '"text"', until: 'until <N>', criteria: 'criteria <n>', frame: 'era`/`live', xp: 'xp <N>', money: 'money <amount>' };
-const MOD_WORDS = ['map', 'npc', 'object', 'item', 'quest', 'r', 'lvl', 'optional', 'only', 'until', 'criteria', 'era', 'live', 'nearest', 'reward', 'choose', 'xp', 'money'];
+const MOD_LABEL = { at: '@x,y', count: 'xN', text: '"text"', until: 'until <N>', criteria: 'criteria <n>', frame: 'era`/`live', xp: 'xp <N>', money: 'money <amount>', group: 'group [N]' };
+const MOD_WORDS = ['map', 'npc', 'object', 'item', 'quest', 'r', 'lvl', 'optional', 'only', 'until', 'criteria', 'era', 'live', 'nearest', 'reward', 'choose', 'xp', 'money', 'group'];
+// A party or raid: 2 to 40 players.
+const GROUP_MIN = 2;
+const GROUP_MAX = 40;
 
 // Item qualities as the client numbers them (Enum.ItemQuality).
 const QUALITIES = ['poor', 'common', 'uncommon', 'rare', 'epic', 'legendary', 'artifact', 'heirloom'];
@@ -213,7 +217,7 @@ function parseGuide(text, file, diag) {
 				err(ln, `unknown header key "${toks[0].text}"`, `header keys: ${HEADER_KEYS.join(', ')}`);
 				continue;
 			}
-			const repeatable = kw === 'pro' || kw === 'con';
+			const repeatable = kw === 'pro' || kw === 'con' || kw === 'reward';
 			if (guide.lines[kw] && !repeatable) {
 				err(ln, `duplicate header key \`${kw}\` (first on line ${guide.lines[kw]})`);
 				continue;
@@ -321,6 +325,7 @@ function parseHeader(guide, kw, line, lex, ln, err, warn) {
 		case 'category':
 		case 'author':
 		case 'pitch':
+		case 'why':
 		case 'folder':
 			h[kw] = rest;
 			return;
@@ -353,6 +358,35 @@ function parseHeader(guide, kw, line, lex, ln, err, warn) {
 				return;
 			}
 			h.collects = nums;
+			return;
+		}
+		case 'reward': {
+			// What the guide's goal gives, for the guide menu: `reward item <id>
+			// ["Name"] [quality] ...` (several items on one line: a choice of
+			// one), `reward spell <id> ["Name"]` or `reward text <words>`.
+			const kind = toks[1].quoted ? '' : toks[1].text.toLowerCase();
+			let entries;
+			if (kind === 'item') {
+				const r = readRewardList(toks, 2, 'reward item');
+				if (r.error) return err(ln, r.error);
+				if (r.next < toks.length) return err(ln, `unexpected "${toks[r.next].text}" in \`reward item\` (expected <itemId> ["Item name"] [quality] ...)`);
+				const choice = r.items.length > 1;
+				entries = r.items.map((it) => (choice ? { ...it, choice: true } : it));
+			} else if (kind === 'spell') {
+				const id = toks[2];
+				if (!id || id.quoted || !INT_RE.test(id.text) || Number(id.text) <= 0 || toks.length > 4 || (toks[3] && !toks[3].quoted)) {
+					return err(ln, 'malformed `reward spell` (expected reward spell <spellId> ["Spell name"])');
+				}
+				entries = [{ spell: Number(id.text), spellName: toks[3] ? toks[3].text : undefined }];
+			} else if (kind === 'text') {
+				const text = unquoteRest(line, lex, 2);
+				if (!text) return err(ln, '`reward text` needs words');
+				entries = [{ text }];
+			} else {
+				return err(ln, `unknown reward kind "${toks[1].text}" (expected \`reward item\`, \`reward spell\` or \`reward text\`)`);
+			}
+			(h.reward = h.reward || []).push(...entries.map((e) => ({ ...e, line: ln })));
+			(guide.lines.rewards = guide.lines.rewards || []).push(ln);
 			return;
 		}
 		case 'pro':
@@ -800,6 +834,23 @@ function parseGoal(verb, line, lex, ln, err, warn) {
 				goal.optional = true;
 				i++;
 				continue;
+			case 'group': {
+				if (!use('group')) return null;
+				// The size is optional: a next token that starts like a number is one.
+				const tk = toks[i + 1];
+				if (tk && !tk.quoted && /^[-+.\d]/.test(tk.text)) {
+					const n = INT_RE.test(tk.text) ? Number(tk.text) : NaN;
+					if (!(n >= GROUP_MIN && n <= GROUP_MAX)) {
+						return err(ln, `malformed group size "${tk.text}" (${GROUP_MIN} to ${GROUP_MAX} players)`), null;
+					}
+					goal.group = { size: n };
+					i += 2;
+				} else {
+					goal.group = {};
+					i++;
+				}
+				continue;
+			}
 			case 'only': {
 				if (!use('only')) return null;
 				let list = '';

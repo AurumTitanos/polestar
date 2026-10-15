@@ -6,8 +6,10 @@ zone Stranglethorn Vale
 next forever/horde/40-50/02-feralas
 # Route from the Polestar route simulator's Horde consensus (Tauren export),
 # visit 31 (Stranglethorn Vale, levels 40.2-42.3) and visit 32 (Swamp of
-# Sorrows, 42.3-42.5). Checked by lint, not play-tested on Forever yet. Era +
-# known Forever quests only.
+# Sorrows, 42.3-42.5) of the export it was written from; the October
+# refresh's export has them as visits 30 (Stranglethorn 40.9-42.9) and 28
+# (Swamp of Sorrows 36-40 quests, at 40.0-40.4, before Desolace). Checked by
+# lint, not play-tested on Forever yet. Era + known Forever quests only.
 #
 # Flow: Shadowprey Village -> fly Ratchet -> boat to Booty Bay -> the
 # Bloodsail cove, the Wild Shore and the Bloodsail ships -> Booty Bay ->
@@ -16,10 +18,10 @@ next forever/horde/40-50/02-feralas
 # jungle stalkers -> the naga shore and the Holy Spring -> Booty Bay (bind)
 # -> the ghost pirates -> Zul'Mamwe and the Balia'mah and Ziata'jai trophy
 # skulls -> Grom'gol -> hearth to Booty Bay -> fly Grom'gol -> Nesingwary ->
-# north through Duskwood and Deadwind Pass -> Stonard (flight path) ->
-# Galen's escort, Noboru and Galen's strongbox -> crocolisks -> the
-# Harborage -> Misty Reed Post -> the snappers on the strand -> Misty Reed
-# Post.
+# north through Duskwood and Deadwind Pass -> the Harborage -> Stonard
+# (flight path) -> Galen's escort, the Draenethyst crystals, Noboru and
+# Galen's strongbox -> crocolisks -> the Harborage -> Misty Reed Post -> the
+# snappers on the strand -> Misty Reed Post.
 #
 # Deviations from the simulator's order:
 # - One stay at Zul'Mamwe for Speaking with Gan'zulah (586), Split Bone
@@ -44,6 +46,11 @@ next forever/horde/40-50/02-feralas
 # - Swamp of Sorrows: the Harborage (Noboru the Cudgel) after the
 #   crocolisks, so the west of the swamp is visited once before riding to
 #   Misty Reed Post.
+# - Added in the October refresh, from the new export (Forever above 30
+#   cannot be checked in game until launch on 4 November: from the data, not
+#   from play): Draenethyst Crystals (1389). Magtoor gives it at the
+#   Harborage, so the route stops there first on the way in; the crystals
+#   stand in the Fallow Sanctuary on the way up to Galen's cage.
 #
 # Turned in here from earlier guides: Sunken Treasure (669, from Shakes
 # O'Breen in forever/horde/30-40/03-arathi-highlands) at Fleet Master Seahorn
@@ -64,6 +71,21 @@ next forever/horde/40-50/02-feralas
 # (1182: its chain 1178-1181 starts at Pozzik in Thousand Needles and runs
 # through Gazlowe in Ratchet, none of it on the route, and Cozzle's
 # footlocker sits in the Venture Co. camp at Lake Nazferiti, off this loop).
+# Left out from the refreshed export:
+# - Ancient Gurubashi Idol (96774, new in Forever, 8,800 XP): a dungeon quest
+#   in the Drowned City ("gather some friends", wowforevertalents.com, read
+#   from the beta client). The data places its giver Mazu'kon in north-west
+#   Mulgore (32.5,20.6), which the export visits for it alone at 43.3; no
+#   other source places him, so it is not added.
+# - Lost in Transit (93663, new, Dar in Stonard to Magtoor): the data has no
+#   place for the missing courier or the Courier's Shipment.
+# - My Little Friends (93176, new, Amaryllis Webb west of Stonard): its
+#   critters are an Arbor Tarantula in Stranglethorn, a Hay Weevil in Arathi
+#   and a Flesh Picker in Desolace (data), caught with a kit you only get
+#   here; the route has left all three zones by now.
+# - Neeka Bloodscar (1418): the export takes it in the Swamp before the
+#   Badlands; here the Badlands come first and Report to Helgrum (1420)
+#   arrives from Neeka instead.
 
 # ---------------------------------------------------------------- The way in
 
@@ -262,13 +284,18 @@ step Nesingwary's Expedition
 
 step Into the Swamp of Sorrows
   zone Swamp of Sorrows
-  tip Keep riding north into Duskwood, then east along the road through Deadwind Pass. Stonard lies in the reeds south of the road.
-  goto 46.0,54.7 "Stonard"
+  tip Keep riding north into Duskwood, then east along the road through Deadwind Pass into the swamp. Magtoor waits at the Harborage, the draenei camp near the way in from Deadwind Pass.
+  accept 1389                           -- Magtoor
 
 step Stonard
+  tip Ride east to Stonard, in the reeds south of the road.
   getfp "Stonard" npc 6026              -- Breyk
   turnin 1420                           -- Helgrum the Swift
   accept 698                            -- Dar
+
+step Draenethyst crystals
+  tip Ride north-east to the Fallow Sanctuary. The crystals stand along the way up to Galen Goodward's cage.
+  collect 6071 x6 quest 1389.1          -- Draenethyst Crystals
 
 step Galen's Escape
   tip Galen Goodward is held in the Fallow Sanctuary in the swamp's north-east. Free him and follow him out, fighting off the swamp creatures that chase him.
@@ -292,6 +319,7 @@ step Sawtooth crocolisks
 step The Harborage
   tip Ride west along the road to the draenei camp at the Harborage, near the way in from Deadwind Pass.
   turnin 1392                           -- Magtoor
+  turnin 1389
 
 step Misty Reed Post
   tip Ride back east past Stonard and follow the road south-east to the small Horde post on the shore.

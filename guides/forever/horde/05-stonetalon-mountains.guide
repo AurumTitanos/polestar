@@ -11,15 +11,16 @@ next forever/horde/06-hillsbrad-foothills
 #
 # Flow: north from the Crossroads to Kadrak at the Mor'shan Rampart (Warsong
 # Reports) -> Splintertree Post (flight path, bind) -> Night Run (Ashenvale
-# Hunt) -> the Warsong Scout and Outrider -> west across Ashenvale to
-# Zoram'gar Outpost (flight path, Warsong Runner, naga heads) -> fly to
-# Splintertree, back to Kadrak -> south to the Crossroads and west into
-# Stonetalon: Malaka'jin -> Ziz Fizziks and Windshear Crag -> Sun Rock
-# Retreat (flight path, bind) -> Mirkfallon Lake -> Stonetalon Peak (Jin'Zil's
-# reagents, Cenarion grove) -> hearth to Sun Rock -> the Charred Vale -> Sun
-# Rock -> down the Webwinder Path to
-# Malaka'jin -> fly from the Crossroads to Orgrimmar, zeppelin to the
-# Undercity, fly to Tarren Mill (bind) for forever/horde/06-hillsbrad-foothills.
+# Hunt) -> the Warsong Scout and Outrider -> west across Ashenvale, Va'xug
+# Firefure's ravine on the way -> Zoram'gar Outpost (flight path, Warsong
+# Runner, naga heads) -> fly to Splintertree, back to Kadrak -> south to the
+# Crossroads and west into Stonetalon: Malaka'jin -> Ziz Fizziks and
+# Windshear Crag -> Sun Rock Retreat (flight path, bind) -> Mirkfallon Lake ->
+# Stonetalon Peak (Jin'Zil's reagents, Cenarion grove) -> hearth to Sun Rock
+# -> the Charred Vale -> Sun Rock -> down the Webwinder Path to Malaka'jin ->
+# fly from the Crossroads to Orgrimmar, zeppelin to the Undercity, fly to the
+# Sepulcher, Beren's Peril (the Offering Stone), ride on to Tarren Mill (bind)
+# for forever/horde/06-hillsbrad-foothills.
 #
 # Deviations from the export (same quest set):
 # - The export turns in Report to Kadrak after the Night Run stop; the walk
@@ -48,11 +49,24 @@ next forever/horde/06-hillsbrad-foothills
 # (1088, Alliance side of Ashenvale), Arachnophobia (6284, Besseleth is
 # elite and the export leaves it out).
 #
-# Class quests: Undead Priests hand Devouring Plague (5646, from Ur'kyo at
-# 20) to Aelthalyste on the Undercity stop.
+# Class quests: Undead Priests hand Dark Sacrifice (5646, from Ur'kyo at
+# 20; Forever renamed Devouring Plague) to Aelthalyste on the Undercity stop.
 #
 # Added: Bloodfury Trinkets (86576, Forever): the sunstones drop from the
 # Charred Vale harpies the route kills for Harpies Threaten (6282).
+# Never Coming Back and A Void Path (98251, 98252, Forever, new consensus
+# route): Va'xug Firefure's ravine lies just south of the road the route
+# rides west to Zoram'gar, and his stags and bears (21-22) suit the level
+# here (the export does them at about 26 on the later Ashenvale visit,
+# where they would be five levels below you).
+# The Offering Stone, The Tortured Soul and The Offering of Blood (95884,
+# 95883, 95885, Forever, new consensus route): all three start and end at
+# the Offering Stone in Beren's Peril, a short ride off the road to Tarren
+# Mill (the export does them on a second Silverpine visit at about 21). The
+# Offering of Blood is optional: Wowhead lists it as elite.
+# Skyborne: Lady Sylvanas Windrunner in the Undercity is one of the leaders
+# for Exploring the Horde (93739, from Thrall in
+# forever/horde/03-silverpine-forest); talk to her on the Undercity stop.
 #
 # Dropped: Stepping Stones (79192) and Scramble (79980): they follow ... and
 # that note you found (79007), which no Horde guide takes.
@@ -85,6 +99,18 @@ step Night Run
 step Warsong Outrider
   tip The Warsong Outrider patrols the road east of Night Run toward the Satyrnaar.
   collect 16765 quest 6543.3 @81.83,53.51 -- Warsong Outrider
+
+step Va'xug Firefure
+  tip On the ride west, Va'xug Firefure is stuck in a ravine south of the main road, south-east of Astranaar. Shadowhorn Stags and Ashenvale Bears roam the woods all around it.
+  accept 98251 @40.4,61.5             -- Va'xug Firefure
+  kill 3817 quest 98251.1
+  kill 3809 quest 98251.2
+  turnin 98251
+  accept 98252
+
+step A Void Path
+  tip Steer Va'xug's Eye of Kilrogg out of the ravine to the main road within four minutes; if the channel breaks, ask Va'xug again.
+  turnin 98252 @38.2,58.1             -- Eye of Kilrogg, on the road
 
 # ---------------------------------------------------------------- Zoram'gar Outpost
 
@@ -191,15 +217,32 @@ step To the Undercity
   zone Undercity
   tip Ride east to the Crossroads and fly to Orgrimmar. Take the zeppelin from the towers outside Orgrimmar to Tirisfal Glades; the Undercity lies below the Ruins of Lordaeron. The bat handler is in the Trade Quarter.
   getfp "Undercity"
+  kill 10181 quest 93739.4 only Skyborne optional -- Speak with Lady Sylvanas Windrunner, in the Royal Quarter: Exploring the Horde
 
 step Aelthalyste
   only Undead,Priest
   tip Aelthalyste stands in the War Quarter.
   turnin 5646                         -- Aelthalyste: Dark Sacrifice
 
+step Beren's Peril
+  zone Silverpine Forest
+  tip If you already know the Tarren Mill flight path, fly there and skip to Tarren Mill. Otherwise fly from the Undercity to the Sepulcher and ride south down the road past Pyrewood. The Ravenclaw undead haunt the ruins of Beren's Peril east of the road in the south-east of the forest; a Ravenclaw Guardian drops the Note Scrap that leads to the Offering Stone.
+  accept 95884 item 271343            -- Note Scrap, from a Ravenclaw Guardian
+  turnin 95884 @58.1,69.8             -- Offering Stone
+  accept 95883
+  collect 271350 quest 95883.1        -- Tortured Soul, from the Tortured Souls among the ruins
+  turnin 95883
+
+step The Offering of Blood
+  tip Use the Tortured Soul at the Offering Stone for a willing sacrifice and kill the Tortured Soul that answers. The Tortured Soul is elite: grouping up is advised.
+  goto 58.1,69.8 "Offering Stone"
+  accept 95885 optional
+  kill 212753 quest 95885.1 optional
+  turnin 95885 optional
+
 step Southpoint Tower
   zone Hillsbrad Foothills
-  tip If you already know the Tarren Mill flight path, fly there and skip this step. Otherwise leave the Undercity and ride south down the road through Silverpine Forest past the Sepulcher and Pyrewood. Where the road turns east into Hillsbrad, Deathstalker Lesh waits at Southpoint Tower.
+  tip Back on the road south. Where it turns east into Hillsbrad, Deathstalker Lesh waits at Southpoint Tower.
   accept 494 optional                 -- Deathstalker Lesh: Darthalia in Tarren Mill
 
 step Tarren Mill

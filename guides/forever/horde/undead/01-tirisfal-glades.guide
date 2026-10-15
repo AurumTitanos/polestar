@@ -7,7 +7,9 @@ zone Tirisfal Glades
 next forever/horde/02-the-barrens
 
 # Route: the simulator's consensus Undead route (data/sim/export/
-# consensus-horde-undead, visit 1, levels 1-12.9).
+# consensus-horde-undead, visit 1, levels 1-11.9). Checked against the
+# 2026-10-14 export: same Tirisfal quests, same order apart from turn-ins
+# swapped within one Brill visit.
 #
 # Flow: Deathknell -> the road east past Calvin Montague and Gordo -> Brill
 # (bind) -> Doom Weed north of town -> west fields, Gordo, Calvin's duel ->
@@ -22,7 +24,10 @@ next forever/horde/02-the-barrens
 #
 # Optional: A Letter Undelivered (361). A Letter to Yvette drops from the
 # Agamand Mills undead about one kill in 25-30, so its accept and turn-in never
-# block.
+# block. Rear Guard Patrol (99156, Forever): Riptear, a level 13 elite
+# abomination, wanders the woods next to the Vicious Night Web Spiders of the
+# east loop; the quest is taken and handed in at Linnea's camp, which the route
+# visits before and after that loop.
 #
 # Deviations from the export (same quest set apart from "Left out"):
 # - Patience (99141): the export accepts and turns it in on the spot; here the
@@ -51,28 +56,57 @@ next forever/horde/02-the-barrens
 #   zeppelin from the towers by the Ruins of Lordaeron, then the walk through
 #   Durotar to the Crossroads, where the next guide starts.
 #
-# Class quests: Paladins take A Difficult Path (98601) from Sarvis and
-# Rediscovering the Light (90902, Holy Light) from Aramis Hammerhand in
-# Deathknell; Warlocks do Piercing the Veil (1470, Summon Imp) with Venya
+# Class quests: Paladins take A Difficult Path (98601) from Sarvis,
+# Rediscovering the Light (90902, Holy Light) and Coming to Terms (91208, the
+# Frightened Paladin west of the church) from Aramis Hammerhand in
+# Deathknell, then Continue Your Training (91209) to Shari Stilwell, their
+# trainer in Brill; Warlocks do Piercing the Veil (1470, Summon Imp) with Venya
 # Marthand on the Rattlecage Skeletons. At about 10 from Brill: Warriors kill
 # Ulag the Cleaver north of town (1819, Defensive Stance); Warlocks take
 # Creature of the Void (1473) from Carendin Halgar in the Undercity on the way
 # to the Scarlet camp, where Egalin's Grimoire lies in Perrine's Chest, and
 # bind the Voidwalker (1471) in the Undercity before the zeppelin; Priests
 # learn Touch of Weakness (5658) from Aelthalyste on the same Undercity stop.
+# In Favor of Darkness / Garments of Darkness (5651, 5650, Priest) reward a
+# robe, not a spell: not taken.
+# Mages: at 10 Cain Firesong in Brill sends them to Anastasia Hartwell in the
+# Undercity (1881) on the way to the Scarlet camp, the Balnir Snapdragons
+# (1882) are picked in the east loop, and the hand-in waits for the last
+# Undercity stop.
+# Class letters: Sarvis's level 1 letter for each class (Simple Scroll 3095
+# Warrior, Encrypted Scroll 3096 Rogue, Hallowed Scroll 3097 Priest, Glyphic
+# Scroll 3098 Mage, Tainted Scroll 3099 Warlock; Paladins: A Difficult Path
+# 98601) is taken after The Mindless Ones and handed to the trainer at the
+# church.
 # Class training at Deathknell (2, 4) and in Brill (6, 8, 10, 12).
 #
-# Left out for Paladins: A Lesson in Divinity (94427-94441, Redemption) runs
-# from Bandarion Keep on the west coast to the Undercity and Deathguard Falgan
-# at the far east end of the glades and back: three crossings of the zone for
-# a resurrection spell that solo leveling does not need. The Bandarion Keep
-# story quests (91208 onwards) teach no spell.
+# Paladin only: As Above, So Below (99152, Hilda the Breaker) and The One
+# That Got Away (99153, Ephram Barbaro) at Bandarion Keep. QuestieDB has no
+# class gate on them, but a Scourge Mage (Mike_, 0.2.3) found neither in the
+# givers' quest windows, and warcraft.wiki.gg calls Hilda a Forsaken paladin
+# trainer: the keep is the Paladin hub. Other classes skip the keep; the
+# Shadowvale elixir bottles (95314) stay for everyone.
 #
-# Left out (accepted by the export but never turned in on its route): The
-# Prodigal Lich (405, Bethor Iceshard in the Undercity), Delivery to
-# Silverpine Forest (445, the Sepulcher) and Leonid's Letter (98545, Glix
-# Xizzix in the Undercity). With them go the Prodigal Lich chain and the
-# Undercity flight path of the older Tirisfal guide; the export has neither.
+# Left out for Paladins: the Bandarion Keep chain (91282-91317, 95803) and A
+# Lesson in Divinity (94427-94441, Redemption) run from Bandarion Keep on the
+# west coast to the Undercity and Deathguard Falgan at the far east end of the
+# glades and back: three crossings of the zone for a resurrection spell solo
+# leveling does not need. They are the Class guide
+# forever/class/paladin/tyrs-watch.
+#
+# Left out: The Prodigal Lich (405, Bethor Iceshard in the Undercity): the
+# export accepts it and never turns it in. With it go the Prodigal Lich chain
+# and the Undercity flight path of the older Tirisfal guide. Leonid's Letter
+# (98545, Glix Xizzix in the Undercity, 90 XP) is not on the new export's
+# route at all.
+# Left out: the export's Sepulcher stop at 11.9-12.2 (Delivery to Silverpine
+# Forest 445, Supplying the Sepulcher 6321, Ride to the Undercity 6323,
+# Michael Garrett 6322, Prove Your Worth 421, Arugal's Folly 422). The new
+# export goes on into Silverpine from there, while this route goes to the
+# Barrens first; tried as a detour from Brill to the Sepulcher and a bat to
+# the Undercity before the zeppelin, it cost 0.03 h to level 20 under the
+# simulator. Arugal's Folly (422) could not have been added anyway: nothing in
+# the data places its Remedy of Arugal.
 
 # ---------------------------------------------------------------- Deathknell
 
@@ -95,6 +129,16 @@ step Shadow Priest Sarvis
   accept 3901
   accept 376                          -- Novice Elreth, beside the church
   accept 98389                        -- Aramis Hammerhand
+  accept 3095 only Warrior            -- Shadow Priest Sarvis: Simple Scroll
+  accept 3096 only Rogue              -- Shadow Priest Sarvis: Encrypted Scroll
+  accept 3097 only Priest             -- Shadow Priest Sarvis: Hallowed Scroll
+  accept 3098 only Mage               -- Shadow Priest Sarvis: Glyphic Scroll
+  accept 3099 only Warlock            -- Shadow Priest Sarvis: Tainted Scroll
+  turnin 3095 only Warrior            -- Dannal Stern, the warrior trainer
+  turnin 3096 only Rogue              -- David Trias, the rogue trainer
+  turnin 3097 only Priest             -- Dark Cleric Duesten, the priest trainer in the church
+  turnin 3098 only Mage               -- Isabella, the mage trainer, in the church
+  turnin 3099 only Warlock            -- Maximillion, the warlock trainer
   train class                         -- The Deathknell trainers stand around the church
 
 step Aramis and Venya
@@ -133,10 +177,13 @@ step Scavenging Deathknell
   tip The Equipment Boxes lie beside the ruined houses in the north of Deathknell.
   collect 11127 quest 3902.1
 
+# Night Web's Hollow: "26,60 nightwebs and entrace to cave"
+# (https://www.wowhead.com/classic/quest=380, comments).
 step Night Web's Hollow
   tip Head west to the cave. The Young Night Web Spiders sit outside; the Night Web Spiders and the Webbed Victims are inside.
   kill 1504 quest 380.1
   kill 1505 quest 380.2
+  goto 26.0,60.0 "Night Web's Hollow"
   goto 24.8,59.6 "Webbed Victims"    -- Free six Webbed Victims inside the cave for Aramis
 
 step Back to Deathknell
@@ -144,7 +191,13 @@ step Back to Deathknell
   turnin 380                          -- Executor Arren
   accept 381
   turnin 98389                        -- Aramis Hammerhand
+  accept 91208 only Paladin           -- Aramis Hammerhand
   accept 6395                         -- Novice Elreth
+
+step The Frightened Paladin
+  only Paladin
+  tip Coming to Terms: the Frightened Paladin fled into the hills just west of the church.
+  talk 246143                         -- Offer aid to the Frightened Paladin
 
 step The Scarlet farm
   tip The Scarlet Converts and Initiates hold the farm east of Deathknell. Samuel Fipps wanders between the farmhouses: his remains are for Marla's Last Wish.
@@ -158,6 +211,8 @@ step Marla's Grave
 step Executor Arren
   turnin 6395                         -- Novice Elreth
   turnin 381                          -- Executor Arren
+  turnin 91208 only Paladin           -- Aramis Hammerhand
+  accept 91209 only Paladin
   accept 382
 
 step Meven Korgal
@@ -187,6 +242,7 @@ step Brill
   sethome "Gallows' End Tavern" npc 5688 -- Innkeeper Renee
   turnin 8                            -- Innkeeper Renee
   turnin 383                          -- Executor Zygand
+  turnin 91209 only Paladin           -- Shari Stilwell, the Paladin trainer
   accept 427
   accept 99134
   accept 99141
@@ -288,6 +344,7 @@ step Deathguard Linnea
   accept 360
   accept 356
   accept 97558                        -- Shelene Rhobart
+  accept 99156 optional               -- Deathguard Linnea: Riptear, an elite abomination in the east
   collect 286201 quest 99141.2 @65.2,60.3 -- Ask Deathguard Kristof for his report
 
 step Magistrate Sevren
@@ -326,18 +383,20 @@ step Vile Fin shore
   tip More Vile Fin murlocs walk the shore just north of the outpost.
   collect 278244 quest 97558.2
 
-step Whispering Forest
+step Paladin: Whispering Forest
+  only Paladin
   tip Head west into the Whispering Forest; Hilda and Ephram camp at its edge.
   accept 99152                        -- Hilda the Breaker
   accept 99153                        -- Ephram Barbaro
 
 step Shadowvale
   tip Shadowvale is the hollow at the west edge of the glades. The Shadowvale Lurchers and Mystics drop the bones; the bottles lie on the ground among them, and the Glowing Crystal Fragment is at the south end.
-  collect 286259 quest 99152.1
+  collect 286259 quest 99152.1 only Paladin
   collect 268801 quest 95314.1
-  collect 286269 quest 99153.1
+  collect 286269 quest 99153.1 only Paladin
 
-step Whispering Forest
+step Paladin: Whispering Forest
+  only Paladin
   turnin 99153                        -- Ephram Barbaro
   turnin 99152                        -- Hilda the Breaker
 
@@ -358,6 +417,7 @@ step Brill
   turnin 362                          -- Coleman Farthing
   turnin 354
   turnin 407                          -- The Captured Scarlet Zealot, in the town hall basement
+  accept 1881 only Mage               -- Cain Firesong: Anastasia Hartwell in the Undercity takes it
   train class
 
 step Ulag the Cleaver
@@ -372,6 +432,13 @@ step Carendin Halgar
   zone Undercity
   tip Walk south from Brill to the Ruins of Lordaeron and down into the Undercity. Carendin Halgar stands in the Magic Quarter. The Scarlet camp is just west of the ruins.
   accept 1473                         -- Carendin Halgar
+
+step Anastasia Hartwell
+  only Mage
+  zone Undercity
+  tip Walk south from Brill to the Ruins of Lordaeron and down into the Undercity. Anastasia Hartwell stands in the Magic Quarter. The Scarlet camp is just west of the ruins.
+  turnin 1881                         -- Anastasia Hartwell
+  accept 1882
 
 # ---------------------------------------------------------------- The Scarlet camp
 
@@ -417,6 +484,7 @@ step Balnir graves
   kill 1529 quest 356.1
   kill 1532 quest 356.2
   collect 286204 quest 99142.1
+  collect 7227 quest 1882.1 only Mage -- Balnir Snapdragons, in the farmstead's garden
 
 step Captain Vachon
   tip The Scarlet Friars camp just north-east of the graves; Captain Vachon stands among them.
@@ -424,8 +492,9 @@ step Captain Vachon
   kill 1538 quest 371.2
 
 step Vicious Night Web Spiders
-  tip The spiders lurk in the woods at the far east end of the glades.
+  tip The spiders lurk in the woods at the far east end of the glades. Riptear, a rogue abomination, wanders just north-west of them. Riptear is elite: grouping up is advised.
   collect 2872 quest 369.1
+  collect 286326 quest 99156.1 optional -- Riptear's Heart, from Riptear
 
 step Hides for the Forsaken
   tip Duskbats and Darkhounds roam all along the road back west; finish the wings and hides on the way.
@@ -435,6 +504,7 @@ step Hides for the Forsaken
 step Deathguard Linnea's camp
   turnin 356                          -- Deathguard Linnea
   turnin 97558                        -- Shelene Rhobart
+  turnin 99156 optional               -- Deathguard Linnea
   turnin 96897                        -- Hadric Harlson
   turnin 96898
 
@@ -471,9 +541,9 @@ step Hearth to Brill
   hearth "Gallows' End Tavern"
 
 step The Undercity
-  only Warlock,Priest
+  only Warlock,Priest,Mage
   zone Undercity
-  tip The Undercity is under the Ruins of Lordaeron, beside the zeppelin towers. Carendin Halgar is in the Magic Quarter: use the Runes of Summoning on the summoning circle beside him and defeat the voidwalker. Aelthalyste is in the War Quarter.
+  tip The Undercity is under the Ruins of Lordaeron, beside the zeppelin towers. Carendin Halgar is in the Magic Quarter: use the Runes of Summoning on the summoning circle beside him and defeat the voidwalker. Aelthalyste is in the War Quarter. Anastasia Hartwell is in the Magic Quarter too.
   turnin 1473 only Warlock            -- Carendin Halgar
   accept 1471 only Warlock
   use 6284 @86.6,27.1 only Warlock    -- Runes of Summoning
@@ -481,6 +551,7 @@ step The Undercity
   turnin 1471 only Warlock            -- Carendin Halgar: Summon Voidwalker
   accept 5658 only Priest             -- Aelthalyste
   turnin 5658 only Priest             -- Aelthalyste: Touch of Weakness
+  turnin 1882 only Mage choose 9514 7507 -- Anastasia Hartwell: The Balnir Farmstead
 
 step Zeppelin to Durotar
   zone Tirisfal Glades

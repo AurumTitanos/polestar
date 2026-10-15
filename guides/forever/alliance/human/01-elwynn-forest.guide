@@ -7,7 +7,8 @@ zone Elwynn Forest
 next forever/alliance/02-westfall
 
 # Route: the simulator's consensus route for Human (consensus-alliance-human,
-# visit 1, levels 1 to 12.3).
+# visits 1 and 3, levels 1 to 12.3). Its visit 2, a Stormwind stop at 6, is
+# left out (see "Left out").
 #
 # Flow: Northshire Valley (Abbey, the kobold camp, Echo Ridge Mine, the
 # Defias and Milly's vineyard) -> Goldshire (bind) and Crystal Lake -> the
@@ -52,6 +53,13 @@ next forever/alliance/02-westfall
 #   Westbrook trip at 11 instead of at 8: he is level 12 and walks with the
 #   gnolls Riverpaw Gnoll Bounty sends you to. Manhunt (147) moves with it
 #   to the last east pass, where Morgan the Collector walks beside the murlocs.
+# - Shipment to Stormwind (61) is taken from William Pestle when Kobold
+#   Candles is handed in; Morgan Pestle takes it on the Stormwind stop of
+#   02-westfall (the simulator took it and never handed it in).
+# - An Apple Treat (91738) is done on the Westbrook trip: its Thunder Applejack
+#   comes from the Applejack Still (91736) north of the garrison, for four
+#   Shiny Red Apples (Wowhead Forever, quest=91736), bought from Homer
+#   Stonefield at the Stonefield farm. The still is a short walk off the road.
 #
 # Class quests, as class-only steps (the level 10-12 ones from the last
 # Goldshire stop, about level 12):
@@ -59,20 +67,40 @@ next forever/alliance/02-westfall
 #   Summons (1685, Remen Marcot) to Surena Caledon (1688) and The Binding
 #   (1689, Summon Voidwalker): a trip to Stormwind and the Brackwell Pumpkin
 #   Patch before Westfall.
-# - Hunter: Josephine Carson's three Taming the Beast quests (94792, 94863,
-#   94864) and Training the Beast (94793, Isaac Chan), all around Goldshire.
+# - Hunter: A Scribbled Letter (92479) from Marshal McBride to Tordrin
+#   Sternblade in Northshire; Josephine Carson's three Taming the Beast
+#   quests (94792, 94863, 94864: Tame Beast) and Training the Beast (94793,
+#   Isaac Chan: Beast Training), all around Goldshire.
 # - Paladin: Tome of Divinity (2998, Brother Wilhelm) through Henze Faulk by
 #   Stone Cairn Lake to Redemption (1788): a trip to Stormwind and east
 #   Elwynn before Westfall.
 # - Priest: Desperate Prayer (5635) and Divine Grace (94774) from Priestess
 #   Josetta, handed in at the Cathedral of Light (02-westfall).
+#   Forever rewords Desperate Prayer to name High Priest Rohan in Ironforge;
+#   the quest data still has Laurena take it, so the route keeps her.
+# - Priest: In Favor of the Light / Garments of the Light (5623, 5624) reward
+#   a robe, not a spell: not taken.
 # - Warrior: the Defensive Stance quests are taken in Stormwind (02-westfall).
-# - Mage and Rogue: their level 10 quests reward items, not spells: not taken.
+# - Mage: Glyphic Letter (3104) in the Abbey. Speak with Jennea (1860,
+#   Zaldimar Wefhellt in Goldshire) and Mirror Lake (1861): a Stormwind stop
+#   and the Mirror Lake waterfall on the way to Westfall; handed in at the
+#   Stormwind stop of 02-westfall (Ley Staff or Ley Orb).
+# - Rogue: their level 10 quests reward items, not spells: not taken.
+#   Rogues: see the Class guide Blade of Cunning (Alliance).
+# - Level 1 class letters are taken: every class's letter from Marshal
+#   McBride (3100-3105, 92479) goes to its trainer in the Abbey once Kobold
+#   Camp Cleanup is handed in.
 # Train at the Abbey and in Goldshire.
-# Left out: Shipment to Stormwind (61, the route never goes to Stormwind to
-# hand it in), An Enchanting Lesson (91753, it needs Enchanting to disenchant
-# the effigies) and An Apple Treat (91738, the Thunder Applejack it wants has
-# no known source).
+# Left out: An Enchanting Lesson (91753, it needs Enchanting to disenchant
+# the effigies). Rare Books (91777, after Book Return) wants two books from
+# the Jasperlode Mine taken to Brother Paxton in Northshire, off the route.
+# Elmpaw's Head (91746) and Croaky's Head (91740) start from the heads of
+# two named mobs that roam north-east and south-east Elwynn, off the route;
+# Croaky's goes to Ridgepoint Tower. The simulator's Stormwind stop at 6 is
+# for Jennea Cannon's book quests (84397, 84398, 84399, 84402: each needs a
+# book that has no known source, and Wowhead lists them at level 60) and
+# three level 2 deliveries (332, 333, 334): not worth the walk without the
+# books.
 
 # ---------------------------------------------------------------- Northshire Valley
 
@@ -107,6 +135,20 @@ step Northshire Abbey
   turnin 92124                                -- Daniel, in the library
   accept 91743                                -- Brother Paxton
   turnin 7                                    -- Marshal McBride
+  accept 3100 only Warrior                    -- Marshal McBride: Simple Letter
+  turnin 3100 only Warrior                    -- Llane Beshere, the warrior trainer
+  accept 3101 only Paladin                    -- Marshal McBride: Consecrated Letter
+  turnin 3101 only Paladin                    -- Brother Sammuel, the paladin trainer
+  accept 92479 only Hunter                    -- Marshal McBride: A Scribbled Letter
+  turnin 92479 only Hunter                    -- Tordrin Sternblade, by the Abbey
+  accept 3102 only Rogue                      -- Marshal McBride: Encrypted Letter
+  turnin 3102 only Rogue                      -- Jorik Kerridan, the rogue trainer
+  accept 3103 only Priest                     -- Marshal McBride: Hallowed Letter
+  turnin 3103 only Priest                     -- Priestess Anetta, the priest trainer
+  accept 3104 only Mage                       -- Marshal McBride: Glyphic Letter
+  turnin 3104 only Mage                       -- Khelden Bremen, the mage trainer, inside the Abbey
+  accept 3105 only Warlock                    -- Marshal McBride: Tainted Letter
+  turnin 3105 only Warlock                    -- Drusilla La Salle, outside the Abbey
   accept 15
 
 step Echo Ridge Mine
@@ -268,12 +310,22 @@ step "Auntie" Bernice Stonefield
   turnin 86
   accept 84
 
+# Goldtooth (41.71,78.03) is inside the Fargodeep Mine, under the hill: "He
+# was always INSIDE the mine, in the back, on the ground level. Stay leftish"
+# (https://www.wowhead.com/forever/npc=327, comments, 2026); "Enter mine 39 82
+# and go to 41 78 to kill him" and "Don't go up the stairs for Goldtooth!"
+# (https://www.wowhead.com/classic/quest=87, comments); "Enter is on 39 83"
+# (https://www.wowhead.com/classic/quest=62, comments). The mouth, 39.5,82.4,
+# lies between the Kobold Tunnelers outside it (39.33,83.2, 39.6,82.13) and
+# the Kobold Miners inside (39.85,81.06 on). From Billy a straight line to
+# Goldtooth climbs the hill above the mine, so the step ends at the mouth.
 step Billy Maclure
   turnin 84
   accept 87
+  goto 39.5,82.4 "Fargodeep Mine's mouth"
 
 step Goldtooth
-  tip Goldtooth, a named kobold, sits in the back of the Fargodeep Mine's lower level. Defias Bandits around the vineyards drop a Westfall Deed now and then: right-click it.
+  tip Goldtooth is inside the Fargodeep Mine, not on the hill above it: go in at the mouth and keep left to the back of the mine floor; don't take the stairs up. Defias Bandits around the vineyards drop a Westfall Deed now and then: right-click it.
   collect 981 quest 87                        -- Bernice's Necklace
   collect 1972 x1 optional                    -- Westfall Deed
   accept 184 optional
@@ -289,6 +341,7 @@ step Goldshire
   turnin 91775 optional
   accept 76
   turnin 60                                   -- William Pestle
+  accept 61                                   -- Morgan Pestle in Stormwind takes it (02-westfall)
   turnin 107
   accept 112
   train class
@@ -349,6 +402,10 @@ step The gnoll camps
   tip Riverpaw gnolls camp in the hills west of Stone Cairn Lake; the Stolen Enchanting Supplies lie in their camps.
   collect 247805 quest 91725                  -- Stolen Enchanting Supplies
 
+# "The mine entrance is at 61.6,54.1" (https://www.wowhead.com/classic/quest=76, comments).
+step The Jasperlode Mine's entrance
+  goto 61.6,54.1 "The Jasperlode Mine"
+
 step The Jasperlode Mine
   tip The mine is south-west of the gnoll camps. Mining Tools lie near the entrance; Kobold Geomancers hold the tunnels.
   complete 76 @60.2,49.2                      -- Walk into the mine
@@ -386,11 +443,20 @@ step Maybell Maclure
 step The Stonefield Farm
   turnin 88                                   -- Ma Stonefield
   turnin 87                                   -- "Auntie" Bernice Stonefield
+  buy 4536 x4 npc 894                         -- Shiny Red Apples, from Homer Stonefield, for the Applejack Still
+
+step The Applejack Still
+  tip Head north-west across the fields to the Applejack Still, north of the Westbrook Garrison. Hand it four Shiny Red Apples for a Thunder Applejack.
+  accept 91736 optional                       -- Applejack Still
+  turnin 91736 optional
+  collect 247824 x1 @24.6,58.0                -- Thunder Applejack, from the still
 
 step Westbrook Garrison
-  tip Follow the river north-west to the Westbrook Garrison, by the road to Westfall. Deputy Rainer stands outside the barracks.
+  tip Back south to the Westbrook Garrison, by the road to Westfall. Deputy Rainer stands outside the barracks, Sergeant De Vries beside him.
   turnin 239
   accept 11
+  accept 91738                                -- Sergeant De Vries: he wants your Thunder Applejack
+  turnin 91738
 
 step Forest's Edge
   tip Riverpaw Runts and Outrunners hold the hills south of the garrison, along the Westfall border. Gruff Swiftbite, a level 12 gnoll, walks among them and carries the Gold Pickup Schedule: right-click it.
@@ -443,22 +509,36 @@ step Goldshire
   accept 2998 only Paladin                    -- Brother Wilhelm: Duthorian Rall in Stormwind takes it
   accept 5635 only Priest                     -- Priestess Josetta: High Priestess Laurena in Stormwind takes both
   accept 94774 only Priest
+  accept 1860 only Mage                       -- Zaldimar Wefhellt: Jennea Cannon in Stormwind takes it
   train class
 
 step Taming the Beast
   only Hunter
   tip Josephine Carson stands with the Goldshire trainers. Each of her quests hands you a Taming Rod: use it on the beast she names, then bring the rod back to her. Rockhide Boars and Young Forest Bears roam the hills south of the Maclure Vineyards, Gray Forest Wolves the woods east of Crystal Lake.
   accept 94792                                -- Josephine Carson
-  goto 43.3,77.9 "Rockhide Boars"
+  kill 524 quest 94792.1                      -- Rockhide Boar: tame it with the Taming Rod
   turnin 94792
   accept 94863
-  goto 58.4,62.1 "Gray Forest Wolves"
+  kill 1922 quest 94863.1                     -- Gray Forest Wolf: tame it with the Taming Rod
   turnin 94863
   accept 94864
-  goto 45.0,80.0 "Young Forest Bears"
-  turnin 94864                                -- Taming Lesson: Tame Beast
+  kill 822 quest 94864.1                      -- Young Forest Bear: tame it with the Taming Rod
+  turnin 94864                                -- Tame Beast
   accept 94793
-  turnin 94793                                -- Isaac Chan, beside her: Training Lesson
+  turnin 94793                                -- Isaac Chan, beside her: Beast Training
+
+step Jennea Cannon
+  only Mage
+  zone Stormwind City
+  tip Follow the road north from Goldshire into Stormwind. Jennea Cannon stands in the Wizard's Sanctum, the tower of the Mage Quarter; she gives you a flask for the Mirror Lake waterfall.
+  turnin 1860                                 -- Jennea Cannon
+  accept 1861
+
+step Mirror Lake
+  only Mage
+  zone Elwynn Forest
+  tip Leave Stormwind by the main gate. The Mirror Lake waterfall is south-west of the gates, on the way west to Westfall: fill Jennea's Flask at its base.
+  collect 7206 quest 1861.1                   -- Mirror Lake Water Sample
 
 # ---------------------------------------------------------------- Warlocks and Paladins: Stormwind and east Elwynn
 

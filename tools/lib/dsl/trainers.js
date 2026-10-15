@@ -1,6 +1,7 @@
 'use strict';
 // Class trainers (data/forever/trainers.json), from three sources:
 //   guide    every `train <npcId> only <Class>` goal (one class) under guides/
+//            (the pack's guides: not Recorder drafts or dist/, see findGuideFiles)
 //   record   recorded `trainer` events, tagged with the recording character's
 //            class (npcs seen by exactly one class, never profession trainers)
 //   curated  the name list below: capital and starting-town class trainers,
@@ -16,6 +17,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { parseGuide } = require('./parse');
 const { Diagnostics } = require('./diag');
+const { findGuideFiles } = require('./project');
 const { CLASS_FILES } = require('../game/races');
 
 const SW = 1453;
@@ -106,7 +108,7 @@ const CURATED = [
 	['WARRIOR', 'Darnath Bladesinger', DN],
 	['HUNTER', 'Jocaste', DN],
 	['HUNTER', 'Dorion', DN],
-	['HUNTER', 'Ariyell Skyshadow', DN],
+	['HUNTER', "Jeen'ra Nightrunner", DN],
 	['ROGUE', 'Syurna', DN],
 	['ROGUE', 'Anishar', DN],
 	['ROGUE', 'Erion Shadewhisper', DN],
@@ -226,6 +228,27 @@ const CURATED = [
 	['PALADIN', 'Alodan the Hopeful', TB],
 	['HUNTER', 'Tordrin Sternblade', ELWYNN],
 	['HUNTER', 'Josephine Carson', ELWYNN],
+	// Capital and Mulgore class trainers the list above lacked: npcs.json's
+	// <… Trainer> subName (pfQuest and QuestieDB's Forever store, 2026-10-15).
+	['WARRIOR', 'Ander Germaine', SW],
+	['DRUID', 'Theridran', SW],
+	['DRUID', 'Maldryn', SW],
+	['HUNTER', 'Thorfin Stoneshield', SW],
+	['PRIEST', 'Nara Meideros', SW],
+	['ROGUE', 'Lord Tony Romano', SW],
+	['WARRIOR', 'Kelv Sternhammer', IF],
+	['PRIEST', 'Toldren Deepiron', IF],
+	['PRIEST', 'High Priestess Mims', IF],
+	['MAGE', 'Nittlebur Sparkfizzle', IF],
+	['WARLOCK', 'Briarthorn', IF],
+	['PRIEST', 'Priestess Alathea', DN],
+	['WARRIOR', 'Grezz Ragefist', OG],
+	['SHAMAN', "Sian'tsu", OG],
+	['MAGE', 'Enyo', OG],
+	['PRIEST', "X'yera", OG],
+	['MAGE', 'Anastasia Hartwell', UC],
+	['SHAMAN', 'Palah Thunderhoof', MULGORE],
+	['DRUID', 'Hana Lighthoof', MULGORE],
 	// Zephras Isle (Skyborne): Thendal Grove, Shen'dar Village, Valanaar.
 	['WARRIOR', 'Blademaster Ren', ZEPHRAS],
 	['WARRIOR', 'Seena Skybreaker', ZEPHRAS],
@@ -319,7 +342,8 @@ function buildTrainers({ data, guidesDir, recordingsDir }) {
 	const counts = { curated: entries.size, guide: 0, record: 0 };
 
 	// Guides: `train <npcId>` restricted (goal or step `only`) to exactly one class.
-	for (const file of listFiles(guidesDir, '.guide')) {
+	for (const rel of guidesDir ? findGuideFiles(guidesDir) : []) {
+		const file = path.join(guidesDir, rel);
 		const ast = parseGuide(fs.readFileSync(file, 'utf8'), file, new Diagnostics());
 		if (!ast) continue;
 		for (const s of ast.steps) {

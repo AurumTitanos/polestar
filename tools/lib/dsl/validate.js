@@ -6,8 +6,9 @@
 // never take, missing prerequisites, accepts above the plausible level,
 // accepts closed by an exclusive quest taken earlier, accepts never turned in
 // on a route, `complete` on quests without objectives, required elite work in
-// Leveling guides, `|` in player-facing text, and a `goto` placed right
-// before a goal that already leads to the same place.
+// Leveling guides, `|` in player-facing text, a `goto` placed right before a
+// goal that already leads to the same place, and timed quest items carried
+// longer than they last (timed.js).
 //
 // Our house rules (required elite work, the solo filter) are errors in our
 // pack (`guides`) and warnings in every other.
@@ -22,8 +23,10 @@ const { applicable, maskExcludes, raceSides, characterKeys, whoLabel } = require
 const { raceLabel, classLabel, RACE_BY_FILE } = require('../game/races');
 const { blockingPrereqs } = require('../data/prereqs');
 const SOLO = require('../sim/solo');
+const { eliteWork } = require('./group');
 const { PIPE_HINT } = require('../pack/manifest');
 const { MAX_LEVEL, CUM_XP } = require('../game/xp');
+const { checkTimedItems } = require('./timed');
 
 // Quest XP is only part of what a questing route earns; mob kills on the way
 // add roughly as much again. Generous on purpose: this only drives a warning.
@@ -62,18 +65,10 @@ function followProblem(g, other, data) {
 	};
 }
 
-// Elite work: Leveling guides route solo characters, so it may appear only as
-// an `optional` extra. An elite is an npcs.json rank 1-3 (elite, rare elite,
-// boss) hostile to a side the goal applies to; a friendly one is a talk credit
-// (Questie encodes "listen to X" as a kill).
-const ELITE_RANKS = new Set([1, 2, 3]);
-const FRIENDLY_TO = { Alliance: ['A', 'AH'], Horde: ['H', 'AH'] };
+// Elite work (group.js `eliteWork`): Leveling guides route solo characters,
+// so it may appear only as an `optional` extra.
 // Goals already reported as elite errors, so the lint solo policy skips them.
 const eliteReported = new WeakSet();
-
-function isElite(rank, faction, sides) {
-	return ELITE_RANKS.has(Number(rank)) && sides.some((s) => !FRIENDLY_TO[s].includes(faction));
-}
 
 function eliteTip(target) {
 	return `in a Leveling guide make the goal \`optional\` with the tip "${target} is elite: grouping up is advised."`;
@@ -176,28 +171,14 @@ function validatePackFrames(guides, data, ours, ourData, diag) {
 	});
 }
 
-// The message for a `kill` of an elite, or a `collect` of an item whose every
-// located dropper in data is an elite (the compiler's `from` names one source
-// of the same data; one normal dropper keeps the item soloable). Null when
-// the goal is not elite work.
+// The message for elite work (group.js `eliteWork`): a `kill` of an elite, or
+// a `collect` of an item only elites drop. Null when the goal is not elite work.
 function eliteGoal(goal, sides, data) {
-	if (goal.t === 'kill' && goal.npc !== undefined) {
-		const n = data.npc(goal.npc);
-		return n && isElite(n.rank, n.faction, sides) ? `\`kill\` npc ${goal.npc} (${n.name}) is elite; ${eliteTip(n.name)}` : null;
-	}
-	if (goal.t !== 'collect' || goal.candidates) return null;
+	const elite = eliteWork(goal, sides, data);
+	if (!elite) return null;
+	if (goal.t === 'kill') return `\`kill\` npc ${goal.npc} (${elite.names[0]}) is elite; ${eliteTip(elite.names[0])}`;
 	const item = `\`collect\` item ${goal.item}${goal.itemName ? ` (${goal.itemName})` : ''}`;
-	const it = data.item(goal.item);
-	const sources = [];
-	for (const kind of ['npc', 'object']) {
-		for (const [id, chance] of Object.entries((it && it.drops && it.drops[kind]) || {})) sources.push({ kind, id: Number(id), chance: Number(chance) || 0 });
-	}
-	const located = sources.filter((s) => data.spawns(s.kind, s.id).length);
-	const list = (located.length ? located : sources).sort((a, b) => b.chance - a.chance);
-	if (!list.length) return null;
-	const recs = list.map((s) => (s.kind === 'npc' ? data.npc(s.id) : null));
-	if (!recs.every((r) => r && isElite(r.rank, r.faction, sides))) return null;
-	return `${item} drops only from elites (${[...new Set(recs.map((r) => r.name))].join(', ')}); ${eliteTip(recs[0].name)}`;
+	return `${item} drops only from elites (${elite.names.join(', ')}); ${eliteTip(elite.names[0])}`;
 }
 
 // The characters a goal applies to, as "side|race|class" keys, narrowed by the
@@ -367,11 +348,11 @@ function validateGuides(guides, data, diag) {
 		}
 		return xp;
 	};
-	const walkXp = (g, start, onAccept) => {
+	const walkXp = (g, start, onGoal) => {
 		let xp = start;
 		for (const { step, goal } of goalsOf(g)) {
-			if (goal.t === 'accept' && onAccept) onAccept(step, goal, xp);
-			else if (goal.t === 'turnin') {
+			if (onGoal) onGoal(step, goal, xp);
+			if (goal.t === 'turnin') {
 				const q = data.quest(goal.quest);
 				// Data XP, else the XP the turn-in line states (`xp <N>`).
 				const qxp = q && q.xp > 0 ? q.xp : goal.rewards && goal.rewards.xp > 0 ? goal.rewards.xp : 0;
@@ -558,15 +539,24 @@ function validateGuides(guides, data, diag) {
 			for (const r of failing) diag.warn(file, a.goal._line, `quest ${name} is accepted but never turned in on the route through "${r.s.id}"${some(r.left)}${why(r, 'it')}`, hint(outside(r)));
 		});
 
+		// The route's level at each goal (when XP data exists): accepts above
+		// it warn, and the timed-item check times kills at it.
+		const levels = new Map();
 		if (data.hasXp) {
 			walkXp(g, entryXp(g, new Set([g.id])), (step, goal, xp) => {
-				if (!(goal.minLevel > 0)) return;
 				const reach = levelAt(xp);
+				levels.set(goal, reach);
+				if (goal.t !== 'accept' || !(goal.minLevel > 0)) return;
 				if (goal.minLevel > reach) {
 					diag.warn(file, goal._line, `quest ${goal.quest} needs level ${goal.minLevel}, but the route plausibly reaches only level ${reach} here`);
 				}
 			});
 		}
+		checkTimedItems(g, data, diag, {
+			levelAt: (goal) => levels.get(goal),
+			characters: (step, goal) => characters([gl, step._only, goal._only], goal.quest !== undefined ? data.quest(goal.quest) : null),
+			meets,
+		});
 	}
 }
 

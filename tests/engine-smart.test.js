@@ -214,7 +214,11 @@ test('GUIDE_OUTLEVELED fires once per guide when the level passes maxLevel + 2',
 	assert.deepEqual(out, { at7: 0, fired: ['test/low>test/mid'], guide: 'test/low' });
 });
 
-test('skipGrey skips grey accepts the chain does not need, keeps the rest, and never auto-accepts them', () => {
+// Wogi's report: a Human at 20 in Darkshore (16-21) was sent to grey quests.
+// With the setting on, a grey quest turned in later in the guide is left out
+// with its turn-in; a grey quest stays when a quest down the chain that is not
+// grey needs it, directly or through other grey quests.
+test('skipGrey skips grey accepts and their turn-ins unless a quest worth doing needs them, and never auto-accepts them', () => {
 	const guides = `
 		Polestar.RegisterGuide({ id = "test/g1", pack = "test", title = "G1", faction = "Horde", minLevel = 1, maxLevel = 30, next = "test/g2", steps = {
 			{ goals = { { t = "accept", quest = 101, title = "Grey alone", qlvl = 2 } } },
@@ -222,6 +226,12 @@ test('skipGrey skips grey accepts the chain does not need, keeps the rest, and n
 			{ goals = { { t = "accept", quest = 103, title = "Grey prerequisite", qlvl = 4 } } },
 			{ goals = { { t = "accept", quest = 104, title = "Current", qlvl = 19 } } },
 			{ goals = { { t = "turnin", quest = 102, title = "Grey turned in" } } },
+			{ goals = { { t = "accept", quest = 106, title = "Grey chain start", qlvl = 5 } } },
+			{ goals = { { t = "accept", quest = 107, title = "Grey chain middle", qlvl = 6, pre = { 106 } } } },
+			{ goals = { { t = "accept", quest = 108, title = "Chain end worth it", qlvl = 18, pre = { 107 } } } },
+			{ goals = { { t = "accept", quest = 109, title = "Grey dead end start", qlvl = 5 } } },
+			{ goals = { { t = "accept", quest = 110, title = "Grey dead end", qlvl = 6, preAll = { 109 } } } },
+			{ goals = { { t = "turnin", quest = 110, title = "Grey dead end" } } },
 		} })
 		Polestar.RegisterGuide({ id = "test/g2", pack = "test", title = "G2", faction = "Horde", minLevel = 20, maxLevel = 30, steps = {
 			{ goals = { { t = "accept", quest = 105, title = "Follow-up", qlvl = 20, pre = { 103 } } } },
@@ -229,16 +239,29 @@ test('skipGrey skips grey accepts the chain does not need, keeps the rest, and n
 	`;
 	const script = `
 		E.SetGuide("test/g1")
-		local s = {}
-		for i = 1, 4 do s[i] = E.GetStepView(i).goals[1].status end
+		local function statuses()
+			local s = {}
+			for i = 1, #E.GetGuide().steps do s[i] = E.GetStepView(i).goals[1].status end
+			return s
+		end
+		local s = statuses()
 		local w = stub.world
 		w.questDetail(1, 101); w.close()
-		emit({ statuses = s, at = E.GetStepIndex(), accepted101 = w.log[101] ~= nil, grey = E.GetStepView(1).goals[1].skippedGrey or false })
+		local out = { statuses = s, at = E.GetStepIndex(), accepted101 = w.log[101] ~= nil, grey = E.GetStepView(1).goals[1].skippedGrey or false }
+		-- Taken by hand anyway: its accept and turn-in are back.
+		w.accept(102, {}, "Grey turned in"); flush()
+		local again = statuses()
+		out.byHand = { again[2], again[5] }
+		emit(out)
 	`;
 	const [on] = run({ guides, saved: { Polestar: 'PolestarDB = { schema = 1, settings = { behavior = { skipGrey = true } } }' }, script });
-	assert.deepEqual(on, { statuses: ['na', 'active', 'pending', 'pending'], at: 2, accepted101: false, grey: true });
+	assert.deepEqual(on, {
+		statuses: ['na', 'na', 'active', 'pending', 'na', 'pending', 'pending', 'pending', 'na', 'na', 'na'],
+		at: 3, accepted101: false, grey: true, byHand: ['done', 'pending'],
+	});
 	const [off] = run({ guides, script });
-	assert.deepEqual(off, { statuses: ['active', 'pending', 'pending', 'pending'], at: 1, accepted101: true, grey: false });
+	assert.equal(off.statuses.filter((s) => s === 'na').length, 0, JSON.stringify(off.statuses));
+	assert.deepEqual([off.at, off.accepted101, off.grey], [1, true, false]);
 });
 
 test('learn goals with candidates point at the nearest usable trainer and complete when the spell is known', () => {

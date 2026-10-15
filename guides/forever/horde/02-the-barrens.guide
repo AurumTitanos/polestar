@@ -8,15 +8,16 @@ next forever/horde/03-silverpine-forest
 # Built from the simulator's consensus Horde route (Tauren export, the Barrens
 # visit at 12.7-16.6); not yet play-tested on Forever.
 #
-# Arrivals, all at the Crossroads: Tauren at about 12.7 from Razor Hill
+# Arrivals, all at the Crossroads: Tauren at about 12 from Mulgore
 # (Crossroads flight path and bind already done), Undead at about 13 from
 # Tirisfal Glades, Skyborne at about 14.6 from Zephras Isle, Orcs and Trolls at
 # about 16 from their own Barrens guide (most of this guide is already done for
 # them: the engine skips what is).
 #
 # Flow: Crossroads -> plains around town (plainstriders, raptors, zhevra) ->
-# Razormane camp east -> Far Watch Post -> Ratchet (flight path) -> Southsea
-# beach, twice -> Crossroads -> Razormane camp again, Echeyakee -> the Sludge
+# Razormane camp east -> Far Watch Post (Tauren Warriors) -> Ratchet (flight
+# path) -> Southsea beach, twice -> Crossroads -> Razormane camp again,
+# Echeyakee -> the Sludge
 # Fen console -> the Dry Hills (harpies, Chen's keg) -> Regthar, the Forgotten
 # Pools, the Kolkar -> Crossroads -> Stagnant Oasis and the raptor nests ->
 # Ratchet -> Crossroads -> Lushwater Oasis -> Crossroads -> north: harpy
@@ -50,12 +51,15 @@ next forever/horde/03-silverpine-forest
 # Call of Fire (1523) from forever/horde/tauren/01-mulgore: Path of Defense,
 # Thun'grim Firegaze and Forged Steel (1498, 1502, 1503); Call of Fire (1524-
 # 1527) with Telf Joolam on the Durotar bank of the river. Orcs and Trolls do
-# these in their own Barrens guide.
+# these in their own Barrens guide. Forever's Call of Fire (1527) also gives
+# the Totem of Charged Flames (Wowhead Forever's Shaman page).
 # Path of Defense stays Tauren-only here: Undead and Skyborne Warriors learn
 # Defensive Stance from their own start guides' class quests.
 #
-# Far Watch Post is for Orcs, Trolls and Tauren only: Crossroads Conscription
-# (842) needs Conscript of the Horde (840), which only their start guides give.
+# Far Watch Post is for Tauren Warriors only (Uzzek): Orcs and Trolls hand in
+# Conscript of the Horde (840) in Durotar and Crossroads Conscription (842)
+# in their own Barrens guide; since the Tauren start dropped its Durotar trip
+# (Razor Hill), Tauren no longer carry 840.
 #
 # No grind stops: the export has none here.
 
@@ -112,12 +116,10 @@ step Kranal Fiss
   accept 1524
 
 step Far Watch Post
-  only Orc,Troll,Tauren
-  tip Follow the road east to the outpost above the Southfury River. Crossroads Conscription follows Conscript of the Horde from Razor Hill, so only Orcs, Trolls and Tauren are sent here.
-  turnin 840                          -- Kargal Battlescar
-  accept 842
-  turnin 1505 only Tauren,Warrior     -- Uzzek
-  accept 1498 only Tauren,Warrior
+  only Tauren,Warrior
+  tip Follow the road east to the outpost above the Southfury River.
+  turnin 1505                         -- Uzzek
+  accept 1498
 
 step Thunder lizards across the river
   only Tauren,Warrior
@@ -190,7 +192,7 @@ step Ratchet
 step The Crossroads
   tip Walk back west along the road to the Crossroads.
   turnin 903                          -- Sergra Darkthorn
-  turnin 842 only Orc,Troll,Tauren
+  turnin 842 only Orc,Troll
   accept 881
   turnin 871                          -- Thork
   turnin 5041
@@ -218,7 +220,7 @@ step Telf Joolam
 step Kranal Fiss
   only Tauren,Shaman
   zone The Barrens
-  turnin 1527
+  turnin 1527 reward 5176 263412      -- Kranal Fiss: Searing Totem, your Fire Totem and the Totem of Charged Flames
 
 step Echeyakee
   zone The Barrens

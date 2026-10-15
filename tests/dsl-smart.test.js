@@ -2,7 +2,8 @@
 // Smart targets: `train <Profession> [Rank]`, `train class`, `buy … nearest`,
 // `vendor nearest`, `sethome nearest` compile to candidate sets
 // (docs/ARCHITECTURE.md "Smart logic"); `trainers build`; `qlvl`/`pre` on
-// accepts for the engine's grey-quest skipping.
+// accepts for the engine's grey-quest skipping; a quest's profession on its
+// goals for the engine's profession gate.
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
@@ -213,6 +214,48 @@ test('accept goals carry the quest level and prerequisites for grey-quest skippi
 	assert.deepEqual([unknown.qlvl, unknown.pre], [undefined, undefined]);
 });
 
+test('every goal of a quest that needs a profession carries it; a Leveling guide warns on its non-optional goals unless it trains the profession first', () => {
+	// Kobold Camp Cleanup (7) needs Mining 50, Wolves Across the Border (33) Mining with no level (rank 1).
+	const { data } = dataWith((raw) => {
+		Object.assign(raw['quests.json'][7], { skill: 186, skillLevel: 50, pre: [] });
+		Object.assign(raw['quests.json'][33], { skill: 186 });
+	});
+	const src = (category, lines) => [...head('Alliance', [`category ${category}`]), 'step S', ...lines];
+	const steps = ['  accept 7', '  kill 6 quest 7', '  turnin 7 optional', '  accept 33 optional', '  accept 9500'];
+	const { r, goals: g } = goals(src('Leveling', steps), data);
+	assert.deepEqual(
+		g.map((x) => [x.t, x.profLine, x.profName, x.profRank]),
+		[['accept', 186, 'Mining', 50], ['kill', 186, 'Mining', 50], ['turnin', 186, 'Mining', 50], ['accept', 186, 'Mining', 1], ['accept', undefined, undefined, undefined]],
+	);
+	const text = `${src('Leveling', steps).join('\n')}\n`;
+	const warned = only(r.warnings, /needs Mining/);
+	assert.deepEqual(warned, [
+		`test.guide:${lineOf(text, 'accept 7')}: quest 7 (Kobold Camp Cleanup) needs Mining 50, and the guide does not train it before here: characters without it never see this goal`,
+		`test.guide:${lineOf(text, 'kill 6 quest 7')}: quest 7 (Kobold Camp Cleanup) needs Mining 50, and the guide does not train it before here: characters without it never see this goal`,
+	]);
+	// Trained earlier in the guide (levelled to the quest's rank above 1), or another category: no warning.
+	const warns = (category, lines) => only(goals(src(category, lines), data).r.warnings, /needs Mining/).length;
+	assert.equal(warns('Leveling', ['  train Mining', '  accept 33']), 0);
+	assert.equal(warns('Leveling', ['  train Mining', '  accept 7']), 1);
+	assert.equal(warns('Leveling', ['  skill Mining 50', '  accept 7']), 0);
+	assert.equal(warns('Class', steps), 0);
+	// The Core's registry takes the new fields.
+	const pack = compile(text.replace(/^guide t\//, 'guide test/'), data, { pack: 'test' });
+	const file = path.join(writeTestPack(pack.guides, data).dir, 'Guides.lua');
+	assert.match(fs.readFileSync(file, 'utf8'), /profLine = 186, profName = "Mining", profRank = 50/);
+	const [out] = runAddon({
+		addons: [{ name: 'Polestar', files: ['Core/Core.xml'] }],
+		script: `
+			${TEST_PACK}
+			local results = {}
+			local real = Polestar.RegisterGuide
+			Polestar.RegisterGuide = function(g) local ok, e = real(g); results[#results + 1] = ok and "ok" or e; return ok, e end
+			assert(loadfile(${JSON.stringify(file)}))("Polestar_Guides", {})
+			emit({ results = results })`,
+	}).emitted;
+	assert.deepEqual(out.results, ['ok']);
+});
+
 test('smart goals emit Lua the real engine registry accepts, and round-trip', () => {
 	const src = [...head(null), 'step S', '  train Mining', '  train class', '  buy 159 nearest', '  vendor nearest', '  sethome nearest', '  accept 9500'];
 	const r = compile(`${src.join('\n')}\n`.replace(/^guide t\//, 'guide test/'), undefined, { pack: 'test' });
@@ -280,6 +323,25 @@ test('trainers build: guide goals, recordings and the curated list, verified and
 		}).emitted[0];
 	assert.deepEqual(nearest('Human', 'Alliance', 1429, 48, 42), { npc: 911, faction: 'A' });
 	assert.deepEqual(nearest('Orc', 'Horde', 1411, 43, 68), { npc: 3153, faction: 'H' });
+});
+
+test('trainers build reads the pack guides only: Recorder drafts and dist/ are skipped', async () => {
+	const guides = tmpdir();
+	fs.writeFileSync(path.join(guides, 'a.guide'), guideText(['step S', '  train 152 only Rogue']));
+	// 3175 is a profession trainer: a draft's `only Warrior` must not make it a class trainer.
+	for (const dir of ['drafts', 'dist']) {
+		fs.mkdirSync(path.join(guides, dir));
+		fs.writeFileSync(path.join(guides, dir, 'x.guide'), guideText(['step S', '  train 3175 only Warrior']));
+	}
+	const data = tmpdir();
+	for (const f of fs.readdirSync(DATA_DIR)) fs.copyFileSync(path.join(DATA_DIR, f), path.join(data, f));
+	const args = ['build', '--guides', guides, '--data', data, '--recordings', tmpdir(), '--lua', path.join(tmpdir(), 'ClassTrainers.lua')];
+	const { result, out } = await quiet(() => trainersCmd.run(args));
+	assert.equal(result, 0, out);
+	assert.match(out, /from guides 1 goals/);
+	const t = JSON.parse(fs.readFileSync(path.join(data, 'trainers.json'), 'utf8'));
+	assert.deepEqual(t[152] && t[152].sources, ['guide']);
+	assert.ok(!t[3175]);
 });
 
 test('every Era-frame coordinate in an emitted pack, candidates included, has its map frame registered', () => {

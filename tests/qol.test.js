@@ -56,7 +56,8 @@ test('options: every qol setting is registered, on Questing or Quality of Life, 
 		for _, k in ipairs({ "itemButton", "targetButton", "hearthButton", "buttonScale", "xpTracker", "sellJunk", "autoRepair",
 			"rewardHighlight", "rewardAutoPick", "flightAutoOpen", "flightHighlight", "deathHelper", "instantQuestText",
 			"skipGossip", "fastLoot", "declineDuels", "repairGuild", "hideErrors", "autoReleasePvP", "declineGuildInvites",
-			"declinePartyStrangers", "acceptPartyFriends", "acceptSummon", "acceptResurrect" }) do keys[k] = Polestar.GetDefault("qol." .. k) end
+			"declinePartyStrangers", "acceptPartyFriends", "acceptSummon", "acceptResurrect", "buyGoals", "trainAll",
+			"rewardEquip" }) do keys[k] = Polestar.GetDefault("qol." .. k) end
 		emit(keys)
 	`);
 	const registered = new Set(specs.filter((c) => c.key).map((c) => c.key.replace(/^qol\./, '')));
@@ -67,6 +68,9 @@ test('options: every qol setting is registered, on Questing or Quality of Life, 
 		assert.ok(c.tab && c.section);
 	}
 	assert.equal(defaults.rewardAutoPick, false, 'auto-pick is off by default');
+	assert.equal(defaults.buyGoals, false, 'buying for the guide is off by default');
+	assert.equal(defaults.trainAll, false, 'learning at trainers is off by default');
+	assert.equal(defaults.rewardEquip, false, 'wearing rewards is off by default');
 	assert.equal(defaults.sellJunk, true);
 });
 
@@ -548,6 +552,461 @@ test('merchant: repairs after selling, if affordable; Shift and settings off do 
 });
 
 // ---------------------------------------------------------------------------
+// Buying for the step's buy goals
+// ---------------------------------------------------------------------------
+
+const GOODS = `
+	q.items[20] = { name = "Soothing Spices", quality = 1, price = 10 }
+	q.items[21] = { name = "Bronze Tube", quality = 1, price = 100 }
+	q.items[22] = { name = "Refreshing Spring Water", quality = 1, price = 1 }
+	q.items[23] = { name = "Flagon of Mead", quality = 1, price = 5 }
+	q.goods = {
+		{ id = 22, price = 25, stackCount = 5, maxStack = 20 },
+		{ id = 20, price = 40 },
+		{ id = 23, price = 80, numAvailable = 1 },
+	}
+	local function bought()
+		local out = {}
+		for _, c in ipairs(q.calls) do if c[1] == "BuyMerchantItem" then out[#out + 1] = c[2] .. "x" .. c[3] end end
+		return out
+	end
+`;
+
+test('buying: buys what the open buy goals still need from this merchant, after the items land prints the total', () => {
+	const [first, out, money, msg, again] = run(`${GOODS}
+		set("buyGoals", true)
+		q.money = 1000
+		q.addItem(0, 1, 20, 1)
+		q.step({
+			{ t = "buy", item = 20, count = 3, itemName = "Soothing Spices" },
+			{ t = "buy", item = 21, count = 1, itemName = "Bronze Tube" },      -- not sold here
+			{ t = "buy", item = 23, count = 1, status = "done" },
+			{ t = "kill", target = "Kobold Vermin" },
+		})
+		q.openMerchant()
+		emit(bought())
+		stub.advance(1)
+		emit(bought())
+		emit(q.money)
+		emit(printed("Bought 2 Soothing Spices for 80c"))
+		q.closeMerchant()
+		q.openMerchant()                  -- the bags hold three now
+		stub.advance(1)
+		emit(#bought())
+	`);
+	assert.deepEqual(first, ['2x2'], 'two more spices, one purchase each');
+	assert.deepEqual(out, ['2x2']);
+	assert.equal(money, 920);
+	assert.equal(msg, true);
+	assert.equal(again, 1, 'nothing more once the goal is met');
+});
+
+test('buying: a purchase still on its way counts, so opening the merchant again before it lands buys nothing more', () => {
+	const [first, reopened, landed, count] = run(`${GOODS}
+		set("buyGoals", true)
+		q.money = 1000
+		q.landDelay = 0.5
+		q.step({
+			{ t = "buy", item = 20, count = 3, itemName = "Soothing Spices" },
+			{ t = "buy", item = 20, count = 2, itemName = "Soothing Spices" },   -- the same item twice: the larger count
+		})
+		q.openMerchant()
+		emit(#bought())
+		q.closeMerchant()
+		q.openMerchant()                  -- before the spices land
+		emit(#bought())
+		stub.advance(2)
+		q.closeMerchant()
+		q.openMerchant()
+		stub.advance(2)
+		emit(#bought())
+		emit(C_Item.GetItemCount(20))
+	`);
+	assert.equal(first, 1);
+	assert.equal(reopened, 1, 'not bought twice');
+	assert.equal(landed, 1);
+	assert.equal(count, 3);
+});
+
+test('buying: a goal raised while a purchase is on its way buys only the difference, however often the merchant opens', () => {
+	const [requested, count, msgs] = run(`${GOODS}
+		set("buyGoals", true)
+		q.money = 1000
+		q.landDelay = 0.5
+		q.step({ { t = "buy", item = 20, count = 3, itemName = "Soothing Spices" } })
+		q.openMerchant()
+		q.closeMerchant()
+		q.step({ { t = "buy", item = 20, count = 5, itemName = "Soothing Spices" } })
+		q.openMerchant()
+		q.closeMerchant()
+		q.openMerchant()
+		q.closeMerchant()
+		stub.advance(2)
+		local n = 0
+		for _, c in ipairs(q.calls) do if c[1] == "BuyMerchantItem" then n = n + c[3] end end
+		emit(n)
+		emit(C_Item.GetItemCount(20))
+		local n5, other = 0, false
+		for _, m in ipairs(stub.messages) do
+			if m:find("Bought 5 Soothing Spices for 2s 0c") then n5 = n5 + 1 elseif m:find("Bought") then other = true end
+		end
+		emit({ n5, other })
+	`);
+	assert.equal(requested, 5);
+	assert.equal(count, 5);
+	assert.deepEqual(msgs, [1, false], 'the five that landed, reported once');
+});
+
+test('buying: a purchase the server refuses is never reported as bought', () => {
+	const [requests, msgs] = run(`${GOODS}
+		set("buyGoals", true)
+		q.money = 1000
+		q.landDelay = 0.5
+		q.step({ { t = "buy", item = 20, count = 3, itemName = "Soothing Spices" } })
+		q.openMerchant()
+		q.closeMerchant()
+		local buy = BuyMerchantItem       -- the server refuses the next purchase (sold out meanwhile)
+		BuyMerchantItem = function(i, n) table.insert(q.calls, { "BuyMerchantItem", i, n }) end
+		q.step({ { t = "buy", item = 20, count = 5, itemName = "Soothing Spices" } })
+		q.openMerchant()
+		BuyMerchantItem = buy
+		emit(bought())                    -- the 3 on their way, then 2 more
+		stub.advance(2)
+		local out = {}
+		for _, m in ipairs(stub.messages) do
+			local b = m:match("(Bought.*)")
+			if b then out[#out + 1] = b end
+		end
+		emit(out)
+	`);
+	assert.deepEqual(requests, ['2x3', '2x2']);
+	assert.deepEqual(msgs, ['Bought 3 Soothing Spices for 1s 20c.']);
+});
+
+test('buying: a purchase that lands late, on a slow server, is still reported once', () => {
+	const [msgs] = run(`${GOODS}
+		set("buyGoals", true)
+		q.money = 1000
+		q.landDelay = 1.5
+		q.step({ { t = "buy", item = 20, count = 3, itemName = "Soothing Spices" } })
+		q.openMerchant()
+		stub.advance(6)
+		local out = {}
+		for _, m in ipairs(stub.messages) do
+			local b = m:match("(Bought.*)")
+			if b then out[#out + 1] = b end
+		end
+		emit(out)
+	`);
+	assert.deepEqual(msgs, ['Bought 3 Soothing Spices for 1s 20c.']);
+});
+
+test('buying: goods sold in stacks are bought in whole stacks within the stack limit; stock and money cap the rest', () => {
+	const out = run(`${GOODS}
+		set("buyGoals", true)
+		q.money = 1000
+		q.step({ { t = "buy", item = 22, count = 27, itemName = "Refreshing Spring Water" } })
+		q.openMerchant()
+		stub.advance(1)
+		emit(bought())                    -- 30 in calls of at most 20
+		q.closeMerchant()
+
+		q.calls = {}
+		q.step({ { t = "buy", item = 23, count = 3, itemName = "Flagon of Mead" } })
+		q.openMerchant()
+		stub.advance(1)
+		emit(bought())                    -- one left in stock
+		q.closeMerchant()
+
+		q.calls = {}
+		q.goods[1].numAvailable = 6       -- six bottles left, sold five at a time
+		q.step({ { t = "buy", item = 22, count = 57, itemName = "Refreshing Spring Water" } })
+		q.openMerchant()
+		stub.advance(1)
+		emit(bought())
+		emit(q.refused)
+		q.closeMerchant()
+
+		q.calls = {}
+		q.money = 90
+		stub.messages = {}
+		q.step({ { t = "buy", item = 20, count = 4, itemName = "Soothing Spices" } })
+		q.openMerchant()
+		stub.advance(1)
+		emit(bought())
+		emit(printed("Not enough money to buy 2 Soothing Spices %(80c%)"))
+	`);
+	assert.deepEqual(out[0], ['1x20', '1x10']);
+	assert.deepEqual(out[1], ['3x1']);
+	assert.deepEqual(out[2], ['1x5'], 'one whole purchase the stock covers');
+	assert.equal(out[3], 0, 'nothing refused');
+	assert.deepEqual(out[4], ['2x2'], 'what 90c covers');
+	assert.equal(out[5], true);
+});
+
+test('buying: selling greys pays for it first; goods for other currencies, Shift and the setting off buy nothing', () => {
+	const out = run(`${BAGS}${GOODS}
+		set("buyGoals", true)
+		q.money = 0
+		q.step({ { t = "buy", item = 20, count = 1, itemName = "Soothing Spices" } })
+		q.openMerchant()                  -- from 0c: the greys sell for 99c first
+		stub.advance(2)
+		emit(bought())
+		emit(printed("Bought 1 Soothing Spices for 40c"))
+		q.closeMerchant()
+
+		q.calls = {}
+		q.money = 1000
+		q.goods[2].extendedCost = true
+		q.step({ { t = "buy", item = 20, count = 3, itemName = "Soothing Spices" } })
+		q.openMerchant()
+		stub.advance(1)
+		emit(#bought())
+		q.closeMerchant()
+		q.goods[2].extendedCost = false
+
+		stub.keys.shift = true
+		q.openMerchant()
+		stub.advance(1)
+		emit(#bought())
+		q.closeMerchant()
+		stub.keys.shift = false
+
+		set("buyGoals", false)
+		q.openMerchant()
+		stub.advance(1)
+		emit(#bought())
+	`);
+	assert.deepEqual(out[0], ['2x1'], 'the sale paid for it');
+	assert.equal(out[1], true);
+	assert.equal(out[2], 0, 'paid in another currency: left alone');
+	assert.equal(out[3], 0, 'Shift: nothing');
+	assert.equal(out[4], 0, 'off: nothing');
+});
+
+test('buying: optional buy goals are left to the player, like the raptor colours ("buy any you want, or none")', () => {
+	const [requests, msg] = run(`${GOODS}
+		set("buyGoals", true)
+		q.money = 1000000                 -- 100g
+		q.items[8588] = { name = "Whistle of the Emerald Raptor", quality = 1, price = 50000 }
+		q.items[8591] = { name = "Whistle of the Turquoise Raptor", quality = 1, price = 50000 }
+		q.items[8592] = { name = "Whistle of the Violet Raptor", quality = 1, price = 50000 }
+		q.goods = { { id = 8588, price = 200000 }, { id = 8591, price = 200000 }, { id = 8592, price = 200000 } }
+		q.step({
+			{ t = "buy", item = 8588, npc = 7952, optional = true, itemName = "Whistle of the Emerald Raptor" },
+			{ t = "buy", item = 8591, npc = 7952, optional = true, itemName = "Whistle of the Turquoise Raptor" },
+			{ t = "buy", item = 8592, npc = 7952, optional = true, itemName = "Whistle of the Violet Raptor" },
+		})
+		q.openMerchant()
+		stub.advance(1)
+		emit(#bought())
+		emit(printed("Raptor"))
+	`);
+	assert.equal(requests, 0, 'no whistle bought');
+	assert.equal(msg, false, 'and nothing said about them');
+});
+
+test('buying: a goal costing over 50g is left to the player with a line saying so; a big stack of thread under it is bought', () => {
+	const [requests, money, left, thread] = run(`${GOODS}
+		set("buyGoals", true)
+		q.money = 3000000                 -- 300g
+		q.items[19030] = { name = "Stormpike Battle Charger", quality = 3, price = 0 }
+		q.items[8343] = { name = "Heavy Silken Thread", quality = 1, price = 500 }
+		q.goods = { { id = 19030, price = 2000000 }, { id = 8343, price = 2000, maxStack = 20 } }
+		q.step({
+			{ t = "buy", item = 19030, npc = 13217, itemName = "Stormpike Battle Charger" },
+			{ t = "buy", item = 8343, count = 120, itemName = "Heavy Silken Thread" },   -- 24g
+		})
+		q.openMerchant()
+		stub.advance(1)
+		local n = 0
+		for _, c in ipairs(q.calls) do if c[1] == "BuyMerchantItem" and c[2] == 1 then n = n + 1 end end
+		emit(n)
+		emit(q.money)
+		emit(printed("Left 1 Stormpike Battle Charger %(200g 0s 0c%) for you to buy"))
+		emit(C_Item.GetItemCount(8343))
+	`);
+	assert.equal(requests, 0, 'the 200g mount is not bought');
+	assert.equal(money, 3000000 - 240000, 'only the thread is paid for');
+	assert.equal(left, true);
+	assert.equal(thread, 120);
+});
+
+test('buying: the 50g cap weighs the whole goal, not this visit\'s stock: 5 x 20g with 2 in stock is left to the player', () => {
+	const [requests, money, left] = run(`${GOODS}
+		set("buyGoals", true)
+		q.money = 3000000                 -- 300g
+		q.items[30] = { name = "Gleaming Bauble", quality = 1, price = 0 }
+		q.goods = { { id = 30, price = 200000, numAvailable = 2 } }
+		q.step({ { t = "buy", item = 30, count = 5, itemName = "Gleaming Bauble" } })
+		q.openMerchant()
+		stub.advance(1)
+		local n = 0
+		for _, c in ipairs(q.calls) do if c[1] == "BuyMerchantItem" then n = n + 1 end end
+		emit(n)
+		emit(q.money)
+		emit(printed("Left 5 Gleaming Bauble %(100g 0s 0c%) for you to buy"))
+	`);
+	assert.equal(requests, 0, 'none bought, though the two in stock cost 40g');
+	assert.equal(money, 3000000);
+	assert.equal(left, true);
+});
+
+test('buying: the 50g cap also weighs the whole visit: of three 20g goals at one merchant two are bought, the third left', () => {
+	const [requests, money, left] = run(`${GOODS}
+		set("buyGoals", true)
+		q.money = 3000000                 -- 300g
+		q.items[31] = { name = "Iron Lockbox", quality = 1, price = 0 }
+		q.items[32] = { name = "Silver Lockbox", quality = 1, price = 0 }
+		q.items[33] = { name = "Gold Lockbox", quality = 1, price = 0 }
+		q.goods = { { id = 31, price = 200000 }, { id = 32, price = 200000 }, { id = 33, price = 200000 } }
+		q.step({
+			{ t = "buy", item = 31, itemName = "Iron Lockbox" },
+			{ t = "buy", item = 32, itemName = "Silver Lockbox" },
+			{ t = "buy", item = 33, itemName = "Gold Lockbox" },
+		})
+		q.openMerchant()
+		stub.advance(1)
+		local n = 0
+		for _, c in ipairs(q.calls) do if c[1] == "BuyMerchantItem" then n = n + c[3] end end
+		emit(n)
+		emit(q.money)
+		emit(printed("Left 1 Gold Lockbox %(20g 0s 0c%) for you to buy"))
+	`);
+	assert.equal(requests, 2, 'two lockboxes bought');
+	assert.equal(money, 3000000 - 400000);
+	assert.equal(left, true);
+});
+
+// ---------------------------------------------------------------------------
+// Class trainer
+// ---------------------------------------------------------------------------
+
+const SPELLS = `
+	q.trainer = { tradeskill = false, services = {
+		{ name = "Fireball", rank = "Rank 1", kind = "used", cost = 0 },
+		{ name = "Fireball", rank = "Rank 2", kind = "available", cost = 100 },
+		{ name = "Frost Armor", rank = "Rank 1", kind = "available", cost = 200 },
+		{ name = "Arcane Missiles", rank = "Rank 1", kind = "unavailable", cost = 50 },
+	} }
+`;
+
+test('trainer: learns every spell it offers now, one per list update, and prints the total', () => {
+	const [first, bought, after] = run(`${SPELLS}
+		set("trainAll", true)
+		q.money = 1000
+		q.openTrainer()
+		emit(#calls("BuyTrainerService"))   -- one at a time: the list moves after each
+		stub.advance(1)
+		local out = {}
+		for _, c in ipairs(q.calls) do if c[1] == "BuyTrainerService" then out[#out + 1] = c[2] .. " " .. c[3] end end
+		emit(out)
+		emit({ money = q.money, msg = printed("Learned 2 spells for 3s 0c") })
+	`);
+	assert.equal(first, 1);
+	assert.deepEqual(bought, ['Fireball Rank 2', 'Frost Armor Rank 1']);
+	assert.deepEqual(after, { money: 700, msg: true });
+});
+
+test('trainer: waits for each purchase to land before the next, whatever else updates the list', () => {
+	const [out] = run(`${SPELLS}
+		set("trainAll", true)
+		q.money = 1000
+		q.openTrainer()
+		stub.fire("TRAINER_UPDATE")      -- not from the purchase, which has not landed yet
+		stub.fire("TRAINER_UPDATE")
+		local early = #calls("BuyTrainerService")
+		stub.advance(1)
+		emit({ early = early, bought = #calls("BuyTrainerService"), money = q.money, msg = printed("Learned 2 spells for 3s 0c") })
+	`);
+	assert.deepEqual(out, { early: 1, bought: 2, money: 700, msg: true });
+});
+
+test('trainer: a refused purchase ends the run; one still on its way at closing is counted', () => {
+	const out = run(`${SPELLS}
+		set("trainAll", true)
+		q.money = 1000
+		q.trainer.services[3].refuse = true   -- Frost Armor
+		q.openTrainer()
+		stub.advance(3)
+		emit({ bought = #calls("BuyTrainerService"), msg = printed("Learned 1 spell for 1s 0c") })
+		q.closeTrainer()
+
+		stub.messages = {}
+		q.trainer.services = {
+			{ name = "Fireball", rank = "Rank 2", kind = "available", cost = 100 },
+			{ name = "Frost Armor", rank = "Rank 1", kind = "available", cost = 200 },
+		}
+		q.openTrainer()
+		q.closeTrainer()                  -- before the first purchase lands
+		emit(printed("Learned 1 spell for 1s 0c"))
+	`);
+	assert.deepEqual(out[0], { bought: 2, msg: true });
+	assert.equal(out[1], true);
+});
+
+test('trainer: learns what you can afford and says how much more the rest costs', () => {
+	const [out] = run(`${SPELLS}
+		set("trainAll", true)
+		q.money = 150
+		q.openTrainer()
+		stub.advance(1)
+		emit({ bought = #calls("BuyTrainerService"), money = q.money,
+			learned = printed("Learned 1 spell for 1s 0c"), short = printed("Not enough money for 1 more %(2s 0c%)") })
+	`);
+	assert.deepEqual(out, { bought: 1, money: 50, learned: true, short: true });
+});
+
+test('trainer: off by default; profession trainers, Shift and closing the window stop it', () => {
+	const out = run(`${SPELLS}
+		q.money = 1000
+		q.openTrainer(); stub.advance(1)
+		emit(#calls("BuyTrainerService"))
+		q.closeTrainer()
+
+		set("trainAll", true)
+		q.trainer.tradeskill = true
+		q.openTrainer(); stub.advance(1)
+		emit(#calls("BuyTrainerService"))
+		q.closeTrainer()
+		q.trainer.tradeskill = false
+
+		stub.keys.shift = true
+		q.openTrainer(); stub.advance(1)
+		emit(#calls("BuyTrainerService"))
+		q.closeTrainer()
+		stub.keys.shift = false
+
+		q.openTrainer()
+		q.closeTrainer()
+		stub.advance(1)
+		emit(#calls("BuyTrainerService"))
+	`);
+	assert.equal(out[0], 0, 'off by default');
+	assert.equal(out[1], 0, 'profession trainer');
+	assert.equal(out[2], 0, 'Shift');
+	assert.equal(out[3], 1, 'closed after the first purchase: no more');
+});
+
+test('trainer: riding, weapon and pet trainers are left alone, so opening one to check a price spends nothing', () => {
+	const out = run(`
+		set("trainAll", true)
+		for _, t in ipairs({                                            -- none of them a class trainer
+			{ npc = 4732, name = "Apprentice Riding", cost = 1000000 },   -- Randal Hunter, riding
+			{ npc = 90001, name = "Swords", cost = 1000 },                -- a weapon master
+			{ npc = 90002, name = "Bite", cost = 500 },                   -- a pet trainer
+		}) do
+			q.money, q.calls = 1000000, {}
+			q.trainer = { tradeskill = false, services = { { name = t.name, rank = "", kind = "available", cost = t.cost } } }
+			q.openTrainer(t.npc); stub.advance(1)
+			emit(#calls("BuyTrainerService"))
+			q.closeTrainer()
+		end
+	`);
+	assert.deepEqual(out, [0, 0, 0]);
+});
+
+// ---------------------------------------------------------------------------
 // Quest rewards
 // ---------------------------------------------------------------------------
 
@@ -568,9 +1027,10 @@ test('rewards: ranking by gear upgrade, else vendor value (stack included)', () 
 	assert.deepEqual(out[2], [[2, 1], 'value'], 'a zero-delta "upgrade" is no upgrade');
 });
 
-// The marks on the reward panel, per choice: the corner badge ("qol-upgrade",
-// "qol-coin" or false) and its tint, whether the best's hairline is drawn, and
-// whether the mark hangs off the item icon (never over the name).
+// The marks on the reward panel, per choice: the upgrade badge ("qol-upgrade"
+// or false) and its tint, the coin on the most valuable (true or false),
+// whether the best's hairline is drawn, and whether the mark hangs off the
+// item icon (never over the name).
 const MARKS = `
 local T = Polestar.Theme
 local function tint(t)
@@ -585,13 +1045,14 @@ local function marks()
 	local out = {}
 	for _, b in ipairs(QuestInfoRewardsFrame.RewardButtons) do
 		if b:IsShown() then
-			local seen = { badge = false, best = false }
+			local seen = { badge = false, coin = false, best = false }
 			for _, c in ipairs(b.children) do
 				if c.Badge and c:IsShown() then
 					if c.Badge:IsShown() then
 						seen.badge = c.Badge:GetTexture():match("([%w-]+)$")
 						seen.tint = tint(c.Badge)
 					end
+					seen.coin = c.Coin:IsShown()
 					seen.best = c.Ring[1]:IsShown()
 					seen.onIcon = select(2, c:GetPoint(1)) == b.Icon
 				end
@@ -602,7 +1063,7 @@ local function marks()
 	return out
 end`;
 
-test('rewards: a green arrow on every upgrade, the best framed, on the icon; no upgrade: the coin on the most valuable; no pick by default', () => {
+test('rewards: a green arrow on every upgrade, the best framed, on the icon; the coin always on the most valuable; no pick by default', () => {
 	const [vendor, vendorMarks, upgrades, upgradeMarks, finished] = run(`${MARKS}
 		q.items[11] = { name = "Cloak", price = 120 }
 		q.items[12] = { name = "Potion", price = 50 }
@@ -630,17 +1091,17 @@ test('rewards: a green arrow on every upgrade, the best framed, on the icon; no 
 	`);
 	assert.deepEqual(vendor, { best: 2, reason: 'value', picks: 0 }, 'five potions sell for most');
 	assert.deepEqual(vendorMarks, [
-		{ badge: false, best: false },
-		{ badge: 'qol-coin', tint: 'accent', best: true, onIcon: true },
-		{ badge: false, best: false },
+		{ badge: false, coin: false, best: false },
+		{ badge: false, coin: true, best: true, onIcon: true },
+		{ badge: false, coin: false, best: false },
 	]);
 	assert.deepEqual(upgrades, { best: 3, reason: 'upgrade' });
 	assert.deepEqual(upgradeMarks, [
-		{ badge: 'qol-upgrade', tint: 'success', best: false, onIcon: true },
-		{ badge: false, best: false },
-		{ badge: 'qol-upgrade', tint: 'success', best: true, onIcon: true },
-	], 'both upgrades get the arrow; the bigger one is framed; no coin');
-	assert.deepEqual(finished, [{ badge: false, best: false }, { badge: false, best: false }, { badge: false, best: false }]);
+		{ badge: 'qol-upgrade', tint: 'success', coin: false, best: false, onIcon: true },
+		{ badge: false, coin: true, best: false, onIcon: true },
+		{ badge: 'qol-upgrade', tint: 'success', coin: false, best: true, onIcon: true },
+	], 'both upgrades get the arrow; the bigger one is framed; the five potions still show the coin');
+	assert.deepEqual(finished, [{ badge: false, coin: false, best: false }, { badge: false, coin: false, best: false }, { badge: false, coin: false, best: false }]);
 });
 
 test('rewards: a disabled Gear module marks no upgrades; a single choice gets its arrow but no frame', () => {
@@ -657,8 +1118,8 @@ test('rewards: a disabled Gear module marks no upgrades; a single choice gets it
 		q.questComplete(); stub.runTimers()
 		emit(marks())
 	`);
-	assert.deepEqual(disabled, [{ badge: false, best: false }, { badge: 'qol-coin', tint: 'accent', best: true, onIcon: true }]);
-	assert.deepEqual(single, [{ badge: 'qol-upgrade', tint: 'success', best: false, onIcon: true }]);
+	assert.deepEqual(disabled, [{ badge: false, coin: false, best: false }, { badge: false, coin: true, best: true, onIcon: true }]);
+	assert.deepEqual(single, [{ badge: 'qol-upgrade', tint: 'success', coin: false, best: false, onIcon: true }]);
 });
 
 test('rewards: auto-pick takes the best when on; Shift, quest cost and a disabled Gear module are respected', () => {
@@ -684,6 +1145,314 @@ test('rewards: auto-pick takes the best when on; Shift, quest cost and a disable
 	assert.equal(out[2], 0);
 });
 
+const WEAR = `
+	q.items[11] = { name = "Sturdy Boots", quality = 2 }
+	q.items[12] = { name = "Light Gloves", quality = 2 }
+	q.items[13] = { name = "Old Belt", quality = 1 }
+	q.landRewards = true
+	-- A quest offering the boots or the gloves, the belt with every turn-in;
+	-- the panel empties after each turn-in, as the client's does.
+	local function offer(choices, rewards)
+		q.choices, q.rewards = choices or { { id = 11 }, { id = 12 } }, rewards or { { id = 13 } }
+		q.questComplete(); stub.runTimers()
+	end
+	local function turnIn(i, choices, rewards)
+		offer(choices, rewards)
+		GetQuestReward(i)
+		stub.advance(1)
+	end
+	Polestar.Gear = {
+		IsEnabled = function() return true end,
+		IsUpgrade = function(link)
+			if link:find("item:11|", 1, true) then return true, 6, 12.5 end
+			if link:find("item:13|", 1, true) then return true, 2, nil end
+			return false, -1
+		end,
+		CompareToEquipped = function(link) return { slot = link:find("item:11|", 1, true) and 8 or 6 } end,
+		Client = { InventoryLink = function(slot) return q.worn[slot] and ("|Hitem:" .. q.worn[slot] .. "|h") end },
+		GetItemInfo = function() end,
+		GainText = function(pct) return "+" .. math.floor(pct + 0.5) .. "%" end,
+	}
+	local function worn()
+		local out = {}
+		for _, c in ipairs(q.calls) do
+			if c[1] == "EquipItemByName" then out[#out + 1] = c[2]:match("item:(%d+)") .. "@" .. tostring(c[3]) end
+		end
+		return out
+	end
+`;
+
+test('rewards: what a turn-in gives is worn once it reaches the bags, when it is an upgrade', () => {
+	const [out] = run(`${WEAR}
+		set("rewardEquip", true)
+		offer()
+		GetQuestReward(1)                 -- the player's pick; the belt comes with every turn-in
+		local early = #worn()
+		stub.advance(1)
+		emit({ early = early, worn = worn(), boots = printed("Wearing |Hitem:11|h%[Sturdy Boots%]|h %(%+13%%%)"), belt = printed("Wearing |Hitem:13|h%[Old Belt%]|h%.") })
+	`);
+	assert.deepEqual(out, { early: 0, worn: ['11@8', '13@6'], boots: true, belt: true });
+});
+
+test('rewards: wearing waits for combat to end; off by default, Shift at the turn-in, a pick that is no upgrade and a disabled Gear module wear nothing', () => {
+	const out = run(`${WEAR}
+		turnIn(1)
+		emit(#worn())                       -- off by default
+
+		set("rewardEquip", true)
+		q.combat(true)
+		turnIn(1)
+		local inCombat = #worn()
+		q.combat(false)
+		stub.advance(1)
+		emit({ inCombat = inCombat, after = worn() })
+
+		q.calls = {}
+		stub.keys.shift = true
+		turnIn(1)
+		stub.keys.shift = false
+		emit(#worn())
+
+		turnIn(2, nil, {})
+		emit(#worn())                       -- the gloves are no upgrade
+
+		Polestar.Gear.IsEnabled = function() return false end
+		turnIn(1)
+		emit(#worn())
+	`);
+	assert.equal(out[0], 0, 'off by default');
+	assert.deepEqual(out[1], { inCombat: 0, after: ['11@8', '13@6'] });
+	assert.equal(out[2], 0, 'Shift');
+	assert.equal(out[3], 0, 'no upgrade');
+	assert.equal(out[4], 0, 'Gear disabled');
+});
+
+test('rewards: a turn-in made before anything else sees the panel wears that quest\'s item, not the last quest\'s', () => {
+	const [out] = run(`${WEAR}
+		set("rewardEquip", true)
+		turnIn(2, nil, {})                  -- the gloves: nothing worn, but this panel offered the boots too
+		q.calls = {}
+		q.early = true                      -- turns in on QUEST_COMPLETE, ahead of Polestar, as automation does
+		offer({ { id = 13 } }, {})          -- the only reward: the belt
+		stub.advance(1)
+		emit(worn())
+	`, {
+		before: `
+			local f = CreateFrame("Frame")
+			f:RegisterEvent("QUEST_COMPLETE")
+			f:SetScript("OnEvent", function() if stub.qol.early then GetQuestReward(1) end end)
+		`,
+	});
+	assert.deepEqual(out, ['13@6']);
+});
+
+test('rewards: only a new copy counts: an older one in the bags, or a turn-in that never delivers, wears nothing', () => {
+	const [out] = run(`${WEAR}
+		set("rewardEquip", true)
+		q.addItem(0, 9, 11, 1)              -- boots from before
+		q.landRewards = false               -- the turn-in never delivers
+		offer()
+		GetQuestReward(1)
+		stub.fire("BAG_UPDATE_DELAYED")     -- something else moves in the bags
+		stub.advance(12)
+		q.addItem(0, 10, 11, 1)             -- boots from elsewhere, long after the turn-in
+		stub.fire("BAG_UPDATE_DELAYED")
+		emit(worn())
+	`);
+	assert.deepEqual(out, {});
+});
+
+// Gear answering from what is worn now (q.worn) and fixed scores, as the real
+// one does: a ring replaces the weaker finger, and a one-hand or off-hand
+// piece against a worn two-hander is weighed together with the best partner
+// in the bags (q.bagPartner).
+const GEAR = `
+	local score, inv = {}, {} -- item ID -> score, inventory type
+	local function linkOf(id) return id and ("|Hitem:" .. id .. "|h[" .. ((q.items[id] or {}).name or "?") .. "]|h") end
+	local function idOf(link) return tonumber(link:match("item:(%d+)")) end
+	local function at(slot) return score[q.worn[slot]] or 0 end
+	Polestar.Gear = {
+		IsEnabled = function() return true end,
+		Client = { InventoryLink = function(slot) return linkOf(q.worn[slot]) end },
+		GetItemInfo = function(link) local id = idOf(link); return inv[id] and { id = id, inv = inv[id] } end,
+		GainText = function(pct) return "+" .. math.floor(pct + 0.5) .. "%" end,
+		CompareToEquipped = function(link)
+			local id = idOf(link)
+			local s, t, r = score[id], inv[id]
+			if t == 11 then
+				local slot = at(12) < at(11) and 12 or 11
+				r = { slot = slot, old = at(slot), new = s }
+			elseif (t == 13 or t == 14) and inv[q.worn[16]] == 17 then
+				r = { slot = t == 14 and 17 or 16, old = at(16), new = s + (q.bagPartner or 0) }
+			else
+				local slot = ({ [8] = 8, [13] = 16, [14] = 17 })[t]
+				r = { slot = slot, old = at(slot), new = s }
+			end
+			r.score, r.delta = s, r.new - r.old
+			r.pct = r.old > 0 and r.delta / r.old * 100 or nil
+			return r
+		end,
+	}
+	Polestar.Gear.IsUpgrade = function(link)
+		local r = Polestar.Gear.CompareToEquipped(link)
+		return r.delta > 0, r.delta, r.pct
+	end
+`;
+
+test('rewards: with a two-hander worn, a one-hand reward is worn only when it beats the two-hander by itself, and an off-hand piece never', () => {
+	const out = run(`${WEAR}${GEAR}
+		set("rewardEquip", true)
+		q.items[30], q.items[31], q.items[32] = { name = "Greatsword" }, { name = "Short Sword" }, { name = "Buckler" }
+		score[30], inv[30] = 10, 17
+		score[31], inv[31] = 7, 13
+		score[32], inv[32] = 6, 14
+		q.worn[16] = 30
+		q.bagPartner = 5                    -- 7 + 5 and 6 + 5 beat the 10 only with a bag piece
+		turnIn(1, { { id = 31 } }, { { id = 32 } })
+		emit({ worn = worn(), main = q.worn[16] })
+
+		score[32] = 12                      -- a buckler that beats the two-hander by itself
+		turnIn(1, { { id = 32 } }, {})
+		emit({ worn = worn(), main = q.worn[16] })
+
+		score[31] = 11                      -- beats the two-hander by itself
+		turnIn(1, { { id = 31 } }, {})
+		emit({ worn = worn(), main = q.worn[16], said = printed("Wearing |Hitem:31|h%[Short Sword%]|h %(%+10%%%)") })
+	`);
+	assert.deepEqual(out[0], { worn: {}, main: 30 }, 'the two-hander stays on');
+	assert.deepEqual(out[1], { worn: {}, main: 30 }, 'an off-hand piece would leave the main hand empty: it stays in the bags');
+	assert.deepEqual(out[2], { worn: ['31@16'], main: 31, said: true });
+});
+
+test('rewards: with a two-hander worn, a reward for any other slot goes in its own slot', () => {
+	const [out] = run(`${WEAR}${GEAR}
+		set("rewardEquip", true)
+		score[30], inv[30] = 10, 17
+		score[11], inv[11] = 4, 8           -- the boots, for the feet
+		q.worn[16] = 30
+		turnIn(1, { { id = 11 } }, {})
+		emit(worn())
+	`);
+	assert.deepEqual(out, ['11@8']);
+});
+
+test('rewards: two rings from one turn-in go on one at a time, the second on the other finger only when it beats the ring there', () => {
+	const fingers = (worn11) => run(`${WEAR}${GEAR}
+		set("rewardEquip", true)
+		for id, s in pairs({ [20] = ${worn11}, [21] = 10, [22] = 8, [23] = 3 }) do score[id], inv[id] = s, 11 end
+		q.worn[11], q.worn[12] = 20, 23
+		turnIn(1, { { id = 21 } }, { { id = 22 } })   -- the pick (10) and a ring every turn-in gives (8)
+		emit({ worn = worn(), fingers = { q.worn[11], q.worn[12] } })
+	`)[0];
+	assert.deepEqual(fingers(5), { worn: ['21@12', '22@11'], fingers: [22, 21] }, 'the second ring beats the 5 on the other finger');
+	assert.deepEqual(fingers(9), { worn: ['21@12'], fingers: [20, 21] }, 'the second ring loses to the 9 and leaves the first alone');
+});
+
+test('rewards: another slot changing while a ring is still going on does not send the next ring to the same finger', () => {
+	const [out] = run(`${WEAR}${GEAR}
+		set("rewardEquip", true)
+		for id, s in pairs({ [20] = 5, [21] = 10, [22] = 8, [23] = 3 }) do score[id], inv[id] = s, 11 end
+		q.worn[11], q.worn[12] = 20, 23
+		offer({ { id = 21 } }, { { id = 22 } })
+		GetQuestReward(1)
+		stub.advance(0.1)                   -- both rings land; the first is on its way to a finger
+		stub.fire("PLAYER_EQUIPMENT_CHANGED", 1, true)
+		stub.advance(1)
+		emit({ worn = worn(), fingers = { q.worn[11], q.worn[12] } })
+	`);
+	assert.deepEqual(out, { worn: ['21@12', '22@11'], fingers: [22, 21] });
+});
+
+test('rewards: a reward that never goes on (its bind confirmation cancelled) holds up the next one only for a while', () => {
+	const [out] = run(`${WEAR}${GEAR}
+		set("rewardEquip", true)
+		for id, s in pairs({ [20] = 5, [21] = 10, [22] = 8, [23] = 3 }) do score[id], inv[id] = s, 11 end
+		q.worn[11], q.worn[12] = 20, 23
+		q.refuse[21] = true
+		turnIn(1, { { id = 21 } }, { { id = 22 } })
+		stub.advance(12)
+		emit({ worn = worn(), fingers = { q.worn[11], q.worn[12] },
+			refused = printed("Wearing |Hitem:21|"), second = printed("Wearing |Hitem:22|") })
+	`);
+	assert.deepEqual(out, { worn: ['21@12', '22@12'], fingers: [20, 22], refused: false, second: true }, 'only what goes on is announced');
+});
+
+// The real Gear module (Arms Warrior, level 30, no Dual Wield) scoring
+// ItemDB entries in the generated format, reading what q.worn and q.bags hold.
+test('rewards: with the real Gear module, a two-hander stays on against a one-hander that wins only with a bag shield, rings end as the best two', () => {
+	const out = runAddon({
+		stubs: ['stub_qol.lua'],
+		addons: [{ name: 'Polestar', files: ['Core/Init.lua', 'Core/Compat.lua', 'Theme/Theme.xml', 'Gear/ItemDB.lua', 'Gear/Weights.lua', 'Gear/SpecData.lua', 'Gear/Gear.lua', 'QoL/QoL.xml'] }],
+		before: `
+			local q = stub.qol
+			q.level = 30
+			function UnitClass(unit) return "Warrior", "WARRIOR", 1 end
+			function UnitRace(unit) return "Troll", "Troll", 8 end
+			function UnitFactionGroup(unit) return "Horde" end
+			local function linkOf(id) return id and ("|Hitem:" .. id .. "|h[" .. ((q.items[id] or {}).name or "?") .. "]|h") end
+			function GetInventoryItemLink(unit, slot) if unit == "player" then return linkOf(q.worn[slot]) end end
+			function C_Container.GetContainerItemLink(bag, slot) local s = q.bags[bag].slots[slot]; return s and linkOf(s.itemID) end
+		`,
+		login: true,
+		script: PRELUDE + `
+			Polestar.ItemDB.Register({ schema = 1, build = "test" }, {
+				[9032] = "17 22 17 2 2 8 str10 dmin40 dmax60 speed3000",          -- two-hander: 126.9
+				[9033] = "13 22 17 2 2 7 agi3 dmin12 dmax22 speed1800",           -- weak one-hander: 67.6
+				[9034] = "14 30 25 3 4 6 sta20 armor3000",                        -- strong shield: 70
+				[9035] = "13 30 25 3 2 7 str20 dmin30 dmax50 speed2000",          -- strong one-hander: 160
+				[9010] = "11 20 15 2 4 0 sta5", [9011] = "11 20 15 2 4 0 sta2",
+				[9012] = "11 20 15 2 4 0 sta4", [9013] = "11 25 20 3 4 0 sta6",
+			})
+			for _, id in ipairs({ 9032, 9033, 9034, 9035, 9010, 9011, 9012, 9013 }) do q.items[id] = { name = "Item " .. id } end
+			q.landRewards = true
+			set("rewardEquip", true)
+			local function turnIn(choices, rewards)
+				q.choices, q.rewards = choices, rewards
+				q.questComplete(); stub.runTimers()
+				GetQuestReward(1)
+				stub.advance(1)
+			end
+			local function worn()
+				local out = {}
+				for _, c in ipairs(q.calls) do
+					if c[1] == "EquipItemByName" then out[#out + 1] = c[2]:match("item:(%d+)") .. "@" .. tostring(c[3]) end
+				end
+				return out
+			end
+
+			q.worn[16] = 9032
+			q.addItem(0, 16, 9034, 1)             -- the shield waits in the bags
+			turnIn({ { id = 9033 } }, {})
+			emit({ worn = worn(), main = q.worn[16], off = q.worn[17] or false })
+
+			q.calls = {}
+			turnIn({ { id = 9035 } }, {})
+			emit({ worn = worn(), main = q.worn[16], said = printed("Wearing |Hitem:9035|h%[Item 9035%]|h %(%+26%%%)") })
+
+			q.calls = {}
+			q.worn[11], q.worn[12] = 9013, 9011   -- 3 and 1
+			turnIn({ { id = 9012 } }, { { id = 9010 } })   -- 2 takes the 1's finger, then 2.5 takes the 2's
+			emit({ worn = worn(), fingers = { q.worn[11], q.worn[12] } })
+		`,
+	}).emitted;
+	assert.deepEqual(out[0], { worn: {}, main: 9032, off: false }, 'the one-hander beats the two-hander only with the bag shield: nothing goes on');
+	assert.deepEqual(out[1], { worn: ['9035@16'], main: 9035, said: true }, 'a one-hander that beats the two-hander by itself goes on');
+	assert.deepEqual(out[2], { worn: ['9012@12', '9010@12'], fingers: [9013, 9010] }, 'the rings end as the best two');
+});
+
+test('rewards: turning wearing off while a reward waits for combat to end wears nothing', () => {
+	const [out] = run(`${WEAR}
+		set("rewardEquip", true)
+		q.combat(true)
+		turnIn(1)
+		set("rewardEquip", false)
+		q.combat(false)
+		stub.advance(1)
+		emit(worn())
+	`);
+	assert.deepEqual(out, {});
+});
+
 test('rewards: waits for uncached item data before ranking; an upgrade is marked from its item ID meanwhile, the frame once it settles', () => {
 	const out = run(`${MARKS}
 		q.items[11] = { name = "Cloak", price = 120 }
@@ -700,9 +1469,9 @@ test('rewards: waits for uncached item data before ranking; an upgrade is marked
 		emit(marks())
 	`);
 	assert.equal(out[0], 'pending');
-	assert.deepEqual(out[1], [{ badge: false, best: false }, { badge: 'qol-upgrade', tint: 'success', best: false, onIcon: true }]);
+	assert.deepEqual(out[1], [{ badge: false, coin: false, best: false }, { badge: 'qol-upgrade', tint: 'success', coin: false, best: false, onIcon: true }], 'no coin until every price is known');
 	assert.equal(out[2], 2);
-	assert.deepEqual(out[3][1], { badge: 'qol-upgrade', tint: 'success', best: true, onIcon: true });
+	assert.deepEqual(out[3][1], { badge: 'qol-upgrade', tint: 'success', coin: true, best: true, onIcon: true }, 'the ring is both the upgrade and the best seller');
 });
 
 test('rewards: marking off clears an open panel; both settings off do nothing', () => {
@@ -720,8 +1489,8 @@ test('rewards: marking off clears an open panel; both settings off do nothing', 
 		emit(marks())
 		emit(#stub.messages - n0)
 	`);
-	assert.deepEqual(before[1], { badge: 'qol-coin', tint: 'accent', best: true, onIcon: true });
-	assert.deepEqual(cleared, [{ badge: false, best: false }, { badge: false, best: false }]);
+	assert.deepEqual(before[1], { badge: false, coin: true, best: true, onIcon: true });
+	assert.deepEqual(cleared, [{ badge: false, coin: false, best: false }, { badge: false, coin: false, best: false }]);
 	assert.equal(best, 'none');
 	assert.deepEqual(after, cleared);
 	assert.equal(msgs, 0);

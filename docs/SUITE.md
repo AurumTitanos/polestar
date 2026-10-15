@@ -14,16 +14,17 @@ contracts between the modules are in [docs/ARCHITECTURE.md](ARCHITECTURE.md).
 | Navigation (core) | Arrow, travel planner, waypoints; `/polestar way <x> <y> [label]` (or `/pole way`) points the arrow at a spot on the current map |
 | Quests | Map and minimap pins for available quests, objective areas, quest givers (off by default, Map options); tooltip lines on mobs and items that a quest needs; quest levels in the log; a quest icon beside the health bar of nameplates of mobs a quest needs (replacement nameplates included) |
 | Lookup (Codex) | One search over guides and entities (items, mounts, pets, recipes, tabards, quests, NPCs, rares, treasures, dungeons, zones). "How to get" for any item, mount or pet: sources ranked for this character, one click to a guide (curated when one exists, otherwise built on the spot). Tooltip source lines; Alt-click an item link to guide; target or mouse over a player to see their mount and how to get it. Search only: no browse-everything lists |
-| Dungeons | A journal page per dungeon: every quest with where to get it, its objective, its chain and its rewards (item choices, XP, money, reputation), plus bosses and the entrance on the map, with "guide me" to givers and the entrance. No loot tables |
+| Dungeons | A journal page per dungeon: every quest with where to get it, its objective, its chain and its rewards (item choices, XP, money, reputation), plus bosses and the entrance on the map, with "guide me" to givers and the entrance; attunements and keys (Molten Core, Onyxia's Lair, Blackwing Lair, Naxxramas, Scholomance, Blackrock Depths, the City of Dalaran...) with this character's progress and a guide through what is left. No loot tables |
 | Upgrades | Upgrade indicator on item tooltips and the best pick on quest reward choices, from stat weights per spec (detected from the client's talent points) and level band |
 | Rares | Rare NPC and treasure database with locations and loot, map pins (off by default, Map options), alerts (only through APIs the Forever client has) |
 | Maps | World map without fog of war (the zone-art overlay table), coordinates, zone level ranges, dungeon entrance and travel pins (off by default, Map options) |
 | QoL | Quality of life helpers: action buttons, XP and pace, merchant, reward marks, flight masters, death helper, toggles, requests from other players |
+| Talents (planned) | Where your next talent points go, level by level, on the talent panel, per class and spec. The trees are read from the client; the builds are written by contributors |
 
 Out of scope: a full UI suite (Polestar integrates with EllesmereUI through its
 public skinning API), boss and combat warnings, aura tracking, best-in-slot
-lists, loot browsing and talent builds. Polestar keeps the dungeon quest
-journal and the upgrade indicator on tooltips.
+lists and loot browsing. Polestar keeps the dungeon quest journal and the
+upgrade indicator on tooltips.
 
 Every module can be switched off in options, and none costs memory until it is
 used: modules load their data packs on demand. No surface lists a whole data
@@ -38,10 +39,12 @@ Inputs are read from the installed copies under
 databases wowforevertalents.com, foreverchanges.pro). Polestar itself is
 GPL-3.0; each input keeps its own licence, and the rules follow it:
 
-| Licence of the input | What may enter the repository |
+| Input | What may enter the repository and the releases |
 |---|---|
-| MIT (ForeverLevelingBiS, wowsims) | Derived data, with attribution (THIRD_PARTY.md) |
-| GPL, no licence, All Rights Reserved (AtlasLoot, QuestieDB, DungeonJournal, RareScanner) and web sources | Nothing: the importer code only. Outputs are local build products (gitignored) |
+| MIT (pfQuest, ForeverLevelingBiS, wowsims) | Derived data, with attribution (THIRD_PARTY.md) |
+| QuestieDB (no licence file; its maintainers ask that it be treated as all rights reserved) | Facts only, credited, in the shipped packs (the compiled guides, `Polestar_QuestDB`, `Polestar_Codex`); `data build --no-questie` builds without them if the maintainers ask |
+| Web sources (Wowhead's Forever database, warcraft.wiki.gg, the Forever databases) | Facts only, each with its source: corrections, `entrances.json`, `repgates.json`, `attunements.json`, `journal-quests.json`, the Wowhead caches (incl. its dungeon and raid quest lists) |
+| GPL-2.0, no licence or All Rights Reserved addons (AtlasLoot, DungeonJournal, RareScanner, Attune) | Nothing: the importer code only, read by `codex build --local-extras` for the parity comparison (Attune: by `codex attune`, the local comparison of dungeon quests and attunements); its output stays local and `pack` refuses it |
 
 Always facts (ids, names, levels, coordinates, drop rates, sources, rewards),
 never another addon's prose, art or code. Every output records its sources and
@@ -79,8 +82,8 @@ their versions in its `meta`.
 
 Local packs are generated into gitignored folders and installed by
 `node tools/polestar.js install` like the rest. Without them the core still
-works: Lookup, Dungeons and Rares say the Codex is missing or disabled
-(reinstall Polestar or enable it) instead of failing. Every addon, what it holds and how it is built: [ARCHITECTURE, "Overview"](ARCHITECTURE.md#overview).
+works: Lookup, Dungeons and Rares say the Codex is not installed (get the
+release zip, not GitHub's "Source code") or turned off (enable it) instead of failing. Every addon, what it holds and how it is built: [ARCHITECTURE, "Overview"](ARCHITECTURE.md#overview).
 
 Guide packs (ours and the community's) register through one registry
 (`Core/Guides.lua`, ARCHITECTURE "The guide registry"; the rules in

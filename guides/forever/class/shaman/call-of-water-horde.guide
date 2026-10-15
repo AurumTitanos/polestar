@@ -1,0 +1,98 @@
+guide forever/class/shaman/call-of-water-horde
+title Call of Water (Horde)
+category Class
+class Shaman
+folder Shaman
+faction Horde
+levels 20-23
+zone Orgrimmar
+keywords Water Totem, Healing Stream Totem, Water Sapta, Searn Firewarder, Xanis Flameweaver, Islen Waterseer, Brine, waterskin, Spring Well, Ruins of Stardust, Brazier of Everfount, Minor Manifestation of Water, Shaman, class quest, totem
+reward item 5177
+reward spell 5394 "Healing Stream Totem"
+reward item 6637
+why The Water Totem that lets you place water totems, and Healing Stream Totem with it.
+
+# Call of Water for Horde Shamans: your trainer -> Islen Waterseer south of
+# Ratchet -> Brine's three waterskins (the quilboar watering hole below her
+# hut, the Spring Well in Tarren Mill, the Ruins of Stardust fountain in
+# Ashenvale) -> Islen (Water Sapta) -> the Brazier of Everfount in Silverpine
+# Forest -> Islen, who teaches Healing Stream Totem and gives the Water Totem.
+# Sources: quests.json, npcs.json, objects.json and items.json (the fill
+# objects); Wowhead Forever's quest pages for the rewards
+# (https://www.wowhead.com/forever/quest=96: Healing Stream Totem and the
+# Water Totem; 220: Water Sapta).
+# The four openers (1528 Searn Firewarder in Orgrimmar, 1529 Xanis Flameweaver
+# in Thunder Bluff, 2985 Swart in Razor Hill, 2986 Narm Skychaser in Bloodhoof
+# Village) exclude one another; this guide takes the city trainers': Orgrimmar
+# for Orcs and Trolls, Thunder Bluff for Tauren and Skyborne.
+# The Horde leveling guides already carry this chain as class-only steps,
+# spread from 20 to the low 30s (forever/horde/04-the-barrens to
+# 30-40/02-stranglethorn-vale); this guide does it in one go, for anyone off
+# the route or wanting Healing Stream Totem sooner.
+# Water Sapta (972) and Tiev Mordune's Call of Water (1103, by the brazier)
+# replace a lost Water Sapta: not steps.
+
+step Searn Firewarder
+  only Orc,Troll
+  zone Orgrimmar
+  tip At 20 Searn Firewarder in the Valley of Wisdom sends you to Islen Waterseer in the Barrens.
+  accept 1528                                 -- Searn Firewarder
+
+step Xanis Flameweaver
+  only Tauren,Skyborne
+  zone Thunder Bluff
+  tip At 20 Xanis Flameweaver, a shaman trainer in Thunder Bluff, sends you to Islen Waterseer in the Barrens.
+  accept 1529                                 -- Xanis Flameweaver
+
+step Islen Waterseer
+  zone The Barrens
+  tip Islen waits on the hill south of Ratchet.
+  turnin 1528 only Orc,Troll                  -- Islen Waterseer
+  turnin 1529 only Tauren,Skyborne            -- Islen Waterseer
+  accept 1530
+
+step Brine
+  tip Brine's hut stands on the ridge above the quilboar watering hole, south of Camp Taurajo.
+  turnin 1530                                 -- Brine
+  accept 1535
+  collect 7769 quest 1535.1                   -- Fill the Empty Brown Waterskin at the quilboar watering hole
+  turnin 1535
+  accept 1536
+
+step The Spring Well
+  zone Hillsbrad Foothills
+  tip Take the zeppelin from Orgrimmar to Tirisfal Glades and travel south to Tarren Mill. The Spring Well stands beside the inn.
+  collect 7771 quest 1536.1                   -- Fill the Empty Red Waterskin at the Spring Well
+
+step Brine
+  zone The Barrens
+  turnin 1536                                 -- Brine
+  accept 1534
+
+step The Ruins of Stardust
+  zone Ashenvale
+  tip The fountain stands in the middle of the Ruins of Stardust, in south-western Ashenvale.
+  collect 7770 quest 1534.1                   -- Fill the Empty Blue Waterskin at the fountain
+
+step Brine
+  zone The Barrens
+  turnin 1534                                 -- Brine
+  accept 220                                  -- the Vial of Purest Water, for Islen
+
+step Islen Waterseer
+  turnin 220 reward 6637                      -- Islen Waterseer: your Water Sapta
+  accept 63
+
+step The Brazier of Everfount
+  zone Silverpine Forest
+  tip Fly to the Sepulcher: the Brazier of Everfount stands on the hill just south-west of it. Drink the Water Sapta there, beat the Corrupt Minor Manifestation of Water for its bracers and place them in the brazier, then speak to the Minor Manifestation of Water and keep the Shard of Water for Islen.
+  use 6637 @38.3,44.6                         -- Water Sapta
+  collect 7812 quest 63.1                     -- Corrupt Manifestation's Bracers
+  turnin 63                                   -- Brazier of Everfount
+  accept 100
+  turnin 100                                  -- Minor Manifestation of Water
+  accept 96
+
+step Islen Waterseer
+  zone The Barrens
+  turnin 96 reward 5177                       -- Islen Waterseer: Healing Stream Totem and your Water Totem

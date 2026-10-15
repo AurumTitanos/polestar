@@ -9,8 +9,8 @@ under the same model.
 "Proven" here means: best found under the model, after a search large enough
 that more search stops improving it, and still best (or within a stated margin)
 across thousands of plausible variations of the model's parameters. Real-world
-proof comes from recorded play (`record report`), which also recalibrates the
-model.
+proof comes from recorded play (`record report`); `sim calibrate` fits the
+model's kill time to the same recordings.
 
 Code: `tools/lib/sim/` (Node ≥24, CommonJS, zero npm dependencies,
 `worker_threads` for parallel search). CLI: `node tools/polestar.js sim <cmd>`.
@@ -139,7 +139,10 @@ an excluded quest goes with it (the Mau'ari E'ko chain after 969). The
 Forever client's QuestInfo table (1 Elite, 41 PvP, 62 Raid, 81 Dungeon)
 only names the types; which quest has which type, and suggested group
 sizes, are server data that neither the client tables nor QuestieDB carry,
-so the types are derived from areas and objectives as above.
+so the types are derived from areas and objectives as above. The compiler
+applies the same dungeon/raid rule from the data (`instanceQuest`, without
+dungeons.json) to tell players which goals are a dungeon or raid run
+(GUIDE_FORMAT.md, "Group content").
 
 `OVERRIDES` in solo.js is the explicit hook for what the data cannot
 express: `exclude` (Naxxramas-era Argent Dawn turn-ins 9124-9142 and
@@ -183,7 +186,8 @@ packages.
   (it would turn the gate into "grind to any package": a trial run let the
   Human route grind 6 -> 26 before Duskwood).
 - Guide sequences (`sim compare`) are scored as written: only travel, levels
-  and prerequisites apply, not these route rules.
+  and prerequisites apply, not these route rules. Their `optional` goals are
+  left out (§5).
 
 ## 2. Character and XP/time model (parameters with priors in data/sim/params.json)
 
@@ -220,7 +224,13 @@ packages.
   single-quest trips back; 450 s and 2.5 gave Orc 121.5 h with 2.9 h of
   grinding and 22 visits for one quest or none, Human 120.7 h with 10.2 h
   and 23.
-- Quest log limit 20; a package that needs more open quests is split.
+- Quest log limit 20; a package that needs more open quests is split. Forever's
+  client accepts 40 (`MAXIMUM_NUM_QUESTS_LOG_CAN_ACCEPT = 40` for its Camelot
+  game type, `Blizzard_APIDocumentationGenerated/QuestConstantsDocumentation.lua`;
+  the quest log shows N/40). The limit never binds the guides or the score
+  (the evaluator does not count the log across packages); at 20 it splits one
+  package, Alliance Elwynn Forest 6-10, which the published Alliance results
+  use, so 40 comes with the next world and new searches in 0.2.5 (issue #30).
 - Every parameter has a prior (mean and spread). Calibration (§4) narrows
   them.
 
@@ -272,6 +282,19 @@ Only the fitted parameter values are kept (data/sim/params.json).
 
 - Polestar: the compiled guides (default route and every route choice),
   against the best route found (solo and with dungeons).
+- **Guides are scored on what they require.** A guide's `optional` goals are
+  left out: an optional quest (its accept is optional) whole, any other
+  optional goal by itself. Most are quests started by rare drops (the OOX
+  beacons, A Strange Red Key, the ritual totems at about 3%), the Green Hills
+  of Stranglethorn pages, profession and bag quests and rares: counting them
+  as done assumed every player gets every rare drop. Until 0.2.4 they were
+  counted, which made the guides look about 8 h (Horde) and 5 h (Alliance)
+  faster than what a player following them can expect; joelwurtz found it
+  (issue #30). `sim compare --with-optional` (and `sim bench
+  --with-optional`) scores them as done, the old way, to show what the
+  extras can save. Elite and dungeon quests are outside the solo world, so
+  they stay out either way. Search results (best found, consensus) are not
+  guides and are unchanged.
 - A guide pack (`sim compare --pack <dir>`, or the pack folder as the one
   argument): its chain, after our chain up to the pack's first level when it
   starts above 1, under the same model
@@ -285,7 +308,8 @@ sim calibrate [--fdj DIR]                            fit parameters to quest dat
 sim run     --faction F [--race R] [--class C] [--paths N] [--workers W] [--seed S] [--dungeons]
             [--jobs J] [--anneal A] [--max-paths M]
 sim robust  --faction F [--race R] [--draws K] [--top N]   robustness of the top routes
-sim compare --faction F [--race R] [--guides DIR] [--pack DIR | DIR] [--to 10,20,30]  Polestar's routes vs the best found, same model
+sim compare --faction F [--race R] [--guides DIR] [--pack DIR | DIR] [--to 10,20,30] [--with-optional]
+            Polestar's routes vs the best found, same model
 sim bench   --faction F [--race R]                  bracket table: zones, levels, quests per 10 levels
 sim export  --result <file> --out <dir>             zone-by-zone skeleton guides + visits.json for authors
 sim consensus --faction F [--dungeons] [--evals N]  one 12-60 route shared by the faction's starts (+ exports)
@@ -396,6 +420,7 @@ support; absolute hours are not.
 | Skyborne A | 121.2 | 119.6 | 129.0 (27.7) | 133.0 (60.4) |
 
 Guides: each race's default chain as written (`sim compare --guides`),
+counting their optional goals as done (the scoring until 0.2.4, §5),
 grinding at their own `level` steps. The leveling guides were rebuilt from
 this run's consensus exports with a flow pass the model does not make:
 side trips for one or two small quests behind a flight, boat, hearth or long
@@ -501,6 +526,9 @@ the guides as they ship scored on the fourth world:
 - Fourth: seed 4, `--paths 6000000` (cap 18M), world `329281f957a5`, the data
   0.2.0 ships with; every start reached the cap still improving.
 
+Guide columns count the optional goals as done (the scoring until 0.2.4;
+the hours for what the guides require are in the next section).
+
 | start | third: best / consensus | fourth: best / consensus | guides 0.2.0 on the fourth world (grinding) | guides 0.1.0 there (grinding) |
 |---|---|---|---|---|
 | Orc | 117.7 / 116.8 | 119.6 / 117.3 | 123.8 (16.1) | 123.0 (14.4) |
@@ -525,6 +553,40 @@ the guides as they ship scored on the fourth world:
 - The third world predates the data correction that places Sulhasa in the
   southern Barrens, so it charges the Horde guides a trip to Un'Goro Crater
   for Field to Clear (about 0.9 h); the fourth world has the correction.
+
+### Guides scored on what they require (0.2.4)
+
+Since 0.2.4 the guides are scored without their optional goals (§5,
+issue #30). On world `5eef72140b61` (the data 0.2.4 ships with), each
+race's default chain (`sim compare`, and `--with-optional` for the last
+column; `--guides` with the guides of tag v0.1.0 for the middle one):
+
+| start | guides 0.2.4 (grinding) | guides 0.1.0 (grinding) | guides 0.2.4 with optionals (grinding) | guides 0.1.0 with optionals |
+|---|---|---|---|---|
+| Orc | 131.1 (34.2) | 128.5 (29.7) | 122.8 (14.0) | 123.0 |
+| Tauren | 130.1 (34.2) | 127.8 (29.1) | 121.9 (13.9) | 122.4 |
+| Undead | 131.5 (33.8) | 128.9 (29.1) | 123.3 (13.6) | 123.4 |
+| Skyborne H | 130.1 (32.8) | 128.3 (28.2) | 122.3 (12.7) | 122.9 |
+| Human | 132.5 (37.0) | 132.1 (35.5) | 127.5 (26.0) | 129.1 |
+| Dwarf | 133.1 (36.9) | 132.6 (35.5) | 128.2 (26.0) | 129.6 |
+| NightElf | 133.0 (37.1) | 132.6 (35.6) | 128.1 (26.1) | 129.6 |
+| Skyborne A | 133.5 (36.2) | 132.5 (34.5) | 129.0 (25.6) | 129.8 |
+
+- The optional extras are worth 7.8-8.3 h (Horde) and 4.5-5.0 h (Alliance)
+  to a player who gets every one; almost all of it comes back as grinding
+  (about 20 h more for the Horde, 11 h for the Alliance) where the extras'
+  experience is missing. The largest for the Orc chain: The Green Hills of
+  Stranglethorn and its chapters (2.4 h together), A Strange Red Key
+  (0.9 h), the OOX-09 and OOX-17 chains (0.9 and 0.8 h), Winterfall
+  Firewater (0.8 h).
+- Against the fourth consensus (its own world) the guides cost 13.3-14.1 h
+  (Horde) and 13.6-15.1 h (Alliance).
+- With the optionals the guides of 0.2.4 and 0.1.0 are within 0.6 h
+  (Horde); without them 0.1.0 is 1.8-2.6 h faster for the Horde, because
+  the later guides marked more of their quests optional. The Alliance
+  guides of 0.2.4 are 0.4-1.0 h slower without and 0.8-1.6 h faster with.
+- The search's best and consensus routes were searched on earlier worlds,
+  so the README's charts show only the guides.
 
 ## Known limitations
 
@@ -570,3 +632,39 @@ node tools/polestar.js sim consensus --faction horde && node tools/polestar.js s
 ```
 
 then re-export (`sim export`) the starts the guides follow.
+
+### Keeping the guides' fixes
+
+The guides are hand-written from the exports, and a refresh re-applies a new
+route to them. It keeps every fix a guide's header documents (its "Order
+changes against the export", "Deviations from the export" or "Local order
+fixed by hand" list): those orders answer player reports and things the
+model does not see, such as a cave's mouth, a quest item that vanishes
+after a while, or a delivery that belongs on the way out of a starting
+glen. A refresh that changes such a stretch changes the header too, and
+says why the new order still holds.
+
+Two checks enforce it:
+
+- `tests/guides-reported.test.js` (and `tests/guides-caves.test.js` for
+  cave mouths) pins each player-reported fix on the compiled guide: goal
+  order and where the arrow leads, one case per report. A refresh that
+  undoes one fails the suite.
+- Lint warns when a guide carries a timed quest item (items.json
+  `duration`, the Forever client's ItemSparse DurationInInventory) longer
+  than it lasts: from the goal that gets it (an `accept` that hands it
+  over, a `collect`, a `buy`) to each later goal that spends it (a `turnin`
+  that needs it, a `use`), timed from the latest goal that got more of it.
+  The time is this model's (§2, at the priors): the straight line × the
+  detour factor at run (or mounted) speed, flights from travel.json plus
+  `flightOverhead`, the hearthstone cast, `talkSec` and `interactSec`, and
+  kill time with the walk between mobs of the goal's spawn areas for kills
+  and drops; other characters' and `optional` goals, grinding and legs
+  across continents are left out, so the estimate errs short
+  (`tools/lib/dsl/timed.js`).
+
+When a guide is wrong because the data is (a giver, a spawn, a drop chance),
+the fix belongs in `tools/lib/data/corrections.json` as well as in the
+guide: the simulator builds its world from the data, so only a corrected
+record keeps the next search, export and refresh from reproducing the
+mistake.

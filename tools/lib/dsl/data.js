@@ -6,10 +6,13 @@
 // races, travel) are also treated as missing when they cannot be parsed, so a
 // half-built data folder never stops compilation. dungeons.json is not read:
 // its DungeonJournal facts stay local (THIRD_PARTY.md), so a quest only it
-// knows needs its title (and `lvl`) in the guide.
+// knows needs its title (and `lvl`) in the guide. The instances (group
+// content) come from the cached client tables in the `sources` folder beside
+// the data folder (data/sources for data/forever), when there is one.
 
 const fs = require('node:fs');
 const path = require('node:path');
+const SOLO = require('../sim/solo');
 
 const FILES = ['quests', 'npcs', 'objects', 'items', 'zones', 'map-frames', 'meta'];
 const OPTIONAL = ['professions', 'factions', 'trainers', 'races', 'travel'];
@@ -59,6 +62,7 @@ function loadData(dir) {
 			raw[name] = {};
 		}
 	}
+	raw.instances = SOLO.loadInstances(path.join(dir, '..', 'sources'));
 	return new Data(raw, { dir, missing });
 }
 
@@ -86,6 +90,9 @@ class Data {
 		this.trainersRaw = raw.trainers || {};
 		this.races = raw.races || {};
 		this.travel = raw.travel || {};
+		// Instances from the client's Map/AreaTable/UiMapAssignment (solo.js
+		// loadInstances): { areas, maps } or null. Group content (group.js).
+		this.instances = raw.instances || null;
 		this.zoneByName = new Map();
 		for (const z of Object.values(this.zones)) {
 			if (!z || !z.name) continue;

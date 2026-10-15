@@ -7,6 +7,21 @@
 # Coven and the Valley of Bones, back up the road to Nijel's Point) > fly to Theramore,
 # where the next guide starts.
 #
+# Forever above level 30 cannot be checked in game until launch on 4
+# November: the Forever additions here come from the data, not from play.
+# Added (Forever, consensus Desolace visit 30, 39.7-40.3):
+# - Carved Centaur Totems (93224): Captain Pentigast at Nijel's Point; the
+#   totems drop from the Maraudine of the Valley of Spears (data), where the
+#   loop already frees Melizza.
+# - My Little Friends (93176, from 05-arathi-highlands): the Flesh Picker is
+#   caught at the Kodo Graveyard (data spawn 48-50,57-60), beside Hornizz.
+# Left out (Forever): the Shen'dralas and Valley of Bones quests the consensus
+# runs here (visits 29-30: Mountain of Bones 92844, Khan Jehn 93128, Ravaging
+# Ravagers 93035, Outing Outcasts 93037, Facing the Truth 93041, Valley of
+# Bones 93034 and 92841, A Conqueror's Crown 92743): each wants standing with
+# the Magram or the Gelkis ("Maintain your reputation with ..."; Valley of
+# Bones 92841 needs Magram Honored, Wowhead Forever), which the simulator
+# does not model and the route does not build (see Dropped below).
 # Deviations from the export:
 # - The Shimmering Flats and Ratchet stops (visits 30-31) are dropped: a long
 #   ride from Dustwallow for small breadcrumbs (Wharfmaster Dizzywig 1111,
@@ -175,6 +190,7 @@ step Nijel's Point
   accept 261
   accept 1454                         -- Kreldig Ungor
   accept 1466
+  accept 93224                        -- Captain Pentigast
 
 step Karnitol's Chest
   tip Follow the road west across the north of Desolace to the ruins of Ethel Rethor; the wrecked ship's chest lies on the shore just west of them.
@@ -204,9 +220,14 @@ step Bibbly F'utzbuckle
   accept 5501
 
 step Kodo Graveyard
-  tip Hornizz stands at the edge of the Kodo Graveyard, south-west of Kormek's Hut; Kodo Bones lie among the skeletons.
+  tip Hornizz stands at the edge of the Kodo Graveyard, south-west of Kormek's Hut; Kodo Bones lie among the skeletons. A Flesh Picker crawls about the graveyard: catch one with the Entomology Starter Kit, then tick it off.
   accept 6134                         -- Hornizz Brimbuzzle
   collect 13703 quest 5501            -- Kodo Bone
+  kill 217590                         -- Flesh Picker: catch it, for My Little Friends
+
+step Maraudine centaurs
+  tip The Maraudine centaurs hold the Valley of Spears west of the graveyard; every kind drops the totems.
+  collect 254432 quest 93224.1        -- Carved Centaur Totem
 
 step Melizza Brimbuzzle
   tip Melizza is held in the centaur camp west of the graveyard. Free her and keep her alive on the walk out; she stops by the graveyard.
@@ -242,6 +263,7 @@ step Kormek's Hut
 step Nijel's Point
   tip Follow the road north to Nijel's Point.
   turnin 1466                         -- Kreldig Ungor
+  turnin 93224                        -- Captain Pentigast
   accept 1467                         -- for Roetten Stonehammer in Ironforge: keep it
   turnin 261                          -- Brother Anton
   accept 1052                         -- for Raleigh the Devout in Southshore: keep it

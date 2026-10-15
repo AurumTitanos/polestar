@@ -282,6 +282,8 @@ end
 --   state: "none" | "instance" | "taxi" | "unknown" | "far" | "travel" | "arrived"
 --          | "instruction" (a route leg to act on here: fly, ride, hearth)
 --          | "search" (reached a spot of an area objective: look around here)
+--          | "nopos" (the client gives no player position here: the Deeprun
+--            Tram, a map of its own without a world map)
 --   distance/relAngle/dNorth/dWest are toward what the arrow points at: the
 --   current route leg's end while a travel route is active, else the target.
 --   An area target (`area`, yards: a spawn area) is reached anywhere inside
@@ -317,7 +319,14 @@ function Nav.Sample()
 	end
 	local pc, px, py
 	if C.GetPlayerWorldPosition then pc, px, py = C.GetPlayerWorldPosition() end
-	if not pc then return "unknown" end
+	if not pc then
+		-- No position, nothing to measure. A ride, flight or hearth on the
+		-- route is still what to do (the tram ride itself); else say so.
+		local T = Nav.travel
+		local leg = T and T.Active and T.Active() and T.CurrentLeg()
+		if leg and leg.kind ~= "walk" then return "instruction" end
+		return "nopos"
+	end
 
 	local T = Nav.travel
 	if T and T.Active and T.Active() then
@@ -489,17 +498,37 @@ ns.RegisterCommand("arrow", function(rest)
 	end
 end, L["Waypoint arrow: show, hide, reset"])
 
+-- Two whitespace-separated coordinates take decimal points ("45.5 30.2") or a
+-- decimal comma in both ("45,5 30,2"); otherwise a comma separates x and y
+-- ("45,30", "45, 30 Camp"). A decimal comma in only one ("45,5 30", "45 30,2")
+-- is refused: it reads just as well as x,y with a numeric label ("45,30 50"),
+-- and either guess can point the arrow at a plausible wrong spot.
+local function parseWay(s)
+	local x, y, label = s:match("^%s*(%d+[,%.]?%d*)%s+(%d+[,%.]?%d*)(.*)$")
+	if x and (label == "" or label:match("^%s")) then
+		if (x:find("%d,%d") ~= nil) ~= (y:find("%d,%d") ~= nil) then return end
+		x, y = x:gsub(",", "."), y:gsub(",", ".")
+	else
+		x, y, label = s:match("^%s*([%d%.]+)[%s,]+([%d%.]+)(.*)$")
+	end
+	return tonumber(x), tonumber(y), label and label:match("^%s*(.-)%s*$")
+end
+
 ns.RegisterCommand("way", function(rest)
-	local x, y, label = (rest or ""):match("^%s*([%d%.]+)[%s,]+([%d%.]+)%s*(.-)%s*$")
-	x, y = tonumber(x), tonumber(y)
-	local C = ns.Compat
-	local map = C and C.GetPlayerMapPosition and C.GetPlayerMapPosition()
-	if not (x and y and map) then
+	local x, y, label = parseWay(rest or "")
+	if x and y and (x > 100 or y > 100) then x = nil end
+	if not (x and y) then
 		if (rest or ""):match("^%s*$") then
 			Nav.ClearTarget()
 		else
 			ns.Print(L["Usage: /polestar way <x> <y> [label]"])
 		end
+		return
+	end
+	local C = ns.Compat
+	local map = C and C.GetPlayerMapPosition and C.GetPlayerMapPosition()
+	if not map then
+		ns.Print(L["No position here: the game gives none in instances and on some maps."])
 		return
 	end
 	Nav.SetTarget(map, x, y, label ~= "" and label or nil)

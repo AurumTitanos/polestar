@@ -1,21 +1,65 @@
 guide forever/collectibles/mounts/alliance/paladin-charger
 title Paladin Charger
-category Collectibles
-folder Mounts · Class
-keywords Summon Charger, Lord Grayson Shadowbreaker, Judgment and Redemption, Darkreaver, Scholomance, Paladin, class mount
+category Class
+folder Paladin
+keywords Summon Charger, Lord Grayson Shadowbreaker, Emphasis on Sacrifice, Exorcising Terrordale, Grimand Elmore, Collection of Goods, Arcanite Barding, Ancient Equine Spirit, Manna-Enriched Horse Feed, Divination Scryer, Judgment and Redemption, Darkreaver, Dire Maul, Scholomance, Paladin, class mount
+reward spell 23214 "Summon Charger"
+why Your epic mount at 60, summoned at will: the faster step up from the Warhorse.
 faction Alliance
 class Paladin
 levels 60-60
 zone Stormwind City
 
-# Summon Charger for Alliance Paladins: the hand-off to Lord Grayson
-# Shadowbreaker, then his long chain (named in the tip, not routed step by
-# step).
+# Summon Charger for Alliance Paladins: the whole chain, from the trainer's
+# hand-off to Darkreaver's Fallen Charger in Scholomance.
 # Sources: Forever client 1.60.1.70338 tables via wago.tools (Mount: the spell
 # is still a Forever mount; ItemSparse); quests.json and npcs.json for the
 # chain.
+# The chain, from quests.json and data/forever/codex/quests.json: Lord Grayson
+# Shadowbreaker (7638 from Duthorian Rall in Stormwind, or 7670 from Brandur
+# Ironhammer in Ironforge; they exclude each other) -> Emphasis on Sacrifice
+# (7637: High Priest Rohan's Exorcism Censer in Ironforge, a 150 gold
+# donation) -> To Show Due Judgment (7639) -> Exorcising Terrordale (7640: 25
+# Terrordale Spirits with the Exorcism Censer) -> The Work of Grimand Elmore
+# (7641) -> Collection of Goods (7642: 40 Runecloth, 6 Arcanite Bars, 10
+# Arthas' Tears, 5 Stratholme Holy Water and 150 gold) -> Grimand's Finest
+# Work (7648: the Arcanite Barding to Lord Grayson) -> Ancient Equine Spirit
+# (7643, with Manna-Enriched Horse Feed 7645: 20 Enriched Manna Biscuits and
+# 50 gold for Merideth Carlson in Southshore; Tendris Warpwood in Dire Maul
+# frees the spirit) -> Blessed Arcanite Barding (7644) -> The Divination
+# Scryer (7646: an Azerothian Diamond and a Pristine Black Diamond) ->
+# Judgment and Redemption (7647: the Divination Scryer in the Great Ossuary of
+# Scholomance, Death Knight Darkreaver, the Charger's Redeemed Soul) ->
+# Summon Charger.
+# quests.json gives The Work of Grimand Elmore (7641) and Ancient Equine
+# Spirit (7643) no `pre`; the codex has them after Exorcising Terrordale
+# (7640) and Collection of Goods (7642), and the story (Lord Grayson sends
+# you on after each) and Wowhead's series put them after 7640 and Grimand's
+# Finest Work (7648). This guide follows that order.
+# Again Into the Great Ossuary (7666, repeatable, a new Divination Scryer) is
+# only named in a tip: the data lists it after Judgment and Redemption, and
+# it only matters when an attempt at Darkreaver fails.
+# Places: npcs.json for the givers and the Terrordale Spirits;
+# items.json for the vendors of the Enriched Manna Biscuits (the Argent Dawn
+# quartermasters), the Stratholme Supply Crates that hold the Holy Water and
+# the droppers of the diamonds; tools/lib/codex/entrances.json (QuestieDB
+# Forever) for the Dire Maul gate (Feralas 59.2,45.1), Scholomance (Caer
+# Darrow, Western Plaguelands 69.7,73.2) and Stratholme's main gate (Eastern
+# Plaguelands 26.5,10.4, Forever's map). Tendris Warpwood, the Ancient Equine
+# Spirit, Darkreaver and his Fallen Charger have no spawns in our data (they
+# are inside the dungeons): their goals point at the entrances.
+# The Arcanite Bars point at Stormwind's auctioneers (npcs.json, Auctioneer
+# Fitch, 61.2,71.3), the biscuits at Argent Quartermaster Lightspark in
+# Chillwind Camp; classicdb.ch's item page (classicdb.ch/?item=13724) for the
+# biscuits being sold in fives from Friendly with the Argent Dawn.
+# Dungeon work: Stratholme, Dire Maul and Scholomance, groups of five at 60.
 # Forever's Forsaken Paladins get the Forsaken Charger from their own quest
-# (Justice and Retribution); it is not in our data yet.
+# (Justice and Retribution); it is not in our data yet: quests.json has no
+# Horde Charger chain, so this guide stays Alliance.
+# Based on data, not play: the beta caps at level 30 until launch on
+# 4 November.
+
+# ---------------------------------------------------------------- Lord Grayson Shadowbreaker
 
 step Lord Grayson Shadowbreaker (Ironforge)
   only Dwarf
@@ -26,9 +70,107 @@ step Lord Grayson Shadowbreaker (Ironforge)
 
 step Lord Grayson Shadowbreaker
   zone Stormwind City
-  tip The Summon Charger chain is long and needs Scholomance. After this hand-off, Lord Grayson sends you on Emphasis on Sacrifice (High Priest Rohan in Ironforge), To Show Due Judgment and Exorcising Terrordale (25 Terrordale Spirits), The Work of Grimand Elmore (Collection of Goods: 40 Runecloth, 6 Arcanite Bars, 10 Arthas' Tears, 5 Stratholme Holy Water), Ancient Equine Spirit (Manna-Enriched Horse Feed from Merideth Carlson in Southshore), The Divination Scryer (an Azerothian Diamond and a Pristine Black Diamond) and Judgment and Redemption, which ends with Darkreaver's Fallen Charger in Scholomance.
+  tip The Summon Charger chain is long: it takes you through Stratholme, Dire Maul and Scholomance, and costs about 350 gold in donations on top of the materials. Lord Grayson stands in the Cathedral of Light.
   level 60
   accept 7638 only Human              -- Duthorian Rall, Cathedral of Light
   turnin 7638 only Human
   turnin 7670 only Dwarf
-  learn 23214 "Summon Charger"        -- Ticks once you finish the chain
+  accept 7637
+
+# ---------------------------------------------------------------- The Exorcism Censer
+
+step High Priest Rohan
+  zone Ironforge
+  tip High Priest Rohan is in Ironforge's Mystic Ward. Bring 150 gold: the censer is yours for a donation.
+  turnin 7637                         -- High Priest Rohan: 150 gold
+  accept 7639
+
+step Back to Lord Grayson
+  zone Stormwind City
+  turnin 7639                         -- Lord Grayson Shadowbreaker
+  accept 7640
+
+step Exorcising Terrordale
+  zone Eastern Plaguelands
+  tip Terrordale lies in the far north-west of the Eastern Plaguelands, by the Western Plaguelands border. Use the Exorcism Censer there to drive out the spirits, then defeat them.
+  kill 14564 quest 7640.1             -- Terrordale Spirits
+
+step Lord Grayson Shadowbreaker
+  zone Stormwind City
+  turnin 7640                         -- Lord Grayson Shadowbreaker
+  accept 7641
+
+# ---------------------------------------------------------------- The Arcanite Barding
+
+step Grimand Elmore
+  tip Grimand Elmore works in Stormwind's Dwarven District.
+  turnin 7641                         -- Grimand Elmore
+  accept 7642
+
+step Grimand's materials
+  tip Runecloth drops from humanoids around level 50 and up; Arthas' Tears is an herb of the Plaguelands and Felwood; Arcanite Bars are an Alchemy transmute. The Auction House in Stormwind's Trade District sells all three, and so do crafters.
+  collect 14047 quest 7642.3          -- Runecloth
+  collect 8836 quest 7642.2           -- Arthas' Tears
+  collect 12360 quest 7642.4 @61.2,71.3 live -- Arcanite Bars: the Auction House
+
+step Stratholme Holy Water
+  zone Eastern Plaguelands
+  tip Stratholme is a group of five, level 58-60, at the north end of the Eastern Plaguelands. The Supply Crates scattered through the city hold the Stratholme Holy Water.
+  goto 26.5,10.4 live "Stratholme"
+  collect 13180 quest 7642.1 @26.5,10.4 live -- Supply Crates, inside
+
+step Grimand Elmore
+  zone Stormwind City
+  tip Bring 150 gold for Grimand along with the materials.
+  turnin 7642                         -- Grimand Elmore: 150 gold
+  accept 7648
+
+step Lord Grayson Shadowbreaker
+  turnin 7648                         -- Lord Grayson Shadowbreaker: the Arcanite Barding
+  accept 7643
+
+# ---------------------------------------------------------------- The Ancient Equine Spirit
+
+step Enriched Manna Biscuits
+  zone Western Plaguelands
+  tip The Argent Dawn quartermasters sell the biscuits in fives once the Argent Dawn is Friendly with you: Argent Quartermaster Lightspark at Chillwind Camp, Quartermaster Miranda Breechlock at Light's Hope Chapel, Argent Quartermaster Hasana at the Bulwark.
+  collect 13724 x20 @42.8,83.7        -- Enriched Manna Biscuits: Argent Quartermaster Lightspark, Chillwind Camp
+
+step Merideth Carlson
+  zone Hillsbrad Foothills
+  tip Merideth Carlson breeds horses in Southshore. She also wants 50 gold.
+  accept 7645                         -- Merideth Carlson
+  turnin 7645                         -- Manna-Enriched Horse Feed
+
+step Dire Maul: Tendris Warpwood
+  zone Feralas
+  tip Dire Maul lies in central Feralas; Tendris Warpwood guards the start of the West wing. Defeat him to free the Ancient Equine Spirit, feed it the Manna-Enriched Horse Feed and hand it the Arcanite Barding to bless. Bring a group.
+  goto 59.2,45.1 "Dire Maul"
+  kill 11489 @59.2,45.1               -- Tendris Warpwood, inside the West wing
+  turnin 7643 @59.2,45.1              -- Ancient Equine Spirit
+  accept 7644 @59.2,45.1
+
+step Lord Grayson Shadowbreaker
+  zone Stormwind City
+  turnin 7644                         -- Lord Grayson Shadowbreaker
+  accept 7646
+
+# ---------------------------------------------------------------- Darkreaver
+
+step Two diamonds
+  tip An Azerothian Diamond comes from Thorium veins, a Pristine Black Diamond from the elites of the Western Plaguelands, both rarely: the Auction House is the usual source.
+  collect 12800 quest 7646.1          -- Azerothian Diamond
+  collect 18335 quest 7646.2          -- Pristine Black Diamond
+
+step Lord Grayson Shadowbreaker
+  zone Stormwind City
+  turnin 7646                         -- Lord Grayson Shadowbreaker
+  accept 7647                         -- he hands you the Divination Scryer
+
+step The Great Ossuary
+  zone Western Plaguelands
+  tip Scholomance lies under Caer Darrow, the island town in the south-east of the Western Plaguelands. Use the Divination Scryer in the heart of the Great Ossuary's basement, defeat the spirits it calls and then Death Knight Darkreaver, and give his Fallen Charger the Charger's Redeemed Soul and the Blessed Arcanite Barding. All are elite: bring a group. If the attempt fails, Lord Grayson gives you a new scryer through Again Into the Great Ossuary.
+  goto 69.7,73.2 "Scholomance"
+  collect 18799 quest 7647.1 @69.7,73.2 -- Charger's Redeemed Soul: Death Knight Darkreaver
+  turnin 7647 @69.7,73.2              -- Darkreaver's Fallen Charger
+  learn 23214 "Summon Charger"

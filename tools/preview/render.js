@@ -424,6 +424,26 @@ function svg(dump, { fonts, textures, roots, margin = 28, prefix = 'p', shared, 
 		return ` clip-path="url(#${clipIds.get(c.id)})"`;
 	};
 
+	// A mask texture (AddMaskTexture) shows its texture's region only where
+	// the mask's alpha is: an SVG mask over the mask's own rectangle, nothing
+	// outside it (the client's CLAMPTOBLACKADDITIVE).
+	const maskIds = new Map();
+	const maskAttr = (o) => {
+		const m = o.mask != null ? byId.get(o.mask) : null;
+		const mr = m && rects.get(m.id);
+		const name = m && textureName(m.texture);
+		if (!mr || !name) return '';
+		if (!maskIds.has(m.id)) {
+			const id = `${prefix}m${m.id}`;
+			const box = `x="${f2(mr.x - ox)}" y="${f2(mr.y - oy)}" width="${f2(mr.w)}" height="${f2(mr.h)}"`;
+			const uri = name === 'white' ? null : textures.uri(name, [1, 1, 1, 1], null, 0);
+			const shape = uri ? `<image ${box} preserveAspectRatio="none" href="${uri}"/>` : `<rect ${box} fill="#fff"/>`;
+			defs.push(`<mask id="${id}" maskUnits="userSpaceOnUse" ${box}>${shape}</mask>`);
+			maskIds.set(m.id, id);
+		}
+		return ` mask="url(#${maskIds.get(m.id)})"`;
+	};
+
 	const rect = (r, c, alpha, clip = '') => {
 		const { fill, opacity } = rgba(c, alpha);
 		if (opacity <= 0.001 || r.w <= 0 || r.h <= 0) return;
@@ -482,7 +502,7 @@ function svg(dump, { fonts, textures, roots, margin = 28, prefix = 'p', shared, 
 		}
 		const r = rects.get(t.id);
 		if (!r || r.w <= 0 || r.h <= 0) return;
-		const clip = clipAttr(t);
+		const clip = clipAttr(t) + maskAttr(t);
 		const vc = t.vertexColor || [1, 1, 1, 1];
 		if (t.color) {
 			rect(r, [t.color[0] * vc[0], t.color[1] * vc[1], t.color[2] * vc[2], (t.color[3] ?? 1) * (vc[3] ?? 1)], a * (t.alpha ?? 1), clip);
@@ -499,6 +519,19 @@ function svg(dump, { fonts, textures, roots, margin = 28, prefix = 'p', shared, 
 			defs.push(`<linearGradient id="${id}" x1="0" y1="${vertical ? 1 : 0}" x2="${vertical ? 0 : 1}" y2="0">${stop(g.min, 0)}${stop(g.max, 1)}</linearGradient>`);
 			const op = Math.max(0, Math.min(1, a * (t.alpha ?? 1)));
 			if (op > 0.001) body.push(`<rect x="${f2(r.x - ox)}" y="${f2(r.y - oy)}" width="${f2(r.w)}" height="${f2(r.h)}" fill="url(#${id})" opacity="${f2(op)}"${clip}/>`);
+			return;
+		}
+		if (name === 'white' && t.vertexOffset) {
+			// SetVertexOffset bends the quad: its corners (upper left, lower
+			// left, upper right, lower right) moved in UI units, y up. Pieces
+			// share edges exactly in game; crispEdges keeps the SVG renderer's
+			// own anti-aliasing from drawing seams between them.
+			const s = scaleOf(t);
+			const v = t.vertexOffset;
+			const at = (i, x, y) => `${f2(x - ox + v[2 * i] * s)},${f2(y - oy - v[2 * i + 1] * s)}`;
+			const pts = [at(0, r.x, r.y), at(2, r.x + r.w, r.y), at(3, r.x + r.w, r.y + r.h), at(1, r.x, r.y + r.h)].join(' ');
+			const { fill, opacity } = rgba(vc, a * (t.alpha ?? 1));
+			if (opacity > 0.001) body.push(`<polygon points="${pts}" fill="${fill}" fill-opacity="${f2(opacity)}" shape-rendering="crispEdges"${clip}/>`);
 			return;
 		}
 		if (name === 'white' && !t.texCoord) {

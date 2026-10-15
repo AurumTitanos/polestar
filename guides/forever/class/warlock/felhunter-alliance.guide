@@ -1,0 +1,81 @@
+guide forever/class/warlock/felhunter-alliance
+title Felhunter (Alliance)
+category Class
+class Warlock
+folder Warlock
+faction Alliance
+levels 30-33
+zone The Barrens
+keywords Summon Felhunter, Tome of the Cabal, Seeking Strahad, Strahad Farsan, Krom Stoutarm, Moldy Tome, Tattered Manuscript, Rod of Channeling, The Binding, Warlock, class pet
+reward spell 691 "Summon Felhunter"
+reward item 22244
+why The felhunter, the demon to bring against spellcasters, and a Box of Souls for your shards.
+
+# The felhunter for Alliance warlocks: Seeking Strahad (1798) from your
+# trainer to Strahad Farsan in Ratchet, Tome of the Cabal (1758, 1802, 1804)
+# with Krom Stoutarm in Ironforge, and The Binding (1795) back in Ratchet.
+# Sources: quests.json, npcs.json, objects.json and items.json (Questie 12.1.0
+# and Questie-Forever) for the givers, the tome, the chest, the rods and the
+# summoning circle; Wowhead Forever's Warlock class page
+# (data/local/quest-audit/wowhead-class-quests.json): the chain is unchanged in
+# Forever and The Binding pays a Box of Souls.
+# The Alliance leveling guides leave the chain out (see
+# forever/alliance/30-40/01-hillsbrad-foothills): it crosses between Ratchet,
+# Ironforge, the Hillsbrad coast, Thousand Needles and the Wetlands.
+# Based on data, not play: the beta caps at level 30 until launch on
+# 4 November, and the chain starts at 30, so it has not been checked in game.
+
+step Seeking Strahad (Stormwind)
+  only Human
+  zone Stormwind City
+  tip At 30 Gakin the Darkbinder, in the cellar of the Slaughtered Lamb in the Mage Quarter, sends you to Strahad Farsan in Ratchet.
+  level 30
+  accept 1798 npc 6122                -- Gakin the Darkbinder
+
+step Seeking Strahad (Ironforge)
+  only Gnome
+  zone Ironforge
+  tip At 30 Lago Blackwrench, in the Forlorn Cavern, sends you to Strahad Farsan in Ratchet.
+  level 30
+  accept 1798 npc 6120                -- Lago Blackwrench
+
+step Strahad Farsan
+  zone The Barrens
+  tip Ratchet is on the Barrens coast; Strahad Farsan stands on the hill in town.
+  turnin 1798                         -- Strahad Farsan
+  accept 1758
+
+step Krom Stoutarm
+  zone Ironforge
+  tip Krom Stoutarm stands in the Hall of Explorers.
+  turnin 1758                         -- Krom Stoutarm
+  accept 1802
+
+step Moldy Tome
+  zone Hillsbrad Foothills
+  tip The Moldy Tome lies on the shore west of Southshore, past the Torn Fin murloc camps.
+  collect 6931 quest 1802.1           -- Moldy Tome
+
+step Tattered Manuscript
+  zone Thousand Needles
+  tip The Damaged Chest lies in the canyon north of Freewind Post.
+  collect 6997 quest 1802.2           -- Tattered Manuscript, in the Damaged Chest
+
+step Krom Stoutarm
+  zone Ironforge
+  turnin 1802                         -- Krom Stoutarm
+  accept 1804
+
+step Rods of Channeling
+  zone Wetlands
+  tip The Dragonmaw Bonewarders and Shadowwarders hold the hills east of the road through the Wetlands: the rods drop from them.
+  collect 6930 quest 1804.1           -- Rods of Channeling
+
+step The Binding
+  zone The Barrens
+  tip Back to Strahad Farsan in Ratchet. Use the Tome of the Cabal on the summoning circle beside him and defeat the felhunter to bind it.
+  turnin 1804                         -- Strahad Farsan
+  accept 1795
+  use 6999 @62.6,35.3                 -- Tome of the Cabal
+  kill 6268 quest 1795.1              -- Summoned Felhunter
+  turnin 1795                         -- Strahad Farsan: he binds the felhunter to you

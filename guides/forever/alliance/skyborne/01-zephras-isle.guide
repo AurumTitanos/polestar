@@ -22,14 +22,29 @@ next forever/alliance/02-westfall
 # - Hunter: Quel'ana Quickgale's Taming the Beast (94978, 94979, 94013:
 #   Windsong Crawler, Vuldren Alpha, Ornery Galestrider) and Training the
 #   Beast (94050) after the Valanaar turn-ins at about 11; Elayaa Easewind's
-#   breadcrumb (94007) is not needed.
+#   breadcrumb (94007) is not needed. The Way of the Hunter (92482) is
+#   handed to Tai'ree Farsight in Thendal Grove at 2.
 # - Warrior: The Skybreaker Bulwark (94003, Defensive Stance), Zaal
 #   Stormshield at the Shrine of Akir. The data puts Zaal by Hanaa's camp in
 #   Thendal Grove; the quest text and players' reports put him at the shrine.
+#   The Warrior's Path (92532), Rorian to Blademaster Ren in the grove at 2.
 # - Druid: The Great Ursera Spirit and Strength and Mercy (94006, 94638, Bear
 #   Form) from Lotheluum Starbreeze, Urs'endris and Ur'endra. Cat Form is in
 #   03-darkshore.
-# - Mage and Rogue: no spell quests on the isle.
+#   At the Dalaran landing Alfina Nightgaze's Child of Nature (94912) goes to
+#   Sheldras Moontree in Stormwind, whose Moonglade (94914) teaches Teleport:
+#   Moonglade; Dendrite takes it on the Cat Form trip in 03-darkshore.
+# - Druid at 2: A Student of Nature (92485), Rorian to Xyton Silverwind in
+#   Thendal Grove.
+# - Mage: A Student of the Arcane (92481) in Thendal Grove; Speak with Belann
+#   and Boughs in the Wind (93791, 93797: Windbough Wand) around Valanaar at
+#   about 10; Mirror Lake (1861) from Jennea Cannon in Stormwind, its water
+#   taken on the way to Westfall, handed in at the 02-westfall Stormwind stop.
+# - Rogue: At Home in the Shadows (92483), Rorian to Akeri Duskblade in the
+#   watchtower (no spell).
+# - Level 2 class letters are taken: Rorian's note for every class (92532,
+#   92482, 92483, 92481, 92485) goes to its trainer in Thendal Grove once
+#   Harmony in Balance is handed in.
 #
 # Optional extra: WANTED: Vulgara the Insatiable (93318), not in the export;
 # Vulgara is elite, so it stays an optional extra.
@@ -48,6 +63,20 @@ next forever/alliance/02-westfall
 #
 # Carried on: Journey to Sentinel Hill (98021), from Bolvar, is turned in to
 # Gryan Stoutmantle at the start of the Westfall guide.
+#
+# The refreshed consensus export leaves the isle at about 12.2, after the
+# Gustberry Lowlands, because it now runs every start on one shared route
+# from level 12. This guide keeps the isle to 14.6 (the turncoat, the Shrine
+# of Akir, Shadowgale Forest and the skycutter): the previous export, which
+# did, reached level 20 sooner (9.4 h against 9.8 h), and it is the
+# Skyborne's own story.
+# Not taken: Boughs in the Wind (93797), which the new export takes, follows
+# Speak with Belann (93791, Mage only) and is on Wowhead Forever's Mage page:
+# a Mage quest, not one for everyone. Exploring the Alliance (93963), from
+# Bolvar with Journey to Sentinel Hill, sends you to Magni and Mekkatorque in
+# Ironforge and Tyrande in Darnassus: the route reaches Ironforge only in
+# 06-ashenvale and Darnassus only for Druid class quests. More Al'Aketh Ears
+# (93459, Vayn Moongaze) is a repeatable reputation turn-in with no XP.
 
 # ---------------------------------------------------------------- Thendal Grove
 
@@ -67,6 +96,16 @@ step Back to Thendal Grove
   turnin 92462                                -- Elatrell Featherlight
   accept 92463
   turnin 92461                                -- Rorian the Dayseeker
+  accept 92532 only Warrior                   -- Rorian the Dayseeker: the Crumpled Note
+  turnin 92532 only Warrior                   -- Blademaster Ren, in the watchtower
+  accept 92482 only Hunter                    -- Rorian the Dayseeker: a note from your trainer
+  turnin 92482 only Hunter                    -- Tai'ree Farsight
+  accept 92483 only Rogue                     -- Rorian the Dayseeker: read the Simple Note
+  turnin 92483 only Rogue                     -- Akeri Duskblade, in the watchtower
+  accept 92481 only Mage                      -- Rorian the Dayseeker: A Student of the Arcane
+  turnin 92481 only Mage                      -- Dorii Brightwhisper, the mage trainer: read the Glowing Recall Crystal first
+  accept 92485 only Druid                     -- Rorian: A Student of Nature
+  turnin 92485 only Druid                     -- Xyton Silverwind, the druid trainer, on the ground floor of the tree behind Rorian
   train class                                 -- The class trainers stand together in the grove
   accept 93552                                -- Dalia the Collector
   accept 92597                                -- Falorne Fallwind
@@ -314,6 +353,9 @@ step Valanaar turn-ins
   accept 92840
   accept 94003 only Warrior                   -- Seena Skybreaker: Zaal Stormshield waits at the Shrine of Akir
   accept 94978 only Hunter                    -- Quel'ana Quickgale
+  accept 93791 only Mage                      -- Anathamaas Aetherwind, the mage trainer
+  turnin 93791 only Mage                      -- Belann Windwood
+  accept 93797 only Mage
   train class
 
 step Taming the Beast
@@ -333,9 +375,11 @@ step Taming the Beast
 step The Windstone Formations
   tip The Windstone Formations stand on the rise west of Fillion's camp.
   interact 697118 quest 92840.1
+  collect 262668 quest 93797.1 only Mage      -- Wind-Infused Bough: by the wind shrine south of Falaath Village
 
 step Elaadrin Evengale
   turnin 92840                                -- Elaadrin Evengale
+  turnin 93797 only Mage                      -- Belann Windwood: Windbough Wand
   accept 92834
   accept 92860
   turnin 92860                                -- Valennia Stormfist
@@ -501,6 +545,7 @@ step Denaaris Stargale
   zone Alterac Mountains
   tip Denaaris stands beside the Skyborne Portal where the zeppelin lands. The portal takes you to Stormwind.
   turnin 94946                                -- Denaaris Stargale
+  accept 94912 npc 270459 only Druid          -- Alfina Nightgaze, beside Denaaris: for Sheldras Moontree in Stormwind
   accept 94947
   interact 631299 quest 94947.1               -- Skyborne Portal to Stormwind
 
@@ -509,3 +554,22 @@ step Stormwind Keep
   tip Bolvar Fordragon stands in the throne room of Stormwind Keep, at the north end of the city. Then leave by the main gate for Westfall.
   turnin 94947                                -- Highlord Bolvar Fordragon
   accept 98021                                -- For Gryan Stoutmantle at Sentinel Hill
+
+step Sheldras Moontree
+  only Druid
+  zone Stormwind City
+  tip Sheldras Moontree, Stormwind's druid trainer, teaches you Teleport: Moonglade. Dendrite Starblaze's welcome waits for your Cat Form trip at the end of Darkshore.
+  turnin 94912                                -- Sheldras Moontree
+  accept 94914
+
+step Jennea Cannon
+  only Mage
+  zone Stormwind City
+  tip Jennea Cannon stands in the Wizard's Sanctum, the tower of the Mage Quarter; she gives you a flask for the Mirror Lake waterfall.
+  accept 1861                                 -- Jennea Cannon
+
+step Mirror Lake
+  only Mage
+  zone Elwynn Forest
+  tip Leave Stormwind by the main gate. The Mirror Lake waterfall is south-west of the gates, on the way west to Westfall: fill Jennea's Flask at its base.
+  collect 7206 quest 1861.1                   -- Mirror Lake Water Sample

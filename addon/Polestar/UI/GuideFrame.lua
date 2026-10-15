@@ -69,7 +69,7 @@ local focusGroup -- the group on screen
 local shownIndex, shownGuide, shownFocus -- what the card shows, to tell a change from an update
 local tipOpen = false
 local inCombat = false
-local state = "none" -- "steps" | "noguides" | "noguide" | "complete"
+local state = "none" -- "steps" | "noguides" | "noguide" | "notyet" | "complete"
 local texts = {} -- every string the window draws, for transparent-mode outlines
 local chrome = {} -- frames that hide in transparent mode until hovered
 
@@ -353,7 +353,8 @@ end
 -- lands with a short back-out pop (scale only; reduced motion skips it).
 -- current = the first open goal of the focus: its glyph alone takes the
 -- accent; the others sit in textDim.
-local function paintRow(r, goal, pop, sameStep, current)
+-- `noParty`: a row above already says the group line (UI.GoalSubline).
+local function paintRow(r, goal, pop, sameStep, current, noParty)
 	local sameGoal = sameStep and r.psGoal and r.psGoal.index == goal.index and r.psGoal.t == goal.t
 	r.psGoal = goal
 	local status = goal.status
@@ -368,7 +369,7 @@ local function paintRow(r, goal, pop, sameStep, current)
 	r.Text:SetText(UI.GoalLine(goal))
 	-- White while it is to be done; done and skipped goals step back.
 	W.Color(r.Text, (done or skipped) and "textMuted" or "text")
-	local sub = UI.GoalSubline(goal, person.Where:IsShown() and person.psPlace and person.psPlace.map or nil)
+	local sub = UI.GoalSubline(goal, person.Where:IsShown() and person.psPlace and person.psPlace.map or nil, noParty)
 	r.Sub:SetText(sub or "")
 	r.Sub:SetShown(sub ~= nil)
 	-- An unavailable quest's reason is the point of the line: keep it readable.
@@ -656,7 +657,7 @@ local function tabButton(i)
 end
 
 local CATEGORY_ICON = {
-	Leveling = "icon-level", Professions = "icon-craft", Reputation = "icon-rep", Legacy = "icon-achieve",
+	Leveling = "icon-level", Class = "icon-train", Professions = "icon-craft", Reputation = "icon-rep", Legacy = "icon-achieve",
 	Exploration = "icon-explore", Collectibles = "star", Dungeons = "icon-kill",
 }
 GF.CATEGORY_ICON = CATEGORY_ICON
@@ -1097,6 +1098,16 @@ end
 -- Render
 ---------------------------------------------------------------------------
 
+-- A finished dungeon pick-up guide whose dungeon has quests in the log ->
+-- the dungeon's key | nil.
+local function pickupKey(guide)
+	local lk, Dg = guide and guide.lookup, ns.Dungeons
+	if not (lk and lk.kind == "pickup" and Dg and Dg.HandinPlan and UI.DungeonsSection) then return nil end
+	local plan = Dg.HandinPlan(lk.id)
+	if not plan or #plan.hand + #plan.unfinished + #plan.inside + #plan.unplaced == 0 then return nil end
+	return lk.id
+end
+
 local function setEmpty(kind)
 	state = kind
 	local E, G = Engine(), ns.Guides
@@ -1108,7 +1119,7 @@ local function setEmpty(kind)
 		empty.Title:SetText(L["No guides shown"])
 		empty.Text:SetText(L["The guide packs are switched off. Turn one on under Options, Guide packs (/polestar packs)."])
 		W.SetButtonText(empty.Primary, L["Guide packs"])
-		empty.Primary.psAction = function() UI.ShowOptions(L["Guide packs"]) end
+		empty.Primary.psAction = function() UI.ShowOptions("guidepacks") end
 		empty.Primary:Show()
 	elseif kind == "noguides" then
 		empty.Title:SetText(L["No guides installed"])
@@ -1133,11 +1144,34 @@ local function setEmpty(kind)
 			empty.Primary.psAction = function() UI.ShowPicker() end
 			empty.Primary:Show()
 		end
+	elseif kind == "notyet" then
+		-- A Class guide the character cannot start yet (Engine.StartGate):
+		-- when it opens, who starts it; the guide picks up by itself.
+		glyph = "icon-level"
+		local guide = E and E.GetGuide and E.GetGuide()
+		local gate = guide and E.StartGate and E.StartGate(guide.id) or {}
+		local lines = {}
+		if gate.giver then
+			local zone = gate.map and UI.MapName(gate.map) or nil
+			lines[1] = string.format(L["%s starts it."], zone and (gate.giver .. ", " .. zone) or gate.giver)
+		end
+		if gate.level then
+			empty.Title:SetText(string.format(L["Available from level %d"], gate.level))
+			lines[#lines + 1] = string.format(L["Come back at level %d: the guide picks up by itself then."], gate.level)
+		else
+			empty.Title:SetText(L["Not available yet"])
+			lines[#lines + 1] = string.format(L["Finish %s first: the guide picks up by itself then."], gate.preTitle or "")
+		end
+		empty.Text:SetText(table.concat(lines, "\n"))
+		W.SetButtonText(empty.Primary, L["Choose a guide"])
+		empty.Primary.psAction = function() UI.ShowPicker() end
+		empty.Primary:Show()
 	elseif kind == "complete" then
 		glyph, color = "check", "success"
 		local guide = E and E.GetGuide and E.GetGuide()
 		local nextGuide = guide and guide.next and G and G.Get and G.Get(guide.next)
 		local choiceFrom = guide and E.PendingRouteChoice and E.PendingRouteChoice()
+		local afterRun = not choiceFrom and pickupKey(guide)
 		empty.Title:SetText(L["Guide complete"])
 		if choiceFrom then
 			-- Several zones to continue in: the player picks (UI.RouteChoice).
@@ -1146,6 +1180,16 @@ local function setEmpty(kind)
 			empty.Primary.psAction = function() UI.ShowRouteChoice(choiceFrom) end
 			empty.Primary:Show()
 			W.SetButtonText(empty.Secondary, L["Browse guides"])
+			empty.Secondary.psAction = function() UI.ShowPicker() end
+			empty.Secondary:Show()
+		elseif afterRun then
+			-- A dungeon's pick-up guide ends at the entrance; after the run
+			-- its quests are handed in (Dungeons/Handin.lua).
+			empty.Text:SetText(L["After the run: a guide to where this dungeon's quests are turned in, and the follow-ups there."])
+			W.SetButtonText(empty.Primary, L["Hand in the quests"])
+			empty.Primary.psAction = function() UI.DungeonsSection.HandIn(afterRun) end
+			empty.Primary:Show()
+			W.SetButtonText(empty.Secondary, L["Choose a guide"])
 			empty.Secondary.psAction = function() UI.ShowPicker() end
 			empty.Secondary:Show()
 		elseif nextGuide then
@@ -1329,6 +1373,9 @@ local function fillCard(sameFocus)
 	person:Show()
 	local t = targetOf()
 	local n = 0
+	-- A group line ("Dungeon: Dire Maul") reads once, on the first open
+	-- goal that carries it, not under every goal of the same run.
+	local partySaid = {}
 	-- The current goal (the Engine's `current`: the first open blocking goal
 	-- of the focus, else its first open optional one) takes the accent; it
 	-- is the goal the arrow leads to. The header stands for its "Go to".
@@ -1337,7 +1384,9 @@ local function fillCard(sameFocus)
 		local r = goalRow(n)
 		local pop = sameFocus and goal.status == "done" and r.psStatus and r.psStatus ~= "done" and r.psGoal and r.psGoal.index == goal.index
 		local isCurrent = view.current ~= nil and goal.index == view.current and goal.status == "active"
-		paintRow(r, goal, pop, sameFocus, isCurrent)
+		local party = UI.GroupLine(goal)
+		paintRow(r, goal, pop, sameFocus, isCurrent, party and partySaid[party])
+		if party then partySaid[party] = true end
 		r.Mark:SetShown(goal.status ~= "done" and goal.status ~= "skipped" and isTarget(goal, t) and not person.Mark:IsShown())
 		r:Show()
 	end
@@ -1389,6 +1438,15 @@ function GF.Render()
 		showSteps(false)
 		GF.Layout()
 		GF.PaintProgress(true)
+		return
+	end
+	-- A Class guide the character cannot start yet: its notice on the live
+	-- step; Next still looks at the steps ahead.
+	if index == (E.GetLiveStep and E.GetLiveStep()) and E.StartGate and E.StartGate(guide.id) then
+		view, shownIndex, shownGuide, shownFocus = nil, nil, guide.id, nil
+		setEmpty("notyet")
+		showSteps(false)
+		GF.Layout()
 		return
 	end
 	local stepChanged = shownGuide ~= guide.id or shownIndex ~= index
@@ -1549,15 +1607,32 @@ function GF.ApplyAlpha(animate)
 	end
 end
 
+-- The corner the window is pinned by and that corner's y: the bottom-left
+-- with ui.growUp (a longer step pushes the top edge up), else the top-left
+-- (it pushes the bottom edge down). ui.pos holds that corner.
+local function pinCorner()
+	if ns.Get("ui.growUp") then return "BOTTOMLEFT", F:GetBottom() end
+	return "TOPLEFT", F:GetTop()
+end
+
 function GF.ApplyPosition()
 	if not F then return end
 	local pos = ns.Get("ui.pos")
 	F:ClearAllPoints()
 	if type(pos) == "table" and type(pos[1]) == "number" and type(pos[2]) == "number" then
-		F:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", pos[1], pos[2])
+		F:SetPoint(ns.Get("ui.growUp") and "BOTTOMLEFT" or "TOPLEFT", UIParent, "BOTTOMLEFT", pos[1], pos[2])
+	elseif ns.Get("ui.growUp") then
+		F:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -64, 240)
 	else
 		F:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -64, -240)
 	end
+end
+
+function GF.SavePosition()
+	if not F then return end
+	local l = F:GetLeft()
+	local _, y = pinCorner()
+	if l and y then ns.Set("ui.pos", { floor(l + 0.5), floor(y + 0.5) }) end
 end
 
 function GF.ApplyLock()
@@ -1578,18 +1653,19 @@ function GF.ApplyCompact()
 	GF.Layout()
 end
 
--- Scale about the top-left corner, so the window stays where the user put
+-- Scale about the pinned corner, so the window stays where the user put
 -- it, then repaint so 1px lines land on the new pixel grid.
 function GF.ApplyScale()
 	local new = ns.Get("ui.scale") or 1
 	local old = F:GetScale()
 	if old == new then return end
-	local l, t = F:GetLeft(), F:GetTop()
+	local l = F:GetLeft()
+	local corner, y = pinCorner()
 	F:SetScale(new)
-	if l and t and type(ns.Get("ui.pos")) == "table" then
+	if l and y and type(ns.Get("ui.pos")) == "table" then
 		F:ClearAllPoints()
-		F:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", l * old / new, t * old / new)
-		ns.Set("ui.pos", { floor(l * old / new + 0.5), floor(t * old / new + 0.5) })
+		F:SetPoint(corner, UIParent, "BOTTOMLEFT", l * old / new, y * old / new)
+		ns.Set("ui.pos", { floor(l * old / new + 0.5), floor(y * old / new + 0.5) })
 	end
 	Theme.Refresh()
 end
@@ -1604,6 +1680,8 @@ local APPLY = {
 	["ui.compact"] = function() GF.ApplyCompact() end,
 	["ui.width"] = function() GF.ApplyWidth() end,
 	["ui.pos"] = function() GF.ApplyPosition() end,
+	-- Re-pin by the other corner where the window stands now, so it does not jump.
+	["ui.growUp"] = function() GF.SavePosition() end,
 	["ui.upcoming"] = function() GF.Render() end,
 	["ui.upcomingOpen"] = function() GF.Render() end,
 	["ui.showNotes"] = function() GF.Render() end,
@@ -1626,10 +1704,7 @@ end
 -- Move and resize
 ---------------------------------------------------------------------------
 
-local function savePosition()
-	local l, t = F:GetLeft(), F:GetTop()
-	if l and t then ns.Set("ui.pos", { floor(l + 0.5), floor(t + 0.5) }) end
-end
+local savePosition = GF.SavePosition
 
 local function dragStart()
 	if ns.Get("ui.locked") then return end
@@ -1652,11 +1727,12 @@ end
 
 local function resizeStart(self)
 	if ns.Get("ui.locked") then return end
-	-- Grow from the left edge: pin the window by its top-left first.
-	local l, t = F:GetLeft(), F:GetTop()
-	if l and t then
+	-- Grow from the left edge: pin the window by its left corner first.
+	local l = F:GetLeft()
+	local corner, y = pinCorner()
+	if l and y then
 		F:ClearAllPoints()
-		F:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", l, t)
+		F:SetPoint(corner, UIParent, "BOTTOMLEFT", l, y)
 	end
 	self.psStartX = GetCursorPosition() / F:GetEffectiveScale()
 	self.psStartW = F:GetWidth()

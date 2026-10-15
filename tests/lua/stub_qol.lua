@@ -2,7 +2,8 @@
 -- wow_stub.lua. It installs contract-faithful fakes for the Engine, Nav and
 -- Pins (just before ADDON_LOADED, after the addon files ran), overrides the
 -- map half of Compat with one flat test map, and provides the client APIs QoL
--- uses: XP, bags and items, merchant (guild repair), quest rewards, gossip,
+-- uses: XP, bags and items, merchant (guild repair, goods), trainer, quest
+-- rewards, gossip,
 -- taxi map, death, loot, requests from other players (q.social), popups
 -- (q.showPopup), UIErrorsFrame message types, and installed-but-unloaded
 -- addons (q.installed).
@@ -170,6 +171,29 @@ end
 function C_Item.GetItemIconByID(id) return (q.items[id] and q.items[id].icon) or 134400 end
 function C_Item.IsItemInRange() return q.inRange end
 function C_Item.IsUsableItem(id) return true end
+-- Wearing lands a moment later, once the server answers: one copy leaves the
+-- bags for q.worn[slot] (slot -> item ID), BAG_UPDATE_DELAYED, then
+-- PLAYER_EQUIPMENT_CHANGED. q.refuse[id]: that item never goes on (its bind
+-- confirmation cancelled).
+q.worn, q.refuse = {}, {}
+function C_Item.EquipItemByName(item, slot)
+	call("EquipItemByName", item, slot)
+	local id = tonumber(tostring(item):match("item:(%d+)"))
+	if q.refuse[id] then return end
+	C_Timer.After(0.1, function()
+		for bag = 0, 4 do
+			for s, it in pairs(q.bags[bag].slots) do
+				if it.itemID == id then
+					q.bags[bag].slots[s] = nil
+					if slot then q.worn[slot] = id end
+					stub.fire("BAG_UPDATE_DELAYED")
+					stub.fire("PLAYER_EQUIPMENT_CHANGED", slot, false)
+					return
+				end
+			end
+		end
+	end)
+end
 function C_Item.GetItemSpell(id) local it = q.items[id]; if it and it.spell then return "Use", it.spell end end
 function C_Item.GetItemInfoInstant(id)
 	local it = q.items[id] or {}
@@ -202,6 +226,50 @@ function RepairAllItems(guild)
 	q.repair.cost = 0
 end
 
+-- Goods for sale: q.goods = { { id, price (per purchase), stackCount (items
+-- per purchase), numAvailable (-1: unlimited), maxStack, extendedCost } }.
+-- A purchase is paid at once and lands in the bags q.landDelay seconds later,
+-- as the server answers.
+q.goods = {}
+q.landDelay = 0.1
+function GetMerchantNumItems() return #q.goods end
+function GetMerchantItemID(i) return q.goods[i] and q.goods[i].id end
+function GetMerchantItemInfo(i)
+	local g = q.goods[i]
+	if not g then return nil end
+	local it = q.items[g.id] or {}
+	return it.name, 134400, g.price or 0, g.stackCount or 1, g.numAvailable or -1, true, true, g.extendedCost or false
+end
+function GetMerchantItemMaxStack(i) return q.goods[i] and (q.goods[i].maxStack or 20) or 0 end
+-- The server refuses a purchase over the stack limit, not in whole stacks,
+-- beyond the stock (counted in items here) or your money: nothing is paid
+-- and nothing lands (q.refused counts them).
+q.refused = 0
+function BuyMerchantItem(i, quantity)
+	quantity = quantity or 1
+	call("BuyMerchantItem", i, quantity)
+	local g = q.goods[i]
+	if not (g and q.merchantOpen) then return end
+	local per = g.stackCount or 1
+	local cost = (g.price or 0) * quantity / per
+	local stock = g.numAvailable or -1
+	if quantity > (g.maxStack or 20) or quantity % per ~= 0 or cost > q.money or (stock >= 0 and quantity > stock) then
+		q.refused = q.refused + 1
+		return
+	end
+	q.money = q.money - cost
+	if stock >= 0 then g.numAvailable = stock - quantity end
+	C_Timer.After(q.landDelay, function()
+		for slot = 1, q.bags[0].size do
+			if not q.bags[0].slots[slot] then
+				q.addItem(0, slot, g.id, quantity)
+				break
+			end
+		end
+		stub.fire("BAG_UPDATE_DELAYED")
+	end)
+end
+
 function q.openMerchant()
 	q.merchantOpen = true
 	stub.fire("MERCHANT_SHOW")
@@ -209,6 +277,55 @@ end
 function q.closeMerchant()
 	q.merchantOpen = false
 	stub.fire("MERCHANT_CLOSED")
+end
+
+---------------------------------------------------------------------------
+-- Trainer: q.trainer = { tradeskill = bool, services = { { name, rank, kind
+-- ("available" | "unavailable" | "used"), cost }, ... } }. A purchase lands
+-- a moment later, as from the server: the money is taken, the service is
+-- used and moves to the end of the list (the indexes shift), then
+-- TRAINER_UPDATE. A service with `refuse = true` is refused: nothing comes back.
+-- q.classTrainers holds the npcs the Engine knows as trainers of the
+-- character's class; q.openTrainer(npc) opens one of them unless given another.
+---------------------------------------------------------------------------
+
+q.trainer = { tradeskill = false, services = {} }
+function IsTradeskillTrainer() return q.trainer.tradeskill end
+function GetNumTrainerServices() return #q.trainer.services end
+function GetTrainerServiceInfo(i)
+	local s = q.trainer.services[i]
+	if s then return s.name, s.kind, 136096, 1, s.rank, "" end
+end
+function GetTrainerServiceCost(i)
+	local s = q.trainer.services[i]
+	if s then return s.cost or 0, q.trainer.tradeskill end
+end
+function BuyTrainerService(i)
+	local s = q.trainer.services[i]
+	call("BuyTrainerService", s and s.name, s and s.rank)
+	C_Timer.After(0.1, function()
+		if not (s and s.kind == "available" and not s.refuse and q.money >= (s.cost or 0)) then return end
+		q.money = q.money - (s.cost or 0)
+		s.kind = "used"
+		local list = q.trainer.services
+		for j = 1, #list do
+			if list[j] == s then table.remove(list, j); break end
+		end
+		list[#list + 1] = s
+		if q.trainerOpen then stub.fire("TRAINER_UPDATE") end
+	end)
+end
+
+q.classTrainers = { [198] = true }
+function q.openTrainer(npc)
+	q.npc = npc or 198
+	q.trainerOpen = true
+	stub.fire("TRAINER_SHOW")
+end
+function q.closeTrainer()
+	q.npc = nil
+	q.trainerOpen = false
+	stub.fire("TRAINER_CLOSED")
 end
 
 ---------------------------------------------------------------------------
@@ -220,20 +337,47 @@ QuestInfoRewardsFrame.RewardButtons = {}
 QuestInfoFrame = CreateFrame("Frame", "QuestInfoFrame", UIParent)
 QuestInfoFrame.rewardsFrame = QuestInfoRewardsFrame
 
+-- q.rewards = { { id, count }, ... }: the items every turn-in gives. With
+-- q.landRewards, a turn-in puts the chosen item and those in the first free
+-- slots of bag 0 a moment later, then BAG_UPDATE_DELAYED, and the reward
+-- panel empties (QUEST_FINISHED).
+q.rewards = {}
+local function rewardOf(kind, i)
+	if kind == "choice" then return q.choices[i] end
+	if kind == "reward" then return q.rewards[i] end
+end
 function GetNumQuestChoices() return #q.choices end
+function GetNumQuestRewards() return #q.rewards end
 function GetQuestItemInfo(kind, i)
-	local c = kind == "choice" and q.choices[i]
+	local c = rewardOf(kind, i)
 	if not c then return nil end
 	local it = q.items[c.id] or {}
 	return it.name, 134400, c.count or 1, it.quality, true, c.id
 end
 function GetQuestItemLink(kind, i)
-	local c = kind == "choice" and q.choices[i]
+	local c = rewardOf(kind, i)
 	if not c or (q.items[c.id] and q.items[c.id].uncached) then return nil end
 	return "|Hitem:" .. c.id .. "|h[" .. ((q.items[c.id] or {}).name or "?") .. "]|h"
 end
 function GetQuestMoneyToGet() return q.questMoney end
-function GetQuestReward(i) call("GetQuestReward", i) end
+function GetQuestReward(i)
+	call("GetQuestReward", i)
+	if not q.landRewards then return end
+	local given = {}
+	if q.choices[i] then given[#given + 1] = q.choices[i] end
+	for _, r in ipairs(q.rewards) do given[#given + 1] = r end
+	C_Timer.After(0.1, function()
+		local slots = q.bags[0].slots
+		for _, r in ipairs(given) do
+			for slot = 1, q.bags[0].size do
+				if not slots[slot] then q.addItem(0, slot, r.id, r.count); break end
+			end
+		end
+		stub.fire("BAG_UPDATE_DELAYED")
+		q.choices, q.rewards = {}, {}
+		stub.fire("QUEST_FINISHED")
+	end)
+end
 
 -- Open the reward panel with the current q.choices, laying out buttons the way
 -- QuestInfo does (LargeQuestRewardItemButtonTemplate: a 39px Icon at TOPLEFT).
@@ -394,6 +538,7 @@ function Engine.GetStepIndex() return q.engine.step end
 function Engine.GetStepView(i) if i == q.engine.step then return q.engine.view end end
 function Engine.GetGuide() return q.engine.guide end
 function Engine.GetWaypoint() return q.engine.waypoint end
+function Engine.IsClassTrainer(npc) return npc ~= nil and q.classTrainers[npc] == true end
 
 -- A step from raw goals: views get status "active" unless goal.status says otherwise.
 function q.step(goals, index)

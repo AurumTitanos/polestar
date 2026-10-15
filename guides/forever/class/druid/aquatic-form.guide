@@ -1,0 +1,126 @@
+guide forever/class/druid/aquatic-form
+title Aquatic Form
+category Class
+folder Druid
+keywords Aquatic Form, A Lesson to Learn, Trial of the Lake, Trial of the Sea Lion, Pendant of the Sea Lion, Strange Lockbox, Shrine of Remulos, Idol of Shifting Tides, Moonglade, class quest
+reward spell 1066 "Aquatic Form"
+reward item 263411
+reward item 16608
+why Your water travel form: swim fast and breathe underwater, with a belt and an idol besides.
+class Druid
+levels 16-22
+zone Moonglade
+
+# Aquatic Form: in Forever Aquatic Form (5061 Night Elf, 31 Tauren) rewards
+# the form itself and the Idol of Shifting Tides besides the Aquarius Belt
+# (Wowhead Forever's druid class page: "Rewards: adds Aquatic Form, Idol of
+# Shifting Tides").
+# Chain: A Lesson to Learn (26 / 27, your trainer) -> Trial of the Lake (29 /
+# 28: a Shrine Bauble from Lake Elune'ara used at the Shrine of Remulos) ->
+# Trial of the Sea Lion (272 / 30: the two half pendants from Strange
+# Lockboxes, joined near the shrine) -> Aquatic Form back at your trainer.
+# Night Elves find the halves in Darkshore and Westfall, Tauren in the Barrens
+# and Silverpine Forest.
+# The leveling guides carry the chain inline (Night Elves in
+# alliance/03-darkshore, 04-redridge-mountains and 06-ashenvale; Tauren in
+# horde/03-silverpine-forest and 04-the-barrens): this guide is for druids off
+# our route. Skyborne: the data offers no Aquatic Form quest to them.
+# Sources: quests.json, objects.json and items.json (Questie 12.1.0,
+# Forever); the lockbox tips are the ones the leveling guides above use.
+
+# ---------------------------------------------------------------- Night Elves
+
+step A Lesson to Learn
+  only NightElf
+  zone Darnassus
+  tip Mathrengyl Bearwalker stands in the Cenarion Enclave.
+  level 16
+  accept 26                             -- Mathrengyl Bearwalker
+
+step Trial of the Lake
+  only NightElf
+  zone Moonglade
+  tip Cast Teleport: Moonglade. Dendrite Starblaze is in Nighthaven. Shrine Baubles lie in the containers on the floor of Lake Elune'ara, below Nighthaven: take one to the Shrine of Remulos on the north-west shore, use it there and speak to Tajarri.
+  turnin 26                             -- Dendrite Starblaze
+  accept 29
+  collect 15877 x1                      -- Shrine Bauble, from a Bauble Container in the lake
+  use 15877 @36.0,41.4                  -- At the Shrine of Remulos
+  complete 29
+  turnin 29                             -- Tajarri
+  accept 272
+
+step Half Pendant of Aquatic Agility
+  only NightElf
+  zone Darkshore
+  tip Fly from Nighthaven to Auberdine. The Strange Lockbox lies under the water off the north coast, west of the Ruins of Mathystra.
+  fly "Auberdine"
+  collect 15883 x1                      -- Half Pendant of Aquatic Agility
+
+step Half Pendant of Aquatic Endurance
+  only NightElf
+  zone Westfall
+  tip Take the boat from Auberdine to Stormwind and fly to Sentinel Hill. Ride north-west to the coast: the Strange Lockbox lies on the sea floor off the shore.
+  fly "Sentinel Hill"
+  collect 15882 x1                      -- Half Pendant of Aquatic Endurance
+
+step Pendant of the Sea Lion
+  only NightElf
+  zone Moonglade
+  tip Cast Teleport: Moonglade. Join the two halves into the Pendant of the Sea Lion near the Shrine of Remulos, on the north-west shore of the lake, then see Dendrite Starblaze in Nighthaven. Fly to Rut'theran Village afterwards.
+  collect 15885 quest 272.1             -- Pendant of the Sea Lion: join the halves at the shrine
+  turnin 272                            -- Dendrite Starblaze
+  accept 5061
+  fly "Rut'theran Village"
+
+step Aquatic Form
+  only NightElf
+  zone Darnassus
+  tip Take the portal up to Mathrengyl in the Cenarion Enclave.
+  turnin 5061 reward 16608 263411       -- Mathrengyl Bearwalker: Aquatic Form
+
+# ---------------------------------------------------------------- Tauren
+
+step A Lesson to Learn
+  only Tauren
+  zone Thunder Bluff
+  tip Turak Runetotem stands on Elder Rise.
+  level 16
+  accept 27                             -- Turak Runetotem
+
+step Trial of the Lake
+  only Tauren
+  zone Moonglade
+  tip Cast Teleport: Moonglade. Dendrite Starblaze is in Nighthaven. The Shrine Baubles lie on the bed of Lake Elune'ara and fade within minutes: swim one straight to the Shrine of Remulos on the north-west shore, use it there and speak to Tajarri.
+  turnin 27                             -- Dendrite Starblaze
+  accept 28
+  collect 15877 x1                      -- Shrine Bauble, from a Bauble Container in the lake
+  use 15877 @36.0,41.4                  -- At the Shrine of Remulos
+  complete 28
+  turnin 28                             -- Tajarri
+  accept 30
+
+step Half Pendant of Aquatic Endurance
+  only Tauren
+  zone Silverpine Forest
+  tip Take Bunthen Plainswind's flight to Thunder Bluff, fly to Orgrimmar and take the zeppelin to Tirisfal Glades; Silverpine Forest is south of the Undercity. The Strange Lockbox lies on the coast west of the Dead Field, north of the Sepulcher.
+  collect 15882 x1                      -- Half Pendant of Aquatic Endurance
+
+step Half Pendant of Aquatic Agility
+  only Tauren
+  zone The Barrens
+  tip The Strange Lockbox lies at the north edge of the Sludge Fen, by the Venture Co. tower, north of the Crossroads.
+  collect 15883 x1                      -- Half Pendant of Aquatic Agility
+
+step Pendant of the Sea Lion
+  only Tauren
+  zone Moonglade
+  tip Cast Teleport: Moonglade. Join the two halves into the Pendant of the Sea Lion near the Shrine of Remulos, on the north-west shore of the lake, then see Dendrite Starblaze in Nighthaven. Bunthen Plainswind flies druids to Thunder Bluff.
+  collect 15885 quest 30.1              -- Pendant of the Sea Lion: join the halves at the shrine
+  turnin 30                             -- Dendrite Starblaze
+  accept 31
+  fly "Thunder Bluff"
+
+step Aquatic Form
+  only Tauren
+  zone Thunder Bluff
+  turnin 31 reward 16608 263411         -- Turak Runetotem: Aquatic Form

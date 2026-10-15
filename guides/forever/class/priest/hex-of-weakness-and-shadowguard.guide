@@ -1,0 +1,38 @@
+guide forever/class/priest/hex-of-weakness-and-shadowguard
+title Hex of Weakness and Shadowguard
+category Class
+class Priest
+folder Priest
+faction Horde
+race Troll
+levels 10-20
+zone Orgrimmar
+keywords Hex of Weakness, Shadowguard, Ur'kyo, Valley of Spirits, Troll, racial, Priest
+reward spell 9035 "Hex of Weakness"
+reward spell 18137 "Shadowguard"
+why The Troll priest spells: Hex of Weakness at 10, Shadowguard at 20.
+
+# The Troll Priest spell quests: Hex of Weakness at 10 (5652) and
+# Shadowguard at 20 (5680), both from Ur'kyo in Orgrimmar's Valley of
+# Spirits.
+# Sources: quests.json and npcs.json for the givers; Wowhead Forever's
+# Priest class page (data/local/quest-audit/wowhead-class-quests.json: both
+# unchanged); classicwowforever.com/racials for the spells (Hex of Weakness
+# and Shadowguard stay Troll spells).
+# horde/orc-troll/01-durotar and 03-silverpine-forest carry Hex of Weakness
+# on the route (5654, from Tai'jin in Razor Hill) and horde/04-the-barrens
+# carries Shadowguard; this guide repeats them for anyone off the route. The
+# game offers one quest of each set.
+# Not checked in game: written from the sources above.
+
+step Hex of Weakness
+  tip At 10, go to Ur'kyo in the Valley of Spirits, on Orgrimmar's west side. Priest trainers elsewhere (Tai'jin in Razor Hill, Miles Welsh in Thunder Bluff) send you to him with a quest of the same name.
+  level 10
+  accept 5652                                 -- Ur'kyo
+  turnin 5652                                 -- Ur'kyo: Hex of Weakness
+
+step Shadowguard
+  tip At 20, Ur'kyo teaches Shadowguard. Miles Welsh in Thunder Bluff and Aelthalyste in the Undercity send you to him with a quest of the same name.
+  level 20
+  accept 5680                                 -- Ur'kyo
+  turnin 5680                                 -- Ur'kyo: Shadowguard

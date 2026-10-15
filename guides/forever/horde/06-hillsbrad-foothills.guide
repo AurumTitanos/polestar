@@ -45,9 +45,16 @@ next forever/horde/07-ashenvale
 # and never hands it in. Melor Sends Word (1130): its turn-in in Thunder
 # Bluff at 30 is not on the route any more. Blood of Innocents (1066) needs
 # Journey to Tarren Mill (1065), from Zamah's chain in Thunder Bluff, which
-# this route never runs. Unending Torment (97289-97292): the chain starts
-# from the Abominable Head, a drop from The Baron in the Ruins of Lordaeron
-# dungeon (97288).
+# this route never runs. Unending Torment (97289-97292): re-checked for the
+# new consensus route, which does all four in the Undercity at about 21
+# because the data lists no prerequisite for them; but 97289 asks for the
+# Head of the Baron, and the chain starts from the Abominable Head (97288), a
+# drop from The Baron in the Ruins of Lordaeron dungeon, so they stay out.
+# Valuable Vantages (98095, Forever, Masoj's follow-up to Scout Support):
+# the new consensus route takes it, but its three vial spots (the hills by
+# Dun Garok, the plateau over Durnholde, the Headland ridge above Hillsbrad,
+# per its quest text) have no coordinates in the data or any source we
+# could read, so it is left out until they are placed.
 #
 # Added: Scout Support (98094, Forever): Darthalia's orders for Deathstalker
 # Masoj, who hides on the way from Durnholde to the Mudsnout Blossoms.
@@ -62,7 +69,9 @@ next forever/horde/07-ashenvale
 # of Camp Taurajo, who gives the blue waterskin (1534) for the Ruins of
 # Stardust in forever/horde/07-ashenvale. Rogues who finished Mission:
 # Possible But Not Probable hand Hinott's Assistance (2479, 2480, optional:
-# Gallywix is elite) to Serge Hinott in Tarren Mill and learn Poisons.
+# Gallywix is elite) to Serge Hinott in Tarren Mill and learn Poisons. Those
+# who skipped Gallywix are pointed at the Class guide Poisons (Horde)
+# (forever/class/rogue/poisons-horde): 2479 needs 2478 turned in.
 
 # ---------------------------------------------------------------- Tarren Mill
 
@@ -86,6 +95,7 @@ step Serge Hinott
   accept 2480 optional
   complete 2480 optional
   turnin 2480 optional                -- Serge Hinott: Poisons
+  note "No Gallywix yet? The Class guide Poisons (Horde) runs the chain from Shenthul again, with a group for Gallywix."
 
 # ---------------------------------------------------------------- West: the hills and Hillsbrad Fields
 

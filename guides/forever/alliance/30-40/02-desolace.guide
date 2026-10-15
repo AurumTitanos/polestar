@@ -8,6 +8,12 @@
 # Graveyard -> the Kolkar -> hearth to Nijel's Point.
 # Next guide: Ashenvale.
 #
+# Forever above level 30 cannot be checked in game until launch on 4
+# November: the Forever additions here come from the data (Questie Forever,
+# Wowhead Forever), not from play.
+# Added: Bloom of the Heavens (98209, Forever) is handed to Thundris
+# Windweaver while passing Auberdine; Sylessa gives it in Menethil at the
+# start of 30-40/01-hillsbrad-foothills (consensus Wetlands visit, 30.7).
 # Deviations from the simulator route (consensus, Alliance Human):
 # - Azore's Sceptre of Light is taken on the way to Thunder Axe Fortress and
 #   done together with Tyranis, instead of a separate trip from Nijel's Point
@@ -21,10 +27,18 @@
 # the centaur war (1384, 1386, 1369, 1370, 1373 Ongeku): Friendly with the
 # Gelkis comes only from killing Magram and the reverse, so one character
 # cannot serve both, and the route builds neither standing. Gizmo for Warug
-# (1371) and Khan Shaka (1375) go with them.
+# (1371) and Khan Shaka (1375) go with them. Forever's follow-ups to the war
+# (A Conqueror's Crown 92743, Valley of Bones 92841 and 93034, and the
+# Shen'dralas quests 92844, 93035, 93037, 93041, 93128) need Friendly or
+# Honored with the Magram or the Gelkis (Wowhead Forever quest=92841: Magram
+# Honored), so they are left out too; see 30-40/06-badlands.
 # Class quests: Warlocks pick up the Heartswood (1738) north-west of
 # Astranaar on the way to the Talondeep Path; Gakin takes it in Stormwind
-# (30-40/05-arathi-highlands).
+# (30-40/05-arathi-highlands). Warlocks with What Is Love? (65602, the
+# incubus, optional, from Takar in 07-thousand-needles) also pick up the
+# Wooden Figurine on that detour (Ashenvale 26.6,22.0, Questie Forever object
+# 375544); Gakin takes it at the same Stormwind stop. Forever data, not play:
+# forever/class/warlock/incubus-alliance has the whole chain.
 guide forever/alliance/30-40/02-desolace
 title Desolace
 faction Alliance
@@ -40,14 +54,16 @@ step Menethil Harbor
 
 step Auberdine
   zone Darkshore
-  tip Take the boat to Auberdine from Menethil's docks.
+  tip Take the boat to Auberdine from Menethil's docks. Thundris Windweaver stands in Auberdine, north of the flight master.
+  turnin 98209                        -- Thundris Windweaver: Nord'el, from Sylessa in Menethil
   fly "Astranaar"
 
 step Heartswood
   only Warlock
   zone Ashenvale
-  tip From Astranaar ride north-west into the hills: the Heartswood is a glowing tree north of the road to Maestra's Post. Then back past Astranaar to the Talondeep Path.
+  tip From Astranaar ride north-west into the hills: the Heartswood is a glowing tree north of the road to Maestra's Post. If you took What Is Love?, the Wooden Figurine lies in a house among the trees north of Maestra's Post (26.6,22.0). Then back past Astranaar to the Talondeep Path.
   collect 6912 quest 1738.1               -- Heartswood
+  collect 190309 quest 65602.1 optional   -- Wooden Figurine, north of Maestra's Post
 
 step The Talondeep Path
   zone Stonetalon Mountains

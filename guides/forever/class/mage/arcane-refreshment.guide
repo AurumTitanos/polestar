@@ -1,0 +1,44 @@
+guide forever/class/mage/arcane-refreshment
+title Conjure Water (Arcane Refreshment)
+category Class
+class Mage
+folder Mage
+levels 60-60
+zone Feralas
+keywords Arcane Refreshment, Conjure Water, Lorekeeper Lydros, Athenaeum, Hydrospawn, Hydrospawn Essence, Warpwood Quarter, Dire Maul, Shen'dralar, Mage, class spell
+reward spell 10140 "Conjure Water"
+reward text Shen'dralar reputation
+why The level 60 Conjure Water, from a Dire Maul library: drink for you and your group.
+
+# Arcane Refreshment (7463), both factions: Lorekeeper Lydros in Dire Maul's
+# Athenaeum teaches Conjure Water (spell 10140) for the Hydrospawn Essence.
+# Level 60: the Forever beta stops at 30 until launch on 4 November, so this
+# guide is based on data, not play.
+# Forever status: not on Wowhead Forever's Mage class page, but Wowhead's
+# Forever database has it (https://www.wowhead.com/forever/quest=7463, checked
+# 2026-10-14: the objective, Conjure Water and 200 Shen'dralar reputation) and
+# quests.json has it from questie-forever.
+# Sources: quests.json for the quest; codex/instances.json for Hydrospawn as a
+# Dire Maul East boss; objects.json for the Meeting Stone in Feralas
+# (57.97,44.48), the point the arrow uses for Dire Maul (our data has no spawns
+# for Lydros or Hydrospawn); travel.json for the Feralas flight points; the
+# quest text for the Warpwood Quarter. Wowhead's Classic guide "Mage Class
+# Quests in WoW Classic" (https://www.wowhead.com/classic/guide/mage-class-quests-classic-wow,
+# Sh3rro, 2023-11-09) fills in the way to the library (the West wing, or the
+# North wing with a Crescent Key) and Hydrospawn's pool (below the satyr room
+# where Pusillin turns to fight).
+# Dungeon work: Dire Maul, groups of five, level 55-60.
+# Left out: The Arcanist's Cookbook (7500) starts from a book that drops in
+# Dire Maul and its reward is an item Wowhead Forever cannot name (#18468).
+
+step Lorekeeper Lydros
+  tip Fly to Feathermoon (Alliance) or Camp Mojache (Horde) and ride to Dire Maul in central Feralas. Lorekeeper Lydros waits in the Athenaeum, the library, reached through the West wing (or the North wing with a Crescent Key).
+  level 60
+  accept 7463 @58.0,44.5                      -- Lorekeeper Lydros
+
+step Hydrospawn
+  tip Hydrospawn, a water elemental, lives in the Warpwood Quarter (Dire Maul East): chase the imp Pusillin until he turns to fight, clear the satyr room, then take the spiral ramp down to the pool.
+  collect 18299 quest 7463.1 @58.0,44.5       -- Hydrospawn Essence: Hydrospawn
+
+step Back to Lydros
+  turnin 7463 @58.0,44.5                      -- Lorekeeper Lydros: Conjure Water

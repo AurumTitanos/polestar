@@ -66,9 +66,9 @@ local CLASS_RARE = { rare = true, rareelite = true }
 -- Sounds the alert may play: SOUNDKIT names in Blizzard_SharedXML/Mainline/
 -- SoundKitConstants.lua (Forever 1.60.1), with their ids as the fallback.
 Rares.SOUNDS = {
-	{ value = "raid", label = "Raid warning", kit = "RAID_WARNING", id = 8959 },
-	{ value = "ready", label = "Ready check", kit = "READY_CHECK", id = 8960 },
-	{ value = "whisper", label = "Boss whisper", kit = "UI_RAID_BOSS_WHISPER_WARNING", id = 37666 },
+	{ value = "raid", label = L["Raid warning"], kit = "RAID_WARNING", id = 8959 },
+	{ value = "ready", label = L["Ready check"], kit = "READY_CHECK", id = 8960 },
+	{ value = "whisper", label = L["Boss whisper"], kit = "UI_RAID_BOSS_WHISPER_WARNING", id = 37666 },
 }
 
 local function get(key) return ns.Get("rares." .. key) end

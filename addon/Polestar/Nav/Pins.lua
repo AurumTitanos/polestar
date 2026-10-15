@@ -1,15 +1,20 @@
 -- Polestar.Pins: map and minimap icons for every module (quests, maps, QoL,
 -- Nav's own target). Contract: docs/ARCHITECTURE.md, "Pins".
 --
---   Pins.SetLayer(layer, pins, opts)   replace a layer; opts = { world = true, minimap = true, edge = false, scale = 1 }
+--   Pins.SetLayer(layer, pins, opts)   replace a layer; opts = { world = true, minimap = true, edge = false, scale = 1,
+--                                      minimapAreas = false }
 --   Pins.ClearLayer(layer)
 --   Pins.SetLayerVisible(layer, visible)
 --   pin = { map, x, y, f, icon, size, color = { r, g, b, a }, tooltip = string | function(tooltip),
 --           onClick = function(button), priority }
 --   Additive pin fields: c, wx, wy (world position instead of map/x/y), glow (soft halo),
---   area (yards: a soft disc of that radius under the pin, world map only, in the pin's colour),
---   backdrop (true: icon pins sit on a dark Theme "scrim" disc), ring ({ r, g, b, a }: a thin
---   circle around the pin), minimapSize (size on the minimap instead of size).
+--   area (yards: a soft disc of that radius under the pin, in the pin's colour, on the world
+--   map; on the minimap too in a layer with minimapAreas, cut at the minimap's rim),
+--   hull ({ wx1, wy1, wx2, wy2, ... }: a convex region in world yards on the pin's continent,
+--   filled softly with a rim in the pin's colour, drawn like area), areaOnly (true: only the
+--   area or hull draws, no pin), backdrop (true: icon pins sit on a dark
+--   Theme "scrim" disc), ring ({ r, g, b, a }: a thin circle around the pin), minimapSize
+--   (size on the minimap instead of size).
 --   Pins.SetTrail(runs, opts)          the travel route's dots; runs = { { live = true, point, ... }, ... },
 --                                      point = { c, wx, wy }; opts = { world = true, minimap = true, color }
 --   Pins.ClearTrail()
@@ -27,7 +32,9 @@
 -- Movement events wake the driver at once. Layer changes redraw once on the
 -- next frame however many layers changed in this one. Each layer indexes its
 -- pins by continent and by CELL-yard grid square, so a redraw visits the
--- pins around the player, not every pin a module published.
+-- pins around the player, not every pin a module published. A hull on the
+-- minimap is laid out again only when the zoom, the minimap's size or (when
+-- it rotates) the facing changed; walking moves one anchor.
 --
 -- The trail is dots along the straight lines between a run's points (`live`:
 -- the player's position goes first), anchored to the run's end: a dot every
@@ -45,6 +52,7 @@ local ADDON, ns = ...
 
 local type, pairs, ipairs, tonumber, pcall = type, pairs, ipairs, tonumber, pcall
 local sqrt, atan2, sin, cos, abs, max, pi, ceil = math.sqrt, math.atan2, math.sin, math.cos, math.abs, math.max, math.pi, math.ceil
+local floor = math.floor
 
 local Pins = {}
 ns.Pins = Pins
@@ -52,8 +60,13 @@ ns.Pins = Pins
 local MEDIA = "Interface\\AddOns\\" .. ADDON .. "\\Media\\Nav\\"
 local TEMPLATE = "PolestarPinsTemplate"
 local AREA_TEMPLATE = "PolestarPinsAreaTemplate"
+local HULL_TEMPLATE = "PolestarPinsHullTemplate"
 local TRAIL_TEMPLATE = "PolestarPinsTrailTemplate"
 local AREA_ALPHA = 0.32 -- area disc opacity, times the pin colour's alpha
+-- Hulls: fill and rim opacity (times the pin colour's alpha), the rim's width
+-- on screen (UI units), and the solid texture their pieces are cut from.
+local HULL_FILL, HULL_RIM, HULL_RIM_WIDTH = 0.2, 0.7, 1.5
+local WHITE = "Interface\\Buttons\\WHITE8X8"
 local WORLD_SIZE, MINIMAP_SIZE = 16, 14
 local WATCH_INTERVAL = 0.1
 local DRIVE_INTERVAL = 1 / 30
@@ -89,7 +102,7 @@ local drawTrailWorld, updateTrailDriver -- forward (trail)
 local function resolveLayer(layer)
 	local C = ns.Compat
 	local pins = layer.pins
-	local wc, wxs, wys = layer.c, layer.wx, layer.wy
+	local wc, wxs, wys, reach = layer.c, layer.wx, layer.wy, layer.reach
 	local unresolved = 0
 	-- byC[c] = { i, ... } (edge layers draw every pin on the continent);
 	-- grid[c][gx][gy] = { i, ... } for the others.
@@ -103,6 +116,17 @@ local function resolveLayer(layer)
 			if C and C.MapToWorld and p.map and p.x and p.y then c, wx, wy = C.MapToWorld(p.map, p.x, p.y, p.f) end
 		end
 		wc[i], wxs[i], wys[i] = c or false, wx or 0, wy or 0
+		-- How far the pin's area or hull reaches from its position (yards).
+		local r = tonumber(p.area) or 0
+		local hull = p.hull
+		if c and type(hull) == "table" then
+			for k = 1, #hull - 1, 2 do
+				local dx, dy = hull[k] - wx, hull[k + 1] - wy
+				local d = sqrt(dx * dx + dy * dy)
+				if d > r then r = d end
+			end
+		end
+		reach[i] = r
 		if c then
 			local list = byC[c]
 			if not list then
@@ -134,6 +158,15 @@ local function resolveLayer(layer)
 	layer.byC, layer.grid = byC, grid
 	layer.resolved = C ~= nil and C.MapToWorld ~= nil
 	layer.unresolved = unresolved
+	-- The widest area or hull decides how far past the minimap's view a pin
+	-- may still reach into it.
+	local maxArea = 0
+	if layer.minimapAreas then
+		for i = 1, #pins do
+			if reach[i] > maxArea then maxArea = reach[i] end
+		end
+	end
+	layer.maxArea = maxArea
 end
 
 function Pins.SetLayer(name, pins, opts)
@@ -150,7 +183,8 @@ function Pins.SetLayer(name, pins, opts)
 	layer.minimap = opts.minimap ~= false
 	layer.edge = opts.edge == true
 	layer.scale = tonumber(opts.scale) or 1
-	layer.c, layer.wx, layer.wy = {}, {}, {}
+	layer.minimapAreas = opts.minimapAreas == true
+	layer.c, layer.wx, layer.wy, layer.reach = {}, {}, {}, {}
 	resolveLayer(layer)
 	layer.version = (layer.version or 0) + 1
 	refreshWorld()
@@ -312,6 +346,118 @@ end
 
 local function click(p, button)
 	if p and type(p.onClick) == "function" then ns.SafeCall(p.onClick, button) end
+end
+
+---------------------------------------------------------------------------
+-- Hulls, shared by both surfaces: a convex polygon cut from solid textures
+-- whose quads SetVertexOffset bends into place. Pieces that share an edge
+-- are rasterised without a seam or an overlap, so the fill is even at any
+-- alpha. The polygon inset by the rim's width is filled with quads fanned
+-- from its first point; the rim is one quad per edge between the polygon
+-- and its inset. Every piece keeps one rectangle (the polygon's box around
+-- its centre), so moving that rectangle moves the whole hull.
+---------------------------------------------------------------------------
+
+local hx, hy, inX, inY = {}, {}, {}, {} -- a polygon in local units (y up), and its inset
+local HULL_EPSILON = 0.01                -- local units: closer points are one
+
+local function hullTexture(parent)
+	local t = parent:CreateTexture(nil, "BACKGROUND")
+	t:SetTexture(WHITE)
+	-- Snapping each piece's rectangle to the pixel grid on its own would
+	-- open or overlap the edges they share.
+	if t.SetSnapToPixelGrid then t:SetSnapToPixelGrid(false) end
+	if t.SetTexelSnappingBias then t:SetTexelSnappingBias(0) end
+	return t
+end
+
+-- Bend texture t's quad onto a, b, c, d (clockwise, local units around the
+-- centre of its rectangle of half extents hw, hh).
+local function bend(t, hw, hh, ax, ay, bx, by, cx, cy, dx, dy)
+	t:SetVertexOffset(1, ax + hw, ay - hh) -- upper left
+	t:SetVertexOffset(3, bx - hw, by - hh) -- upper right
+	t:SetVertexOffset(4, cx - hw, cy + hh) -- lower right
+	t:SetVertexOffset(2, dx + hw, dy + hh) -- lower left
+end
+
+-- Lay out the n points in hx/hy (local units around the rectangle's centre,
+-- y up, convex, either winding) on textures get(1), get(2), ...: the rim
+-- `rim` units wide (at most 0.4 of the way to the centre), in r, g, b at
+-- alpha a. Leaves the polygon clockwise in hx/hy. Returns the textures used,
+-- the rectangle's half extents and the point count.
+local function layHull(n, rim, get, r, g, b, a)
+	local m = 0
+	for i = 1, n do
+		local x, y = hx[i], hy[i]
+		if m == 0 or abs(x - hx[m]) > HULL_EPSILON or abs(y - hy[m]) > HULL_EPSILON then
+			m = m + 1
+			hx[m], hy[m] = x, y
+		end
+	end
+	if m > 1 and abs(hx[m] - hx[1]) <= HULL_EPSILON and abs(hy[m] - hy[1]) <= HULL_EPSILON then m = m - 1 end
+	n = m
+	if n < 3 then return 0, 0, 0, n end
+	local area2, hw, hh, mx, my = 0, 0, 0, 0, 0
+	for i = 1, n do
+		local j = i % n + 1
+		area2 = area2 + hx[i] * hy[j] - hx[j] * hy[i]
+		hw, hh = max(hw, abs(hx[i])), max(hh, abs(hy[i]))
+		mx, my = mx + hx[i] / n, my + hy[i] / n
+	end
+	if area2 > 0 then -- counter-clockwise: the quads' corners run clockwise
+		for i = 1, floor(n / 2) do
+			local j = n + 1 - i
+			hx[i], hx[j] = hx[j], hx[i]
+			hy[i], hy[j] = hy[j], hy[i]
+		end
+	end
+	-- Outward edge normals (inX/inY hold them for now) and how far the
+	-- centre is from the nearest edge.
+	local inner = math.huge
+	for i = 1, n do
+		local j = i % n + 1
+		local dx, dy = hx[j] - hx[i], hy[j] - hy[i]
+		local len = sqrt(dx * dx + dy * dy)
+		local nx, ny = -dy / len, dx / len
+		inX[i], inY[i] = nx, ny
+		local d = (hx[i] - mx) * nx + (hy[i] - my) * ny
+		if d < inner then inner = d end
+	end
+	local w = rim
+	if w > inner * 0.4 then w = inner * 0.4 end
+	if w < 0 then w = 0 end
+	-- The inset: each point moved in along the bisector of its two edges'
+	-- normals, w from both edges.
+	local px, py = inX[n], inY[n]
+	for i = 1, n do
+		local nx, ny = inX[i], inY[i]
+		local k = w / (1 + px * nx + py * ny)
+		inX[i], inY[i] = hx[i] - (px + nx) * k, hy[i] - (py + ny) * k
+		px, py = nx, ny
+	end
+	local used = 0
+	for k = 2, n - 1, 2 do
+		local k2 = k + 2 > n and n or k + 2
+		used = used + 1
+		local t = get(used)
+		bend(t, hw, hh, inX[1], inY[1], inX[k], inY[k], inX[k + 1], inY[k + 1], inX[k2], inY[k2])
+		t:SetVertexColor(r, g, b, a * HULL_FILL)
+	end
+	for i = 1, n do
+		local j = i % n + 1
+		used = used + 1
+		local t = get(used)
+		bend(t, hw, hh, hx[i], hy[i], hx[j], hy[j], inX[j], inY[j], inX[i], inY[i])
+		t:SetVertexColor(r, g, b, a * HULL_RIM)
+	end
+	return used, hw, hh, n
+end
+
+-- Copy the polygon in hx/hy into out (diagnostics and tests).
+local function outline(out, n)
+	for i = 1, n do out[2 * i - 1], out[2 * i] = hx[i], hy[i] end
+	for i = #out, 2 * n + 1, -1 do out[i] = nil end
+	return out
 end
 
 ---------------------------------------------------------------------------
@@ -522,9 +668,13 @@ end
 -- GetNumActive) and releasing pins the way MapCanvas's own pools do.
 ---------------------------------------------------------------------------
 
-local provider, pinMixin, areaMixin, trailMixin, installedOn
+local provider, pinMixin, areaMixin, hullMixin, trailMixin, installedOn
 local wDots, wDotCount = {}, 0 -- trail pins acquired since the last refresh, and how many show
 local TRAIL_DATA = {}
+-- The viewed map (viewMap): its continent, world yards -> percent, and the
+-- trail's dot spacing (nil continent: no trail or hull can show there).
+local wC, wLeft, wTop, wKx, wKy, wSpacing
+local viewMap -- forward
 
 local function newPool(map, mixin, mouse)
 	local pool = { active = {}, inactive = {}, count = 0 }
@@ -642,7 +792,7 @@ local function buildWorldMixins()
 		self:SetSize(d, d)
 	end
 
-	-- data = { pin, x, y, dx } (dx: the radius in percent of the map's width)
+	-- data = { pin, layer, x, y, dx } (dx: the radius in percent of the map's width)
 	function areaMixin:OnAcquired(data)
 		self.data = data
 		local r, g, b, a = pinColor(data.pin)
@@ -654,6 +804,70 @@ local function buildWorldMixins()
 
 	function areaMixin:OnCanvasSizeChanged()
 		if self.data then self:Resize() end
+	end
+
+	-- Hulls: a pin's `hull` as a region on the map canvas, at the areas'
+	-- level, no mouse. Sized in canvas units like the areas; the rim stays
+	-- HULL_RIM_WIDTH wide on screen at any zoom.
+	hullMixin = CreateFromMixins(MapCanvasPinMixin)
+
+	function hullMixin:OnLoad()
+		self:SetIgnoreGlobalPinScale(true)
+		self:UseFrameLevelType("PIN_FRAME_LEVEL_QUEST_BLOB")
+		self.texs, self.used, self.outline = {}, 0, {}
+		self.get = function(k)
+			local t = self.texs[k]
+			if not t then
+				t = hullTexture(self)
+				t:SetAllPoints(self)
+				self.texs[k] = t
+			end
+			t:Show()
+			return t
+		end
+	end
+
+	function hullMixin:CheckMouseButtonPassthrough() end -- never takes the mouse
+
+	-- The rim's width in canvas units: HULL_RIM_WIDTH on screen.
+	local function rimWidth(map)
+		local scale = map.GetCanvasScale and map:GetCanvasScale() or 1
+		return HULL_RIM_WIDTH / (scale and scale > 0 and scale or 1)
+	end
+
+	function hullMixin:Layout()
+		local d, map = self.data, self:GetMap()
+		local canvas = map:GetCanvas()
+		local w, h = canvas:GetWidth() or 0, canvas:GetHeight() or 0
+		local xs, ys, x, y = d.xs, d.ys, d.x, d.y
+		for i = 1, d.n do hx[i], hy[i] = (xs[i] - x) / 100 * w, (y - ys[i]) / 100 * h end
+		self.rim = rimWidth(map)
+		local r, g, b, a = pinColor(d.pin)
+		local used, hw, hh, n = layHull(d.n, self.rim, self.get, r, g, b, a)
+		for k = used + 1, self.used do self.texs[k]:Hide() end
+		self.used = used
+		self:SetSize(max(2 * hw, 1), max(2 * hh, 1))
+		outline(self.outline, used > 0 and n or 0)
+	end
+
+	-- data = { pin, layer, x, y, xs, ys, n } (the centre and the n points of
+	-- the hull, in percent of the viewed map)
+	function hullMixin:OnAcquired(data)
+		self.data = data
+		self:SetScale(1)
+		self:Layout()
+		self:SetPosition(data.x / 100, data.y / 100)
+	end
+
+	function hullMixin:OnCanvasSizeChanged()
+		if self.data then self:Layout() end
+	end
+
+	-- Zooming: the rim keeps its width on screen (within a quarter).
+	function hullMixin:OnCanvasScaleChanged()
+		if not self.data then return end
+		local rim = rimWidth(self:GetMap())
+		if not self.rim or rim > self.rim * 1.25 or rim < self.rim * 0.8 then self:Layout() end
 	end
 
 	-- Trail dots: small discs in the trail's colour, under every pin (the
@@ -680,6 +894,7 @@ local function buildWorldMixins()
 	function provider:RemoveAllData()
 		local map = self:GetMap()
 		map:RemoveAllPinsByTemplate(AREA_TEMPLATE)
+		map:RemoveAllPinsByTemplate(HULL_TEMPLATE)
 		map:RemoveAllPinsByTemplate(TEMPLATE)
 		map:RemoveAllPinsByTemplate(TRAIL_TEMPLATE)
 		for i = #wDots, 1, -1 do wDots[i] = nil end
@@ -699,6 +914,28 @@ local function buildWorldMixins()
 		return dx > 0 and dx or nil
 	end
 
+	-- A pin's hull in percent of the viewed map (same continent), when any
+	-- of it lies on that map.
+	local function hullOn(p, layer, i, map)
+		local hull, c = p.hull, layer.c[i]
+		if not (c and c == wC) then return end
+		local xs, ys, n = {}, {}, 0
+		local x0, y0, x1, y1 = math.huge, math.huge, -math.huge, -math.huge
+		for k = 1, #hull - 1, 2 do
+			local x, y = (hull[k + 1] - wLeft) * wKx, (hull[k] - wTop) * wKy
+			n = n + 1
+			xs[n], ys[n] = x, y
+			if x < x0 then x0 = x end
+			if x > x1 then x1 = x end
+			if y < y0 then y0 = y end
+			if y > y1 then y1 = y end
+		end
+		if n < 3 or x1 < 0 or x0 > 100 or y1 < 0 or y0 > 100 then return end
+		map:AcquirePin(HULL_TEMPLATE, {
+			pin = p, layer = layer, x = (layer.wy[i] - wLeft) * wKx, y = (layer.wx[i] - wTop) * wKy, xs = xs, ys = ys, n = n,
+		})
+	end
+
 	-- Higher priority acquires last, so it lands on top.
 	local queue, qPin, qLayer, qX, qY, qPri = {}, {}, {}, {}, {}, {}
 	local function byPriority(a, b)
@@ -712,6 +949,7 @@ local function buildWorldMixins()
 		local mapID = map:GetMapID()
 		local C = ns.Compat
 		if not mapID then return end
+		viewMap(mapID)
 		local n = 0
 		for _, name in ipairs(order) do
 			local layer = layers[name]
@@ -720,24 +958,29 @@ local function buildWorldMixins()
 				local pins = layer.pins
 				for i = 1, #pins do
 					local p = pins[i]
-					local x, y
-					if p.map == mapID and p.x and p.y and not p.f then
-						x, y = p.x, p.y
-					elseif layer.c[i] and C and C.WorldToMap then
-						x, y = C.WorldToMap(layer.c[i], layer.wx[i], layer.wy[i], mapID)
-					end
-					if x and x >= 0 and x <= 100 and y >= 0 and y <= 100 then
-						n = n + 1
-						queue[n], qPin[n], qLayer[n], qX[n], qY[n], qPri[n] = n, p, layer, x, y, tonumber(p.priority) or 0
-						if p.area then
-							local dx = areaRadius(p, layer, i, x, mapID, C)
-							if dx then map:AcquirePin(AREA_TEMPLATE, { pin = p, x = x, y = y, dx = dx }) end
+					if type(p.hull) == "table" then hullOn(p, layer, i, map) end
+					if not (p.areaOnly and not p.area) then
+						local x, y
+						if p.map == mapID and p.x and p.y and not p.f then
+							x, y = p.x, p.y
+						elseif layer.c[i] and C and C.WorldToMap then
+							x, y = C.WorldToMap(layer.c[i], layer.wx[i], layer.wy[i], mapID)
+						end
+						if x and x >= 0 and x <= 100 and y >= 0 and y <= 100 then
+							if not p.areaOnly then
+								n = n + 1
+								queue[n], qPin[n], qLayer[n], qX[n], qY[n], qPri[n] = n, p, layer, x, y, tonumber(p.priority) or 0
+							end
+							if p.area then
+								local dx = areaRadius(p, layer, i, x, mapID, C)
+								if dx then map:AcquirePin(AREA_TEMPLATE, { pin = p, layer = layer, x = x, y = y, dx = dx }) end
+							end
 						end
 					end
 				end
 			end
 		end
-		drawTrailWorld(trailFrac(), mapID)
+		drawTrailWorld(trailFrac())
 		updateTrailDriver()
 		for i = #queue, n + 1, -1 do queue[i] = nil end
 		table.sort(queue, byPriority)
@@ -759,6 +1002,7 @@ local function installWorld()
 	buildWorldMixins()
 	if not map.pinPools[TEMPLATE] then map.pinPools[TEMPLATE] = newPool(map, pinMixin, true) end
 	if not map.pinPools[AREA_TEMPLATE] then map.pinPools[AREA_TEMPLATE] = newPool(map, areaMixin, false) end
+	if not map.pinPools[HULL_TEMPLATE] then map.pinPools[HULL_TEMPLATE] = newPool(map, hullMixin, false) end
 	if not map.pinPools[TRAIL_TEMPLATE] then map.pinPools[TRAIL_TEMPLATE] = newPool(map, trailMixin, false) end
 	map:AddDataProvider(provider)
 	installedOn = map
@@ -769,11 +1013,7 @@ function refreshWorld()
 	if installedOn and installedOn:IsShown() then provider:RefreshAllData() end
 end
 
--- The viewed map for the trail: its continent, world yards -> percent, and
--- the dot spacing (nil continent: the trail cannot show there).
-local wC, wLeft, wTop, wKx, wKy, wSpacing
-
-local function trailMap(mapID)
+function viewMap(mapID)
 	wC = nil
 	local C = ns.Compat
 	if not (mapID and C and C.MapToWorld) then return end
@@ -786,9 +1026,8 @@ local function trailMap(mapID)
 end
 
 -- Place the world map's trail dots, reusing the pins already acquired and
--- hiding the rest. mapID: the map changed or its pins were released.
-function drawTrailWorld(frac, mapID)
-	if mapID then trailMap(mapID) end
+-- hiding the rest (on the map viewMap last measured).
+function drawTrailWorld(frac)
 	local count = 0
 	local map = installedOn
 	if trail and trail.world and wC and map and map:IsShown() then
@@ -1004,15 +1243,154 @@ local function drawTrailMinimap(frac)
 	mmTrailAt = GetTime()
 end
 
+-- Areas on the minimap (layers with minimapAreas): textures on one frame
+-- just under the trail, masked to the minimap's shape so a disc or hull
+-- reaching past the rim is cut there (a round minimap: pin-fill's disc, which
+-- covers 42 of its 64 pixels; a square one: a plain square). A client
+-- without mask textures shows only the ones that fit inside.
+local SQUARE_MASK = "Interface\\Buttons\\WHITE8X8"
+local mmArea, mmMask, mmMaskSquare, mmMaskHalf
+local mmAreas, mmAreaCount = {}, 0
+-- Hulls: one record per hull drawn, { pin, texs, used, outline, ... }.
+local mmHulls, mmHullCount = {}, 0
+
+-- The mask follows the minimap's shape and size.
+local function shapeMask(square, half)
+	if not mmMask or (square == mmMaskSquare and half == mmMaskHalf) then return end
+	mmMaskSquare, mmMaskHalf = square, half
+	local d = square and half * 2 or half * 2 * 64 / 42
+	mmMask:SetTexture(square and SQUARE_MASK or MEDIA .. "pin-fill", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+	mmMask:SetSize(d, d)
+end
+
+local function areaFrame()
+	if mmArea then return end
+	mmArea = CreateFrame("Frame", nil, Minimap)
+	mmArea:SetAllPoints(Minimap)
+	mmArea:SetFrameLevel((Minimap:GetFrameLevel() or 1) + 3)
+	if mmArea.CreateMaskTexture then
+		mmMask = mmArea:CreateMaskTexture()
+		mmMask:SetPoint("CENTER", mmArea, "CENTER", 0, 0)
+		shapeMask(sSquare, sHalf)
+	end
+end
+
+local function minimapArea(i)
+	local t = mmArea:CreateTexture(nil, "BACKGROUND")
+	t:SetTexture(MEDIA .. "area")
+	if mmMask and t.AddMaskTexture then t:AddMaskTexture(mmMask) end
+	mmAreas[i] = t
+	return t
+end
+
+-- Place pin p's area (yards) at the world offset (dn, dw) from the player as
+-- the count-th disc; returns the new count.
+local function placeArea(count, p, layer, dn, dw, area)
+	local half, radius = sHalf, sRadius
+	areaFrame()
+	if not mmMask and sqrt(dn * dn + dw * dw) + area > radius then return count end
+	count = count + 1
+	local t = mmAreas[count] or minimapArea(count)
+	if t.pin ~= p or t.version ~= layer.version then
+		local r, g, b, a = pinColor(p)
+		t:SetVertexColor(r, g, b, a * AREA_ALPHA)
+		t.pin, t.layer, t.version = p, layer, layer.version
+	end
+	local d = 2 * area * half / radius
+	local x, y = Pins.Project(dn, dw, sFacing, radius, half, sRotate, sSquare, nil)
+	t:SetSize(d, d)
+	t:ClearAllPoints()
+	t:SetPoint("CENTER", Minimap, "CENTER", x, y)
+	t:Show()
+	return count
+end
+
+local function hideAreasFrom(count)
+	for i = count + 1, mmAreaCount do
+		local t = mmAreas[i]
+		t:Hide()
+		t.pin, t.layer = nil, nil
+	end
+	mmAreaCount = count
+end
+
+local function hullRecord(i)
+	local rec = { texs = {}, used = 0, outline = {} }
+	-- Piece k shares piece 1's rectangle, so placing piece 1 places the hull.
+	rec.get = function(k)
+		local t = rec.texs[k]
+		if not t then
+			t = hullTexture(mmArea)
+			if mmMask and t.AddMaskTexture then t:AddMaskTexture(mmMask) end
+			if k > 1 then t:SetAllPoints(rec.texs[1]) end
+			rec.texs[k] = t
+		end
+		t:Show()
+		return t
+	end
+	mmHulls[i] = rec
+	return rec
+end
+
+-- Place layer pin i's hull, its centre at the world offset (dn, dw) from the
+-- player, as the count-th hull; returns the new count. Its shape is laid out
+-- again only when the pin, the zoom, the minimap's size or (rotating) the
+-- facing changed; walking only moves it.
+local function placeHull(count, p, layer, i, dn, dw)
+	areaFrame()
+	if not mmMask and sqrt(dn * dn + dw * dw) + layer.reach[i] > sRadius then return count end
+	count = count + 1
+	local rec = mmHulls[count] or hullRecord(count)
+	local facing = sRotate and sFacing or false
+	if rec.pin ~= p or rec.version ~= layer.version or rec.radius ~= sRadius or rec.half ~= sHalf or rec.facing ~= facing then
+		local hull, cx, cy, n = p.hull, layer.wx[i], layer.wy[i], 0
+		local project = Pins.Project
+		for k = 1, #hull - 1, 2 do
+			n = n + 1
+			hx[n], hy[n] = project(hull[k] - cx, hull[k + 1] - cy, sFacing, sRadius, sHalf, sRotate, sSquare, nil)
+		end
+		local r, g, b, a = pinColor(p)
+		local used, hw, hh
+		used, hw, hh, n = layHull(n, HULL_RIM_WIDTH, rec.get, r, g, b, a)
+		for k = used + 1, rec.used do rec.texs[k]:Hide() end
+		rec.used = used
+		if used > 0 then rec.texs[1]:SetSize(2 * hw, 2 * hh) end
+		outline(rec.outline, used > 0 and n or 0)
+		rec.pin, rec.layer, rec.version, rec.radius, rec.half, rec.facing = p, layer, layer.version, sRadius, sHalf, facing
+	end
+	if rec.used > 0 then
+		local x, y = Pins.Project(dn, dw, sFacing, sRadius, sHalf, sRotate, sSquare, nil)
+		local t = rec.texs[1]
+		t:ClearAllPoints()
+		t:SetPoint("CENTER", Minimap, "CENTER", x, y)
+		rec.x, rec.y = x, y
+	end
+	return count
+end
+
+local function hideHullsFrom(count)
+	for i = count + 1, mmHullCount do
+		local rec = mmHulls[i]
+		for k = 1, rec.used do rec.texs[k]:Hide() end
+		rec.used, rec.pin, rec.layer = 0, nil, nil
+	end
+	mmHullCount = count
+end
+
 -- Place every visible pin for the current state (sPc, sPx, ...).
 local function drawMinimap()
 	gen = gen + 1
 	stats.draws = stats.draws + 1
 	local half = sHalf
 	local base = (Minimap:GetFrameLevel() or 1) + 5
+	local areas, hulls = 0, 0
 	if sPc then
 		local reach = sRadius * MINIMAP_REACH
 		local reach2 = reach * reach
+		-- How far from the player the view reaches: a square's corners reach
+		-- radius * sqrt(2).
+		local view = sSquare and sRadius * 1.415 or sRadius
+		shapeMask(sSquare, half)
 		for _, name in ipairs(order) do
 			local layer = layers[name]
 			if layer and layer.minimap and not hidden[name] then
@@ -1020,13 +1398,25 @@ local function drawMinimap()
 				local pins, lx, ly = layer.pins, layer.wx, layer.wy
 				local edge = layer.edge
 				local size = MINIMAP_SIZE * layer.scale
-				local list, n = nearPins(layer, reach)
+				local maxArea = layer.maxArea or 0
+				local list, n = nearPins(layer, maxArea > 0 and max(reach, view + maxArea) or reach)
 				stats.visited = stats.visited + n
 				for k = 1, n do
 					local i = list[k]
 					local dn, dw = lx[i] - sPx, ly[i] - sPy
-					if edge or dn * dn + dw * dw <= reach2 then
-						local p = pins[i]
+					local d2 = dn * dn + dw * dw
+					local p = pins[i]
+					if maxArea > 0 then
+						local r = layer.reach[i]
+						if r > 0 and d2 <= (view + r) * (view + r) then
+							if type(p.hull) == "table" then
+								hulls = placeHull(hulls, p, layer, i, dn, dw)
+							elseif p.area then
+								areas = placeArea(areas, p, layer, dn, dw, r)
+							end
+						end
+					end
+					if not p.areaOnly and (edge or d2 <= reach2) then
 						local f = assigned[p]
 						local own = tonumber(p.minimapSize) or tonumber(p.size)
 						local psize = (own or MINIMAP_SIZE) * layer.scale
@@ -1059,6 +1449,8 @@ local function drawMinimap()
 	for i = #mmActive, 1, -1 do
 		if mmActive[i].gen ~= gen then releaseAt(i) end
 	end
+	hideAreasFrom(areas)
+	hideHullsFrom(hulls)
 	drawTrailMinimap(trailFrac())
 	-- Held still, the world map's dots follow the player with these redraws.
 	if wDotCount > 0 and installedOn and installedOn:IsShown() and stillTrail() then drawTrailWorld(TRAIL_STILL) end
@@ -1133,6 +1525,8 @@ local function redraw(force)
 	updateWatcher()
 	if not hasMinimapPins() then
 		releaseAllMinimap()
+		hideAreasFrom(0)
+		hideHullsFrom(0)
 		drawTrailMinimap(0) -- no trail: hides its dots
 		dirty = true
 		return
@@ -1173,6 +1567,57 @@ function Pins.GetMinimapFrames(name)
 	local out = {}
 	for _, f in ipairs(mmActive) do
 		if f.layer and f.layer.name == name then out[#out + 1] = f end
+	end
+	return out
+end
+
+-- Area discs currently drawn on the minimap for a layer (diagnostics and
+-- tests; a redraw still queued for this frame runs first).
+function Pins.GetMinimapAreas(name)
+	flushQueued()
+	local out = {}
+	for i = 1, mmAreaCount do
+		local t = mmAreas[i]
+		if t.layer and t.layer.name == name then out[#out + 1] = t end
+	end
+	return out
+end
+
+-- Hulls currently drawn on the minimap for a layer (diagnostics and tests; a
+-- redraw still queued for this frame runs first): { pin, texs, used,
+-- outline = { x1, y1, ... } (pixels around x, y, its centre's place on the
+-- minimap, y up), x, y }.
+function Pins.GetMinimapHulls(name)
+	flushQueued()
+	local out = {}
+	for i = 1, mmHullCount do
+		local rec = mmHulls[i]
+		if rec.layer and rec.layer.name == name and rec.used > 0 then out[#out + 1] = rec end
+	end
+	return out
+end
+
+-- What the areas draw now, per surface: hulls and the textures they are cut
+-- from, and discs (in game: /dump Polestar.Pins.AreaStats()).
+function Pins.AreaStats()
+	flushQueued()
+	local out = { world = { hulls = 0, pieces = 0, discs = 0 }, minimap = { hulls = 0, pieces = 0, discs = mmAreaCount } }
+	local pools = installedOn and installedOn:IsShown() and installedOn.pinPools
+	if pools then
+		if pools[HULL_TEMPLATE] then
+			for pin in pools[HULL_TEMPLATE]:EnumerateActive() do
+				out.world.hulls = out.world.hulls + 1
+				out.world.pieces = out.world.pieces + pin.used
+			end
+		end
+		if pools[AREA_TEMPLATE] then out.world.discs = pools[AREA_TEMPLATE]:GetNumActive() end
+	end
+	for i = 1, mmHullCount do
+		local used = mmHulls[i].used
+		if used > 0 then
+			out.minimap.hulls = out.minimap.hulls + 1
+			out.minimap.pieces = out.minimap.pieces + used
+		end
 	end
 	return out
 end

@@ -1,0 +1,106 @@
+guide forever/class/warrior/voodoo-feathers
+title Voodoo Feathers
+category Class
+class Warrior
+folder Warrior
+levels 50-52
+zone Swamp of Sorrows
+keywords A Troubled Spirit, Fallen Hero of the Horde, Warrior Kinship, War on the Shadowsworn, Voodoo Feathers, Sunken Temple, Temple of Atal'Hakkar, Blasted Lands, Helboar, Warrior, class quest
+reward text Experience
+why Experience at 50, ending in the Sunken Temple; Forever removed the Classic item choice.
+
+# The level 50-52 Warrior quests: A Troubled Spirit (8417) from any warrior
+# trainer of the capitals, then Warrior Kinship, War on the Shadowsworn and
+# Voodoo Feathers (8423, 8424, 8425) for the Fallen Hero of the Horde at the
+# entrance to the Blasted Lands.
+# Sources: quests.json, npcs.json and items.json for the chain, objectives,
+# drops and places; Wowhead Forever's Warrior class page
+# (data/local/quest-audit/wowhead-class-quests.json): Voodoo Feathers no longer
+# offers its Classic choice of Diamond Flask, Fury Visor or Razorsteel
+# Shoulders, and Wowhead does not say what replaces it. The voodoo feathers
+# drop from the Atal'ai minibosses on the Sunken Temple's balcony, which have
+# no spawns in the data (https://foreverchanges.pro/dungeons/sunken-temple,
+# "Balcony Minibosses"); the temple entrance, Swamp of Sorrows 69.9,53.6, is
+# the one guides/forever/alliance/40-50/07-un-goro-crater.guide uses.
+# No leveling guide takes the chain: Voodoo Feathers needs the Sunken Temple.
+# Level 50 and up is above the beta's level cap: this guide is written from
+# the data, not from play.
+
+step A Troubled Spirit (Stormwind)
+  only Human,Skyborne,Alliance
+  zone Stormwind City
+  tip At 50, Wu Shen in Old Town, beside the Pig and Whistle, sends you to the Fallen Hero of the Horde in the Swamp of Sorrows.
+  level 50
+  accept 8417 npc 5479                        -- Wu Shen
+
+step A Troubled Spirit (Ironforge)
+  only Dwarf,Gnome
+  zone Ironforge
+  tip At 50, Kelv Sternhammer, the warrior trainer of Ironforge, sends you to the Fallen Hero of the Horde in the Swamp of Sorrows.
+  level 50
+  accept 8417 npc 5113                        -- Kelv Sternhammer
+
+step A Troubled Spirit (Darnassus)
+  only NightElf
+  zone Darnassus
+  tip At 50, Darnath Bladesinger, the warrior trainer of Darnassus, sends you to the Fallen Hero of the Horde in the Swamp of Sorrows.
+  level 50
+  accept 8417 npc 7315                        -- Darnath Bladesinger
+
+step A Troubled Spirit (Orgrimmar)
+  only Orc,Troll,Skyborne,Horde
+  zone Orgrimmar
+  tip At 50, Sorek in the Valley of Honor sends you to the Fallen Hero of the Horde in the Swamp of Sorrows.
+  level 50
+  accept 8417 npc 3354                        -- Sorek
+
+step A Troubled Spirit (Thunder Bluff)
+  only Tauren
+  zone Thunder Bluff
+  tip At 50, Torm Ragetotem, the warrior trainer of Thunder Bluff, sends you to the Fallen Hero of the Horde in the Swamp of Sorrows.
+  level 50
+  accept 8417 npc 3041                        -- Torm Ragetotem
+
+step A Troubled Spirit (Undercity)
+  only Undead
+  zone Undercity
+  tip At 50, Christoph Walker, a warrior trainer of the Undercity, sends you to the Fallen Hero of the Horde in the Swamp of Sorrows.
+  level 50
+  accept 8417 npc 4593                        -- Christoph Walker
+
+step The Fallen Hero of the Horde
+  zone Swamp of Sorrows
+  tip The Fallen Hero of the Horde stands in the south-west of the Swamp of Sorrows, at the entrance to the Blasted Lands.
+  turnin 8417                                 -- Fallen Hero of the Horde
+  accept 8423
+
+step Helboars
+  zone Blasted Lands
+  tip The Helboars roam the north of the Blasted Lands, south of the Fallen Hero.
+  kill 5993 quest 8423.1                      -- Helboar
+
+step War on the Shadowsworn
+  zone Swamp of Sorrows
+  turnin 8423                                 -- Fallen Hero of the Horde
+  accept 8424
+
+step Shadowsworn camps
+  zone Blasted Lands
+  tip The Shadowsworn cultists hold the east of the Blasted Lands.
+  kill 6006 quest 8424.1                      -- Shadowsworn Adept
+  kill 6004 quest 8424.2                      -- Shadowsworn Cultist
+  kill 6005 quest 8424.3                      -- Shadowsworn Thug
+
+step Voodoo Feathers
+  zone Swamp of Sorrows
+  turnin 8424                                 -- Fallen Hero of the Horde
+  accept 8425
+
+step The Sunken Temple
+  tip The Sunken Temple lies under the Pool of Tears in the east of the Swamp of Sorrows. Each of the six Atal'ai trolls on the balcony drops a voodoo feather: Gasher or Zul'Lor the amber, Hukku or Mijan the blue, Zolo or Loro the green. The Sunken Temple is a dungeon and the trolls are elite: grouping up is advised.
+  collect 20606 quest 8425.1 @69.9,53.6       -- Amber Voodoo Feather
+  collect 20607 quest 8425.2 @69.9,53.6       -- Blue Voodoo Feather
+  collect 20608 quest 8425.3 @69.9,53.6       -- Green Voodoo Feather
+
+step Back to the Fallen Hero
+  turnin 8425                                 -- Fallen Hero of the Horde

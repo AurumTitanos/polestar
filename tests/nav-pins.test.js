@@ -237,6 +237,172 @@ test('a pin\'s area draws a disc of its radius in yards under the world map pins
 	assert.equal(out.cleared, 0);
 });
 
+test('a layer with minimapAreas draws its areas on the minimap too, cut at the rim; areaOnly pins draw no pin', () => {
+	const [out] = run(`
+		nav.viewRadius = 200                                             -- 70 px for 200 yd: 0.35 px a yard
+		local function areas(layer)
+			local r = {}
+			for _, t in ipairs(Pins.GetMinimapAreas(layer)) do
+				local _, _, _, x, y = t:GetPoint(1)
+				r[#r + 1] = { math.floor(x + 0.5), math.floor(y + 0.5), math.floor(t.width + 0.5), t.mask ~= nil }
+			end
+			table.sort(r, function(a, b) return a[1] > b[1] end)
+			return r
+		end
+		Pins.SetLayer("spawns", {
+			at(100, 0, { area = 60, areaOnly = true, color = { 1, 0.5, 0.5, 1 } }),   -- in view
+			at(0, 240, { area = 60, areaOnly = true }),                               -- centre past the rim, disc reaching in
+			at(0, 300, { area = 60, areaOnly = true }),                               -- out of reach
+		}, { minimapAreas = true })
+		Pins.SetLayer("quests.objectives", { at(-50, 0, { area = 60 }) })        -- no minimapAreas: the pin only
+		stub.advance(0.3)
+		local r = { areas = areas("spawns"), pins = frames("spawns"), quests = { frames("quests.objectives"), #Pins.GetMinimapAreas("quests.objectives") } }
+		local t = Pins.GetMinimapAreas("spawns")[1]
+		local _, _, _, alpha = t:GetVertexColor()
+		r.alpha = alpha
+		local mask = t.mask
+		r.mask = { mask.texture, math.floor(mask.width + 0.5) }
+		nav.place(100, 0); stub.advance(0.3)
+		r.moved = areas("spawns")
+		GetMinimapShape = function() return "SQUARE" end
+		nav.place(0, 0); stub.advance(0.3)
+		r.square = #areas("spawns")
+		r.squareMask = { mask.texture, math.floor(mask.width + 0.5) }
+		GetMinimapShape = nil
+		nav.showWorldMap(9000)
+		r.world = { #nav.pins("PolestarPinsAreaTemplate"), #nav.pins() }
+		Pins.ClearLayer("spawns")
+		stub.advance(0.3)
+		r.cleared = #Pins.GetMinimapAreas("spawns")
+		emit(r)`);
+	assert.deepEqual(out.areas, [[0, 35, 42, true], [-84, 0, 42, true]], 'discs 2 x 60 yd wide where the player sees them, one reaching in past the rim');
+	assert.equal(out.pins, 0, 'areaOnly: no pin frame');
+	assert.deepEqual(out.quests, [1, 0], 'a layer without minimapAreas keeps its areas on the world map');
+	assert.ok(out.alpha > 0 && out.alpha < 0.5, 'a faint disc');
+	assert.deepEqual(out.mask, ['Interface\\AddOns\\Polestar\\Media\\Nav\\pin-fill', 213], "masked to the round minimap: pin-fill's disc over its width");
+	assert.deepEqual(out.moved[0], [0, 0, 42, true], 'the disc follows the player');
+	assert.equal(out.square, 3, "a square minimap's corners reach further");
+	assert.deepEqual(out.squareMask, ['Interface\\Buttons\\WHITE8X8', 140]);
+	assert.deepEqual(out.world, [4, 1], 'every area on the world map; only the plain pin as a pin');
+	assert.equal(out.cleared, 0);
+});
+
+// The corners of each piece a hull is cut from (upper left, upper right,
+// lower right, lower left; local units around the rectangle's centre, y up),
+// from the rectangle's size and the pieces' vertex offsets; their areas and
+// whether every corner lies inside the outline.
+const PIECES = `
+local function area(pts)
+	local a = 0
+	for i = 1, #pts, 2 do
+		local j = i + 2 > #pts and 1 or i + 2
+		a = a + pts[i] * pts[j + 1] - pts[j] * pts[i + 1]
+	end
+	return math.abs(a) / 2
+end
+local function inside(outline, x, y)
+	local sign = 0
+	for i = 1, #outline, 2 do
+		local j = i + 2 > #outline and 1 or i + 2
+		local c = (outline[j] - outline[i]) * (y - outline[i + 1]) - (outline[j + 1] - outline[i + 1]) * (x - outline[i])
+		if math.abs(c) > 1e-6 then
+			local s = c > 0 and 1 or -1
+			if sign ~= 0 and s ~= sign then return false end
+			sign = s
+		end
+	end
+	return true
+end
+local function pieces(texs, used, w, h, outline)
+	local hw, hh = w / 2, h / 2
+	local r = { fill = 0, rim = 0, inside = true, alphas = {}, masked = true, shown = true }
+	for k = 1, used do
+		local t, o = texs[k], texs[k].vertexOffset
+		local q = { -hw + o[1], hh + o[2], hw + o[5], hh + o[6], hw + o[7], -hh + o[8], -hw + o[3], -hh + o[4] }
+		local _, _, _, a = t:GetVertexColor()
+		local key = math.floor(a * 100 + 0.5)
+		r.alphas[key] = (r.alphas[key] or 0) + 1
+		if a < 0.5 then r.fill = r.fill + area(q) else r.rim = r.rim + area(q) end
+		for i = 1, 8, 2 do
+			if not inside(outline, q[i], q[i + 1]) then
+				local near = false
+				for j = 1, #outline, 2 do near = near or (math.abs(outline[j] - q[i]) < 1e-6 and math.abs(outline[j + 1] - q[i + 1]) < 1e-6) end
+				if not near then r.inside = false end
+			end
+		end
+		if t.mask == nil then r.masked = false end
+		if not t:IsShown() then r.shown = false end
+	end
+	r.outline = area(outline)
+	return r
+end
+`;
+
+test('a hull is a region cut from pieces that tile it exactly, with a rim kept thin on screen; on the minimap walking only moves it', () => {
+	const [out] = run(`${PIECES}
+		WorldMapFrame.Child:SetSize(1000, 1000)                          -- map 9000: 0.5 canvas units a yard
+		local canvasScale = 1
+		function WorldMapFrame.GetCanvasScale() return canvasScale end
+		nav.viewRadius = 200                                             -- 0.35 px a yard
+		local offsets = 0
+		local orig = stub.Methods.SetVertexOffset
+		stub.Methods.SetVertexOffset = function(...) offsets = offsets + 1; return orig(...) end
+		-- A diamond 200 yd north to south and 300 yd east to west around the origin.
+		Pins.SetLayer("spawns", {
+			{ c = 0, wx = 0, wy = 0, hull = { 100, 0, 0, 150, -100, 0, 0, -150 }, areaOnly = true, color = { 1, 0.5, 0.5, 0.8 } },
+		}, { minimapAreas = true })
+		nav.showWorldMap(9000)
+		local r = {}
+		local hulls = nav.pins("PolestarPinsHullTemplate")
+		local pin = hulls[1]
+		r.world = { #hulls, #nav.pins(), pin.pinFrameLevelType, pin:IsMouseEnabled() and true or false,
+			pin.normalizedX, pin.normalizedY, pin.width, pin.height, pin.used }
+		r.worldPieces = pieces(pin.texs, pin.used, pin.width, pin.height, pin.outline)
+		canvasScale = 2                                                  -- zoomed in: the rim halves in canvas units
+		pin:OnCanvasScaleChanged()
+		r.zoomed = pieces(pin.texs, pin.used, pin.width, pin.height, pin.outline)
+		stub.advance(0.3)
+		local mm = Pins.GetMinimapHulls("spawns")
+		local rec = mm[1]
+		r.minimap = { #mm, rec.used, rec.texs[1].width, rec.texs[1].height, rec.x, rec.y }
+		r.minimapPieces = pieces(rec.texs, rec.used, rec.texs[1].width, rec.texs[1].height, rec.outline)
+		offsets = 0
+		nav.place(50, 0); stub.advance(0.3)                              -- walk 50 yd north
+		r.walked = { offsets, rec.x, rec.y, #Pins.GetMinimapHulls("spawns") }
+		nav.viewRadius = 100; stub.advance(0.3)                          -- zoom in: laid out again
+		r.zoomedMinimap = { offsets > 0, rec.texs[1].width, rec.texs[1].height }
+		r.stats = Pins.AreaStats()
+		Pins.ClearLayer("spawns")
+		stub.advance(0.3)
+		r.cleared = { #nav.pins("PolestarPinsHullTemplate"), #Pins.GetMinimapHulls("spawns"), rec.texs[1]:IsShown() }
+		emit(r)`);
+	const [count, plain, level, mouse, x, y, w, h, used] = out.world;
+	assert.deepEqual([count, plain, level, mouse], [1, 0, 'PIN_FRAME_LEVEL_QUEST_BLOB', false], 'one region under every pin, no pin, no mouse');
+	assert.deepEqual([x, y], [0.5, 0.5], 'centred on its centre');
+	assert.deepEqual([Math.round(w), Math.round(h)], [150, 100], '300 x 200 yd at 0.5 canvas units a yard');
+	assert.equal(used, 5, 'a 4-gon: one fill quad and a rim quad per side');
+	const near = (a, b, eps, msg) => assert.ok(Math.abs(a - b) <= eps, `${msg}: ${a} vs ${b}`);
+	const wp = out.worldPieces;
+	near(wp.outline, 7500, 1e-6, 'the outline is the diamond');
+	near(wp.fill + wp.rim, wp.outline, 1e-6, 'fill and rim tile the outline: no gap, no overlap');
+	assert.equal(wp.inside, true, 'every piece lies inside the outline');
+	assert.deepEqual(wp.alphas, { 16: 1, 56: 4 }, 'fill 0.2, rim 0.7, times the colour alpha 0.8');
+	const perimeter = 4 * Math.hypot(75, 50);
+	near(wp.rim / perimeter, 1.5, 0.05, 'the rim is 1.5 units wide');
+	near(out.zoomed.rim / perimeter, 0.75, 0.03, 'zoomed in twice: 0.75 canvas units, still 1.5 on screen');
+	near(out.zoomed.fill + out.zoomed.rim, out.zoomed.outline, 1e-6, 'still tiled exactly');
+	assert.deepEqual(out.minimap.map((v) => Math.round(v * 100) / 100), [1, 5, 105, 70, 0, 0], '300 x 200 yd at 0.35 px a yard, around the player');
+	const mp = out.minimapPieces;
+	near(mp.fill + mp.rim, mp.outline, 1e-6, 'the minimap pieces tile the outline too');
+	assert.equal(mp.inside, true);
+	assert.equal(mp.masked, true, 'every piece is cut at the rim');
+	assert.equal(mp.shown, true);
+	assert.deepEqual(out.walked.map((v) => Math.round(v * 100) / 100), [0, 0, -17.5, 1], 'walking moves the anchor only: no vertex offset set');
+	assert.deepEqual(out.zoomedMinimap.map((v) => (typeof v === 'number' ? Math.round(v) : v)), [true, 210, 140]);
+	assert.deepEqual(out.stats, { world: { hulls: 1, pieces: 5, discs: 0 }, minimap: { hulls: 1, pieces: 5, discs: 0 } });
+	assert.deepEqual(out.cleared, [0, 0, false]);
+});
+
 test('icon pins may sit on a dark disc, carry a ring, and take their own minimap size', () => {
 	const [out] = run(`
 		nav.viewRadius = 200

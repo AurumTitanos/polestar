@@ -151,7 +151,7 @@ test('the reference names every header key, step line, verb, modifier and condit
 
 // The parser's modifier names as the reference writes them.
 const LABEL = { at: '@x,y', count: 'xN', text: '"text"', frame: 'era', until: 'until', criteria: 'criteria' };
-const COMMON = ['optional', 'only', 'text'];
+const COMMON = ['optional', 'only', 'text', 'group'];
 const PLACE = ['at', 'map', 'r', 'frame'];
 
 test("the Goals table's last column lists exactly the modifiers each verb takes", () => {
@@ -164,15 +164,16 @@ test("the Goals table's last column lists exactly the modifiers each verb takes"
 		// Beyond the common ones: the verb's own modifiers, as written.
 		const own = allowed.filter((m) => !COMMON.includes(m) && !PLACE.includes(m)).map(label);
 		const placeNamed = named.filter((n) => ['@x,y', 'map', 'r', 'era', 'live'].includes(n));
-		const ownNamed = named.filter((n) => !placeNamed.includes(n) && n !== '"text"');
+		const ownNamed = named.filter((n) => !placeNamed.includes(n) && n !== '"text"' && n !== 'group');
 		assert.deepEqual(ownNamed.sort(), own.sort(), `${verb}: ${col}`);
 		const place = allowed.filter((m) => PLACE.includes(m));
 		if (/no place modifiers/.test(col)) assert.deepEqual(place, [], verb);
 		else if (/ only$/.test(col)) assert.deepEqual(placeNamed.filter((n) => n !== 'live').map((n) => ({ era: 'frame' })[n] || n).sort(), place.sort(), verb);
 		else assert.deepEqual(place, PLACE, `${verb} takes every place modifier`);
+		// The common ones, but those the column says the verb takes not ("no `group`").
+		const without = COMMON.filter((m) => col.includes(`no \`${label(m)}\``));
 		const common = COMMON.filter((m) => allowed.includes(m));
-		if (/no `"text"`/.test(col)) assert.deepEqual(common, ['optional', 'only'], verb);
-		else assert.deepEqual(common, COMMON, `${verb} takes optional, only and "text"`);
+		assert.deepEqual(common, COMMON.filter((m) => !without.includes(m)), `${verb} takes ${COMMON.filter((m) => !without.includes(m)).join(', ')}`);
 	}
 });
 

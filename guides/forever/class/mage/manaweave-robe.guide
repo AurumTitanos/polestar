@@ -1,0 +1,76 @@
+guide forever/class/mage/manaweave-robe
+title Manaweave Robe
+category Class
+class Mage
+folder Mage
+faction Alliance
+levels 15-17
+zone Stormwind City
+keywords Jennea Cannon, Investigate the Blue Recluse, Gathering Materials, Wynne Larson, Rift Spawn, Charged Rift Gem, Silver Stream Mine, Loch Modan, Manaweave Robe, Mage, class robe
+reward item 7509
+why A robe at 15 for Alliance mages, from Stormwind and Loch Modan.
+
+# The Alliance mage robe at 15: Report to Jennea (1919), Investigate the Blue
+# Recluse (1920), Gathering Materials (1921) and Manaweave Robe (1941).
+# Sources: quests.json, npcs.json, objects.json and items.json for the chain,
+# the coffers and the Rift Spawn in the Blue Recluse, and the Miners' League
+# Crates in Loch Modan; Wowhead Forever's Mage class page
+# (data/local/quest-audit/wowhead-class-quests.json) and quest pages
+# (https://www.wowhead.com/forever/quest=1920 and 1941, checked 2026-10-14) for
+# the races and the reward (Manaweave Robe); the quest texts for the Blue
+# Recluse and the Silver Stream Mine.
+# Wowhead Forever lists Human, Gnome and Skyborne mages for 1919-1921; our data
+# has Skyborne only on 1920.
+# Investigate the Blue Recluse needs Report to Jennea first (quests.json):
+# Zaldimar Wefhellt in Goldshire, Magis Sparkmantle in Kharanos and Dink in
+# Ironforge give it.
+# Not in a leveling guide: the Charged Rift Gems are only in Loch Modan, which
+# no Alliance route visits at this level.
+
+step Zaldimar Wefhellt (Goldshire)
+  only Human,Skyborne
+  zone Elwynn Forest
+  tip Zaldimar Wefhellt is the Goldshire mage trainer.
+  level 15
+  accept 1919 npc 328                         -- Zaldimar Wefhellt
+
+step Dink (Ironforge)
+  only Gnome
+  zone Ironforge
+  tip Dink teaches mages in Ironforge's Mystic Ward. Take the Deeprun Tram from Tinker Town to Stormwind afterwards.
+  level 15
+  accept 1919 npc 7312                        -- Dink
+
+step Jennea Cannon
+  zone Stormwind City
+  tip Jennea Cannon stands in the Wizard's Sanctum, the tower of the Mage Quarter. The Chest of Containment Coffers and the Cantation of Manifestation lie behind her.
+  turnin 1919                                 -- Jennea Cannon
+  accept 1920
+  collect 7247 quest 1920.2                   -- Chest of Containment Coffers
+  collect 7308 quest 1920.3                   -- Cantation of Manifestation
+
+step The Blue Recluse
+  tip The Blue Recluse is the tavern in the Mage Quarter. Use the Cantation of Manifestation inside to make the Rift Spawn visible, subdue one with your spells, then use the Chest of Containment Coffers to throw down a coffer and capture it.
+  use 7308 optional @51.3,93.3 live           -- Cantation of Manifestation
+  kill 6492 optional                          -- Rift Spawn
+  collect 7292 quest 1920.1 @51.3,93.3 live   -- Filled Containment Coffer
+
+step Back to Jennea Cannon
+  turnin 1920                                 -- Jennea Cannon
+  accept 1921
+
+step Linen Cloth
+  tip Humanoids drop Linen Cloth; the Auction House in the Trade District sells it.
+  collect 2589 quest 1921.1                   -- Linen Cloth
+
+step The Silver Stream Mine
+  zone Loch Modan
+  tip Take the Deeprun Tram to Ironforge, then the road east through the South Gate tunnel into Loch Modan. The dwarven miners' league left the crates in the Silver Stream Mine at the north end of the loch; Tunnel Rat troggs hold the mine.
+  collect 7249 quest 1921.2                   -- Charged Rift Gem: Miners' League Crates
+
+step Wynne Larson
+  zone Stormwind City
+  tip Back to Stormwind by the tram. Wynne Larson works at Larson Clothiers in the Mage Quarter.
+  turnin 1921                                 -- Wynne Larson
+  accept 1941
+  turnin 1941                                 -- Wynne Larson: Manaweave Robe

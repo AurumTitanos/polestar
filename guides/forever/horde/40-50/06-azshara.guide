@@ -63,8 +63,11 @@ next forever/horde/50-60/01-un-goro-crater
 # Sticky (4504), Bungle in the Jungle (4496), The Stone Circle (3444) and
 # Delivery to Andron Gant (3542, the next guide's Undercity stop).
 #
-# Class quests: none here; the level-52 class errands to Azshara are taken
-# on the later Azshara visit.
+# Class quests: none here. The level-52 Hunter chain to Ogtinc in Azshara
+# (The Hunter's Charm, 8151-8232) is a Class guide
+# (forever/class/hunter/the-hunters-charm): its last part needs Morphaz in
+# the Sunken Temple, and Forever took The Green Drake's (8232) reward
+# choices away, so it pays experience only.
 
 # ---------------------------------------------------------------- Undercity
 

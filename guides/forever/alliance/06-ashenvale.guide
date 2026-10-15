@@ -48,6 +48,17 @@ next forever/alliance/07-thousand-needles
 #   Family steps (98190, 98191) follow Karl Boran's chain through Menethil
 #   Keep, Stormwind Keep and the Cathedral; The Shamed Lieutenant (98219) is
 #   carried to Southshore.
+# - Refresh (2026): Making Do (97926, Forever: Baros Alexston's reply from
+#   the Stormwind stop in 04-redridge-mountains) goes to Thundris Windweaver
+#   as the boat lands in Auberdine. Alchemical Hazards (98282, Forever, from
+#   the new consensus's Wetlands visit): Caitlin Grassman in Menethil wants a
+#   gland from the stalkers of Thelgen Rock, beside the raptor quests. The
+#   Powers Below (968), only with the book from Darkshore, is handed in at
+#   the Ironforge stop.
+# - The new consensus runs Ashenvale right after Darkshore (21-23) and the
+#   Wetlands before Redridge and Duskwood; the guides keep their zone order
+#   and the Forever Ashenvale quests of its 29-30 visit (98027, 98418,
+#   95737, 86757) are in 30-40/03-ashenvale.
 #
 # Class quests: on arrival in Auberdine, Night Elf Druids finish Trial of the
 # Sea Lion and Aquatic Form (272, 5061: Moonglade, then Darnassus) and Night
@@ -55,6 +66,11 @@ next forever/alliance/07-thousand-needles
 # Rut'theran flight; in Ironforge, Dwarf and Gnome Priests hand in Chastise
 # (5645) and Contingency Plan (94819). Class training in Ironforge, Druids
 # in Stormwind (Ironforge has no druid trainer).
+# Paladins: A Strange Artifact (78088, level 30, from 22) starts at the
+# Strange Orb atop the Tower of Althalaxx in Darkshore and runs through
+# Delgren at Maestra's Post, Stormwind, Redridge and Demon Fall Canyon to the
+# Cloak of the Divine Storm: the Class guide
+# forever/class/paladin/cloak-of-the-divine-storm.
 #
 # Left out (the export accepts them but never turns them in): Journey to
 # Stonetalon Peak (1056), Pridewings of Stonetalon (1134), Mage Summoner
@@ -67,8 +83,8 @@ next forever/alliance/07-thousand-needles
 # Retreat and back for one tiny quest; no grind needed to cover it.
 # Checked and skipped: The Tower of Althalaxx (981) needs 1143 (Athrikus
 # Narassin, after 1167), which the route never does. The Absent Minded
-# Prospector (943) needs 942 from Uldaman's Greywhisker, and its Stone of Relu
-# is a 1.5% raptor drop.
+# Prospector (943) needs 741 and 942 through Chief Archaeologist Greywhisker
+# in Darnassus, and its Stone of Relu is a 1.5% raptor drop.
 # Dropped: The Zoram Strand (1008): 20 heads from naga 6 levels below you,
 # at 80% XP. Remember That I Love You (95161): the Matron offers it only to
 # those who bring the Blood-Stained Letter out of the Ruins of Lordaeron
@@ -102,7 +118,8 @@ step Elune's Grace
 
 step Boat to Auberdine
   zone Darkshore
-  tip From Stormwind Harbor take the boat to Auberdine, then ride south along the road through Darkshore.
+  tip From Stormwind Harbor take the boat to Auberdine; Thundris Windweaver stands at the north end of the village. Then ride south along the road through Darkshore.
+  turnin 97926                                -- Thundris Windweaver: Alexston's reply
   goto 44.4,76.4 "Grove of the Ancients"
 
 step Kerlonian Evershade
@@ -283,6 +300,7 @@ step Menethil Harbor
   accept 472                              -- Harlo Barnaby, by the north gate
   accept 484                              -- James Halloran, by the north gate
   accept 305                              -- Tarrel Rockweaver, by the north gate
+  accept 98282                            -- Caitlin Grassman
 
 step Spoils of War
   tip Timber and iron piles lie around the keep and along the harbor's walls.
@@ -351,6 +369,10 @@ step Raptor valley
 step Ormer Ironbraid
   turnin 295
 
+step Thelgen Rock
+  tip Cave Stalkers and Leech Stalkers fill Thelgen Rock, the cave south-east of the excavation site.
+  collect 280319 quest 98282              -- Unruptured Stalker Gland
+
 step Black Oozes
   tip Black Oozes creep through the marsh north of the Green Belt road, west of Einar's camp. Any ooze may hold Sida's bag.
   collect 3349 quest 470                  -- Sida's Bag
@@ -401,6 +423,7 @@ step Hearth to Menethil
   turnin 484
   accept 471                              -- For the giant crocolisks of the north coast, on your next visit
   turnin 470                              -- Sida
+  turnin 98282                            -- Caitlin Grassman
   vendor nearest
 
 # ---------------------------------------------------------------- Ironforge
@@ -410,6 +433,7 @@ step Ironforge
   tip Ride east along the Wetlands road, south through Dun Algaz into Loch Modan and west through the tunnel into Dun Morogh to Ironforge.
   getfp "Ironforge" npc 1573              -- Gryth Thurden, in the Great Forge
   turnin 1072                             -- Lomac Gearstrip, Tinker Town
+  turnin 968 optional                     -- Only with Book: The Powers Below from Darkshore: Gerrig Bonegrip, the Forlorn Cavern
   accept 1179                             -- Pilot Longbeard
   train class only Warrior,Paladin,Hunter,Rogue,Priest,Shaman,Mage,Warlock
   vendor nearest

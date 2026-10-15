@@ -112,13 +112,25 @@ local function missingPre(goal)
 end
 
 -- Quests a guide or any guide after it (via `next` and every route choice)
--- still needs: targets of non-accept goals (turn-ins, objectives) and
--- prerequisites (`pre`) of its accepts. Cached per guide.
+-- still needs at a character level: the prerequisites (`pre`, `preAll`) of
+-- every accept that is not grey at that level, and of every accept a needed
+-- quest's own accept is, down the chain (a grey Buzzbox 827 opens the Buzzbox
+-- quests that still give full experience). A quest's own turn-in and
+-- objectives are not a need: they go with its accept. Cached per guide and
+-- level.
 local chainNeedsCache = setmetatable({}, { __mode = "k" })
-local function chainNeeds(g)
-	local set = chainNeedsCache[g]
+local function chainNeeds(g, level)
+	local byLevel = chainNeedsCache[g]
+	if not byLevel then
+		byLevel = {}
+		chainNeedsCache[g] = byLevel
+	end
+	local set = byLevel[level]
 	if set then return set end
-	set = {}
+	local C = Compat()
+	-- Every accept down the chain: quest -> its prerequisite lists; open: the
+	-- quests whose accepts are not grey, needed as they are.
+	local pres, open = {}, {}
 	local seenIds, queue, head = {}, { g }, 1
 	while queue[head] and head <= 200 do
 		local cur = queue[head]
@@ -127,13 +139,16 @@ local function chainNeeds(g)
 			seenIds[cur.id] = true
 			for _, step in ipairs(cur.steps) do
 				for _, goal in ipairs(step.goals) do
-					if goal.quest and goal.t ~= "accept" then set[goal.quest] = true end
-					if goal.t == "accept" then
-						for _, key in ipairs({ "pre", "preAll" }) do
-							if type(goal[key]) == "table" then
-								for _, q in ipairs(goal[key]) do set[q] = true end
-							end
+					if goal.t == "accept" and goal.quest then
+						local list = pres[goal.quest]
+						if not list then
+							list = {}
+							pres[goal.quest] = list
 						end
+						for _, key in ipairs({ "pre", "preAll" }) do
+							if type(goal[key]) == "table" then list[#list + 1] = goal[key] end
+						end
+						if not (goal.qlvl and C.IsQuestTrivial(tonumber(goal.qlvl), level)) then open[#open + 1] = goal.quest end
 					end
 				end
 			end
@@ -143,20 +158,36 @@ local function chainNeeds(g)
 			end
 		end
 	end
-	chainNeedsCache[g] = set
+	set = {}
+	local walked = {}
+	while #open > 0 do
+		local q = table.remove(open)
+		if not walked[q] then
+			walked[q] = true
+			for _, list in ipairs(pres[q] or {}) do
+				for _, p in ipairs(list) do
+					set[p] = true
+					open[#open + 1] = p
+				end
+			end
+		end
+	end
+	byLevel[level] = set
 	return set
 end
 
 -- behavior.skipGrey: an accept for a quest already grey for the character,
--- not taken yet and not needed later in the guide or its chain, no longer
--- applies (status "na", never blocks, never auto-accepted).
+-- not taken yet and not a prerequisite of a quest later in the guide or its
+-- chain, no longer applies (status "na", never blocks, never auto-accepted);
+-- its turn-in and objectives go with it (orphaned).
 local function greySkipped(goal)
 	if goal.t ~= "accept" or not goal.qlvl or not ns.Get("behavior.skipGrey") then return false end
 	local C = Compat()
-	if not C.IsQuestTrivial(tonumber(goal.qlvl), player.level or 1) then return false end
+	local level = player.level or 1
+	if not C.IsQuestTrivial(tonumber(goal.qlvl), level) then return false end
 	local q = goal.quest
 	if C.IsOnQuest(q) or questDone(q) then return false end
-	return not chainNeeds(guide)[q]
+	return not chainNeeds(guide, level)[q]
 end
 
 -- Per guide: each goal's step index, and each quest's accept goals.
@@ -185,9 +216,9 @@ end
 
 -- A turn-in, complete or objective goal for a quest the character neither
 -- has nor has done, and that this guide does not (for this character) accept
--- at or before that step, in a step the player has not skipped: it was picked
--- up on another route, or skipped, so it cannot be done here and no longer
--- applies.
+-- at or before that step, in a step the player has not skipped, with an
+-- accept that is not left out as grey: it was picked up on another route, or
+-- skipped, so it cannot be done here and no longer applies.
 local function orphaned(goal)
 	local q = goal.quest
 	if not q or goal.t == "accept" or not guide then return false end
@@ -198,15 +229,31 @@ local function orphaned(goal)
 	if not s then return false end
 	local skipped = ns.CharState().skipped[guide.id]
 	for _, a in ipairs(l.accepts[q] or NONE) do
-		if a.s <= s and not (skipped and skipped[a.s]) and Guides.Matches(a.step.only, player) and Guides.Matches(a.goal.only, player) then
+		if a.s <= s and not (skipped and skipped[a.s]) and Guides.Matches(a.step.only, player) and Guides.Matches(a.goal.only, player) and not greySkipped(a.goal) then
 			return false
 		end
 	end
 	return true
 end
 
+-- A goal of a quest only characters with a profession can take (`profLine`,
+-- `profName`, `profRank`: the quest's required skill) is not this
+-- character's without the profession or below that rank, like another
+-- class's goals; learning it brings them back (SKILL_LINES_CHANGED). A quest
+-- in the log or done keeps its goals, and a client that cannot read skills
+-- shows them. (Inline: the main chunk is at Lua's 200 locals.)
 local function goalApplies(goal)
-	return Guides.Matches(goal.only, player) and not greySkipped(goal) and not orphaned(goal)
+	if not Guides.Matches(goal.only, player) then return false end
+	if goal.profLine or goal.profName then
+		local C = Compat()
+		local q = goal.quest
+		if C.GetSkillRank and C.Supports("skill") and not (q and (C.IsOnQuest(q) or questDone(q))) then
+			local rank = goal.profLine and C.GetSkillRank(goal.profLine)
+			if not rank and goal.profName then rank = C.GetSkillRank(goal.profName) end
+			if (rank or 0) < (goal.profRank or 1) then return false end
+		end
+	end
+	return not greySkipped(goal) and not orphaned(goal)
 end
 
 -- Quests found unavailable at their giver this session (questID ->
@@ -330,6 +377,77 @@ function Own.key(s, g)
 		row[g] = k
 	end
 	return k
+end
+
+-- A Class guide this character cannot start yet: nothing of it played (no
+-- step skipped, no goal ticked, none of its quests taken or done) and its
+-- opening, the first step for this character with an accept or a `level`
+-- goal, waits on them: a `level` goal above their level, or accepts none of
+-- which they can take yet (level first, then a missing prerequisite). Such a
+-- guide shows a notice instead of its steps, points nowhere and marks
+-- nothing unavailable, and starts by itself once the gate opens (level-up,
+-- turn-in). { step, level } or { step, pre, preTitles }, with the opening's
+-- first accept as `giver`; else nil. Cached per evaluation.
+Own.gateCache = setmetatable({}, { __mode = "k" })
+function Own.startGate(g)
+	if not (g and g.category == "Class" and player) then return nil end
+	local level = player.level or 1
+	local c = Own.gateCache[g]
+	if c and c.gen == generation and c.level == level then return c.gate or nil end
+	local gate = Own.findGate(g, level)
+	Own.gateCache[g] = { gen = generation, level = level, gate = gate or false }
+	return gate
+end
+
+function Own.findGate(g, level)
+	local s = ns.CharState()
+	local sk, ticks = s.skipped[g.id], s.manual[g.id]
+	if (type(sk) == "table" and next(sk)) or (type(ticks) == "table" and next(ticks)) then return nil end
+	local C = Compat()
+	for _, step in ipairs(g.steps) do
+		for _, goal in ipairs(step.goals) do
+			local q = goal.quest
+			if q and (C.IsOnQuest(q) or questDone(q)) then return nil end
+		end
+	end
+	for i, step in ipairs(g.steps) do
+		if Guides.Matches(step.only, player) then
+			local opening, need, doable, acceptLevel, pre, giver = false, 0, false, nil, nil, nil
+			for _, goal in ipairs(step.goals) do
+				if Guides.Matches(goal.only, player) then
+					if goal.t == "level" then
+						opening = true
+						if (goal.level or 0) > need then need = goal.level end
+					elseif goal.t == "accept" then
+						opening = true
+						giver = giver or goal
+						local lvl = tonumber(goal.minLevel)
+						if lvl and level < lvl then
+							if not acceptLevel or lvl < acceptLevel then acceptLevel = lvl end
+						else
+							local p = missingPre(goal)
+							if p then
+								pre = pre or { quest = p, titles = goal.preTitles }
+							else
+								local closed = false
+								for _, by in ipairs(type(goal.closedBy) == "table" and goal.closedBy or NONE) do
+									if C.IsOnQuest(by) or questDone(by) then closed = true end
+								end
+								if not closed then doable = true end
+							end
+						end
+					end
+				end
+			end
+			if opening then
+				if not doable and acceptLevel and acceptLevel > need then need = acceptLevel end
+				if need > level then return { step = i, level = need, giver = giver } end
+				if not doable and pre then return { step = i, pre = pre.quest, preTitles = pre.titles, giver = giver } end
+				return nil
+			end
+		end
+	end
+	return nil
 end
 
 local MANUAL = { talk = true, hearth = true, getfp = true, fly = true, train = true, vendor = true }
@@ -661,11 +779,11 @@ local function checked(s, g)
 	return m ~= nil and m[Own.key(s, g)] and true or false
 end
 
-local STANDINGS = { "Hated", "Hostile", "Unfriendly", "Neutral", "Friendly", "Honored", "Revered", "Exalted" }
+local STANDINGS = { L["Hated"], L["Hostile"], L["Unfriendly"], L["Neutral"], L["Friendly"], L["Honored"], L["Revered"], L["Exalted"] }
 
 -- Localized by the client's FACTION_STANDING_LABELn when present.
 local function standingName(n)
-	return _G["FACTION_STANDING_LABEL" .. tostring(n)] or (STANDINGS[n] and L[STANDINGS[n]]) or tostring(n)
+	return _G["FACTION_STANDING_LABEL" .. tostring(n)] or STANDINGS[n] or tostring(n)
 end
 
 -- "first aid" -> "First Aid", for goals that only carry a skill line ID.
@@ -1230,27 +1348,34 @@ local function unavailableText(u)
 	return L["Not offered by %s"]:format(a.npcName or a.objName or L["the quest giver"])
 end
 
+-- A translated pattern (L["from %s"]) filled with value; nil without one.
 local function fmt(pattern, value)
 	if not value then return nil end
-	return L[pattern]:format(value)
+	return pattern:format(value)
 end
 
--- verb, subject, subjectKind, detail
+-- verb, subject, subjectKind, detail. An accept above the character's level
+-- says from which level (an attunement's quests stay in its guide until then).
 local function describe(goal)
 	local t = goal.t
 	local C = Compat()
 	if t == "accept" then
-		return L["Accept"], questTitle(goal), "quest", fmt("from %s", goal.npcName or goal.objName or goal.itemName)
+		local detail = fmt(L["from %s"], goal.npcName or goal.objName or goal.itemName)
+		local lvl = tonumber(goal.minLevel)
+		if lvl and player and (player.level or 1) < lvl then
+			detail = detail and L["%s, from level %d"]:format(detail, lvl) or L["From level %d"]:format(lvl)
+		end
+		return L["Accept"], questTitle(goal), "quest", detail
 	elseif t == "turnin" then
-		return L["Turn in"], questTitle(goal), "quest", fmt("at %s", goal.npcName or goal.objName)
+		return L["Turn in"], questTitle(goal), "quest", fmt(L["at %s"], goal.npcName or goal.objName)
 	elseif t == "complete" then
 		return L["Complete"], questTitle(goal), "quest", nil
 	elseif t == "kill" then
-		return L["Kill"], goal.target, "npc", goal.quest and fmt("for %s", questTitle(goal)) or nil
+		return L["Kill"], goal.target, "npc", goal.quest and fmt(L["for %s"], questTitle(goal)) or nil
 	elseif t == "collect" then
-		if goal.quest then return L["Collect"], goal.itemName, "item", fmt("for %s", questTitle(goal)) end
+		if goal.quest then return L["Collect"], goal.itemName, "item", fmt(L["for %s"], questTitle(goal)) end
 		local _, npcName = npcOf(goal)
-		return L["Collect"], goal.itemName, "item", fmt("from %s", npcName)
+		return L["Collect"], goal.itemName, "item", fmt(L["from %s"], npcName)
 	elseif t == "goto" then
 		local mapName = C.GetMapName(goal.map)
 		if goal.text then return L["Go to"], goal.text, "place", mapName end
@@ -1259,30 +1384,30 @@ local function describe(goal)
 	elseif t == "talk" then
 		return L["Talk to"], goal.npcName, "npc", nil
 	elseif t == "interact" then
-		return L["Click"], goal.objName, "object", goal.quest and fmt("for %s", questTitle(goal)) or nil
+		return L["Click"], goal.objName, "object", goal.quest and fmt(L["for %s"], questTitle(goal)) or nil
 	elseif t == "use" then
-		return L["Use"], goal.itemName, "item", goal.quest and fmt("for %s", questTitle(goal)) or nil
+		return L["Use"], goal.itemName, "item", goal.quest and fmt(L["for %s"], questTitle(goal)) or nil
 	elseif t == "sethome" then
 		local _, npcName = npcOf(goal)
-		if goal.location then return L["Set your home to"], goal.location, "place", fmt("at %s", npcName) end
+		if goal.location then return L["Set your home to"], goal.location, "place", fmt(L["at %s"], npcName) end
 		return L["Set your home at"], npcName or L["the nearest inn"], npcName and "npc" or "text", nil
 	elseif t == "hearth" then
 		return L["Hearth to"], goal.location, "place", nil
 	elseif t == "getfp" then
-		return L["Get the flight path at"], goal.location, "place", fmt("from %s", goal.npcName)
+		return L["Get the flight path at"], goal.location, "place", fmt(L["from %s"], goal.npcName)
 	elseif t == "fly" then
 		return L["Fly to"], goal.location, "place", nil
 	elseif t == "train" then
 		local _, npcName = npcOf(goal)
 		if goal.skillLine and rankCap(goal) then
 			local name = skillName(goal) or goal.skill
-			return L["Train"], name, "skill", fmt("at %s", npcName)
+			return L["Train"], name, "skill", fmt(L["at %s"], npcName)
 		end
 		if npcName then return L["Train at"], npcName, "npc", nil end
 		return L["Train at"], L["your trainer"], "text", nil
 	elseif t == "buy" then
 		local _, npcName = npcOf(goal)
-		return L["Buy"], goal.itemName, "item", fmt("from %s", npcName)
+		return L["Buy"], goal.itemName, "item", fmt(L["from %s"], npcName)
 	elseif t == "vendor" then
 		local _, npcName = npcOf(goal)
 		if npcName then return L["Sell and repair at"], npcName, "npc", nil end
@@ -1290,15 +1415,15 @@ local function describe(goal)
 	elseif t == "level" then
 		return L["Reach level"], tostring(goal.level), "level", nil
 	elseif t == "skill" then
-		return L["Raise"], goal.skill, "skill", fmt("to %d", goal.level)
+		return L["Raise"], goal.skill, "skill", fmt(L["to %d"], goal.level)
 	elseif t == "learn" then
 		local _, npcName = npcOf(goal)
-		return L["Learn"], goal.spellName, "spell", fmt("from %s", npcName)
+		return L["Learn"], goal.spellName, "spell", fmt(L["from %s"], npcName)
 	elseif t == "craft" then
 		local detail
 		if goal.untilSkill then
 			local name = skillName(goal)
-			detail = name and L["until %s %d"]:format(name, goal.untilSkill) or fmt("until skill %d", goal.untilSkill)
+			detail = name and L["until %s %d"]:format(name, goal.untilSkill) or fmt(L["until skill %d"], goal.untilSkill)
 		end
 		return L["Craft"], goal.spellName, "spell", detail
 	elseif t == "rep" then
@@ -1331,15 +1456,39 @@ end
 local TEXT_IS_PLACE = { ["goto"] = true, explore = true }
 
 -- Plain text, independent of the goal's state: "Kill Kobold Vermin" (with a
--- progress bar), "Kill 5 Young Wolf" (manual, no tracking).
+-- progress bar), "Kill 5 Young Wolf" (manual, no tracking). Second: a
+-- collect's compiled source (`from`, `fromAlso`, `fromKind`, `fromRank`,
+-- `fromFaction`; an NPC of a faction that is not the character's own is one
+-- to kill), `inText` when the text names it.
 local function goalText(goal, verb, subject, detail)
-	if goal.text and not TEXT_IS_PLACE[goal.t] then return goal.text end
-	if verb == "" then return subject end
-	if goal.t == "skill" then return verb .. " " .. tostring(subject) .. " " .. detail end
-	if goal.count and goal.count > 1 and not tracksProgress(goal) then
-		return verb .. " " .. goal.count .. " " .. tostring(subject)
+	local src = goal.from and {
+		name = goal.from, also = goal.fromAlso, kind = goal.fromKind or "npc", rank = goal.fromRank,
+		enemy = (goal.fromKind or "npc") == "npc" and not (goal.fromFaction == "AH"
+			or (goal.fromFaction == "A" and player and player.faction == "Alliance")
+			or (goal.fromFaction == "H" and player and player.faction == "Horde")),
+	} or nil
+	if goal.text and not TEXT_IS_PLACE[goal.t] then return goal.text, src end
+	if verb == "" then return subject, src end
+	if goal.t == "skill" then return verb .. " " .. tostring(subject) .. " " .. detail, src end
+	local counted = goal.count and goal.count > 1 and not tracksProgress(goal)
+	-- "Kill Grell or Grellkin for Fel Moss", "Collect Oats from Sack of Oats":
+	-- a collect whose source is known says where the item comes from (the
+	-- game's objective only names the item); not an object named as the item
+	-- (the item lying there).
+	if goal.t == "collect" and subject and src and src.name ~= goal.itemName then
+		local item = counted and (goal.count .. " " .. subject) or subject
+		local who = src.name
+		local rank = src.rank and ({ L["elite"], L["rare elite"], L["boss"], L["rare"] })[src.rank]
+		if rank then who = who .. " (" .. rank .. ")" end
+		if src.also then who = L["%s or %s"]:format(who, src.also) end
+		src.inText = true
+		if src.enemy then return L["Kill %s for %s"]:format(who, item), src end
+		return L["Collect %s from %s"]:format(item, who), src
 	end
-	return verb .. " " .. tostring(subject)
+	if counted then
+		return verb .. " " .. goal.count .. " " .. tostring(subject), src
+	end
+	return verb .. " " .. tostring(subject), src
 end
 
 local function goalView(s, g, goal, stepStatus, group)
@@ -1359,12 +1508,13 @@ local function goalView(s, g, goal, stepStatus, group)
 		alternatives = n > 0 and n - 1 or 0
 	end
 	local unavail = status == "skipped" and unavailableFor(goal) or nil
+	local text, src = goalText(goal, verb, subject, detail)
 	return {
 		index = g,
 		group = group,
 		t = goal.t,
 		status = status,
-		text = goalText(goal, verb, subject, detail),
+		text = text,
 		verb = verb,
 		subject = subject,
 		subjectKind = kind,
@@ -1391,14 +1541,12 @@ local function goalView(s, g, goal, stepStatus, group)
 		standing = goal.standing, standingName = goal.standing and standingName(goal.standing) or nil,
 		achievement = goal.achievement, criteria = goal.criteria,
 		rewards = goal.rewards,
-		-- A collect's dominant source (compiled `from`): an NPC of a faction
-		-- that is not the character's own is one to kill.
-		source = goal.from and {
-			name = goal.from, kind = goal.fromKind or "npc", rank = goal.fromRank,
-			enemy = (goal.fromKind or "npc") == "npc" and not (goal.fromFaction == "AH"
-				or (goal.fromFaction == "A" and player and player.faction == "Alliance")
-				or (goal.fromFaction == "H" and player and player.faction == "Horde")),
-		} or nil,
+		-- Group content (compiled `group`: elite, dungeon, raid or an author's
+		-- group size); `group` above is the goal's field group.
+		party = type(goal.group) == "table" and type(goal.group.kind) == "string" and goal.group or nil,
+		-- A collect's source (compiled `from`); `inText`: the goal's text
+		-- already names it.
+		source = src,
 	}
 end
 
@@ -1439,7 +1587,7 @@ local function waypointOf(g, goal)
 	local many = area and #goal.spots > 1
 	return {
 		map = map, x = x, y = y, f = f,
-		label = goalText(goal, verb, subject, detail),
+		label = (goalText(goal, verb, subject, detail)),
 		stepIndex = current, goalIndex = g, kind = goal.t,
 		r = goal.r or DEFAULT_RADIUS, area = area,
 		search = area and goal.spread or nil,
@@ -1499,9 +1647,10 @@ end
 -- else the header's; else the focus group's first open located goal
 -- (blocking, then optional, then notes). The arrow only ever points at a goal
 -- the guide window shows. A done step (no focus, e.g. viewed with Prev) has
--- nothing to point at, even when optional goals are left open.
+-- nothing to point at, even when optional goals are left open; nor has a
+-- Class guide the character cannot start yet (Own.startGate), on its live step.
 local function findWaypoint()
-	if not current then return nil end
+	if not current or (current == computed and Own.startGate(guide)) then return nil end
 	local goals = guide.steps[current].goals
 	if aim then
 		for g, goal in ipairs(goals) do
@@ -1959,6 +2108,9 @@ local sigParts = {}
 local function signature()
 	local n = 0
 	if current then
+		-- A gate opening (level-up, turn-in) changes the view, not the step.
+		n = n + 1
+		sigParts[n] = Own.startGate(guide) and "gated" or "open"
 		local goals = guide.steps[current].goals
 		for g = 1, #goals do
 			local goal = goals[g]
@@ -2124,7 +2276,7 @@ end
 ---------------------------------------------------------------------------
 
 local classTrainers = { candidates = {} } -- a pseudo goal, so pickFor ranks them
-local trainerClasses = {} -- npc -> { classFile, ... }
+local trainerClasses = {} -- npc -> { [classFile] = true }, every class trainer
 local TRAIN_LOOKAHEAD = 4 -- applicable steps, from the current one
 
 function ns.RegisterClassTrainers(list)
@@ -2134,10 +2286,25 @@ function ns.RegisterClassTrainers(list)
 		if type(t) == "table" and type(t.npc) == "number" and type(t.map) == "number" and type(t.x) == "number"
 			and type(t.y) == "number" and type(t.classes) == "table" then
 			c[#c + 1] = t
-			trainerClasses[t.npc] = t.classes
 		end
 	end
 	picks[classTrainers] = nil
+end
+
+-- Every class trainer's npc id by class ({ WARRIOR = { 914, ... } }), not only
+-- the reminder's one per town: what Engine.IsClassTrainer answers from.
+function ns.RegisterClassTrainerIds(byClass)
+	if type(byClass) ~= "table" then return end
+	for cls, ids in pairs(byClass) do
+		if type(cls) == "string" and type(ids) == "table" then
+			for _, id in ipairs(ids) do
+				if type(id) == "number" then
+					trainerClasses[id] = trainerClasses[id] or {}
+					trainerClasses[id][cls] = true
+				end
+			end
+		end
+	end
 end
 
 -- The best class trainer for the character from where they stand, or nil.
@@ -2146,6 +2313,14 @@ function Engine.NearestClassTrainer()
 	if not player then refreshPlayer() end
 	local p = pickFor(classTrainers)
 	return p.list[p.i]
+end
+
+-- Whether `npc` is a class trainer of the character's class.
+function Engine.IsClassTrainer(npc)
+	local classes = npc and trainerClasses[npc]
+	if not classes then return false end
+	if not player then refreshPlayer() end
+	return classes[player.class] == true
 end
 
 -- The active guide sends the character to their class trainer soon.
@@ -2188,17 +2363,11 @@ end
 
 -- A trainer window of the character's class: trained at this level.
 local function noteClassTrainer(npc)
-	local classes = npc and trainerClasses[npc]
-	if not classes then return end
+	if not Engine.IsClassTrainer(npc) then return end
 	refreshPlayer()
-	for _, c in ipairs(classes) do
-		if c == player.class then
-			local s = ns.CharState()
-			s.classTrainLevel = player.level or 1
-			ns.Fire("CLASS_TRAINED", s.classTrainLevel)
-			return
-		end
-	end
+	local s = ns.CharState()
+	s.classTrainLevel = player.level or 1
+	ns.Fire("CLASS_TRAINED", s.classTrainLevel)
 end
 
 -- Fresh step state for a new guide in the loaded tab.
@@ -2220,7 +2389,10 @@ local function evaluateLoaded(active)
 		end
 		return
 	end
-	computed = computeCurrent()
+	-- A Class guide the character cannot start yet holds at its opening
+	-- without placing (which would mark its accepts unavailable and move on).
+	local gate = Own.startGate(guide)
+	computed = gate and gate.step or computeCurrent()
 	-- Placed once the quest log could be read (it can lag PLAYER_LOGIN).
 	local wasPlacing = placing
 	if placing and (logReady or GetTime() >= placing) then placing = nil end
@@ -2779,6 +2951,27 @@ end
 -- The live step: the first applicable, not skipped, not done one (nil when
 -- the guide is complete), whatever step the player is looking at.
 function Engine.GetLiveStep() return computed end
+
+-- What a Class guide waits on before this character can start it
+-- (Own.startGate), for the guide window's notice and the guide menu's row:
+-- { level } or { pre, preTitle }, with who starts it (giver: the opening's
+-- first accept's NPC, object or item name, and its map); nil when it can be
+-- started (or is under way).
+function Engine.StartGate(id)
+	local g = id and Guides.Get(id)
+	if not g then return nil end
+	if not player then refreshPlayer() end
+	local gate = Own.startGate(g)
+	if not gate then return nil end
+	local a = gate.giver
+	return {
+		level = gate.level,
+		pre = gate.pre,
+		preTitle = gate.pre and titleOfQuest(gate.pre, gate.preTitles) or nil,
+		giver = a and (a.npcName or a.objName or a.itemName) or nil,
+		map = a and a.map or nil,
+	}
+end
 
 -- Look at step s instead of the live one (nil, or the live step: back to it).
 function Own.view(s)

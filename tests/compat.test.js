@@ -160,6 +160,25 @@ test('spells count as known from the spellbook or as learned recipes', () => {
 	assert.deepEqual(out, [true, true, false, false]);
 });
 
+test('item and spell links come from the cache; an uncached item or spell is requested', () => {
+	const [out] = run(`
+		local cached, asked = { [20536] = true }, {}
+		C_Item = {
+			IsItemDataCachedByID = function(id) return cached[id] == true end,
+			RequestLoadItemDataByID = function(id) asked[#asked + 1] = "item " .. id end,
+			GetItemInfo = function(id) if cached[id] then return "Soul Harvester", "|Hitem:" .. id .. "|h[Soul Harvester]|h" end end,
+		}
+		C_Spell = {
+			IsSpellDataCached = function(id) return id == 23161 end,
+			RequestLoadSpellData = function(id) asked[#asked + 1] = "spell " .. id end,
+			GetSpellLink = function(id) return "|Hspell:" .. id .. "|h[Summon Felhunter]|h" end,
+		}
+		emit({ C.ItemLink(20536), C.ItemLink(20534) == nil, C.RequestItem(20536), C.RequestItem(20534),
+			C.SpellLink(691), C.RequestSpell(23161), C.RequestSpell(691), asked })
+	`);
+	assert.deepEqual(out, ['|Hitem:20536|h[Soul Harvester]|h', true, true, false, '|Hspell:691|h[Summon Felhunter]|h', true, false, ['item 20534', 'spell 691']]);
+});
+
 test('faction standing, area exploration and achievements read the client', () => {
 	const [out] = run(`
 		w.setRep(72, "Stormwind", 6, 4500, 3000, 9000)

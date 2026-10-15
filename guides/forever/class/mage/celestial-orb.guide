@@ -1,0 +1,76 @@
+guide forever/class/mage/celestial-orb
+title Celestial Orb and Stave
+category Class
+class Mage
+folder Mage
+levels 35-40
+zone Dustwallow Marsh
+keywords Return to the Marsh, Tabetha, The Infernal Orb, Burning Blade Summoner, Mannoroc Coven, Desolace, The Exorcism, Demon of the Orb, Power in Uldaman, Obsidian Sentinel, Uldaman, Mana Surges, Celestial Power, Celestial Orb, Celestial Stave, Mage, class weapon
+reward item 7515 9517
+why An off-hand orb or a staff for the late 30s, your pick.
+
+# Tabetha's second chain, both factions: Return to the Marsh (1953), The
+# Infernal Orb (1954), The Exorcism (1955), Power in Uldaman (1956), Mana
+# Surges (1957) and Celestial Power (1958).
+# Levels 35-40: the Forever beta stops at 30 until launch on 4 November, so
+# this guide is based on data, not play.
+# Sources: quests.json, npcs.json and items.json for the chain, the Burning
+# Blade Summoners, the Demon of the Orb and the Mana Surges by Tabetha's
+# cottage; codex/instances.json for the Obsidian Sentinel as an Uldaman boss;
+# objects.json for the Meeting Stone in the northern Badlands (49.1,13.7), the point the
+# arrow uses for the dungeon; Wowhead Forever's Mage class page
+# (data/local/quest-audit/wowhead-class-quests.json, all six unchanged) and
+# quest pages (https://www.wowhead.com/forever/quest=1953 to 1958, checked
+# 2026-10-14) for the givers, the elite Exorcism, the timers (3 minutes for the
+# demon, 10 for the surges) and the reward choice (Celestial Orb or Celestial
+# Stave); the quest texts for the Mannoroc Coven and the Obsidian Sentinel.
+# Power in Uldaman is dungeon work (Uldaman, a group of five).
+
+step Return to the Marsh (Stormwind)
+  only Alliance
+  zone Stormwind City
+  tip Jennea Cannon in the Wizard's Sanctum, Stormwind's Mage Quarter, sends you back to Tabetha; Bink in Ironforge gives the same quest.
+  level 35
+  accept 1953 npc 5497                        -- Jennea Cannon
+
+step Return to the Marsh (Orgrimmar)
+  only Horde
+  zone Orgrimmar
+  tip Deino, one of Orgrimmar's mage trainers, sends you back to Tabetha; Anastasia Hartwell in the Undercity and Ursyn Ghull in Thunder Bluff give the same quest.
+  level 35
+  accept 1953 npc 5885                        -- Deino
+
+step Tabetha
+  zone Dustwallow Marsh
+  tip Tabetha's cottage is deep in the marsh west of Theramore, just north of the Stonemaul Ruins.
+  turnin 1953                                 -- Tabetha
+  accept 1954
+
+step The Infernal Orb
+  zone Desolace
+  tip The Burning Blade Summoners work the Mannoroc Coven in southern Desolace; any of them carries an Infernal Orb.
+  collect 7291 quest 1954.1                   -- Infernal Orb: Burning Blade Summoner
+
+step The Exorcism
+  zone Dustwallow Marsh
+  tip Tabetha draws the demon out of the orb beside her cottage. The Demon of the Orb is elite: grouping up is advised. You have three minutes before it slips back into the orb.
+  turnin 1954                                 -- Tabetha
+  accept 1955
+  kill 6549 quest 1955.1                      -- Demon of the Orb
+  turnin 1955                                 -- Tabetha
+  accept 1956
+
+step Power in Uldaman
+  zone Badlands
+  tip Uldaman is a dungeon in the northern Badlands, by the Meeting Stone: a group of five. Defeat the Obsidian Sentinel inside for its power source.
+  collect 8053 quest 1956.1 @49.1,13.7        -- Obsidian Power Source: Obsidian Sentinel
+
+step Mana Surges
+  zone Dustwallow Marsh
+  tip Back to Tabetha. She opens a mana rift beside her cottage: kill twelve Mana Surges within ten minutes.
+  turnin 1956                                 -- Tabetha
+  accept 1957
+  kill 6550 quest 1957.1                      -- Mana Surge
+  turnin 1957                                 -- Tabetha
+  accept 1958
+  turnin 1958 choose 7515 9517                -- Celestial Power

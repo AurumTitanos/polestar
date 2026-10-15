@@ -304,6 +304,8 @@ test('compareCodex: per-kind match against the internal build, missing and diffe
 	const v = compareCodex(ours, theirs, verify);
 	assert.deepEqual(v.kinds.instances.internalOnly, { confirmed: 0, notInForever: 1, unverified: 0 });
 	assert.deepEqual(v.kinds.rares.internalOnly, { confirmed: 0, notInForever: 1, unverified: 0 });
-	assert.deepEqual(v.kinds['items: rep'].internalOnly, { confirmed: 0, notInForever: 1, unverified: 0 });
+	// A tooltip without a standing proves nothing: the gate sits on the vendor or the quest.
+	assert.deepEqual(v.kinds['items: rep'].internalOnly, { confirmed: 0, notInForever: 0, unverified: 1 });
+	assert.deepEqual(v.kinds['items: rep'].missing.map((x) => x.id), [3]);
 	assert.deepEqual(v.needsRecording, [], 'nothing to record for what Forever does not have');
 });

@@ -243,14 +243,16 @@ test('without professions.json and factions.json: built-in professions still res
 });
 
 test('documented categories are accepted case-insensitively; others warn and pass through', () => {
-	const base = (cat) => guideText(['guide t/c', 'title C', 'levels 1-5', 'zone Elwynn Forest', `category ${cat}`, '', 'step S', '  level 2']);
-	for (const c of ['Leveling', 'Professions', 'Reputation', 'Legacy', 'Exploration', 'Collectibles', 'Dungeons']) {
+	// A Class guide says what its goal gives and why (a warning without them).
+	const base = (cat) =>
+		guideText(['guide t/c', 'title C', 'levels 1-5', 'zone Elwynn Forest', `category ${cat}`, ...(cat === 'class' ? ['reward text Defensive Stance', 'why A stance.'] : []), '', 'step S', '  level 2']);
+	for (const c of ['Leveling', 'Class', 'Professions', 'Reputation', 'Legacy', 'Exploration', 'Collectibles', 'Dungeons']) {
 		const r = compile(base(c.toLowerCase()));
 		assert.deepEqual([r.guides[0].category, r.warnings], [c, []]);
 	}
 	const odd = compile(base('Fishing Tales'));
 	assert.equal(odd.guides[0].category, 'Fishing Tales');
-	assert.deepEqual(odd.warnings, ['test.guide:5: unknown category "Fishing Tales" (known: Leveling, Professions, Reputation, Legacy, Exploration, Collectibles, Dungeons)']);
+	assert.deepEqual(odd.warnings, ['test.guide:5: unknown category "Fishing Tales" (known: Leveling, Class, Professions, Reputation, Legacy, Exploration, Collectibles, Dungeons)']);
 });
 
 test('new verbs emit Lua that loads under Lua 5.1 and round-trips, with reagents as nested tables', () => {

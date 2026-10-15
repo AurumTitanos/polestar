@@ -331,6 +331,140 @@ test('selecting a guide shows its details and loads nothing; the selection is re
 	});
 });
 
+test('a Class guide\'s details lead with its reward (item and spell icons, quality colour, the game\'s tooltip on hover) and why', () => {
+	const out = run(`
+		local id = "forever/class/warlock/test"
+		uistub.guides[id] = { id = id, pack = "guides", title = "An Imp's Request", category = "Class", folder = "Warlock", minLevel = 50, maxLevel = 54,
+			zone = 1429, zoneName = "Felwood",
+			reward = { { spell = 23161, spellName = "Summon Dreadsteed" }, { item = 20536, itemName = "Soul Harvester", quality = 3, choice = true },
+				{ item = 20534, itemName = "Abyss Shard", quality = 3, choice = true }, { text = "Summon Incubus" } },
+			why = "A staff, an off-hand or a robe for the 50s.",
+			steps = { { title = "One", goals = { { t = "note", text = "One", status = "pending" } } } } }
+		table.insert(uistub.order, id)
+		ITEM_QUALITY_COLORS = { [3] = { r = 0, g = 0.44, b = 0.87 } }
+		Polestar.Compat.ItemIcon = function(item) return item == 20536 and 135139 or nil end
+		Polestar.Compat.SpellIcon = function(spell) return spell == 23161 and 132238 or nil end
+		local tips = {}
+		GameTooltip.SetHyperlink = function(_, link) tips[#tips + 1] = link end
+		GameTooltip.SetSpellByID = function(_, spell) tips[#tips + 1] = "spell:" .. spell end
+		Polestar.Set("ui.pickerFaction", "All")
+		UI.ShowPicker()
+		P.Select(id)
+		local d = D()
+		local tiles = {}
+		for _, t in ipairs(d.Rewards) do
+			if t:IsShown() then
+				stub.RunScript(t, "OnEnter")
+				tiles[#tiles + 1] = { t.Name:GetText(), t.Icon:GetTexture() }
+			end
+		end
+		emit({ reward = P.detail.reward, facts = { P.detail.facts[1], P.detail.facts[2], P.detail.facts[3] }, tiles = tiles, tips = tips,
+			blue = select(3, d.Rewards[3].Name:GetTextColor()) > 0.8 })
+		P.Select("forever/alliance/02-westfall")
+		local shown = 0
+		for _, t in ipairs(d.Rewards) do if t:IsShown() then shown = shown + 1 end end
+		emit({ shown = shown, reward = P.detail.reward == nil, first = P.detail.facts[1][1] })`);
+	const [rows, after] = out;
+	assert.deepEqual(rows.reward, [
+		{ kind: 'spell', id: 23161, name: 'Summon Dreadsteed' },
+		{ kind: 'text', name: 'Summon Incubus' },
+		{ kind: 'item', id: 20536, name: 'Soul Harvester', choice: true },
+		{ kind: 'item', id: 20534, name: 'Abyss Shard', choice: true },
+	]);
+	assert.deepEqual(rows.facts, [
+		['Reward', 'Summon Dreadsteed, Summon Incubus'],
+		['Choose one', 'Soul Harvester, Abyss Shard'],
+		['Why', 'A staff, an off-hand or a robe for the 50s.'],
+	]);
+	assert.equal(rows.tiles.length, 4);
+	assert.equal(rows.tiles[0][1], 132238, 'the spell\'s icon');
+	assert.equal(rows.tiles[2][1], 135139, 'the item\'s icon');
+	assert.deepEqual(rows.tips, ['spell:23161', 'item:20536', 'item:20534'], 'items and spells show the game\'s tooltip; words none');
+	assert.equal(rows.blue, true, 'a rare item in its quality colour');
+	assert.deepEqual(after, { shown: 0, reward: true, first: 'Steps' });
+});
+
+test('reward tiles: an uncached item\'s tooltip fills in when the item arrives, the pane asks for its items, and modified clicks act as on any item or spell button', () => {
+	const [out] = run(`
+		local id = "forever/class/warlock/test"
+		uistub.guides[id] = { id = id, pack = "guides", title = "An Imp's Request", category = "Class", folder = "Warlock", minLevel = 50, maxLevel = 54,
+			reward = { { spell = 691, spellName = "Summon Felhunter" }, { item = 20536, itemName = "Soul Harvester", quality = 3, choice = true },
+				{ item = 20534, itemName = "Abyss Shard", quality = 3, choice = true } },
+			steps = { { title = "One", goals = { { t = "note", text = "One", status = "pending" } } } } }
+		table.insert(uistub.order, id)
+		local cached, requested, spellsRequested = {}, {}, {}
+		local names = { [20536] = "Soul Harvester", [20534] = "Abyss Shard" }
+		local function link(item) return "|cff0070dd|Hitem:" .. item .. "::::::::50:::::|h[" .. names[item] .. "]|h|r" end
+		local C = Polestar.Compat
+		C.RequestItem = function(item) if cached[item] then return true end requested[#requested + 1] = item; return false end
+		C.ItemLink = function(item) return cached[item] and link(item) or nil end
+		C.RequestSpell = function(spell) spellsRequested[#spellsRequested + 1] = spell; return false end
+		C.SpellLink = function(spell) return "|cff71d5ff|Hspell:" .. spell .. ":0|h[Summon Felhunter]|h|r" end
+		GameTooltip.GetOwner = function(self) return self.owner end
+		GameTooltip.IsOwned = function(self, f) return self.owner == f end
+		GameTooltip.SetHyperlink = function(self, l)
+			local item = tonumber(l:match("item:(%d+)"))
+			self.lines = { cached[item] and names[item] or "Retrieving item information" }
+		end
+		GameTooltip.SetSpellByID = function(self, spell) self.lines = { "spell " .. spell } end
+		local calls = {}
+		function IsModifiedClick(kind)
+			if kind == "CHATLINK" then return stub.keys.shift == true end
+			if kind == "DRESSUP" then return stub.keys.ctrl == true end
+			return (stub.keys.shift or stub.keys.ctrl or stub.keys.alt) and true or false
+		end
+		ChatFrameUtil = { InsertLink = function(l) calls[#calls + 1] = "chat " .. l; return true end }
+		function DressUpItemLink(l) calls[#calls + 1] = "dressup " .. l; return true end
+		function HandleModifiedItemClick(l)
+			if IsModifiedClick("CHATLINK") and ChatFrameUtil.InsertLink(l) then return true end
+			if IsModifiedClick("DRESSUP") then return DressUpItemLink(l) end
+			return false
+		end
+		Polestar.Hooks.ItemClick("test", function(_, item) if IsAltKeyDown() then calls[#calls + 1] = "guide " .. item end end)
+		Polestar.Set("ui.pickerFaction", "All")
+		UI.ShowPicker()
+		P.Select(id)
+		local d = D()
+		local r = { requested = requested, spellsRequested = spellsRequested }
+		local spell, harvester, shard = d.Rewards[1], d.Rewards[2], d.Rewards[3]
+		stub.RunScript(harvester, "OnEnter")
+		r.before = { GameTooltip.lines[1], GameTooltip:IsShown() }
+		cached[20536] = true
+		stub.fire("GET_ITEM_INFO_RECEIVED", 20534, true)
+		r.other = GameTooltip.lines[1]
+		stub.fire("GET_ITEM_INFO_RECEIVED", 20536, true)
+		r.after = { GameTooltip.lines[1], GameTooltip.owner == harvester }
+		stub.RunScript(harvester, "OnLeave")
+		stub.fire("GET_ITEM_INFO_RECEIVED", 20536, true)
+		r.left = GameTooltip:IsShown()
+		cached[20534] = true
+		stub.RunScript(spell, "OnEnter")
+		stub.fire("SPELL_DATA_LOAD_RESULT", 691, true)
+		r.spellTip = GameTooltip.lines[1]
+		stub.keys.ctrl = true; stub.RunScript(harvester, "OnClick", "LeftButton"); stub.keys.ctrl = false
+		stub.keys.shift = true; stub.RunScript(harvester, "OnClick", "LeftButton"); stub.RunScript(spell, "OnClick", "LeftButton"); stub.keys.shift = false
+		stub.keys.alt = true; stub.RunScript(harvester, "OnClick", "LeftButton")
+		cached[20534] = false
+		stub.RunScript(shard, "OnClick", "LeftButton"); stub.keys.alt = false
+		stub.RunScript(harvester, "OnClick", "LeftButton")
+		r.calls = calls
+		emit(r)`);
+	assert.deepEqual(out.requested.slice(0, 2), [20536, 20534], 'the pane asks for its reward items as it paints them');
+	assert.deepEqual(out.spellsRequested.slice(0, 1), [691], 'and for its spells');
+	assert.deepEqual(out.before, ['Retrieving item information', true]);
+	assert.equal(out.other, 'Retrieving item information', 'another item arriving leaves the tooltip alone');
+	assert.deepEqual(out.after, ['Soul Harvester', true], 'the item arriving fills the tooltip in');
+	assert.equal(out.left, false, 'nothing reopens once the cursor has left');
+	assert.equal(out.spellTip, 'spell 691');
+	assert.deepEqual(out.calls, [
+		'dressup |cff0070dd|Hitem:20536::::::::50:::::|h[Soul Harvester]|h|r',
+		'chat |cff0070dd|Hitem:20536::::::::50:::::|h[Soul Harvester]|h|r',
+		'chat |cff71d5ff|Hspell:691:0|h[Summon Felhunter]|h|r',
+		'guide 20536',
+		'guide 20534',
+	], 'Ctrl tries it on, Shift links the item or spell, Alt still guides (an uncached item too); a plain click does nothing');
+});
+
 test('Load guide replaces the current tab, Open in new tab adds one; double-click and Enter load', () => {
 	const [out] = run(`
 		uistub.openTabs(TABS, 1)

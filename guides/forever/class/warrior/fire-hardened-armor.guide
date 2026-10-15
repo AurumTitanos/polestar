@@ -1,0 +1,163 @@
+guide forever/class/warrior/fire-hardened-armor
+title Fire Hardened Armor
+category Class
+class Warrior
+folder Warrior
+faction Alliance
+levels 20-30
+zone Redridge Mountains
+keywords Yorus Barleybrew, The Rethban Gauntlet, Furen Longbeard, Furen's Favor, Fire Hardened Mail, Grimand Elmore, Mathiel, Klockmort Spannerspan, Fire Hardened Coif, Fire Hardened Leggings, Fire Hardened Gauntlets, Roogug, Razorfen Kraul, Warrior, class armor
+reward item 6972
+reward item 6971 6973 6974
+reward item 6970
+why A hauberk at 28, a coif, leggings or gauntlets by race, and a shield on the way.
+
+# The Alliance Warrior armor chain: Yorus Barleybrew, The Rethban Gauntlet and
+# The Shieldsmith (1698, 1699, 1702, level 20-22: Furen's Favor), Fire Hardened
+# Mail and Furen's Armor (1701, 1782, level 28), then one piece by race:
+# Humans from Grimand Elmore in Stormwind (1700, 1705, 1706: Fire Hardened
+# Coif), Night Elves from Mathiel in Darnassus (1703, 1710, 1711: Fire Hardened
+# Leggings), Dwarves and Gnomes from Klockmort Spannerspan in Ironforge (1704,
+# 1708, 1709: Fire Hardened Gauntlets). The data gives Skyborne none of the
+# three: their chain ends with Furen's Armor.
+# Sources: quests.json, npcs.json, objects.json and items.json for the chain,
+# objectives, drops and places (the Rethban Caverns point is the quest's own
+# objective position); Wowhead Forever's Warrior class page
+# (data/local/quest-audit/wowhead-class-quests.json) for the rewards and
+# Forever's changes (none for this chain); the Razorfen Kraul entrance from
+# data/forever/dungeons.json (The Barrens 42.9,90.2, live frame). Roogug, who
+# drops the Vial of Phlogiston, has no spawn in the data: he is a quilboar
+# elite inside Razorfen Kraul (https://www.wowhead.com/zone=491/razorfen-kraul,
+# https://wowwiki-archive.fandom.com/wiki/Vial_of_Phlogiston).
+# No leveling guide takes this chain: it needs a dungeon (Razorfen Kraul) and
+# runs from Redridge to Stonetalon, the Wetlands and the capitals.
+# Fire Hardened Mail and the pieces after it (level 28-30) are near or above
+# the beta's level cap: that part is written from the data, not from play.
+
+step Yorus Barleybrew (Stormwind)
+  only Human,Skyborne
+  zone Stormwind City
+  tip At 20, Wu Shen in Old Town, beside the Pig and Whistle, sends you to Yorus Barleybrew in Redridge.
+  level 20
+  accept 1698 npc 5479                        -- Wu Shen
+
+step Yorus Barleybrew (Ironforge)
+  only Dwarf,Gnome
+  zone Ironforge
+  tip At 20, Kelv Sternhammer, the warrior trainer of Ironforge, sends you to Yorus Barleybrew in Redridge.
+  level 20
+  accept 1698 npc 5113                        -- Kelv Sternhammer
+
+step Yorus Barleybrew (Darnassus)
+  only NightElf
+  zone Darnassus
+  tip At 20, Darnath Bladesinger, the warrior trainer of Darnassus, sends you to Yorus Barleybrew in Redridge.
+  level 20
+  accept 1698 npc 7315                        -- Darnath Bladesinger
+
+step The Rethban Gauntlet
+  zone Redridge Mountains
+  tip Yorus Barleybrew is in Lakeshire, at the inn. His test is timed: run north-west into the Rethban Caverns, reach the first fork and come back to him before the timer runs out. Do not die and release your spirit.
+  turnin 1698                                 -- Yorus Barleybrew
+  accept 1699
+  complete 1699                               -- Enter the Rethban Caverns and come back
+  turnin 1699
+  accept 1702
+
+step The Shieldsmith
+  zone Stormwind City
+  tip Furen Longbeard works in the Dwarven District of Stormwind. He keeps the Cask of Scalder and gives you Furen's Favor, a shield; Fire Hardened Mail is a level 28 quest.
+  turnin 1702 reward 6970                     -- Furen Longbeard
+  accept 1701
+
+step Scorched Spider Fangs
+  zone Wetlands
+  tip The Leech Stalkers and Cave Stalkers crawl around 46,61 in the middle of the Wetlands; they drop the Scorched Spider Fang.
+  collect 6838 quest 1701.1                   -- Scorched Spider Fang
+
+step Charred and Galvanized Horns
+  zone Stonetalon Mountains
+  tip The Fledgling and Young Chimaeras roam the south-west of Stonetalon, with the Chimaera Matriarch among them: the young ones drop the Charred Horn, the Matriarch the Galvanized Horn.
+  collect 6839 quest 1701.2                   -- Charred Horn from the young chimaeras
+  collect 6840 quest 1701.3                   -- Galvanized Horn from the Chimaera Matriarch
+
+step Roogug in Razorfen Kraul
+  zone The Barrens
+  tip Roogug is an elite quilboar inside Razorfen Kraul, the dungeon at the south end of the Barrens; he drops the Vial of Phlogiston. Razorfen Kraul is a dungeon: grouping up is advised.
+  collect 6841 quest 1701.4 @42.9,90.2 live   -- Vial of Phlogiston, from Roogug
+
+step Furen's Armor
+  zone Stormwind City
+  tip Back to Furen Longbeard in the Dwarven District. He sends you on to a smith of your own race.
+  turnin 1701                                 -- Furen Longbeard
+  accept 1782
+  turnin 1782
+  accept 1700 only Human
+  accept 1703 only NightElf
+  accept 1704 only Dwarf,Gnome
+
+# ---------------------------------------------------------------- Human: Grimand Elmore
+
+step Grimand Elmore
+  only Human
+  tip Grimand Elmore is in Stormwind, a short walk from Furen.
+  turnin 1700                                 -- Grimand Elmore
+  accept 1705
+
+step Burning Blood
+  only Human
+  zone Duskwood
+  tip The Nightbane worgen of Duskwood drop the Burning Blood. Gutspill walks in the far south-east of Duskwood and carries the Burning Rock.
+  collect 6844 quest 1705.1                   -- Burning Blood from the Nightbane worgen
+  collect 6845 quest 1705.2                   -- Burning Rock from Gutspill
+
+step Grimand's Armor
+  only Human
+  zone Stormwind City
+  turnin 1705                                 -- Grimand Elmore
+  accept 1706
+  turnin 1706 reward 6971
+
+# ---------------------------------------------------------------- Night Elf: Mathiel
+
+step Mathiel
+  only NightElf
+  zone Darnassus
+  tip Mathiel is a smith in Darnassus.
+  turnin 1703                                 -- Mathiel
+  accept 1710
+
+step Sunscorched Shells
+  only NightElf
+  zone Thousand Needles
+  tip The Sunscorched Shells lie along the western edge of Thousand Needles.
+  collect 6849 quest 1710.1                   -- Sunscorched Shells
+
+step Mathiel's Armor
+  only NightElf
+  zone Darnassus
+  turnin 1710                                 -- Mathiel
+  accept 1711
+  turnin 1711 reward 6973
+
+# ---------------------------------------------------------------- Dwarf and Gnome: Klockmort Spannerspan
+
+step Klockmort Spannerspan
+  only Dwarf,Gnome
+  zone Ironforge
+  tip Ride the Deeprun Tram from Stormwind to Ironforge.
+  turnin 1704                                 -- Klockmort Spannerspan
+  accept 1708
+
+step Iron Coral
+  only Dwarf,Gnome
+  zone Wetlands
+  tip The Iron Coral grows along the Wetlands' west coast, south of Menethil Harbor.
+  collect 6848 quest 1708.1                   -- Searing Coral
+
+step Klockmort's Creation
+  only Dwarf,Gnome
+  zone Ironforge
+  turnin 1708                                 -- Klockmort Spannerspan
+  accept 1709
+  turnin 1709 reward 6974

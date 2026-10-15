@@ -1,0 +1,40 @@
+guide forever/class/priest/starshards-and-elunes-grace
+title Starshards and Elune's Grace
+category Class
+class Priest
+folder Priest
+faction Alliance
+race NightElf
+levels 10-20
+zone Darnassus
+keywords Starshards, Stars of Elune, Elune's Grace, Priestess Alathea, Temple of the Moon, Night Elf, racial, Priest
+reward spell 10797 "Starshards"
+reward spell 2651 "Elune's Grace"
+why The Night Elf priest spells: Starshards at 10, Elune's Grace at 20.
+
+# The Night Elf Priest spell quests: Stars of Elune at 10 (5627, Starshards)
+# and Elune's Grace at 20 (5672), both from Priestess Alathea in the Temple
+# of the Moon in Darnassus.
+# Sources: quests.json and npcs.json for the givers; Wowhead Forever's
+# Priest class page (data/local/quest-audit/wowhead-class-quests.json:
+# both unchanged; Elune's Grace 5674 now also starts at Nara Meideros);
+# classicwowforever.com/racials and wowclassicforever.info/classes/priest
+# for the spells (Starshards and Elune's Grace stay Night Elf spells).
+# alliance/nightelf/01-teldrassil carries Starshards on the route (5629,
+# Returning Home, from Laurna Morninglight in Dolanaar) and
+# alliance/04-redridge-mountains and 06-ashenvale carry Elune's Grace (5673,
+# from High Priestess Laurena); this guide repeats them for anyone off the
+# route. The game offers one quest of each set.
+# Not checked in game: written from the sources above.
+
+step Stars of Elune
+  tip At 10, go to Priestess Alathea in the Temple of the Moon. Priest trainers elsewhere (Laurna Morninglight in Dolanaar, Priestess Josetta in Goldshire, Maxan Anvol in Kharanos) send you to her with Returning Home.
+  level 10
+  accept 5627                                 -- Priestess Alathea
+  turnin 5627                                 -- Priestess Alathea: Starshards
+
+step Elune's Grace
+  tip At 20, Priestess Alathea teaches Elune's Grace. High Priestess Laurena in Stormwind and High Priest Rohan in Ironforge send you to her with a quest of the same name.
+  level 20
+  accept 5672                                 -- Priestess Alathea
+  turnin 5672                                 -- Priestess Alathea: Elune's Grace

@@ -1,0 +1,77 @@
+guide forever/class/druid/bloodpetal-poison
+title Bloodpetal Poison
+category Class
+folder Druid
+keywords Torwa Pathfinder, Bloodpetal Poison, Toxic Test, A Better Ingredient, Putrid Vine, Atal'alarion, Sunken Temple, Devilsaur, Gorishi Sting, Bloodcap, Un'Goro Crater, Loganaar, class quest
+reward item 13446
+why Experience in Un'Goro at 50 and two healing potions; Forever removed the Classic item choice.
+class Druid
+levels 50-54
+zone Un'Goro Crater
+
+# The level-52 druid quests in Un'Goro Crater: Torwa Pathfinder (9063, from
+# Loganaar in Nighthaven; Turak Runetotem, Mathrengyl Bearwalker and
+# Theridran offer it too) -> Bloodpetal Poison (9052: 8 Gorishi Stings, 8
+# Bloodcap) -> Toxic Test (9051: stab a Devilsaur with the Devilsaur Barb) ->
+# A Better Ingredient (9053: the Putrid Vine from Atal'alarion, the guardian
+# at the bottom of the Sunken Temple).
+# Forever removed A Better Ingredient's reward choices (Forest's Embrace,
+# Grizzled Pelt, Moonshadow Stave; Wowhead Forever's druid class page), so
+# the chain now pays experience and Bloodpetal Poison's two Major Healing
+# Potions. Devilsaurs are elite and Atal'alarion is a dungeon boss: bring a
+# group for both.
+# Based on data, not play: the beta stops at level 30, so none of this could
+# be checked in game before launch (4 November).
+# Sources: quests.json, npcs.json, objects.json and items.json (Questie
+# 12.1.0, Forever); the Sunken Temple entrance is the point
+# forever/alliance/40-50/07-un-goro-crater uses (Epiccarry's Sunken Temple
+# guide gives 69,53 in the Swamp of Sorrows).
+# Left out, though Wowhead's Forever database has them (tooltip found) and the
+# data marks them questie-forever: The Emerald Dream (7506: a Dire Maul book
+# drop; its ender, Lorekeeper Javon, has no position in the data) and the
+# raid and dungeon gear exchanges, which are not class chains: the Zul'Gurub
+# Paragons of Power and kelp quests (8057, 8064, 8065, 8110-8113),
+# Animist's Caress (8192), Armaments of War (8382), the Ahn'Qiraj quests
+# (8665-8669, 8692, 8700, 8708), the Dungeon Set 2 chain (8905, 8913, 8926,
+# 8927, 8951, 8999, 9007, 9016), the Naxxramas Dreamwalker and Polar pieces
+# (9086-9093, 9241-9243) and Atiesh (9250, 9251, 9269).
+
+step Loganaar
+  zone Moonglade
+  tip Cast Teleport: Moonglade. Loganaar stands in Nighthaven; your class trainer offers the same quest.
+  level 50
+  accept 9063 npc 12042                 -- Loganaar
+
+step Torwa Pathfinder
+  zone Un'Goro Crater
+  tip Fly to Gadgetzan, ride west to the long ramp down into Un'Goro Crater: Torwa camps at its foot, in the south-east corner of the crater.
+  turnin 9063                           -- Torwa Pathfinder
+  accept 9052
+
+step Gorishi Stings and Bloodcap
+  tip The Gorishi wasps, workers and reavers of the hive in the south of the crater drop the stings; the Bloodpetal Sprouts that give the Bloodcap grow all over the crater's western half.
+  collect 22435 x8 quest 9052.1         -- Gorishi Sting
+  collect 22434 x8 quest 9052.2         -- Bloodcap
+
+step Torwa Pathfinder
+  turnin 9052                           -- Torwa Pathfinder
+  accept 9051
+
+step Toxic Test
+  tip Use the Devilsaur Barb on a Devilsaur. Devilsaurs are elite (level 54-55) and roam the crater: grouping up is advised.
+  kill 6498 quest 9051.1                -- Devilsaur: stab it with the Devilsaur Barb
+
+step Torwa Pathfinder
+  turnin 9051                           -- Torwa Pathfinder
+  accept 9053
+
+step The Sunken Temple
+  zone Swamp of Sorrows
+  tip The Temple of Atal'Hakkar lies in the Pool of Tears in the Swamp of Sorrows. Atal'alarion guards the bottom of the temple: a dungeon boss, so bring a group.
+  goto 69.9,53.6 "The Temple of Atal'Hakkar"
+  collect 22444 quest 9053.1 @69.9,53.6 -- Putrid Vine: Atal'alarion
+
+step A Better Ingredient
+  zone Un'Goro Crater
+  tip Back to Torwa in the south-east corner of Un'Goro Crater.
+  turnin 9053                           -- Torwa Pathfinder

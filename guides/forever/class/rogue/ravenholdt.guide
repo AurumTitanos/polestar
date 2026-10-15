@@ -1,0 +1,65 @@
+guide forever/class/rogue/ravenholdt
+title Ravenholdt
+category Class
+class Rogue
+folder Rogue
+levels 24-36
+zone Hillsbrad Foothills
+keywords Ravenholdt, Ravenholdt Manor, The Manor Ravenholdt, Elegant Letter, Seal of Ravenholdt, Rite of Cunning, Fahrad, Myrokos Silentform, Syndicate Sabotage, Lord Tomas, Durnholde Keep, What's the Big Idea?, Barton, Barton's Scouting Report, Strahnbrad, Syndicate Emblems, Rogue, reputation
+reward text Ravenholdt reputation
+why Opens Ravenholdt Manor, the hidden rogue house in the Alterac hills, and its first jobs.
+
+# Ravenholdt for Rogues of both factions: The Manor, Ravenholdt (6681, from
+# the Elegant Letter at 24) to Fahrad, then Forever's new jobs for Myrokos
+# Silentform at the manor: Syndicate Sabotage (96779, level 24, Lord Tomas
+# in Durnholde Keep) and What's the Big Idea? (96781, level 36, Barton at
+# Strahnbrad in the Alterac Mountains). Syndicate Emblems (6701) is the
+# Ravenholdt Guards' repeatable reputation turn-in.
+# Sources: Wowhead Forever's Rogue class page
+# (data/local/quest-audit/wowhead-class-quests.json) for which quests Forever
+# has and their rewards (Ravenholdt reputation; no items); quests.json,
+# npcs.json and items.json for the givers, places and the Elegant Letter's
+# givers (Master Mathias Shaw and Osborne the Night Man in Stormwind, Gest
+# and Ormok in Orgrimmar); the quest texts on foreverchanges.pro (96779,
+# 96781) for Durnholde and the pickpocketing.
+# Left out, new in Forever but not placeable in the data (no position for
+# their items, objects or NPCs and no named source for one): Covert
+# Extraction (96782, the Perenolde heirlooms "in two towers among the ruins
+# of Alterac"), and the Stromgarde chain A Way In, Master of Disguise, Ain't
+# No Telling and The Syndicate Sting (96783-96786: the Syndicate Footlocker
+# at Northfold Manor, Anastasia Miller, the Stolen Funds and the shipment at
+# Thoradin's Wall). Junkboxes Needed (8249, level 50+ repeatable, Fahrad) is
+# also left out: its Heavy Junkboxes come from level 50+ pickpocketing.
+# Based on data, not play past 30: What's the Big Idea? (36) is above the
+# beta's level cap until launch on 4 November.
+
+step The Elegant Letter
+  tip At 24 an Elegant Letter from Ravenholdt starts this; the data gives it to you through Master Mathias Shaw or Osborne the Night Man in Stormwind, or Gest or Ormok in Orgrimmar. The quest hands you the Seal of Ravenholdt for Fahrad.
+  level 24
+  accept 6681 item 17126                      -- Elegant Letter
+
+step Ravenholdt Manor
+  tip Horde fly to Tarren Mill, Alliance to Southshore. The manor hides in the hills east of Tarren Mill, up a path into the Alterac Mountains; the Rite of Cunning is passing its way in.
+  kill 13936 quest 6681.1                     -- Rite of Cunning
+  zone Alterac Mountains
+  turnin 6681                                 -- Fahrad
+  accept 96779                                -- Myrokos Silentform
+  accept 6701 optional                        -- Ravenholdt Guard: Syndicate Emblems, repeatable
+
+step Lord Tomas
+  zone Hillsbrad Foothills
+  tip Lord Tomas is inside Durnholde Keep, the Syndicate fortress in eastern Hillsbrad, south of the manor. Quick and quiet, says Myrokos.
+  kill 266216 quest 96779.1                   -- Lord Tomas
+
+step Myrokos Silentform
+  zone Alterac Mountains
+  turnin 96779                                -- Myrokos Silentform
+
+step What's the Big Idea?
+  tip At 36, Myrokos sends you after Barton's scouting report. Barton leads a Syndicate party at Strahnbrad, in the east of the Alterac Mountains: pick his pocket, do not kill him.
+  level 36
+  accept 96781                                -- Myrokos Silentform
+  collect 275482 quest 96781.1 @62.6,46.9     -- Barton's Scouting Report: pickpocket Barton
+
+step Back to Myrokos
+  turnin 96781                                -- Myrokos Silentform

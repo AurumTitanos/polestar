@@ -1,0 +1,84 @@
+guide forever/class/priest/blood-of-morphaz
+title Blood of Morphaz
+category Class
+class Priest
+folder Priest
+levels 50-52
+zone Azshara
+keywords Cenarion Aid, Of Coursers We Know, The Ichor of Undeath, Blood of Morphaz, Ogtinc, Greta Mosshoof, Morphaz, Sunken Temple, Temple of Atal'Hakkar, Blessed Prayer Beads, Circle of Hope, Woestave, class quest
+reward text Experience and gold
+why Experience and gold at 50 through Azshara and the Sunken Temple; Forever removed the Classic item choice.
+
+# The level 52 Priest class chain: Cenarion Aid (8254) from your class
+# trainer to Ogtinc in Azshara, then Of Coursers We Know (8255), The Ichor
+# of Undeath (8256) and Blood of Morphaz (8257), handed in to Greta
+# Mosshoof in Felwood.
+# Sources: quests.json, npcs.json and items.json (Questie 12.1.0 and
+# Questie-Forever) for the givers, drops and spawns; travel.json for the
+# flight points. Wowhead Forever (wowhead.com/forever/quest=8254, checked
+# 2026-10-14) lists Brother Joshua (Stormwind), High Priest Rohan
+# (Ironforge) and Ur'kyo (Orgrimmar) as the givers of Cenarion Aid.
+# Rewards: Wowhead Forever's change notes for Blood of Morphaz
+# (data/local/quest-audit/wowhead-class-quests.json: "Rewards: no longer
+# Choice of Blessed Prayer Beads, Choice of Circle of Hope, Choice of
+# Woestave") remove the item choice, and they list no new reward: the chain
+# pays experience and money only (6350 XP and 1g55s for 8257).
+# The Blood of Morphaz drops from Morphaz, an elite boss in the Sunken
+# Temple: this chain needs a dungeon group. The data has no position for
+# Morphaz or the dungeon entrance; the entrance point (69,54, the temple in
+# the middle of the Pool of Tears) is from a comment on Wowhead's Sunken
+# Temple zone page (wowhead.com/zone=1477).
+# The Ichor of Undeath drops from undead all over the world (4-13%): in
+# Azshara, the Lingering Highborne (levels 48-50, about 10%) haunt the Ruins
+# of Eldarath below Ogtinc's cliffs, and Highborne Apparitions and Lichlings
+# (45-47, about 8%) the ruins near Talrendis Point.
+# Based on data, not play: the beta caps at level 30 until launch on
+# 4 November, so nothing here has been checked in game.
+
+step Cenarion Aid (Alliance)
+  only Alliance
+  zone Stormwind City
+  tip At 50 Brother Joshua in Stormwind's Cathedral of Light or High Priest Rohan in Ironforge's Hall of Mysteries offers it.
+  level 50
+  accept 8254 npc 5489                        -- Brother Joshua
+
+step Cenarion Aid (Horde)
+  only Horde
+  zone Orgrimmar
+  tip At 50 Ur'kyo in Orgrimmar's Valley of Spirits offers it.
+  level 50
+  accept 8254 npc 6018                        -- Ur'kyo
+
+step Ogtinc
+  zone Azshara
+  tip Ogtinc lives atop the cliffs north-east of the Ruins of Eldarath. Alliance: fly to Talrendis Point; Horde: fly to Valormok.
+  getfp "Talrendis Point" only Alliance
+  getfp "Valormok" only Horde
+  turnin 8254                                 -- Ogtinc
+  accept 8255
+
+step Of Coursers We Know
+  tip Mosshoof Coursers graze all over Azshara; about one in three drops a Healthy Courser Gland.
+  collect 20027 quest 8255.1                  -- Healthy Courser Gland
+
+step Ogtinc
+  turnin 8255                                 -- Ogtinc
+  accept 8256
+
+step The Ichor of Undeath
+  tip Any undead can drop it. The Lingering Highborne in the Ruins of Eldarath, below Ogtinc's cliffs, are the nearest; Highborne Apparitions and Lichlings haunt the ruins near Talrendis Point.
+  collect 7972 quest 8256.1                   -- Ichor of Undeath
+
+step Ogtinc
+  turnin 8256                                 -- Ogtinc
+  accept 8257
+
+step Morphaz in the Sunken Temple
+  zone Swamp of Sorrows
+  tip Morphaz is an elite dragon boss inside the Sunken Temple, a level 50 dungeon: bring a group of five. The temple stands in the middle of the Pool of Tears; swim down into it to reach the entrance. Horde: fly to Stonard; Alliance: fly to Darkshire or Nethergarde Keep and ride on.
+  collect 20025 quest 8257.1 @69.0,54.0       -- Blood of Morphaz: the Sunken Temple entrance
+
+step Greta Mosshoof
+  zone Felwood
+  tip Greta Mosshoof is at the Emerald Sanctuary in southern Felwood.
+  turnin 8257                                 -- Greta Mosshoof

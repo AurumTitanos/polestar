@@ -10,6 +10,10 @@ next forever/horde/02-the-barrens
 # visit 2, the Barrens 11.9-16.2). Trolls share it. Starts at the Crossroads,
 # where the Durotar guide leaves you bound with the flight path; ends at the
 # Crossroads, bound there, where the next guide picks up.
+# Checked against the 2026-10-14 export, which runs Orgrimmar and Silverpine
+# Forest first and reaches the Barrens at 14.3: its Barrens quests up to 17
+# are this guide's, plus Ak'Zeloth / The Demon Seed (809, 924), which hang on
+# the Orgrimmar stop the Durotar guide leaves out (see its header).
 #
 # Flow: Crossroads -> the plains around town (two short loops) -> Thun'grim
 # and the Razormane camp -> Ratchet (flight path, bind) and the Southsea beach
@@ -132,7 +136,7 @@ step Telf Joolam
 step Kranal Fiss
   only Shaman
   zone The Barrens
-  turnin 1527
+  turnin 1527 reward 5176 263412      -- Kranal Fiss: Searing Totem, your Fire Totem and the Totem of Charged Flames
 
 step Thun'grim Firegaze
   only Warrior

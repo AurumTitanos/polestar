@@ -355,7 +355,7 @@ stub.addonMeta.Polestar = { ["X-Website"] = "https://github.com/polestar-wow/pol
 stub.addonMeta.Polestar_Guides = { ["X-Polestar-Pack"] = "guides", ["X-Polestar-Format"] = "1" }
 stub.addonMeta.JoeRoutes = { ["X-Polestar-Pack"] = "joe", ["X-Polestar-Format"] = "1" }
 stub.addonMeta.AnnDungeons = { ["X-Polestar-Pack"] = "ann", ["X-Polestar-Format"] = "1" }
-stub.addonMeta.SamProfessions = { ["X-Polestar-Pack"] = "sam", ["X-Polestar-Format"] = "2", ["X-Polestar-Needs"] = "0.3.0", Title = "Sam's Professions", Author = "Sam", Version = "0.9.0", ["X-License"] = "MIT" }
+stub.addonMeta.SamProfessions = { ["X-Polestar-Pack"] = "sam", ["X-Polestar-Format"] = "3", ["X-Polestar-Needs"] = "0.3.0", Title = "Sam's Professions", Author = "Sam", Version = "0.9.0", ["X-License"] = "MIT" }
 stub.addonMeta.KimQuests = { ["X-Polestar-Pack"] = "kim", ["X-Polestar-Format"] = "1", Title = "Kim's Quests", Author = "Kim", Version = "2.1.0", ["X-License"] = "CC0-1.0", ["X-Website"] = "https://github.com/kim/quests" }`;
 const PACKS_SCENE = `local realGuides = uistub.realGuides
 Polestar.Guides = realGuides
@@ -455,14 +455,17 @@ const MAP_W = 700, MAP_H = 470;
 // it) sized like the world map's, and the minimap's ground. Map percent to
 // canvas pixels: x * MAP_W, y * MAP_H from the top left.
 const QUEST_PLAYER = { x: 46.4, y: 39.6 };
-function questWorld() {
+// The zone a scene plays in (default: Elwynn at the abbey); `frame` its
+// world bounds, the same in the Era frame.
+const ELWYNN = { map: 1429, name: 'Elwynn Forest', frame: 'c = 0, left = 1500, right = -1500, top = 500, bottom = -1500', player: QUEST_PLAYER };
+function questWorld(place = ELWYNN) {
 	return `${questDbLua()}
 local w = stub.world
-w.addMap(1429, { name = "Elwynn Forest", c = 0, left = 1500, right = -1500, top = 500, bottom = -1500 })
-w.moveTo(1429, ${QUEST_PLAYER.x}, ${QUEST_PLAYER.y})
+w.addMap(${place.map}, { name = "${place.name}", ${place.frame} })
+w.moveTo(${place.map}, ${place.player.x}, ${place.player.y})
 for q, t in pairs({ [7] = "Kobold Camp Cleanup", [18] = "Gathering Wood", [33] = "Wolves Across the Border", [60] = "Kobold Candles" }) do w.titles[q] = t end
 w.complete({ 14 }); w.setLevel(4)
-stub.worldMapID = 1429
+stub.worldMapID = ${place.map}
 local FONT = "Interface\\\\AddOns\\\\Polestar\\\\Media\\\\Fonts\\\\Inter-SemiBold.ttf"
 local NAV = "Interface\\\\AddOns\\\\Polestar\\\\Media\\\\Nav\\\\"
 
@@ -506,7 +509,7 @@ for i = 1, 9 do
 end
 local name = canvas:CreateFontString(nil, "ARTWORK")
 name:SetFont(FONT, 15, ""); name:SetTextColor(0.93, 0.89, 0.78, 0.6)
-name:SetPoint("TOPLEFT", canvas, "TOPLEFT", 14, -12); name:SetText("Elwynn Forest")
+name:SetPoint("TOPLEFT", canvas, "TOPLEFT", 14, -12); name:SetText("${place.name}")
 function map.GetCanvas() return canvas end
 function map.SetPinPosition(self, pin, x, y)
 	pin:ClearAllPoints()
@@ -537,7 +540,7 @@ function map.UnregisterPin() end
 -- The player, as the world map's own unit pin draws it: above every pin.
 local me = CreateFrame("Frame", nil, canvas)
 me:SetFrameLevel(100); me:SetSize(22, 22)
-me:SetPoint("CENTER", canvas, "TOPLEFT", ${(QUEST_PLAYER.x / 100) * MAP_W}, ${-(QUEST_PLAYER.y / 100) * MAP_H})
+me:SetPoint("CENTER", canvas, "TOPLEFT", ${(place.player.x / 100) * MAP_W}, ${-(place.player.y / 100) * MAP_H})
 local meArrow = me:CreateTexture(nil, "OVERLAY")
 meArrow:SetAllPoints(me); meArrow:SetTexture(NAV .. "arrow"); meArrow:SetRotation(0.4)
 
@@ -589,10 +592,111 @@ Polestar.Nav.RegisterCrossings({ complete = true,
 	crossings = { { id = "border", a = { map = 1429, c = 0, wx = -700, wy = 1460, r = 15 }, b = { map = 1436, c = 0, wx = -700, wy = 1540, r = 15 } } } })
 Polestar.Nav.SetTarget(1436, 60, 45, "Sentinel Hill")
 stub.advance(1)`;
-function questScene(roots, script) {
+// Spawn areas: Teldrassil's "The Balance of Nature" as the pack compiles it
+// (`spots`: every place each goal's mobs and objects spawn), the player in
+// the Grells' woods west of Aldrassil, no quest markers on. The arrow on the
+// Fel Moss: the woods its Grells roam as one region and a lone Grell's place,
+// in the arrow's colour; the Nightsabers', Thistle Boars' and Gnarlpine
+// Totems' regions fainter (a place only the Nightsabers' other spawn covers
+// fainter still). On the minimap the Fel Moss region, cut at the rim.
+const TELDRASSIL = {
+	map: 1438, name: 'Teldrassil', frame: 'c = 1, left = 3814.583, right = -1277.083, top = 11831.25, bottom = 8437.5', player: { x: 55.3, y: 42.4 },
+};
+const AREAS = `local w = stub.world
+Polestar.RegisterMapFrames({ era = { [1438] = { ${TELDRASSIL.frame} } } })
+w.setLevel(3)
+w.titles[456], w.titles[459], w.titles[97977] = "The Balance of Nature", "The Woodland Protector", "Nature's Call"
+w.accept(456, { { text = "Young Nightsaber slain: 0/7", type = "monster", required = 7 }, { text = "Young Thistle Boar slain: 0/4", type = "monster", required = 4 } })
+w.progress(456, 1, 2)
+w.accept(459, { { text = "Fel Moss: 0/8", type = "item", required = 8 } }); w.progress(459, 1, 3)
+w.accept(97977, { { text = "Gnarlpine Totem destroyed: 0/1", type = "object", required = 1 } })
+stub.advance(0.3)
+Polestar.RegisterPack({ addon = "Polestar_Preview", id = "preview", format = 1, title = "Preview", author = "Polestar", version = "1", license = "GPL-3.0-only" })
+Polestar.RegisterGuide({ id = "preview/areas", pack = "preview", title = "Teldrassil", faction = "Alliance", minLevel = 1, maxLevel = 10, zone = 1438, steps = {
+	{ title = "The Balance of Nature", goals = {
+		{ t = "kill", quest = 456, title = "The Balance of Nature", target = "Young Nightsaber", npc = 2031, count = 7, oi = 1, map = 1438, x = 57.87, y = 44.69, f = "e", spots = { { x = 57.2, y = 44.6, r = 35, n = 2 }, { x = 58.5, y = 46.1, r = 23, n = 3 }, { x = 61.3, y = 44.9, r = 63, n = 7 }, { x = 61.5, y = 40.1, r = 30, n = 2 }, { x = 62.4, y = 42.1, r = 50, n = 5 }, { x = 64.3, y = 41.3, r = 29, n = 2 }, { x = 57.9, y = 39, r = 15, n = 1, alt = true } } },
+		{ t = "kill", quest = 456, title = "The Balance of Nature", target = "Young Thistle Boar", npc = 1984, count = 4, oi = 2, map = 1438, x = 57.44, y = 45.02, f = "e", spots = { { x = 57.1, y = 45, r = 34, n = 3 }, { x = 59, y = 44.7, r = 47, n = 4 }, { x = 55.7, y = 42.4, r = 48, n = 6 }, { x = 60.9, y = 46, r = 18, n = 2 }, { x = 61.7, y = 42.6, r = 51, n = 4 }, { x = 57.8, y = 42.4, r = 15, n = 1, alt = true }, { x = 57.6, y = 39.5, r = 15, n = 1, alt = true }, { x = 63.2, y = 42.2, r = 15, n = 1, alt = true } } },
+		{ t = "collect", quest = 459, title = "The Woodland Protector", item = 3297, itemName = "Fel Moss", count = 8, oi = 1, map = 1438, x = 56.16, y = 45.81, f = "e", spots = { { x = 55.9, y = 45.9, r = 40, n = 6 }, { x = 54.6, y = 44.1, r = 40, n = 6 }, { x = 55.8, y = 41.6, r = 40, n = 1 }, { x = 56.2, y = 38.5, r = 40, n = 1 }, { x = 54.4, y = 39.1, r = 40, n = 7 }, { x = 56.3, y = 34.6, r = 40, n = 1 }, { x = 59.6, y = 35, r = 40, n = 1 }, { x = 62.3, y = 35.7, r = 40, n = 1 }, { x = 64.2, y = 42.2, r = 40, n = 1 } }, spread = true, from = "Grellkin", fromKind = "npc", fromAlso = "Grell" },
+		{ t = "interact", quest = 97977, title = "Nature's Call", object = 668482, objName = "Gnarlpine Totem", oi = 1, map = 1438, x = 56, y = 46.1, f = "e", spots = { { x = 56, y = 46.1, r = 15, n = 1 }, { x = 55.2, y = 44.2, r = 36, n = 2 }, { x = 56.2, y = 39.4, r = 15, n = 1 }, { x = 54.6, y = 39.7, r = 26, n = 2 } }, note = "Gnarlpine Totem" },
+	} },
+} })
+Polestar.Engine.SetGuide("preview/areas")
+stub.advance(0.3)
+Polestar.Engine.AimGoal(1, 3)
+stub.advance(0.3)`;
+function questScene(roots, script, place) {
 	// `before` is read when the panel runs, so the database is only built for these scenes.
-	return { roots, stubs: QUEST_STUBS, files: QUEST_FILES, get before() { return questWorld(); }, script };
+	return { roots, stubs: QUEST_STUBS, files: QUEST_FILES, get before() { return questWorld(place); }, script };
 }
+// Group content (the compiled `group`, the goal view's `party`): a class
+// guide whose route needs a group, its Felwood step (elites; the author's
+// "group 3" on the boss) and its Dire Maul step (two goals of one run, said
+// once), next to one that needs none. Names from the shipped warlock mount
+// guides; the steps are written for the preview.
+const GROUP_GUIDES = `local function G(t, f) f.t = t; return f end
+local DM = { kind = "dungeon", name = "Dire Maul" }
+local function class(id, title, group, steps)
+	uistub.guides[id] = { id = id, pack = "guides", title = title, classes = { "WARLOCK" }, minLevel = 60, maxLevel = 60, category = "Class", folder = "Warlock",
+		zone = 1428, zoneName = "Burning Steppes", author = "Polestar", version = 1, group = group, steps = steps }
+	table.insert(uistub.order, id)
+end
+class("forever/collectibles/mounts/neutral/warlock-dreadsteed", "Warlock Dreadsteed", true, {
+	{ title = "Shadow Hold", goals = {
+		G("kill", { verb = "Kill", subject = "Jaedenar Legionnaires", subjectKind = "npc", npc = 9862, progress = { cur = 2, max = 6 }, party = { kind = "elite", rank = 1 }, status = "active" }),
+		G("kill", { verb = "Kill", subject = "Prince Xavalis", subjectKind = "npc", npc = 9876, party = { kind = "group", size = 3 }, status = "active" }),
+	} },
+	{ title = "Dire Maul", goals = {
+		G("kill", { verb = "Kill", subject = "Xorothian Dreadsteed", subjectKind = "npc", npc = 14502, progress = { cur = 0, max = 1 }, party = DM, status = "active" }),
+		G("complete", { verb = "Complete", subject = "Dreadsteed of Xoroth", subjectKind = "quest", quest = 7631, party = DM, status = "active" }),
+	} },
+})
+class("forever/collectibles/mounts/neutral/warlock-felsteed", "Warlock Felsteed", nil, {
+	{ title = "Gorzeeki Wildeyes", goals = { G("note", { text = "Step 1", status = "pending" }) } },
+})
+local DREADSTEED = "forever/collectibles/mounts/neutral/warlock-dreadsteed"
+uistub.guides[DREADSTEED].reward = { { spell = 23161, spellName = "Summon Dreadsteed" } }
+uistub.guides[DREADSTEED].why = "Your epic mount at 60: summoned anywhere, with no gold spent on an epic horse."
+uistub.guides["forever/collectibles/mounts/neutral/warlock-felsteed"].reward = { { spell = 5784, spellName = "Summon Felsteed" } }
+uistub.player.class, uistub.player.level = "WARLOCK", 60`;
+// A level 12 shaman and two Class guides: Call of Water opens at 20
+// (Engine.StartGate, stubbed as the engine would answer), Call of Earth now.
+const NOT_YET_GUIDES = `local function G(t, f) f.t = t; return f end
+local function class(id, title, lo, hi, steps)
+	uistub.guides[id] = { id = id, pack = "guides", title = title, classes = { "SHAMAN" }, minLevel = lo, maxLevel = hi, category = "Class", folder = "Shaman",
+		zone = 1411, zoneName = "Durotar", author = "Polestar", version = 1, steps = steps }
+	table.insert(uistub.order, id)
+end
+class("forever/class/shaman/call-of-water-horde", "Call of Water (Horde)", 20, 23, {
+	{ title = "Searn Firewarder", goals = { G("accept", { verb = "Accept", subject = "Call of Water", subjectKind = "quest", quest = 1528, status = "active" }) } },
+})
+class("forever/class/shaman/call-of-earth-horde", "Call of Earth (Horde)", 4, 10, {
+	{ title = "Canaga Earthcaller", goals = { G("accept", { verb = "Accept", subject = "Call of Earth", subjectKind = "quest", quest = 1516, status = "active" }) } },
+})
+local WATER = "forever/class/shaman/call-of-water-horde"
+Polestar.Engine.StartGate = function(id)
+	if id == WATER then return { level = 20, giver = "Searn Firewarder", map = 1454 } end
+end
+uistub.player.class, uistub.player.level = "SHAMAN", 12`;
+// Class guides (`reward`, `why`): what the chain gives leads the details, a
+// choice of rare items and a demon minion beside the mount. Rewards and why
+// lines as the shipped warlock guides have them; steps written for the preview.
+const CLASS_GUIDES = `${GROUP_GUIDES}
+class("forever/class/warlock/impsys-request", "An Imp's Request", true, {
+	{ title = "Impsy", goals = { G("note", { text = "Step 1", status = "pending" }) } },
+	{ title = "The Sunken Temple", goals = { G("note", { text = "Step 2", status = "pending" }) } },
+})
+local IMPSY = uistub.guides["forever/class/warlock/impsys-request"]
+IMPSY.minLevel, IMPSY.maxLevel, IMPSY.zone, IMPSY.zoneName = 50, 54, 1448, "Felwood"
+IMPSY.reward = { { item = 20536, itemName = "Soul Harvester", quality = 3, choice = true }, { item = 20534, itemName = "Abyss Shard", quality = 3, choice = true },
+	{ item = 20530, itemName = "Robes of Servitude", quality = 3, choice = true } }
+IMPSY.why = "A staff, off-hand or robe for your 50s; Impsy's own errand, not a step of the Dreadsteed chain."
+class("forever/class/warlock/incubus-horde", "Incubus (Horde)", nil, {
+	{ title = "Devourer of Souls", goals = { G("note", { text = "Step 1", status = "pending" }) } },
+})
+local INCUBUS = uistub.guides["forever/class/warlock/incubus-horde"]
+INCUBUS.minLevel, INCUBUS.maxLevel, INCUBUS.faction, INCUBUS.zone, INCUBUS.zoneName = 20, 28, "Horde", 1454, "Orgrimmar"
+INCUBUS.reward = { { spell = 713, spellName = "Summon Incubus" }, { item = 22243, itemName = "Small Soul Pouch", quality = 2 } }
+INCUBUS.why = "A second seducer demon, the male sayaad, and a soul shard bag to carry your shards."`;
 const SCENES = [
 	{
 		file: 'guide.svg',
@@ -676,6 +780,52 @@ uistub.setStep(4)`,
 				script: `${TABS}; local f = uistub.goal(3, 4); f.npcName, f.lvl, f.alternatives, f.detail = "Young Wolf", { min = 2, max = 4 }, 2, nil
 f.candidates = { { npcName = "Young Wolf", map = 1429, x = 46, y = 38.5 } }
 uistub.update()`,
+			},
+		],
+	},
+	{
+		file: 'guide-group.svg',
+		title: 'Group content: elites and an author\'s group size; a dungeon run said once; the guide menu\'s Group chip',
+		panels: [
+			{ roots: GUIDE, script: `${GROUP_GUIDES}; uistub.openTabs({ { DREADSTEED, 1 } }, 1)` },
+			{ roots: GUIDE, script: `${GROUP_GUIDES}; uistub.openTabs({ { DREADSTEED, 2 } }, 1)` },
+			{
+				roots: PICKER,
+				script: pickerScene(`${GROUP_GUIDES}; uistub.openTabs({ { DREADSTEED, 2 } }, 1); Polestar.UI.ShowPicker(); Polestar.UI.Picker.SetCategory("Class")
+Polestar.UI.Picker.Select(DREADSTEED)`),
+			},
+		],
+	},
+	{
+		file: 'class-not-yet.svg',
+		title: 'A Class guide opened too early: the guide window says from which level and who starts it; the guide menu\'s row says "From level 20"',
+		panels: [
+			{ roots: GUIDE, script: `${NOT_YET_GUIDES}; uistub.openTabs({ { WATER, 1 } }, 1)` },
+			{
+				roots: PICKER,
+				script: pickerScene(`${NOT_YET_GUIDES}; Polestar.Set("ui.pickerFaction", "Horde"); Polestar.UI.ShowPicker(); Polestar.UI.Picker.SetCategory("Class")
+Polestar.UI.Picker.Select("forever/class/shaman/call-of-earth-horde")`),
+			},
+		],
+	},
+	{
+		file: 'picker-class.svg',
+		title: 'Class guides in the guide menu: the details lead with what the chain gives and why (a mount spell; a choice of rare items; a demon and its soul bag)',
+		panels: [
+			{
+				roots: PICKER,
+				script: pickerScene(`${CLASS_GUIDES}; Polestar.UI.ShowPicker(); Polestar.UI.Picker.SetCategory("Class")
+Polestar.UI.Picker.Select(DREADSTEED)`),
+			},
+			{
+				roots: PICKER,
+				script: pickerScene(`${CLASS_GUIDES}; Polestar.UI.ShowPicker(); Polestar.UI.Picker.SetCategory("Class")
+Polestar.UI.Picker.Select("forever/class/warlock/impsys-request")`),
+			},
+			{
+				roots: PICKER,
+				script: pickerScene(`${CLASS_GUIDES}; Polestar.Set("ui.pickerFaction", "All"); Polestar.UI.ShowPicker(); Polestar.UI.Picker.SetCategory("Class")
+Polestar.UI.Picker.Select("forever/class/warlock/incubus-horde")`),
 			},
 		],
 	},
@@ -930,8 +1080,20 @@ Polestar.UI.Picker.SetCategory("Leveling"); Polestar.UI.Picker.Select("forever/h
 	},
 	{
 		file: 'travel.svg',
-		title: 'Travel: the arrow (Arrow scale 160%) on a route into the next zone, its leg captioned ("Go to Westfall"), and the trail dots on the world map from the player to the zone crossing',
-		panels: [questScene(['PolestarNavArrow'], `Polestar.Set("nav.arrowScale", 1.6)\n${TRAVEL}`), questScene(['WorldMapFrame'], TRAVEL)],
+		title: 'Travel: the arrow (Arrow scale 160%) on a route into the next zone, its leg captioned ("Go to Westfall"), and the trail dots on the world map from the player to the zone crossing; then the arrow where the game gives no position (the Deeprun Tram)',
+		panels: [
+			questScene(['PolestarNavArrow'], `Polestar.Set("nav.arrowScale", 1.6)\n${TRAVEL}`),
+			questScene(['WorldMapFrame'], TRAVEL),
+			questScene(['PolestarNavArrow'], `Polestar.Set("nav.arrowScale", 1.6)\n${TRAVEL}\nstub.world.map = nil\nstub.advance(0.2)`),
+		],
+	},
+	{
+		file: 'nav-areas.svg',
+		title: "Spawn regions: Teldrassil's The Balance of Nature, the arrow on the Fel Moss. On the world map every place the step's mobs and objects spawn is a region: the Grells' woods west and north of Aldrassil and a lone Grell's place in the arrow's colour, the Nightsabers', Thistle Boars' and Gnarlpine Totems' regions fainter; on the minimap the Fel Moss region around the player, cut at the rim",
+		panels: [
+			questScene(['WorldMapFrame'], AREAS, TELDRASSIL),
+			questScene(['Minimap'], AREAS, TELDRASSIL),
+		],
 	},
 	{
 		file: 'dungeons.svg',
@@ -948,6 +1110,14 @@ Polestar.UI.Picker.SetCategory("Leveling"); Polestar.UI.Picker.Select("forever/h
 			{ dungeons: true, roots: PICKER, script: dungeonsScene('Polestar.Dungeons.Open("wailing-caverns"); DS.SetTab("bosses")') },
 			{ dungeons: true, roots: PICKER, script: dungeonsScene('Polestar.Dungeons.Open("wailing-caverns"); DS.SetTab("map")') },
 			{ dungeons: true, roots: PICKER, script: dungeonsScene('Polestar.Dungeons.Open(); DS.SetFaction("All"); DS.SetBand("all")') },
+		],
+	},
+	{
+		file: 'dungeons-attune.svg',
+		title: 'The Attunement tab: Wailing Caverns\' attunement with the first quest done and the second in the log, and "Guide me through it"; the Deadmines\' keys with the filter on All',
+		panels: [
+			{ dungeons: true, roots: PICKER, script: dungeonsScene('done[90001] = true; log[90002] = true; Polestar.Dungeons.Open("wailing-caverns"); DS.SetTab("attune")') },
+			{ dungeons: true, roots: PICKER, script: dungeonsScene('DS.SetFaction("All"); Polestar.Dungeons.Open("deadmines"); DS.SetTab("attune")') },
 		],
 	},
 	{

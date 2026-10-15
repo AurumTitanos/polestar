@@ -1,0 +1,85 @@
+guide forever/class/paladin/cloak-of-the-divine-storm
+title Cloak of the Divine Storm
+category Class
+class Paladin
+folder Paladin
+faction Alliance
+levels 22-30
+zone Darkshore
+keywords A Strange Artifact, Strange Orb, Althalaxx Orb, Tower of Althalaxx, Delgren the Purifier, Katherine the Pure, Ursula Deline, Summoner's Salt, Mote of Mannoroth, Spear of Mannoroth, Demon Fall Canyon, Divine Storm, Paladin, class quest
+collects 277205
+reward item 277205
+why A rare cloak at 30 from the old Divine Storm story; for now only Alliance paladins can finish it.
+
+# The Season of Discovery Divine Storm chain, back in Forever as a level 30
+# Paladin chain for the Cloak of the Divine Storm: A Strange Artifact (78088)
+# from the Strange Orb atop the Tower of Althalaxx, Advice From Stormwind
+# (78089), A Second Opinion (78090), Earning Your Salt (78091), It Must Be
+# Destroyed (78092) and Return to Delgren (78093).
+# Sources: quests.json, npcs.json, objects.json and items.json (Questie-Forever)
+# for givers, enders, objectives and the droppers of the Summoner's Salt and
+# the Motes of Mannoroth; Wowhead Forever's Paladin class page
+# (data/local/quest-audit/wowhead-class-quests.json) for the Forever changes:
+# level 30, requires 22, starts at the Strange Orb instead of Delgren, rewards
+# the Cloak of the Divine Storm. The Strange Orb is not in our data: its place
+# (Darkshore 56.2,26.5, the top of the Tower of Althalaxx) and the mobs that
+# drop the salt are from Wowhead's news "New Paladin-Exclusive Cloak Currently
+# Alliance Only" (10 October 2026, wowhead.com/news=383286, mirrored by
+# seramate.com), which also says only Alliance Paladins can finish the chain
+# for now.
+# The chain is level 30 with level 22 to start: inside the beta's level cap.
+
+# ---------------------------------------------------------------- Darkshore
+
+step The Strange Orb
+  tip Climb to the top of the Tower of Althalaxx in northern Darkshore. Loot the Strange Orb up there: it gives you the Althalaxx Orb, which starts the quest.
+  accept 78088 @56.2,26.5             -- Strange Orb atop the Tower of Althalaxx: right-click the Althalaxx Orb it gives
+
+# ---------------------------------------------------------------- Ashenvale
+
+step Delgren the Purifier
+  zone Ashenvale
+  tip Delgren the Purifier stands at Maestra's Post in western Ashenvale.
+  turnin 78088                        -- Delgren the Purifier
+  accept 78089
+
+# ---------------------------------------------------------------- Stormwind
+
+step Katherine the Pure
+  zone Stormwind City
+  tip Katherine the Pure is in the Cathedral of Light.
+  turnin 78089                        -- Katherine the Pure
+  accept 78090
+
+step Ursula Deline
+  tip Katherine sends you to the warlocks in the Mage Quarter; Ursula Deline speaks for them.
+  turnin 78090                        -- Ursula Deline
+  accept 78091
+
+# ---------------------------------------------------------------- Redridge Mountains
+
+step Summoner's Salt
+  zone Redridge Mountains
+  tip Blackrock Summoners, Champions and Trackers camp in the north-west of Redridge; they drop the Summoner's Salt.
+  collect 209778 quest 78091.1 @23.5,12.0 live
+
+step Back to Ursula
+  zone Stormwind City
+  turnin 78091                        -- Ursula Deline
+  accept 78092
+
+# ---------------------------------------------------------------- Demon Fall Canyon
+
+step Motes of Mannoroth
+  zone Ashenvale
+  tip Demon Fall Canyon is in south-east Ashenvale. The Mannoroc Lashers, Searing Infernals, Felguards and Legion Hounds in it drop the Motes of Mannoroth.
+  collect 209779 quest 78092.1
+
+step The Spear of Mannoroth
+  tip The Spear of Mannoroth stands at the east end of Demon Fall Canyon. Shatter the orb on it; the Shattered Orb appears beside it.
+  turnin 78092                        -- Spear of Mannoroth
+  accept 78093                        -- from the Shattered Orb
+
+step Return to Delgren
+  tip Back to Maestra's Post.
+  turnin 78093                        -- Delgren the Purifier: Cloak of the Divine Storm

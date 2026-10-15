@@ -1,0 +1,76 @@
+guide forever/class/paladin/holy-mightstone
+title Holy Mightstone
+category Class
+class Paladin
+folder Paladin
+faction Alliance
+levels 50-56
+zone Stormwind City
+keywords Chillwind Point, Dispelling Evil, Inert Scourgestones, Forging the Mightstone, Holy Mightstone, Commander Ashlam Valorfist, High Priest Thel'danis, Lord Grayson Shadowbreaker, Brandur Ironhammer, Minion's Scourgestone, Voodoo Feather, Sunken Temple, Paladin, class quest
+collects 20620
+reward item 20620
+why A one-use stone that makes you much stronger against undead for 10 minutes; the old choice rewards are gone.
+
+# The level 52 Paladin chain: Chillwind Point (8415) from Lord Grayson
+# Shadowbreaker in Stormwind or Brandur Ironhammer in Ironforge, Dispelling
+# Evil (8414), Inert Scourgestones (8416) and Forging the Mightstone (8418).
+# Titled after its reward, the Holy Mightstone (one use, ten minutes against
+# the undead: Wowhead Classic's item tooltip, wowhead.com/classic/item=20620);
+# the quest name stays in keywords.
+# Sources: quests.json, npcs.json and items.json for givers, enders,
+# objectives and the droppers of the Minion's Scourgestones and the Voodoo
+# Feathers; Wowhead Forever's Paladin class page
+# (data/local/quest-audit/wowhead-class-quests.json) for the rewards: the Holy
+# Mightstone, and Forever's change note on 8418, "Rewards: no longer Choice of
+# Chivalrous Signet, Choice of Lightforged Blade, Choice of Sanctified Orb".
+# The Sunken Temple entrance (Swamp of Sorrows 69.9,53.6) is the one
+# forever/alliance/40-50/07-un-goro-crater uses.
+# The Voodoo Feathers drop from the elite troll bosses of the Sunken Temple
+# (Zolo, Gasher, Loro, Hukku, Zul'Lor, Mijan), a level 50 dungeon: bring a
+# group.
+# Based on data, not play: the beta caps at level 30 until launch on
+# 4 November, so nothing here has been checked in game.
+
+step Lord Grayson Shadowbreaker
+  only Human
+  zone Stormwind City
+  tip Lord Grayson Shadowbreaker is in the Cathedral of Light.
+  level 50
+  accept 8415 npc 928                 -- Lord Grayson Shadowbreaker
+
+step Brandur Ironhammer
+  only Dwarf
+  zone Ironforge
+  tip Brandur Ironhammer is in the Mystic Ward.
+  level 50
+  accept 8415 npc 5149                -- Brandur Ironhammer
+
+step Chillwind Camp
+  zone Western Plaguelands
+  tip Commander Ashlam Valorfist commands Chillwind Camp in the south of the Western Plaguelands.
+  turnin 8415                         -- Commander Ashlam Valorfist
+  accept 8414
+
+step Minion's Scourgestones
+  tip The Scourge throughout the Western Plaguelands drop Minion's Scourgestones.
+  collect 12840 quest 8414.1
+
+step High Priest Thel'danis
+  turnin 8414                         -- High Priest Thel'danis
+  accept 8416
+
+step Commander Ashlam Valorfist
+  turnin 8416                         -- Commander Ashlam Valorfist
+  accept 8418
+
+step The Sunken Temple
+  zone Swamp of Sorrows
+  tip The Temple of Atal'Hakkar lies in the Pool of Tears in eastern Swamp of Sorrows. Inside, Gasher and Zul'Lor drop the Amber Voodoo Feather, Hukku and Mijan the Blue, Zolo and Loro the Green.
+  goto 69.9,53.6 "The Temple of Atal'Hakkar"
+  collect 20606 quest 8418.1 @69.9,53.6 -- Amber Voodoo Feather, inside
+  collect 20607 quest 8418.2 @69.9,53.6 -- Blue Voodoo Feather, inside
+  collect 20608 quest 8418.3 @69.9,53.6 -- Green Voodoo Feather, inside
+
+step Forging the Mightstone
+  zone Western Plaguelands
+  turnin 8418                         -- Commander Ashlam Valorfist: Holy Mightstone

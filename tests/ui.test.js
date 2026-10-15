@@ -6,6 +6,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { runAddon } = require('./helpers/lua');
+const { fakeLocale } = require('./helpers/locale');
 
 const FILES = ['Core/Core.xml', 'Theme/Theme.xml', 'UI/UI.xml'];
 
@@ -373,9 +374,45 @@ test('dragging saves the position; the grip resizes width within bounds', () => 
 	assert.equal(out.point[0], 'TOPLEFT');
 });
 
-test('combat: fade dims the window, hide hides it, both restore afterwards', () => {
+test('grow upward pins the window by its bottom-left; turning it on or off keeps the window in place', () => {
 	const [out] = run(`
 		uistub.setGuide(uistub.elwynn, 3)
+		F.x, F.y = 1500, 300
+		Polestar.Set("ui.growUp", true)
+		local on, onPoint = Polestar.Get("ui.pos"), { F:GetPoint(1) }
+		F.x, F.y = 900, 120
+		stub.RunScript(GF.parts.nav, "OnDragStart")
+		stub.RunScript(GF.parts.nav, "OnDragStop")
+		local dragged = Polestar.Get("ui.pos")
+		stub.cursor = { 100, 500 }
+		stub.RunScript(GF.grip, "OnMouseDown", "LeftButton")
+		local resizePoint = { F:GetPoint(1) }
+		stub.RunScript(GF.grip, "OnMouseUp", "LeftButton")
+		Polestar.Set("ui.pos", nil)
+		local resetPoint = { F:GetPoint(1) }
+		F.x, F.y = 900, 120
+		Polestar.Set("ui.growUp", false)
+		emit({ on = on, onPoint = onPoint, dragged = dragged, resizePoint = resizePoint, resetPoint = resetPoint,
+			off = Polestar.Get("ui.pos"), offPoint = { F:GetPoint(1) }, top = F:GetTop() })`);
+	assert.deepEqual(out.on, [1500, 300], 'turning it on saves the bottom-left where the window stands');
+	assert.equal(out.onPoint[0], 'BOTTOMLEFT');
+	assert.deepEqual(out.dragged, [900, 120], 'dragging saves the bottom-left');
+	assert.equal(out.resizePoint[0], 'BOTTOMLEFT', 'resizing the width keeps the bottom edge pinned');
+	assert.equal(out.resetPoint[0], 'BOTTOMRIGHT', 'reset puts it in the bottom-right corner');
+	assert.equal(out.resetPoint[2], 'BOTTOMRIGHT');
+	assert.deepEqual(out.off, [900, out.top], 'turning it off saves the top-left where the window stands');
+	assert.equal(out.offPoint[0], 'TOPLEFT');
+});
+
+test('combat: by default the window stays as it is; fade dims it, hide hides it, both restore afterwards', () => {
+	const [out] = run(`
+		uistub.setGuide(uistub.elwynn, 3)
+		stub.fire("PLAYER_REGEN_DISABLED")
+		stub.advance(1)
+		local steady = F:GetAlpha()
+		stub.fire("PLAYER_REGEN_ENABLED")
+		stub.advance(1)
+		Polestar.Set("ui.combat", "fade")
 		stub.fire("PLAYER_REGEN_DISABLED")
 		stub.advance(1)
 		local faded = F:GetAlpha()
@@ -386,7 +423,8 @@ test('combat: fade dims the window, hide hides it, both restore afterwards', () 
 		stub.fire("PLAYER_REGEN_DISABLED")
 		local hidden = not F:IsShown()
 		stub.fire("PLAYER_REGEN_ENABLED")
-		emit({ faded = faded, restored = restored, hidden = hidden, shown = F:IsShown() })`);
+		emit({ steady = steady, faded = faded, restored = restored, hidden = hidden, shown = F:IsShown() })`);
+	assert.equal(out.steady, 1, 'no fade on every pull unless the player asks for it');
 	assert.ok(Math.abs(out.faded - 0.35) < 1e-9);
 	assert.equal(out.restored, 1);
 	assert.equal(out.hidden, true);
@@ -990,4 +1028,28 @@ test('the next spot of an area objective takes the arrow there, over a point pic
 	assert.deepEqual(out.cycle, ['CycleSpot', 3, 3]);
 	assert.deepEqual(out.release, ['ReleaseTarget']);
 	assert.notEqual(out.target, 'By hand');
+});
+
+test('labels kept in tables are in the client language: the group line and the guide menu\'s tabs', () => {
+	const [out] = run(
+		`
+		UI.ShowPicker()
+		local tabs = {}
+		for _, b in ipairs(PolestarPicker.tabButtons) do if b:IsShown() then tabs[#tabs + 1] = b.Label:GetText() end end
+		emit({ elite = UI.GroupLine({ party = { kind = "elite", rank = 2 } }), tabs = tabs, title = PolestarPicker.Title:GetText() })`,
+		{ before: fakeLocale('deDE', { 'Rare elite: group advised': 'Rarer Elite: Gruppe empfohlen', Home: 'Start', Browse: 'Stöbern', Current: 'Aktuell', Recent: 'Zuletzt' }) },
+	);
+	assert.match(out.elite, /\|c\w+Rarer Elite: Gruppe empfohlen\|r/);
+	assert.deepEqual(out.tabs, ['Start', 'Stöbern', 'Aktuell', 'Zuletzt']);
+	assert.equal(out.title, 'Start');
+});
+
+test('a collect whose line already names its source has no source line under it; author text keeps it', () => {
+	const [out] = run(`
+		local src = { name = "Grell", also = "Grellkin", kind = "npc", enemy = true }
+		local named = { t = "collect", text = "Kill Grell or Grellkin for Fel Moss", subject = "Fel Moss", status = "active", source = setmetatable({ inText = true }, { __index = src }) }
+		local authored = { t = "collect", text = "Get the moss", subject = "Fel Moss", status = "active", source = src }
+		emit({ named = UI.GoalSubline(named) or false, authored = UI.GoalSubline(authored) or false })`);
+	assert.equal(out.named, false);
+	assert.equal(out.authored, 'Kill Grell or Grellkin');
 });

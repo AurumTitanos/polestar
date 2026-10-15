@@ -58,7 +58,7 @@ Every line before the first `step`.
 
 | Key | Required | Value |
 |---|---|---|
-| `guide` | yes, first line | id: `[a-z0-9/_-]+`, unique across all guides; it starts with the pack's id and `/` (`joe-routes/elwynn`; Polestar's own guides: `forever/`) |
+| `guide` | yes, first line | id: `[a-z0-9_-]+` parts joined by single `/` (none leading or trailing), unique across all guides; it starts with the pack's id and `/` (`joe-routes/elwynn`; Polestar's own guides: `forever/`) |
 | `title` | yes | rest of line |
 | `levels` | yes | `<min>-<max>` |
 | `zone` | yes | default zone: map name from `data/forever/zones.json`, or `map <uiMapID>` |
@@ -66,10 +66,12 @@ Every line before the first `step`.
 | `race` | no | comma list (see Conditions) |
 | `class` | no | comma list |
 | `next` | no | id of the guide that follows, or several ids separated by commas: a **route choice**. The player picks where to level next in the "Choose your path" window; the first id is the author's default. Every option must be the guide's own faction. |
-| `category` | no | default `Leveling`; others: `Professions`, `Reputation`, `Legacy`, `Exploration`, `Collectibles`, `Dungeons` |
+| `category` | no | default `Leveling`; others: `Class` (class quest chains, mounts and weapons; pair with a `class` header), `Professions`, `Reputation`, `Legacy`, `Exploration`, `Collectibles`, `Dungeons` |
 | `folder` | no | the guide menu folder this guide is listed under, any category (e.g. `Mounts · Level 40`, `Companion pets · Vendors`). Guides sharing a folder sort by faction (yours first), then level. Without it: the category's folder (Leveling: by faction and level band). |
 | `keywords` | no | comma list of extra words the guide menu search matches (e.g. the colours a mount guide covers); an empty entry is an error, a repeated one a warning |
 | `collects` | no | comma list of item ids this guide obtains (a mount guide: every colour it sells). Compiled as `collects = { ... }`; the Lookup module opens this guide for those items instead of building one. Malformed or repeated ids are errors; an id missing from `items.json` is a warning. |
+| `reward` | no (a warning on a `Class` guide without it) | what the guide's goal gives, shown first in the guide menu's details with its icon and the game's tooltip. Repeatable, one entry per line: `reward item <item> ["Name"] [quality] ...` (entries as in `choose`; several on one line are a choice of one), `reward spell <spellId> "Spell name"` (a mount, a form, a demon, an ability; the name is required; the id is the spell the player ends up with, as the Forever client's `SpellName` table has it: `reward spell 691 "Summon Felhunter"`, not the quest's "Teach" spell) or `reward text <words>` (anything without an id: reputation, experience). A spell written as `reward text` shows a glyph instead of its icon and no tooltip, and tests/guides-class.test.js fails on one for the guide's class. The details list the entries given outright under "Reward", then the choices under "Choose one", each group in header order. An item's name defaults to `items.json`; an id missing there needs its name. Compiled as `reward = { { item, itemName, quality, choice }, { spell, spellName }, { text } }`. |
+| `why` | no (a warning on a `Class` guide without it) | one short line in the guide menu's details: why the goal is worth doing, in the author's words |
 | `author` | no | default: the pack's author (`pack.json`) |
 | `version` | no | integer, default `1` |
 | `coords` | no | `era` (default) or `live`: the map frame of coordinates typed in this guide (`@x,y`, `goto`, `explore`). Era-frame ones compile with `f = "e"`; on a map without Era bounds they compile live. `record draft` writes `coords live`. |
@@ -175,6 +177,7 @@ Modifiers, in any order after the positional arguments:
 | `r <yards>` | Arrival radius (`goto`, default 8). |
 | `lvl <N>` | Minimum level shown on an `accept`. |
 | `optional` | Never blocks the step. |
+| `group [N]` | Needs a group, of `N` players (2–40) when given (`kill 1234 group 3`, `accept 7583 group 5`). The guide window says "Group of 3 advised" (or "Group advised") under the goal. Overrides what the compiler derives: see "Group content". |
 | `only <cond>[,<cond>...]` | Goal applies only to matching characters. |
 | `era` / `live` | Map frame of this goal's typed coordinates, overriding `coords`. |
 | `choose <item> ["Name"] [quality] ...` | `turnin` only: the reward choices, shown under the turn-in and in its tooltip. Each entry is an item id, optionally its quoted name and a quality word (`poor` `common` `uncommon` `rare` `epic` `legendary` `artifact` `heirloom`); entries follow one another (`choose 6480 918 "Deviate Hide Pack" common`). Names and qualities default to `items.json`; an id missing there needs its name. Display only: a named unknown id is not a warning. |
@@ -207,13 +210,14 @@ AND. `only Warrior,Paladin,Dwarf` = (Warrior or Paladin) and Dwarf.
 | coordinates | the target's spawns, trying maps in order: the current zone, then maps the guide already used (most recent first), then anywhere. On the chosen map: the spawn nearest the previous goal when that goal is on the same map, else the centroid of the highest-priority candidate |
 | `kill` target name | `npcs.json` |
 | `collect` coordinates | every drop source with spawns, ranked as above (zone, used maps, nearness), then by drop chance |
-| `collect` source `from`, `fromKind`, `fromRank`, `fromFaction` | a `collect` outside a quest objective whose item has one source with spawns, or one that drops it at 50% or more: the source's name, `npc` or `object`, the NPC's rank (1 elite, 2 rare elite, 3 boss, 4 rare) and faction (`A`, `H`, `AH`; none for a hostile mob). The guide window says "Kill Aean Swiftriver (rare elite)" for an enemy, "From <name>" otherwise; a quest started by that item reads as one line ("Runed Scroll: kill Aean Swiftriver (rare elite)") |
+| `collect` source `from`, `fromAlso`, `fromKind`, `fromRank`, `fromFaction` | a `collect` (quest objectives too) whose item has one source with spawns, or one that drops it at 50% or more, and at most 8 sources at 2% or more (not cloth that drops everywhere): the source's name, a second source of the same kind at 50% or more, `npc` or `object`, the NPC's rank (1 elite, 2 rare elite, 3 boss, 4 rare) and faction (`A`, `H`, `AH`; none for a hostile mob). The goal line names it: "Kill Grell or Grellkin for Fel Moss" for an enemy, "Collect Oats from Sack of Oats" otherwise (nothing added for an object named as the item); with author `text` the line under it says "Kill Aean Swiftriver (rare elite)" or "From <name>"; a quest started by that item reads as one line ("Runed Scroll: kill Aean Swiftriver (rare elite)") |
 | profession, recipe, trainer | `professions.json` (skill line, recipe name, created item, reagents, recipe item; a trainer-taught `learn` gets every trainer of the rank that teaches it, both factions (a smart target), unless `npc <id>` names one). Classic profession names resolve without it. |
 | faction | `factions.json` by name (lowest id on ties) or id |
 | objective index | the quest's objective whose `id` matches the npc/item, when `quest Q` has no `.O` |
 | count | the linked objective's count |
 | Era frame flag `f = "e"` | when coordinates come from Era-frame data, or were typed in an `era` guide/goal |
 | spawn areas `spots` | every goal placed at an NPC or object that spawns at more than one place, and hand-placed `@x,y` goals whose target the data also knows: see "Spawn areas" below |
+| group content `group` | elite work, dungeon and raid quests and goals on an instance map: see "Group content" below |
 
 **Spawn areas.** Mobs, quest objects and some NPCs spawn at more than one
 place, and a player who finds nothing where the arrow led must be able to try
@@ -253,7 +257,7 @@ gets no `spots`.
   a walk from the goal's point, and the rest follow as alternatives. At runtime
   the player searches spot by spot: the arrow says "Search here" inside a spot
   (never "Arrived"), moves on to the nearest spot not visited lately once the
-  player leaves it, and the world map marks every spot.
+  player leaves it, and the map shades every region the spots cover.
 - **Hand-placed** (`@x,y`): the author's point is the spot the arrow takes,
   wide enough for any place of the target it stands in, and every other place
   the data knows follows as an alternative. Only where the data agrees: a point
@@ -264,6 +268,35 @@ gets no `spots`.
   point lies.
 
 See docs/ARCHITECTURE.md, Smart logic, "Spawn areas".
+
+## Group content
+
+Every goal that needs a group says so in the guide window, under the goal
+(once per card when several goals share it), and a guide with such a goal on
+its route (not `optional`) carries a "Group" chip in the guide menu. The
+compiler writes `group` on the goal, first match wins:
+
+1. the author's `group [N]`: `{ kind = "group", size = N }` ("Group of N
+   advised"; "Group advised" without `N`);
+2. a dungeon or raid: a goal with a quest (`accept`, `turnin`, `complete`, or
+   an objective goal with `quest`) that the simulator's solo filter counts as
+   a dungeon or raid quest (tools/lib/sim/solo.js): the quest's area in
+   `quests.json` lies in an instance, and its giver, its ender or one of its
+   objectives has no open-world spawn (a breadcrumb into the instance stays an
+   open-world quest); or a goal placed on a map drawn only on an instance:
+   `{ kind = "dungeon" | "raid", name = "Dire Maul" }` ("Dungeon: Dire Maul",
+   "Raid: Molten Core");
+3. elite work, the same test as the Leveling-guide elite rule (Validation): a
+   `kill` of an npc of rank 1–3 hostile to a side the goal applies to, or a
+   `collect` whose every located dropper is one: `{ kind = "elite", rank }`
+   ("Elite: group advised", "Rare elite: group advised", "Boss: group
+   advised").
+
+The instances come from the Forever client's `Map.csv`, `AreaTable.csv` and
+`UiMapAssignment.csv` in the `sources` folder beside the data folder
+(`data/sources/wago/<build>/` for `data/forever`; `data build` and `codex
+build` cache them). Without them only `group [N]` and elite work apply. The
+guide's `group = true` is set when any goal that is not `optional` has `group`.
 
 ## Validation
 
@@ -286,7 +319,7 @@ Errors:
 - `rep` standing outside 1–8 / Hated–Exalted; `craft` with both `xN` and `until`
 - empty quoted strings (names, titles, labels, notes)
 - `era`/`live` on a goal without typed coordinates
-- `choose`/`reward` without item ids, an item listed twice, a reward item missing from `items.json` without a name; malformed `money` or `xp`
+- `choose`/`reward` without item ids, an item listed twice, a reward item missing from `items.json` without a name; malformed `money` or `xp`; a `group` size that is not a whole number from 2 to 40
 - a smart target (`nearest`, `train <Profession>`, `train class`, `collect … nearest`) with no candidate
   in the data or with coordinates; `collect … nearest` without `xN` or with `quest`;
   `nearest`/`train class` with an `npc` (`train <Profession> npc <id>` keeps that
@@ -329,6 +362,17 @@ Warnings:
 - a `goto` right before a goal that already leads to the same place: the next
   goal (notes skipped) is located within 200 yards of the goto point, measured to
   the edge of its nearest spawn area (see `goto` under "Places")
+- a quest item that vanishes after a while (items.json `duration`, from the
+  Forever client's ItemSparse) carried longer than it lasts: from the goal
+  that gets it (an `accept` whose quest hands it over, a `collect`, a `buy`)
+  to a later `turnin` that needs it or `use` of it, timed from the latest
+  goal that got more of it (`buy 13320 x2` serves two turn-ins, the second
+  measured from the purchase), with the simulator's travel and kill times
+  over the guide's goals (docs/SIMULATION.md, "Keeping the guides' fixes"):
+  ``item 10439 (Durnan's Scalding Mornbrew) lasts 5 minutes, but the route
+  takes about 11:29 from here to the `turnin` that spends it (line 196)``.
+  Goals for other characters and `optional` ones are left out, so the
+  estimate errs short
 - a smart target with no candidate for a faction the goal applies to (and, for
   `train class`, for a class that faction's allowed races can be); a `train
   <Profession>` whose default rank needs more skill than any earlier `skill` target
@@ -342,6 +386,11 @@ Warnings:
   known places (`did you mean "Feathermoon Stronghold"?`). Inns and flight
   points come from `data/forever/travel.json`; without it (or without the
   inns or the flight points in it) those goals are not checked
+- a `|` in text the player sees (`title`, `folder`, `pitch`, `pro`, `con`,
+  `author`, step titles and tips, goal texts and notes, quoted names): it
+  prints literally in game
+- another pack's Era frame for a map Polestar's guides also use, with other
+  bounds: in game Polestar's wins, so coordinates on that map may be off
 - `lint` only, with a simulator world cached in `data/sim` (or `--sim <dir>`): a
   non-`optional` quest goal in a `Leveling` guide on a quest the solo filter
   excludes (dungeon, raid, pvp, rare drop, reputation, repeatable or profession;

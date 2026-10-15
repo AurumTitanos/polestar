@@ -237,10 +237,11 @@ function Compat.IsQuestTrivial(qlvl, level)
 	return qlvl <= greyLevel(level)
 end
 
-function Compat.GetItemCount(itemID)
+-- includeBank: the bank's too (a key left there still counts as owned).
+function Compat.GetItemCount(itemID, includeBank)
 	local fn = (C_Item and C_Item.GetItemCount) or GetItemCount
 	if not fn then return 0 end
-	return fn(itemID) or 0
+	return fn(itemID, includeBank and true or nil) or 0
 end
 
 -- The client's quality for an item (0 poor .. 7 heirloom), or nil while the
@@ -266,6 +267,71 @@ function Compat.ItemQualityHex(quality)
 	local c = type(colors) == "table" and colors[quality]
 	if type(c) ~= "table" or type(c.r) ~= "number" then return nil end
 	return string.format("ff%02x%02x%02x", math.floor(c.r * 255 + 0.5), math.floor(c.g * 255 + 0.5), math.floor(c.b * 255 + 0.5))
+end
+
+-- An item's icon (file id or path) from its id; the client knows it without
+-- the item being cached. nil when unknown.
+function Compat.ItemIcon(itemID)
+	local fn = type(itemID) == "number" and ((C_Item and C_Item.GetItemIconByID) or GetItemIcon)
+	if not fn then return nil end
+	local ok, icon = pcall(fn, itemID)
+	if ok and icon and not isSecret(icon) then return icon end
+	return nil
+end
+
+-- A spell's icon from its id, or nil.
+function Compat.SpellIcon(spellID)
+	local fn = type(spellID) == "number" and ((C_Spell and C_Spell.GetSpellTexture) or GetSpellTexture)
+	if not fn then return nil end
+	local ok, icon = pcall(fn, spellID)
+	if ok and icon and not isSecret(icon) then return icon end
+	return nil
+end
+
+-- An item's link ("|cff...|Hitem:...|h[Name]|h|r"), or nil while the item
+-- is not cached (C_Item.GetItemInfo answers only from the cache).
+function Compat.ItemLink(itemID)
+	local fn = type(itemID) == "number" and ((C_Item and C_Item.GetItemInfo) or GetItemInfo)
+	if not fn then return nil end
+	local ok, _, link = pcall(fn, itemID)
+	if ok and type(link) == "string" and not isSecret(link) then return link end
+	return nil
+end
+
+-- true when the item is in the client's cache; otherwise asks the server for
+-- it (GET_ITEM_INFO_RECEIVED fires with the item ID when it arrives) and
+-- returns false.
+function Compat.RequestItem(itemID)
+	if type(itemID) ~= "number" or not C_Item then return false end
+	local cached = C_Item.IsItemDataCachedByID
+	if cached then
+		local ok, yes = pcall(cached, itemID)
+		if ok and yes == true then return true end
+	end
+	if C_Item.RequestLoadItemDataByID then pcall(C_Item.RequestLoadItemDataByID, itemID) end
+	return false
+end
+
+-- A spell's chat link, or nil.
+function Compat.SpellLink(spellID)
+	local fn = type(spellID) == "number" and ((C_Spell and C_Spell.GetSpellLink) or GetSpellLink)
+	if not fn then return nil end
+	local ok, link = pcall(fn, spellID)
+	if ok and type(link) == "string" and not isSecret(link) then return link end
+	return nil
+end
+
+-- The spell twin of RequestItem: true when cached, else asks for it
+-- (SPELL_DATA_LOAD_RESULT fires with the spell ID) and returns false.
+function Compat.RequestSpell(spellID)
+	if type(spellID) ~= "number" or not C_Spell then return false end
+	local cached = C_Spell.IsSpellDataCached
+	if cached then
+		local ok, yes = pcall(cached, spellID)
+		if ok and yes == true then return true end
+	end
+	if C_Spell.RequestLoadSpellData then pcall(C_Spell.RequestLoadSpellData, spellID) end
+	return false
 end
 
 ---------------------------------------------------------------------------

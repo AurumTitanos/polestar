@@ -1,0 +1,122 @@
+guide forever/class/paladin/tyrs-watch
+title Tyr's Watch and Redemption
+category Class
+class Paladin
+folder Paladin
+faction Horde
+race Undead
+levels 9-13
+zone Tirisfal Glades
+keywords Tyr's Watch, Bandarion Keep, Danitha Morr, Breton Samuels, Shari Stilwell, A Lesson in Divinity, Redemption, Symbol of Life, Rudolph Gelhardt, Forsaken Paladin, class quest
+reward spell 7328 "Redemption"
+reward item 246164 246165
+reward item 246265
+why Redemption to raise fallen allies, plus a weapon and a shield for a new Forsaken paladin.
+
+# The Forsaken Paladin order at Bandarion Keep (Tyr's Watch), new in Forever:
+# A Second Home (91282) from Shari Stilwell in Brill, Murlocs at the Gates
+# (91285), Touring the Grounds (91294), Making Repairs (91316), The Tarnished
+# (91317) and A Token of Good Faith (95803, to Sylvanas), then the seven
+# A Lesson in Divinity quests (94427-94441) that end with Redemption.
+# Sources: quests.json, npcs.json, objects.json and items.json (Questie-Forever)
+# for givers, enders, objectives and spawns; Wowhead Forever's quest pages for
+# the order of the chain (the data has no prerequisites for these quests), the
+# rewards (Skullthumper or Driftwood Smasher, the Salvaged Wooden Tower Shield,
+# the Symbol of Life, Redemption from Danitha Morr) and where things are:
+# Bandarion Keep "on the bluffs just northwest of the Solliden Farmstead", the
+# Sturdy Lumber in a root cellar at Shadowvale, Deathguard Falgan at Venomweb
+# Vale, Billmuth "downstairs" in the keep.
+# The leveling guide (forever/horde/undead/01-tirisfal-glades) leaves this
+# chain out: three crossings of the glades for a spell solo leveling does not
+# need. Take this guide from Brill at level 9 (Shari offers A Second Home at
+# 8, The Tarnished needs 9); the Redemption half needs level 12. Danitha Morr
+# also starts the level 18 chain in Silverpine
+# (forever/class/paladin/lumina-windsinger).
+
+# ---------------------------------------------------------------- Bandarion Keep
+
+step Shari Stilwell
+  tip Shari Stilwell, who trains Paladins in Brill, sends you to the order's keep on the west coast.
+  accept 91282                        -- Shari Stilwell, Brill
+
+step Bandarion Keep
+  tip Bandarion Keep stands on the bluffs north-west of the Solliden Farmstead. Breton Samuels waits at the gate.
+  turnin 91282                        -- Breton Samuels
+  accept 91285
+
+step Murlocs at the Gates
+  tip The Vile Fin murlocs lurk on the bluffs along the road east of the keep and in the camps around the lake to the west.
+  kill 250283 quest 91285.1           -- Vile Fin Attackers
+  kill 250282 quest 91285.2           -- Vile Fin Seers
+
+step Touring the Grounds
+  turnin 91285 choose 246164 246165   -- Breton Samuels
+  accept 91294
+  talk 246389                         -- Hilda the Breaker
+  talk 246393                         -- Jorin Croge
+  talk 246394                         -- Ander Solliden
+
+step Danitha Morr
+  tip Danitha Morr leads the order from inside the keep; Jorin Croge stands beside it.
+  turnin 91294                        -- Danitha Morr
+  accept 91317
+  accept 91316                        -- Jorin Croge
+
+step Shadowvale
+  tip The Tarnished hold the ruined village of Shadowvale in the Whispering Forest, south-west of the keep. The Sturdy Lumber is piled in the root cellar of one of its houses; Commander Rudolph Gelhardt walks among his Tarnished.
+  collect 246213 quest 91316.1        -- Lumber Pile, in the root cellar
+  kill 259434 quest 91317.1           -- Tarnished Drudges
+  kill 259433 quest 91317.2           -- Tarnished Zealots
+  collect 270435 quest 91317.3        -- Rudolph Gelhardt's Head
+
+step Back to the keep
+  turnin 91316 choose 246265          -- Jorin Croge
+  turnin 91317                        -- Danitha Morr
+  accept 95803
+
+# ---------------------------------------------------------------- A Lesson in Divinity
+
+step A Lesson in Divinity
+  tip Danitha offers the first Lesson in Divinity at level 12.
+  level 12
+  accept 94427                        -- Danitha Morr
+
+step The Undercity
+  zone Undercity
+  tip Walk south from Brill to the Ruins of Lordaeron and down into the Undercity. Lady Sylvanas Windrunner holds court in the Royal Quarter; Tanis Alderwood begs in the Trade Quarter.
+  turnin 95803                        -- Lady Sylvanas Windrunner
+  turnin 94427                        -- Tanis Alderwood
+  accept 94434
+
+step Linen Cloth
+  zone Tirisfal Glades
+  tip Tanis needs 10 Linen Cloth. Scarlet Zealots and Scarlet Friars drop it about three times in ten; bring it along if you already carry some.
+  collect 2589 quest 94434.1
+
+step Tanis Alderwood
+  zone Undercity
+  turnin 94434
+  accept 94435
+
+step The Symbol of Life
+  zone Tirisfal Glades
+  tip Back to Bandarion Keep. Danitha gives you the Symbol of Life; Deathguard Billmuth waits downstairs in the keep.
+  turnin 94435                        -- Danitha Morr: Symbol of Life
+  accept 94436
+  turnin 94436                        -- Deathguard Billmuth
+  accept 94438
+
+step Deathguard Falgan
+  tip Venomweb Vale is at the far east end of the glades. Use the Symbol of Life on Deathguard Falgan, then speak to him. If you lose the symbol, Danitha Morr gives you another.
+  turnin 94438                        -- Deathguard Falgan
+  accept 94440
+
+step The Scarlet attack plans
+  tip The Scarlet Crusaders camped around Venomweb Vale carry the attack plans.
+  collect 264693 quest 94440.1
+
+step Redemption
+  tip Back to Bandarion Keep: Billmuth takes the plans, Danitha teaches you Redemption.
+  turnin 94440                        -- Deathguard Billmuth
+  accept 94441
+  turnin 94441                        -- Danitha Morr: Redemption

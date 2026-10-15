@@ -52,7 +52,9 @@
 # Duthorian Rall in Stormwind; Warlocks take Summon Felsteed (4488) from
 # Demisette Cloyce and hand it in at Ratchet at the end of the next guide.
 # Warriors finish The Islander and The Affray (1718, 1719, Berserker Stance)
-# on Fray Island on the ride to Ratchet.
+# on Fray Island on the ride to Ratchet; Klannoc's follow-up, The Windwatcher
+# (1791) and the Whirlwind weapon chain with its elite, is left to the Class
+# guide forever/class/warrior/whirlwind-weapon (a note at The Affray says so).
 # Class training: Stormwind; Shamans at the Ironforge stop at the end.
 # Riding: the Stormwind stop at about 42 is the first city after 40. Each race
 # is pointed to its own riding trainer and mount vendor: Humans to Randal
@@ -64,6 +66,11 @@
 # any race learn from any riding trainer (unconfirmed). Every goal is
 # optional (100g).
 # The Bloodsail captains (608) are optional: 45-48 on decks of 42-45 pirates.
+# Added: My Little Friends (93176, Forever, from 30-40/05-arathi-highlands):
+# the Arbor Tarantula (data spawn 43-44,17-19) is caught on the ride to the
+# Rebel Camp and the quest is handed to Amaryllis Webb on the Swamp stop, as
+# the consensus does (42.9); based on data, not play (Forever above 30 is
+# unchecked until 4 November).
 guide forever/alliance/40-50/01-stranglethorn-vale
 title Stranglethorn Vale, Dustwallow Marsh & Swamp of Sorrows
 faction Alliance
@@ -184,6 +191,7 @@ step The Affray
   accept 1719
   complete 1719                           -- Defeat the challengers and Big Will
   turnin 1719                             -- Klannoc Macleod: Berserker Stance
+  note Klannoc offers The Windwatcher next (1791): the Whirlwind weapon chain, with an elite at the end, is in the Warrior class guide Whirlwind Weapon.
 
 step Ratchet
   zone The Barrens
@@ -313,7 +321,8 @@ step The north-west coast
   collect 4034 quest 611              -- Stone of the Tides
 
 step Rebel Camp
-  tip Ride north-east past Nesingwary's camp and follow the road north to the camp at the top of the vale.
+  tip Ride north-east past Nesingwary's camp and follow the road north to the camp at the top of the vale. On the way, an Arbor Tarantula crawls in the jungle south-east of Nesingwary's camp: catch one with the Entomology Starter Kit, then tick it off.
+  kill 217588                         -- Arbor Tarantula: catch it, for My Little Friends
   turnin 622                          -- Corporal Kaleb
 
 step Booty Bay
@@ -399,9 +408,10 @@ step Misty Reed Strand
   collect 6146 quest 1398             -- Sundried Driftwood
 
 step Watcher Biggs
-  tip Ride back west along the road.
+  tip Ride back west along the road; Amaryllis Webb stands a short way north of Biggs.
   turnin 1398
   accept 1425                         -- for Nethergarde Keep: keep it
+  turnin 93176                        -- Amaryllis Webb: My Little Friends, from 30-40/05-arathi-highlands
 
 # ---------------------------------------------------------------- Stormwind and Ironforge
 

@@ -6,7 +6,12 @@ zone Desolace
 next forever/horde/30-40/02-stranglethorn-vale
 
 # Consensus route (Horde Tauren export), visits 16-23 (Orgrimmar 30.4 to
-# Alterac Mountains 32.9), shared by every Horde start.
+# Alterac Mountains 32.9) of the export it was written from, shared by every
+# Horde start. The October refresh's export (visits 16-21: Dustwallow 30.4,
+# Thunder Bluff, Orgrimmar, Desolace 30.8-32.3, Hillsbrad, Alterac 32.9) has
+# the same Desolace and Hillsbrad quests; the notes below say where it
+# differs. Forever above 30 cannot be checked in game until launch on 4
+# November: this guide follows the data, not play.
 #
 # Flow: Freewind Post (where the previous guide ends) -> fly to Orgrimmar
 # (Alliance Relations, training) -> fly to Sun Rock Retreat -> ride into
@@ -32,26 +37,32 @@ next forever/horde/30-40/02-stranglethorn-vale
 #   Alchemy item no vendor sells. Without one, skip the whole chain.
 #
 # Deviations from the export:
-# - The export's first Stranglethorn stop (visit 17, level 30.4: Welcome to
+# - Stranglethorn: the old export's first stop there (level 30.4: Welcome to
 #   the Jungle 583, Tiger Mastery 185, Panther Mastery 190, the Booty Bay
-#   flight path) is merged into the Stranglethorn visit of the next guide:
-#   the same camp, two zeppelin rides shorter. Its Booty Bay and Thunder
-#   Bluff binds are dropped (replaced before use).
-# - The Thunder Bluff stop (visit 18) is dropped: a flight detour for two
-#   small hand-ins, Sacred Fire (5062) and Melor Sends Word (1130). It also
-#   accepted The Sacred Flame (1195) and Steelsnap (1131), which the export
-#   never turns in. Druids and Paladins still fly there to train (below).
-# - Stonetalon and the Undercity hand-in (visits 20-21) dropped: Test of Lore
+#   flight path) is merged into the Stranglethorn visit of the next guide;
+#   the refreshed export now does the same.
+# - The Thunder Bluff stop (refreshed export visit 17, before Orgrimmar) is
+#   dropped: a flight detour for small hand-ins, Sacred Fire (5062), Melor
+#   Sends Word (1130) and Steelsnap (1131). It also accepts The Sacred Flame
+#   (1195), which the export never turns in. Druids and Paladins still fly
+#   there to train (below).
+# - Stonetalon and the Undercity hand-in (the old export's visits 20-21)
+#   stay dropped, and the refreshed export drops them too: Test of Lore
 #   (1152, 1154, 6627, 1159) needs the Legacy of the Aspects from
 #   south-eastern Ashenvale, two Talondeep Path crossings from Braug
-#   Dimspirit (the export counts it as found on the spot), for under a tenth
-#   of a level. Ordanus (1088) is only accepted there.
+#   Dimspirit, for under a tenth of a level. Ordanus (1088) is only accepted
+#   there.
+# - Hillsbrad: the refreshed export also runs Elixir of Agony (509, 513),
+#   Dangerous! (567) and Battle of Hillsbrad (539) here; forever/horde/06-
+#   hillsbrad-foothills already does them around level 23.
 # - Centaur clans dropped: Magram Alliance and Gelkis Alliance (1367, 1368)
 #   need Friendly standing, earned only by killing the rival clan (+20 per
 #   kill, and -100 with the clan you kill), so the export's plan to serve
 #   both clans cannot work; their follow-ups Broken Tears (1369), Stealing
 #   Supplies (1370), Gizmo for Warug (1371, an Engineering target dummy),
-#   Khan Shaka (1375) and Ongeku (1373, only accepted) go with them.
+#   Khan Shaka (1375) and Ongeku (1373, only accepted) go with them. Forever
+#   continues both chains from Valley of Bones (93034 and on), which need
+#   Honored: left out too, see forever/horde/30-40/04-dustwallow-marsh.
 # - Shadowprey bind and hearth dropped: the ride from Ghost Walker Post back
 #   to Shadowprey runs past the Gelkis grind, and the hearth stays free for
 #   the Hillsbrad keg.
@@ -63,14 +74,16 @@ next forever/horde/30-40/02-stranglethorn-vale
 #   Tarren Mill visit.
 # - Helcular's Revenge part 2 (553) is not taken: the export leaves it open,
 #   and Helcular's grave is in Southshore's graveyard.
-# - Blood in the Streets (92434) and Key to the City (93680) left out: steps
-#   of the City of Dalaran dungeon chain (92434 opens only after Dalaran
-#   Patrols, 545, which the route does not do).
+# - Blood in the Streets (92434) and Key to the City (93680), which the
+#   refreshed export takes at Tarren Mill, stay out: they lead into the new
+#   City of Dalaran dungeon (wowforevertalents.com: the Grimy Key from the
+#   internment camp opens its sewers), the data has no place for the Grimy
+#   Key and no XP for 93680, and 92434 (270 XP) ends at the sewer entrance
+#   on Lordamere Lake's Silverpine shore, off this route.
 # - Warsong Supplies (6571): the export lists its objectives here but never
 #   turns it in; left out. Alliance Relations part 4 (1436) is only accepted.
 #
-# Class quests (a short Shaman and Warlock hop from Orgrimmar before Sun Rock
-# Retreat):
+# Class quests (a short Shaman hop from Orgrimmar before Sun Rock Retreat):
 # - Shaman: Call of Air (1531) from Searn Firewarder in Orgrimmar to Prate
 #   Cloudseer by Freewind Post (Air Totem). Call of Water: Islen Waterseer
 #   south of Ratchet takes the Vial of Purest Water (220, from Brine) and
@@ -78,11 +91,14 @@ next forever/horde/30-40/02-stranglethorn-vale
 #   Sepulcher, beat the Corrupt Manifestation of Water at the Brazier of
 #   Everfount and take the Shard of Water (100, 96) back to Islen from
 #   Stranglethorn (forever/horde/30-40/02-stranglethorn-vale).
-# - Warlock: the Felhunter starts here: Seeking Strahad (2996, Gan'rul) to
-#   Strahad Farsan in Ratchet, Tome of the Cabal (1801) to Jorah Annison in the
-#   Undercity, then the Moldy Tome on the Hillsbrad coast past the Torn Fin
-#   murlocs (1803; the Tattered Manuscript waits in Thousand Needles, from
-#   Stranglethorn).
+#   Call of Air's follow-ups (Elemental Aid to The Tempest's Weapons, 33-40)
+#   are in forever/class/shaman/call-of-air-horde: Forever moved Elemental
+#   Aid's start (79360) to Prate, so his step points there.
+# - Warlock: the Felhunter chain (2996/3001, 1801, 1803, 1805, 1795) runs
+#   between Orgrimmar, Ratchet, the Undercity, the Hillsbrad coast, Thousand
+#   Needles and the Wetlands: a long standalone chain, in
+#   forever/class/warlock/felhunter-horde. Its Orgrimmar, Ratchet, Undercity
+#   and Moldy Tome steps left this guide for it.
 # - Warrior: Berserker Stance (The Islander 1718, The Affray 1719) waits for
 #   forever/horde/30-40/03-arathi-highlands: Big Will is level 33.
 #
@@ -94,6 +110,11 @@ next forever/horde/30-40/02-stranglethorn-vale
 # Carried on: Hunting in Stranglethorn (5763) for Hemet Nesingwary in the
 # next guide; The Hammer May Fall (676) for Hammerfall and Regthar Deathgate
 # (1361) for the Barrens, later on the route.
+#
+# Skyborne: Exploring the Horde (93739, from Thrall in forever/horde/03-
+# silverpine-forest; its four leader visits end in forever/horde/07-
+# ashenvale) is handed to Thrall on the Orgrimmar stop at the start; it is
+# optional there, as in those guides.
 
 # ---------------------------------------------------------------- Orgrimmar
 
@@ -103,10 +124,11 @@ step Fly to Orgrimmar
   fly "Orgrimmar"
 
 step Alliance Relations
-  tip Craven Drok waits in the Drag; Keldran stands in the Valley of Spirits on the west side of the city.
+  tip Craven Drok waits in the Drag; Keldran stands in the Valley of Spirits on the west side of the city. Skyborne: Thrall waits in Grommash Hold, in the Valley of Wisdom.
   accept 1431                         -- Craven Drok
   turnin 1431                         -- Keldran
   accept 1432
+  turnin 93739 optional only Skyborne -- Thrall, Grommash Hold, if you carry it
 
 step Train
   only Warrior,Hunter,Rogue,Priest,Shaman,Mage,Warlock
@@ -121,20 +143,17 @@ step Thunder Bluff
   train class
 
 step Orgrimmar class quests
-  only Shaman,Warlock
-  tip Searn Firewarder stands in the Valley of Wisdom; Gan'rul Bloodeye in the Cleft of Shadow, under the Valley of Strength.
-  accept 1531 only Shaman             -- Searn Firewarder
-  accept 2996 only Warlock            -- Gan'rul Bloodeye
+  only Shaman
+  tip Searn Firewarder stands in the Valley of Wisdom.
+  accept 1531                         -- Searn Firewarder
 
 step Ratchet
-  only Shaman,Warlock
+  only Shaman
   zone The Barrens
-  tip Fly to Ratchet. Strahad Farsan stands on the hill in town; Islen Waterseer camps on the coast a short ride south of it.
+  tip Fly to Ratchet. Islen Waterseer camps on the coast a short ride south of the town.
   fly "Ratchet"
-  turnin 2996 only Warlock            -- Strahad Farsan
-  accept 1801 only Warlock
-  turnin 220 only Shaman              -- Islen Waterseer
-  accept 63 only Shaman
+  turnin 220                          -- Islen Waterseer
+  accept 63
 
 step Prate Cloudseer
   only Shaman
@@ -142,6 +161,7 @@ step Prate Cloudseer
   tip Fly to Freewind Post. Prate Cloudseer hides in a small cave in the canyon wall north-east of the post.
   fly "Freewind Post"
   turnin 1531                         -- Prate Cloudseer: your Air Totem
+  note Prate also starts Elemental Aid (Razorfen Kraul), the 33-40 chain to The Tempest's Weapons: forever/class/shaman/call-of-air-horde.
 
 step Fly to Sun Rock Retreat
   zone Stonetalon Mountains
@@ -285,13 +305,6 @@ step Zeppelin to the Undercity
   tip Leave Orgrimmar by the main gate; the zeppelin tower stands just north-east of it. Take the Undercity zeppelin.
   goto 50.8,13.5 "Zeppelin tower"
 
-step Jorah Annison
-  only Warlock
-  zone Undercity
-  tip Jorah Annison stands in the Magic Quarter.
-  turnin 1801                         -- Jorah Annison
-  accept 1803
-
 step Garen Largo
   only Paladin
   zone Undercity
@@ -337,11 +350,6 @@ step Torn Fin murlocs
   tip Follow the shore west past Southshore's bay; the Torn Fin murlocs camp on the beaches beyond it.
   goto 36.0,68.0 "Torn Fin beach"
   collect 3510 quest 515.3 optional
-
-step Moldy Tome
-  only Warlock
-  tip The Moldy Tome lies on the shore a little further west, past the murloc camps.
-  collect 6931 quest 1803.1
 
 step Apothecary Lydon
   tip Ride back north to Tarren Mill, keeping west of Southshore.

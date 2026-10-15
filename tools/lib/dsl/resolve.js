@@ -19,6 +19,11 @@ const { objectiveLabel } = require('./data');
 const { checkLocation } = require('./places');
 const { blockingPrereqs } = require('../data/prereqs');
 const { clusterPoints, scaleOf } = require('../questdb/cluster');
+const { groupOf } = require('./group');
+
+// A collect's sources are named only for an item that few creatures or
+// objects drop (at 2% or more, with spawns); past this it drops everywhere.
+const MAX_NAMED_SOURCES = 8;
 
 // Standard rank caps and the skill each rank can first be trained at (Classic).
 const RANK_CAPS = [75, 150, 225, 300];
@@ -374,6 +379,31 @@ function resolveGuide(ast, data, diag, opts = {}) {
 			if (haveItems && !data.item(id)) warn(ast.lines.collects, `\`collects\` item ${id} is not in data (new Forever content?)`);
 		}
 	}
+	// `reward` / `why`: what the guide's goal gives and why it is worth it,
+	// shown in the guide menu. Display only: an item's name from the line,
+	// else items.json (an id with neither is an error); a spell needs its name.
+	if (h.reward) {
+		guide.reward = h.reward.map((e) => {
+			if (e.text !== undefined) return { text: e.text };
+			if (e.spell !== undefined) {
+				if (!e.spellName) err(e.line, `reward spell ${e.spell} needs its name: \`reward spell ${e.spell} "Spell name"\``);
+				return { spell: e.spell, spellName: e.spellName };
+			}
+			const known = data.item(e.item);
+			const out = { item: e.item };
+			const name = e.itemName || (known && known.name ? String(known.name) : null);
+			if (!name) err(e.line, `reward item ${e.item} is not in data; give its name: \`${e.item} "Item name"\``, FIND_ID_HINT);
+			else out.itemName = name;
+			setIf(out, 'quality', e.quality);
+			if (e.choice) out.choice = true;
+			return out;
+		});
+	}
+	setIf(guide, 'why', h.why);
+	if (guide.category === 'Class') {
+		if (!h.reward) warn(ast.line, 'a Class guide needs `reward`: what its chain gives (`reward item <id>`, `reward spell <id> "Name"` or `reward text <words>`), shown in the guide menu');
+		if (!h.why) warn(ast.line, 'a Class guide needs `why`: one short line on why the chain is worth doing, shown in the guide menu');
+	}
 	const hz = resolveZone(h.zone);
 	if (hz) {
 		guide.zone = hz.id;
@@ -438,6 +468,20 @@ function resolveGuide(ast, data, diag, opts = {}) {
 			hidden(goal, '_line', g.line);
 			hidden(goal, '_only', g.only || null);
 			step.goals.push(goal);
+			// Leveling guides are for every character: a goal only those with a
+			// profession see should be optional, unless the guide trains it first
+			// (and levels it to the quest's rank above 1).
+			if (guide.category === 'Leveling' && goal.profLine !== undefined && !goal.optional) {
+				const prog = profProgress.get(goal.profLine);
+				if (!prog || !(prog.target >= goal.profRank || (prog.rank >= 1 && goal.profRank <= 1))) {
+					const prof = `${goal.profName || `skill ${goal.profLine}`} ${goal.profRank}`;
+					warn(
+						g.line,
+						`quest ${goal.quest} (${goal.title || 'untitled'}) needs ${prof}, and the guide does not train it before here: characters without it never see this goal`,
+						`make the goal \`optional\`, or \`train ${goal.profName || '<Profession>'}\` earlier in the guide`,
+					);
+				}
+			}
 			if (goal.map !== undefined && zoneId !== null && goal.map !== zoneId && !zonesSet.has(goal.map)) {
 				const name = (id) => {
 					const z = data.zone(id);
@@ -456,6 +500,8 @@ function resolveGuide(ast, data, diag, opts = {}) {
 		}
 		guide.steps.push(step);
 	}
+	// The guide menu's "Group" chip: some goal of the route needs a group.
+	if (guide.steps.some((s) => s.goals.some((goal) => goal.group && !goal.optional))) guide.group = true;
 	return guide;
 }
 
@@ -465,7 +511,7 @@ function objectiveFor(q, kind, id) {
 	return idx < 0 ? null : idx + 1;
 }
 
-const CATEGORIES = ['Leveling', 'Professions', 'Reputation', 'Legacy', 'Exploration', 'Collectibles', 'Dungeons'];
+const CATEGORIES = ['Leveling', 'Class', 'Professions', 'Reputation', 'Legacy', 'Exploration', 'Collectibles', 'Dungeons'];
 
 // Documented categories are matched case-insensitively; others pass through with a warning.
 function canonicalCategory(raw, ast, warn) {
@@ -746,12 +792,17 @@ function resolveGoal(g, zoneMap, prev, data, err, warn, ctx = { sides: ['Allianc
 				break;
 			}
 			candidates = sources.filter((s) => data.spawns(s.kind, s.id).length);
-			// The one source that matters, named for the reading flow ("Kill Aean
-			// Swiftriver (rare elite)"): only outside a quest objective (those name
-			// their mobs through the quest), and only when a single located source
-			// has it or one drops it at 50% or more. `fromFaction` lets the engine
-			// tell an enemy from a friend of the character's faction.
-			if (g.quest === undefined && candidates.length && (candidates.length === 1 || candidates[0].chance >= 50)) {
+			// The sources that matter, named for the reading flow ("Kill Aean
+			// Swiftriver (rare elite)", "Kill Grell or Grellkin"): the item's
+			// game objective only says "Fel Moss: 0/8", so quest objectives get
+			// them too. Named only when a single located source has it or one
+			// drops it at 50% or more; a second of the same kind at 50% or more
+			// is named beside it (`fromAlso`). Not for an item that drops all
+			// over the world (cloth: hundreds of droppers, where a guard's 100%
+			// says nothing about where to farm it). `fromFaction` lets the
+			// engine tell an enemy from a friend of the character's faction.
+			const widespread = candidates.filter((s) => s.chance >= 2).length > MAX_NAMED_SOURCES;
+			if (!widespread && candidates.length && (candidates.length === 1 || candidates[0].chance >= 50)) {
 				const top = candidates[0];
 				const rec = top.kind === 'npc' ? data.npc(top.id) : data.object(top.id);
 				if (rec && rec.name) {
@@ -761,6 +812,9 @@ function resolveGoal(g, zoneMap, prev, data, err, warn, ctx = { sides: ['Allianc
 						if (Number(rec.rank) > 0) goal.fromRank = Number(rec.rank);
 						if (['A', 'H', 'AH'].includes(rec.faction)) goal.fromFaction = rec.faction;
 					}
+					const next = candidates[1];
+					const nrec = next && next.kind === top.kind && next.chance >= 50 && (next.kind === 'npc' ? data.npc(next.id) : data.object(next.id));
+					if (nrec && nrec.name && String(nrec.name) !== goal.from) goal.fromAlso = String(nrec.name);
 				}
 			}
 			// The 50-yard check only compares with real sources: anything dropping the
@@ -1013,6 +1067,19 @@ function resolveGoal(g, zoneMap, prev, data, err, warn, ctx = { sides: ['Allianc
 		if (oi !== undefined) goal.oi = oi;
 	}
 	if ((v === 'kill' || v === 'collect') && g.count !== undefined) goal.count = g.count;
+	// A quest only characters with a profession can take (quests.json `skill`
+	// and `skillLevel`, rank 1 when the level is unknown): every goal of it is
+	// for them only, as another class's goals are not this character's.
+	if (goal.quest !== undefined) {
+		const q = data.quest(goal.quest);
+		const line = q ? Number(q.skill) : 0;
+		if (Number.isInteger(line) && line > 0) {
+			const p = data.profession(line);
+			goal.profLine = line;
+			setIf(goal, 'profName', p && p.name ? String(p.name) : undefined);
+			goal.profRank = Number(q.skillLevel) > 0 ? Number(q.skillLevel) : 1;
+		}
+	}
 
 	// Explicit display text, note, flags.
 	if (g.text !== undefined) goal.text = g.text;
@@ -1098,6 +1165,8 @@ function resolveGoal(g, zoneMap, prev, data, err, warn, ctx = { sides: ['Allianc
 	}
 	if (g.r !== undefined) goal.r = g.r;
 	if (g.optional) goal.optional = true;
+	// Group content (group.js): the author's `group [N]`, else derived.
+	setIf(goal, 'group', groupOf(goal, g.group, ctx.sides, data));
 	setIf(goal, 'only', onlyOf(g.only));
 	setIf(goal, 'note', g.note);
 

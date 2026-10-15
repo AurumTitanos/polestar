@@ -23,10 +23,14 @@ Before the first `step`. `guide`, `title`, `levels` and `zone` are required.
 | `faction <Faction>` | Only for `Alliance` or `Horde` characters | `faction Alliance` |
 | `race <Race>, ...` | Only for these races (see Conditions) | `race Human, Dwarf` |
 | `class <Class>, ...` | Only for these classes | `class Warrior, Paladin` |
-| `category <Category>` | The guide menu category: `Leveling` (default), `Professions`, `Reputation`, `Legacy`, `Exploration`, `Collectibles` or `Dungeons` | `category Professions` |
+| `category <Category>` | The guide menu category: `Leveling` (default), `Class`, `Professions`, `Reputation`, `Legacy`, `Exploration`, `Collectibles` or `Dungeons` | `category Professions` |
 | `folder <text>` | The guide menu folder to list it under | `folder Mounts · Level 40` |
 | `keywords <word>, ...` | Extra words the guide menu search finds it by | `keywords wolf, meat` |
 | `collects <item>, ...` | Items the guide obtains; Lookup opens this guide for them | `collects 750` |
+| `reward item <item> ...` | What the guide's goal gives, shown with its icon in the guide menu; several items on one line are a choice of one; repeatable | `reward item 1251 2581` |
+| `reward spell <id> "Name"` | A spell the goal teaches (a mount, a form, a demon) | `reward spell 5784 "Summon Felsteed"` |
+| `reward text <words>` | A reward without an id | `reward text Shen'dralar reputation` |
+| `why <text>` | One short line in the guide menu: why the goal is worth doing (Class guides need it and `reward`) | `why Your own mount at 40.` |
 | `author <name>` | Credits a guide to someone other than the pack's author | `author Joe` |
 | `version <N>` | A whole number you raise when the guide changes (default 1) | `version 2` |
 | `coords era` / `coords live` | The map frame of the coordinates you type (default `era`; `record draft` writes `live`) | `coords live` |
@@ -142,6 +146,7 @@ is a Dwarf who is a Warrior or a Paladin.
 | Line | What it does | Example |
 |---|---|---|
 | `optional` | After a goal: the step can be finished without it | `kill 299 optional` |
+| `group [N]` | After a goal: it needs a group (of N players, 2-40); the guide window says so. Elites, dungeon and raid quests are found from the data without it | `kill 299 group 3` |
 
 ## Handing over with `next`
 

@@ -1,0 +1,36 @@
+guide forever/class/mage/ju-ju-heaps
+title Ju-Ju Heaps
+category Class
+class Mage
+folder Mage
+faction Horde
+levels 10-12
+zone Durotar
+keywords Un'thuwa, Uthel'nay, Thurston Xane, Sen'jin Village, Echo Isles, Zalazane, Ley Staff, Ley Orb, Mage, class weapon
+reward item 9513 7508
+why A staff or an orb at 10 for Horde mages, worth a short trip back to the Echo Isles.
+
+# Ju-Ju Heaps (1884): the level 10 Horde mage quest from Un'thuwa in Sen'jin
+# Village, for a Ley Staff or Ley Orb.
+# Sources: quests.json, npcs.json and objects.json (Un'Thuwa, the Ju-Ju Heaps on
+# the Echo Isles); Wowhead Forever (https://www.wowhead.com/forever/quest=1884,
+# checked 2026-10-14) for the races (Orc, Undead, Troll) and the reward choice;
+# the quest text for Zalazane's huts.
+# Why a Class guide: the Durotar route (horde/orc-troll/01-durotar) crosses the
+# Echo Isles at about level 8, before the quest opens, and leaves for the
+# Barrens from Razor Hill at 12; going back south for it costs a separate trip.
+# Undead mages take their own level 10 quest, The Balnir Farmstead (1882), in
+# Tirisfal. The breadcrumb Speak with Un'thuwa (1883, Uthel'nay in Orgrimmar or
+# Thurston Xane in Thunder Bluff) is not needed: Un'thuwa offers Ju-Ju Heaps
+# without it.
+
+step Un'thuwa
+  tip Un'thuwa stands in Sen'jin Village, on the Durotar coast south of Razor Hill.
+  accept 1884                                 -- Un'Thuwa
+
+step The Ju-Ju Heaps
+  tip Wade across to the Echo Isles, south-east of Sen'jin. Zalazane placed the heaps among his huts on the main isle: click a heap to destroy it.
+  interact 102986 quest 1884.1                -- Ju-Ju Heap
+
+step Back to Un'thuwa
+  turnin 1884 choose 9513 7508                -- Un'Thuwa

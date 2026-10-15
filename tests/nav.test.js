@@ -470,6 +470,169 @@ test('the other places a target spawns are marked fainter and smaller, and say s
 	assert.ok(alt[2] < camp[2], `the alt mark is smaller (${alt[2]} vs ${camp[2]})`);
 });
 
+test("the regions the step's open goals spawn in are on the map; the target's goal's on the minimap too", () => {
+	const [out] = run(`${SEARCH}
+		spots[2].x, spots[2].y = select(2, nav.mapPoint(0, 250))        -- 250 yd west: its region reaches into the minimap
+		spots[3].alt = true
+		local function spot(wx, wy, r, alt)
+			local _, x, y = nav.mapPoint(wx, wy)
+			return { x = x, y = y, r = r, n = 3, alt = alt }
+		end
+		local guide = { steps = { { goals = {
+			{ t = "collect", map = 9000, spots = spots },
+			{ t = "kill", map = 9000, spots = { spot(100, 100, 40), spot(150, -150, 30), spot(-300, 0, 15, true) } },
+			{ t = "kill", map = 9000, spots = { spot(-100, -100, 40) } },
+			{ t = "goto", map = 9000, x = 40, y = 40 },
+		} } } }
+		function nav.Engine.GetGuide() return guide end
+		nav.engine.views[1] = { index = 1, goals = {
+			{ index = 1, status = "active", text = "Collect Raptor Head", map = 9000, x = spots[1].x, y = spots[1].y },
+			{ index = 2, status = "active", text = "Kill Raptors", map = 9000, x = 45, y = 45 },
+			{ index = 3, status = "done", text = "Kill Boars", map = 9000, x = 55, y = 55 },
+			{ index = 4, status = "pending", text = "Go there", map = 9000, x = 40, y = 40 },
+		} }
+		local function alphas(layer)
+			local r = {}
+			for _, p in ipairs(Pins.GetLayer(layer) or {}) do r[#r + 1] = { #p.hull / 2, math.floor(p.color[4] * 100 + 0.5), p.areaOnly } end
+			return r
+		end
+		local function minimap()
+			return { #Pins.GetMinimapAreas("nav.target"), #Pins.GetMinimapHulls("nav.areas"), #Pins.GetMinimapHulls("nav.goalAreas") }
+		end
+		nav.setWaypoint(searchWp(1))
+		nav.showWorldMap(9000)
+		stub.advance(0.3)
+		local r = {}
+		r.world = { #nav.pins("PolestarPinsHullTemplate"), #nav.pins("PolestarPinsAreaTemplate") }
+		r.own, r.others = alphas("nav.areas"), alphas("nav.goalAreas")
+		local ar, ag, ab = N.RGB("arrow")
+		local pr = N.RGB("place")
+		r.ownColor = Pins.GetLayer("nav.areas")[1].color[1] == ar and Pins.GetLayer("nav.areas")[1].color[3] == ab
+		r.otherColor = Pins.GetLayer("nav.goalAreas")[1].color[1] == pr
+		r.minimap = minimap()
+		N.NextSpot(2)                                                    -- the target moves on: the regions stay
+		stub.advance(0.3)
+		r.cycled = { N.GetTarget().spot, #Pins.GetLayer("nav.areas"), Pins.GetLayer("nav.target")[1].area == nil }
+		N.SetTarget(9000, 30, 30, "Somewhere")                          -- a point picked by hand: every goal's regions in the goals' colour
+		stub.advance(0.3)
+		r.manual = { Pins.GetLayer("nav.areas") ~= nil, #Pins.GetLayer("nav.goalAreas") }
+		N.ReleaseTarget()
+		Polestar.Set("nav.minimapPins", false)
+		stub.advance(0.3)
+		r.minimapOff = minimap()
+		Polestar.Set("nav.worldPins", false)
+		r.worldOff = #nav.pins("PolestarPinsHullTemplate")
+		emit(r)`);
+	assert.deepEqual(out.world, [6, 0], "every open goal's regions, none for a done goal; no disc under the target: its region covers it");
+	assert.deepEqual(out.own, [[8, 100, true], [8, 100, true], [8, 60, true]], "the target's goal: a region per place (too far apart to join; small ones are 8-gons), the other places it spawns fainter");
+	assert.deepEqual(out.others, [[8, 60, true], [8, 60, true], [8, 35, true]], "the other goal's regions, a step fainter");
+	assert.equal(out.ownColor, true, "the target's goal wears the arrow's colour");
+	assert.equal(out.otherColor, true, "the other goals wear their pins' colour");
+	assert.deepEqual(out.minimap, [0, 3, 0], "the minimap: the target's goal's regions in reach, not the other goals'");
+	assert.deepEqual(out.cycled, [2, 3, true]);
+	assert.deepEqual(out.manual, [false, 6]);
+	assert.deepEqual(out.minimapOff, [0, 0, 0]);
+	assert.equal(out.worldOff, 0);
+});
+
+// Teldrassil's "The Balance of Nature" as the pack compiles it (Era frame
+// of map 1438: 5092 x 3394 yd).
+const TELDRASSIL = `
+local frame = { c = 1, left = 3814.583, right = -1277.083, top = 11831.25, bottom = 8437.5 }
+nav.era[1438], nav.maps[1438] = frame, frame
+local goals = {
+	{ t = "kill", quest = 456, target = "Young Nightsaber", npc = 2031, count = 7, oi = 1, map = 1438, x = 57.87, y = 44.69, f = "e", spots = { { x = 57.2, y = 44.6, r = 35, n = 2 }, { x = 58.5, y = 46.1, r = 23, n = 3 }, { x = 61.3, y = 44.9, r = 63, n = 7 }, { x = 61.5, y = 40.1, r = 30, n = 2 }, { x = 62.4, y = 42.1, r = 50, n = 5 }, { x = 64.3, y = 41.3, r = 29, n = 2 }, { x = 57.9, y = 39, r = 15, n = 1, alt = true } } },
+	{ t = "kill", quest = 456, target = "Young Thistle Boar", npc = 1984, count = 4, oi = 2, map = 1438, x = 57.44, y = 45.02, f = "e", spots = { { x = 57.1, y = 45, r = 34, n = 3 }, { x = 59, y = 44.7, r = 47, n = 4 }, { x = 55.7, y = 42.4, r = 48, n = 6 }, { x = 60.9, y = 46, r = 18, n = 2 }, { x = 61.7, y = 42.6, r = 51, n = 4 }, { x = 57.8, y = 42.4, r = 15, n = 1, alt = true }, { x = 57.6, y = 39.5, r = 15, n = 1, alt = true }, { x = 63.2, y = 42.2, r = 15, n = 1, alt = true } } },
+	{ t = "collect", quest = 459, item = 3297, itemName = "Fel Moss", count = 8, oi = 1, map = 1438, x = 56.16, y = 45.81, f = "e", spots = { { x = 55.9, y = 45.9, r = 40, n = 6 }, { x = 54.6, y = 44.1, r = 40, n = 6 }, { x = 55.8, y = 41.6, r = 40, n = 1 }, { x = 56.2, y = 38.5, r = 40, n = 1 }, { x = 54.4, y = 39.1, r = 40, n = 7 }, { x = 56.3, y = 34.6, r = 40, n = 1 }, { x = 59.6, y = 35, r = 40, n = 1 }, { x = 62.3, y = 35.7, r = 40, n = 1 }, { x = 64.2, y = 42.2, r = 40, n = 1 } }, spread = true },
+	{ t = "interact", quest = 97977, object = 668482, objName = "Gnarlpine Totem", oi = 1, map = 1438, x = 56, y = 46.1, f = "e", spots = { { x = 56, y = 46.1, r = 15, n = 1 }, { x = 55.2, y = 44.2, r = 36, n = 2 }, { x = 56.2, y = 39.4, r = 15, n = 1 }, { x = 54.6, y = 39.7, r = 26, n = 2 } } },
+}
+local guide = { steps = { { goals = goals } } }
+function nav.Engine.GetGuide() return guide end
+local views = {}
+for i, g in ipairs(goals) do views[i] = { index = i, status = "active", text = g.target or g.itemName or g.objName, map = 1438, x = g.x, y = g.y, f = "e" } end
+nav.engine.views[1] = { index = 1, goals = views }
+-- Is (x, y) inside the convex polygon { x1, y1, ... }?
+local function inside(poly, x, y)
+	local sign = 0
+	for i = 1, #poly, 2 do
+		local j = i + 2 > #poly and 1 or i + 2
+		local c = (poly[j] - poly[i]) * (y - poly[i + 1]) - (poly[j + 1] - poly[i + 1]) * (x - poly[i])
+		local s = c > 0 and 1 or c < 0 and -1 or 0
+		if s ~= 0 then
+			if sign ~= 0 and s ~= sign then return false end
+			sign = s
+		end
+	end
+	return true
+end
+`;
+
+test("a Teldrassil step's spawn regions cover every spawn of its goals and read at world map scale", () => {
+	const [out] = run(`${TELDRASSIL}
+		local r = { goals = {} }
+		for g, goal in ipairs(goals) do
+			local regions = N.layers.Regions(goal)
+			-- Every spot's disc (its spawns lie in it) inside one region, checked
+			-- at 32 points on its rim.
+			local covered = 0
+			for _, s in ipairs(goal.spots) do
+				local c, wx, wy = nav.Compat.MapToWorld(1438, s.x, s.y, "e")
+				for _, rg in ipairs(regions) do
+					local all = true
+					for k = 0, 31 do
+						local a = k * math.pi / 16
+						if not inside(rg.hull, wx + s.r * math.cos(a), wy + s.r * math.sin(a)) then all = false; break end
+					end
+					if all then covered = covered + 1; break end
+				end
+			end
+			local spans = {}
+			for i, rg in ipairs(regions) do
+				local x0, x1, y0, y1 = math.huge, -math.huge, math.huge, -math.huge
+				for k = 1, #rg.hull, 2 do
+					x0, x1 = math.min(x0, rg.hull[k]), math.max(x1, rg.hull[k])
+					y0, y1 = math.min(y0, rg.hull[k + 1]), math.max(y1, rg.hull[k + 1])
+				end
+				spans[i] = { math.floor(y1 - y0 + 0.5), math.floor(x1 - x0 + 0.5), rg.n, rg.alt }
+			end
+			r.goals[g] = { spots = #goal.spots, covered = covered, regions = spans }
+		end
+		-- The arrow on Fel Moss; the world map open on Teldrassil at its art's size.
+		local moss = goals[3]
+		nav.setWaypoint({ map = 1438, x = moss.spots[1].x, y = moss.spots[1].y, f = "e", label = "Fel Moss", stepIndex = 1, goalIndex = 3,
+			kind = "collect", r = 8, area = 40, search = true, spots = moss.spots, spot = 1 })
+		WorldMapFrame.Child:SetSize(1002, 668)
+		nav.showWorldMap(1438)
+		stub.advance(0.3)
+		r.world = {}
+		for _, pin in ipairs(nav.pins("PolestarPinsHullTemplate")) do
+			local _, _, _, fill = pin.texs[1]:GetVertexColor()
+			local _, _, _, rim = pin.texs[pin.used]:GetVertexColor()
+			r.world[#r.world + 1] = { pin.data.layer.name, math.floor(pin.width + 0.5), math.floor(pin.height + 0.5),
+				math.floor(fill * 100 + 0.5), math.floor(rim * 100 + 0.5) }
+		end
+		r.target = { #nav.pins("PolestarPinsAreaTemplate"), Pins.GetLayer("nav.target")[1].area == nil }
+		r.stats = Pins.AreaStats()
+		emit(r)`);
+	for (const [g, goal] of out.goals.entries()) assert.equal(goal.covered, goal.spots, `goal ${g + 1}: every spot's spawns lie in a region`);
+	assert.deepEqual(out.goals.map((g) => g.regions.length), [2, 1, 2, 1], 'the camps around Aldrassil are one region each; a lone far spawn is its own');
+	const [moss, lone] = out.goals[2].regions;
+	assert.ok(moss[0] >= 450 && moss[1] >= 450, `Fel Moss: the Grells' woods west and north of the tree, about 500 x 480 yd (${moss})`);
+	assert.deepEqual([moss[2], moss[3]], [24, false]);
+	assert.deepEqual([lone[2], lone[3]], [1, false]);
+	// The 0.2.4 discs: a 40 yd spot on this 1002-unit canvas was 2 x 40 / 5092 x 1002 = 16 units wide,
+	// under a 22 px target pin. The region the arrow's goal spawns in is six times that.
+	const own = out.world.filter((p) => p[0] === 'nav.areas').sort((a, b) => b[1] - a[1]);
+	const others = out.world.filter((p) => p[0] === 'nav.goalAreas');
+	assert.equal(own.length, 2);
+	assert.ok(own[0][1] >= 96 && own[0][2] >= 90, `the Fel Moss region spans about 100 x 95 canvas units (${own[0]})`);
+	assert.deepEqual(own[0].slice(3), [20, 70], "the arrow's goal: fill 0.2, rim 0.7");
+	assert.deepEqual(others.map((p) => p.slice(3)).sort(), [[12, 42], [12, 42], [12, 42], [7, 24]].sort(),
+		"the step's other goals' regions, fainter (fill 0.12, rim 0.42), a place only the Nightsabers' alternatives cover fainter still");
+	assert.deepEqual(out.target, [0, true], 'no disc under the target: its region covers it');
+	assert.equal(out.stats.world.hulls, 6);
+});
+
 test('hidden on a taxi, in an instance and without a target; zone name on another continent', () => {
 	const [out] = run(`
 		local seen = {}
@@ -502,6 +665,38 @@ test('hidden on a taxi, in an instance and without a target; zone name on anothe
 		['far dial', false, true],
 		['back', true, 'travel', '100 yd'],
 		['cleared', false, 'hidden', '100 yd'],
+	]);
+});
+
+// The Deeprun Tram is a map of its own with no world map: the client gives
+// no player position there (nor in some loading moments). The arrow says so
+// over the target's label instead of vanishing, and points again once a
+// position returns.
+test('without a player position the arrow says so, keeps the label, and points again when one returns', () => {
+	const [out] = run(`
+		local seen = {}
+		local function snap(tag)
+			seen[#seen + 1] = { tag, A.frame:IsShown(), A.GetMode() or "hidden", A.distText:GetText(), A.labelText:GetText(),
+				A.dial:IsShown(), A.etaText:IsShown() }
+		end
+		target(100, 0, "Nightbane Shadow Weavers")
+		stub.advance(0.1); snap("start")
+		nav.player = nil
+		stub.advance(0.1); snap("no position")
+		seen[#seen + 1] = { "state", (N.Sample()), N.GetDistance() or false }
+		nav.place(0, 0, 0)
+		stub.advance(0.1); snap("back")
+		N.ClearTarget()
+		nav.player = nil
+		stub.advance(1.1)
+		seen[#seen + 1] = { "no target", A.frame:IsShown(), A.GetMode() or "hidden" }
+		emit(seen)`);
+	assert.deepEqual(out, [
+		['start', true, 'travel', '100 yd', 'Nightbane Shadow Weavers', true, false],
+		['no position', true, 'nopos', 'No position here', 'Nightbane Shadow Weavers', false, false],
+		['state', 'nopos', false],
+		['back', true, 'travel', '100 yd', 'Nightbane Shadow Weavers', true, false],
+		['no target', false, 'hidden'],
 	]);
 });
 
@@ -538,6 +733,52 @@ test('SetTarget overrides the engine waypoint until the step changes', () => {
 	// Engine announcements, plus Nav's own when it sets/clears an override.
 	assert.deepEqual(out.announced, ['Engine A', 'Mine', 'Engine A2', 'Engine B', 'nil', 'Engine B', 'Engine C']);
 	assert.equal(out.override, false);
+});
+
+test('/polestar way: decimal points or commas in both, a comma separator, labels, range 0..100, empty clears; a decimal comma in one is refused (it could be x,y and a numeric label)', () => {
+	const [out] = run(`
+		nav.place(0, 0)
+		local function way(line)
+			N.SetTarget(9000, 1, 1, "Before")
+			local before = #stub.messages
+			SlashCmdList.POLESTAR("way " .. line)
+			local t = N.GetTarget()
+			return { t and t.x or false, t and t.y or false, t and t.label or false, #stub.messages > before }
+		end
+		local r = {}
+		for _, line in ipairs({ "45 30", "45,30", "45, 30", "45.5 30.2", "45.5 30", "45 30.2", "45,5 30,2",
+			"45 30 Camp", "45,30 Camp", "45, 30 Camp", "45,5 30,2 Camp", "45,30 2nd camp", "45 30 50", "0 100",
+			"45,5 30", "45 30,2", "45,30 50", "45,30 2 camp", "45,5 30 Camp", "45.5 30,2",
+			"100.5 30", "45 101", "45,5 300,2", "abc", "45", "45 .", "45.5.5 30", "" }) do
+			r[line] = way(line)
+		end
+		emit(r)`);
+	const usage = (o) => o[2] === 'Before' && o[3] === true;
+	const at = (o, x, y, label = 'Waypoint') => {
+		near(o[0], x, 1e-9, 'x'); near(o[1], y, 1e-9, 'y');
+		assert.equal(o[2], label); assert.equal(o[3], false, 'no usage message');
+	};
+	at(out['45 30'], 45, 30);
+	at(out['45,30'], 45, 30);
+	at(out['45, 30'], 45, 30);
+	at(out['45.5 30.2'], 45.5, 30.2);
+	at(out['45.5 30'], 45.5, 30);
+	at(out['45 30.2'], 45, 30.2);
+	at(out['45,5 30,2'], 45.5, 30.2);
+	at(out['45 30 Camp'], 45, 30, 'Camp');
+	at(out['45,30 Camp'], 45, 30, 'Camp');
+	at(out['45, 30 Camp'], 45, 30, 'Camp');
+	at(out['45,5 30,2 Camp'], 45.5, 30.2, 'Camp');
+	at(out['45,30 2nd camp'], 45, 30, '2nd camp');
+	at(out['45 30 50'], 45, 30, '50');
+	at(out['0 100'], 0, 100);
+	// A decimal comma in one coordinate only is x,y and a numeric label or a
+	// decimal x and y: refused rather than guessed.
+	for (const line of ['45,5 30', '45 30,2', '45,30 50', '45,30 2 camp', '45,5 30 Camp', '45.5 30,2',
+		'100.5 30', '45 101', '45,5 300,2', 'abc', '45', '45 .', '45.5.5 30']) {
+		assert.ok(usage(out[line]), `${line}: usage, target kept (${JSON.stringify(out[line])})`);
+	}
+	assert.deepEqual(out[''], [false, false, false, false], 'empty clears without a message');
 });
 
 test('minimap projection honours view radius, rotation and clamps to the rim', () => {
@@ -811,4 +1052,27 @@ test('the ETA closing speed ignores out-of-band refreshes', () => {
 	});
 	const expected = out.dist / 7;
 	for (const s of secs) assert.ok(Math.abs(s - expected) <= 4, `ETA ${s} s vs ${expected.toFixed(0)} s (${out.etas})`);
+});
+
+test('/polestar way without a position here says so, not how to type it', () => {
+	const [out] = run(`
+		local function way(msg)
+			stub.messages = {}
+			SlashCmdList.POLESTAR(msg)
+			local t = N.GetTarget()
+			return { msgs = #stub.messages > 0 and stub.messages or "none", target = t and t.label or "nil" }
+		end
+		local r = {}
+		nav.place(0, 0, 1)                 -- other continent: the game gives no map position
+		r.noPosition = way("way 40 60 Mine")
+		nav.place(0, 0, 0)
+		r.malformed = way("way 40")
+		r.valid = way("way 40 60 Mine")
+		emit(r)`);
+	assert.deepEqual(out.noPosition, {
+		msgs: ['|cff4fd1c5Polestar|r: No position here: the game gives none in instances and on some maps.'],
+		target: 'nil',
+	});
+	assert.deepEqual(out.malformed, { msgs: ['|cff4fd1c5Polestar|r: Usage: /polestar way <x> <y> [label]'], target: 'nil' });
+	assert.deepEqual(out.valid, { msgs: 'none', target: 'Mine' });
 });

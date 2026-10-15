@@ -59,7 +59,7 @@ test('the bug in the navigator reports the step on screen: the player\'s words, 
 	for (const fact of ['quest 7', 'npc 6', 'map 1429 @47.60,35.10 live']) assert.ok(kill.includes(fact), `${fact} in ${kill}`);
 	assert.ok(lineWith(out.text, 'Wolves Across the Border').startsWith('[x] Accept'), 'a done goal');
 	const meat = lineWith(out.text, 'Tough Wolf Meat');
-	assert.ok(meat.startsWith('[ ] Collect Tough Wolf Meat 3/8') && meat.includes('item 750'), meat);
+	assert.ok(meat.startsWith('[ ] Kill Young Wolf for Tough Wolf Meat 3/8') && meat.includes('item 750'), meat);
 	assert.ok(lineWith(out.text, 'Arrow:').includes('42 yd'), out.text);
 	assert.ok(lineWith(out.text, 'Where:').includes('Elwynn Forest'), out.text);
 	const who = lineWith(out.text, 'Human Warrior');

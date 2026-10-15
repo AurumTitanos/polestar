@@ -1,0 +1,59 @@
+guide forever/class/warlock/shard-of-the-green-flame
+title Shard of the Green Flame
+category Class
+class Warlock
+folder Warlock
+levels 50-56
+zone Felwood
+keywords Niby the Almighty, What Niby Commands, Flawless Fel Essence, Kroshius' Infernal Core, Kroshius, Fel Fire, Impsy, Shard of the Green Flame, Jaedenar, Legashi, Felguard Sentry, Shatter Scar Vale, Warlock, class quest
+reward item 18762
+why A rare off-hand for your 50s from Niby and Impsy in Felwood, the camp that also offers An Imp's Request.
+
+# Niby the Almighty's errands in Felwood: What Niby Commands (7601) to Impsy,
+# Flawless Fel Essence (7602: Azshara, Jaedenar and the Dark Portal) and
+# Kroshius' Infernal Core (7603), for the Shard of the Green Flame.
+# Sources: quests.json, npcs.json, objects.json and items.json (Questie 12.1.0
+# and Questie-Forever) for Niby, Impsy, the essences' droppers, Kroshius and
+# his remains; Wowhead's Classic quest page (wowhead.com/classic/quest=7603)
+# for lighting the Fel Fire at the remains to wake him; Wowhead Forever's
+# Warlock class page (data/local/quest-audit/wowhead-class-quests.json):
+# unchanged in Forever, Kroshius' Infernal Core rewards the Shard of the Green
+# Flame.
+# Kroshius is elite: grouping up is advised.
+# Based on data, not play: the beta caps at level 30 until launch on
+# 4 November, so nothing here has been checked in game.
+
+step Niby the Almighty
+  tip At 50 Niby the Almighty and his imp Impsy wait in central Felwood, just east of Jaedenar.
+  level 50
+  accept 7601                         -- Niby the Almighty
+  turnin 7601                         -- Impsy
+  accept 7602
+
+step Jaedenar
+  tip The Jaedenar Legionnaires, a short way west of Niby, carry Jaedenar's essence.
+  collect 18622 quest 7602.2          -- Flawless Fel Essence (Jaedenar)
+
+step Azshara
+  zone Azshara
+  tip The Legashi satyrs of northern Azshara carry Azshara's essence.
+  collect 18624 quest 7602.1          -- Flawless Fel Essence (Azshara)
+
+step The Dark Portal
+  zone Blasted Lands
+  tip The Felguard Sentries around the Dark Portal, in southern Blasted Lands, carry its essence.
+  collect 18623 quest 7602.3          -- Flawless Fel Essence (Dark Portal)
+
+step Impsy
+  zone Felwood
+  turnin 7602                         -- Impsy
+  accept 7603
+
+step Kroshius
+  tip Kroshius' remains lie in Shatter Scar Vale, north of Niby. Use the Fel Fire beside them and kill the infernal when he wakes. Kroshius is elite: grouping up is advised.
+  use 18626 @45.7,34.8                -- Fel Fire, at Kroshius' Remains
+  kill 14467 quest 7603.1             -- Kroshius
+  collect 18625 quest 7603.2          -- Kroshius' Infernal Core
+
+step Back to Niby
+  turnin 7603                         -- Niby the Almighty: Shard of the Green Flame

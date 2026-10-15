@@ -48,7 +48,10 @@ is installed. The contract the tools write to is in
 ### Building data
 
 These need the game client's tables, installed addons or other local
-sources, so they run on a maintainer's machine, never in CI.
+sources, so they run on a maintainer's machine, never in Polestar's CI. A
+pack's CI (the template's `pack.yml`) runs
+`data build --no-web-xp --no-wowhead`: pfQuest and the client tables,
+without QuestieDB.
 
 | Command | What it does |
 |---|---|
@@ -58,7 +61,7 @@ sources, so they run on a maintainer's machine, never in CI.
 | `exploration build` / `exploration check` | Writes or checks the exploration guides in `guides/forever/exploration` |
 | `trainers build` | Builds `data/forever/trainers.json` and `Core/ClassTrainers.lua` |
 | `talents build` / `talents check` | Writes or checks `Talents/Builds.lua`: the plans in `talents/forever/` resolved by name on the Forever trait tree and replayed under its rules |
-| `travel build` | Builds the travel network: `data/forever/travel.json`, `Nav/TravelData.lua`, `Polestar_Travel`; `travel route` runs the in-game planner between two points |
+| `travel build` | Builds the travel network: `data/forever/travel.json`, `Nav/TravelData.lua`, `Polestar_Travel`; `travel route` runs the in-game planner between two points; `travel chain` drafts an approach chain from recorded walks |
 | `maps build` / `maps overlays` | Zone level ranges (`Maps/ZoneLevels.lua`) / zone art overlays (`UI/ZoneArtOverlays.lua`) |
 | `qol build` | Spirit healers and flight masters (`QoL/Data.lua`) |
 | `itemdb build` | The `Polestar_ItemDB` item stats (`Items.lua`) |
@@ -118,7 +121,7 @@ The release steps are in [docs/RELEASING.md](../docs/RELEASING.md).
 | `route/` | `draft`: the first-draft route planner and its geometry and tour helpers |
 | `sim/` | The route simulator: world model, evaluation, search, calibration, export, baselines |
 | `tga.js` | Draws textures in code and writes TGA files |
-| `travel/` | `travel build` and `travel route`: flights, transports, inns, paths, crossings |
+| `travel/` | `travel build`, `travel route` and `travel chain`: flights, transports, inns, paths, crossings |
 | `zip.js` | A deterministic ZIP writer and reader for `pack` |
 
 ## Generated files

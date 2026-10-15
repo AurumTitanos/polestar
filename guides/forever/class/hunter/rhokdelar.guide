@@ -1,0 +1,106 @@
+guide forever/class/hunter/rhokdelar
+title Rhok'delar and Lok'delar
+category Class
+class Hunter
+folder Hunter
+levels 60-60
+zone Felwood
+keywords Rhok'delar, Lok'delar, Ancient Sinew Wrapped Lamina, Stave of the Ancients, A Proper String, Vartrus the Ancient, Ancient Petrified Leaf, Molten Core, Onyxia, Azuregos, epic bow, class quest
+collects 18707, 18724, 18714
+reward item 18707
+reward item 18724
+reward item 18714
+why The hunter's epic bow chain: in Classic the stave and sinew became Rhok'delar and Lok'delar (unconfirmed in Forever).
+
+# The level 60 Hunter weapon chain: The Ancient Leaf (7632) from Molten Core
+# to Vartrus the Ancient in Felwood, An Introduction (7633), then Stave of
+# the Ancients (7636, four demons), A Proper String (7635, Onyxia) and,
+# optional, Ancient Sinew Wrapped Lamina (7634, Azuregos).
+# Forever status (Wowhead Forever's Hunter class page,
+# data/local/quest-audit/wowhead-class-quests.json): 7632, 7633, 7634, 7635
+# and 7636 are all listed, "unchanged". Titles, levels and rewards follow
+# those rows: the Ancient Rune Etched Stave (7636), the Enchanted Black
+# Dragon Sinew (7635) and the Ancient Sinew Wrapped Lamina (7634).
+# Sources: quests.json, npcs.json and items.json (Questie 12.1.0 and
+# Questie-Forever) for the givers, drops and spawns; travel.json for the
+# flight points.
+# Classic-only source, for details the Forever data lacks: Icy Veins,
+# "Rhok'delar Quest: Guide to Stave of the Ancients"
+# (icy-veins.com/wow-classic/rhok-delar-quest-guide-to-stave-of-the-ancients):
+# that the demons must be fought alone, without a pet, and that in Classic
+# the stave and the sinew become Rhok'delar and Vartrus then gives
+# Lok'delar. Neither Rhok'delar nor Lok'delar is a quest reward on the Forever page:
+# the last step is not confirmed in Forever.
+# Raid content: the Ancient Petrified Leaf drops from the Cache of the
+# Firelord after Majordomo Executus in Molten Core, the Mature Black Dragon
+# Sinew from Onyxia, the Mature Blue Dragon Sinew from Azuregos (a world
+# boss) and, very rarely, the Cobalt dragonkin in Winterspring. The four
+# demons are elite. The data has no position for Molten Core, Onyxia or
+# the demons' true forms; their disguises are placed from the data. The
+# entrance of Onyxia's Lair (Dustwallow Marsh 52.1,75.8) is from Wowhead's
+# Onyxia's Lair zone page (wowhead.com/zone=2159); Azuregos is placed from
+# npcs.json.
+# Based on data, not play: the beta caps at level 30 until launch on
+# 4 November, so nothing here has been checked in game.
+
+step The Ancient Petrified Leaf
+  tip The Cache of the Firelord appears in Molten Core when Majordomo Executus yields; it holds the Ancient Petrified Leaf about half the time. Molten Core is a 40-player raid inside Blackrock Mountain. Right-click the leaf to start the quest.
+  accept 7632 item 18703              -- from the Ancient Petrified Leaf
+
+step Vartrus the Ancient
+  zone Felwood
+  tip Vartrus, Stoma and Hastat the Ancient stand together in the north of Felwood. Alliance: Talonbranch Glade is the nearest flight point; Horde: Bloodvenom Post.
+  turnin 7632                         -- Vartrus the Ancient
+  accept 7633
+  turnin 7633
+  accept 7636
+  accept 7635                         -- Stoma the Ancient
+  accept 7634                         -- Hastat the Ancient: the quiver, last in this guide
+
+step Artorius the Doombringer
+  zone Winterspring
+  tip Artorius the Amiable, a tauren, waits in the north-east of Winterspring. Talk to him and he becomes Artorius the Doombringer. Fight every demon alone and without your pet: help of any kind makes it vanish. Loot the head.
+  talk 14531                          -- Artorius the Amiable
+  collect 18955 quest 7636.4          -- Artorius's Head
+
+step Simone the Seductress
+  zone Un'Goro Crater
+  tip Simone the Inconspicuous, a troll, stands in the west of Un'Goro Crater. Talk to her and she becomes Simone the Seductress, with a pet of her own. Alone, without your pet.
+  talk 14527                          -- Simone the Inconspicuous
+  collect 18952 quest 7636.1          -- Simone's Head
+
+step Solenor the Slayer
+  zone Silithus
+  tip Nelson the Nice, a gnome, stands in the south-west of Silithus. Talk to him and he becomes Solenor the Slayer. Alone, without your pet; keep away from the beetles he calls.
+  talk 14536                          -- Nelson the Nice
+  collect 18954 quest 7636.3          -- Solenor's Head
+
+step Klinfran the Crazed
+  zone Burning Steppes
+  tip Franklin the Friendly, a human, stands in the west of the Burning Steppes. Talk to him and he becomes Klinfran the Crazed. Alone, without your pet.
+  talk 14529                          -- Franklin the Friendly
+  collect 18953 quest 7636.2          -- Klinfran's Head
+
+step Onyxia
+  zone Dustwallow Marsh
+  tip Onyxia drops the Mature Black Dragon Sinew; she is the 40-player raid boss of Onyxia's Lair, a cave in the Wyrmbog of southern Dustwallow Marsh.
+  collect 18705 quest 7635.1 @52.1,75.8 -- Mature Black Dragon Sinew, from Onyxia
+
+step Back to the Ancients
+  zone Felwood
+  turnin 7636 reward 18707            -- Vartrus the Ancient
+  turnin 7635 reward 18724            -- Stoma the Ancient
+
+step Rhok'delar and Lok'delar
+  tip Not confirmed in Forever. In Classic, using the Ancient Rune Etched Stave with the Enchanted Black Dragon Sinew in your bags made Rhok'delar, and Vartrus then gave Lok'delar, Stave of the Ancient Keepers (Icy Veins).
+  use 18707 @47.8,24.1                -- Ancient Rune Etched Stave, by Vartrus
+  talk 14524 optional                 -- Vartrus the Ancient: Lok'delar in Classic
+
+step Azuregos
+  zone Azshara
+  tip Hastat's quiver needs the Mature Blue Dragon Sinew. Azuregos, a world boss for a raid, roams the south of Azshara and drops it most of the time; the Cobalt dragonkin of Winterspring drop it very rarely. Skip the rest of this guide if you do not want the quiver.
+  collect 18704 quest 7634.1 @53.3,80.4 -- Mature Blue Dragon Sinew, from Azuregos
+
+step Hastat the Ancient
+  zone Felwood
+  turnin 7634 reward 18714            -- Hastat the Ancient

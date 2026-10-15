@@ -106,24 +106,52 @@ function foreverBuild(sourcesDir) {
 
 const KIND = { 1: 'dungeon', 2: 'raid', 3: 'pvp' };
 
-// AreaTable ids inside instances -> 'dungeon' | 'raid' | 'pvp': areas on an
-// instance map, each instance map's own area, and the entrance subzones
-// named after the instance (Gnomeregan 133 in Dun Morogh, Uldaman 1517).
-function instanceAreas(mapRows, areaRows) {
+// Instance maps of Map.csv rows: map id -> { kind, name, area }.
+function instanceMaps(mapRows) {
 	const maps = new Map();
 	for (const m of mapRows) {
 		const k = KIND[Number(m.InstanceType)];
 		if (k) maps.set(Number(m.ID), { kind: k, name: m.MapName_lang, area: Number(m.AreaTableID) || 0 });
 	}
-	const byName = new Map([...maps.values()].map((m) => [m.name, m.kind]));
+	return maps;
+}
+
+// AreaTable ids inside instances -> { kind: 'dungeon' | 'raid' | 'pvp', name }
+// (the instance's name): areas on an instance map, each instance map's own
+// area, and the entrance subzones named after the instance (Gnomeregan 133
+// in Dun Morogh, Uldaman 1517).
+function instancesByArea(mapRows, areaRows) {
+	const maps = instanceMaps(mapRows);
+	const byName = new Map([...maps.values()].map((m) => [m.name, m]));
 	const out = {};
-	for (const m of maps.values()) if (m.area) out[m.area] = m.kind;
+	for (const m of maps.values()) if (m.area) out[m.area] = { kind: m.kind, name: m.name };
 	for (const a of areaRows) {
 		const id = Number(a.ID);
-		const m = maps.get(Number(a.ContinentID));
-		if (m) out[id] = m.kind;
-		else if (Number(a.ParentAreaID) && byName.has(a.AreaName_lang)) out[id] = byName.get(a.AreaName_lang);
+		const m = maps.get(Number(a.ContinentID)) || (Number(a.ParentAreaID) ? byName.get(a.AreaName_lang) : null);
+		if (m) out[id] = { kind: m.kind, name: m.name };
 	}
+	return out;
+}
+
+// AreaTable ids inside instances -> 'dungeon' | 'raid' | 'pvp' (instancesByArea).
+function instanceAreas(mapRows, areaRows) {
+	const out = {};
+	for (const [id, inst] of Object.entries(instancesByArea(mapRows, areaRows))) out[id] = inst.kind;
+	return out;
+}
+
+// UiMap ids drawn only on instance maps (UiMapAssignment.csv) -> { kind, name }.
+function instancesByUiMap(mapRows, assignmentRows) {
+	const maps = instanceMaps(mapRows);
+	const seen = new Map(); // uiMap -> instance map, or null once it also shows another map
+	for (const a of assignmentRows) {
+		const ui = Number(a.UiMapID);
+		const m = maps.get(Number(a.MapID)) || null;
+		if (!seen.has(ui)) seen.set(ui, m);
+		else if (seen.get(ui) !== m) seen.set(ui, null);
+	}
+	const out = {};
+	for (const [ui, m] of seen) if (m) out[ui] = { kind: m.kind, name: m.name };
 	return out;
 }
 
@@ -136,4 +164,39 @@ function loadQuestAreas(sourcesDir) {
 	return { build: path.basename(dir), files, areas: instanceAreas(maps, areas) };
 }
 
-module.exports = { CATEGORIES, FRIENDLY, HIGH_DROPPER, MIN_DROP, OVERRIDES, compileOverrides, instanceAreas, loadQuestAreas, foreverBuild };
+// The compiler's view of the same client tables (docs/GUIDE_FORMAT.md,
+// "Group content"): -> { build, areas: AreaTable id -> { kind, name },
+// maps: uiMap id -> { kind, name } } or null when no Forever build is cached.
+// `maps` is empty without the build's UiMapAssignment.csv.
+function loadInstances(sourcesDir) {
+	const dir = sourcesDir && foreverBuild(sourcesDir);
+	if (!dir) return null;
+	const read = (f) => parseCsv(fs.readFileSync(path.join(dir, f), 'utf8'));
+	const maps = read('Map.csv');
+	const assignments = fs.existsSync(path.join(dir, 'UiMapAssignment.csv')) ? read('UiMapAssignment.csv') : [];
+	return { build: path.basename(dir), areas: instancesByArea(maps, read('AreaTable.csv')), maps: instancesByUiMap(maps, assignments) };
+}
+
+// The solo filter's instance rule for one quest, as world.js applies it: the
+// quest's Questie area lies in an instance (`areas`: instancesByArea), and
+// its giver, its ender or one of its objectives has no open-world place
+// (Questie's area is the story zone, so breadcrumbs and outer-cave quests
+// stay open-world quests). `placed(kind, id)` tells whether an npc, object or
+// item ('item': some npc or object that drops it) has an open-world spawn.
+// The world builder decides the same while it places the quest (it also
+// counts dungeons.json quests, which the compiler does not read).
+// -> { kind: 'dungeon' | 'raid' | 'pvp', name } | null
+function instanceQuest(quest, areas, placed) {
+	const inst = quest && areas && areas[quest.area];
+	if (!inst) return null;
+	const anyPlaced = (ends) => ['npc', 'object'].some((kind) => ((ends || {})[kind] || []).some((id) => placed(kind, id)));
+	if (!anyPlaced(quest.start) || !anyPlaced(quest.end)) return inst;
+	for (const o of quest.objectives || []) {
+		if (!o) continue;
+		const kind = o.type === 'kill' ? 'npc' : o.type;
+		if (kind === 'event' ? o.map == null : !placed(kind, o.id)) return inst;
+	}
+	return null;
+}
+
+module.exports = { CATEGORIES, FRIENDLY, HIGH_DROPPER, MIN_DROP, OVERRIDES, compileOverrides, instanceAreas, instancesByArea, instancesByUiMap, instanceQuest, loadQuestAreas, loadInstances, foreverBuild };

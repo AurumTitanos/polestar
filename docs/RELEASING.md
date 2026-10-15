@@ -53,8 +53,11 @@ one of those three among its sources.
 
 Replace `0.2.0` with the new version throughout.
 
-1. Start from a clean, up-to-date `main` with the game client installed
-   (the data build reads its tables and installed addons).
+1. Start from a clean, up-to-date `next` with the game client installed
+   (the data build reads its tables and installed addons). Work and pull
+   requests for the coming release collect on `next` (the default branch,
+   pushed as it goes); `main` holds the latest release and moves only in
+   step 7. Releases come in batches, when the maintainer decides.
 
 2. Set the version and rebuild the data, the data addons and the guides:
 
@@ -109,13 +112,14 @@ Replace `0.2.0` with the new version throughout.
 
 7. Commit the version bump and the regenerated files that are tracked
    (`git status` lists them; `Polestar_QuestDB` and the other local packs are
-   ignored), tag the commit and push:
+   ignored) on `next`, bring `main` up to it, tag and push both:
 
    ```sh
    git add package.json guides/pack.json addon/Polestar addon/Polestar_Guides addon/Polestar_ItemDB addon/Polestar_Recorder
    git commit -m "Release: 0.2.0"
-   git tag -a v0.2.0 -m "Polestar 0.2.0"
-   git push origin main v0.2.0
+   git switch main && git merge --ff-only next && git switch next
+   git tag -a v0.2.0 -m "Polestar 0.2.0" main
+   git push origin main next v0.2.0
    ```
 
 8. Write the release notes to `dist/notes-0.2.0.md` (`dist/` is not

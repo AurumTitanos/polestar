@@ -14,8 +14,9 @@
 //   flbis|null,                                           (tools/lib/consume/foreverlevelingbis.js)
 //   atlasloot|null, rarescanner|null                      (--local-extras only)
 //   client: clientFacts(tables) + { instanceMaps, instances: instanceFacts() }|null,
-//   curated: [item ids guides collect], entrances: curatedEntrances(),
-//   entranceTable: loadEntranceTable() (tools/lib/codex/entrances.json), localExtras,
+//   curated: [item ids guides collect], curatedGates: curatedRepGates(), entrances: curatedEntrances(),
+//   entranceTable: loadEntranceTable() (tools/lib/codex/entrances.json),
+//   repTable: loadRepGateTable() (tools/lib/codex/repgates.json), localExtras,
 // }
 // Without AtlasLoot and dungeons.json the instances come from the client
 // tables (tools/lib/codex/instances.js).
@@ -38,7 +39,6 @@ const { blockingPrereqs } = require('../data/prereqs');
 
 const { ROOT, DATA, SOURCES } = require('../paths');
 const { CLASSES, FACTION_RACES } = require('../game/races');
-const BUILD = '1.60.1.70338';
 // Map, AreaTable, DungeonEncounter, LFGDungeons, MapDifficulty and ContentTuning
 // give the dungeons and raids (tools/lib/codex/instances.js); Mount and
 // BattlePetSpecies the mount and companion summon spells.
@@ -51,14 +51,20 @@ const TABLES = [
 const ERA_BUILD = '1.15.9.70003';
 const ERA_TABLES = ['Item', 'ItemSparse', 'ItemEffect', 'Map'];
 
-const RANK = { recordings: 0, client: 1, questie: 2, flbis: 2, rarescanner: 2, dungeons: 2, journal: 2, forever: 2, pfquest: 3, atlasloot: 3, wowhead: 4 };
-const KEY_FIELD = { vendor: 'npc', drop: 'npc', object: 'object', quest: 'quest', craft: 'spell', rep: 'faction', pvp: null, container: 'item', world: null };
-const TYPE_ORDER = ['vendor', 'quest', 'craft', 'rep', 'pvp', 'drop', 'object', 'container', 'world'];
+// curated: the cited reputation gate table (tools/lib/codex/repgates.json);
+// guides: Polestar's own curated guides (a collectible's `rep` before its
+// `buy`). A gate from the client beats the table, the table a guide's.
+const RANK = { recordings: 0, client: 1, curated: 2, guides: 3, questie: 4, flbis: 4, rarescanner: 4, dungeons: 4, journal: 4, forever: 4, pfquest: 5, atlasloot: 5, wowhead: 6 };
+const RANK_UNKNOWN = 7;
+// gift: an NPC hands the item out (casts a spell that creates it).
+const KEY_FIELD = { vendor: 'npc', drop: 'npc', object: 'object', quest: 'quest', gift: 'npc', craft: 'spell', rep: 'faction', pvp: null, container: 'item', world: null };
+const TYPE_ORDER = ['vendor', 'quest', 'gift', 'craft', 'rep', 'pvp', 'drop', 'object', 'container', 'world'];
 const SOURCE_FIELDS = {
 	vendor: ['npc', 'cost', 'limited'],
 	drop: ['npc', 'chance', 'instance'],
 	object: ['object', 'chance'],
 	quest: ['quest', 'choice'],
+	gift: ['npc', 'spell'],
 	craft: ['spell', 'skillLine', 'profession', 'skill'],
 	rep: ['faction', 'standing', 'npc'],
 	pvp: ['rank', 'npc'],
@@ -72,8 +78,12 @@ const CAP = { drop: 10, object: 6, vendor: 10, container: 6 };
 const WORLD_DROP_NPCS = 12;
 // Spawns: clusters per map, maps per entity.
 const SPAWN = { radius: 3, perMap: 5, maps: 4 };
-// Loot listed on a rare NPC or treasure (Codex.Loot): best-known chance first.
-const LOOT_CAP = 40;
+// Loot listed on a rare NPC or treasure (Codex.Loot; the Rares view picks its
+// signature drop from it): its own drops (items nothing else drops or holds)
+// first, then best-known chance. A rare's candidates run to hundreds (the
+// world-drop pool; median 286), so the list is cut: 150 keeps every drop
+// RareScanner names for a rare or treasure Wowhead Forever confirms.
+const LOOT_CAP = 150;
 
 // Class mount spells the client tables give no class for (SkillLineAbility
 // ClassMask 0 and no SpellClassOptions row on 1.60.1.70338).
@@ -84,6 +94,7 @@ const SKILL_MOUNTS = 777;
 const SKILL_COMPANIONS = 778;
 const AURA_MOUNTED = 78;
 const EFFECT_AURA = 6;
+const EFFECT_CREATE_ITEM = 24;
 const TRIGGER_LEARN = 6;
 const TRIGGER_USE = 0;
 
@@ -142,8 +153,9 @@ function sortKeysDeep(v) {
 // { build, items: { id: { name, quality, reqLevel, buyPrice, classId, subclassId, inventoryType,
 //   minFaction, minStanding, pvpRank, learn, use } }, spellNames: { id: name },
 //   mountAura: Set(spellId), skillLines: { id: name }, skillAbility: { spell: skillLine },
-//   mountSkill: [spellId], companionSkill: [spellId], spellClass: { spell: CLASS } }
-function clientFacts(tables, build = BUILD) {
+//   mountSkill: [spellId], companionSkill: [spellId], spellClass: { spell: CLASS },
+//   creates: { item: [spellId] } (SpellEffect 24, create item; no profession's spell) }
+function clientFacts(tables, build = null) {
 	const items = {};
 	for (const r of tables.ItemSparse || []) {
 		const id = int(r.ID);
@@ -216,6 +228,17 @@ function clientFacts(tables, build = BUILD) {
 		if (classes.length === 1) spellClass[spell] = classes[0];
 	}
 	for (const [spell, cls] of Object.entries(CLASS_MOUNT_FALLBACK)) if (!spellClass[spell]) spellClass[spell] = cls;
+	// Spells that create an item (Effect 24) outside a skill line: an NPC's
+	// gift (Duke Hydraxis's Create Aqual Quintessence), an item's use.
+	const creates = {};
+	for (const r of tables.SpellEffect || []) {
+		const spell = int(r.SpellID);
+		const item = int(r.EffectItemType);
+		if (int(r.Effect) !== EFFECT_CREATE_ITEM || !item || !spell || spell in skillAbility) continue;
+		const list = (creates[item] = creates[item] || []);
+		if (!list.includes(spell)) list.push(spell);
+	}
+	for (const list of Object.values(creates)) list.sort(byId);
 	// Summon spells the client names as mounts (Mount.SourceSpellID) and companions (BattlePetSpecies.SummonSpellID).
 	const mountSpells = new Set((tables.Mount || []).map((r) => int(r.SourceSpellID)).filter(Boolean));
 	// A miscellaneous item whose spell carries a Mount row's name casts that mount
@@ -228,7 +251,7 @@ function clientFacts(tables, build = BUILD) {
 	// Mount.Flags 0x40: hidden from the mount journal until known (retired mounts).
 	const mountHidden = new Set((tables.Mount || []).filter((r) => (int(r.Flags) || 0) & 0x40).map((r) => int(r.SourceSpellID)).filter(Boolean));
 	const petSpells = new Set([...(tables.BattlePetSpecies || []).map((r) => int(r.SummonSpellID)).filter(Boolean), ...summonsPet]);
-	return { build, items, spellNames, mountAura, teaches, mountSpells, mountHidden, petSpells, skillLines, skillAbility, mountSkill: [...new Set(mountSkill)].sort(byId), companionSkill: [...new Set(companionSkill)].sort(byId), spellClass };
+	return { build, items, spellNames, mountAura, teaches, mountSpells, mountHidden, petSpells, skillLines, skillAbility, mountSkill: [...new Set(mountSkill)].sort(byId), companionSkill: [...new Set(companionSkill)].sort(byId), spellClass, creates };
 }
 
 // ---------------------------------------------------------------------------
@@ -292,12 +315,35 @@ function fromLabels(list) {
 	return [...out];
 }
 
+// Reputation value -> standing 1..8 (Hated..Exalted): the lowest value of each.
+const STANDING_FLOOR = [-42000, -6000, -3000, 0, 3000, 9000, 21000, 42000];
+function standingOf(value) {
+	let s = 1;
+	for (let i = 0; i < STANDING_FLOOR.length; i++) if (value >= STANDING_FLOOR[i]) s = i + 1;
+	return s;
+}
+
+// The standing a quest's rewards need (data/forever quests.json, QuestieDB):
+// `minRep` to take it, or a `reputation` objective to finish it, the higher
+// of the two -> { faction, standing } | null. Neutral counts (Timbermaw Hold
+// starts below it); Hated gates nothing.
+function questRep(q) {
+	let best = null;
+	for (const r of [q && q.minRep, q && q.reputation]) {
+		if (!r || !r.faction || typeof r.value !== 'number') continue;
+		const standing = standingOf(r.value);
+		if (standing <= 1) continue;
+		if (!best || standing > best.standing) best = { faction: r.faction, standing };
+	}
+	return best;
+}
+
 function rankOf(from) {
-	return Math.min(...from.map((f) => (RANK[f] === undefined ? 5 : RANK[f])));
+	return Math.min(...from.map((f) => (RANK[f] === undefined ? RANK_UNKNOWN : RANK[f])));
 }
 
 function sortFrom(from) {
-	return [...new Set(from)].sort((a, b) => (RANK[a] ?? 5) - (RANK[b] ?? 5) || (a < b ? -1 : 1));
+	return [...new Set(from)].sort((a, b) => (RANK[a] ?? RANK_UNKNOWN) - (RANK[b] ?? RANK_UNKNOWN) || (a < b ? -1 : 1));
 }
 
 function sideOf(side) {
@@ -318,7 +364,8 @@ function factionOfRaces(races) {
 
 // Candidate sources -> deduped, field-merged, capped, ordered list.
 // isBoss(npc): a boss's drops stay past the cap (its instance's loot list).
-function finalizeSources(cands, npcLevel, isBoss = () => true) {
+// onCut(source): each merged source the cap leaves out (parity's evidence).
+function finalizeSources(cands, npcLevel, isBoss = () => true, onCut = null) {
 	const groups = new Map();
 	for (const c of cands) {
 		const kf = KEY_FIELD[c.type];
@@ -363,7 +410,9 @@ function finalizeSources(cands, npcLevel, isBoss = () => true) {
 	const seen = {};
 	out = out.filter((s) => {
 		seen[s.type] = (seen[s.type] || 0) + 1;
-		return !CAP[s.type] || seen[s.type] <= CAP[s.type] || (s.type === 'drop' && s.instance && isBoss(s.npc));
+		const keep = !CAP[s.type] || seen[s.type] <= CAP[s.type] || (s.type === 'drop' && s.instance && isBoss(s.npc));
+		if (!keep && onCut) onCut(s);
+		return keep;
 	});
 	return out;
 }
@@ -434,6 +483,16 @@ function mergeCodex(inputs) {
 				npcRoles[id].add('rare');
 			}
 			if (!rec.spawns.length && spawns.length) rec.spawns = spawns;
+		}
+		// Wowhead's NPC list rows (`codex wowhead`, one request per 1,000):
+		// the level of an NPC neither our data nor a page gives one. Only the
+		// level: a row's rank and place are no page's (rares and bosses stay
+		// the pages' and the data's).
+		for (const [id, r] of Object.entries((wh.listed && wh.listed.npc) || {})) {
+			const rec = npcs[id];
+			if (!rec || rec.level != null || !r.level) continue;
+			rec.level = r.level[0];
+			rec.levelMax = r.level[1] !== r.level[0] ? r.level[1] : null;
 		}
 	}
 	const addRole = (id, role) => {
@@ -571,6 +630,7 @@ function mergeCodex(inputs) {
 		const built = buildInstances(cl.instances, {
 			npcs: fv.npcs,
 			items: fv.items,
+			objects: fv.objects,
 			zones: zonesIn,
 			frames: (fv.mapFrames && fv.mapFrames.forever) || {},
 			recorded: fv.instances || {},
@@ -690,6 +750,20 @@ function mergeCodex(inputs) {
 			add(it, { type: 'quest', quest: Number(qid), choice: true, from });
 		}
 	}
+	// The cited gate table's quest rows: the quest hands the item out
+	// (QuestieDB lists no rewards for Rin'wosho the Trader's barters).
+	const repTable = inputs.repTable || {};
+	for (const rows of Object.values(repTable)) {
+		for (const g of rows) {
+			if (!g.quest) continue;
+			if (!(fv.quests || {})[g.quest]) {
+				warnings.push(`repgates.json: ${g.item} ${g.name || ''}: quest ${g.quest} is not in the Codex`);
+				continue;
+			}
+			reward(g.quest, g.item, !!g.choice);
+			add(g.item, { type: 'quest', quest: g.quest, choice: g.choice ? true : null, from: ['curated'] });
+		}
+	}
 	const flbQuests = (flb && flb.quests) || {};
 	for (const [qid, q] of Object.entries(flbQuests)) {
 		for (const it of (q.rewards && q.rewards.items) || []) {
@@ -733,6 +807,26 @@ function mergeCodex(inputs) {
 		}
 	}
 	for (const [id, x] of Object.entries(dungeonItems)) if (!names[id]) names[id] = x.name;
+	// Wowhead Forever's quest lists (quests.json `wowhead`, data build), last:
+	// the reward items no recording, ForeverLevelingBiS or dungeons.json row
+	// names, each as Wowhead files it (one of `choices`, or every one of
+	// `items`). Its lists carry most dungeon quests' rewards these lack.
+	for (const [qid, q] of Object.entries(fv.quests || {})) {
+		const w = q.wowhead;
+		if (!w) continue;
+		const have = questRewards[qid];
+		const known = (it) => have && (have.rewards.has(it) || have.choices.has(it));
+		for (const [list, choice] of [
+			[w.choices || [], true],
+			[w.items || [], false],
+		]) {
+			for (const [it] of list) {
+				if (known(it)) continue;
+				reward(qid, it, choice);
+				add(it, { type: 'quest', quest: Number(qid), choice: choice || null, from: ['wowhead'] });
+			}
+		}
+	}
 	if (flb) {
 		for (const [id, it] of Object.entries(flb.items || {})) {
 			if (it.name && !names[id]) names[id] = it.name;
@@ -793,6 +887,8 @@ function mergeCodex(inputs) {
 	// Forever-only rows (Questie without pfQuest) are trusted. Companions have
 	// no such client flag, so a release build retires none.
 	const listed = new Set([...((al && al.collections) || []).map((c) => Number(c.item)), ...(inputs.curated || []).map(Number)]);
+	// { item: [{ npc, faction|factionName, standing }] } (curatedRepGates).
+	const curatedGates = inputs.curatedGates || {};
 	const hiddenMount = (spell) => !!(cl && cl.mountHidden && spell && cl.mountHidden.has(spell));
 	const statusOf = (id, kind, sources, spell) => {
 		if (!sources.length) return 'nosource';
@@ -811,7 +907,10 @@ function mergeCodex(inputs) {
 	const items = {};
 	const factionByName = {};
 	for (const f of Object.values(factions)) factionByName[normName(f.name)] = f.id;
-	const evidence = { noRep: [], noPvp: [] }; // items Wowhead's Forever tooltip shows without a reputation / PvP rank
+	// noPvp: items Wowhead's Forever tooltip shows without a PvP rank. cut:
+	// what a cap left out (parity's reason, not shipped): drop { item: [npc] },
+	// rare { npc: [item] }, treasure { object: [item] }.
+	const evidence = { noPvp: [], cut: { drop: {}, rare: {}, treasure: {} } };
 	const allIds = new Set([...Object.keys(names), ...Object.keys(cands)].map(Number));
 	for (const id of [...allIds].sort(byId)) {
 		const c = cl && cl.items[id];
@@ -831,8 +930,32 @@ function mergeCodex(inputs) {
 				if (faction) list.push({ type: 'rep', faction, standing: r.standing, npc: vendor ? vendor.npc : null, from: ['wowhead'] });
 			}
 			if (tip.pvpRank) list.push({ type: 'pvp', rank: tip.pvpRank, npc: vendor ? vendor.npc : null, from: ['wowhead'] });
-			if (!(tip.rep || []).length) evidence.noRep.push(id);
 			if (!tip.pvpRank) evidence.noPvp.push(id);
+		}
+		// A curated guide that collects the item reaches a standing before it
+		// buys the item from a vendor: that vendor's gate (13086 Winterspring
+		// Frostsaber: Exalted, server-side, on no tooltip).
+		for (const g of curatedGates[id] || []) {
+			const faction = g.faction || factionByName[normName(g.factionName)];
+			if (faction) list.push({ type: 'rep', faction, standing: g.standing, npc: g.npc, from: ['guides'] });
+		}
+		// An NPC that casts a spell creating the item (the client's SpellEffect;
+		// who casts it, Wowhead Forever's spell page) hands it out.
+		for (const spell of (cl && cl.creates && cl.creates[id]) || []) {
+			for (const npc of (wh && wh.spell && wh.spell[spell] && wh.spell[spell].usedBy) || []) {
+				if (npcs[npc]) list.push({ type: 'gift', npc, spell, from: ['wowhead'] });
+			}
+		}
+		// The cited gate table (repgates.json): the standing its vendor or
+		// giver asks (the Alterac Valley and Warsong Gulch supply officers,
+		// the Argent Dawn quartermasters). A row naming an npc that neither
+		// sells nor hands out the item is stale: a warning, never a gate.
+		for (const g of repTable[id] || []) {
+			if (g.name && g.name !== name) warnings.push(`repgates.json: ${id} is "${name}" in the Codex, not "${g.name}"`);
+			for (const npc of g.npcs || []) {
+				if (list.some((s) => (s.type === 'vendor' || s.type === 'gift') && s.npc === npc)) list.push({ type: 'rep', faction: g.faction, standing: g.standing, npc, from: ['curated'] });
+				else warnings.push(`repgates.json: ${id} ${name}: npc ${npc} neither sells nor gives it in the Codex`);
+			}
 		}
 		if (c && c.pvpRank) {
 			const vendor = list.find((s) => s.type === 'vendor');
@@ -844,7 +967,22 @@ function mergeCodex(inputs) {
 				if (vendor) s.npc = vendor.npc;
 			}
 		}
-		const sources = finalizeSources(list, npcLevel, (npc) => !!bossInstance[npc]);
+		// A quest's reputation gate (questRep, QuestieDB's): its rewards need
+		// that standing. It names no vendor (added after the fill above), so it
+		// never gates a purchase; the quest record carries it too.
+		for (const s of list.filter((x) => x.type === 'quest')) {
+			const g = questRep((fv.quests || {})[s.quest]);
+			if (g) list.push({ type: 'rep', faction: g.faction, standing: g.standing, npc: null, from: ['questie'] });
+		}
+		for (const g of repTable[id] || []) {
+			if (g.quest && list.some((s) => s.type === 'quest' && s.quest === g.quest)) list.push({ type: 'rep', faction: g.faction, standing: g.standing, npc: null, from: ['curated'] });
+		}
+		const sources = finalizeSources(
+			list,
+			npcLevel,
+			(npc) => !!bossInstance[npc],
+			(s) => s.type === 'drop' && (evidence.cut.drop[id] = evidence.cut.drop[id] || []).push(s.npc),
+		);
 		if (!sources.length && JUNK.test(name)) continue;
 		let kind = 'item';
 		if (mountItems.has(id)) kind = 'mount';
@@ -857,11 +995,13 @@ function mergeCodex(inputs) {
 		// Purchase requirements: reputation (standing 1..8, Hated..Exalted, as
 		// Compat.GetFactionStanding) and profession skill, from the client tables.
 		// Some reputation vendors gate items in their gossip, not in ItemSparse
-		// (13086 Winterspring Frostsaber): an item both sold and listed as a
-		// reputation reward takes that reward's faction and standing.
+		// (13086 Winterspring Frostsaber): an item sold or handed out by the npc
+		// a reputation source stands at takes that source's faction and
+		// standing. A quest's gate (its giver's) stays on the quest.
 		let repFaction = (c && c.minFaction) || null;
 		let repStanding = repFaction ? c.minStanding : null;
-		const rep = !repFaction && sources.some((s) => s.type === 'vendor') ? sources.find((s) => s.type === 'rep' && s.faction && s.standing) : null;
+		const vendors = new Set(sources.filter((s) => s.type === 'vendor' || s.type === 'gift').map((s) => s.npc));
+		const rep = !repFaction ? sources.find((s) => s.type === 'rep' && s.faction && s.standing && vendors.has(s.npc)) : null;
 		if (rep) {
 			repFaction = rep.faction;
 			repStanding = rep.standing;
@@ -880,6 +1020,9 @@ function mergeCodex(inputs) {
 			status: statusOf(id, kind, sources, spell),
 			sources,
 		};
+	}
+	for (const [id, rows] of Object.entries(repTable)) {
+		if (!items[id]) warnings.push(`repgates.json: item ${id} ${rows[0].name || ''} is not in the Codex`);
 	}
 
 	// ----- spells (mount / pet summons, class mounts)
@@ -904,6 +1047,7 @@ function mergeCodex(inputs) {
 	// ----- objects: treasures, item sources, quest starts/ends/objectives
 	const wantObjects = new Set();
 	for (const it of Object.values(items)) for (const s of it.sources) if (s.type === 'object') wantObjects.add(s.object);
+	for (const inst of Object.values(instances)) for (const b of inst.bosses || []) if (b.object) wantObjects.add(b.object);
 	const questsIn = fv.quests || {};
 	for (const q of Object.values(questsIn)) {
 		for (const o of (q.start && q.start.object) || []) wantObjects.add(o);
@@ -962,6 +1106,9 @@ function mergeCodex(inputs) {
 				rewards,
 				choices,
 			};
+			// The standing its rewards need (questRep): an unmet one blocks its reward row.
+			const gate = questRep(q);
+			if (gate) Object.assign(quests[id], { repFaction: gate.faction, repStanding: gate.standing });
 			continue;
 		}
 		const f = flbQuests[id];
@@ -986,14 +1133,34 @@ function mergeCodex(inputs) {
 			choices,
 		};
 	}
+	// The table's quest rows gate their quest too: the table's standing over
+	// QuestieDB's (a difference is worth a look: a warning).
+	for (const rows of Object.values(repTable)) {
+		for (const g of rows) {
+			const q = g.quest && quests[g.quest];
+			if (!q) continue;
+			if (q.repFaction && (q.repFaction !== g.faction || q.repStanding !== g.standing)) warnings.push(`repgates.json: quest ${g.quest} asks ${g.faction}/${g.standing} here, ${q.repFaction}/${q.repStanding} in QuestieDB`);
+			Object.assign(q, { repFaction: g.faction, repStanding: g.standing });
+		}
+	}
 
 	// ----- loot of rares and treasures: RareScanner loot plus every drop/object
-	// candidate naming them (before the per-item caps), items known to the Codex only.
-	const lootOf = (rec, chances, listed) => {
+	// candidate naming them (before the per-item caps), items known to the Codex
+	// only; its own drops first (the only drop or object candidate of the item).
+	const holderOf = {}; // item -> 'n<npc>' | 'o<object>' when one alone drops or holds it, else null
+	for (const [item, list] of Object.entries(cands)) {
+		for (const s of list) {
+			if (s.type !== 'drop' && s.type !== 'object') continue;
+			const h = s.type === 'drop' ? `n${s.npc}` : `o${s.object}`;
+			holderOf[item] = holderOf[item] === undefined || holderOf[item] === h ? h : null;
+		}
+	}
+	const lootOf = (rec, holder, chances, listed, cut) => {
 		const ids = new Set([...(listed || []), ...chances.keys()].filter((id) => items[id]));
-		rec.loot = [...ids]
-			.sort((a, b) => (chances.get(b) ?? -1) - (chances.get(a) ?? -1) || (items[b].quality ?? -1) - (items[a].quality ?? -1) || a - b)
-			.slice(0, LOOT_CAP);
+		const own = (id) => (holderOf[id] === holder ? 0 : 1);
+		const ranked = [...ids].sort((a, b) => own(a) - own(b) || (chances.get(b) ?? -1) - (chances.get(a) ?? -1) || (items[b].quality ?? -1) - (items[a].quality ?? -1) || a - b);
+		rec.loot = ranked.slice(0, LOOT_CAP);
+		if (ranked.length > LOOT_CAP) cut[rec.id] = ranked.slice(LOOT_CAP);
 	};
 	const npcChances = {};
 	const objectChances = {};
@@ -1009,11 +1176,11 @@ function mergeCodex(inputs) {
 		}
 	}
 	for (const [id, n] of Object.entries(npcs)) {
-		if (n.rare) lootOf(n, npcChances[id] || new Map(), rareLoot[id]);
+		if (n.rare) lootOf(n, `n${id}`, npcChances[id] || new Map(), rareLoot[id], evidence.cut.rare);
 		else n.loot = [];
 	}
 	for (const [id, o] of Object.entries(objects)) {
-		if (o.treasure) lootOf(o, objectChances[id] || new Map(), treasureLoot[id]);
+		if (o.treasure) lootOf(o, `o${id}`, objectChances[id] || new Map(), treasureLoot[id], evidence.cut.treasure);
 		else o.loot = [];
 	}
 
@@ -1145,12 +1312,20 @@ function writePackDir(dir, files) {
 	fs.rmSync(old, { recursive: true, force: true });
 }
 
+// The Forever client build to read (tools/lib/data/wago.js, as `data build`
+// --forever-build): `build` when given, else the newest 1.60+ build wago.tools
+// lists, else (offline or unreachable) the newest cached one holding every
+// table the Codex reads. -> { build, warnings }
+function pickForeverBuild({ sourcesDir, build, offline = false, fetchImpl } = {}) {
+	return require('../data/wago').pickBuild({ sourcesDir: sourcesDir || SOURCES, build, offline, fetchImpl, product: 'forever', tables: TABLES });
+}
+
 // localExtras: also merge the installed AtlasLoot (GPL-2.0), RareScanner (All
 // Rights Reserved) and data/forever/dungeons.json (DungeonJournal, no
 // licence). Such a build is for this machine only: its meta says `local`
 // and `pack` refuses to ship it. Without it every input is release-safe
 // (docs/ARCHITECTURE.md, "Codex (`codex build`)").
-async function loadInputs({ addons, offline = false, dataDir, sourcesDir, build = BUILD, fetchImpl, localExtras = false, guidesDir, log = () => {} } = {}) {
+async function loadInputs({ addons, offline = false, dataDir, sourcesDir, build, fetchImpl, localExtras = false, guidesDir, log = () => {} } = {}) {
 	dataDir = dataDir || DATA;
 	sourcesDir = sourcesDir || SOURCES;
 	guidesDir = guidesDir || path.join(ROOT, 'guides');
@@ -1196,7 +1371,10 @@ async function loadInputs({ addons, offline = false, dataDir, sourcesDir, build 
 		}
 	}
 	const { loadTables } = require('../professions/tables');
-	const loaded = await loadTables({ sourcesDir, build, offline, fetchImpl, log, tables: TABLES });
+	const picked = await pickForeverBuild({ sourcesDir, build, offline, fetchImpl });
+	warnings.push(...picked.warnings);
+	log(`Forever client build ${picked.build}${build ? ' (--build)' : ''}`);
+	const loaded = await loadTables({ sourcesDir, build: picked.build, offline, fetchImpl, log, tables: TABLES });
 	warnings.push(...loaded.warnings);
 	const client = clientFacts(loaded.tables, loaded.build);
 	client.instanceMaps = require('./journal').instanceMapsOf(loaded.tables.Map || [], loaded.tables.AreaTable || []);
@@ -1217,25 +1395,74 @@ async function loadInputs({ addons, offline = false, dataDir, sourcesDir, build 
 		warnings.push(`Era client tables ${ERA_BUILD}: ${err.message}`);
 	}
 	client.instances = instanceFacts(loaded.tables, eraMaps);
-	return { forever, atlasloot, rarescanner, flbis, client, wowhead, curated: curatedCollects(guidesDir), entrances: curatedEntrances(guidesDir), entranceTable: loadEntranceTable(), localExtras: !!localExtras, warnings };
+	return { forever, atlasloot, rarescanner, flbis, client, wowhead, curated: curatedCollects(guidesDir), curatedGates: curatedRepGates(guidesDir), entrances: curatedEntrances(guidesDir), entranceTable: loadEntranceTable(), repTable: loadRepGateTable(), localExtras: !!localExtras, warnings };
+}
+
+// Every .guide file under dir -> [{ file, text }], by path.
+function guideTexts(dir) {
+	const out = [];
+	const walk = (d) => {
+		if (!fs.existsSync(d)) return;
+		for (const e of fs.readdirSync(d, { withFileTypes: true }).sort((a, b) => (a.name < b.name ? -1 : 1))) {
+			const p = path.join(d, e.name);
+			if (e.isDirectory()) walk(p);
+			else if (e.name.endsWith('.guide')) out.push({ file: p, text: fs.readFileSync(p, 'utf8') });
+		}
+	};
+	walk(dir);
+	return out;
+}
+
+function collectsOf(text) {
+	const m = text.match(/^collects\s+(.+)$/m);
+	return m ? m[1].split(/[\s,]+/).filter((id) => /^\d+$/.test(id)).map(Number) : [];
 }
 
 // Item ids that Polestar's own guides obtain (`collects` headers under guides/).
 function curatedCollects(dir = path.join(ROOT, 'guides')) {
 	const out = new Set();
-	const walk = (d) => {
-		if (!fs.existsSync(d)) return;
-		for (const e of fs.readdirSync(d, { withFileTypes: true })) {
-			const p = path.join(d, e.name);
-			if (e.isDirectory()) walk(p);
-			else if (e.name.endsWith('.guide')) {
-				const m = fs.readFileSync(p, 'utf8').match(/^collects\s+(.+)$/m);
-				if (m) for (const id of m[1].split(/[\s,]+/)) if (/^\d+$/.test(id)) out.add(Number(id));
-			}
-		}
-	};
-	walk(dir);
+	for (const { text } of guideTexts(dir)) for (const id of collectsOf(text)) out.add(id);
 	return [...out].sort(byId);
+}
+
+// The vendor gates Polestar's own guides state: in a guide that collects an
+// item, the last `rep <faction> <Standing>` goal before `buy <item> npc <id>`
+// -> { item: [{ npc, faction|null, factionName|null, standing }] }.
+const GUIDE_STANDINGS = { hated: 1, hostile: 2, unfriendly: 3, neutral: 4, friendly: 5, honored: 6, revered: 7, exalted: 8 };
+function curatedRepGates(dir = path.join(ROOT, 'guides')) {
+	const out = {};
+	for (const { text } of guideTexts(dir)) {
+		const collects = new Set(collectsOf(text));
+		if (!collects.size) continue;
+		let rep = null;
+		for (const line of text.split(/\r?\n/)) {
+			const goal = line.replace(/\s--.*$/, '').trim();
+			const r = /^rep\s+(?:(\d+)\s+)?(?:"([^"]+)"\s+)?([A-Za-z]+)$/.exec(goal);
+			if (r && GUIDE_STANDINGS[r[3].toLowerCase()] && (r[1] || r[2])) {
+				rep = { faction: r[1] ? Number(r[1]) : null, factionName: r[2] || null, standing: GUIDE_STANDINGS[r[3].toLowerCase()] };
+				continue;
+			}
+			const b = /^buy\s+(\d+)\b.*\bnpc\s+(\d+)/.exec(goal);
+			if (b && rep && collects.has(Number(b[1]))) (out[b[1]] = out[b[1]] || []).push({ npc: Number(b[2]), ...rep });
+		}
+	}
+	return out;
+}
+
+// The cited reputation gate table (tools/lib/codex/repgates.json): rows
+// { item, name, faction, standing (1..8), npcs: [vendor or giver] | quest
+// (+ choice), source (URL), note? } -> { item: [row] }. A malformed row throws.
+function loadRepGateTable(file = path.join(__dirname, 'repgates.json')) {
+	if (!fs.existsSync(file)) return {};
+	const out = {};
+	for (const g of JSON.parse(fs.readFileSync(file, 'utf8')).gates || []) {
+		const where = Array.isArray(g.npcs) && g.npcs.length && g.npcs.every(Number.isInteger) ? !g.quest : Number.isInteger(g.quest) && !g.npcs;
+		if (!Number.isInteger(g.item) || !Number.isInteger(g.faction) || !(g.standing >= 1 && g.standing <= 8) || !where || !/^https:\/\//.test(g.source || '')) {
+			throw new Error(`${path.basename(file)}: bad row ${JSON.stringify(g)}`);
+		}
+		(out[g.item] = out[g.item] || []).push(g);
+	}
+	return out;
 }
 
 function sourcesMeta(inputs) {
@@ -1253,10 +1480,17 @@ function sourcesMeta(inputs) {
 	const wh = inputs.wowhead;
 	if (wh) {
 		const n = Object.keys(wh.npc).length + Object.keys(wh.object).length + Object.keys(wh.item).length;
-		if (n) out.push({ name: 'Wowhead Forever database (wowhead.com/forever): NPC and object pages, item tooltips', version: `${n} entities; cache data/sources/wowhead/codex`, licence: 'Public web pages; facts only (levels, classification, positions, drop counts, requirements)' });
+		const listed = wh.listed && wh.listed.npc ? Object.keys(wh.listed.npc).length : 0;
+		if (n || listed) out.push({ name: `Wowhead Forever database (wowhead.com/forever): NPC and object pages, item tooltips${listed ? ', NPC list levels' : ''}`, version: `${n} entities${listed ? `, ${listed} listed NPCs` : ''}; cache data/sources/wowhead/codex`, licence: 'Public web pages; facts only (levels, classification, positions, drop counts, requirements)' });
 	}
 	const ne = Object.keys(inputs.entranceTable || {}).length;
 	if (ne && !inputs.atlasloot) out.push({ name: 'Curated instance entrances (tools/lib/codex/entrances.json): QuestieDB Forever dungeon table, warcraft.wiki.gg, Wowhead Forever', version: `${ne} entrances`, licence: 'Facts only (coordinates), each entry with its source' });
+	const nr = Object.keys(inputs.repTable || {}).length;
+	if (nr) out.push({ name: 'Curated reputation gates (tools/lib/codex/repgates.json): warcraft.wiki.gg, Wowhead Classic reputation guides, QuestieDB', version: `${nr} items`, licence: 'Facts only (standings), each row with its source' });
+	const na = (inputs.attunementTable || require('./attunements').loadAttunementTable()).attunements.length;
+	if (na) out.push({ name: 'Curated attunement goals (tools/lib/codex/attunements.json): Wowhead Forever, warcraft.wiki.gg', version: `${na} attunements`, licence: 'Facts only (quest and item ids), each entry with its sources' });
+	const nj = (inputs.journalQuests || require('./journal').loadJournalQuests()).length;
+	if (nj) out.push({ name: 'Curated Dungeons journal quests (tools/lib/codex/journal-quests.json): Wowhead Forever', version: `${nj} quests`, licence: 'Facts only (quest ids and instances), each row with its source' });
 	if (inputs.client) out.push({ name: 'World of Warcraft: Forever client tables via wago.tools', version: inputs.client.build, licence: 'Blizzard Entertainment game data, facts only' });
 	if (inputs.client && inputs.client.eraBuild) out.push({ name: 'World of Warcraft Classic Era client item tables via wago.tools (items missing from the Forever tables)', version: inputs.client.eraBuild, licence: 'Blizzard Entertainment game data, facts only' });
 	return out;
@@ -1276,7 +1510,7 @@ async function buildCodex(opts = {}) {
 	const meta = {
 		schema: SCHEMA,
 		builtAt: opts.builtAt || (inputs.forever.meta && inputs.forever.meta.builtAt) || null,
-		build: (inputs.client && inputs.client.build) || BUILD,
+		build: (inputs.client && inputs.client.build) || null,
 		// A --local-extras build (AtlasLoot, RareScanner, DungeonJournal): never released.
 		localExtras: !!(inputs.localExtras || inputs.atlasloot || inputs.rarescanner || (inputs.forever && inputs.forever.dungeons)),
 		sources: sourcesMeta(inputs),
@@ -1289,7 +1523,7 @@ async function buildCodex(opts = {}) {
 	const extraFiles = [];
 	// The Dungeons journal (tools/lib/codex/journal.js) rides in this pack.
 	const { buildJournal, emitJournal } = require('./journal');
-	const journal = buildJournal(inputs, codex);
+	const { warnings: journalWarnings = [], ...journal } = buildJournal(inputs, codex);
 	extraFiles.push(...emitJournal(journal));
 	// Parity with the last --local-extras build (tools/lib/codex/parity.js):
 	// a release build records the match per kind; without that build, none.
@@ -1318,7 +1552,7 @@ async function buildCodex(opts = {}) {
 	const out = { meta, items: codex.items, npcs: codex.npcs, objects: codex.objects, quests: codex.quests, instances: codex.instances, zones: codex.zones, factions: codex.factions, spells: codex.spells, frames };
 	out.journal = journal;
 	for (const [name, value] of Object.entries(out)) writeAtomic(path.join(outDir, `${name}.json`), `${JSON.stringify(sortKeysDeep(value), null, '\t')}\n`);
-	return { codex: out, files, outDir, packDir, bytes, memory, parity, warnings: [...(inputs.warnings || []), ...mergeWarnings], ms: Date.now() - t0 };
+	return { codex: out, files, outDir, packDir, bytes, memory, parity, warnings: [...(inputs.warnings || []), ...mergeWarnings, ...journalWarnings], ms: Date.now() - t0 };
 }
 
 // What checks an internal-only fact (tools/lib/codex/parity.js): Wowhead's
@@ -1328,6 +1562,8 @@ function verifyOf(inputs) {
 	return {
 		wowhead: inputs.wowhead || { npc: {}, object: {}, item: {} },
 		clientInstances: new Set(((inputs.client && inputs.client.instanceMaps) || []).map((m) => norm(m.name))),
+		// The AreaTable areas on instance maps (Wowhead's `location` inside one).
+		instanceAreas: inputs.client ? new Set((inputs.client.instanceMaps || []).flatMap((m) => m.inner || [])) : null,
 	};
 }
 
@@ -1341,4 +1577,4 @@ function writeParity(ours, theirs, dir, verify = null) {
 	return { report, files };
 }
 
-module.exports = { buildCodex, loadInputs, mergeCodex, clientFacts, cluster, slug, writeParity, BUILD, TABLES };
+module.exports = { buildCodex, loadInputs, mergeCodex, clientFacts, curatedRepGates, loadRepGateTable, cluster, slug, writeParity, pickForeverBuild, TABLES };

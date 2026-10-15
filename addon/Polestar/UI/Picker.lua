@@ -12,16 +12,20 @@
 -- Middle: tabs (Home: Continue cards for the open tabs and the suggested
 -- guides; Browse: the last category or the search; Current: the open tabs;
 -- Recent: the last guides loaded), one always active, over one line per
--- guide, "Title (min-max)", a check on finished guides and a muted "Tab N"
+-- guide, "Title (min-max)", a "Group" chip on a guide with group content
+-- (elites, dungeons, raids: the compiled `group`; on the Continue cards
+-- too), a check on finished guides and a muted "Tab N"
 -- on open ones, under small folder headers (leveling by faction and band:
 -- "Horde 30-40"; the rest by category). The faction filter sits at the
 -- right of the tab row. The header says what the list holds ("Horde · 65
 -- guides · 1 open", or the search's result count). The list runs to the
 -- window's bottom.
 -- Right: the selected guide's details: its zone's art from the client (the
--- night band without it) with the title on it, chips (levels, faction,
--- races, classes), progress, the facts (steps, the quests this character
--- takes, the zones in route order, what comes next), pitch, pros and cons,
+-- night band without it) with the title on it, chips (levels, group,
+-- faction, races, classes), progress, the facts (what the guide's goal gives
+-- and why: a Class guide's `reward`, item and spell icons with the game's
+-- tooltip on hover, and its `why`; steps, the quests this character takes,
+-- the zones in route order, what comes next), pitch, pros and cons,
 -- the favourite star, "Load guide" (into the current tab) and "Open in new
 -- tab"; on an open guide Load reads "Continue" and the new-tab button goes.
 --
@@ -71,15 +75,15 @@ local visibleIds = {} -- guide ids in the middle pane, top to bottom (arrow keys
 
 local FACTIONS = { "Alliance", "Horde", "All" }
 local VIEWS = { "home", "browse", "current", "recent" }
-local VIEW_LABEL = { home = "Home", browse = "Browse", current = "Current", recent = "Recent" }
+local VIEW_LABEL = { home = L["Home"], browse = L["Browse"], current = L["Current"], recent = L["Recent"] }
 
 -- The guide format's categories, in the order players look for them.
-local CATEGORIES = { "Leveling", "Professions", "Reputation", "Exploration", "Legacy", "Collectibles" }
+local CATEGORIES = { "Leveling", "Class", "Professions", "Reputation", "Exploration", "Legacy", "Collectibles" }
 P.CATEGORIES = CATEGORIES
 local CATEGORY_RANK = {}
 for i, c in ipairs(CATEGORIES) do CATEGORY_RANK[c] = i end
 local CATEGORY_ICON = {
-	Leveling = "icon-level", Professions = "icon-craft", Reputation = "icon-rep", Exploration = "icon-explore",
+	Leveling = "icon-level", Class = "icon-train", Professions = "icon-craft", Reputation = "icon-rep", Exploration = "icon-explore",
 	Legacy = "icon-achieve", Collectibles = "icon-collect", Favorites = "star",
 }
 P.CATEGORY_ICON = CATEGORY_ICON
@@ -514,6 +518,10 @@ local function guideRow(i)
 	r.Title:SetPoint("LEFT", r, "LEFT", TEXT_X, 0)
 	r.Range = W.Text(r, "body", "textMuted")
 	r.Range:SetPoint("LEFT", r.Title, "RIGHT", 5, 0)
+	-- A guide with group content (compiled `group`): "Group" after the range.
+	r.Group = W.Chip(r)
+	r.Group:SetPoint("LEFT", r.Range, "RIGHT", 6, 0)
+	r.Group:Hide()
 	-- An open guide's tab ("Tab 2", "Tab 2 · 25%").
 	r.Note = W.Text(r, "small", "textMuted")
 	r.Note:SetJustifyH("RIGHT")
@@ -535,11 +543,20 @@ local function paintRow(r, g, note, width)
 	r.Bar:SetShown(sel)
 	local done = guideState(g.id) == "done"
 	r.Check:SetShown(done)
+	-- A Class guide this character cannot start yet recedes and says when.
+	local E = ns.Engine
+	local gate = not done and E and E.StartGate and E.StartGate(g.id)
+	if gate then
+		local when = gate.level and string.format(L["From level %d"], gate.level) or L["Not available yet"]
+		note = note and (note .. DOT .. when) or when
+	end
 	r.Title:SetWidth(0) -- measured below from scratch, as the note
 	r.Title:SetText(g.title or g.id)
-	W.Color(r.Title, sel and "text" or (done and "textDim" or "text"))
+	W.Color(r.Title, sel and "text" or ((done or gate) and "textDim" or "text"))
 	local lv = UI.LevelRange(g.minLevel, g.maxLevel)
 	r.Range:SetText(lv and ("(" .. lv .. ")") or "")
+	local groupW = g.group == true and (W.SetChip(r.Group, L["Group"], "dungeon") + 6) or 0
+	r.Group:SetShown(groupW > 0)
 	-- A pack's guide carries its pack's title, except in that pack's own list.
 	local pack = packOf(g)
 	if pack and not (view == "browse" and category == PACK .. pack.id) then
@@ -552,7 +569,7 @@ local function paintRow(r, g, note, width)
 	-- The note never takes more than 45% of the row: a long pack title is cut.
 	local noteW = note and min(floor(r.Note:GetStringWidth() + 1), floor(width * 0.45)) or 0
 	r.Note:SetWidth(noteW)
-	local room = width - TEXT_X * 2 - (note and (noteW + 12) or 0) - (lv and (r.Range:GetStringWidth() + 5) or 0)
+	local room = width - TEXT_X * 2 - (note and (noteW + 12) or 0) - (lv and (r.Range:GetStringWidth() + 5) or 0) - groupW
 	r.Title:SetWidth(max(40, min(room, floor(r.Title:GetStringWidth() + 1))))
 	r:SetWidth(width)
 end
@@ -576,6 +593,10 @@ local function card(i)
 	c.Note = W.Text(c, "small", "textMuted")
 	c.Note:SetJustifyH("RIGHT")
 	c.Note:SetPoint("RIGHT", c, "TOPRIGHT", -TEXT_X, -20)
+	-- A guide with group content: "Group" left of the tab.
+	c.Group = W.Chip(c)
+	c.Group:SetPoint("RIGHT", c.Note, "LEFT", -8, 0)
+	c.Group:Hide()
 	c.Step = W.Text(c, "small", "textDim")
 	c.Step:SetPoint("TOPLEFT", c, "TOPLEFT", TEXT_X, -38)
 	c.Pct = W.Text(c, "number", "textDim")
@@ -619,7 +640,9 @@ local function layoutCards(tabs, active, byId, y)
 		c:SetWidth(cw)
 		W.SetProgress(c.Line, frac, cw - TEXT_X * 2)
 		c.Note:SetText(string.format(L["Tab %d"], i))
-		local room = cw - TEXT_X * 2 - 14 - 8 - c.Note:GetStringWidth() - 8
+		local groupW = c.psGuide.group == true and (W.SetChip(c.Group, L["Group"], "dungeon") + 8) or 0
+		c.Group:SetShown(groupW > 0)
+		local room = cw - TEXT_X * 2 - 14 - 8 - c.Note:GetStringWidth() - 8 - groupW
 		c.Title:SetWidth(max(40, floor(room)))
 		local col, line = (i - 1) % per, floor((i - 1) / per)
 		c:ClearAllPoints()
@@ -673,6 +696,106 @@ local function factRow(i)
 	f.Value:SetWordWrap(true)
 	details.Facts[i] = f
 	return f
+end
+
+-- The guide's reward: one tile per entry in the facts' value column, an
+-- item or spell icon (a glyph for words) and its name; items in their
+-- quality's colour and border. Hovering shows the game's item or spell
+-- tooltip, a modified click acts as on any item or spell button
+-- (W.ItemClick, W.SpellClick); the pane asks for the items and spells as it
+-- paints them, so the first hover usually finds them cached.
+local REWARD_H, REWARD_GAP = 22, 4
+
+local function rewardEnter(self)
+	local e = self.psReward
+	if not e then return end
+	if e.item then
+		W.ItemTip(self, e.item)
+	elseif e.spell then
+		W.SpellTip(self, e.spell)
+	end
+end
+
+local function rewardClick(self)
+	local e = self.psReward
+	if not e then return end
+	if e.item then
+		W.ItemClick(e.item)
+	elseif e.spell then
+		W.SpellClick(e.spell)
+	end
+end
+
+local function rewardTile(i)
+	local t = details.Rewards[i]
+	if t then return t end
+	t = CreateFrame("Button", nil, details)
+	t:SetSize(DETAIL_W - DPAD * 2 - FACT_W, REWARD_H)
+	W.Hover(t)
+	t.Well = CreateFrame("Frame", nil, t)
+	t.Well:SetSize(REWARD_H, REWARD_H)
+	t.Well:SetPoint("LEFT", t, "LEFT", 0, 0)
+	t.Well.Ground = W.Fill(t.Well, "scrim", "BACKGROUND", 0)
+	t.Icon = t.Well:CreateTexture(nil, "ARTWORK")
+	t.Icon:SetPoint("TOPLEFT", t.Well, "TOPLEFT", 1, -1)
+	t.Icon:SetPoint("BOTTOMRIGHT", t.Well, "BOTTOMRIGHT", -1, 1)
+	t.Name = W.Text(t, "note", "text")
+	t.Name:SetPoint("LEFT", t.Well, "RIGHT", 8, 0)
+	t.Name:SetWidth(DETAIL_W - DPAD * 2 - FACT_W - REWARD_H - 8)
+	t:SetScript("OnEnter", rewardEnter)
+	t:SetScript("OnLeave", W.HideTip)
+	t:SetScript("OnClick", rewardClick)
+	details.Rewards[i] = t
+	return t
+end
+
+-- "ffrrggbb" -> r, g, b (0-1).
+local function hexRGB(hex)
+	local r, g, b = hex:match("^%x%x(%x%x)(%x%x)(%x%x)$")
+	if not r then return nil end
+	return tonumber(r, 16) / 255, tonumber(g, 16) / 255, tonumber(b, 16) / 255
+end
+
+-- Paints tile t for reward entry e -> the name shown.
+local function paintReward(t, e)
+	local C = ns.Compat
+	t.psReward = e
+	local icon, name, hex
+	if e.item then
+		W.PrefetchItem(e.item)
+		icon = C.ItemIcon and C.ItemIcon(e.item)
+		name = e.itemName or (L["Item"] .. " " .. e.item)
+		local q = (C.GetItemQuality and C.GetItemQuality(e.item)) or e.quality
+		hex = q and C.ItemQualityHex and C.ItemQualityHex(q)
+	elseif e.spell then
+		W.PrefetchSpell(e.spell)
+		icon = C.SpellIcon and C.SpellIcon(e.spell)
+		name = e.spellName or (L["Spell"] .. " " .. e.spell)
+	else
+		name = e.text or ""
+	end
+	if icon then
+		t.Icon:SetTexture(icon)
+		t.Icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+		W.Uncolor(t.Icon)
+		t.Icon:SetVertexColor(1, 1, 1, 1)
+	else
+		t.Icon:SetTexture(Theme.Media(e.item and "icon-collect" or "icon-train"))
+		t.Icon:SetTexCoord(0, 1, 0, 1)
+		W.Color(t.Icon, "textMuted")
+	end
+	local r, g, b = hexRGB(hex or "")
+	if r then
+		Theme.Border(t.Well, r, g, b, 0.9)
+		W.Uncolor(t.Name)
+		t.Name:SetTextColor(Theme.Legible(r, g, b))
+	else
+		local br, bg, bb = Theme.Wash("border")
+		Theme.Border(t.Well, br, bg, bb, 0.6)
+		W.Color(t.Name, e.item and "item" or "text")
+	end
+	t.Name:SetText(name)
+	return name
 end
 
 -- The zones in route order, as many as fit on two lines ("A › B › …").
@@ -745,6 +868,7 @@ local function buildDetails()
 	-- The facts, under a hairline (factRow).
 	d.FactRule = W.Divider(d)
 	d.Facts = {}
+	d.Rewards = {}
 	-- Credits under the facts: who wrote it and, for a pack's guide, the
 	-- pack; the pack's source on its own line.
 	d.Credits = W.Text(d, "small", "textMuted")
@@ -834,6 +958,7 @@ local function renderDetails(byId, tabs, active)
 			f.Label:Hide()
 			f.Value:Hide()
 		end
+		for _, t in ipairs(d.Rewards) do t:Hide() end
 		d.EmptyTitle:Show()
 		d.EmptyNote:Show()
 		P.detail = nil
@@ -850,7 +975,7 @@ local function renderDetails(byId, tabs, active)
 	d.Star.psTip = fav and L["Remove from favourites"] or L["Add to favourites"]
 	d.Title:SetText(g.title or g.id)
 
-	-- Chips: levels, faction, races, classes; on two lines at most.
+	-- Chips: levels, group content, faction, races, classes; on two lines at most.
 	local y = ART_H + 16
 	local n, x, line, full = 0, DPAD, 0, false
 	local function addChip(text, kind)
@@ -872,6 +997,7 @@ local function renderDetails(byId, tabs, active)
 	end
 	local lv = UI.LevelRange(g.minLevel, g.maxLevel)
 	if lv then addChip(L["Levels"] .. " " .. lv, "accent") end
+	if g.group == true then addChip(L["Group"], "dungeon") end
 	addChip(g.faction and L[g.faction] or L["Both factions"])
 	if type(g.races) == "table" then for _, race in ipairs(g.races) do addChip(UI.RaceName(race)) end end
 	if type(g.classes) == "table" then for _, cl in ipairs(g.classes) do addChip(UI.ClassName(cl)) end end
@@ -910,9 +1036,23 @@ local function renderDetails(byId, tabs, active)
 	d.Prog:SetShown(started and true or false)
 	y = y + (started and (20 + 2) or 14) + 16
 
-	-- Facts: steps, the quests this character takes, the zones in route
-	-- order, where the guide leads.
+	-- Facts: what the guide's goal gives and why (a Class guide's `reward`
+	-- and `why`), then steps, the quests this character takes, the zones in
+	-- route order, where the guide leads. Reward entries are tiles: those
+	-- given outright under "Reward", a choice under "Choose one".
 	local facts, info = {}, guideFacts(g)
+	if type(g.reward) == "table" then
+		local get, choose = {}, {}
+		for _, e in ipairs(g.reward) do
+			if type(e) == "table" then
+				local list = e.choice and choose or get
+				list[#list + 1] = e
+			end
+		end
+		if #get > 0 then facts[#facts + 1] = { L["Reward"], rewards = get } end
+		if #choose > 0 then facts[#facts + 1] = { L["Choose one"], rewards = choose } end
+	end
+	if type(g.why) == "string" and g.why ~= "" then facts[#facts + 1] = { L["Why"], g.why } end
 	if g.stepCount then facts[#facts + 1] = { L["Steps"], tostring(g.stepCount) } end
 	if info.quests > 0 then facts[#facts + 1] = { L["Quests"], tostring(info.quests) } end
 	if #info.zones > 0 then facts[#facts + 1] = { L["Zones"], info.zones, "textDim" } end
@@ -922,26 +1062,46 @@ local function renderDetails(byId, tabs, active)
 	d.FactRule:SetPoint("TOPLEFT", d, "TOPLEFT", DPAD, -y)
 	d.FactRule:SetPoint("TOPRIGHT", d, "TOPRIGHT", -DPAD, -y)
 	d.FactRule:SetShown(#facts > 0)
-	local shownFacts = {}
+	local shownFacts, shownRewards, nTiles = {}, {}, 0
 	if #facts > 0 then y = y + 1 + 16 end
 	for i, f in ipairs(facts) do
 		local row = factRow(i)
 		row.Label:SetText(f[1])
-		W.Color(row.Value, f[3] or "text")
-		if type(f[2]) == "table" then fitZones(row.Value, f[2]) else row.Value:SetText(f[2]) end
 		row.Label:ClearAllPoints()
-		row.Label:SetPoint("TOPLEFT", d, "TOPLEFT", DPAD, -(y + 1))
-		row.Value:ClearAllPoints()
-		row.Value:SetPoint("TOPLEFT", d, "TOPLEFT", DPAD + FACT_W, -y)
 		row.Label:Show()
-		row.Value:Show()
-		y = y + max(row.Value:GetStringHeight(), row.Label:GetStringHeight()) + FACT_GAP
-		shownFacts[i] = { f[1], row.Value:GetText() }
+		if f.rewards then
+			-- The label sits on the first tile's text line.
+			row.Label:SetPoint("TOPLEFT", d, "TOPLEFT", DPAD, -(y + (REWARD_H - row.Label:GetStringHeight()) / 2))
+			row.Value:Hide()
+			local names = {}
+			for k, e in ipairs(f.rewards) do
+				nTiles = nTiles + 1
+				local t = rewardTile(nTiles)
+				t:ClearAllPoints()
+				t:SetPoint("TOPLEFT", d, "TOPLEFT", DPAD + FACT_W, -y)
+				names[k] = paintReward(t, e)
+				shownRewards[#shownRewards + 1] = { kind = e.item and "item" or e.spell and "spell" or "text", id = e.item or e.spell, name = names[k], choice = e.choice and true or nil }
+				t:Show()
+				y = y + REWARD_H + (k < #f.rewards and REWARD_GAP or 0)
+			end
+			y = y + FACT_GAP
+			shownFacts[i] = { f[1], table.concat(names, ", ") }
+		else
+			W.Color(row.Value, f[3] or "text")
+			if type(f[2]) == "table" then fitZones(row.Value, f[2]) else row.Value:SetText(f[2]) end
+			row.Label:SetPoint("TOPLEFT", d, "TOPLEFT", DPAD, -(y + 1))
+			row.Value:ClearAllPoints()
+			row.Value:SetPoint("TOPLEFT", d, "TOPLEFT", DPAD + FACT_W, -y)
+			row.Value:Show()
+			y = y + max(row.Value:GetStringHeight(), row.Label:GetStringHeight()) + FACT_GAP
+			shownFacts[i] = { f[1], row.Value:GetText() }
+		end
 	end
 	for i = #facts + 1, #d.Facts do
 		d.Facts[i].Label:Hide()
 		d.Facts[i].Value:Hide()
 	end
+	for i = nTiles + 1, #d.Rewards do d.Rewards[i]:Hide() end
 	if #facts > 0 then y = y - FACT_GAP + 20 end
 
 	-- Credits, and the pack's source.
@@ -1023,7 +1183,7 @@ local function renderDetails(byId, tabs, active)
 		setPrimary(d.Load, true)
 	end
 	P.detail = { id = g.id, art = d.psArt, state = state, tab = tabIndex, label = label, frac = frac, facts = shownFacts,
-		credits = credits, source = source }
+		reward = #shownRewards > 0 and shownRewards or nil, credits = credits, source = source }
 end
 
 ---------------------------------------------------------------------------
@@ -1258,7 +1418,7 @@ function P.Render()
 	W.ShellNav(win, navItems(counts, total), view == "browse" and category or nil, function(key) P.SetCategory(key) end)
 	navTips(filter)
 	local tabsList = {}
-	for i, v in ipairs(VIEWS) do tabsList[i] = { key = v, label = L[VIEW_LABEL[v]] } end
+	for i, v in ipairs(VIEWS) do tabsList[i] = { key = v, label = VIEW_LABEL[v] } end
 	W.ShellTabs(win, tabsList, view, function(key) P.SetView(key) end)
 	paintSegments(filter)
 
@@ -1281,7 +1441,7 @@ function P.Render()
 			subtitle = table.concat(parts, DOT)
 		end
 	else
-		title = L[VIEW_LABEL[view]]
+		title = VIEW_LABEL[view]
 		if view == "home" then
 			subtitle = L["Pick up where you left off, or start something new."]
 		elseif view == "current" then

@@ -1,14 +1,14 @@
 guide forever/horde/tauren/01-mulgore
-title Mulgore & Durotar
+title Mulgore
 faction Horde
 race Tauren
-levels 1-13
+levels 1-12
 zone Mulgore
 next forever/horde/02-the-barrens
 
 # Route: the simulator's consensus route for Tauren (data/sim/export/consensus-horde-tauren),
-# visits 1-2: Mulgore 1-11.8 (bind Bloodhoof Village), Durotar 11.8-12.7
-# (bind Razor Hill), ending at the Crossroads (flight path, bind).
+# visits 1-2: Mulgore 1-11.9 (bind Bloodhoof Village) and Thunder Bluff
+# 11.9-12.1, ending at the Crossroads (flight path, bind).
 #
 # Flow: Camp Narache -> plainstriders and cougars -> Seer Graytongue -> the
 # shrine of An'she and Mu'sha -> Brambleblade Ravine -> Camp Narache ->
@@ -17,9 +17,7 @@ next forever/horde/02-the-barrens
 # Winterhoof Water Well, the Rolling Plains, Galak centaurs and the Ravaged
 # Caravan -> Bloodhoof -> Venture Co. Mine -> Wildmane Water Well and
 # Windfury Ridge -> Bael'dun Digsite -> Palemane Rock -> Bloodhoof ->
-# Winterhoof Water Well -> Red Rocks -> through the Barrens to Razor Hill
-# (Crossroads flight path on the way) -> the naga coast -> Drygulch Ravine
-# and Skull Rock -> Thunder Ridge -> Razor Hill -> the Crossroads.
+# Winterhoof Water Well -> Red Rocks -> Thunder Bluff -> the Crossroads.
 #
 # Deviations from the export:
 # - Break Sharptusk! (3376) is taken from Brave Windfeather at the second
@@ -28,26 +26,39 @@ next forever/horde/02-the-barrens
 #   Narache and handed to Kaga Wildhoof on the road into Bloodhoof; it unlocks
 #   The Great Outdoors and Camping 101, which the export took earlier than
 #   The Adventurer (impossible in game). All three are done on arrival.
+# - A Task Unfinished (1656, Antur Fallow, handed to Innkeeper Kauth in
+#   Bloodhoof) starts the cougar hunt instead of being a step of its own:
+#   Antur stands at the camp's west end, by the cougars' north-west corner,
+#   and the hunt goes on from him instead of walking back into the camp.
+#   He lies off every walk out of the camp; taken after the hunt or on the
+#   way to Seer Graytongue (about 230 yards out of the way) it is 0.002 h
+#   later to 10 and 20 under the simulator, with the plainstriders 0.02 h,
+#   so it stays first and saves the back-and-forth instead.
 # - Fizsprocket's Notes (98424) and the Venture Co. quests (764, 765) share
 #   one trip into the mine: the notes start from Supervisor Fizsprocket's drop,
 #   so the export's first mine visit is folded into the second.
 # - A Sacred Burial (833) and Rite of Wisdom (773) are done on one visit to
 #   Red Rocks instead of two.
-# - Durotar: the first Threat from Below (99049) is done on the coast loop
-#   and handed in after Thunder Ridge; Skull Rock is visited from Drygulch
-#   Ravine before Rezlak, so nothing is walked twice.
-#   The Crossroads flight path is picked up on the walk to Razor Hill.
-# - Threat from Below (99051) is now taken from Orgnil after 99049's turn-in,
-#   with a short second trip to the naga coast east of Razor Hill.
-#
+# - Durotar is no longer visited: the older guide went on from the Crossroads
+#   to Razor Hill for Threat from Below (99048, 99049, 99051), Rezlak's
+#   Stormy Potential (97281, 97282), Lost But Not Forgotten (816), Burning
+#   Shadows (832) and Conscript of the Horde (840). Neither consensus route
+#   goes there. Under the simulator this guide now reaches level 20 in
+#   10.48 h, against 10.75 h for the previous version with the trip. The
+#   Barrens guide starts at level 12.
 # - Thunder Bluff stop after Red Rocks (added at the integrator's request;
 #   class quests are not simulated): flight path, training, and the turn-ins
 #   the export accepts but never hands in: Journey into Thunder Bluff (775),
 #   The High Chieftain (99082), Thunderhorn's Report (98435), The Hunter's
 #   Way (861) and The Longwalkers (98430, escorted out of Palemane Rock).
 #   The export's hearth to Bloodhoof at 10.2 is not used; Druids hearth there
-#   from Moonglade instead. The export's Razor Hill bind and hearth are
-#   dropped too: Thunder Ridge is a short walk from Razor Hill.
+#   from Moonglade instead.
+# - Added from the new consensus at the Thunder Bluff stop: Traditions of the
+#   Bluff (97485, Forever: buy four incense parts from the city's vendors and
+#   spread the incense on Hunter Rise; it shows the city's trades and rises),
+#   and the breadcrumbs Sergra Darkthorn (860) and The Barrens Oases (886),
+#   handed in on arrival at the Crossroads. Simulator cost of the three: 0.02
+#   h to level 20, kept for the teaching quest.
 #
 # Class quests at 4: Shamans take Call of Earth (1519-1521) from Seer
 # Ravenfeather when the ravine turn-ins in Camp Narache bring them to 4, then
@@ -57,11 +68,17 @@ next forever/horde/02-the-barrens
 # Class quests at 10 (Thunder Bluff stop):
 # - Warrior: Veteran Uzzek (1505), continued in the Barrens guide.
 # - Shaman: Call of Fire (1523), continued in the Barrens guide.
-# - Hunter: The Hunter's Path (6065) and the taming chain at Bloodhoof to
-#   Training the Beast (6089), handed in on a flight back from the Crossroads.
+# - Hunter: The Hunter's Path (6065) and the taming chain at Bloodhoof (6061,
+#   6087, 6088: Tame Beast) to Training the Beast (6089, Beast Training),
+#   handed in on a flight back from the Crossroads.
 # - Druid: Heeding the Call (5926) through the Great Bear Spirit in Moonglade
 #   to Body and Heart (6002) at the Moonkin Stone in the eastern pass, handed
 #   in on a flight back from the Crossroads.
+#
+# Class letters at 1: Grull Hawkwind's letter for each class (Simple Note
+# 3091 Warrior, Etched Note 3092 Hunter, Rune-Inscribed Note 3093 Shaman,
+# Verdant Note 3094 Druid) is taken after The Hunt Begins and handed to the
+# trainer in Camp Narache.
 #
 # Class training: Camp Narache, Bloodhoof Village and Thunder Bluff.
 #
@@ -82,6 +99,14 @@ step The Hunt Begins
 step Grull Hawkwind
   turnin 747
   accept 750
+  accept 3091 only Warrior            -- Grull Hawkwind: Simple Note
+  accept 3092 only Hunter             -- Grull Hawkwind: Etched Note
+  accept 3093 only Shaman             -- Grull Hawkwind: Rune-Inscribed Note
+  accept 3094 only Druid              -- Grull Hawkwind: Verdant Note
+  turnin 3091 only Warrior            -- Harutt Thunderhorn, the warrior trainer
+  turnin 3092 only Hunter             -- Lanka Farshot, the hunter trainer
+  turnin 3093 only Shaman             -- Meela Dawnstrider, the shaman trainer in camp
+  turnin 3094 only Druid              -- Gart Mistrunner, the druid trainer beside him
   train class
 
 step Greatmother Hawkwind
@@ -94,12 +119,9 @@ step Chief Hawkwind
   turnin 753
   accept 755
 
-step Antur Fallow
-  tip Antur stands at the west end of the camp.
-  accept 1656
-
 step The Hunt Continues
-  tip Mountain Cougars prowl the hills south of the camp.
+  tip Antur Fallow stands at the west end of the camp, at the north-west corner of the hills where the Mountain Cougars prowl: take his quest, hunt the cougars from there south and east, then come back up to Grull.
+  accept 1656                         -- Antur Fallow
   complete 750
 
 step Grull Hawkwind
@@ -359,15 +381,32 @@ step Thunder Bluff
   turnin 98430
   train class
 
+step Traditions of the Bluff
+  zone Thunder Bluff
+  tip Eylah Sunhorn wants tauren incense: buy its four parts from Nida the herbalist, Nata the enchanting supplier, Mahu the leatherworking supplier and Naal the cooking supplier, then combine them into Prepared Incense.
+  accept 97485                        -- Eylah Sunhorn
+  buy 278079 x1 npc 3014              -- Bundle of Herbs, from Nida Winterhoof
+  buy 278080 x1 npc 3012              -- Bundle of Dried Cedar Twigs, from Nata Dawnstrider
+  buy 278081 x1 npc 3005              -- Sinew Thread, from Mahu
+  buy 278083 x1 npc 3027              -- Ceremonial Flint and Tinder, from Naal Mistrunner
+
 step Hunter Rise
   zone Thunder Bluff
+  tip Spread the incense at the ceremonial mat and burner on the south-facing cliff of Hunter Rise.
+  interact 665373 quest 97485.2       -- Incense Burner
   turnin 861                          -- Melor Stonehoof
+  accept 860                          -- Melor Stonehoof: for Sergra Darkthorn at the Crossroads
   accept 1505 npc 3041 only Warrior   -- Torm Ragetotem
   accept 6065 only Hunter             -- Kary Thunderhorn
+
+step Eylah Sunhorn
+  zone Thunder Bluff
+  turnin 97485
 
 step Elder Rise
   zone Thunder Bluff
   turnin 98435                        -- Arch Druid Hamuul Runetotem
+  accept 886                          -- Arch Druid Hamuul Runetotem: for Tonga Runetotem at the Crossroads
 
 step Spirit Rise
   only Shaman
@@ -413,7 +452,7 @@ step Yaw Sharpmane
   turnin 6087
   accept 6088
   kill 2970 quest 6088.1              -- Tame it with the Taming Rod
-  turnin 6088
+  turnin 6088                         -- Tame Beast
   accept 6089
 
 step The Moonkin Stone
@@ -423,12 +462,15 @@ step The Moonkin Stone
   use 15710 @71.7,65.0                -- Cenarion Lunardust
   complete 6002
 
-# ---------------------------------------------------------------- Durotar
+# ---------------------------------------------------------------- The Crossroads
 
 step The Crossroads
   zone The Barrens
-  tip Leave Mulgore by the south-eastern pass and follow the road to the Crossroads.
+  tip Leave Mulgore by the south-eastern pass and follow the road to the Crossroads. Sergra Darkthorn stands by the inn, Tonga Runetotem at the south gate. The Barrens guide starts here.
   getfp "Crossroads" npc 3615         -- Devrak
+  sethome "The Crossroads" npc 3934   -- Innkeeper Boorand Plainswind
+  turnin 860                          -- Sergra Darkthorn
+  turnin 886                          -- Tonga Runetotem
 
 step Class turn-ins in Thunder Bluff
   only Hunter,Druid
@@ -437,59 +479,3 @@ step Class turn-ins in Thunder Bluff
   turnin 6089 only Hunter             -- Holt Thunderhorn, Hunter Rise
   turnin 6002 only Druid              -- Turak Runetotem, Elder Rise
   fly "Crossroads"
-
-step Razor Hill
-  zone Durotar
-  tip Cross the bridge into Durotar and follow the road east to Razor Hill.
-  accept 840                          -- Takrin Pathseeker
-  accept 99048                        -- Orgnil Soulscar
-
-step Heglan Shadeeye
-  tip Heglan stands east of Razor Hill, towards the coast.
-  turnin 99048
-  accept 99049
-
-step Threat from Below
-  tip The naga raid the coast east of Razor Hill: their weapons, banners and spinefins come from them.
-  complete 99049
-
-step Drygulch Ravine
-  tip The Dustwind harpies nest in Drygulch Ravine to the north; the storm witches drop the Dull Storm Orb.
-  collect 277661
-  accept 97281
-
-step Skull Rock
-  tip Skull Rock lies just north of the ravine. Gazz'uz hides at the back of the caves and drops the Eye of Burning Shadow.
-  collect 4903
-  accept 832
-
-step Rezlak
-  tip Rezlak stands on the road west of the ravine. The Thunder Lizards roam Thunder Ridge to the west.
-  turnin 97281
-  accept 97282
-  complete 97282
-  turnin 97282
-
-step Lost But Not Forgotten
-  tip Misha Tor'kren lives in the farmstead south of Thunder Ridge. Kron's Amulet drops from the Death Flayers and Venomtail Scorpids on the ridge.
-  accept 816
-  complete 816
-  turnin 816
-
-step Back to Razor Hill
-  tip Walk south-east from Thunder Ridge back to Razor Hill.
-  turnin 99049                        -- Orgnil Soulscar
-  accept 99051
-
-step Threat from Below
-  tip Back east to the naga on the coast: Naga Spinefins drop from them.
-  complete 99051
-
-step Razor Hill
-  tip Back west to Razor Hill.
-  turnin 99051                        -- Orgnil Soulscar
-
-step The Crossroads
-  zone The Barrens
-  tip Walk back west over the bridge to the Crossroads.
-  sethome "The Crossroads" npc 3934   -- Innkeeper Boorand Plainswind

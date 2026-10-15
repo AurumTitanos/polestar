@@ -1,5 +1,434 @@
 # Changelog
 
+## 0.2.4 (unreleased)
+
+### For players
+
+- A class guide opened before your level says so: the guide window shows
+  "Available from level 20" with who starts it (or the quest to finish
+  first), instead of sending you to a trainer who has nothing for you, then
+  skipping its quests one by one until it called itself complete. The guide
+  starts by itself on the level-up, and the guide menu's row reads "From
+  level 20".
+- The published leveling times count only what a guide requires: about
+  130-132 h to 60 for the Horde and 132-134 h for the Alliance, not 123-124
+  and 128-129. They used to count the guides' optional extras (rare-drop
+  quest starters, the Green Hills pages, profession quests) as done; doing
+  them as they come can still save up to about 8 h (thanks joelwurtz).
+- "Skip grey quests" (Options, Guide, Automation) leaves out grey quests now:
+  it kept every quest the guide also turns in, which is nearly all of them,
+  so a character ahead of the route still saw them. A grey quest goes with
+  its turn-in; one that opens a quest still worth doing stays, as Buzzbox 827
+  does in Darkshore at 20 (thanks Wogi).
+- The Undead Tirisfal Glades guide sends only Paladins to Bandarion Keep for
+  As Above, So Below and The One That Got Away: Hilda the Breaker and Ephram
+  Barbaro offer them to Paladins only. Other classes still collect the
+  Shadowvale elixir bottles (thanks Mike_).
+- The Dungeons journal lists the dungeon quests it missed and drops ones that
+  were not: each quest's chain now holds every prerequisite and breadcrumb
+  (Nathanos Blightcaller's errands before Ramstein, Speak with Shoni before
+  Underground Assault, Alba Fairmoon's Toxic Soil chain before Destruction in
+  Deadmines, Rethiel's Wetlands chain before Horrors in the Highland, Magus
+  Voidglare's quests before Blood in the Streets); the instance Wowhead
+  Forever files a quest under counts (An Ancient Grudge in the Hall of Thanes,
+  now for both sides); a quest whose start item drops or lies inside is on
+  that dungeon's page too (An Unholy Alliance on Razorfen Kraul's, the
+  Treaty of Understanding on the Hall of Thanes'); the report back that ends
+  a dungeon quest's story is on its page (Hidden Enemies, The Lord of
+  Blackrock, The Platinum Discs); Shards of the Felvine is on Dire Maul's.
+  Quests whose items are sold, crafted or found outside (Murloc Poachers,
+  Craftsman's Writs, Desert Survival Kits) left the pages. (thanks Shockp)
+- Dungeon quest rewards: the reputation a quest gives (pages showed the
+  standing some quests ask for, such as +3000), the money, the rewards of
+  108 quests that showed none, how many of an item ("5 x"), and Deviate
+  Hides gives both of its items now (thanks Shockp)
+- A dungeon's pick-up guide no longer sends you to the Darkmoon Faire: the
+  Deadmines guide started with Copper Modulator, Rinling's Faire ticket
+  turn-in, because the modulator drops there. Darkmoon Faire, holiday and
+  war effort quests are on a dungeon's page only where the game files them,
+  and an item a boss drops only rarely by Wowhead's count no longer ties a
+  quest to it: The Ectoplasmic Distiller left Naxxramas and Zul'Gurub, The
+  Dread Citadel left Blackwing Lair (thanks kp)
+- A dungeon quest several NPCs give goes to the nearest one of your side:
+  Tabetha's Task for Zul'Farrak sent Alliance mages to Anastasia Hartwell in
+  the Undercity; now the pick-up guide, the quest's card and Lookup send
+  them to an Alliance mage trainer, and Lookup marks a quest only the other
+  side's NPCs give as that side's.
+- Quests Forever renamed carry their Forever names in the guides: Chastise
+  (once A Lack of Fear), Dark Sacrifice (once Devouring Plague), Look to the
+  Stars, Onu is Meditating and the others Wowhead Forever lists as renamed.
+- The leveling guides follow the refreshed simulator route and take
+  Forever's new quests on it. Alliance: Shipment to Stormwind and An Apple
+  Treat in Elwynn Forest, Crown of the Earth and the Temple of the Moon in
+  Darnassus, Fishin' Time in Stormwind, Expanding Horizons and Making Do
+  between Darkshore and Stormwind, a Wetlands loop out of Menethil at 30
+  (From the Ashes, Crocs of the Sky, Stopping the Cycle and the rest),
+  Hillsbrad's Hoard, Seeking Caitlin, Shared Fury and the Gleaming Crescent
+  Necklace in Ashenvale, Carved Centaur Totems in Desolace and My Little
+  Friends across Arathi, Desolace and Stranglethorn. Horde: Beren's Peril and
+  the Offering Stone in Silverpine, Va'xug Firefure in Stonetalon, Gloomrise
+  north of Thunder Bluff, Stop the Screeching at Freewind Post, Traditions of
+  the Bluff, The Kolkar of Desolace and Draenethyst Crystals; the Tauren
+  start no longer walks to Durotar. Elite quests on the way (Aggor the Young,
+  Riptear, Carnage, The Offering of Blood) are optional.
+- A Class category in the guide menu, after Leveling, with 62 guides for the
+  class quest chains of every class, one guide per goal and named after it:
+  Druid forms and Cure Poison, Rhok'delar and Lok'delar and The Hunter's
+  Charm, the Mage robes, orbs, wands and Polymorph: Pig, Verigan's Fist, the
+  Holy Mightstone and the Paladin's Tyr's Watch and Lumina Windsinger
+  chains, the Priest spell quests and Benediction and Anathema, Ravenholdt,
+  Poisons and the Rogue's key and horn chains, the Shaman totems and
+  Darkreaver, the Warlock's felhunter, incubus, Orb of Orahil (both
+  acolytes' paths in one guide), Shard of the Green Flame and Tome of
+  Sacrifice, and the Warrior's armour and weapon chains. The details in the
+  guide menu lead with what each one gives (the item or spell with its icon
+  and the game's tooltip on hover, a choice of items under "Choose one") and
+  one line on why it is worth doing. A reward behaves like any item: Shift-
+  click links it (a spell too), Ctrl-click tries it on, Alt-click guides you
+  to it, and its tooltip fills in when the game has not loaded the item yet
+  instead of staying at "Retrieving item information" (the Dungeons loot,
+  the guide window's gear picks and rare drops too). The spells the chains
+  teach (forms, demons, stances, the Priest racials) show their own icon and
+  tooltip. The four class mounts (Paladin Warhorse and Charger, Warlock
+  Felsteed and Dreadsteed) moved there from Collectibles, and the Charger
+  and Dreadsteed guides now walk their whole chains (Emphasis on Sacrifice
+  to Judgment and Redemption; Rage of Blood to Dreadsteed of Xoroth)
+  instead of naming them in a tip.
+- Class quests on the leveling route: every start takes its level 1 class
+  letter to the trainer; Night Elf and Tauren Druids learn Cure Poison on
+  the way (Darkshore, the Barrens), Mages do Mirror Lake (Alliance) and The
+  Balnir Farmstead (Undead), Hunters' taming quests say they teach Tame
+  Beast and Beast Training (Orc and Troll Hunters hand Training the Beast in
+  before leaving Durotar), Undead Paladins take Coming to Terms, Call of Fire
+  names the Totem of Charged Flames it gives Shamans, Rogues may do The
+  Touch of Zanzil in Stormwind and Alliance Warlocks the incubus. The
+  Warlock felhunter chain left the Horde 30-40 guides for its Class guide,
+  and the leveling guides point at the Class guides for the long chains they
+  leave out.
+- The guide window says when a goal needs a group, under the goal in violet:
+  "Elite: group advised" (also rare elite and boss), "Dungeon: Dire Maul",
+  "Raid: Molten Core" or the guide's own "Group of 3 advised"; once per card
+  when several goals share it. The guide menu tags guides with group content
+  on their route "Group" in the list, on the Continue cards and in the
+  details.
+- The Deathcharger guide's arrow points at Stratholme's Service Entrance
+  (41.5,17.7), not at the spot its Era map position falls on Forever's
+  redrawn Eastern Plaguelands map.
+- Without the Codex, Lookup and Dungeons say which case it is: not installed
+  (get the Polestar zip from CurseForge or the GitHub Releases page, not
+  GitHub's "Source code" download) or turned off in the AddOns list.
+- At login, Polestar says in chat when its install is incomplete: the Codex
+  or the guides missing, or a Polestar folder left from another version
+  (copied over an old install, or unzipped one folder too deep), with how to
+  reinstall cleanly.
+- Durotar: Cutting Teeth goes back to Gornek as soon as the boars are
+  done, with the class letter, so Sting of the Scorpid and Galgar's Cactus
+  Apple Surprise come along to Sarkoth, whose slope is full of the Scorpid
+  Workers and cactuses they need (thanks Tom).
+- The arrow leads to a cave's mouth before anyone inside it: the Den (Kzan
+  Thornslash, at the back of the cave behind Gornek), the Burning Blade
+  Coven and Skull Rock in Durotar, the Coldridge troll cave in Dun Morogh,
+  the Jasperlode Mine in Elwynn Forest, Shadowthread Cave and Fel Rock in
+  Teldrassil and Night Web's Hollow in Tirisfal Glades, instead of straight
+  through the mountain (thanks Tom).
+- Dungeons: after the run, "Hand in the quests" on a dungeon's page builds a
+  guide to where its quests in your log are turned in, on the shortest path
+  from where you stand, and takes the follow-ups those turn-ins open from the
+  same NPC or one close by; quests not finished yet are listed instead of
+  routed. The button leads once a quest is finished, the pick-up guide's
+  last step points to it and its end offers it, and the hand-in guide takes
+  the finished pick-up guide's tab (thanks Feverish).
+- Reputation the Codex knew nothing of: quest rewards say the standing their
+  quest needs (the Bloodsail Admiral's Hat, the Cenarion Circle's Ahn'Qiraj
+  gear) and Lookup marks the quest unavailable until you have it; the
+  Winterspring Frostsaber, Stormpike Battle Charger and Frostwolf Howler
+  ask for Exalted at their vendor; Aqual and Eternal Quintessence come from
+  Duke Hydraxis.
+- Lookup knows the standing about 180 reputation rewards ask at their
+  vendor, which the game's data does not say: the Alterac Valley and Warsong
+  Gulch supply officers' wares (each side's at its own faction: an Alliance
+  player buying Alterac Manna Biscuits needs Honored with the Stormpike
+  Guard, a Horde one with the Frostwolf Clan), the Argent Dawn's resistance
+  mantles, Timbermaw Hold's Furbolg Medicine Pouch and Totem, Duke
+  Hydraxis's Aqual and Eternal Quintessence, and the Zandalar Tribe's
+  Essence Mangoes, Zanza potions and signets, now listed as rewards of
+  Rin'wosho the Trader's quests. Such a source shows as unavailable, with
+  the grind, until you have the standing, and a guide built from it reaches
+  the standing first.
+- 286 more NPCs show their level in Lookup (from Wowhead Forever's NPC list,
+  where nothing else gave one).
+- Dungeons list more than their encounters: the Ring of Law's fighters,
+  event and rare bosses (Edge of Madness, Theldren, Mor Grayhoof) after the
+  encounter bosses, and boss chests with their loot (Chest of The Seven,
+  Gordok Tribute, Cache of the Firelord). Kirtonos the Herald shows his loot.
+- A boss's loot lists its own drops first, so world drops no longer push
+  them out, and a rare's or a treasure's list starts with what only it drops
+  and shows up to 150 items.
+- On the quest reward panel the coin always marks the reward that sells for
+  most, beside any upgrade arrow, not only when no reward is an upgrade.
+- An object a quest item drops from names the quest once on its tooltip,
+  not once per object of that name: the Sapphire of Aku'Mai in Blackfathom
+  Deeps listed its quest three times (thanks Mightie).
+- Elwynn Forest: Goldtooth is inside the Fargodeep Mine, at the back of the
+  mine floor; the arrow now leads to the mine's mouth first instead of onto
+  the hill above it (thanks Verium).
+- Ashenvale (Horde): the Sapphires of Aku'Mai grow in the tunnels leading to
+  the Blackfathom Deeps portal, underground, not on the strand; the arrow
+  now leads to the ruins' pit first, and the step warns that the tunnels'
+  satyrs and naga are elite (thanks Mightie).
+- The arrow no longer vanishes on the Deeprun Tram, where the game gives no
+  position: on the ride it keeps showing "Take the tram to Stormwind" (or
+  Ironforge), anywhere else without a position it says "No position here"
+  over the step, and it points again as soon as you step off (thanks
+  Igotthis).
+- Teldrassil, Dun Morogh and Mulgore: the starting glens no longer send you
+  off for one delivery quest and back. Dolanaar Delivery and Supplies to
+  Tannok are taken on the way out of Shadowglen and Coldridge Valley, by the
+  path where Porthannius and Hands Springsprocket stand, and A Task
+  Unfinished starts the cougar hunt at Antur Fallow's end of Camp Narache.
+- Quest items that vanish after a while reach their turn-in in time: Dun
+  Morogh takes the Scalding Mornbrew (five minutes) from Nori just before
+  Anvilmar instead of before the troll cave, the Blasted Lands go to
+  Nethergarde Keep with the Crate of Power Stones (an hour) before the
+  bloodmages' beasts, and Horde Warriors in the Barrens gather the Twitching
+  Antennae (fifteen minutes) on the way back from Gann Stonespire and hearth
+  to Ruga at once. Teldrassil says Iverron's Antidote lasts five minutes.
+- Western Plaguelands (Alliance): the Arcane Quickeners vanish 30 minutes
+  after you buy them, so the guide no longer buys all four at the first
+  Chillwind Camp stop, where they ran out before the cauldrons: one is
+  bought on the stop right before Felstone Field's cauldron and two on the
+  one before the Writhing Haunt's and Dalson's Tears', and the steps say
+  they last 30 minutes.
+- Dungeons: an Attunement tab (Keys where each is a key) on the pages of
+  Molten Core (Attunement to the Core, and Aqual Quintessence for the runes),
+  Onyxia's Lair (the Drakefire Amulet, each side's chain), Blackwing Lair
+  (Blackhand's Command), Naxxramas (the Dread Citadel quest your Argent Dawn
+  standing allows), Scholomance (the Skeleton Key), Blackrock Depths (the
+  Shadowforge and Prison Cell keys), Stratholme, Dire Maul, Gnomeregan,
+  Scarlet Monastery and the City of Dalaran (the Horde's Dalaran Sewer Key).
+  Each shows what it opens and who needs it, whether you hold the key, and
+  every step with your progress: done, in your log, open now, waiting on an
+  earlier step, too low or short of standing. "Guide me through it" opens a
+  guide through what is left, from where you stand: every quest of the
+  chain in turn, including the ones given, ended or done inside a dungeon
+  (Marshal Windsor in Blackrock Depths, Blackhand's Command at Drakkisath's
+  Brand, the Core Fragment by the Molten Core portal), which send you to
+  that dungeon's entrance and say what is inside; a quest still above your
+  level stays in the guide, its accept saying from which level. Forever took
+  the Seal of Ascension out, so Upper Blackrock Spire has no key (thanks
+  Shockp).
+- A step that asks you to buy something can buy it for you at a merchant
+  that sells it, after selling greys and repairing: Options, Quality of
+  Life, Vendors, Buy for the guide (off by default; Shift skips). Only what
+  your bags still lack, and only for money. Optional buys, like a second
+  mount colour, are left to you, and so is anything over 50g: the chat says
+  what it left (thanks CDVolvik).
+- Dun Morogh: Grund and Gozwin is done from Anvilmar and handed in on the
+  way to the troll cave, The Adventurer is taken from Thalos on the way out,
+  the arrow leads to the troll cave's mouth where it is in game, and the Crag
+  Boars on the road to Kharanos count toward Ragnar's ribs: the valley is
+  never walked back to, about two minutes sooner to level 10 (thanks
+  thmastin).
+- Class trainers can teach you every new spell you can afford as you open
+  them: Options, Quality of Life, Vendors, Learn new spells (off by default;
+  Shift skips). Riding, weapon, pet and profession trainers are left alone
+  (thanks CDVolvik).
+- Darnassus hunters are sent to Jeen'ra Nightrunner, not Ariyell Skyshadow
+  (a weapon merchant), and Polestar knows twenty more class trainers in the
+  capitals and Mulgore (Ander Germaine, Grezz Ragefist, Sian'tsu, Hana
+  Lighthoof...), so learning new spells works at every class trainer.
+- Quest rewards that are upgrades can go on by themselves once they reach
+  your bags, out of combat: Options, Questing, Rewards & gear, Wear reward
+  upgrades (off by default; Shift at the turn-in skips). Chat says
+  "Wearing [item] (+12%)" once it is on, and nothing when you cancel its
+  bind confirmation (thanks CDVolvik).
+- Grow upward (Options, Guide, Window, Position): the guide window keeps its
+  bottom edge in place, so a longer step extends it up instead of down.
+  Turning it on or off leaves the window where it stands (thanks thmastin).
+- `/polestar way 40 60` where the game gives no map position (an instance,
+  another continent) says "No position here" instead of how to type the
+  command (thanks meellm).
+- `/polestar way` takes decimal commas in both coordinates
+  (`/polestar way 45,5 30,2`) as well as decimal points, and `45,30` still
+  reads as x and y. A decimal comma in only one (`45,5 30`, which could also
+  be 45,5 with the label 30) and coordinates outside 0-100 show the usage
+  line instead of setting a waypoint. So does `x,y` followed by a numeric
+  label (`45,30 50`), which reads the same way; write `45 30 50` instead
+  (thanks meellm).
+- Quests only a profession's practitioners are offered stay out of sight
+  for everyone else, the way another class's quests do: a Troll Warrior
+  without Enchanting no longer sees A Pain in the Neck in Durotar, and
+  learning the profession (or the rank the quest needs) brings it back. The
+  Dun Morogh and Teldrassil guides take Beer Basted Boar Ribs and Recipe of
+  the Kaldorei after the cooking lesson, since Ragnar Thunderbrew and Zarrin
+  offer them to cooks only (thanks AndarKerran).
+- A quest item's goal says where it comes from: "Kill Grellkin or Grell for
+  Fel Moss" instead of "Collect Fel Moss", and "Collect Handful of Oats from
+  Sack of Oats" for one you pick up, on the goal line and the arrow. Up to
+  two creatures that drop it at 50% or more are named; cloth and other items
+  that drop everywhere are not. Two tips that said "click" for picking up an
+  item now say so (thanks Pynte).
+- The guide window no longer fades out on every pull: "In combat" (Options,
+  Guide, Window, Combat) is "Keep visible" by default. "Hide" stays if you
+  chose it; to keep the fade, pick "Fade out" there (thanks Pynte).
+- Every place the guide step's mobs and objects spawn is a region on the map
+  now, not one point: the whole stretch they are found in, shaded with an
+  outline, so the Grells carrying Fel Moss are one region over the woods they
+  roam, not small circles hidden under the pins. The goal the arrow follows
+  wears the arrow's colour on the world map and the minimap (cut at its rim);
+  the step's other goals' regions are fainter, on the world map. If the first
+  camp is crowded, the next one is in sight; the next-spot button, or a click
+  on a camp's mark on the world map, moves the arrow there (thanks Pynte).
+
+### For guide authors
+
+- `category Class` files a guide under the new Class category (class quest
+  chains, mounts and weapons; pair it with a `class` header), listed after
+  Leveling in the guide menu with the trainer icon. Two header keys say what
+  the guide's goal gives and why, shown first in the guide menu's details:
+  `reward item <item> ...` (several on one line are a choice of one),
+  `reward spell <id> "Name"` or `reward text <words>`, repeatable, and `why
+  <one line>` (format 2; lint warns when a Class guide lacks either).
+- `data build` applies Wowhead Forever's "Renamed from Y" notes too: a quest
+  whose title is still Y takes Forever's name (its `source` gains
+  `wowhead:title`). It also reads Wowhead Forever's class quest pages, so
+  Forever's XP and level changes reach class quests that no zone list shows.
+- Goals carry `group` (format 2 of the pack format; Polestar 0.2.4 reads it,
+  older versions show such a pack as needing 0.2.4): the compiler derives it
+  from elite kills and elite-only drops, from the solo filter's dungeon and
+  raid quests and from instance maps, and the new `group [N]` modifier
+  (`kill 1234 group 3`) says it outright. A guide with group content on its
+  route carries `group = true`. `compile` now writes format 2 for every pack.
+- Lint warns when a guide carries a quest item that vanishes after a while
+  longer than it lasts: `item 10439 (Durnan's Scalding Mornbrew) lasts 5
+  minutes, but the route takes about 11:29 from here to the turnin that
+  spends it`. It times each goal that spends the item (a `turnin` that
+  needs it, a `use`) from the latest goal that got it (an `accept` that hands
+  it over, a `collect`, a `buy`; `buy x2` serves two turn-ins) with the
+  simulator's travel and kill times over the guide's own goals and places.
+  It flags the orders the Dun Morogh, Blasted Lands and Barrens fixes
+  replaced and the Western Plaguelands Arcane Quickeners. `data build` now
+  reads the Forever client's ItemSparse for it: items.json gives such items
+  a `duration` in seconds (101 today).
+- `travel chain --to <map,x,y>` drafts an approach chain (a cave, a climb)
+  from recorded walks to that spot: where the walks leave the straight line
+  to it, and the walked path from there as nodes with radii and captions,
+  ready for the local crossings file once checked in game. `--session`
+  drafts from chosen recordings, `--reverse` counts ways out as ways in
+  (thanks CDVolvik).
+- Every goal of a quest that needs a profession (quests.json `skill` and
+  `skillLevel`) carries `profLine`, `profName` and `profRank`, and Polestar
+  hides it from characters without that profession and rank (older
+  versions ignore the fields). In a Leveling guide lint warns on such a goal
+  unless it is `optional` or the guide trains the profession (and levels it
+  to the quest's rank) first.
+
+### For contributors
+
+- `sim compare` and `sim bench` score the guides without their `optional`
+  goals (an optional quest whole); `--with-optional` scores them as done, the
+  old way. README, docs/SIMULATION.md and the charts are republished on world
+  5eef72140b61. The world builder's quest log stays 20 with Forever's 40
+  (`MAXIMUM_NUM_QUESTS_LOG_CAN_ACCEPT`) cited: 40 never binds the guides but
+  merges one Alliance package, so it comes with the next world (thanks
+  joelwurtz).
+- The solo filter's dungeon and raid rule (`instanceQuest` in
+  `tools/lib/sim/solo.js`) is shared with the compiler's group content
+  (`tools/lib/dsl/group.js`), and `preview` renders the group line
+  (`docs/preview/guide-group.svg`).
+- The search speed test no longer pins one machine's speed (it failed under
+  4 ms on slower Windows machines running the full suite): a keystroke over
+  25,000 names must cost under 12 scans of the same names in the same run,
+  and grow under 15x from 2,500 names, each the median of several batches,
+  so a per-keystroke index rebuild or a quadratic search still fails it
+  (thanks CDVolvik).
+- `tests/recorder-perf.test.js` holds the Recorder to Polestar's CPU budgets
+  while it records, without reference data so CI runs it: a walking frame
+  under 1 ms, a burst of questing events with a full quest log and a burst
+  of finds (20 rares, kills and loot windows in one frame) under 4 ms, each
+  the median of 5 rounds. Each is also held against a reference timed in
+  the same round (400 events to a plain handler doing a Recorder handler's
+  work), which holds across machines and lua5.1 or LuaJIT; on Windows,
+  where `os.clock()` is wall time, only that is held (thanks CDVolvik).
+- `tools/lib/codex/repgates.json`: a curated, cited table of the reputation
+  a vendor, giver or quest asks for an item (one row per item and faction,
+  each with its warcraft.wiki.gg or Wowhead Classic page), which `codex
+  build` applies after the client's own gates and before a guide's; a row
+  whose item, vendor or quest the Codex lacks is a build warning. Parity
+  "items: rep" goes from 505 to 682 of 689.
+- `codex wowhead` reads Wowhead Forever's NPC, object and item lists first
+  (1,000 rows a request, by id range, cached under
+  `data/sources/wowhead/codex/lists/`) and fetches a cached page again only
+  when its list row changed, an older parser read it, or it is older than
+  `--max-age` (default 7 days) and an open parity gap or Forever's own (new
+  or updated): an entity Forever left as in Classic keeps its page. A
+  refresh with every page stale goes from 1,704 page requests to 210 plus
+  103 list requests (151 the first time). `--dry-run` counts a run's
+  requests. The Codex reads the lists for NPC levels only; parity is
+  unchanged.
+- `codex build` reads the newest Forever client build wago.tools lists
+  (1.60.1.70374 today, was pinned to 1.60.1.70338), picked as `data build`
+  picks its `--forever-build` (`pickBuild`, tools/lib/data/wago.js);
+  `--build <version>` names one, and offline the newest cached build holding
+  every table the Codex reads is used. `meta.json` records the build;
+  `codex parity` and `codex wowhead` read the client tables of the build the
+  Codex was made from.
+- A route refresh keeps every fix a guide's header documents
+  (docs/SIMULATION.md, "Keeping the guides' fixes"; CONTRIBUTING.md, "Fixing
+  a guide"): `tests/guides-reported.test.js` pins each player-reported fix on
+  the compiled guide by behaviour, one case per report (Durotar's Sting of
+  the Scorpid taken to Sarkoth, the arrow through the Den's mouth to Kzan
+  Thornslash and through the mouths of the Burning Blade Coven, Skull Rock,
+  the Coldridge troll cave, the Jasperlode Mine, Shadowthread Cave, Fel Rock
+  and Night Web's Hollow, Dolanaar Delivery and Supplies to Tannok on the way
+  out of the starting glens, Antur Fallow starting the cougar hunt, Bandarion
+  Keep's quests for Paladins only, Coldridge Valley without walking back),
+  and `tests/lint-timed.test.js` checks the timed-item rule on the old and
+  fixed orders and on every guide. A data mistake behind a guide fix belongs
+  in `tools/lib/data/corrections.json` too, so the simulator sees it.
+- `tools/lib/codex/attunements.json`: a cited table naming each attunement's
+  goal (the quests that end it, or the key item) per instance;
+  `tools/lib/codex/attunements.js` builds the steps from the Codex's quest
+  chains and item sources into the journal pages (`attunement`), and
+  `auditReport` compares them with the Attune addon's for the local
+  `data/local/attunements-audit.md` (thanks Shockp).
+- `preview` renders the Attunement tab (`docs/preview/dungeons-attune.svg`).
+- Translations: `/polestar help` prints every line in the client's language,
+  the show, hide, guides, options and debug commands' too: Init.lua, which
+  loads before the locale file, registered them in English; they register
+  in Core/Commands.lua now. `tests/helpers/locale.js` fakes a translation in
+  the addon's tests.
+- Translations: a word with two meanings has a key per meaning
+  (`Polestar.LC`): the gear slots on the tooltip line are `"slot: Back"`,
+  `"slot: Chest"` and so on, and a dungeon boss that is a chest is
+  `"boss: Chest"`, so they no longer share "Back" with the welcome's button
+  or "Chest" with each other.
+- Translations: the options pages keep English keys whatever their titles
+  read, so `/polestar options quests`, `gear`, `lookup` and the others and
+  `/polestar packs` open the right page on a translated client instead of
+  the first one. `Polestar.RegisterOptions` takes an optional `key` for a
+  page's stable key.
+- Translations: the travel route's boat, zeppelin and tram captions ("Take
+  the tram to %s") are written as `L["..."]` keys in Nav/Travel.lua like the
+  flight one, so a translator finds them.
+- Translations: every label kept in a table is written as a literal
+  `L["..."]` where it is defined, so a translator finds it by searching:
+  the gear tooltip's reasons, the Dungeons journal's boss roles, attunement
+  kinds, quest ties and Codex messages, Lookup's kinds, standings, factions
+  and statuses, the guide menu's tabs, the group lines, source ranks, the
+  welcome's feature columns, the step details ("from %s", "at %s"), the
+  hand-in notes, the travel map's boat tooltips, the rare alert sounds and
+  `/polestar gear`'s spec source. The item qualities in Lookup are
+  `"quality: Rare"` and so on, apart from the rare mobs. Nothing changes in
+  English.
+- The docs say what the code does: ARCHITECTURE (startup, refused guides,
+  waypoints, which code calls the client outside Compat), GUIDE_FORMAT (the
+  guide id rule), README, SIMULATION, THIRD_PARTY and the tools README
+  (thanks CDVolvik).
+- `trainers build` reads the same guides as `compile`: Recorder drafts under
+  `guides/drafts/` and build output under `dist/` no longer add class
+  trainers to `trainers.json` (thanks meellm).
+
 ## 0.2.3 (2026-10-14)
 
 ### For players
@@ -84,6 +513,17 @@
   set X where the data still holds the old value (Scaring Shaky now gives
   3300 XP, not 820). Quests still without XP take Wowhead's. `--no-wowhead`
   skips it; guide pack workflows and Codespaces build with it.
+- The Recorder records finds (`rare`, `treasure`, `slain`, `drop`, `enter`,
+  `encounter` events; docs/ARCHITECTURE.md, "Recordings") and the quest
+  frames' `items`, `choices` and `rewardMoney`. `record import` and `data
+  build` turn them into npc ranks, levels, the `rare` role and spawns; drop
+  chances from loot windows over kills, merged across sessions, with their
+  counts in items' `seen` (10 kills or more replace the existing chance);
+  `chest`/`herb`/`mine` objects with their spawns; quest `rewards`; and the
+  new `instances.json` (entrances, encounters and their bosses).
+- npcs and objects inside dungeons and raids carry `instances` (instance map
+  ids), from QuestieDB's areas and the Forever `AreaTable` and `Map` tables
+  (`Map` is now read with the Forever tables) plus recordings.
 
 ### For contributors
 
@@ -98,17 +538,6 @@
 ### For players
 
 - Quests with several objectives check off the right one: a goal counted the
-- The Recorder records finds (`rare`, `treasure`, `slain`, `drop`, `enter`,
-  `encounter` events; docs/ARCHITECTURE.md, "Recordings") and the quest
-  frames' `items`, `choices` and `rewardMoney`. `record import` and `data
-  build` turn them into npc ranks, levels, the `rare` role and spawns; drop
-  chances from loot windows over kills, merged across sessions, with their
-  counts in items' `seen` (10 kills or more replace the existing chance);
-  `chest`/`herb`/`mine` objects with their spawns; quest `rewards`; and the
-  new `instances.json` (entrances, encounters and their bosses).
-- npcs and objects inside dungeons and raids carry `instances` (instance map
-  ids), from QuestieDB's areas and the Forever `AreaTable` and `Map` tables
-  (`Map` is now read with the Forever tables) plus recordings.
   objective at its place in the quest's text instead of its place in the quest
   log, so in The Guns of Northwatch "Kill Cannoneer Smythe" showed the 10/10
   medals and Captain Fairmount never ticked. 135 goals in 46 quests of the

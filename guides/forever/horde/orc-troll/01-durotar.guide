@@ -7,7 +7,11 @@ zone Durotar
 next forever/horde/orc-troll/02-the-barrens
 
 # Route: the simulator's consensus Orc route (data/sim/export/consensus-horde-orc,
-# visit 1, Durotar 1-11.9). Trolls start in the same valley and share it.
+# visit 1, Durotar 1-11.8). Trolls start in the same valley and share it.
+# Checked against the 2026-10-14 export: same Durotar quests (it drops only
+# the enchanters' A Pain in the Neck, kept here as optional); its order goes
+# from Tiragarde Keep straight to Sen'jin, but its Durotar visit takes 3.26 h
+# against 3.27 h for the one this guide was built from, so the order stays.
 #
 # Flow: Valley of Trials -> Sen'jin Village (report) -> Razor Hill (bind) ->
 # Razormane Grounds -> Tiragarde Keep -> Razor Hill -> Rezlak, Drygulch Ravine
@@ -18,6 +22,12 @@ next forever/horde/orc-troll/02-the-barrens
 # Crossroads (flight path, bind). The Barrens guide starts at the Crossroads.
 #
 # Local order fixed by hand (same quest set as the export unless listed below):
+# - Cutting Teeth (788) is turned in as soon as the boars are done, with the
+#   class letters and Wayward Weapons, so Sting of the Scorpid (789) and
+#   Galgar's Cactus Apple Surprise (4402), which need 788, are carried to
+#   Sarkoth: his slope is full of Scorpid Workers and cactuses. All three go
+#   back to the Den with Sarkoth (804); 0.01 h faster to 10 and 20 under the
+#   simulator than taking 789 and 4402 after Sarkoth.
 # - Legging It (96821) is taken at Sen'jin on the first visit: its spiders sit
 #   on the road north to Razor Hill, where Gar'Thok takes it.
 # - Rezlak's second pair (A Simmering Storm 97281, Stormy Potential 97282) and
@@ -35,6 +45,9 @@ next forever/horde/orc-troll/02-the-barrens
 # - A Pain in the Neck (96873) is for enchanters: Pa'zula's Luminous Residue
 #   comes from disenchanting the Hexed Pendants the Echo Isles trolls drop.
 #   Taken at Sen'jin, done on the isles and handed in on the way back.
+# - Threat from Below (99052, Forever, optional): Orgnil's last naga quest,
+#   Aggor the Young on the north coast. Aggor is elite, so the simulator
+#   leaves it out; it is offered at the last Razor Hill stop for groups.
 #
 # Class quests: Warlocks do Ruzan's Vile Familiars (1485, 1499) instead of
 # Zureetha's. Shamans take Call of Earth (1516-1518) from Canaga Earthcaller
@@ -43,18 +56,37 @@ next forever/horde/orc-troll/02-the-barrens
 # take Veteran Uzzek (1505) and do Path of Defense (1498) at Far Watch Post on
 # the way out (Thun'grim 1502 and Forged Steel 1503 follow in the Barrens
 # guide); Shamans take Call of Fire (2983), continued in the Barrens guide;
-# Hunters tame their three beasts for Thotar (6062, 6083, 6082) around Razor
-# Hill and carry Training the Beast (6081) to Ormak Grimshot in Orgrimmar
-# (forever/horde/03-silverpine-forest, about 16); Warlocks take Gan'rul's
-# Summons (1506) from Ophek and get the Voidwalker (1501, 1504) on two short
-# trips into Orgrimmar, whose gate is a few steps from Skull Rock; Troll
-# Priests take Hex of Weakness (5654) from Tai'jin, handed to Ur'kyo in
-# Orgrimmar at about 16. The Shattered Hand (1963, Rogue) teaches no spell
-# and is left out.
+# Hunters take Etched Parchment (3087, Orcs) or Etched Tablet (3082, Trolls)
+# to Jen'shan at 1, tame their three beasts for Thotar (6062, 6083, 6082:
+# Tame Beast) around Razor Hill and hand Training the Beast (6081, Beast
+# Training) to Ormak Grimshot on a short trip into Orgrimmar before leaving
+# Durotar (moved from Silverpine at 16: Forever's 6081 now teaches Beast
+# Training); Warlocks take Gan'rul's Summons (1506) from Ophek and get the
+# Voidwalker (1501, 1504) on two short trips into Orgrimmar, whose gate is a
+# few steps from Skull Rock; Troll Priests take Hex of Weakness (5654) from
+# Tai'jin, handed to Ur'kyo in Orgrimmar at about 16. The Shattered Hand
+# (1963, Rogue) teaches no spell and is left out. In Favor of Spirituality /
+# Garments of Spirituality (5649, 5648, Troll Priest) reward a robe, not a
+# spell: not taken. Mages read their letter from Gornek (98576 Orc, 3086
+# Troll) and hand it to Mai'ah at the Den. Ju-Ju Heaps (1884), their level 10
+# quest, opens after the route's Echo Isles visit at about 8: see
+# forever/class/mage/ju-ju-heaps.
+# Class letters: every class's level 1 letter from Gornek (2383/3065 Warrior,
+# 3087/3082 Hunter, 3088/3083 Rogue, 3085 Troll Priest, 3089/3084 Shaman,
+# 98576/3086 Mage, 3090/98575 Warlock; Orc/Troll) is taken at the Den and
+# handed to the trainer beside it.
 #
-# Left out: quests the route accepts and never turns in: The Admiral's Orders
-# (831, to Nazgrel), Need for a Cure (812), Neeru Fireblade (829).
-# Burning Shadows (832) is carried to Neeru Fireblade in Orgrimmar (about 19).
+# Left out: the export's Orgrimmar stop at 11.8-12.5: Neeru Fireblade (829),
+# The Admiral's Orders (831, Nazgrel), Burning Shadows (832) and Ak'Zeloth
+# (809, to Far Watch Post, then The Demon Seed 924), plus the city's Forever
+# cooking errands (97326, 97246, 97249, 97242, 97275). The export goes from
+# Orgrimmar to the zeppelin for Silverpine; this route goes west to the
+# Barrens, so the city is a detour. Tried after Skull Rock and again before
+# Far Watch Post: 0.07-0.10 h slower to level 20 under the simulator. The
+# cooking errands are done in Orgrimmar at about 19 in
+# forever/horde/03-silverpine-forest at full XP, and Burning Shadows (832) is
+# carried there too. Need for a Cure (812) and Finding the Antidote (813):
+# the export never finishes them.
 
 # ---------------------------------------------------------------- Valley of Trials
 
@@ -67,36 +99,76 @@ step Gornek
   accept 788
   accept 97279
 
+# The Den is a cave: Gornek stands just inside its mouth, Kzan Thornslash
+# "behind me in the Den" (Gornek in Wayward Weapons, 97279,
+# https://www.wowhead.com/forever/quest=97279/wayward-weapons), "all the way
+# back in the back of the cave" (https://www.wowhead.com/classic/npc=3159,
+# comments), and Mai'ah, the mage trainer, at 42.51,69.04 "near the entrance
+# to the Den" (Glyphic Parchment, 98576). The mouth, 42.4,68.6, lies between
+# her and Gornek (42.06,68.33) and opens east onto the training grounds; from
+# the boars or from Hana'zua a straight line to anyone inside crosses the
+# hill, so the steps before each Den visit end at the mouth.
 step Training weapons and boars
   tip The weapons lie around the Den and the training grounds; the Mottled Boars roam the whole valley floor.
   collect 277653 quest 97279.1
   kill 3098 quest 788.1
+  goto 42.4,68.6 "The Den's cave mouth"
 
-step Kzan Thornslash
-  tip Kzan stands behind the Den, on its west side.
-  turnin 97279
+step The Den
+  tip Gornek stands just inside the cave mouth; Kzan Thornslash at the back of the cave behind him.
+  turnin 788                          -- Gornek
+  accept 2383 only Orc,Warrior        -- Gornek: Simple Parchment
+  accept 3065 only Troll,Warrior      -- Gornek: Simple Tablet
+  accept 3087 only Orc,Hunter         -- Gornek: Etched Parchment
+  accept 3082 only Troll,Hunter       -- Gornek: Etched Tablet
+  accept 3088 only Orc,Rogue          -- Gornek: Encrypted Parchment
+  accept 3083 only Troll,Rogue        -- Gornek: Encrypted Tablet
+  accept 3085 only Troll,Priest       -- Gornek: Hallowed Tablet
+  accept 3089 only Orc,Shaman         -- Gornek: Rune-Inscribed Parchment
+  accept 3084 only Troll,Shaman       -- Gornek: Rune-Inscribed Tablet
+  accept 98576 only Orc,Mage          -- Gornek: Glyphic Parchment
+  accept 3086 only Troll,Mage         -- Gornek: Glyphic Tablet
+  accept 3090 only Orc,Warlock        -- Gornek: Tainted Parchment
+  accept 98575 only Troll,Warlock     -- Gornek: Tainted Tablet
+  accept 789                          -- Gornek
+  turnin 97279                        -- Kzan Thornslash, at the back of the cave
+  turnin 3090 only Orc,Warlock        -- Nartok, the warlock trainer at the back of the cave
+  turnin 98575 only Troll,Warlock     -- Nartok
+  turnin 3088 only Orc,Rogue          -- Rwag, the rogue trainer in the Den
+  turnin 3083 only Troll,Rogue        -- Rwag
+  turnin 2383 only Orc,Warrior        -- Frang, the warrior trainer beside the Den
+  turnin 3065 only Troll,Warrior      -- Frang
+  turnin 3087 only Orc,Hunter         -- Jen'shan, the hunter trainer beside the Den
+  turnin 3082 only Troll,Hunter       -- Jen'shan
+  turnin 3085 only Troll,Priest       -- Ken'jai, the priest trainer at the Den
+  turnin 3089 only Orc,Shaman         -- Shikrik, the shaman trainer beside the Den
+  turnin 3084 only Troll,Shaman       -- Shikrik
+  turnin 98576 only Orc,Mage          -- Mai'ah, the mage trainer, at the entrance to the Den
+  turnin 3086 only Troll,Mage         -- Mai'ah
+  accept 4402                         -- Galgar, by the cooking fire
+  accept 792 only !Warlock            -- Zureetha Fargaze
+  accept 1485 only Warlock            -- Ruzan
+  train class
 
 step Hana'zua
   tip Hana'zua lies wounded at the foot of the hills north-west of the Den.
   accept 790
 
 step Sarkoth
-  tip Sarkoth, a large scorpid, prowls the slope south of Hana'zua.
+  tip Sarkoth, a large scorpid, prowls the slope south of Hana'zua among the Scorpid Workers; pick the Cactus Apples by the cactuses on the way.
   collect 4905 quest 790.1
-  kill 3098 quest 788.1
+  collect 4862 quest 789.1
+  collect 11583 quest 4402.1
 
 step Hana'zua
   turnin 790
   accept 804
+  goto 42.4,68.6 "The Den's cave mouth"
 
-step The Den
+step Back to the Den
   turnin 804                          -- Gornek
-  turnin 788
-  accept 789
-  accept 4402                         -- Galgar, by the cooking fire
-  accept 792 only !Warlock            -- Zureetha Fargaze
-  accept 1485 only Warlock            -- Ruzan
-  train class
+  turnin 789                          -- Gornek
+  turnin 4402                         -- Galgar
 
 step Foreman Thazz'ril
   tip The foreman stands at the lumber pile east of the Den.
@@ -110,18 +182,22 @@ step Foreman Thazz'ril
   turnin 5441
   accept 6394
 
+# The Burning Blade Coven's mouth: "Go in the cave (45 56) and stay right"
+# (https://www.wowhead.com/classic/quest=794, comments); the pick lies past the
+# first split, straight on, then right along the stream to the waterfall
+# (https://www.wowhead.com/classic/quest=6394, comments).
 step North end of the valley
-  tip Collect Cactus Apples and kill Scorpid Workers on the way north. The Vile Familiars swarm the slope by the cave on the valley's north side; Thazz'ril's Pick lies just inside the cave mouth.
-  collect 11583 quest 4402.1
-  collect 4862 quest 789.1
+  tip The Vile Familiars swarm the slope below the Burning Blade Coven, the cave on the valley's north side.
   kill 3101 quest 792.1 only !Warlock
   collect 6487 quest 1485.1 only Warlock
+  goto 45.0,56.0 "Burning Blade Coven"
+
+step Thazz'ril's Pick
+  tip Inside the cave, go straight on at the first split, then right and follow the stream on your left to the waterfall: the pick glows by the water, behind a column of rock.
   collect 16332 quest 6394.1 @43.7,53.8
 
 step Back at the Den
   turnin 6394                         -- Foreman Thazz'ril
-  turnin 4402                         -- Galgar
-  turnin 789                          -- Gornek
   turnin 792 only !Warlock            -- Zureetha Fargaze
   turnin 1485 only Warlock            -- Ruzan
   accept 1499 only Warlock
@@ -134,7 +210,10 @@ step Canaga Earthcaller
   accept 1516                         -- Canaga Earthcaller
 
 step Burning Blade Coven
-  tip Yarrog Baneshadow waits at the back of the cave on the valley's north side.
+  goto 45.0,56.0 "Burning Blade Coven"
+
+step Yarrog Baneshadow
+  tip Inside the cave, keep to the right wall all the way round, over the stream: Yarrog waits at the end.
   collect 4859 quest 794.1
 
 step Felstalker hooves
@@ -376,9 +455,15 @@ step Gan'rul Bloodeye
   turnin 1506                         -- Gan'rul Bloodeye
   accept 1501
 
-step Skull Rock
+# Skull Rock's mouth: "Entrance to the cave is at 55,10" and "Cave entrance is
+# at 55, 10" (https://www.wowhead.com/classic/quest=827, comments); Gazz'uz
+# stands at its back (52.6,8.8).
+step Skull Rock's mouth
   zone Durotar
-  tip Burning Blade cultists hold the caves of Skull Rock to the north; any of them drops a Searing Collar. Gazz'uz, a level 14 warlock, stands deep inside and drops the Eye of Burning Shadow.
+  goto 55.0,10.0 "Skull Rock"
+
+step Skull Rock
+  tip Burning Blade cultists hold the caves of Skull Rock; any of them drops a Searing Collar. Gazz'uz, a level 14 warlock, stands deep inside and drops the Eye of Burning Shadow.
   collect 4871 quest 827.1
   collect 4903 "Eye of Burning Shadow"
   accept 832
@@ -416,15 +501,27 @@ step Spitelash naga
 step Razor Hill
   tip Back to Razor Hill.
   turnin 99051                        -- Orgnil Soulscar
+  accept 99052 optional               -- Orgnil Soulscar: Aggor the Young, an elite sea giant
   turnin 6083 only Hunter             -- Thotar
   accept 6082 only Hunter
+
+step Aggor the Young
+  tip Aggor the Young, a young sea giant, walks Durotar's north coast, north of the naga beach. Aggor the Young is elite: grouping up is advised.
+  collect 286009 quest 99052.1 optional -- Aggor's Belt
+  turnin 99052 optional               -- Orgnil Soulscar, back in Razor Hill
 
 step Armored Scorpid
   only Hunter
   tip Armored Scorpids crawl over the plains west of Razor Hill. Tame one, then return to Thotar.
   kill 3126 quest 6082.1              -- Tame it with the Taming Rod
-  turnin 6082                         -- Thotar
+  turnin 6082                         -- Thotar: Tame Beast
   accept 6081                         -- Thotar: Ormak Grimshot in Orgrimmar teaches Beast Training
+
+step Ormak Grimshot
+  only Hunter
+  zone Orgrimmar
+  tip Follow the road north from Razor Hill to Orgrimmar's main gate, just west of Skull Rock. Ormak Grimshot stands with the hunter trainers in the Valley of Honor.
+  turnin 6081                         -- Ormak Grimshot: Beast Training
 
 # ---------------------------------------------------------------- To the Crossroads
 

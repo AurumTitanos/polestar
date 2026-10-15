@@ -1,0 +1,55 @@
+guide forever/class/warrior/haggards-weapons
+title Haggard's Weapons
+category Class
+class Warrior
+folder Warrior
+faction Alliance
+levels 10-11
+zone Stormwind City
+keywords Defensive Stance, Bartleby, Harry Burlguard, Marshal Haggard, Dead-tooth Jack, Haggard's Axe, Haggard's Hammer, Haggard's Dagger, Haggard's Sword, Warrior, class weapon
+reward item 6979 6983 6980 6985
+reward spell 71 "Defensive Stance"
+why Defensive Stance and a one-hand weapon of your choice at 10.
+
+# Marshal Haggard and Dead-tooth Jack (1666, 1667): the weapon at the end of
+# the Alliance Defensive Stance quests (1638, 1639, 1640, 1665).
+# Sources: quests.json, npcs.json, objects.json and items.json for the chain,
+# places and the key (Dead-tooth's Key, item 6783, drops from Dead-Tooth Jack
+# and opens his strongbox); Wowhead Forever's Warrior class page
+# (data/local/quest-audit/wowhead-class-quests.json) for the rewards: Bartleby's
+# Mug (1665) teaches Defensive Stance, Dead-tooth Jack lets you choose Haggard's
+# Axe, Hammer, Dagger or Sword.
+# The leveling guides do the Defensive Stance quests for every Alliance race in
+# Stormwind (02-westfall, dwarf-gnome/01-dun-morogh, nightelf/01-teldrassil);
+# this guide repeats them for anyone off the route, then adds the weapon.
+# Vejrek (1678, Ironforge) and Vorlus Vilehoof (1683, Darnassus) are the other
+# Defensive Stance quests; the game offers only one of the three, and the
+# routes take Bartleby's.
+
+step Defensive Stance
+  zone Stormwind City
+  tip Ilsa Corbin trains warriors in Old Town; Harry Burlguard and Bartleby stand together by the Pig and Whistle Tavern there. Bartleby fights you for his mug.
+  accept 1638 npc 5480                        -- Ilsa Corbin
+  turnin 1638                                 -- Harry Burlguard
+  accept 1639
+  turnin 1639                                 -- Bartleby
+  accept 1640
+  kill 6090 quest 1640.1                      -- Beat Bartleby
+  turnin 1640
+  accept 1665
+  turnin 1665                                 -- Harry Burlguard: Defensive Stance
+  accept 1666
+
+step Marshal Haggard
+  zone Elwynn Forest
+  tip Marshal Haggard's house is in eastern Elwynn Forest, south of the road from Stormwind to Redridge.
+  turnin 1666                                 -- Marshal Haggard
+  accept 1667
+
+step Dead-tooth Jack
+  tip Dead-Tooth Jack camps in the far south-east of Elwynn Forest, south-east of Marshal Haggard. He carries the key to the strongbox in his camp.
+  kill 6093                                   -- Dead-Tooth Jack: his key opens the strongbox
+  collect 6782 quest 1667.1                   -- Dead-tooth's Strongbox
+
+step Back to Marshal Haggard
+  turnin 1667 choose 6979 6983 6980 6985      -- Marshal Haggard
