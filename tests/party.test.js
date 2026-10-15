@@ -55,7 +55,7 @@ emit(res)`);
 
 test('party: malformed text, another version and out-of-range counts are refused', () => {
 	const eleven = Array.from({ length: 11 }, () => '1/2').join(',');
-	const many = Array.from({ length: 26 }, (_, i) => `${i + 1}:1/2`).join(';');
+	const many = Array.from({ length: 41 }, (_, i) => `${i + 1}:1/2`).join(';');
 	const bad = ['x', '', '2|33:1/2', '1|33:1000/2', '1|abc:1/2', '1|33:1/', '1|33', `1|33:${eleven}`, `1|${many}`];
 	const out = run(bad.map((t) => `emit(P.Decode(${JSON.stringify(t)}) == nil)`).join('\n'));
 	assert.deepEqual(out, bad.map(() => true));
@@ -104,8 +104,9 @@ w.progress(33, 1, 3)
 stub.advance(2)
 emit(texts())
 emit(p.sent[#p.sent].chatType .. " " .. p.sent[#p.sent].prefix)`, LIVE);
-	assert.deepEqual(before, ['1S|33:0/8']);
-	assert.deepEqual(after, ['1S|33:0/8', '1|33:3/8']);
+	// Solo before, so we knew nobody's progress: the snapshot asks for theirs.
+	assert.deepEqual(before, ['1R|33:0/8']);
+	assert.deepEqual(after, ['1R|33:0/8', '1|33:3/8']);
 	assert.equal(chat, 'PARTY Polestar');
 });
 
@@ -142,7 +143,7 @@ emit(#p.sent)
 stub.advance(3.2)
 emit(texts())`, LIVE);
 	assert.equal(early, 0);
-	assert.deepEqual(late, ['1S|33:0/8;60:']);
+	assert.deepEqual(late, ['1R|33:0/8;60:']);
 });
 
 test('party: solo, in a raid, or with sharing off, nothing is sent', () => {
@@ -314,7 +315,6 @@ emit(texts())
 p.sent = {}
 stub.advance(10)
 p.receive("Ana-TestRealm", "1R|60:1/4")
-stub.advance(6)
 p.receive("Ana-TestRealm", "1R|60:1/4")
 stub.advance(6)
 emit(texts())`, { stubs: LIVE.stubs, login: false });
@@ -393,4 +393,133 @@ end)
 emit(keys); emit(Polestar.Get("party.share")); emit(Polestar.Get("party.show"))`, SHOWN);
 	assert.deepEqual(keys, ['Questing/party.share', 'Questing/party.show']);
 	assert.deepEqual([share, show], [true, true]);
+});
+
+// Found by the final review (Codex and a fresh reviewer).
+
+test('party: a 40-quest log reaches the party whole, at most 40 quests a message', () => {
+	const [one, many] = run(`
+local function entries(n)
+	local out = {}
+	for q = 1, n do out[q] = { q = q, counts = { { 1, 2 } } } end
+	return out
+end
+local function decoded(msgs)
+	local total, ok = 0, true
+	for _, m in ipairs(msgs) do
+		local snap, got = P.Decode(m)
+		if snap == nil then ok = false else total = total + #got end
+	end
+	return { n = #msgs, total = total, ok = ok }
+end
+emit(decoded(P.Encode(entries(30), true)))
+emit(decoded(P.Encode(entries(45), true)))`);
+	assert.deepEqual(one, { n: 1, total: 30, ok: true });
+	assert.deepEqual(many, { n: 2, total: 45, ok: true });
+});
+
+test('party: a refused snapshot is owed, and the next send is a full one', () => {
+	const [last] = run(`${SENT}
+w.onQuest(33, { 8 })
+w.onQuest(60, { 4 })
+p.result = Enum.SendAddonMessageResult.AddOnMessageLockdown
+p.join("Ana")
+stub.advance(6)
+p.result = 0
+w.progress(60, 1, 1)
+stub.advance(2)
+emit(p.sent[#p.sent].text)`, LIVE);
+	assert.equal(last, '1R|33:0/8;60:1/4');
+});
+
+test('party: a member who goes offline leaves the line, and gets a snapshot when back', () => {
+	const [gone, back] = run(`${SENT}${MEMBERS}
+w.onQuest(33, { 8 })
+p.join("Ana")
+stub.advance(6)
+p.receive("Ana-TestRealm", "1|33:3/8")
+p.connect("Ana", false)
+emit(#P.Members())
+p.sent = {}
+p.connect("Ana", true)
+stub.advance(6)
+emit(texts())`, LIVE);
+	assert.equal(gone, 0);
+	// Back online with nobody else known: the snapshot asks for hers too.
+	assert.deepEqual(back, ['1R|33:0/8']);
+});
+
+test('party: a member whose name is not known yet is not on the roster', () => {
+	const [n] = run(`${SENT}
+p.join("Unknown")
+p.receive("Unknown-TestRealm", "1|33:3/8")
+emit(#P.Members())`, LIVE);
+	assert.equal(n, 0);
+});
+
+test('party: turning sharing off tells the party to forget your counts; on again, it resyncs', () => {
+	const [off, on, showOn] = run(`${SENT}
+w.onQuest(33, { 8 })
+p.join("Ana")
+stub.advance(6)
+p.sent = {}
+Polestar.Set("party.share", false)
+w.progress(33, 1, 2)
+stub.advance(10)
+emit(texts())
+p.sent = {}
+Polestar.Set("party.share", true)
+stub.advance(6)
+emit(texts())
+p.sent = {}
+Polestar.Set("party.show", false)
+Polestar.Set("party.show", true)
+stub.advance(6)
+emit(texts())`, LIVE);
+	assert.deepEqual(off, ['1S|']);
+	assert.deepEqual(on, ['1R|33:2/8']);
+	assert.deepEqual(showOn, ['1R|33:2/8']);
+});
+
+test('party: a request soon after a snapshot the requester may have missed is answered', () => {
+	const [replies] = run(`${SENT}
+w.onQuest(33, { 8 })
+p.join("Ana")
+stub.advance(6)
+p.sent = {}
+stub.advance(5)
+p.receive("Ana-TestRealm", "1R|")
+stub.advance(6)
+emit(texts())`, LIVE);
+	assert.deepEqual(replies, ['1S|33:0/8']);
+});
+
+test('party: a member on a realm whose name has a space is matched', () => {
+	const [got] = run(`${SENT}${MEMBERS}
+p.join("Ben", "Other Realm")
+p.receive("Ben-OtherRealm", "1|60:2/4")
+emit(members())`, LIVE);
+	assert.deepEqual(got, ['Ben 60:2/4']);
+});
+
+test('party: a member who sent the quest is never listed as lacking it', () => {
+	const [none] = run(`${SENT}
+w.onQuest(33, { 8 })
+p.join("Ben")
+p.onQuest.Ben = { [33] = false }
+p.receive("Ben-TestRealm", "1|33:0/8")
+emit(P.Line({ t = "accept", quest = 33, status = "done" }) == nil)`, SHOWN);
+	assert.equal(none, true);
+});
+
+test('party: a member\'s quest log changing, or someone joining, refreshes the guide', () => {
+	const [fires] = run(`${SENT}
+local fires = 0
+Polestar.On("PARTY_PROGRESS", function() fires = fires + 1 end)
+p.join("Ben")
+stub.advance(1)
+p.questLogChanged("Ben")
+stub.advance(1)
+emit(fires)`, LIVE);
+	assert.equal(fires, 2);
 });

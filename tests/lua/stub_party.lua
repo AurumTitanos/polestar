@@ -13,6 +13,8 @@
 --   p.result = 3                      -- what SendAddonMessage returns (0 = Success)
 --   p.onQuest.Ana = { [33] = true }   -- C_QuestLog.IsUnitOnQuest answers
 --   p.noUnitQuestAPI()                -- a client without C_QuestLog.IsUnitOnQuest
+--   p.connect("Ana", false)          -- UNIT_CONNECTION: offline / back online
+--   p.questLogChanged("Ana")          -- UNIT_QUEST_LOG_CHANGED for her unit
 
 local party = { members = {}, sent = {}, result = 0, onQuest = {}, inRaid = false, prefixes = {} }
 stub.party = party
@@ -52,6 +54,25 @@ function party.receive(sender, text, channel, prefix)
 end
 
 function party.noUnitQuestAPI() C_QuestLog.IsUnitOnQuest = nil end
+
+-- UNIT_CONNECTION(unit, isConnected) for a member going offline or back online.
+function party.connect(name, online)
+	for i, m in ipairs(party.members) do
+		if m.name == name then
+			m.online = online
+			stub.fire("UNIT_CONNECTION", "party" .. i, online)
+		end
+	end
+end
+
+-- UNIT_QUEST_LOG_CHANGED(unit) for a member's quest log.
+function party.questLogChanged(name)
+	for i, m in ipairs(party.members) do
+		if m.name == name then stub.fire("UNIT_QUEST_LOG_CHANGED", "party" .. i) end
+	end
+end
+
+UNKNOWNOBJECT = "Unknown"
 
 function IsInGroup() return #party.members > 0 end
 function IsInRaid() return party.inRaid end

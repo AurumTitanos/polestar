@@ -26,7 +26,9 @@ ns.Party = Party
 Party.PREFIX = "Polestar"
 Party.MAX_BYTES = 255
 local VERSION = "1"
-local MAX_QUESTS, MAX_OBJECTIVES, MAX_COUNT = 25, 10, 999
+-- Forever's log holds 40 quests (QuestLogConstsMainlineCamelot.
+-- MAXIMUM_NUM_QUESTS_LOG_CAN_ACCEPT); a message carries at most that many.
+local MAX_QUESTS, MAX_OBJECTIVES, MAX_COUNT = 40, 10, 999
 
 ---------------------------------------------------------------------------
 -- The message format
@@ -52,7 +54,7 @@ function Party.Encode(entries, snapshot, asks)
 	for i, e in ipairs(entries) do
 		local p = piece(e)
 		local extra = (#parts > 0 and 1 or 0) + #p
-		if #parts > 0 and #header() + size + extra > Party.MAX_BYTES then
+		if #parts > 0 and (#parts >= MAX_QUESTS or #header() + size + extra > Party.MAX_BYTES) then
 			out[#out + 1] = header() .. concat(parts, ";")
 			ends[#out] = i - 1
 			parts, size, extra = {}, 0, #p
@@ -113,11 +115,12 @@ function Party.ReadLog()
 	local out = {}
 	local Q = C_QuestLog
 	if not (Q and Q.GetNumQuestLogEntries and Q.GetInfo) then return out end
-	local n = Q.GetNumQuestLogEntries() or 0
+	local n, kept = Q.GetNumQuestLogEntries() or 0, 0
 	for i = 1, n do
 		local info = Q.GetInfo(i)
-		local q = info and not info.isHeader and info.questID
-		if q and q > 0 and not out[q] then
+		local q = info and not info.isHeader and not info.isHidden and info.questID
+		if q and q > 0 and not out[q] and kept < MAX_QUESTS then
+			kept = kept + 1
 			local objs = ns.Compat.GetQuestObjectives(q) or {}
 			local parts = {}
 			for j = 1, math.min(#objs, MAX_OBJECTIVES) do
@@ -138,10 +141,15 @@ ns.RegisterDefaults("party", { share = true, show = true })
 
 local DEBOUNCE = 2 -- seconds after a quest log change
 local JOIN_MIN, JOIN_SPREAD = 3, 3 -- snapshot 3-6 s after the roster gains someone
+-- A request for our snapshot within this of our last one: the requester, up
+-- at least JOIN_MIN before asking, already got it.
+local REPLY_GAP = JOIN_MIN
 
 local lastSent = {} -- quest id -> counts string the party last got from us
-local flushPending, snapPending = false, false
-local roster = {} -- "Name" or "Name-Realm" -> short name, the party but you
+local flushPending, snapPending, pendingAsks = false, false, false
+local owed -- a snapshot the client refused (throttle, instance lockdown): { asks = bool }
+local lastSnapshotAt -- GetTime() of our last snapshot
+local roster = {} -- "Name" or "Name-Realm" -> short name: the party but you, online
 
 local function grouped()
 	return IsInGroup and IsInGroup() and not (IsInRaid and IsInRaid()) or false
@@ -186,9 +194,32 @@ local function sendQuests(ids, now, snapshot, asks)
 	return true
 end
 
+-- The whole log, replacing what the party knows of us; `asks`: and asking
+-- for theirs.
+local function snapshot(asks)
+	snapPending, pendingAsks = false, false
+	if not sharing() then return end
+	local now, ids = Party.ReadLog(), {}
+	for q in pairs(now) do ids[#ids + 1] = q end
+	table.sort(ids)
+	if sendQuests(ids, now, true, asks) then
+		owed, lastSnapshotAt = nil, GetTime()
+	else
+		owed = { asks = (owed and owed.asks) or asks }
+	end
+end
+
+local function scheduleSnapshot(asks)
+	if asks then pendingAsks = true end
+	if snapPending or not C_Timer then return end
+	snapPending = true
+	C_Timer.After(JOIN_MIN + math.random() * JOIN_SPREAD, function() snapshot(pendingAsks) end)
+end
+
 local function flush()
 	flushPending = false
 	if not sharing() then return end
+	if owed then return snapshot(owed.asks) end
 	local now, ids = Party.ReadLog(), {}
 	for q, s in pairs(now) do
 		if lastSent[q] ~= s then ids[#ids + 1] = q end
@@ -199,24 +230,6 @@ local function flush()
 	if #ids == 0 then return end
 	table.sort(ids)
 	sendQuests(ids, now, false)
-end
-
-local REPLY_GAP = 10 -- seconds: a request for our snapshot within this of the last one is already answered
-local lastSnapshotAt -- GetTime() of our last snapshot
-
-local function snapshot(asks)
-	snapPending = false
-	if not sharing() then return end
-	local now, ids = Party.ReadLog(), {}
-	for q in pairs(now) do ids[#ids + 1] = q end
-	table.sort(ids)
-	if sendQuests(ids, now, true, asks) then lastSnapshotAt = GetTime() end
-end
-
-local function scheduleSnapshot(asks)
-	if snapPending or not C_Timer then return end
-	snapPending = true
-	C_Timer.After(JOIN_MIN + math.random() * JOIN_SPREAD, function() snapshot(asks) end)
 end
 
 local function onLog()
@@ -244,44 +257,58 @@ local function progressChanged()
 end
 
 local function forgetAll()
-	local had = next(members) ~= nil
-	roster, lastSent, members = {}, {}, {}
+	local had = next(members) ~= nil or next(roster) ~= nil
+	roster, lastSent, members, owed = {}, {}, {}, nil
 	if had then progressChanged() end
 end
 
+-- The roster key a party unit's messages arrive under: chat senders carry
+-- the normalized realm (no spaces or hyphens); nil while the name is unknown.
 local function memberKey(unit)
 	local name, realm = UnitName(unit)
-	if not name then return nil end
-	if realm and realm ~= "" then return name .. "-" .. realm, name end
+	if not name or name == "" or name == UNKNOWNOBJECT then return nil end
+	if realm and realm ~= "" then return name .. "-" .. realm:gsub("[%s%-]", ""), name end
 	return name, name
 end
 
--- `asks`: the roster is read after a login, a reload or the settings coming
--- back on, when we know nobody's progress: the snapshot asks for theirs.
+-- Offline members are left out: they drop off the line and count as new
+-- when back. A roster read when we knew nobody (login, reload, joining from
+-- solo, the settings back on: `asks`) asks the party for their snapshots.
 local function readRoster(asks)
 	if not grouped() then return forgetAll() end
-	local now, gained = {}, false
+	local wasEmpty = next(roster) == nil
+	local now, gained, changed = {}, false, false
 	local n = GetNumSubgroupMembers and GetNumSubgroupMembers() or 0
 	for i = 1, n do
-		local key, short = memberKey("party" .. i)
-		if key then
+		local unit = "party" .. i
+		local key, short = memberKey(unit)
+		if key and not (UnitIsConnected and not UnitIsConnected(unit)) then
 			now[key] = short
 			if not roster[key] then gained = true end
 		end
 	end
-	roster = now
-	local dropped = false
-	for key in pairs(members) do
-		if not now[key] then
-			members[key] = nil
-			dropped = true
-		end
+	for key in pairs(roster) do
+		if not now[key] then changed = true end
 	end
-	if dropped then progressChanged() end
-	if gained and ns.Get("party.share") then scheduleSnapshot(asks) end
+	roster = now
+	for key in pairs(members) do
+		if not now[key] then members[key] = nil end
+	end
+	if gained or changed then progressChanged() end
+	if gained then scheduleSnapshot(asks or wasEmpty) end
 end
 
 local function onRoster() readRoster(false) end
+
+local function onConnection(_, unit)
+	if type(unit) == "string" and unit:match("^party%d$") then readRoster(false) end
+end
+
+-- A party member's log changed: the "Not on this quest" nudge may be stale
+-- (their client tells ours even without Polestar).
+local function onUnitQuestLog(_, unit)
+	if type(unit) == "string" and unit:match("^party%d$") then progressChanged() end
+end
 
 local function apply(m, entries, snap)
 	if snap then m.quests, m.n = {}, 0 end
@@ -306,7 +333,9 @@ local function onAddonMessage(_, prefix, text, channel, sender)
 	if not short then return end
 	local snap, entries, asks = Party.Decode(text)
 	if snap == nil then return end
-	if asks and sharing() and not (lastSnapshotAt and GetTime() - lastSnapshotAt < REPLY_GAP) then scheduleSnapshot(false) end
+	if asks and sharing() and not snapPending and not (lastSnapshotAt and GetTime() - lastSnapshotAt < REPLY_GAP) then
+		scheduleSnapshot(false)
+	end
 	if not ns.Get("party.show") then return end
 	local m = members[key]
 	if not m then
@@ -331,21 +360,33 @@ end
 ---------------------------------------------------------------------------
 
 local prefixed = false
+local wasShare, wasShow -- the settings at the last Apply; nil before login
 
 local function want(event, on, fn)
 	if on then ns.RegisterEvent(event, fn) else ns.UnregisterEvent(event, fn) end
 end
 
 -- Registers what the settings need and nothing else; at login and whenever
--- a party setting changes.
+-- a party setting changes. Sharing turned off in a group sends one empty
+-- snapshot, so the party drops our counts rather than showing them frozen;
+-- a setting turned back on resyncs.
 function Party.Apply()
 	local share, show = ns.Get("party.share") and true or false, ns.Get("party.show") and true or false
 	local any = share or show
 	want("GROUP_ROSTER_UPDATE", any, onRoster)
 	want("GROUP_LEFT", any, forgetAll)
+	want("UNIT_CONNECTION", any, onConnection)
 	want("QUEST_LOG_UPDATE", share, onLog)
 	-- Received with showing off too: a request for our snapshot still counts.
 	want("CHAT_MSG_ADDON", any, onAddonMessage)
+	want("UNIT_QUEST_LOG_CHANGED", show, onUnitQuestLog)
+	local turnedOff = wasShare and not share
+	local turnedOn = (wasShare == false and share) or (wasShow == false and show)
+	wasShare, wasShow = share, show
+	if turnedOff and grouped() then
+		send(Party.Encode({}, true))
+		lastSent, owed = {}, nil
+	end
 	if not any then return forgetAll() end
 	if not show and next(members) then
 		members = {}
@@ -354,6 +395,10 @@ function Party.Apply()
 	if not prefixed and C_ChatInfo and C_ChatInfo.RegisterAddonMessagePrefix then
 		prefixed = true
 		C_ChatInfo.RegisterAddonMessagePrefix(Party.PREFIX)
+	end
+	if turnedOn and grouped() then
+		lastSent = {}
+		scheduleSnapshot(true)
 	end
 	readRoster(true)
 end
@@ -383,9 +428,12 @@ function Party.Missing(q)
 		local unit = "party" .. i
 		local key, short = memberKey(unit)
 		if key and not (UnitIsConnected and not UnitIsConnected(unit)) then
-			local on
-			if check then on = check(unit, q) end
-			if on == nil and members[key] then on = members[key].quests[q] ~= nil end
+			-- What a member running Polestar sent outranks the client's check,
+			-- which may not know about members far away.
+			local m = members[key]
+			local on = (m and m.quests[q] ~= nil) or nil
+			if not on and check then on = check(unit, q) end
+			if on == nil and m then on = false end
 			if on == false then out[#out + 1] = short end
 		end
 	end
