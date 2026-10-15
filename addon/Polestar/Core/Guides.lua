@@ -234,8 +234,9 @@ local function checkGoal(goal)
 		end
 	end
 	if goal.spread ~= nil and not (goal.spread == true and goal.spots ~= nil) then return "bad spread" end
-	-- A collect's dominant source: its name, kind, rank and faction.
+	-- A collect's dominant source: its name (and a second's), kind, rank and faction.
 	if goal.from ~= nil and not isStr(goal.from) then return "bad from" end
+	if goal.fromAlso ~= nil and not isStr(goal.fromAlso) then return "bad fromAlso" end
 	if goal.fromKind ~= nil and goal.fromKind ~= "npc" and goal.fromKind ~= "object" then return "bad fromKind" end
 	if goal.fromRank ~= nil and not isNum(goal.fromRank) then return "bad fromRank" end
 	if goal.fromFaction ~= nil and goal.fromFaction ~= "A" and goal.fromFaction ~= "H" and goal.fromFaction ~= "AH" then

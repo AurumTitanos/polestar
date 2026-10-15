@@ -104,7 +104,7 @@ step Saldean's Farm
   accept 92911
 
 step The Jansen Stead
-  tip Further north along the road. The Furlbrows sit by their burned farm. Click the Sacks of Oats in the fields as you go and fill the vial at the stead's well.
+  tip Further north along the road. The Furlbrows sit by their burned farm. Collect the oats from the Sacks of Oats in the fields as you go and fill the vial at the stead's well.
   accept 36                                   -- Verna Furlbrow
   accept 151
   accept 64                                   -- Farmer Furlbrow

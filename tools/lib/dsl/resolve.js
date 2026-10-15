@@ -21,6 +21,10 @@ const { blockingPrereqs } = require('../data/prereqs');
 const { clusterPoints, scaleOf } = require('../questdb/cluster');
 const { groupOf } = require('./group');
 
+// A collect's sources are named only for an item that few creatures or
+// objects drop (at 2% or more, with spawns); past this it drops everywhere.
+const MAX_NAMED_SOURCES = 8;
+
 // Standard rank caps and the skill each rank can first be trained at (Classic).
 const RANK_CAPS = [75, 150, 225, 300];
 const RANK_MIN_SKILL = [0, 50, 125, 225];
@@ -788,12 +792,17 @@ function resolveGoal(g, zoneMap, prev, data, err, warn, ctx = { sides: ['Allianc
 				break;
 			}
 			candidates = sources.filter((s) => data.spawns(s.kind, s.id).length);
-			// The one source that matters, named for the reading flow ("Kill Aean
-			// Swiftriver (rare elite)"): only outside a quest objective (those name
-			// their mobs through the quest), and only when a single located source
-			// has it or one drops it at 50% or more. `fromFaction` lets the engine
-			// tell an enemy from a friend of the character's faction.
-			if (g.quest === undefined && candidates.length && (candidates.length === 1 || candidates[0].chance >= 50)) {
+			// The sources that matter, named for the reading flow ("Kill Aean
+			// Swiftriver (rare elite)", "Kill Grell or Grellkin"): the item's
+			// game objective only says "Fel Moss: 0/8", so quest objectives get
+			// them too. Named only when a single located source has it or one
+			// drops it at 50% or more; a second of the same kind at 50% or more
+			// is named beside it (`fromAlso`). Not for an item that drops all
+			// over the world (cloth: hundreds of droppers, where a guard's 100%
+			// says nothing about where to farm it). `fromFaction` lets the
+			// engine tell an enemy from a friend of the character's faction.
+			const widespread = candidates.filter((s) => s.chance >= 2).length > MAX_NAMED_SOURCES;
+			if (!widespread && candidates.length && (candidates.length === 1 || candidates[0].chance >= 50)) {
 				const top = candidates[0];
 				const rec = top.kind === 'npc' ? data.npc(top.id) : data.object(top.id);
 				if (rec && rec.name) {
@@ -803,6 +812,9 @@ function resolveGoal(g, zoneMap, prev, data, err, warn, ctx = { sides: ['Allianc
 						if (Number(rec.rank) > 0) goal.fromRank = Number(rec.rank);
 						if (['A', 'H', 'AH'].includes(rec.faction)) goal.fromFaction = rec.faction;
 					}
+					const next = candidates[1];
+					const nrec = next && next.kind === top.kind && next.chance >= 50 && (next.kind === 'npc' ? data.npc(next.id) : data.object(next.id));
+					if (nrec && nrec.name && String(nrec.name) !== goal.from) goal.fromAlso = String(nrec.name);
 				}
 			}
 			// The 50-yard check only compares with real sources: anything dropping the

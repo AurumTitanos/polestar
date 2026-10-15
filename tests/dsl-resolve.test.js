@@ -65,14 +65,22 @@ test('collect positions at the item drop sources, preferring the current zone, t
 	// point on the map, the higher-chance source's centroid is used. Both droppers'
 	// spawns make the spawn areas: a pack of two and, with only three spawns, the
 	// lone one too; nearest to the goal's point first.
-	// Outside a quest objective the dominant source (50% or more) is named.
+	// The dominant source (50% or more) is named, for quest objectives too.
 	const pack = { x: 45.5, y: 39, r: 30, n: 2 };
 	const lone = { x: 44, y: 45, r: 15, n: 1 };
 	const alone = goalsOf(['step One', '  collect 750 x4']).goals[0];
 	assert.deepEqual(alone, { t: 'collect', item: 750, itemName: 'Tough Wolf Meat', from: 'Timber Wolf', fromKind: 'npc', fromFaction: 'A', count: 4, map: 1429, x: 44.5, y: 42.5, f: 'e', spots: [lone, pack] });
 	// After meeting Eagan (48.94,40.17) the nearest spawn of any source wins: a Young Wolf at 46,38.
 	const linked = goalsOf(['step One', '  accept 33', '  collect 750 quest 33']).goals[1];
-	assert.deepEqual(linked, { t: 'collect', quest: 33, title: 'Wolves Across the Border', item: 750, itemName: 'Tough Wolf Meat', count: 8, oi: 1, map: 1429, x: 46, y: 38, f: 'e', spots: [pack, lone] });
+	assert.deepEqual(linked, { t: 'collect', quest: 33, title: 'Wolves Across the Border', item: 750, itemName: 'Tough Wolf Meat', from: 'Timber Wolf', fromKind: 'npc', fromFaction: 'A', count: 8, oi: 1, map: 1429, x: 46, y: 38, f: 'e', spots: [pack, lone] });
+});
+
+test('a second source dropping the item at 50% or more is named beside the first', () => {
+	// Fractured Canine: Timber Wolf 70%, Diseased Young Wolf (299) 60%.
+	const g = goalsOf(['step One', '  collect 3299 x2']).goals[0];
+	assert.deepEqual([g.from, g.fromAlso, g.fromKind], ['Timber Wolf', 'Diseased Young Wolf', 'npc']);
+	// Tough Wolf Meat: Diseased Young Wolf drops it at 40%, so only Timber Wolf is named.
+	assert.equal(goalsOf(['step One', '  collect 750 x4']).goals[0].fromAlso, undefined);
 });
 
 test('kill goals carry the spawn areas of their mob, nearest to the chosen point first, every other place as an alternative; single spawns get none', () => {

@@ -59,7 +59,7 @@ step Starfall Village
   accept 5245
 
 step The Ruins of Kel'Theril
-  tip The ruins lie around the frozen lake south of Starfall Village. Click the four relic fragments in the ruins, and pick up the Moontouched Feathers on the ground where the wildkin roam.
+  tip The ruins lie around the frozen lake south of Starfall Village. Pick up the four relic fragments lying in the ruins and the Moontouched Feathers on the ground where the wildkin roam.
   collect 12896 quest 5245.1          -- First Relic Fragment
   collect 12897 quest 5245.2          -- Second Relic Fragment
   collect 12898 quest 5245.3          -- Third Relic Fragment

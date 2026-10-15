@@ -1456,15 +1456,39 @@ end
 local TEXT_IS_PLACE = { ["goto"] = true, explore = true }
 
 -- Plain text, independent of the goal's state: "Kill Kobold Vermin" (with a
--- progress bar), "Kill 5 Young Wolf" (manual, no tracking).
+-- progress bar), "Kill 5 Young Wolf" (manual, no tracking). Second: a
+-- collect's compiled source (`from`, `fromAlso`, `fromKind`, `fromRank`,
+-- `fromFaction`; an NPC of a faction that is not the character's own is one
+-- to kill), `inText` when the text names it.
 local function goalText(goal, verb, subject, detail)
-	if goal.text and not TEXT_IS_PLACE[goal.t] then return goal.text end
-	if verb == "" then return subject end
-	if goal.t == "skill" then return verb .. " " .. tostring(subject) .. " " .. detail end
-	if goal.count and goal.count > 1 and not tracksProgress(goal) then
-		return verb .. " " .. goal.count .. " " .. tostring(subject)
+	local src = goal.from and {
+		name = goal.from, also = goal.fromAlso, kind = goal.fromKind or "npc", rank = goal.fromRank,
+		enemy = (goal.fromKind or "npc") == "npc" and not (goal.fromFaction == "AH"
+			or (goal.fromFaction == "A" and player and player.faction == "Alliance")
+			or (goal.fromFaction == "H" and player and player.faction == "Horde")),
+	} or nil
+	if goal.text and not TEXT_IS_PLACE[goal.t] then return goal.text, src end
+	if verb == "" then return subject, src end
+	if goal.t == "skill" then return verb .. " " .. tostring(subject) .. " " .. detail, src end
+	local counted = goal.count and goal.count > 1 and not tracksProgress(goal)
+	-- "Kill Grell or Grellkin for Fel Moss", "Collect Oats from Sack of Oats":
+	-- a collect whose source is known says where the item comes from (the
+	-- game's objective only names the item); not an object named as the item
+	-- (the item lying there).
+	if goal.t == "collect" and subject and src and src.name ~= goal.itemName then
+		local item = counted and (goal.count .. " " .. subject) or subject
+		local who = src.name
+		local rank = src.rank and ({ L["elite"], L["rare elite"], L["boss"], L["rare"] })[src.rank]
+		if rank then who = who .. " (" .. rank .. ")" end
+		if src.also then who = L["%s or %s"]:format(who, src.also) end
+		src.inText = true
+		if src.enemy then return L["Kill %s for %s"]:format(who, item), src end
+		return L["Collect %s from %s"]:format(item, who), src
 	end
-	return verb .. " " .. tostring(subject)
+	if counted then
+		return verb .. " " .. goal.count .. " " .. tostring(subject), src
+	end
+	return verb .. " " .. tostring(subject), src
 end
 
 local function goalView(s, g, goal, stepStatus, group)
@@ -1484,12 +1508,13 @@ local function goalView(s, g, goal, stepStatus, group)
 		alternatives = n > 0 and n - 1 or 0
 	end
 	local unavail = status == "skipped" and unavailableFor(goal) or nil
+	local text, src = goalText(goal, verb, subject, detail)
 	return {
 		index = g,
 		group = group,
 		t = goal.t,
 		status = status,
-		text = goalText(goal, verb, subject, detail),
+		text = text,
 		verb = verb,
 		subject = subject,
 		subjectKind = kind,
@@ -1519,14 +1544,9 @@ local function goalView(s, g, goal, stepStatus, group)
 		-- Group content (compiled `group`: elite, dungeon, raid or an author's
 		-- group size); `group` above is the goal's field group.
 		party = type(goal.group) == "table" and type(goal.group.kind) == "string" and goal.group or nil,
-		-- A collect's dominant source (compiled `from`): an NPC of a faction
-		-- that is not the character's own is one to kill.
-		source = goal.from and {
-			name = goal.from, kind = goal.fromKind or "npc", rank = goal.fromRank,
-			enemy = (goal.fromKind or "npc") == "npc" and not (goal.fromFaction == "AH"
-				or (goal.fromFaction == "A" and player and player.faction == "Alliance")
-				or (goal.fromFaction == "H" and player and player.faction == "Horde")),
-		} or nil,
+		-- A collect's source (compiled `from`); `inText`: the goal's text
+		-- already names it.
+		source = src,
 	}
 end
 
@@ -1567,7 +1587,7 @@ local function waypointOf(g, goal)
 	local many = area and #goal.spots > 1
 	return {
 		map = map, x = x, y = y, f = f,
-		label = goalText(goal, verb, subject, detail),
+		label = (goalText(goal, verb, subject, detail)),
 		stepIndex = current, goalIndex = g, kind = goal.t,
 		r = goal.r or DEFAULT_RADIUS, area = area,
 		search = area and goal.spread or nil,
