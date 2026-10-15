@@ -292,14 +292,15 @@ and each section says what is missing.
 ### Quality of life
 
 Quest item, target and Hearthstone buttons; XP per hour and time to level;
-selling greys and repairing (optionally from the guild bank first); taking
-the best quest reward; instant quest text, single-option gossip and faster
-auto-loot; hiding combat error spam; flight map and death helpers, and
-releasing at once in battlegrounds. Requests from other players: accept
-summons, resurrections and friends' or guildmates' party invitations; decline
-other party invitations, guild invitations and duels (friends and guild
-excepted). Hold **Shift** to skip auto-accept, auto-turn-in, auto-sell or the
-flight helper once, or to answer a request yourself.
+selling greys and repairing (optionally from the guild bank first); learning
+new spells at class trainers; taking the best quest reward; instant quest
+text, single-option gossip and faster auto-loot; hiding combat error spam;
+flight map and death helpers, and releasing at once in battlegrounds.
+Requests from other players: accept summons, resurrections and friends' or
+guildmates' party invitations; decline other party invitations, guild
+invitations and duels (friends and guild excepted). Hold **Shift** to skip
+auto-accept, auto-turn-in, auto-sell, training or the flight helper once, or
+to answer a request yourself.
 
 ### Recorder
 

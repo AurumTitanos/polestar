@@ -576,8 +576,10 @@ Polestar.Engine.GetProgress() -> doneSteps, totalSteps
   one trainer per town and class, with the Era frames of their maps) calls
   `Polestar.RegisterClassTrainers({ { npc, npcName, map, x, y, f, faction, classes }, ... })`.
   `Engine.NearestClassTrainer()` returns the best one for the character (same
-  ranking as candidate goals) or nil. Opening the trainer window of one of the
-  character's class stores `CharState().classTrainLevel = level` and fires
+  ranking as candidate goals) or nil; `Engine.IsClassTrainer(npc)` whether an
+  npc is one of them for the character's class (QoL learns spells only there).
+  Opening the trainer window of one of the character's class stores
+  `CharState().classTrainLevel = level` and fires
   `CLASS_TRAINED(level)`; a character first seen without a stored level counts
   as trained at that level. With `behavior.trainReminder` `"2"` (default; even
   levels only), `"1"` or `"off"`, the Engine fires `TRAIN_DUE(level, trainer)`

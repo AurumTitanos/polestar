@@ -129,6 +129,10 @@
   bloodmages' beasts, and Horde Warriors in the Barrens gather the Twitching
   Antennae (fifteen minutes) on the way back from Gann Stonespire and hearth
   to Ruga at once. Teldrassil says Iverron's Antidote lasts five minutes.
+- Class trainers can teach you every new spell you can afford as you open
+  them: Options, Quality of Life, Vendors, Learn new spells (off by default;
+  Shift skips). Riding, weapon, pet and profession trainers are left alone
+  (thanks CDVolvik).
 
 ### For guide authors
 

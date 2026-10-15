@@ -94,3 +94,13 @@ test('no reminder when the guide trains the class within its next steps, on odd 
 	const off = run({ saved: TRAINED_AT_10, pre: 'Polestar.Set("behavior.trainReminder", "off")', script: 'stub.advance(0.5); emit({ due = #DUE })' })[0];
 	assert.equal(off.due, 0);
 });
+
+test('a class trainer is one the registry holds for the character\'s class; riding trainers and other classes\' are not', () => {
+	const [out] = run({
+		script: `
+			local E = Polestar.Engine
+			emit({ warrior = E.IsClassTrainer(2119), mage = E.IsClassTrainer(198), riding = E.IsClassTrainer(4732), none = E.IsClassTrainer(nil) })`,
+	});
+	// Dannal Stern (warrior, Tirisfal), Khelden Bremen (mage, Northshire), Randal Hunter (riding, Elwynn).
+	assert.deepEqual(out, { warrior: true, mage: false, riding: false, none: false });
+});

@@ -97,6 +97,11 @@ register(QOL, L["Vendors"], L["Merchants"], {
 		help = help("repairGuild", L["When your guild rank may, the guild bank pays for repairs and your money covers the rest."]) },
 })
 
+register(QOL, L["Vendors"], L["Trainers"], {
+	{ kind = "toggle", key = "qol.trainAll", label = L["Learn new spells"],
+		help = L["Learns every spell a class trainer offers that you can afford, and prints the total. Profession trainers are left alone. Hold Shift to skip."] },
+})
+
 register(QOL, L["Trackers"], L["Experience"], {
 	{ kind = "toggle", key = "qol.xpTracker", label = L["XP tracker"],
 		help = L["XP per hour, time, kills and quests to level, and level splits (/pole xp)."] },

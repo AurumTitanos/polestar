@@ -54,6 +54,7 @@ local defaults = {
 	sellJunk = true,
 	autoRepair = true,
 	repairGuild = false,     -- guild bank first when the rank allows
+	trainAll = false,        -- learn every spell a class trainer offers now
 	rewardHighlight = true,
 	rewardAutoPick = false,
 	flightAutoOpen = true,
