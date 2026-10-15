@@ -453,6 +453,7 @@ function GetQuestID()
 	local f = world.frame
 	return f and f.questID or 0
 end
+function GetTitleText() local f = world.frame; return f and f.title or "" end
 function QuestGetAutoAccept() local f = frameOf("detail"); return f and f.auto or false end
 function QuestFlagsPVP() local f = frameOf("detail"); return f and f.pvp or false end
 

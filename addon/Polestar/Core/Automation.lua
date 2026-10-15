@@ -4,7 +4,8 @@
 -- Rules: settings behavior.autoAccept / behavior.autoTurnin; holding Shift
 -- suppresses both; only `accept`/`turnin` goals in the current step or the
 -- next two applicable steps qualify; a reward with several choices is always
--- left to the player, as are quests that cost money or flag for PvP.
+-- left to the player, as are quests that cost money or flag for PvP, and
+-- (behavior.warnClosing) quests that close another one for good.
 --
 -- Quest frame functions are the Forever (Mainline-family) ones used by
 -- Blizzard_UIPanels_Game/Mainline/QuestFrame.lua: GetQuestID, AcceptQuest,
@@ -54,6 +55,7 @@ local function onDetail()
 	if not canAccept() then return end
 	local q = questID()
 	if not wantsAccept(q) then return end
+	if ns.Closes.HoldsOffer() then return end -- closes another quest for good: the player chooses
 	if QuestFlagsPVP and QuestFlagsPVP() then return end -- needs the PvP confirmation
 	if QuestGetAutoAccept and QuestGetAutoAccept() then
 		if AcknowledgeAutoAcceptQuest then AcknowledgeAutoAcceptQuest() end

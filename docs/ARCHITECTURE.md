@@ -677,6 +677,18 @@ Polestar.Engine.GetProgress() -> doneSteps, totalSteps
   <reason>" (one line per quest) until the step changes again, it is
   dismissed, or 20 seconds pass. With the window hidden it goes to chat
   instead. Placement at load never fires it.
+- **Missable quests** (`Core/Closes.lua`, setting `behavior.warnClosing`,
+  default off). `Closes.For(q, title)` lists what taking `q` closes for good
+  for this character: the guide accepts whose `closedBy` names `q`, across
+  every shown guide (indexed once, rebuilt on `GUIDES_REGISTERED` and
+  `PACKS_CHANGED`), and, with the quest database loaded, the quests whose
+  `excl` lists `q` (`QuestDB.ClosedBy`; `excl` is one-way for about one link
+  in fifteen, so it is read from the closed quest's side). Left out: quests
+  done or in the log, the accept's `only` or the database's faction, race and
+  class not matching, a quest one of its own `closedBy`/`excl` already closed,
+  and other versions of `q` (the same title). On `QUEST_DETAIL` (not a quest
+  the game accepted itself) the setting prints "Taking <quest> closes <quests>
+  for good." and Automation leaves that accept to the player.
 - **Not yet available.** A Class guide (`category = "Class"`) the character
   has not played (no step skipped, no goal ticked, none of its quests in the
   log or done) whose opening, the first step for this character with an
@@ -956,7 +968,8 @@ one open, or while the waypoint's goal has spots.
 Automation (setting `behavior.autoAccept`, `behavior.autoTurnin`, default
 on; holding Shift suppresses): accept only quests that are `accept` goals, and
 turn in only quests that are `turnin` goals, in the current or next two
-steps; never choose among multiple rewards.
+steps; never choose among multiple rewards; with `behavior.warnClosing` on,
+never accept a quest that closes another for good (Missable quests).
 
 ## Theme — used by UI and Nav
 

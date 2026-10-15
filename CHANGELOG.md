@@ -20,6 +20,12 @@
   so a character ahead of the route still saw them. A grey quest goes with
   its turn-in; one that opens a quest still worth doing stays, as Buzzbox 827
   does in Darkshore at 20 (thanks Wogi).
+- "Warn about missable quests" (Options, Guide, Automation; off by default):
+  before you take a quest that closes another for good, a breadcrumb's
+  follow-up or one quest of a choice, chat names what you would lose
+  ("Taking Sven's Revenge closes Deliveries to Sven for good.") and quest
+  automation leaves that accept to you. Quests your race or class never gets
+  and other versions of the same quest are left out (thanks Roxton).
 - The Undead Tirisfal Glades guide sends only Paladins to Bandarion Keep for
   As Above, So Below and The One That Got Away: Hilda the Breaker and Ephram
   Barbaro offer them to Paladins only. Other classes still collect the

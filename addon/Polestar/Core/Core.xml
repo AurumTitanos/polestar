@@ -7,6 +7,7 @@
 	<Script file="Search.lua"/>
 	<Script file="Engine.lua"/>
 	<Script file="ClassTrainers.lua"/>
+	<Script file="Closes.lua"/>
 	<Script file="Automation.lua"/>
 	<Script file="Commands.lua"/>
 </Ui>
