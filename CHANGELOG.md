@@ -54,6 +54,12 @@
   the Undercity; now the pick-up guide, the quest's card and Lookup send
   them to an Alliance mage trainer, and Lookup marks a quest only the other
   side's NPCs give as that side's.
+- Party sync: in a party, the guide shows the counts of party members who run
+  Polestar under each shared quest goal (Ana 5/8, Ben done), and on a quest
+  you took, who in the party lacks it, even without Polestar. Quest IDs and
+  counts only, through hidden party messages when a count changes, so it
+  works across guides and client languages; nothing goes to chat. Two
+  switches in Questing > Quests > Party, both on.
 - Quests Forever renamed carry their Forever names in the guides: Chastise
   (once A Lack of Fear), Dark Sacrifice (once Devouring Plague), Look to the
   Stars, Onu is Meditating and the others Wowhead Forever lists as renamed.
