@@ -177,6 +177,7 @@ local BUILTIN = {
 	} },
 	{ page = GUIDE, tab = L["Window"], section = L["Position"], controls = {
 		{ kind = "toggle", key = "ui.locked", label = L["Lock window"], help = L["Prevents moving and resizing."] },
+		{ kind = "toggle", key = "ui.growUp", label = L["Grow upward"], help = L["Keep the bottom edge in place, so longer steps extend the window up."] },
 		{ kind = "button", icon = "reset", label = L["Reset position"], help = L["Put the guide window back in its corner."], onClick = function() ns.Set("ui.pos", nil) end },
 	} },
 	{ page = GUIDE, tab = L["Arrow & routes"], section = L["Arrow"], controls = {

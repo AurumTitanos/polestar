@@ -374,6 +374,36 @@ test('dragging saves the position; the grip resizes width within bounds', () => 
 	assert.equal(out.point[0], 'TOPLEFT');
 });
 
+test('grow upward pins the window by its bottom-left; turning it on or off keeps the window in place', () => {
+	const [out] = run(`
+		uistub.setGuide(uistub.elwynn, 3)
+		F.x, F.y = 1500, 300
+		Polestar.Set("ui.growUp", true)
+		local on, onPoint = Polestar.Get("ui.pos"), { F:GetPoint(1) }
+		F.x, F.y = 900, 120
+		stub.RunScript(GF.parts.nav, "OnDragStart")
+		stub.RunScript(GF.parts.nav, "OnDragStop")
+		local dragged = Polestar.Get("ui.pos")
+		stub.cursor = { 100, 500 }
+		stub.RunScript(GF.grip, "OnMouseDown", "LeftButton")
+		local resizePoint = { F:GetPoint(1) }
+		stub.RunScript(GF.grip, "OnMouseUp", "LeftButton")
+		Polestar.Set("ui.pos", nil)
+		local resetPoint = { F:GetPoint(1) }
+		F.x, F.y = 900, 120
+		Polestar.Set("ui.growUp", false)
+		emit({ on = on, onPoint = onPoint, dragged = dragged, resizePoint = resizePoint, resetPoint = resetPoint,
+			off = Polestar.Get("ui.pos"), offPoint = { F:GetPoint(1) }, top = F:GetTop() })`);
+	assert.deepEqual(out.on, [1500, 300], 'turning it on saves the bottom-left where the window stands');
+	assert.equal(out.onPoint[0], 'BOTTOMLEFT');
+	assert.deepEqual(out.dragged, [900, 120], 'dragging saves the bottom-left');
+	assert.equal(out.resizePoint[0], 'BOTTOMLEFT', 'resizing the width keeps the bottom edge pinned');
+	assert.equal(out.resetPoint[0], 'BOTTOMRIGHT', 'reset puts it in the bottom-right corner');
+	assert.equal(out.resetPoint[2], 'BOTTOMRIGHT');
+	assert.deepEqual(out.off, [900, out.top], 'turning it off saves the top-left where the window stands');
+	assert.equal(out.offPoint[0], 'TOPLEFT');
+});
+
 test('combat: fade dims the window, hide hides it, both restore afterwards', () => {
 	const [out] = run(`
 		uistub.setGuide(uistub.elwynn, 3)

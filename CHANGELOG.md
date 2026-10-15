@@ -194,6 +194,9 @@
   upgrades (off by default; Shift at the turn-in skips). Chat says
   "Wearing [item] (+12%)" once it is on, and nothing when you cancel its
   bind confirmation (thanks CDVolvik).
+- Grow upward (Options, Guide, Window, Position): the guide window keeps its
+  bottom edge in place, so a longer step extends it up instead of down.
+  Turning it on or off leaves the window where it stands (thanks thmastin).
 
 ### For guide authors
 
