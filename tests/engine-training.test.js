@@ -104,3 +104,28 @@ test('a class trainer is one the registry holds for the character\'s class; ridi
 	// Dannal Stern (warrior, Tirisfal), Khelden Bremen (mage, Northshire), Randal Hunter (riding, Elwynn).
 	assert.deepEqual(out, { warrior: true, mage: false, riding: false, none: false });
 });
+
+test('every class trainer counts, not only the reminder\'s one per town: capital trainers the guides use; pet and weapon trainers do not', () => {
+	// Xor'juul (hunter, Orgrimmar), Mirket (warlock, Orgrimmar), Dink (mage,
+	// Ironforge), Fenthwick (rogue, Ironforge), Grezz Ragefist and Ander
+	// Germaine (warriors, Orgrimmar and Stormwind).
+	const cases = [
+		['HUNTER', 3406],
+		['WARLOCK', 3325],
+		['MAGE', 7312],
+		['ROGUE', 5167],
+		['WARRIOR', 3353],
+		['WARRIOR', 914],
+	];
+	for (const [cls, npc] of cases) {
+		const [out] = run({ pre: `stub.world.class = "${cls}"`, script: `emit({ yes = Polestar.Engine.IsClassTrainer(${npc}) })` });
+		assert.equal(out.yes, true, `${cls} ${npc}`);
+	}
+	// Pet trainer (Nalesette Wildbringer), weapon master (Hanashi), riding
+	// (Randal Hunter), and Ariyell Skyshadow, a Darnassus weapon merchant.
+	const [out] = run({
+		pre: 'stub.world.class = "HUNTER"',
+		script: 'local E = Polestar.Engine emit({ pet = E.IsClassTrainer(543), weapon = E.IsClassTrainer(2704), riding = E.IsClassTrainer(4732), merchant = E.IsClassTrainer(4203) })',
+	});
+	assert.deepEqual(out, { pet: false, weapon: false, riding: false, merchant: false });
+});

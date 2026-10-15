@@ -133,6 +133,10 @@
   them: Options, Quality of Life, Vendors, Learn new spells (off by default;
   Shift skips). Riding, weapon, pet and profession trainers are left alone
   (thanks CDVolvik).
+- Darnassus hunters are sent to Jeen'ra Nightrunner, not Ariyell Skyshadow
+  (a weapon merchant), and Polestar knows twenty more class trainers in the
+  capitals and Mulgore (Ander Germaine, Grezz Ragefist, Sian'tsu, Hana
+  Lighthoof...), so learning new spells works at every class trainer.
 
 ### For guide authors
 
