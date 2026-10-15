@@ -685,13 +685,26 @@ the hops between spawns); routes are cached under `data/local/nav`, so the
 next start is immediate. A walk the grid cannot route stays a straight line,
 marked ≈ in the steps list.
 Layers adds Walkable (what the grid can walk: blocked, steep, climb, water,
-indoors, zoomed in) and Arrow aids (the crossings and approach chains of
-`nav aids`).
+indoors, zoomed in), Arrow aids (the crossings and approach chains of
+`nav aids`) and Arrow waypoints (on by default): the points of the pack's
+`via.json` (`node tools/polestar.js nav via`) the in-game arrow leads
+through on each leg of the step, as small diamonds on a dotted line with
+their captions; a leg the arrow walks by a hand-made path (a guide `goto`,
+a chain or crossing of the crossings file) is a long green dash marked
+Hand-made, and is never given waypoints. The playback walks each leg
+through its waypoints, as the arrow will.
 In Edit mode, drag a waypoint, add one with a click, bend a travel line into
 a new labelled waypoint ("Cross the bridge"), or change any goal or
 step in its form: every edit is written into the `.guide` file at once
 (undo with Ctrl+Z; Changes lists and reverts them; Compile builds the addon
-folder), so `dev` picks it up too. Given a pack folder it edits that pack;
+folder), so `dev` picks it up too. Arrow waypoints edit the same way: drag
+one, click it to caption, mark it inside (a cave, a climb, a lift) or delete
+it, and drag a leg that has waypoints to add one (Shift-drag still adds a
+goto); the step editor's Arrow waypoints lists the step's legs with
+Regenerate for a leg, the step or the guide. Edited legs are kept by later
+`nav via` runs (unless `--force`); every change is written into `via.json` and undoes with
+Ctrl+Z. `--workers <n>` sets how many route workers it runs (default: one
+less than the CPUs, at most 2). Given a pack folder it edits that pack;
 `planner mcp` lets an assistant read routes, edit them and drive the open
 page while you watch (`claude mcp add polestar-planner -- node tools/polestar.js planner mcp`).
 The map art is the Forever client's own, fetched from wago.tools and never

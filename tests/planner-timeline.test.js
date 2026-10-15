@@ -354,6 +354,54 @@ test('a flight follows its taxi path points and keeps the flight time', () => {
 	assert.strictEqual(straight.track.m.filter((v) => v === MODES.fly).length, 1);
 });
 
+// Arrow waypoints (compiled goal.via / viaFrom): the walk to the goal goes
+// through them as the arrow leads, each stretch routed on its own.
+function playVia(viaFrom, via) {
+	const guides = guidesOf(guideText(['step Hill', '  explore 30,30 "Hill"', 'step Farm', '  explore 60,60 "Farm"']));
+	const farm = guides.get('t/main').steps[1].goals[0];
+	const pt = ([x, y, inner]) => ({ map: 1429, x, y, f: 'e', r: 12, ...(inner ? { inner: true } : {}) });
+	farm.via = via.map(pt);
+	farm.viaFrom = { map: 1429, x: viaFrom[0], y: viaFrom[1], f: 'e' };
+	const data = fixtureData();
+	const geo = new Geo(data.mapFrames, data.zones);
+	const { routes, calls } = fakeRoutes();
+	const tl = buildTimeline({ guides, data, geo, params: PARAMS, travel: {}, questXp: null, start: 't/main', character: HUMAN, routes });
+	const at = (x, y) => geo.toWorld(1429, x, y, 'e');
+	const hill = at(30, 30);
+	// The walks from the Hill on, as map points (rounded).
+	const from = calls.findIndex((c) => Math.hypot(c.a.wx - hill.wx, c.a.wy - hill.wy) < 1);
+	const ends = calls.slice(from).map((c) => {
+		const p = geo.toMap(1429, c.b.c, c.b.wx, c.b.wy, 'e');
+		return [Math.round(p.x), Math.round(p.y)];
+	});
+	return { tl, ends, farm: tl.steps[1].goals[0] };
+}
+
+test('a walk from the leg\'s start follows every arrow waypoint, one routed stretch each', () => {
+	const { ends, farm } = playVia([30, 30], [[40, 40], [50, 50]]);
+	assert.deepStrictEqual(ends, [[40, 40], [50, 50], [60, 60]]);
+	assert.strictEqual(farm.via, 2);
+	assert.strictEqual(farm.split.travel, 300);
+});
+
+test('a walk near a later stretch of the chain joins at that stretch\'s end', () => {
+	// The Hill lies on the stretch V1 -> V2: the walk joins at V2.
+	const { ends, farm } = playVia([10, 30], [[20, 30], [40, 30], [50, 40]]);
+	assert.deepStrictEqual(ends, [[40, 30], [50, 40], [60, 60]]);
+	assert.strictEqual(farm.via, 2);
+});
+
+test('a walk far from the chain joins at the nearest waypoint that is not inner', () => {
+	// V1 (inner) is far; V2 is nearer than the goal.
+	const far = playVia([80, 10], [[82, 12, true], [40, 45]]);
+	assert.deepStrictEqual(far.ends, [[40, 45], [60, 60]]);
+	assert.strictEqual(far.farm.via, 1);
+	// Every point inner: straight to the goal.
+	const inner = playVia([80, 10], [[82, 12, true], [40, 45, true]]);
+	assert.deepStrictEqual(inner.ends, [[60, 60]]);
+	assert.strictEqual(inner.farm.via, undefined);
+});
+
 test('the Dwarf chain plays from Dun Morogh to level 55 or more', { skip: needs('quests.json', 'npcs.json', 'objects.json', 'items.json', 'zones.json', 'map-frames.json', 'travel.json') }, () => {
 	const { compileProject } = require('../tools/lib/dsl/project');
 	const root = path.join(__dirname, '..');

@@ -1435,12 +1435,25 @@ end
 -- counts the whole area as reached); `r` stays the arrival margin. An area
 -- objective's waypoint also carries `search` (Nav never says arrived),
 -- `spots` (the goal's list, for the map marks) and `spot` (its index).
+-- A goal's arrow waypoints from the navigation grid (compiled `via`,
+-- `viaFrom`) come along when the waypoint is the goal's own point or a spot
+-- within 60 yd of it (Nav/Travel.lua leads the arrow through them).
 local function waypointOf(g, goal)
 	local map, x, y, f, area = posOf(goal)
 	if not (map and x and y) or not goalApplies(goal) or unavailableFor(goal) or Own.goalSkipped(current, g)
 		or goalDone(current, g, goal) then return nil end
 	local verb, subject, _, detail = describe(goal)
 	local many = area and #goal.spots > 1
+	local via = not goal.candidates and goal.via or nil
+	if via and (x ~= goal.x or y ~= goal.y) then
+		local C = Compat()
+		local c1, ax, ay, c2, bx, by
+		if C and C.MapToWorld then
+			c1, ax, ay = C.MapToWorld(goal.map, goal.x, goal.y, goal.f)
+			c2, bx, by = C.MapToWorld(map, x, y, f)
+		end
+		if not (c1 and c1 == c2 and (ax - bx) ^ 2 + (ay - by) ^ 2 <= 3600) then via = nil end
+	end
 	return {
 		map = map, x = x, y = y, f = f,
 		label = goalText(goal, verb, subject, detail),
@@ -1448,6 +1461,7 @@ local function waypointOf(g, goal)
 		r = goal.r or DEFAULT_RADIUS, area = area,
 		search = area and goal.spread or nil,
 		spots = many and goal.spots or nil, spot = many and Spots.index(goal) or nil,
+		via = via, viaFrom = via and goal.viaFrom or nil,
 	}
 end
 

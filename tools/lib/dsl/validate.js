@@ -135,12 +135,14 @@ function checkPipes(g, diag) {
 }
 
 // fn(map, guide, goal) for every map an emitted coordinate uses: the goal's
-// own map/x/y and any coordinate list on it (smart-target `candidates`).
+// own map/x/y, any coordinate list on it (smart-target `candidates`, arrow
+// waypoints `via`) and the start of its arrow waypoints' leg (`viaFrom`).
 function forEachGoalMap(guides, fn) {
 	for (const g of guides) {
 		for (const s of g.steps) {
 			for (const goal of s.goals) {
 				if (goal.map !== undefined) fn(goal.map, g, goal);
+				if (goal.viaFrom) fn(goal.viaFrom.map, g, goal);
 				for (const v of Object.values(goal)) {
 					if (!Array.isArray(v)) continue;
 					for (const el of v) if (el && typeof el === 'object' && el.map !== undefined) fn(el.map, g, goal);

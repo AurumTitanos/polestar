@@ -325,6 +325,26 @@ function hasClass(poly, s0, s1, cls) {
 const d3 = (a, b) => Math.hypot(a.wx - b.wx, a.wy - b.wy, (a.z || 0) - (b.z || 0));
 const d2 = (a, b) => Math.hypot(a.wx - b.wx, a.wy - b.wy);
 
+// A bridge at p ({ wx, wy, z } on continent c): the walk there is a model
+// surface (WMO or M2, not terrain) with liquid or at least BRIDGE_DROP yd of
+// air under it.
+function bridgeAt(nav, c, p) {
+	const at = columnAt(nav, c, p.wx, p.wy);
+	if (!at) return false;
+	const { t, k } = at;
+	let walk = -1;
+	for (let e = t.first[k]; e < t.first[k + 1]; e++) {
+		if (t.flags[e] & (FLAG.BLOCKED | FLAG.SWIM)) continue;
+		if (walk < 0 || Math.abs(t.z[e] - p.z) < Math.abs(t.z[walk] - p.z)) walk = e;
+	}
+	if (walk < 0 || Math.abs(t.z[walk] - p.z) > 3) return false;
+	const f = t.flags[walk];
+	if (f & FLAG.TERRAIN || !(f & (FLAG.WMO | FLAG.M2))) return false;
+	if (walk === t.first[k]) return true; // nothing under it
+	const below = walk - 1; // entries ascend in z
+	return (t.flags[below] & FLAG.SWIM) !== 0 || t.z[walk] - t.z[below] >= BRIDGE_DROP;
+}
+
 // The longest final stretch SHARE_QUORUM of the routes (polylines ending at
 // one target) share with one of them (within SHARE_TOL yd): { L, ref }.
 function shared(polys) {
@@ -994,23 +1014,8 @@ class Generator {
 		return null;
 	}
 
-	// A bridge at p: the walk there is a model surface (WMO or M2, not
-	// terrain) with liquid or at least BRIDGE_DROP yd of air under it.
 	bridgeAt(p) {
-		const at = columnAt(this.nav, this.c, p.wx, p.wy);
-		if (!at) return false;
-		const { t, k } = at;
-		let walk = -1;
-		for (let e = t.first[k]; e < t.first[k + 1]; e++) {
-			if (t.flags[e] & (FLAG.BLOCKED | FLAG.SWIM)) continue;
-			if (walk < 0 || Math.abs(t.z[e] - p.z) < Math.abs(t.z[walk] - p.z)) walk = e;
-		}
-		if (walk < 0 || Math.abs(t.z[walk] - p.z) > 3) return false;
-		const f = t.flags[walk];
-		if (f & FLAG.TERRAIN || !(f & (FLAG.WMO | FLAG.M2))) return false;
-		if (walk === t.first[k]) return true; // nothing under it
-		const below = walk - 1; // entries ascend in z
-		return (t.flags[below] & FLAG.SWIM) !== 0 || t.z[walk] - t.z[below] >= BRIDGE_DROP;
+		return bridgeAt(this.nav, this.c, p);
 	}
 
 	caption(kind, zone) {
@@ -1463,6 +1468,7 @@ module.exports = {
 	Zones,
 	Generator,
 	polyOf,
+	bridgeAt,
 	pointAt,
 	slug,
 	CONSTANTS: {

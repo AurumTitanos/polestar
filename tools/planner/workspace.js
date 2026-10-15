@@ -4,11 +4,15 @@
 // file watch (docs/ARCHITECTURE.md, "Route planner").
 // The .guide files stay the only source of truth: every edit is written at
 // once, and an external change (an editor, git) is read back and pushed.
+// Each pack's via.json (the arrow waypoints, docs/PACK_FORMAT.md) is kept
+// the same way: attached to the compiled guides, edited (via_set) and
+// regenerated (via_generate) through the same undo history, watched.
 //
 // Events: 'changed' { files, guides, external, timeline, routed (the routing
 // id of a timeline whose walks are all routed now) }, 'diagnostics' { pack },
-// 'routing' { id, pending, done } (walks being routed, each second), 'focus',
-// 'seek', 'play' (the page's view_* commands).
+// 'routing' { id, pending, done } (walks being routed, each second), 'via'
+// { job, id, ok, error, written, kept, skipped } (a via_generate job is
+// done), 'focus', 'seek', 'play' (the page's view_* commands).
 
 const fs = require('node:fs');
 const path = require('node:path');
@@ -20,6 +24,8 @@ const { parseGuide } = require('../lib/dsl/parse');
 const { resolveGuide } = require('../lib/dsl/resolve');
 const { loadData } = require('../lib/dsl/data');
 const { findGuideFiles, writePackDir, OFFICIAL_DIR } = require('../lib/dsl/project');
+const { VIA_FILE, viaDocError, attachVia } = require('../lib/dsl/via');
+const { guideLegs } = require('../lib/dsl/legs');
 const { readManifest } = require('../lib/pack/manifest');
 const { buildPack, folderIn } = require('../lib/pack/build');
 const { Geo } = require('../lib/planner/geo');
@@ -128,6 +134,25 @@ parentPort.on('message', ({ seq, target }) => {
 });
 `;
 
+// The waypoint generator's worker (via_generate): one Nav, routes in-process.
+const VIA_WORKER = `
+const { parentPort, workerData } = require('node:worker_threads');
+const via = require(workerData.via);
+const { openNav } = require(workerData.nav);
+const { Geo } = require(workerData.geo);
+const nav = openNav({ dir: workerData.dir });
+const geo = new Geo(workerData.frames, workerData.zones);
+const sets = via.loadHandMade({ dataDir: workerData.dataDir, ...(workerData.crossingsFile ? { crossingsFile: workerData.crossingsFile } : {}), frames: geo.era });
+parentPort.on('message', async ({ job, guide, keys }) => {
+	try {
+		const result = await via.generateLegs({ guide, keys, nav, pool: null, geo, frames: workerData.frames, sets, log: () => {} });
+		parentPort.postMessage({ job, result });
+	} catch (err) {
+		parentPort.postMessage({ job, error: String((err && err.stack) || err) });
+	}
+});
+`;
+
 function shapeDiag(d) {
 	const o = { file: d.file ? shownFile(path.resolve(d.file)) : null, line: d.line || 0, severity: d.severity, message: d.message };
 	if (d.hint) o.hint = d.hint;
@@ -138,14 +163,19 @@ class Workspace extends EventEmitter {
 	// opts: { dataDir, packs: [dir] (other packs, after ours), official (ours,
 	// guides/, first; default true), officialDir, simDir, artDir, navDir (the
 	// navigation grid, data/local/nav: walks are routed on it; default none),
-	// watch, lintDelay, log }
+	// navWorkers (route workers, navpool.js; default its own),
+	// crossingsFile (the hand-made paths; default data/local/crossings.json
+	// beside dataDir), viaGenerator (async ({ guide, keys }) -> generateLegs' result, used
+	// instead of the grid worker: tests), watch, lintDelay, log }
 	constructor(opts = {}) {
 		super();
 		const { dataDir = DATA, packs = [], official = true, officialDir = OFFICIAL_DIR, simDir = path.join(ROOT, 'data', 'sim'), artDir = null, navDir = null, watch = true, lintDelay = 600, log = () => {} } = opts;
+		this.viaGenerator = opts.viaGenerator || null;
 		this.dataDir = dataDir;
 		this.simDir = simDir;
 		this.artDir = artDir;
 		this.navDir = navDir ? path.resolve(navDir) : null;
+		this.navWorkers = opts.navWorkers || null;
 		this.nav = null;
 		this.aidsCache = null;
 		this.log = log;
@@ -164,6 +194,13 @@ class Workspace extends EventEmitter {
 		this.initial = new Map(); // abs -> the text when the planner started (null: no file then)
 		for (const p of this.packs) for (const rel of findGuideFiles(p.dir)) this.load(p, path.join(p.dir, rel), true);
 		this.reindex();
+		this.vias = new Map(); // abs -> { abs, file, pack, text, hash, doc, error }: each pack's via.json (text null: none)
+		for (const p of this.packs) this.loadVia(p, true);
+		this.handMadeSets = null;
+		this.crossingsFile = opts.crossingsFile || null;
+		this.viaWorker = null;
+		this.viaJobs = new Map(); // job id -> { resolve, reject }
+		this.viaSeq = 0;
 		this.compileCache = new Map(); // abs -> { hash, guide, diag, ast }
 		this.viewCache = new Map(); // abs -> { key, view }
 		this.timelines = new Map(); // key -> timeline (insertion order = age)
@@ -240,10 +277,16 @@ class Workspace extends EventEmitter {
 		return this.packs.find((p) => abs.startsWith(p.dir + path.sep)) || null;
 	}
 
-	// -> { hash, guide (null when the source has no guide id), diag, ast }, cached by text.
+	// -> { hash, guide (null when the source has no guide id), diag, ast, via
+	// (the via.json hash its goals' via/viaFrom are from) }, cached by text;
+	// the pack's arrow waypoints are attached again when via.json changed.
 	compiled(src) {
 		const hit = this.compileCache.get(src.abs);
-		if (hit && hit.hash === src.hash) return hit;
+		const via = this.viaOf(src.pack);
+		if (hit && hit.hash === src.hash) {
+			if (hit.via !== via.hash) this.attach(hit, via);
+			return hit;
+		}
 		const diag = new Diagnostics();
 		const ast = parseGuide(src.text, src.file, diag);
 		let guide = null;
@@ -251,9 +294,280 @@ class Workspace extends EventEmitter {
 			ast.source = path.relative(src.pack.dir, src.abs);
 			guide = resolveGuide(ast, this.data, diag, { pack: src.pack.id, author: src.pack.manifest.author });
 		}
-		const out = { hash: src.hash, guide, diag, ast };
+		const out = { hash: src.hash, guide, diag, ast, via: undefined };
+		this.attach(out, via);
 		this.compileCache.set(src.abs, out);
 		return out;
+	}
+
+	attach(compiled, via) {
+		if (compiled.guide) attachVia([compiled.guide], via.doc, this.data.mapFrames);
+		compiled.via = via.hash;
+	}
+
+	// --- arrow waypoints (via.json) ---
+
+	// Read a pack's via.json; `start` records it as the starting text.
+	loadVia(pack, start = false) {
+		const abs = path.join(pack.dir, VIA_FILE);
+		const rec = this.vias.get(abs) || { abs, file: shownFile(abs), pack, text: null, hash: null, doc: null, error: null };
+		let text = null;
+		try {
+			text = fs.readFileSync(abs, 'utf8');
+		} catch {
+			text = null;
+		}
+		this.setViaText(rec, text);
+		this.vias.set(abs, rec);
+		if (start) this.initial.set(abs, text);
+		return rec;
+	}
+
+	setViaText(rec, text) {
+		rec.text = text;
+		rec.hash = text === null ? null : sha1(text);
+		rec.doc = null;
+		rec.error = null;
+		if (text === null) return;
+		try {
+			const doc = JSON.parse(text);
+			rec.error = viaDocError(doc);
+			if (!rec.error) rec.doc = doc;
+		} catch (e) {
+			rec.error = `is not valid JSON (${e.message})`;
+		}
+	}
+
+	viaOf(pack) {
+		return this.vias.get(path.join(pack.dir, VIA_FILE)) || this.loadVia(pack);
+	}
+
+	// Write (text null: delete) a via.json; ours, so the watcher ignores it by hash.
+	writeVia(rec, text) {
+		if (text === null) fs.rmSync(rec.abs, { force: true });
+		else fs.writeFileSync(rec.abs, text);
+		this.setViaText(rec, text);
+	}
+
+	// The disk text wins over the cached one (an external change not yet seen).
+	syncVia(rec) {
+		let text = null;
+		try {
+			text = fs.readFileSync(rec.abs, 'utf8');
+		} catch {
+			text = null;
+		}
+		if (text === rec.text) return false;
+		const before = rec.doc;
+		this.setViaText(rec, text);
+		this.viaChanged(rec, before, true);
+		return true;
+	}
+
+	// 'changed' for a via.json: the guides whose entries differ.
+	viaChanged(rec, beforeDoc, external = false) {
+		const a = (beforeDoc && beforeDoc.guides) || {};
+		const b = (rec.doc && rec.doc.guides) || {};
+		const guides = [...new Set([...Object.keys(a), ...Object.keys(b)])].filter((id) => JSON.stringify(a[id] || null) !== JSON.stringify(b[id] || null) && this.byId.has(id));
+		this.markDirty(rec.pack);
+		this.emit('changed', { files: [rec.file], guides, external });
+		return guides;
+	}
+
+	// Why a leg is hand-made (spec "a hand-made path always wins"): a guide
+	// goto at either end or a crossing/chain of the hand-made paths
+	// (tools/lib/nav/via.js handMadeOf over loadHandMade: travel.json's
+	// recorded crossings and data/local/crossings.json, read once), or its
+	// via.json entry says `hand` -> { kind, id, name } | null.
+	handMade(leg, entry = null) {
+		const { loadHandMade, handMadeOf } = require('../lib/nav/via');
+		if (!this.handMadeSets) this.handMadeSets = loadHandMade({ dataDir: this.dataDir, ...(this.crossingsFile ? { crossingsFile: this.crossingsFile } : {}), frames: this.geo.era });
+		const hm = handMadeOf(leg, { geo: this.geo, sets: this.handMadeSets });
+		if (hm) return hm;
+		return entry && entry.hand ? { kind: 'crossings', id: null, name: null } : null;
+	}
+
+	// A map point as a GuideView shows it, with its world point.
+	pointView(map, x, y, f) {
+		const w = this.geo.toWorld(map, x, y, f === 'e' ? 'e' : 'l');
+		return { map, x, y, f: f === 'e' ? 'e' : 'l', c: w ? w.c : null, wx: w ? Math.round(w.wx * 10) / 10 : null, wy: w ? Math.round(w.wy * 10) / 10 : null };
+	}
+
+	// The legs of a compiled guide (legs.js) as GuideView goals carry them,
+	// by goal: { key, yards, from, via (null: no entry; [] checked, none
+	// needed; else points { map, x, y, f, r, label, inner, c, wx, wy }),
+	// manual, handMade (null | { kind: 'goto'|'chain'|'crossing', id, name }) }.
+	legViews(src, c) {
+		const out = new Map();
+		if (!c.guide) return out;
+		const via = this.viaOf(src.pack);
+		const entries = (via.doc && Object.hasOwn(via.doc.guides, src.id) && via.doc.guides[src.id]) || {};
+		for (const leg of guideLegs(c.guide, { frames: this.data.mapFrames })) {
+			const e = Object.hasOwn(entries, leg.key) ? entries[leg.key] : null;
+			out.set(c.guide.steps[leg.si].goals[leg.gi], {
+				key: leg.key,
+				yards: Math.round(leg.yards),
+				from: this.pointView(leg.from.map, leg.from.x, leg.from.y, leg.from.f),
+				via: e ? e.via.map(([map, x, y, f, r, label, inner]) => ({ ...this.pointView(map, x, y, f), r, label, inner: inner === 1 })) : null,
+				manual: !!(e && e.manual),
+				handMade: this.handMade(leg, e),
+			});
+		}
+		return out;
+	}
+
+	// The leg `key` of a guide, refused when the guide changed since `hash`.
+	legOf(id, hash, key) {
+		const src = this.source(id);
+		this.syncFromDisk(src);
+		if (hash !== src.hash) throw new PlannerError(`${src.file} changed since hash ${hash} (now ${src.hash}): reload the guide and edit again`, 'stale');
+		const c = this.compiled(src);
+		const leg = c.guide ? guideLegs(c.guide, { frames: this.data.mapFrames }).find((l) => l.key === key) : null;
+		if (!leg) throw new PlannerError(`${src.file} has no leg "${key}" (via_get lists its legs)`, 'bad_args');
+		return { src, c, leg };
+	}
+
+	// A via point given as { c, wx, wy } or { map, x, y } (the leg's frame), with
+	// r (yd, default 12), label, inner, as a via.json point: on the goal's map
+	// when it lies inside it, else on the smallest zone/city map holding it.
+	viaPoint(leg, p, i) {
+		const f = leg.to.f === 'e' ? 'e' : 'l';
+		let w;
+		if (p.c !== undefined && p.wx !== undefined && p.wy !== undefined) w = { c: p.c, wx: p.wx, wy: p.wy };
+		else if (p.map !== undefined && p.x !== undefined && p.y !== undefined) w = this.geo.toWorld(p.map, p.x, p.y, f);
+		if (!w) throw new PlannerError(`via[${i}]: give { c, wx, wy } or { map, x, y } on a map with a frame`, 'bad_args');
+		const goalFrame = this.geo.frame(leg.to.map, f);
+		if (!goalFrame || goalFrame.c !== w.c) throw new PlannerError(`via[${i}] is not on the leg's continent`, 'bad_args');
+		let map = leg.to.map;
+		let q = this.geo.toMap(map, w.c, w.wx, w.wy, f);
+		if (!(q && q.x >= 0 && q.x <= 100 && q.y >= 0 && q.y <= 100)) {
+			const z = this.geo.containing(w.c, w.wx, w.wy, f)[0];
+			if (!z) throw new PlannerError(`via[${i}]: no zone map holds ${w.c}:${Math.round(w.wx)},${Math.round(w.wy)}`, 'bad_args');
+			map = z.map;
+			q = z;
+		}
+		const r2 = (v) => Math.round(v * 100) / 100;
+		const r = p.r !== undefined ? p.r : 12;
+		if (!(r > 0)) throw new PlannerError(`via[${i}].r must be above 0`, 'bad_args');
+		const label = typeof p.label === 'string' && p.label.trim() ? p.label.trim() : null;
+		return [map, r2(q.x), r2(q.y), f, r2(r), label, p.inner ? 1 : 0];
+	}
+
+	// Write entries into a pack's via.json as one undoable edit: changes
+	// { [guide id]: { [leg key]: entry | null (dropped) } }. -> true when it changed.
+	writeViaEntries(pack, changes, label) {
+		const { formatVia } = require('../lib/nav/via');
+		const rec = this.viaOf(pack);
+		this.syncVia(rec);
+		if (rec.error) throw new PlannerError(`${rec.file} ${rec.error}: fix or remove it first`, 'conflict');
+		const doc = rec.doc ? JSON.parse(JSON.stringify(rec.doc)) : { schema: 1, source: 'planner', grid: null, guides: {} };
+		for (const [id, entries] of Object.entries(changes)) {
+			const g = doc.guides[id] || (doc.guides[id] = {});
+			for (const [key, entry] of Object.entries(entries)) {
+				if (entry === null) delete g[key];
+				else g[key] = entry;
+			}
+			if (!Object.keys(g).length) delete doc.guides[id];
+		}
+		const text = formatVia(doc);
+		if (text === rec.text) return false;
+		const before = rec.text;
+		const beforeDoc = rec.doc;
+		this.writeVia(rec, text);
+		this.undoStack.push({ abs: rec.abs, file: rec.file, before, after: text, label });
+		this.redoStack = [];
+		this.viaChanged(rec, beforeDoc);
+		return true;
+	}
+
+	// via_get: the guide's legs with their entries (GuideView goals[].leg, flat).
+	viaGet(id) {
+		const view = this.view(id);
+		const rec = this.viaOf(this.source(id).pack);
+		const legs = [];
+		for (const st of view.steps) for (const g of st.goals) if (g.leg) legs.push({ step: st.index, line: g.line, label: g.label, to: g.compiled && { map: g.compiled.map, x: g.compiled.x, y: g.compiled.y, f: g.compiled.f === 'e' ? 'e' : 'l' }, ...g.leg });
+		return { id, hash: view.hash, file: rec.file, exists: rec.text !== null, error: rec.error, legs };
+	}
+
+	// via_set: one leg's points, marked manual. Refused on a hand-made leg.
+	setVia({ id, hash, key, via, label = null }) {
+		const { src, leg } = this.legOf(id, hash, key);
+		const doc = this.viaOf(src.pack).doc;
+		const hm = this.handMade(leg, doc && doc.guides[id] && Object.hasOwn(doc.guides[id], key) ? doc.guides[id][key] : null);
+		if (hm) throw new PlannerError(`leg ${key} follows a hand-made path (${hm.kind}${hm.name ? ` ${hm.name}` : ''}): the arrow takes it, no waypoints there`, 'hand_made');
+		const pts = via.map((p, i) => this.viaPoint(leg, p, i));
+		this.writeViaEntries(src.pack, { [id]: { [key]: { via: pts, manual: true } } }, label || 'Edit arrow waypoints');
+		return { guide: this.view(id), select: null };
+	}
+
+	// via_generate: route the guide's legs (or `keys`) on the grid in a worker
+	// (tools/lib/nav/via.js generateLegs) and write what it finds as one
+	// undoable edit; manual entries are kept unless `force`, hand-made legs
+	// get none. Answers at once { job, legs }; 'via' { job, id, ok, error,
+	// written, kept, skipped } when done.
+	viaGenerate({ id, keys = null, force = false }) {
+		const src = this.source(id);
+		if (!this.viaGenerator && !this.navInfo().available) throw new PlannerError('no navigation grid: run node tools/polestar.js nav build', 'not_found');
+		const c = this.compiled(src);
+		if (!c.guide) throw new PlannerError(`${src.file} does not compile to a guide`, 'bad_args');
+		const all = guideLegs(c.guide, { frames: this.data.mapFrames });
+		if (keys) for (const k of keys) if (!all.some((l) => l.key === k)) throw new PlannerError(`${src.file} has no leg "${k}" (via_get lists its legs)`, 'bad_args');
+		const wanted = all.filter((l) => !keys || keys.includes(l.key));
+		const job = ++this.viaSeq;
+		const { _ast, ...slim } = c.guide;
+		const guide = { ...slim, steps: c.guide.steps.map((s) => ({ ...s, goals: s.goals.map((g) => ({ ...g })) })) };
+		const hash = src.hash;
+		const run = this.viaGenerator
+			? Promise.resolve().then(() => this.viaGenerator({ guide, keys: wanted.map((l) => l.key) }))
+			: new Promise((resolve, reject) => {
+				this.viaJobs.set(job, { resolve, reject });
+				this.viaGenWorker().postMessage({ job, guide, keys: wanted.map((l) => l.key) });
+			});
+		run.then((r) => {
+			if (this.closed) return;
+			if (src.hash !== hash) throw new Error(`${src.file} changed while its waypoints were generated: regenerate`);
+			const rec = this.viaOf(src.pack);
+			this.syncVia(rec);
+			const old = (rec.doc && rec.doc.guides[id]) || {};
+			const entries = {};
+			const kept = [];
+			for (const leg of wanted) {
+				if (old[leg.key] && old[leg.key].manual && !force) kept.push(leg.key);
+				else if (r.entries[leg.key]) {
+					const { manual, ...entry } = r.entries[leg.key];
+					entries[leg.key] = entry;
+				} else if (old[leg.key]) entries[leg.key] = null; // hand-made or unroutable now: no entry
+			}
+			const written = Object.keys(entries).filter((k) => JSON.stringify(old[k] || null) !== JSON.stringify(entries[k])).length;
+			if (written) this.writeViaEntries(src.pack, { [id]: entries }, wanted.length === 1 ? 'Regenerate waypoints' : `Regenerate waypoints (${wanted.length} legs)`);
+			this.emit('via', { job, id, ok: true, error: null, written, kept, skipped: r.skipped || {} });
+		}).catch((err) => {
+			if (!this.closed) this.emit('via', { job, id, ok: false, error: String((err && err.message) || err), written: 0, kept: [], skipped: {} });
+		});
+		return { job, legs: wanted.length };
+	}
+
+	// The generator's worker: one Nav (pool-less routes) and the hand-made sets.
+	viaGenWorker() {
+		if (this.viaWorker) return this.viaWorker;
+		const w = new Worker(VIA_WORKER, { eval: true, workerData: { via: require.resolve('../lib/nav/via'), nav: require.resolve('../lib/nav/path'), geo: require.resolve('../lib/planner/geo'), dir: this.navDir, dataDir: this.dataDir, crossingsFile: this.crossingsFile, frames: this.data.mapFrames, zones: this.data.zones } });
+		w.unref();
+		w.on('message', (m) => {
+			const p = this.viaJobs.get(m.job);
+			if (!p) return;
+			this.viaJobs.delete(m.job);
+			if (m.error) p.reject(new Error(m.error));
+			else p.resolve(m.result);
+		});
+		const fail = (err) => {
+			if (this.viaWorker === w) this.viaWorker = null;
+			for (const p of this.viaJobs.values()) p.reject(err);
+			this.viaJobs.clear();
+		};
+		w.on('error', fail);
+		w.on('exit', (code) => fail(new Error(`the waypoint worker stopped (exit ${code})`)));
+		this.viaWorker = w;
+		return w;
 	}
 
 	// The guides' headers for guides_list.
@@ -304,7 +618,7 @@ class Workspace extends EventEmitter {
 	// point and label, and the file's diagnostics.
 	view(id) {
 		const src = this.source(id);
-		const key = `${src.hash}|${this.lintVersion}`;
+		const key = `${src.hash}|${this.lintVersion}|${this.viaOf(src.pack).hash}`;
 		const hit = this.viewCache.get(src.abs);
 		if (hit && hit.key === key) return hit.view;
 		const { model } = require('../lib/planner/source');
@@ -313,6 +627,7 @@ class Workspace extends EventEmitter {
 		const m = model(src.text, src.file);
 		const byLine = new Map();
 		if (c.guide) for (const st of c.guide.steps) for (const g of st.goals) byLine.set(g._line, g);
+		const legs = this.legViews(src, c);
 		const header = {};
 		for (const [k, v] of Object.entries(m.header || {})) header[k] = v;
 		const view = {
@@ -352,6 +667,7 @@ class Workspace extends EventEmitter {
 						explicit: !!(g.fields && g.fields.explicitCoords),
 						compiled,
 						world,
+						leg: (cg && legs.get(cg)) || null,
 					};
 				}),
 			})),
@@ -411,7 +727,7 @@ class Workspace extends EventEmitter {
 		if (!this.navDir || this.closed) return null;
 		if (!this.nav) {
 			const { NavRoutes } = require('./navpool');
-			this.nav = new NavRoutes({ dir: this.navDir, log: this.log });
+			this.nav = new NavRoutes({ dir: this.navDir, workers: this.navWorkers, log: this.log });
 		}
 		return this.nav;
 	}
@@ -478,7 +794,7 @@ class Workspace extends EventEmitter {
 		const nav = this.navRoutes();
 		const info = nav ? nav.info() : null;
 		const build = info && info.available ? info.build : null;
-		const key = JSON.stringify([ids.map((id) => (this.byId.get(id) || {}).hash || null), character, choices || {}, startLevel, !!optional, build]);
+		const key = JSON.stringify([ids.map((id) => (this.byId.get(id) || {}).hash || null), [...this.vias.values()].map((v) => v.hash), character, choices || {}, startLevel, !!optional, build]);
 		if (this.timelines.has(key)) {
 			const t = this.timelines.get(key);
 			this.timelines.delete(key);
@@ -619,6 +935,15 @@ class Workspace extends EventEmitter {
 			from.pop();
 			return { file: e.file, label: e.label, dropped: true, guide: null };
 		}
+		const via = this.vias.get(e.abs);
+		if (via) {
+			const beforeDoc = via.doc;
+			this.writeVia(via, e[want]);
+			from.pop();
+			to.push(e);
+			const guides = this.viaChanged(via, beforeDoc);
+			return { file: e.file, label: e.label, dropped: false, guide: guides.length === 1 ? this.view(guides[0]) : null };
+		}
 		if (e[want] === null) {
 			fs.rmSync(e.abs);
 			from.pop();
@@ -644,11 +969,12 @@ class Workspace extends EventEmitter {
 	changes() {
 		const out = [];
 		for (const [abs, start] of this.initial) {
-			const src = this.sources.get(abs);
-			const now = src ? src.text : null;
+			const via = this.vias.get(abs);
+			const src = via ? null : this.sources.get(abs);
+			const now = via ? via.text : src ? src.text : null;
 			if (now === start) continue;
 			const d = lineDiff(start === null ? '' : start, now === null ? '' : now);
-			out.push({ file: src ? src.file : shownFile(abs), guide: src ? src.id : null, added: d.added, removed: d.removed });
+			out.push({ file: via ? via.file : src ? src.file : shownFile(abs), guide: src ? src.id : null, added: d.added, removed: d.removed });
 		}
 		return out.sort((a, b) => (a.file < b.file ? -1 : a.file > b.file ? 1 : 0));
 	}
@@ -656,6 +982,8 @@ class Workspace extends EventEmitter {
 	// Put a file back to its starting text (an undoable edit); a guide deleted
 	// since is written back (undo deletes it again).
 	revert(file) {
+		const via = [...this.vias.values()].find((v) => v.file === file || samePath(v.abs, path.resolve(ROOT, file)));
+		if (via) return this.revertVia(via);
 		const found = this.sourceByFile(file);
 		const start = this.initial.get(found.abs);
 		if (start === undefined) throw new PlannerError(`no guide file "${file}"`, 'not_found');
@@ -680,6 +1008,21 @@ class Workspace extends EventEmitter {
 		this.redoStack = [];
 		this.changed([src]);
 		return { file: src.file, guide: src.id ? this.view(src.id) : null };
+	}
+
+	revertVia(rec) {
+		const start = this.initial.get(rec.abs);
+		if (start === null) throw new PlannerError(`${rec.file} did not exist when the planner started; delete it yourself`, 'conflict');
+		this.syncVia(rec);
+		if (rec.text !== start) {
+			const before = rec.text;
+			const beforeDoc = rec.doc;
+			this.writeVia(rec, start);
+			this.undoStack.push({ abs: rec.abs, file: rec.file, before, after: start, label: `Revert ${rec.file}` });
+			this.redoStack = [];
+			this.viaChanged(rec, beforeDoc);
+		}
+		return { file: rec.file, guide: null };
 	}
 
 	// buildPack's pack: another pack reads ours as context.
@@ -790,6 +1133,12 @@ class Workspace extends EventEmitter {
 				const w = fs.watch(p.dir, { recursive: true }, (type, name) => {
 					if (!name) return;
 					const rel = toPosix(String(name));
+					if (rel === VIA_FILE) {
+						this.watchPending.add(path.join(p.dir, rel));
+						clearTimeout(this.watchTimer);
+						this.watchTimer = setTimeout(() => this.flushWatch(), 120);
+						return;
+					}
 					if (!rel.endsWith('.guide') || rel.startsWith('dist/') || rel.startsWith('drafts/') || rel.split('/').some((part) => part.startsWith('.'))) return;
 					this.watchPending.add(path.join(p.dir, rel));
 					clearTimeout(this.watchTimer);
@@ -808,6 +1157,11 @@ class Workspace extends EventEmitter {
 		this.watchTimer = null;
 		const touched = [];
 		for (const abs of this.watchPending) {
+			const via = this.vias.get(abs);
+			if (via) {
+				this.syncVia(via);
+				continue;
+			}
 			const pack = this.packOf(abs);
 			if (!pack) continue;
 			const src = this.sources.get(abs);
@@ -849,6 +1203,8 @@ class Workspace extends EventEmitter {
 		this.worker = null;
 		if (this.nav) this.nav.close();
 		this.nav = null;
+		if (this.viaWorker) this.viaWorker.terminate();
+		this.viaWorker = null;
 		clearTimeout(this.lintTimer);
 		clearTimeout(this.watchTimer);
 		for (const w of this.watchers) w.close();

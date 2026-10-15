@@ -13,7 +13,7 @@ const STEP_KEYS = ['title', 'note', 'only', 'goals'];
 const GOAL_KEYS = [
 	't', 'class', 'spell', 'spellName', 'faction', 'factionName', 'standing', 'achievement', 'achievementName', 'criteria',
 	'quest', 'title', 'target', 'npc', 'npcName', 'object', 'objName', 'item', 'itemName', 'count', 'oi', 'skill', 'skillLine', 'rank', 'rankMax', 'level', 'untilSkill',
-	'reagents', 'location', 'minLevel', 'qlvl', 'pre', 'preAll', 'closedBy', 'preTitles', 'text', 'map', 'x', 'y', 'f', 'r', 'spots', 'spread', 'optional', 'only', 'note',
+	'reagents', 'location', 'minLevel', 'qlvl', 'pre', 'preAll', 'closedBy', 'preTitles', 'text', 'map', 'x', 'y', 'f', 'r', 'spots', 'spread', 'via', 'viaFrom', 'optional', 'only', 'note',
 	'from', 'fromKind', 'fromRank', 'fromFaction', 'candidates', 'rewards', 'group',
 ];
 const REAGENT_KEYS = ['item', 'itemName', 'count'];
@@ -21,12 +21,18 @@ const CANDIDATE_KEYS = ['npc', 'npcName', 'map', 'x', 'y', 'f', 'faction', 'race
 // Spawn areas: map-percent centre in the goal's map and frame, radius in yards,
 // spawn count, and `alt` for a place the arrow reaches only when moved on to it.
 const SPOT_KEYS = ['x', 'y', 'r', 'n', 'alt'];
+// Arrow waypoints from the navigation grid (via.json, tools/lib/dsl/via.js)
+// and the start of the leg they serve.
+const VIA_KEYS = ['map', 'x', 'y', 'f', 'r', 'label', 'inner'];
+const VIA_FROM_KEYS = ['map', 'x', 'y', 'f'];
 // A turn-in's `rewards = { choices, items, money, xp }`: item lists in this order.
 const REWARD_KEYS = ['item', 'itemName', 'quality'];
 // Farm-spot rates (items per kill) need three decimals; coordinates are already rounded to two.
 const LIST_DECIMALS = { candidates: 3 };
-const LIST_KEYS = { reagents: REAGENT_KEYS, candidates: CANDIDATE_KEYS, spots: SPOT_KEYS, items: REWARD_KEYS, choices: REWARD_KEYS };
+const LIST_KEYS = { reagents: REAGENT_KEYS, candidates: CANDIDATE_KEYS, spots: SPOT_KEYS, via: VIA_KEYS, items: REWARD_KEYS, choices: REWARD_KEYS };
 const ONLY_KEYS = ['classes', 'races', 'factions'];
+// Object values with a fixed key order (others sort their keys).
+const OBJECT_KEYS = { only: ONLY_KEYS, lvl: ['min', 'max'], viaFrom: VIA_FROM_KEYS };
 // RegisterPack's keys in order (`addon` and `format` are written by the compiler).
 const PACK_KEYS = ['id', 'title', 'author', 'version', 'license', 'website', 'source', 'notes'];
 const FRAME_KEYS = ['c', 'left', 'right', 'top', 'bottom'];
@@ -92,7 +98,7 @@ function inline(obj, keys, decimals) {
 		if (v === undefined || v === null) continue;
 		if (Array.isArray(v)) parts.push(`${k} = ${list(v, LIST_KEYS[k] || null, LIST_DECIMALS[k])}`);
 		else if (k === 'preTitles') parts.push(`${k} = ${idMap(v)}`);
-		else if (typeof v === 'object') parts.push(`${k} = ${inline(v, k === 'only' ? ONLY_KEYS : k === 'lvl' ? ['min', 'max'] : Object.keys(v).sort(), decimals)}`);
+		else if (typeof v === 'object') parts.push(`${k} = ${inline(v, OBJECT_KEYS[k] || Object.keys(v).sort(), decimals)}`);
 		else parts.push(`${k} = ${scalar(v, decimals)}`);
 	}
 	return parts.length ? `{ ${parts.join(', ')} }` : '{}';

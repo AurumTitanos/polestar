@@ -413,6 +413,24 @@ places follow with `alt = true`; a hand-placed point is the first spot, the
 data's places its alternatives (GUIDE_FORMAT, "Spawn areas"). `x`/`y` stay the
 default point.
 
+Arrow waypoints (format 2; PACK_FORMAT, "via.json"): `via = { { map, x, y,
+f, r, label, inner }, ... }` and `viaFrom = { map, x, y, f }` (after `spread`;
+`f = "e"` only for Era, `label` and `inner = true` only when set). The
+compiler (`tools/lib/dsl/via.js` `attachVia`, also called by the planner)
+copies them from the pack's `via.json`, keyed per guide leg
+(`tools/lib/dsl/legs.js`, shared with `nav via` and the planner: the walk
+into a located goal, one with `map`/`x`/`y` and no `candidates`, from the
+last located goal before it in the guide whose effective `only`, step and
+goal, is none or the same; both ends on one continent, at least
+`LEG_MIN_YARDS` = 40 yd apart; key `1426e:22.6,71.43>1426e:23.5,52.1`).
+`viaFrom` is that leg's start: the arrow follows the points only on the walk
+they were made for (Travel, "Travel planner and zone crossings"). An entry
+with `via: []` (checked, or `hand`: a crossings chain serves the leg) adds
+nothing. Legs into or out of a `goto` are hand-placed arrow fixes and get no
+entry. With a `via.json`, compile and lint warn once per guide about legs
+without an entry (goto legs never count); a malformed file is one error
+naming it; without one, the output is what it was before.
+
 Group content (format 2; GUIDE_FORMAT, "Group content"): `group = { kind =
 "elite", rank = 1|2|3 }`, `{ kind = "dungeon"|"raid", name = "Dire Maul" }` or
 `{ kind = "group", size = 3 }` (`size` optional), derived by
@@ -1059,7 +1077,8 @@ Polestar.Nav.RegisterTravelData(d, replace)        -- TravelData.lua: flight mas
 Polestar.Nav.AddTravelPaths(chunk)                 -- learned walking paths (nodes: c, wx, wy, gateway, uiMap)
 Polestar.Nav.RegisterCrossings(d)                  -- zone crossings (merges; ids seen before are skipped)
 -- leg = { kind = "walk"|"fly"|"boat"|"zeppelin"|"tram"|"hearth", from, to, label, seconds, rest,
---         radius (arrival yards at `to`), waypoint (true: `to` is a crossing or chain node) }
+--         radius (arrival yards at `to`), waypoint (true: `to` is a crossing, chain or via node),
+--         via (k: `to` is the target's via point k) }
 ```
 
 The planner is Dijkstra over the player, the target, known flight masters,
@@ -1094,13 +1113,35 @@ or chain waypoint and carry its caption and radius; the arrow shows the
 current leg's caption and points at its waypoint ("Enter Orgrimmar" at the
 gate, then the target's own label).
 
+**Via points (arrow waypoints from the navigation grid).** A located goal's
+compiled `via` and `viaFrom` (see "Guide data") travel on the Engine's
+waypoint when it is the goal's own point or a spawn spot within 60 yd of it;
+Nav's target keeps them, and a target picked with `Nav.SetTarget` has none.
+Travel.Replan converts them to world yards once per list (Era frame
+honoured) and hands PlanRoute `target.via` (points with `r`, `label`,
+`inner`), `target.viaFrom` and `viaDone`. Every walk that ends at the
+target, from any vertex X (the player, a landing flight master, a dock, the
+inn, a crossing end), goes X -> V_e -> ... -> V_n -> target. The entry e:
+when X is within 200 yd of the chain viaFrom, V_1 .. V_n, target, the far
+end of its nearest segment; else the nearest via point that is not `inner`
+(past a cave mouth, up a climb or lift, inside a building), or straight to
+the target when it is nearer; never a point the live route has already
+reached (`viaDone`, kept across re-plans until the target's via list
+changes). X -> V_e is priced as a straight walk (x1.25), the chain at its
+own length. Walk legs end at each via point (`waypoint`, radius `r`,
+caption `label` or the target's label), so the map's route stops and the
+trail draw them. A hand-made path wins: a walk into the target from a
+crossings-file chain node, or to a target inside a chain, never uses via
+points. Without `via` nothing changes.
+
 **Re-planning.** On target, zone and subzone changes, landing, the
 Hearthstone coming off cooldown, binding, the flight map opening, a flight
 path learned (`UI_INFO_MESSAGE` `ERR_NEWTAXIPATH`: the flight master within
-60 yd is marked known), and, with crossing data, on arriving at a crossing or
-chain waypoint and on moving more than 50 yd from where a plan at least 30 s
-old was made (checked at most once a second). `ROUTE_CHANGED` (legs) fires on
-every plan, `ROUTE_ADVANCED` (legs, ci) when the current leg moves on.
+60 yd is marked known), on arriving at a via point, and, with crossing data,
+on arriving at a crossing or chain waypoint and on moving more than 50 yd
+from where a plan at least 30 s old was made (checked at most once a
+second). `ROUTE_CHANGED` (legs) fires on every plan, `ROUTE_ADVANCED` (legs,
+ci) when the current leg moves on.
 
 **Data.** `node tools/polestar.js travel build` writes TravelData.lua
 (committed: flight masters and flight times, boats, zeppelins, the tram and
@@ -2679,7 +2720,7 @@ the planner and the navigation grid both come from.
   points the flight takes. The workspace builds a
   timeline with the cache as provider; the legs it misses (ends quantised to
   1 yd, plus the profile's speeds) are computed in a `worker_threads` pool
-  (one Nav per worker; CPUs - 1, at most one per 4 GiB) while `timeline_get`
+  (one Nav per worker; `planner --workers <n>`, else CPUs - 1, at most 2) while `timeline_get`
   answers at once with the straight legs and `routing { pending, done }`
   (SSE `routing` each second); when they are all in, the cached timeline is
   dropped and SSE `changed { timeline: true }` makes a page whose timeline is
@@ -2695,6 +2736,33 @@ the planner and the navigation grid both come from.
   Walkable layer (per column: nothing walkable, steep, climb, swim only,
   indoor only; plain ground clear), and `GET /nav/aids.json` serves the
   arrow aids (`nav aids`, crossings schema) as world points.
+- **Arrow waypoints** (`via.json`, docs/PACK_FORMAT.md; spec
+  `docs/superpowers/specs/2026-10-15-arrow-waypoints-design.md`): the
+  workspace reads each pack's `via.json` at start, attaches it to the
+  compiled guides (`tools/lib/dsl/via.js` `attachVia`, again whenever the
+  file changes), and the timeline walks a goal with `via` through its
+  points as the arrow joins them (`walkVia`: the end of the chain stretch
+  nearest the walker within 200 yd, else the nearest point that is not
+  inner; each stretch routed on its own). A GuideView goal that ends a leg
+  (`tools/lib/dsl/legs.js`) carries `leg { key, yards, from, via, manual,
+  handMade }`; `handMade` (`tools/lib/nav/via.js` `handMadeOf`: a guide
+  goto at either end, a chain or crossing of travel.json's recorded
+  crossings or `data/local/crossings.json`, or an entry marked `hand`) shows
+  the leg as Hand-made and refuses edits and regenerates. `via_get` lists a
+  guide's legs; `via_set` writes one leg's points (marked `manual`, written
+  with `formatVia`) and `via_generate` runs `generateLegs` for the guide or
+  some legs in a worker of its own (one Nav, routes in that thread), keeps
+  manual entries unless `force`, and writes the result when done (SSE
+  `via`). Both are entries of the edit history, so `edit_undo`/`edit_redo`,
+  `changes_list` and `changes_revert` treat `via.json` like a guide file,
+  and the file watch reads an outside change back. The page's Arrow
+  waypoints layer (on by default) draws the step's legs: a dotted line from
+  the leg's start through its points, a diamond per point (hollow when
+  inner) with its caption, a hand-made leg as a long dash with a Hand-made
+  pill; in Edit mode the points are handles (drag to move, the ring for the
+  radius, click to caption, mark inner or delete), dragging a leg with
+  points adds one in its nearest stretch (Shift: a goto, as before), and
+  the step editor lists the legs with Regenerate per leg, step and guide.
 
 ### Navigation grid (`nav build`)
 
@@ -2711,14 +2779,21 @@ fileDataID from wago.tools into `data/sources/casc` (local, never shipped):
   2.0833 yd columns (256 per tile), walkable surfaces with 1.6 yd clearance,
   walls (model faces of 80° and steeper) stored per column side; links for
   steps, slopes (terrain to 35° plain, 35-50° and 50-60° slow, 60-80° climbed
-  upward only; models to 50°), jumps to 1.6 yd, falls (free under 14.57 yd,
+  upward only; models to 50°), WMO staircases (treads under the upper
+  column's top rising at most 1 yd walk as a slope to 45°; steps whose top
+  rise is up to 1.6 yd over treads rising at most 1 yd, 2.6 yd in all, are
+  a jump: the Ruins of Lordaeron's throne room into the Undercity's lift
+  halls), jumps to 1.6 yd, falls (free under 14.57 yd,
   then the servers' damage share `0.018 h - 0.2426`; at most 30 yd onto
   ground and 60 yd into water; landing only on stable ground), swims and
   lifts (elevator objects of `data/forever` at their car's travel from the
   client's TransportAnimation); regions; a per-tile graph per movement class.
 - **Routes** (`tools/lib/nav/path.js`, API in its header; `move.js` the
-  profiles): `snap` picks the surface for a map point (indoor floors before
-  terrain, never a ledge one only falls onto), `route` minimises time for a
+  profiles): `snap` picks the surface for a map point (without a height, a
+  point over an indoor floor takes that floor or one level with it beside
+  it: an innkeeper behind a counter gets the inn's floor, not its roof or
+  the terrain under the city, never the storey below; then indoor floors
+  before terrain, never a ledge one only falls onto), `route` minimises time for a
   character (run, swim, mounts, Travel Form, Ghost Wolf, Cheetah, indoor
   rules, slope, fall and lift costs) with a direct search for near ends and
   the per-tile graph otherwise, then smooths the path; `los` tests a

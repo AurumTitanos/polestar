@@ -69,6 +69,22 @@ export function insertWorld(id, { step, index, title, verb = 'goto', text, c, wx
 	});
 }
 
+// Sets the arrow waypoints of leg `key` of guide `id` (marked manual), one
+// edit: via [{ c, wx, wy, r, label, inner }].
+export function setVia(id, key, via, label) {
+	return serial(async () => {
+		const r = await withHash(id, (hash) => cmd('via_set', { id, hash, key, via, ...(label ? { label } : {}) }));
+		landed(r.guide, null);
+		return r;
+	});
+}
+
+// Regenerates the waypoints of guide `id` (legs `keys`, or all) in the
+// background -> { job, legs }; SSE 'via' tells when it is written.
+export function generateVia(id, keys, force = false) {
+	return cmd('via_generate', { id, ...(keys ? { keys } : {}), ...(force ? { force: true } : {}) });
+}
+
 // drop: remove a conflicting top entry instead of applying it.
 export function undo(drop = false) {
 	return serial(async () => {

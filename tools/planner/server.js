@@ -122,7 +122,7 @@ async function startServer(opts = {}) {
 		const chunk = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
 		for (const res of clients) res.write(chunk);
 	}
-	const forward = ['changed', 'diagnostics', 'routing', 'focus', 'seek', 'play'].map((event) => {
+	const forward = ['changed', 'diagnostics', 'routing', 'via', 'focus', 'seek', 'play'].map((event) => {
 		const fn = (data) => broadcast(event, data);
 		ws.on(event, fn);
 		return [event, fn];

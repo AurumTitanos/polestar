@@ -1,11 +1,13 @@
 // The right panel in edit mode: the selected step's title, tip, only and
-// zone, its diagnostics, and one card per goal built from verbs_schema.
+// zone, its diagnostics, one card per goal built from verbs_schema, and the
+// arrow waypoints of its legs (via.json) with their Regenerate buttons.
 // Every change is one source edit (setStep / setGoal / insertGoal / ...);
 // the server's refusal shows inline on the card.
 import { h, clear, glyph, dropdown, verbMeta, goalIconEl, pretty, popover, closePopover } from './dom.js';
 import { S } from './state.js';
 import { findPopover } from './find.js';
 import { toast } from './toasts.js';
+import { handLabel } from './mapctl.js';
 
 const LOCATED_VERBS = new Set(['goto', 'explore']);
 
@@ -202,6 +204,7 @@ export function stepEditor(root, ctx) {
 	let opened = false;       // a new step: the next render starts at the top
 	let stepNum = null;       // the header's step number, null while no step is drawn
 	let diagBox = null;       // the diagnostics block
+	let viaBox = null;        // the arrow waypoints block
 	const extras = new Map(); // goal line -> Set of modifier keys opened with "+"
 	const errors = new Map(); // goal line -> message
 
@@ -281,6 +284,7 @@ export function stepEditor(root, ctx) {
 		rebuilding = false;
 		stepNum = null;
 		diagBox = null;
+		viaBox = null;
 		if (!shown || !shown.vstep) {
 			body.append(h('div.empty', { style: { padding: '16px 0' } }, shown && shown.view ? 'This step is not in the guide source any more.' : 'Select a step in the list to edit it.'));
 			return;
@@ -342,6 +346,9 @@ export function stepEditor(root, ctx) {
 		body.append(h('div.ed-sec', 'Goals', h('span.count', String(vstep.goals.length)), h('span.spacer'), addBtn));
 		vstep.goals.forEach((g, gi) => body.append(goalCard(g, gi, vstep)));
 		if (!vstep.goals.length) body.append(h('div.empty', 'No goals yet.'));
+		viaBox = h('div');
+		body.append(viaBox);
+		renderVia();
 
 		if (opened) {
 			// A new step opens at the top (Title in view), unless that would
@@ -352,6 +359,42 @@ export function stepEditor(root, ctx) {
 			if (c && c.getBoundingClientRect().bottom > body.getBoundingClientRect().bottom) c.scrollIntoView({ block: 'nearest' });
 		} else body.scrollTop = scroll;
 		restoreInputs(kept);
+	}
+
+	// The arrow waypoints of the step's legs: what each leg has, and
+	// Regenerate per leg, for the step and for the whole guide (not on
+	// hand-made legs; a leg edited by hand keeps its points unless its own
+	// Regenerate replaces them). Redrawn on every view (via.json changes
+	// leave the guide's text, so the inputs, as they are).
+	function renderVia() {
+		if (!viaBox) return;
+		clear(viaBox);
+		const { vstep } = shown;
+		const legs = vstep.goals.filter((g) => g.leg);
+		if (!legs.length) return;
+		const grid = !!(S.info && S.info.nav && S.info.nav.available);
+		const auto = legs.filter((g) => !g.leg.handMade).map((g) => g.leg.key);
+		const why = grid ? '' : ' (needs the navigation grid: node tools/polestar.js nav build)';
+		viaBox.append(h('div.ed-sec', 'Arrow waypoints', h('span.count', String(legs.length)), h('span.spacer'),
+			h('button.btn.small', { title: `Regenerate the waypoints of this step's legs (edited ones are kept)${why}`, disabled: !grid || !auto.length, onclick: () => ctx.regenerateVia(auto, false) }, glyph('regenerate'), 'Step'),
+			h('button.btn.small', { title: `Regenerate the waypoints of every leg of the guide (edited ones are kept)${why}`, disabled: !grid, onclick: () => ctx.regenerateVia(null, false) }, glyph('regenerate'), 'Guide')));
+		viaBox.append(h('div.via-legs', legs.map((g) => {
+			const leg = g.leg;
+			let state;
+			let cls = '';
+			if (leg.handMade) {
+				state = handLabel(leg.handMade);
+				cls = 'hand';
+			} else if (!leg.via) state = 'Not generated';
+			else if (!leg.via.length) state = leg.manual ? 'Straight walk (edited)' : 'Straight walk';
+			else state = `${leg.via.length} ${leg.via.length === 1 ? 'waypoint' : 'waypoints'}${leg.manual ? ' (edited)' : ''}`;
+			const regen = leg.handMade ? null : h('button.btn.small.icon', {
+				title: leg.manual ? `Regenerate this leg: replaces your edited waypoints${why}` : `Regenerate this leg${why}`,
+				'aria-label': 'Regenerate this leg', disabled: !grid, onclick: () => ctx.regenerateVia([leg.key], !!leg.manual),
+			}, glyph('regenerate'));
+			return h('div', { class: `via-leg ${cls}`, title: `${leg.key} (${leg.yards} yd)`, onclick: (e) => !e.target.closest('button') && ctx.showVia(g) },
+				glyph('via'), h('span.name', pretty(g.label)), h('span.state', state), regen);
+		})));
 	}
 
 	function goalCard(goal, gi, vstep) {
@@ -528,6 +571,7 @@ export function stepEditor(root, ctx) {
 			// The same source (a diagnostics or timeline update): the inputs stay.
 			stepNum.textContent = stepLabel();
 			renderDiags();
+			renderVia();
 		},
 		selectGoal,
 	};

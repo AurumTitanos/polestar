@@ -12,6 +12,7 @@ const { validateGuides, validatePackFrames, forEachGoalMap } = require('./valida
 const { loadData } = require('./data');
 const { emitGuides, emitPack, emitToc, emitMapFrames, emitLicense } = require('./emit');
 const { ownsGuideId, GENERATED_MARKER } = require('../pack/format');
+const { VIA_FILE, readViaFile, viaDocError, attachVia, viaMissingMessage } = require('./via');
 
 const { ROOT, DATA } = require('../paths');
 // Our own pack: guides/pack.json and the guides beside it.
@@ -95,7 +96,13 @@ function compileProject({ packDir, manifest, dataDir, includeDrafts = false, dat
 		if (!contextData) contextData = contextDataDir && path.resolve(contextDataDir) !== path.resolve(dataDir || '') ? loadProjectData(contextDataDir, diag) : data;
 		context = { sources: readSources(contextDir, findGuideFiles(contextDir)), data: contextData };
 	}
-	return { ...compileSources(readSources(packDir, sources), data, diag, { pack: manifest && manifest.id, author: manifest && manifest.author, context }), data, sources };
+	// The pack's arrow waypoints (via.json): attached by compileSources; a file
+	// that cannot be used is one error naming it.
+	const viaFile = readViaFile(packDir);
+	let via = null;
+	if (viaFile && viaFile.error) diag.error(toPosix(path.relative(process.cwd(), viaFile.file) || viaFile.file), 0, `${VIA_FILE} ${viaFile.error}`, 'regenerate it with `node tools/polestar.js nav via`');
+	else if (viaFile) via = { doc: viaFile.doc, file: toPosix(path.relative(process.cwd(), viaFile.file) || viaFile.file) };
+	return { ...compileSources(readSources(packDir, sources), data, diag, { pack: manifest && manifest.id, author: manifest && manifest.author, context, via: via && via.doc, viaFile: via && via.file }), data, sources };
 }
 
 // Parse and resolve sources into guides of `pack` (ours when absent); a
@@ -116,7 +123,10 @@ function resolveSources(sources, data, diag, pack, author) {
 // guides belong to pack `opts.pack` (ours when absent), by `opts.author`
 // (the pack's author) unless they name their own; when `opts.pack` is given,
 // each guide id must be one the pack owns. `opts.context` ({ sources, data }):
-// our guides, read as context (see compileProject).
+// our guides, read as context (see compileProject). `opts.via`: a via.json
+// document (`opts.viaFile` names it in diagnostics) whose arrow waypoints the
+// guides get (tools/lib/dsl/via.js); with it, a guide with legs it has no
+// entry for is warned about once.
 function compileSources(sources, data, diag = new Diagnostics(), opts = {}) {
 	const guides = resolveSources(sources, data, diag, opts.pack, opts.author);
 	if (opts.pack !== undefined) {
@@ -126,18 +136,29 @@ function compileSources(sources, data, diag = new Diagnostics(), opts = {}) {
 			diag.error(g._ast.file, g._ast.lines.guide || g._ast.line, `guide id "${g.id}" is outside pack "${g.pack}": its guide ids start with ${prefix}`, `start the id with \`${g.pack === 'guides' ? 'forever' : g.pack}/\``);
 		}
 	}
-	if (!opts.context) {
-		validateGuides(guides, data, diag);
-		return { guides, diag };
+	if (!opts.context) validateGuides(guides, data, diag);
+	else {
+		const ours = resolveSources(opts.context.sources, opts.context.data, new Diagnostics(), 'guides');
+		const ourFiles = new Set(opts.context.sources.map((s) => s.file));
+		// Ours first: a pack guide reusing one of our ids is the duplicate reported.
+		const all = new Diagnostics();
+		validateGuides([...ours, ...guides], data, all);
+		for (const d of all.list) if (!ourFiles.has(d.file)) diag.list.push(d);
+		validatePackFrames(guides, data, ours, opts.context.data, diag);
 	}
-	const ours = resolveSources(opts.context.sources, opts.context.data, new Diagnostics(), 'guides');
-	const ourFiles = new Set(opts.context.sources.map((s) => s.file));
-	// Ours first: a pack guide reusing one of our ids is the duplicate reported.
-	const all = new Diagnostics();
-	validateGuides([...ours, ...guides], data, all);
-	for (const d of all.list) if (!ourFiles.has(d.file)) diag.list.push(d);
-	validatePackFrames(guides, data, ours, opts.context.data, diag);
+	if (opts.via) applyVia(guides, opts.via, opts.viaFile || VIA_FILE, data, diag);
 	return { guides, diag };
+}
+
+function applyVia(guides, doc, file, data, diag) {
+	const error = viaDocError(doc);
+	if (error) {
+		diag.error(file, 0, `${VIA_FILE} ${error}`, 'regenerate it with `node tools/polestar.js nav via`');
+		return;
+	}
+	for (const { guide, missing } of attachVia(guides, doc, data.mapFrames)) {
+		diag.warn(guide._ast.file, guide._ast.lines.guide || guide._ast.line, viaMissingMessage(missing));
+	}
 }
 
 // Era bounds for every map any emitted coordinate uses: the goal's own

@@ -23,8 +23,8 @@
 // grid rebuilt, the route code edited) drops the cache and restarts the
 // workers. Errors (a tile being rewritten) are kept in memory only.
 //
-// Workers: one per CPU but one, at most one per 4 GiB of memory (each holds
-// its own Nav and tile cache).
+// Workers: `workers` (the planner's --workers), else one per CPU but one, at
+// most MAX_WORKERS (each holds its own Nav and tile cache, a few GiB).
 
 const fs = require('node:fs');
 const os = require('node:os');
@@ -42,7 +42,7 @@ const DATA_FILES = ['index.json', 'lifts.json'];
 const BATCH = 6; // legs per worker message (consecutive legs share tiles)
 const WORKER_TILES = 64;
 const WALKABLE_CACHE = 256;
-const GIB = 1024 ** 3;
+const MAX_WORKERS = 2;
 
 const r1 = (v) => Math.round(v * 10) / 10;
 const r2 = (v) => Math.round(v * 100) / 100;
@@ -116,7 +116,7 @@ class NavRoutes extends EventEmitter {
 		super();
 		this.dir = path.resolve(dir);
 		this.log = log;
-		this.workerCount = workers || Math.max(1, Math.min(os.cpus().length - 1, Math.floor(os.totalmem() / (4 * GIB))));
+		this.workerCount = workers || Math.max(1, Math.min(os.cpus().length - 1, MAX_WORKERS));
 		this.sig = null; // the files' mtimes when the build id was taken
 		this.build = null;
 		this.index = null;

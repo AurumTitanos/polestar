@@ -41,7 +41,7 @@ export async function commands() {
 	return Array.isArray(body) ? body : body.commands || body.result || [];
 }
 
-const EVENTS = ['hello', 'changed', 'diagnostics', 'routing', 'focus', 'seek', 'play'];
+const EVENTS = ['hello', 'changed', 'diagnostics', 'routing', 'via', 'focus', 'seek', 'play'];
 
 // handlers: { status(connected), hello(d), changed(d), ... }. EventSource
 // retries by itself while the server is down; a stream it gave up on is

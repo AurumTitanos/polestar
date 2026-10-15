@@ -26,7 +26,7 @@ export const S = {
 	changes: [],             // changes_list
 	lint: null,              // lint diagnostics (last run)
 	adding: false,           // the Add waypoint tool is armed
-	layers: { terrain: true, zoneArt: false, route: true, labels: true, spawns: true, grid: false, walkable: false, aids: false },
+	layers: { terrain: true, zoneArt: false, route: true, labels: true, spawns: true, grid: false, walkable: false, aids: false, via: true },
 	routing: null,           // { pending, done } while the server routes the timeline's walks
 	aids: null,              // GET /nav/aids.json when the planner has arrow aids
 	extent: 'step',          // route drawn: 'step' (around the selected step) | 'guide' | 'route' (bird's-eye)

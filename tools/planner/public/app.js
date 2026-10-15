@@ -27,6 +27,7 @@ const LAYERS = [
 	['grid', 'ADT grid'],
 	['walkable', 'Walkable'],
 	['aids', 'Arrow aids'],
+	['via', 'Arrow waypoints'],
 ];
 // Layers offered only when the planner has their data: the navigation grid, the arrow aids.
 const layerOffered = ([k]) => (k === 'walkable' ? !!(S.info.nav && S.info.nav.available) : k === 'aids' ? !!S.aids : true);
@@ -49,6 +50,8 @@ let panelKey = '';
 let bannerKey = '';
 let mapNote = null;
 let keptNote = null;     // [text, kind]: the note an add-waypoint hint covers
+let viaSeq = 0;
+const viaJobs = new Map(); // via_generate job -> its progress toast
 
 // ---------------------------------------------------------------- boot
 
@@ -106,6 +109,7 @@ async function main() {
 			tp.setRouting();
 		},
 		focus: onFocus,
+		via: onViaDone,
 		seek(d) {
 			if (typeof d.t === 'number') seek(d.t, { fit: true });
 		},
@@ -167,6 +171,13 @@ function buildUi() {
 		insertLocated: (verb, step, index) => insertLocated(verb, step, index, null),
 		insertStep,
 		selectLine: (line) => focusEditLine(editTarget.id, line),
+		regenerateVia,
+		showVia(goal) {
+			const leg = goal.leg;
+			if (!map || !leg || !goal.world) return;
+			const pts = [[leg.from.wx, leg.from.wy], ...(leg.via || []).map((p) => [p.wx, p.wy]), [goal.world.wx, goal.world.wy]];
+			map.fitWorld(goal.world.c, pts, { padding: 90, animate: true, maxZoom: 2 });
+		},
 		levelNow: () => (S.timeline && S.timeline.steps[S.step] ? S.timeline.steps[S.step].levelEnd : 1),
 	});
 	editor.el.hidden = true;
@@ -226,6 +237,7 @@ function buildMapChrome() {
 			b.setAttribute('aria-checked', String(S.layers[k]));
 			if (map) map.setLayer(k, S.layers[k]);
 			if (k === 'aids') showOpenBorders();
+			if (k === 'via' && mc && S.mode === 'edit') mc.setHandles(editVStep());
 			savePrefs();
 		}));
 		const radios = EXTENTS.map(([k, label]) => row(label, S.extent === k, (b) => {
@@ -339,6 +351,10 @@ async function initMap() {
 		if (d && d.step != null && d.step !== S.step) selectStep(d.step, { seek: true, fit: false });
 	});
 	map.on('pick', (d) => {
+		if (S.mode === 'edit' && d && d.hit && d.hit.type === 'handle' && d.hit.handle.via) {
+			viaMenu(d.hit.handle, d);
+			return;
+		}
 		if (S.mode !== 'edit' || !S.adding || !d || d.c == null) return;
 		if (d.hit) return;
 		setAdding(false);
@@ -449,6 +465,7 @@ function selectStep(i, { seek: doSeek = false, fit = false, reveal = true, force
 	if (doSeek) S.t = tl.steps[i].start;
 	if (prev !== i) list.select(prev, i);
 	if (mc) mc.setStep(i);
+	showVia();
 	if (fit && mc) mc.fitStep(i, S.t);
 	if (reveal) list.reveal(i, force || !S.playing);
 	panelKey = '';
@@ -603,6 +620,7 @@ function setMode(mode) {
 		setAdding(false);
 		if (mc) mc.editLegs(false);
 		if (mc) map.setHandles([]);
+		showVia();
 		panelKey = '';
 	}
 	bannerKey = '';
@@ -645,9 +663,14 @@ function renderEditor(view) {
 	const tlStep = vstep ? stepOfLine(view.id, vstep.line) : null;
 	editor.show(view, vstep, tlStep != null && tlStep >= 0 ? tlStep : null);
 	if (mc) mc.setHandles(vstep);
+	if (mc) mc.setVia(vstep);
 }
 
 function onGuideView(view) {
+	if (S.mode !== 'edit') {
+		const g = guideOfStep(S.step);
+		if (g && g.id === view.id) showVia();
+	}
 	list.refresh();
 	if (S.mode === 'edit' && editTarget && editTarget.id === view.id) {
 		// The timeline index of this step may have moved; the GuideView step is the truth.
@@ -715,13 +738,16 @@ async function insertStep(index, title) {
 // the goto lands as ONE edit (one undo): right before the goal the leg leads
 // to. Enter writes it with the label; Escape, "No label" or a press
 // elsewhere writes it unlabelled.
-async function bendLeg({ leg, c, wx, wy }) {
+async function bendLeg({ leg, c, wx, wy, shift }) {
 	if (S.mode !== 'edit' || !editTarget) return map.releaseLeg();
 	const id = editTarget.id;
 	const view = S.views.get(id) || (await edits.loadGuide(id));
 	const si = view.steps.findIndex((s) => s.goals.some((g) => g.line === leg.goal.line));
 	if (si < 0) throw new Error('That goal is not in the guide source any more');
 	const index = view.steps[si].goals.findIndex((g) => g.line === leg.goal.line);
+	// A leg with arrow waypoints gets one more (Shift: a goto, as always).
+	const vleg = view.steps[si].goals[index].leg;
+	if (!shift && vleg && !vleg.handMade && vleg.via && vleg.via.length) return addVia(id, view.steps[si].goals[index], { c, wx, wy });
 	let done = false;
 	const insert = async (text) => {
 		if (done) return;
@@ -764,6 +790,10 @@ async function bendLeg({ leg, c, wx, wy }) {
 }
 
 function onHandle(d) {
+	if (S.mode === 'edit' && d && d.phase === 'end' && editTarget && d.handle && d.handle.via) {
+		moveVia(d);
+		return;
+	}
 	if (S.mode !== 'edit' || !d || d.phase !== 'end' || !editTarget) return;
 	const id = editTarget.id;
 	editor.selectGoal(d.id);
@@ -774,6 +804,171 @@ function onHandle(d) {
 		toast(e.message, 'error');
 		if (mc) mc.setHandles(editVStep());
 	});
+}
+
+// ---------------------------------------------------------------- arrow waypoints
+
+// The arrow waypoints of the step shown, on the map's 'via' layer: in Edit
+// the step being edited, else the timeline step's GuideView step (loaded
+// when the page has not got its guide yet).
+async function showVia() {
+	if (!mc) return;
+	if (S.mode === 'edit') return mc.setVia(editVStep());
+	const seq = ++viaSeq;
+	const tl = S.timeline;
+	const g = guideOfStep(S.step);
+	const tlStep = tl && tl.steps[S.step];
+	if (!g || !tlStep) return mc.setVia(null);
+	let view = S.views.get(g.id);
+	if (!view) {
+		try {
+			view = await edits.loadGuide(g.id);
+		} catch {
+			return;
+		}
+	}
+	if (seq !== viaSeq) return;
+	mc.setVia(view.steps.find((s) => s.line === tlStep.line) || null);
+}
+
+// A leg's points as via_set takes them: the point being changed as a world
+// point, the others as written (so they keep their map and frame exactly).
+const viaInput = (p) => ({ map: p.map, x: p.x, y: p.y, r: p.r, label: p.label || null, inner: !!p.inner });
+
+function viaGoal(line) {
+	const vstep = editVStep();
+	return vstep ? vstep.goals.find((g) => g.line === line) || null : null;
+}
+
+function setVia(goal, via, label) {
+	return edits.setVia(editTarget.id, goal.leg.key, via, label).catch((e) => {
+		toast(e.message, 'error');
+		if (mc) mc.setHandles(editVStep());
+	});
+}
+
+// A via handle dropped: its point moved, or its radius set.
+function moveVia(d) {
+	const goal = viaGoal(d.handle.via.line);
+	if (!goal || !goal.leg || !goal.leg.via) return;
+	const i = d.handle.via.i;
+	const via = goal.leg.via.map(viaInput);
+	if (d.part === 'ring') {
+		via[i].r = Math.max(1, Math.round(d.r));
+		setVia(goal, via, 'Set waypoint radius');
+	} else {
+		via[i] = { c: d.c, wx: d.wx, wy: d.wy, r: via[i].r, label: via[i].label, inner: via[i].inner };
+		setVia(goal, via, 'Move arrow waypoint');
+	}
+}
+
+// A popover anchored at a world point of the map.
+function popAt(c, wx, wy, content, opts = {}) {
+	const p = map.toScreen(c, wx, wy);
+	const cr = $('#map').getBoundingClientRect();
+	const anchor = h('div', { style: { position: 'fixed', left: `${cr.left + (p ? p.x : cr.width / 2) - 8}px`, top: `${cr.top + (p ? p.y : cr.height / 2) + 6}px`, width: '16px', height: '4px' } });
+	document.body.append(anchor);
+	popover(content, anchor, { ...opts, onClose() {
+		anchor.remove();
+		if (opts.onClose) opts.onClose();
+	} });
+}
+
+// A via handle clicked: its label, whether it is inside (a cave, a climb, a
+// lift: never joined from afar), delete.
+function viaMenu(handle) {
+	const goal = viaGoal(handle.via.line);
+	if (!goal || !goal.leg || !goal.leg.via) return;
+	const i = handle.via.i;
+	const p = goal.leg.via[i];
+	const input = h('input', { type: 'text', value: p.label || '', placeholder: 'Label, e.g. Enter the cave', 'aria-label': 'Waypoint label', style: { width: '260px' } });
+	const inner = h('input', { type: 'checkbox', checked: !!p.inner });
+	const save = () => {
+		const via = goal.leg.via.map(viaInput);
+		via[i] = { ...via[i], label: input.value.trim() || null, inner: inner.checked };
+		closePopover();
+		setVia(goal, via, 'Edit arrow waypoint');
+	};
+	const del = () => {
+		const via = goal.leg.via.map(viaInput);
+		via.splice(i, 1);
+		closePopover();
+		setVia(goal, via, 'Delete arrow waypoint');
+	};
+	input.addEventListener('keydown', (e) => e.key === 'Enter' && save());
+	popAt(p.c, p.wx, p.wy, h('div',
+		h('div.pop-title', glyph('via'), `Arrow waypoint ${i + 1} of ${goal.leg.via.length}`),
+		input,
+		h('label.pop-check', inner, 'Inside: a cave, a climb or a lift (never joined from afar)'),
+		h('div.pop-foot', h('button.btn.ghost.danger', { onclick: del }, 'Delete'), h('span.spacer'), h('button.btn.primary', { onclick: save }, 'Save'))));
+	input.focus();
+}
+
+// A leg with arrow waypoints dragged or clicked at (c, wx, wy): one more
+// waypoint, in the stretch nearest the point, labelled at once (one edit).
+function addVia(id, goal, { c, wx, wy }) {
+	const leg = goal.leg;
+	const chain = [leg.from, ...leg.via, goal.world];
+	let at = leg.via.length;
+	let best = Infinity;
+	for (let k = 0; k + 1 < chain.length; k++) {
+		const a = chain[k], b = chain[k + 1];
+		const dx = b.wx - a.wx, dy = b.wy - a.wy;
+		const l2 = dx * dx + dy * dy;
+		const f = l2 > 0 ? Math.max(0, Math.min(1, ((wx - a.wx) * dx + (wy - a.wy) * dy) / l2)) : 0;
+		const d = Math.hypot(wx - (a.wx + dx * f), wy - (a.wy + dy * f));
+		if (d < best) {
+			best = d;
+			at = k;
+		}
+	}
+	let done = false;
+	const insert = (label) => {
+		if (done) return;
+		done = true;
+		const via = leg.via.map(viaInput);
+		via.splice(at, 0, { c, wx, wy, label: label || null });
+		setVia(goal, via, 'Add arrow waypoint').finally(() => map.releaseLeg());
+	};
+	const input = h('input', { type: 'text', placeholder: 'Label, e.g. Follow the path up', 'aria-label': 'Waypoint label', style: { width: '260px' } });
+	input.addEventListener('keydown', (e) => {
+		if (e.key === 'Enter') {
+			insert(input.value.trim());
+			closePopover();
+		}
+	});
+	popAt(c, wx, wy, h('div', h('div.pop-title', glyph('via'), 'New arrow waypoint'), input,
+		h('div.pop-hint', 'Shift-drag a leg to add a goto instead.'),
+		h('div.pop-foot', h('button.btn.ghost', { onclick: () => closePopover() }, 'No label'), h('button.btn.primary', { onclick: () => {
+			insert(input.value.trim());
+			closePopover();
+		} }, 'Add waypoint'))), { onClose: () => insert('') });
+	input.focus();
+}
+
+// Regenerate the waypoints of legs `keys` (null: the whole guide) on the
+// grid; the result lands through SSE 'via' (and 'changed').
+async function regenerateVia(keys, force) {
+	if (!editTarget) return;
+	try {
+		const r = await edits.generateVia(editTarget.id, keys, force);
+		viaJobs.set(r.job, toast(`Regenerating the waypoints of ${r.legs} ${r.legs === 1 ? 'leg' : 'legs'}…`, 'info', 600000));
+	} catch (e) {
+		toast(e.message, 'error');
+	}
+}
+
+function onViaDone(d) {
+	const t = viaJobs.get(d.job);
+	if (!t) return;
+	viaJobs.delete(d.job);
+	t.remove();
+	if (!d.ok) return toast(`Regenerating waypoints failed: ${d.error}`, 'error', 8000);
+	const hand = Object.values(d.skipped || {}).filter((s) => s === 'hand-made').length;
+	const parts = [d.written ? `${d.written} ${d.written === 1 ? 'leg' : 'legs'} changed` : 'no change'];
+	if (d.kept.length) parts.push(`${d.kept.length} edited kept`);
+	if (hand) parts.push(`${hand} hand-made left alone`);
+	toast(`Waypoints regenerated: ${parts.join(', ')}${d.written ? ' (Ctrl+Z undoes)' : ''}`, 'ok', 5000);
 }
 
 function setAdding(on) {

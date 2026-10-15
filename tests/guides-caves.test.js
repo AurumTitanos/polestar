@@ -15,6 +15,7 @@ const { needs } = require('./helpers/data');
 const { compileSources, OFFICIAL_DIR } = require('../tools/lib/dsl/project');
 const { loadData } = require('../tools/lib/dsl/data');
 const { DATA } = require('../tools/lib/paths');
+const { readViaFile } = require('../tools/lib/dsl/via');
 
 const skip = needs('quests.json', 'npcs.json', 'objects.json');
 
@@ -36,10 +37,12 @@ const CASES = [
 ];
 
 let data;
+// Compiled with the committed arrow waypoints (guides/via.json) when present.
 function compiled(guide) {
 	data = data || loadData(DATA);
 	const file = path.join(OFFICIAL_DIR, guide);
-	const { guides } = compileSources([{ file, text: fs.readFileSync(file, 'utf8') }], data);
+	const via = readViaFile(OFFICIAL_DIR);
+	const { guides } = compileSources([{ file, text: fs.readFileSync(file, 'utf8') }], data, undefined, { via: via && via.doc });
 	assert.equal(guides.length, 1, `${guide} compiles`);
 	return guides[0];
 }
@@ -53,6 +56,8 @@ for (const c of CASES) {
 		assert.ok(before, 'a located goal comes before the target');
 		const { t, map, x, y } = before.goal;
 		assert.deepEqual({ t, map, x, y }, { t: 'goto', ...c.mouth }, `the waypoint before "${goals[at].step.title}" is the mouth`);
+		assert.equal(before.goal.via, undefined, 'no generated waypoints lead to the hand-placed mouth');
+		assert.equal(goals[at].goal.via, undefined, 'no generated waypoints lead from the mouth to the target');
 		assert.match(goals[at].step.note || '', c.tip);
 	});
 }

@@ -17,6 +17,7 @@ const { needs } = require('./helpers/data');
 const { compileSources, OFFICIAL_DIR } = require('../tools/lib/dsl/project');
 const { loadData } = require('../tools/lib/dsl/data');
 const { DATA } = require('../tools/lib/paths');
+const { readViaFile } = require('../tools/lib/dsl/via');
 
 const skip = needs('quests.json', 'npcs.json', 'objects.json', 'map-frames.json');
 
@@ -29,12 +30,14 @@ const TIRISFAL = 'forever/horde/undead/01-tirisfal-glades.guide';
 
 let data;
 const memo = new Map();
-// The guide's goals in order, as { step, goal }.
+// The guide's goals in order, as { step, goal }, compiled with the committed
+// arrow waypoints (guides/via.json) when present, as the addon gets them.
 function goals(guide) {
 	if (!memo.has(guide)) {
 		data = data || loadData(DATA);
 		const file = path.join(OFFICIAL_DIR, guide);
-		const { guides } = compileSources([{ file, text: fs.readFileSync(file, 'utf8') }], data);
+		const via = readViaFile(OFFICIAL_DIR);
+		const { guides } = compileSources([{ file, text: fs.readFileSync(file, 'utf8') }], data, undefined, { via: via && via.doc });
 		assert.equal(guides.length, 1, `${guide} compiles`);
 		memo.set(guide, guides[0].steps.flatMap((step) => step.goals.map((goal) => ({ step, goal }))));
 	}
@@ -111,6 +114,9 @@ for (const c of CAVES) {
 		assert.ok(before, 'a located goal comes before the target');
 		const { t, map, x, y } = before.goal;
 		assert.deepEqual({ t, map, x, y }, { t: 'goto', ...c.mouth }, `the waypoint before "${list[i].step.title}" is the mouth`);
+		// A hand-placed mouth wins: no generated waypoints into it or from it to the target.
+		assert.equal(before.goal.via, undefined, 'no generated waypoints lead to the mouth');
+		assert.equal(list[i].goal.via, undefined, 'no generated waypoints lead from the mouth to the target');
 	});
 }
 

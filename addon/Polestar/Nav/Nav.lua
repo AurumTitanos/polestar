@@ -162,10 +162,10 @@ end
 -- Target model
 ---------------------------------------------------------------------------
 
-local engineWp    -- last waypoint announced by the Engine
-local override    -- point picked with Nav.SetTarget, kept until the step changes
+local engineWp    -- last waypoint announced by the Engine (with its goal's `via`/`viaFrom`, if any)
+local override    -- point picked with Nav.SetTarget, kept until the step changes (never has via points)
 local dismissed   -- engine waypoint hidden by ClearTarget until the Engine moves on
-local target      -- what we guide to: override, else engine waypoint
+local target      -- what we guide to: override, else engine waypoint (Nav/Travel.lua follows its via points)
 local tC, tX, tY  -- target in world space (nil until resolvable)
 local arrived = false
 local firing = false

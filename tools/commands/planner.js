@@ -13,9 +13,9 @@ const DEFAULT_PORT = 8078;
 const DEFAULT_ART = path.join(ROOT, 'data', 'local', 'planner', 'art');
 const DEFAULT_NAV = path.join(ROOT, 'data', 'local', 'nav');
 
-const usage = `usage: node tools/polestar.js planner [<pack dir>...] [--port ${DEFAULT_PORT}] [--art <dir>] [--nav <dir>] [--open]
+const usage = `usage: node tools/polestar.js planner [<pack dir>...] [--port ${DEFAULT_PORT}] [--art <dir>] [--nav <dir>] [--workers <n>] [--open]
        node tools/polestar.js planner art [--continents 0,1] [--no-zones] [--force] [--offline] [--concurrency N] [--out <dir>]
-       node tools/polestar.js planner mcp [<pack dir>...] [--port ${DEFAULT_PORT}] [--art <dir>] [--nav <dir>]
+       node tools/polestar.js planner mcp [<pack dir>...] [--port ${DEFAULT_PORT}] [--art <dir>] [--nav <dir>] [--workers <n>]
 
 The route planner: a local page (http://127.0.0.1:${DEFAULT_PORT}) that plays a
 guide on the real map, step by step, with the clock, the XP and the quest
@@ -28,6 +28,7 @@ Inspired by Nivek_Gaming (@Nivek_Gaming on X): thank you, Nivek.
   --art <dir>         the map art (default data/local/planner/art)
   --nav <dir>         the navigation grid walks are routed on (default data/local/nav;
                       built by node tools/polestar.js nav build; without it walks are straight lines)
+  --workers <n>       route workers on the grid (default: CPUs - 1, at most 2; each holds its own tiles)
   --data <dir>        reference data (default data/forever/)
   --pack <dir>        one more pack folder
   --open              open the page in the browser
@@ -48,7 +49,7 @@ planner mcp: the planner's commands as an MCP server on stdin/stdout
 (JSON-RPC, one message per line). It uses the planner running on --port, so
 an agent's edits show live in the open page, else starts one itself.`;
 
-const SERVE_OPTIONS = { flags: ['--open'], options: ['--port', '--art', '--nav', '--data', '--pack'] };
+const SERVE_OPTIONS = { flags: ['--open'], options: ['--port', '--art', '--nav', '--data', '--pack', '--workers'] };
 const ART_OPTIONS = { flags: ['--no-zones', '--force', '--offline'], options: ['--continents', '--concurrency', '--out', '--product'] };
 
 function portOf(o) {
@@ -70,8 +71,13 @@ function makeWorkspace(o, positional, log) {
 	const { Workspace } = require('../planner/workspace');
 	const artDir = o.art ? path.resolve(o.art) : DEFAULT_ART;
 	const navDir = o.nav ? path.resolve(o.nav) : DEFAULT_NAV;
+	let navWorkers = null;
+	if (o.workers !== undefined) {
+		navWorkers = Number(o.workers);
+		if (!Number.isInteger(navWorkers) || navWorkers < 1) throw Object.assign(new Error('--workers needs a whole number of 1 or more'), { exit: 2 });
+	}
 	try {
-		return new Workspace({ dataDir, packs: packDirs(o, positional), artDir, navDir, log });
+		return new Workspace({ dataDir, packs: packDirs(o, positional), artDir, navDir, navWorkers, log });
 	} catch (err) {
 		if (!err.exit) err.exit = 1;
 		throw err;
@@ -163,7 +169,7 @@ async function art(argv) {
 }
 
 async function mcp(argv) {
-	const { opts: o, positional, error } = parseArgs(argv, { flags: [], options: ['--port', '--art', '--nav', '--data', '--pack'] });
+	const { opts: o, positional, error } = parseArgs(argv, { flags: [], options: ['--port', '--art', '--nav', '--data', '--pack', '--workers'] });
 	if (error) throw Object.assign(new Error(error), { exit: 2 });
 	const port = portOf(o);
 	const log = (m) => process.stderr.write(`${m}\n`);

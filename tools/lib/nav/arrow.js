@@ -9,6 +9,7 @@
 //     jobs: PlanRoute parameters ({ c, wx, wy, map, target: { c, wx, wy, map, label, x, y, f }, faction, known, speed })
 //   guidePairs({ guides, geo, frames, continents }) -> [{ guide, faction, from, to }]
 //     consecutive located goals of every guide (and across `next`), MIN_PAIR yd apart or more
+//   walkLegs(plan, los) -> [{ from, to, yards, ok, key, caption }]  a plan's walk legs, ok when nav.los walks the line
 //   arrowReport({ nav, frames, pairs, aidsLua, set, reference, stats, log }) -> { json, md }
 //
 // Every pair is planned twice, without and with the aids (Polestar_Travel's
@@ -343,4 +344,4 @@ function renderMd(j) {
 	return L.join('\n');
 }
 
-module.exports = { planRoutes, guidePairs, jobOf, arrowReport, compareReference, renderReport: renderMd, MIN_PAIR, MATCH };
+module.exports = { planRoutes, guidePairs, jobOf, walkLegs, arrowReport, compareReference, renderReport: renderMd, MIN_PAIR, MATCH };

@@ -5,8 +5,9 @@
 //   in the fragment shader from the distance along the polyline; a casing
 //   pass under the colour pass.
 // - Circles: instanced quads with a circle SDF (fill, inner stroke, optional
-//   dash along the circumference); areas draw through the stencil so the fill
-//   blends once and only the outline of their union is stroked.
+//   dash along the circumference; a negative dash draws a diamond, the L1
+//   distance, its corners at the radius); areas draw through the stencil so
+//   the fill blends once and only the outline of their union is stroked.
 // - Markers: instanced quads sampling the pin atlas, optionally rotated.
 // - Grid: the ADT grid over the whole screen.
 // Colours arrive premultiplied.
@@ -264,7 +265,7 @@ flat in vec4 v_stroke;
 flat in vec4 v_par;
 out vec4 o;
 void main() {
-	float d = length(v_local);
+	float d = v_par.y < 0.0 ? abs(v_local.x) + abs(v_local.y) : length(v_local);
 	float R = v_R, sw = min(v_par.x, R);
 	if (u_part == 1) { if (d > R) discard; o = v_fill; return; }
 	if (u_part == 2) { if (d > R - sw) discard; o = vec4(0.0); return; }
@@ -286,7 +287,8 @@ void main() {
 export const CIRCLE_STRIDE = 16;
 
 // Write one circle instance at data[k]; returns k + CIRCLE_STRIDE.
-// pos in layout coords; r yards + rpx CSS px (at least minPx); colours premultiplied.
+// pos in layout coords; r yards + rpx CSS px (at least minPx); colours
+// premultiplied; dash < 0: a diamond instead.
 export function circle(data, k, x, y, r, rpx, fill, stroke, sw = 0, dash = 0, gap = 0, minPx = 0) {
 	data[k++] = x; data[k++] = y; data[k++] = r; data[k++] = rpx;
 	data[k++] = fill[0]; data[k++] = fill[1]; data[k++] = fill[2]; data[k++] = fill[3];

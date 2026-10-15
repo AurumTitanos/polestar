@@ -4,7 +4,8 @@
 // `nav build` builds the grid under data/local/nav (tools/lib/nav/grid);
 // `nav path` routes between two map points on it (tools/lib/nav/path.js);
 // `nav aids` generates the arrow's crossings, open borders and approach
-// chains from it and measures them (tools/lib/nav/aids.js, arrow.js).
+// chains from it and measures them (tools/lib/nav/aids.js, arrow.js);
+// `nav via` generates a pack's arrow waypoints (tools/lib/nav/via.js).
 
 const fs = require('node:fs');
 const path = require('node:path');
@@ -16,6 +17,7 @@ const DEFAULT_DIR = path.join(ROOT, 'data', 'local', 'nav');
 const usage = `usage: node tools/polestar.js nav build [--continents 0,1] [--force] [--offline] [--workers N] [--out <dir>] [--product <p>]
        node tools/polestar.js nav path <map> <x>,<y> <map> <x>,<y> [--class C] [--level N] [--frame era|forever] [--json] [--dir <dir>]
        node tools/polestar.js nav aids [--out <file>] [--lua <file>] [--report] [--continents 0,1] [--workers N] [--reference <file>] [--dir <dir>]
+       node tools/polestar.js nav via [<pack dir>] [--guide <id>] [--force] [--report] [--workers N] [--dir <dir>]
 
 build   the navigation grid of every continent map-frames.json names (or
         --continents): client geometry per ADT tile through the CASC cache
@@ -39,7 +41,17 @@ aids    the arrow's aids from the grid (tools/lib/nav/aids.js): zone
         guides with the addon's planner without and with the aids and writes
         aids-report.json and aids-report.md next to --out, comparing with the
         reference crossings file (--reference, default
-        data/local/crossings.json; read only).`;
+        data/local/crossings.json; read only).
+via     the arrow's waypoints for every leg of a pack's guides (default
+        guides/; another pack reads ours as context) from the grid, written to
+        <pack>/via.json (tools/lib/nav/via.js). Legs from or to a guide goto
+        get none; legs a hand-made chain or crossing serves (the committed
+        recorded crossings and data/local/crossings.json) are marked "hand".
+        Entries edited in the planner ("manual") are kept unless --force;
+        --guide regenerates one guide. Routes in --workers threads (default:
+        up to 3), cached in data/local/nav/routes-<build>.jsonl
+        with the planner's. --report prints counts per guide and measures the
+        arrow without and with the waypoints into data/local/nav/via-report.md.`;
 
 const usageError = (msg) => Object.assign(new Error(msg), { exit: 2 });
 
@@ -241,7 +253,49 @@ async function aids(argv) {
 	return 0;
 }
 
-const SUBCOMMANDS = { build, path: route, aids };
+async function via(argv) {
+	const { opts: o, positional, error } = parseArgs(argv, { flags: ['--force', '--report'], options: ['--guide', '--workers', '--dir'] });
+	if (error || positional.length > 1) throw usageError(error || `unexpected argument "${positional[1]}"`);
+	const workers = o.workers === undefined ? Math.max(1, Math.min(3, require('node:os').availableParallelism() - 1)) : Number(o.workers);
+	if (!Number.isInteger(workers) || workers < 0) throw usageError('--workers needs a number (0: no threads)');
+	const { commandPack } = require('../lib/pack/locate');
+	const pack = commandPack({ pack: positional[0] });
+	if (pack.error) throw usageError(pack.error);
+	const t0 = Date.now();
+	const log = (m) => console.error(`[${((Date.now() - t0) / 1000).toFixed(0)} s] ${m}`);
+	const dir = o.dir ? path.resolve(o.dir) : DEFAULT_DIR;
+	const { openNav } = require('../lib/nav/path');
+	const nav = openNav({ dir, cacheTiles: 160 });
+	if (!nav.available) throw Object.assign(new Error('no navigation grid: run `node tools/polestar.js nav build`'), { exit: 1 });
+	const { compileProject } = require('../lib/dsl/project');
+	const compiled = compileProject({ packDir: pack.dir, manifest: pack.manifest, dataDir: DATA, contextDir: pack.contextDir, contextDataDir: pack.contextDataDir });
+	const { generate, measureArrow, renderReport } = require('../lib/nav/via');
+	const { VIA_FILE } = require('../lib/dsl/via');
+	let r;
+	try {
+		r = await generate({ packDir: pack.dir, guides: compiled.guides, nav, workers, force: !!o.force, onlyGuide: o.guide || null, log });
+	} catch (err) {
+		throw Object.assign(err, { exit: 1 });
+	}
+	const out = path.join(pack.dir, VIA_FILE);
+	fs.writeFileSync(out, r.text);
+	const t = r.stats.total;
+	console.log(`nav via ${r.doc.grid.build}: ${t.legs} legs, ${t.checked} checked, ${t.withPoints} with points, ${t.handMade} hand-made, ${t.unroutable} unroutable, ${t.over} over ${require('../lib/nav/via').MAX_POINTS} -> ${path.relative(process.cwd(), out)} (${r.stats.seconds.toFixed(0)} s)`);
+	if (!o.report) return 0;
+	for (const [id, g] of Object.entries(r.stats.guides)) console.log(`  ${id}: ${g.legs} legs, ${g.checked} checked, ${g.withPoints} with points, ${g.handMade} hand-made, ${g.unroutable} unroutable, ${g.over} over`);
+	const { Geo } = require('../lib/planner/geo');
+	const geo = new Geo(readJson(path.join(DATA, 'map-frames.json')), readJson(path.join(DATA, 'zones.json')));
+	const measure = measureArrow({ items: r.stats.legs, nav, geo, log });
+	const md = renderReport({ stats: r.stats, measure, build: `${r.doc.grid.build} (client ${nav.index.build}, built ${nav.index.builtAt})`, packDir: path.relative(ROOT, pack.dir) || '.' });
+	const reportFile = path.join(dir, 'via-report.md');
+	fs.writeFileSync(reportFile, md);
+	const pctOf = (s) => (s.walkYards ? ((100 * s.blockedYards) / s.walkYards).toFixed(1) : '0');
+	console.log(`blocked yards: ${Math.round(measure.before.blockedYards)} (${pctOf(measure.before)}%) without via, ${Math.round(measure.after.blockedYards)} (${pctOf(measure.after)}%) with; walked/route ${(measure.before.walkYards / measure.before.routeYards).toFixed(3)} -> ${(measure.after.walkYards / measure.after.routeYards).toFixed(3)}`);
+	console.log(`wrote ${path.relative(process.cwd(), reportFile)}`);
+	return 0;
+}
+
+const SUBCOMMANDS = { build, path: route, aids, via };
 
 async function run(argv) {
 	const [sub, ...rest] = argv;

@@ -8,13 +8,16 @@
 //   map.fitWorld(c, [[wx, wy], ...], { padding });
 //   map.toScreen(c, wx, wy)          // { x, y } CSS px in the canvas | null (continent not shown)
 //   map.toWorld(sx, sy)              // { c, wx, wy }
-//   map.setLayer(name, on);          // terrain, zoneArt, route, labels, spawns, grid, walkable, aids
+//   map.setLayer(name, on);          // terrain, zoneArt, route, labels, spawns, grid, walkable, aids, via
 //   map.setNav({ tiles } | null);     // the Walkable layer's tiles: { [c]: ['col_row'] } (GET /nav/index.json)
 //   map.setAids(aids | null);         // the arrow aids (GET /nav/aids.json): crossings, chains
+//   map.setVia([{ key, c, from: { wx, wy }, to: { wx, wy }, pts: [{ id, wx, wy, r, label, inner }], hand }]);
+//                                    // the arrow waypoints of legs (the 'via' layer); hand: a label
+//                                    // ("Hand-made") for a leg the arrow walks by a hand-made path
 //   map.setRoute([{ c, pts /* Float32Array wx,wy,... */, mode, step, state }]);
 //   map.setScene({ areas, dots, markers, rings });
 //   map.setCharacter({ c, wx, wy } | null);
-//   map.setHandles([{ id, c, wx, wy, r, label, kind }]);
+//   map.setHandles([{ id, c, wx, wy, r, label, kind, shape }]);   // shape 'diamond': an arrow waypoint
 //   map.setLegHit(fn | null);        // route legs that can be bent (see 'leg')
 //   map.on('pick' | 'handle' | 'view' | 'marker' | 'leg', fn);   // returns an unsubscribe function
 //
@@ -32,8 +35,8 @@
 //          drag of a handle (part 'ring' changes r); the handle follows the pointer until
 //          the next setHandles
 //   view   map.view, on camera changes (at most every 100 ms, plus a trailing one)
-//   leg    { leg, c, wx, wy } a route leg was clicked or dragged and dropped:
-//          the point to put a waypoint at. setLegHit(fn): fn(sx, sy) ->
+//   leg    { leg, c, wx, wy, shift } a route leg was clicked or dragged and dropped:
+//          the point to put a waypoint at (shift: Shift was held). setLegHit(fn): fn(sx, sy) ->
 //          { key, c, pts (Float32Array wx,wy,...), from: { wx, wy }, to: { wx, wy },
 //          sx, sy (the nearest point on it) } | null; the hovered leg is drawn
 //          in the accent with an add mark, a drag bends it (from -> pointer -> to).
@@ -50,7 +53,12 @@
 // terrain art. The Walkable layer draws under the route from WALKABLE_ZOOM;
 // the aids draw over it: a crossing as its two ends' rings joined by a long
 // dash, its caption at its middle; a chain as a line through its nodes'
-// rings, its name at its first node and the node captions.
+// rings, its name at its first node and the node captions. The arrow
+// waypoints (via) draw over the route: a thin dotted line in --route-via
+// from the leg's start through its points to its goal, each point a small
+// diamond (an inner one hollow) with its label; a hand-made leg is a long
+// dash in the aid colour from start to goal with its `hand` pill at the
+// middle. A point that is also a handle (same id) is drawn as the handle.
 // Route mode is a MODES name or number (teleport is not drawn); a marker is
 // a pin of the atlas (icons.js): { icon: { kind, key } | null, glyph, tint }
 // (tint a colour token); markers { active } grow 1.3x inside an accent ring
@@ -76,7 +84,7 @@ const ZONE_LABELS = [0.012, 1.5];   // zoom range of zone labels; continent name
 const COLORS = {
 	sea: '--sea', route: '--route', routePast: '--route-past', routeFuture: '--route-future',
 	routeFly: '--route-fly', routeBoat: '--route-boat', routeSwim: '--route-swim', routeClimb: '--route-climb',
-	aid: '--nav-aid', accent: '--accent', shade: '--shade', ink: '--ink',
+	aid: '--nav-aid', accent: '--accent', shade: '--shade', ink: '--ink', via: '--route-via',
 };
 const PIN = 24;          // a pin's size in CSS px
 const PIN_ACTIVE = 31;   // the current goal's pin (1.3x)
@@ -92,9 +100,10 @@ export class MapView {
 		this.opts = opts;
 		this.artBase = (opts.artBase ?? '/art').replace(/\/$/, '');
 		this.listeners = {};
-		this.layers = { terrain: true, zoneArt: false, route: true, labels: true, spawns: true, grid: false, walkable: false, aids: false };
+		this.layers = { terrain: true, zoneArt: false, route: true, labels: true, spawns: true, grid: false, walkable: false, aids: false, via: true };
 		this.navTiles = null;
 		this.aids = null;
+		this.via = [];
 		this.mode = 'continent';
 		this.c = Number(opts.c ?? 0);
 		this.cam = { x: 0, y: 0, zoom: 0.02 };
@@ -181,10 +190,16 @@ export class MapView {
 		this.aidRoute = new RouteLayer(gl);
 		const aid = this.colors.aid;
 		this.aidRoute.setColors({ ...this.colors, route: aid, routePast: aid, routeFuture: aid, routeFly: aid, routeBoat: aid });
+		// the arrow waypoints: dotted (the fall row) in the via colour; hand-made legs long dashes (the boat row) in the aid colour
+		this.viaRoute = new RouteLayer(gl);
+		this.viaRoute.setColors({ ...this.colors, route: this.colors.via, routeBoat: aid });
+		this.viaRoute.styles.style.set([1.1, 5, 0, 1], (8 * 3 + 2) * 4);
+		this.viaRoute.styles.style.set([1.25, 14, 6, 0], (2 * 3 + 2) * 4);
+		this.viaRoute.styles.cas[(8 * 3 + 2) * 4 + 3] = 1;
 		this.circles = new CircleProgram(gl);
 		this.inst = {
 			areas: this.circles.instances(), rings: this.circles.instances(), dots: this.circles.instances(),
-			handles: this.circles.instances(), aidRings: this.circles.instances(),
+			handles: this.circles.instances(), aidRings: this.circles.instances(), via: this.circles.instances(),
 		};
 		this.inst.pinRings = this.circles.instances();
 		this.markers = new MarkerLayer(gl);
@@ -357,6 +372,13 @@ export class MapView {
 
 	setAids(aids) {
 		this.aids = aids || null;
+		this._dirty = true;
+		this._overlayDirty = true;
+		this.requestRender();
+	}
+
+	setVia(via) {
+		this.via = via || [];
 		this._dirty = true;
 		this._overlayDirty = true;
 		this.requestRender();
@@ -687,6 +709,10 @@ export class MapView {
 			this.aidRoute.draw(f);
 			this.circles.draw(f, this.inst.aidRings);
 		}
+		if (this.layers.via && this.via.length) {
+			this.viaRoute.draw(f);
+			this.circles.draw(f, this.inst.via);
+		}
 		this.circles.draw(f, this.inst.rings);
 		if (this.layers.spawns) this.circles.draw(f, this.inst.dots);
 		this.markers.draw(f, this.inst.glow);
@@ -790,6 +816,35 @@ export class MapView {
 		this.inst.pinRings.set(rings, kr / CIRCLE_STRIDE);
 		this._rebuildHandles();
 		this._rebuildAids();
+		this._rebuildVia();
+	}
+
+	// The arrow waypoints: a dotted line per leg through its points (a long
+	// dash for a hand-made leg), a diamond per point not shown as a handle.
+	_rebuildVia() {
+		const off = (c) => this._off(Number(c));
+		const lines = [];
+		let n = 0;
+		for (const v of this.via) {
+			const pts = v.hand ? [v.from, v.to] : [v.from, ...v.pts, v.to];
+			lines.push({ c: v.c, pts: new Float32Array(pts.flatMap((p) => [p.wx, p.wy])), mode: v.hand ? 'boat' : 'fall', state: 'current' });
+			n += v.pts.length;
+		}
+		this.viaRoute.set(lines, off, 0);
+		const handled = new Set(this.handles.map((h) => h.id));
+		const d = new Float32Array(Math.max(1, n) * CIRCLE_STRIDE);
+		let k = 0;
+		const col = this.colors.via;
+		const scrim = this.token('scrim');
+		for (const v of this.via) {
+			const o = off(v.c);
+			if (!o || v.hand) continue;
+			for (const p of v.pts) {
+				if (handled.has(p.id)) continue;
+				k = circle(d, k, -p.wy + o.ox, -p.wx + o.oy, 0, 8, p.inner ? pm(scrim, 0.6) : pm(col), p.inner ? pm(col) : pm(scrim, 0.9), 2, -1);
+			}
+		}
+		this.inst.via.set(d, k / CIRCLE_STRIDE);
 	}
 
 	// The arrow aids: crossing ends and chain nodes as rings of their radius
@@ -842,7 +897,10 @@ export class MapView {
 			const x = -h.wy + o.ox, y = -h.wx + o.oy;
 			const hot = this.hover && this.hover.handle?.id === h.id && this.hover.part === 'point';
 			const fill = h.explicit === false ? pm(this.token('scrim'), 0.55) : pm(this.token(h.tint || 'place'));
-			k = circle(d, k, x, y, 0, hot ? 9 : 7.5, fill, pm(hot ? this.colors.accent : this.colors.ink), 2);
+			// an arrow waypoint is a diamond (its corners at the given radius, so a little larger)
+			const diamond = h.shape === 'diamond';
+			const edge = hot ? this.colors.accent : diamond ? (h.explicit === false ? this.colors.via : this.token('scrim')) : this.colors.ink;
+			k = circle(d, k, x, y, 0, diamond ? (hot ? 11 : 9.5) : hot ? 9 : 7.5, fill, pm(edge), 2, diamond ? -1 : 0);
 		}
 		this.inst.handles.set(d, k / CIRCLE_STRIDE);
 		this._overlayDirty = true;
@@ -881,7 +939,24 @@ export class MapView {
 			const h = this._handleAt(h0);
 			const p = this.toScreen(h.c, h.wx, h.wy);
 			if (!p) continue;
-			items.push({ key: `h:${h.id}`, text: h.label, cls: 'mv-pill mv-handle', x: p.x, y: p.y, anchor: 'pin', r: 12, collide: true });
+			items.push({ key: `h:${h.id}`, text: h.label, cls: h.shape === 'diamond' ? 'mv-via mv-handle' : 'mv-pill mv-handle', x: p.x, y: p.y, anchor: 'pin', r: 12, collide: true });
+		}
+		if (this.layers.via) {
+			const handled = new Set(this.handles.map((h) => h.id));
+			for (const v of this.via) {
+				if (v.hand) {
+					const p = this.toScreen(v.c, (v.from.wx + v.to.wx) / 2, (v.from.wy + v.to.wy) / 2);
+					if (p) items.push({ key: `vh:${v.key}`, text: v.hand, cls: 'mv-pill mv-hand', x: p.x, y: p.y, anchor: 'pin', r: 4, collide: true });
+					continue;
+				}
+				for (const q of v.pts) {
+					if (handled.has(q.id)) continue;
+					const p = this.toScreen(v.c, q.wx, q.wy);
+					if (!p) continue;
+					pins.push([p.x, p.y, 8]);
+					if (q.label) items.push({ key: `v:${q.id}`, text: q.label, cls: 'mv-via', x: p.x, y: p.y, anchor: 'pin', r: 8, collide: true });
+				}
+			}
 		}
 		if (this.aids && this.layers.aids) {
 			const at = (c, wx, wy, key, text) => {
@@ -1148,7 +1223,7 @@ export class MapView {
 			if (hit?.type === 'leg') {
 				const lw = this._worldOn(hit.leg.c, sx, sy);
 				this._showLeg(null);
-				this._emit('leg', { leg: hit.leg, c: hit.leg.c, wx: lw.wx, wy: lw.wy });
+				this._emit('leg', { leg: hit.leg, c: hit.leg.c, wx: lw.wx, wy: lw.wy, shift: !!e.shiftKey });
 				return;
 			}
 			this._emit('pick', { c: w.c, wx: w.wx, wy: w.wy, sx, sy, hit, event: e });
@@ -1165,7 +1240,7 @@ export class MapView {
 			if (cancel || !pr.bend) this._showLeg(null);
 			else {
 				this._legHeld = true;
-				this._emit('leg', { leg: pr.hit.leg, c: pr.hit.leg.c, wx: pr.bend.wx, wy: pr.bend.wy });
+				this._emit('leg', { leg: pr.hit.leg, c: pr.hit.leg.c, wx: pr.bend.wx, wy: pr.bend.wy, shift: !!e.shiftKey });
 			}
 			return;
 		}

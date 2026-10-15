@@ -158,6 +158,31 @@ test('floors: a step up to 1 yd walks, a ledge up to 1.6 yd is a jump, higher ha
 	assert.ok(down.length >= 1 && down.every((f) => f.di === -1), 'falls only westward, off the ledge');
 });
 
+test('steps: a WMO tread under a top over a jump high climbs as a jump both ways; a high tread or a top rise over a jump does not', () => {
+	// Floor at 0 west of x = 101; east of it a top, with a tread from x = 100.3
+	// under the top's edge, both in the column at x 100-102: a 0.7 yd tread
+	// under a 2.2 yd top (the Ruins of Lordaeron's throne room steps), a 1.2 yd
+	// tread under it, a 0.7 yd tread under a 2.9 yd top.
+	const s = new Scene({ height: () => -100 });
+	s.floor(0, 0, 101, 300, 0);
+	s.floor(100.3, 0, 101.6, 100, 0.7).floor(101, 0, 200, 100, 2.2);
+	s.floor(100.3, 100, 101.6, 200, 1.2).floor(101, 100, 200, 200, 2.2);
+	s.floor(100.3, 200, 101.6, 300, 0.7).floor(101, 200, 200, 300, 2.9);
+	const t = linked(s);
+	const x = 100 - CELL / 2;
+	const up = linkOf(t, top(t, x, 50).e, E);
+	assert.equal(up >> 5, CLS.JUMP, 'onto the top over the tread');
+	assert.ok(Math.abs(column(t, 101, 50)[(up & 31)].z - 2.2) < 0.01, 'lands on the top');
+	assert.equal(linkOf(t, top(t, 101, 50).e, W) >> 5, CLS.JUMP, 'and down again');
+	assert.equal(linkOf(t, top(t, x, 150).e, E), NO_LINK, 'a 1.2 yd tread is no step');
+	// A 0.7 yd tread 2.2 yd under a 2.9 yd top is a floor of its own: a step onto it, nothing on.
+	const tread = linkOf(t, top(t, x, 250).e, E);
+	assert.equal(tread >> 5, CLS.WALK);
+	const t07 = column(t, 101, 250)[tread & 31];
+	assert.ok(Math.abs(t07.z - 0.7) < 0.01);
+	assert.equal(linkOf(t, t07.e, E), NO_LINK, 'a 2.2 yd rise from the tread is no jump');
+});
+
 test('falls: one way, onto ground up to FALL_MAX, into water up to 60 yd', () => {
 	// Model plateaus west of x = 200 (top 20 in the north, 40 in the south);
 	// east of them ground at 0 in the north and a deep lake (water at 0) in the south.

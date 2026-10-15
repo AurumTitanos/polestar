@@ -14,7 +14,8 @@
 // eye-off, route, map, fit, undo, redo (their own hooked arrows: ui.js's
 // reset and reload are full circles, which read as reload, not as one step
 // back), list, character, clock, warning, download, export, pin-add,
-// filter, swap, lift.
+// filter, swap, lift, via (an arrow waypoint: a diamond on a dotted line),
+// regenerate (one clockwise turn ending in an arrowhead).
 //
 //   mediaPng(group, name) -> PNG of the addon's committed texture
 //                            addon/Polestar/Media/<UI|Nav>/<name>.tga, or null
@@ -134,6 +135,8 @@ const PLANNER = {
 		poly([[12, 6.6], [15.4, 10.6], [8.6, 10.6]]),
 		poly([[12, 17.4], [15.4, 13.4], [8.6, 13.4]]),
 	),
+	via: union(poly([[12, 6.2], [17.8, 12], [12, 17.8], [6.2, 12]]), dot(2.8, 12, 1.5), dot(21.2, 12, 1.5)),
+	regenerate: union(arc(12, 12.6, 7.4, -20, 285), poly([[18.4, 5.4], [12.6, 1.6], [12.6, 9.4]])),
 };
 
 const GLYPHS = { ...ui.GLYPHS, ...PLANNER };

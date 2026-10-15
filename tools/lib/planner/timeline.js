@@ -49,6 +49,11 @@
 //   kinds). The choice between walking and a boat or a flight master
 //   compares straight-line times. `nav` ({ build }) is recorded as the
 //   timeline's `nav`;
+// - a goal with arrow waypoints (compiled `via`/`viaFrom`, a pack's via.json)
+//   is walked to through them as the arrow leads (walkVia: the join rule,
+//   then one walk leg per stretch, each routed on its own), when the walk
+//   ends within VIA_GOAL yd of the goal's point; goal.via counts the
+//   waypoints walked through;
 // - flights keep their time (yards / FLIGHT_SPEED + FLIGHT_STOP per leg);
 //   with `flightPaths` (path id -> [[wx, wy], ...], the TaxiPathNode points
 //   of travel.json's taxi legs) their track follows the points the gryphon
@@ -80,6 +85,12 @@ const MAX_GUIDES = 120;
 const AREA_YARDS = 150; // farming radius around a place without a spot or `r`
 const POOL_MAX = 60; // spawn points considered per farmed target
 const EVENT_YARDS = 60; // reaching an event objective's point completes it
+// Arrow waypoints (goal.via): the arrow's join rule (docs/ARCHITECTURE.md,
+// "Travel planner and zone crossings"): within VIA_JOIN yd of the chain
+// viaFrom, V1..Vn, goal the walk joins at the end of the nearest segment;
+// a walk ending within VIA_GOAL yd of the goal's own point follows them.
+const VIA_JOIN = 200;
+const VIA_GOAL = 60;
 const NO_SPAWN_SPACING = 30; // yards between mobs when the data has no spawns
 // Flights: the addon's own timing (addon/Polestar/Maps/FlightTimer.lua), seconds = yards / speed + stop per hop.
 const FLIGHT_SPEED = 30;
@@ -356,6 +367,7 @@ function buildTimeline({ guides, data, geo, params, travel = null, start, charac
 	const bag = new Map(); // item id -> { id, name, count }
 	let step = null; // the step being played
 	let goalOut = null; // the goal being played
+	let goalVia = null; // its arrow waypoints: { at, from, pts } in world points, or null
 	let guideId = null;
 	let stepIndex = -1;
 
@@ -644,6 +656,59 @@ function buildTimeline({ guides, data, geo, params, travel = null, start, charac
 		pos = end;
 		sample(MODES.fly);
 	};
+	// Walk to `dest` through the goal's arrow waypoints, as the arrow leads:
+	// joined at the end of the chain segment nearest pos when pos is within
+	// VIA_JOIN yd of the chain, else at the nearest waypoint that is not
+	// inner (straight to dest when dest is nearer, or all are inner); each
+	// stretch is its own walk leg (routed on its own). goalOut.via counts the
+	// waypoints walked through.
+	const walkVia = (dest) => {
+		const pts = goalVia.pts;
+		const chain = [goalVia.from || pts[0], ...pts, dest];
+		let near = Infinity;
+		let e = -1; // index in pts of the first waypoint walked to; pts.length = none
+		for (let k = 0; k + 1 < chain.length; k++) {
+			const a = chain[k], b = chain[k + 1];
+			const dx = b.wx - a.wx, dy = b.wy - a.wy;
+			const l2 = dx * dx + dy * dy;
+			const f = l2 > 0 ? Math.max(0, Math.min(1, ((pos.wx - a.wx) * dx + (pos.wy - a.wy) * dy) / l2)) : 0;
+			const d = Math.hypot(pos.wx - (a.wx + dx * f), pos.wy - (a.wy + dy * f));
+			if (d < near) {
+				near = d;
+				e = goalVia.from ? k : k + 1;
+			}
+		}
+		if (near > VIA_JOIN) {
+			e = pts.length;
+			let best = dist(pos, dest);
+			pts.forEach((v, i) => {
+				if (v.inner) return;
+				const d = dist(pos, v);
+				if (d < best) {
+					best = d;
+					e = i;
+				}
+			});
+		}
+		for (let i = Math.max(0, e); i < pts.length; i++) {
+			walkLeg(pts[i]);
+			if (goalOut) goalOut.via = (goalOut.via || 0) + 1;
+		}
+		walkLeg(dest);
+	};
+	// The arrow waypoints of a compiled goal as world points (only those on
+	// the goal's continent), or null.
+	const viaOf = (goal, at) => {
+		if (!at || !Array.isArray(goal.via) || !goal.via.length) return null;
+		const pts = goal.via.map((v) => {
+			const w = worldOf(v.map, v.x, v.y, v.f);
+			return w && w.c === at.c ? { c: w.c, wx: w.wx, wy: w.wy, inner: !!v.inner } : null;
+		}).filter(Boolean);
+		if (!pts.length) return null;
+		const f = goal.viaFrom ? worldOf(goal.viaFrom.map, goal.viaFrom.x, goal.viaFrom.y, goal.viaFrom.f) : null;
+		const self = goal.map != null && goal.x != null ? worldOf(goal.map, goal.x, goal.y, goal.f) : null;
+		return { at: self || at, from: f && f.c === at.c ? f : null, pts };
+	};
 
 	// Arrive at a world point: walking, or a boat/zeppelin/tram when that is
 	// quicker (the only way to another continent).
@@ -674,7 +739,8 @@ function buildTimeline({ guides, data, geo, params, travel = null, start, charac
 			event('boat', { kind: r.kind, from: r.from.name, to: r.to.name });
 		}
 		if (pos.c === dest.c && dist(pos, dest) >= 0.5) {
-			walkLeg(dest);
+			if (goalVia && goalVia.at.c === dest.c && dist(goalVia.at, dest) <= VIA_GOAL) walkVia(dest);
+			else walkLeg(dest);
 		}
 		arrived();
 	};
@@ -979,7 +1045,9 @@ function buildTimeline({ guides, data, geo, params, travel = null, start, charac
 					ref: goalRef(goal),
 				};
 				step.goals.push(goalOut);
+				goalVia = viaOf(goal, place.at);
 				playGoal(goal, quest, place, applies);
+				goalVia = null;
 				goalOut.xp = r2(goalOut.xp);
 				goalOut.kills = r2(goalOut.kills);
 				for (const k of CATS) goalOut.split[k] = r2(goalOut.split[k]);

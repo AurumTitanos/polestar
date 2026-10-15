@@ -216,6 +216,7 @@ AND. `only Warrior,Paladin,Dwarf` = (Warrior or Paladin) and Dwarf.
 | Era frame flag `f = "e"` | when coordinates come from Era-frame data, or were typed in an `era` guide/goal |
 | spawn areas `spots` | every goal placed at an NPC or object that spawns at more than one place, and hand-placed `@x,y` goals whose target the data also knows: see "Spawn areas" below |
 | group content `group` | elite work, dungeon and raid quests and goals on an instance map: see "Group content" below |
+| arrow waypoints `via`, `viaFrom` | the pack's `via.json` (written by `node tools/polestar.js nav via` from the navigation grid, editable in the route planner): the points the arrow leads through on the walk into a located goal, and that walk's start. See "Arrow waypoints" below |
 
 **Spawn areas.** Mobs, quest objects and some NPCs spawn at more than one
 place, and a player who finds nothing where the arrow led must be able to try
@@ -266,6 +267,17 @@ gets no `spots`.
   point lies.
 
 See docs/ARCHITECTURE.md, Smart logic, "Spawn areas".
+
+**Arrow waypoints.** In game the arrow walks straight lines, which can point
+into a mountain or through a cave wall. A pack's `via.json`
+([PACK_FORMAT.md](PACK_FORMAT.md), "via.json") holds, per guide leg (the walk
+into a goal with a fixed point from the last such goal before it whose `only`
+is none or the same, at least 40 yards away on the same continent), the
+points the arrow leads through first. The compiler copies them onto the goal
+as `via`, with the leg's start as `viaFrom`; a leg checked and found straight
+(`via: []`) adds nothing. Your own `goto`s always win: a leg into or out of a
+`goto` gets no generated points, and neither does one a hand-made crossing
+or approach chain serves. Without a `via.json` nothing changes.
 
 ## Group content
 
@@ -384,6 +396,10 @@ Warnings:
   known places (`did you mean "Feathermoon Stronghold"?`). Inns and flight
   points come from `data/forever/travel.json`; without it (or without the
   inns or the flight points in it) those goals are not checked
+- with a `via.json` in the pack folder, once per guide: legs with no entry in
+  it (``3 legs have no waypoints from the navigation grid (run `node
+  tools/polestar.js nav via`)``); legs into or out of a `goto` never count. A
+  `via.json` that is not JSON or breaks its format is one error naming it
 - `lint` only, with a simulator world cached in `data/sim` (or `--sim <dir>`): a
   non-`optional` quest goal in a `Leveling` guide on a quest the solo filter
   excludes (dungeon, raid, pvp, rare drop, reputation, repeatable or profession;

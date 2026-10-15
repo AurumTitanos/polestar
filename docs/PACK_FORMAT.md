@@ -47,10 +47,51 @@ that breaks these rules, is a lint error; an unknown key is a warning; a `|`
 in a displayed value is a warning (it prints literally in game).
 
 The pack folder holds `pack.json`, the `.guide` files in any layout,
-`drafts/` (Recorder drafts, compiled only with `--include-drafts`) and `dist/`
-(build output). The compiler reads every `.guide` file under the folder
-except in `dist/`, `drafts/`, `node_modules/` and folders whose name starts
-with a dot.
+`via.json` (optional: the arrow waypoints, below), `drafts/` (Recorder
+drafts, compiled only with `--include-drafts`) and `dist/` (build output).
+The compiler reads every `.guide` file under the folder except in `dist/`,
+`drafts/`, `node_modules/` and folders whose name starts with a dot.
+
+### `via.json`
+
+Arrow waypoints from the navigation grid, one entry per guide leg: the walk
+into a located goal (one with `map`, `x`, `y` and no `candidates`) from the
+last located goal before it in the same guide whose conditions are the same
+or weaker (its step and goal `only` are none, or equal the goal's), when
+both lie on one continent at least 40 yards apart
+(`tools/lib/dsl/legs.js`). `node tools/polestar.js nav via` writes it on a
+machine with the grid; the route planner edits it; it is committed with the
+guides. The compiler gives each goal whose leg has points `via` and
+`viaFrom` (below).
+
+```json
+{
+	"schema": 1,
+	"source": "nav via: navigation grid of the Forever client 1.60.1.70374, built 2026-10-15T03:30:21Z",
+	"grid": { "client": "1.60.1.70374", "build": "2b65f4c6d294" },
+	"guides": {
+		"forever/alliance/dwarf-gnome/01-dun-morogh": {
+			"1426e:22.6,71.43>1426e:23.5,52.1": { "via": [[1426, 25.12, 60.4, "e", 12, "Follow the path", 0], [1426, 23.9, 53.0, "e", 8, "Enter the cave", 1]] },
+			"1426e:28.1,66.2>1426e:29.9,71.2": { "via": [], "manual": true }
+		}
+	}
+}
+```
+
+- A leg's key is `<map>[e]:<x>,<y>><map>[e]:<x>,<y>`: the start and the goal,
+  `e` for Era-frame points, coordinates with at most two decimals.
+- A point is `[map, x, y, frame ("e" Era | "l" live), r (yards), label | null, inner (0 | 1)]`;
+  `inner` marks a point past a pocket's mouth (inside a cave, up a climb or
+  a lift, in a building) that the arrow never joins from afar.
+- `via: []`: checked, no points needed. `manual: true`: edited by a person;
+  `nav via` keeps it. `hand: true` (with `via: []`, never with `manual`): a
+  hand-made crossing or approach chain serves the leg, so it gets no points.
+  A leg into or out of a guide `goto` (a point a person placed for the arrow)
+  gets no entry.
+- A file that is not JSON or breaks these rules is one compile error naming
+  it. With a `via.json`, lint and compile warn once per guide that has legs
+  without an entry ("N legs have no waypoints from the navigation grid"; legs
+  into or out of a `goto` never count); without one, nothing is said.
 
 ## The addon
 
@@ -256,8 +297,9 @@ Goal keys common to every verb: `t` (the verb), `text` (display text),
 `note`, `optional` (`true`: never blocks the step), `only` (as on a step),
 `map`, `x`, `y` (0 to 100, together), `f` (`"e"`: the Era map frame; absent:
 the live frame), `r` (arrival radius in yards), `spots` (every place the
-goal's target spawns, below; with `map`), `group` (format 2: the goal needs a
-group, below).
+goal's target spawns, below; with `map`), `via` and `viaFrom` (arrow
+waypoints, below; with `map`), `group` (format 2: the goal needs a group,
+below).
 
 | Verb `t` | Required | Optional |
 |---|---|---|
@@ -313,10 +355,12 @@ The fields:
 | `candidates` | smart targets: `{ { npc, npcName, map, x, y, f, faction, races, classes, lvl, rate, spawns } }`; Polestar picks the nearest usable one at runtime |
 | `rewards` | `{ choices = { { item, itemName, quality } }, items = { ... }, xp, money }` (money in copper) |
 | `group` | format 2: the goal needs a group, shown under it in the guide window: `{ kind = "elite", rank = 1 }` (rank 1 elite, 2 rare elite, 3 boss: "Elite: group advised"), `{ kind = "dungeon", name = "Dire Maul" }` ("Dungeon: Dire Maul"), `{ kind = "raid", name = "Molten Core" }` ("Raid: Molten Core"), `{ kind = "group", size = 3 }` ("Group of 3 advised"; without `size`, "Group advised"). The compiler derives it or takes the author's `group [N]` (GUIDE_FORMAT.md, "Group content"); Polestar shows nothing for a kind it does not know |
+| `via` | format 2: the points the arrow leads through on the way to the goal, in order: `{ { map, x, y, f, r, label, inner } }` (`f = "e"` for Era, `r` the arrival radius in yards, `label` the arrow's caption there when set, `inner = true` for a point the arrow never joins from afar); from the pack's `via.json` |
+| `viaFrom` | format 2, with `via`: `{ map, x, y, f }`, the start of the leg the points serve |
 
-Polestar 0.1.0 reads every verb above; 0.2.4 and later read the `group`
-keys. ARCHITECTURE.md ("Guide data") describes when the Engine counts each
-goal done.
+Polestar 0.1.0 reads every verb above; 0.2.4 and later read the `group`,
+`via` and `viaFrom` keys. ARCHITECTURE.md ("Guide data") describes when the
+Engine counts each goal done.
 
 ### `RegisterMapFrames(frames, packId)`
 

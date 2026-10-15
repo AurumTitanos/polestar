@@ -6,6 +6,14 @@ import { S } from './state.js';
 import { position, goalAt, MODE_NAMES } from './playback.js';
 import { verbMeta, goalIcon, pretty } from './dom.js';
 
+export const viaId = (key, i) => `v:${key}:${i}`;
+
+// What a hand-made leg is called on the map.
+export function handLabel(hm) {
+	if (hm.kind === 'goto') return 'Hand-made: a guide goto';
+	return hm.name ? `Hand-made: ${hm.name}` : 'Hand-made path';
+}
+
 const TELEPORT = 5;
 const LIFT = 10;
 const RING_VERBS = new Set(['goto', 'explore']);
@@ -25,6 +33,7 @@ export function mapController(map) {
 	let heading = 0;
 	let legsKey = null;      // { tl, i }: the step legs() last built
 	let legsOf = [];
+	let viaShown = [];        // the via items last drawn (setVia), framed by fitStep
 
 	// Track segments (j-1 -> j) grouped into polylines; segment j belongs to
 	// the step whose k0..k1 range reaches j first.
@@ -194,12 +203,14 @@ export function mapController(map) {
 			if (!byC.size && !pos) return;
 			if (byC.size && !byC.has(c)) c = [...byC.keys()][0];
 			const pts = [...(byC.get(c) || [])];
+			for (const v of viaShown) if (v.c === c) for (const p of v.pts) pts.push([p.wx, p.wy]);
 			if (pos && pos.c === c) pts.push([pos.wx, pos.wy]);
 			followHold = performance.now() + 900;
 			map.fitWorld(c, pts, { padding: 70, animate: true, maxZoom: 1.1 });
 		},
 
-		// Edit handles for the GuideView step `vstep` (every located goal).
+		// Edit handles for the GuideView step `vstep` (every located goal, and
+		// the arrow waypoints of its legs as diamonds; hand-made legs have none).
 		setHandles(vstep) {
 			if (!vstep) {
 				map.setHandles([]);
@@ -211,7 +222,32 @@ export function mapController(map) {
 				const r = RING_VERBS.has(g.verb) ? (g.compiled && g.compiled.r != null ? g.compiled.r : g.fields && g.fields.r != null ? g.fields.r : null) : null;
 				out.push({ id: g.line, c: g.world.c, wx: g.world.wx, wy: g.world.wy, r, label: pretty(g.label), kind: g.verb, tint: verbMeta(g.verb).subj, explicit: !!g.explicit, selected: g.line === S.goal });
 			}
+			if (S.layers.via) {
+				for (const g of vstep.goals) {
+					const leg = g.leg;
+					if (!leg || leg.handMade || !leg.via) continue;
+					leg.via.forEach((p, i) => {
+						if (p.c == null) return;
+						out.push({ id: viaId(leg.key, i), c: p.c, wx: p.wx, wy: p.wy, r: p.r, label: p.label || '', kind: 'via', tint: 'route-via', shape: 'diamond', explicit: !p.inner, via: { line: g.line, key: leg.key, i } });
+					});
+				}
+			}
 			map.setHandles(out);
+		},
+
+		// The arrow waypoints of the GuideView step `vstep` on the 'via' layer:
+		// each leg's dotted line through its points, a hand-made leg marked.
+		setVia(vstep) {
+			const out = [];
+			for (const g of (vstep && vstep.goals) || []) {
+				const leg = g.leg;
+				if (!leg || !g.world || leg.from.c !== g.world.c) continue;
+				const base = { key: leg.key, c: g.world.c, from: { wx: leg.from.wx, wy: leg.from.wy }, to: { wx: g.world.wx, wy: g.world.wy } };
+				if (leg.handMade) out.push({ ...base, pts: [], hand: handLabel(leg.handMade) });
+				else if (leg.via && leg.via.length) out.push({ ...base, pts: leg.via.map((p, i) => ({ id: viaId(leg.key, i), wx: p.wx, wy: p.wy, r: p.r, label: p.label, inner: p.inner })), hand: null });
+			}
+			viaShown = out;
+			map.setVia(out);
 		},
 
 		position: () => lastPos,
