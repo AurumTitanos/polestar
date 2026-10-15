@@ -7,6 +7,8 @@ faction Horde
 levels 58-60
 zone Orgrimmar
 keywords Material Assistance, The Darkreaver Menace, Sagorne Creststrider, Azerothian Diamond, Pristine Black Diamond, Divination Scryer, Death Knight Darkreaver, Great Ossuary, Scholomance, Skyfury Helm, Shaman, class quest
+reward text 200 Horde reputation
+why A Scholomance fight at 60 for Horde reputation; Forever removed the Skyfury Helm.
 
 # The level 60 Shaman chain: Material Assistance (7667: an Azerothian Diamond
 # and a Pristine Black Diamond for Sagorne Creststrider in Orgrimmar) -> The

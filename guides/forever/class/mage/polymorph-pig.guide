@@ -1,11 +1,13 @@
-guide forever/class/mage/fragmented-magic
-title Fragmented Magic
+guide forever/class/mage/polymorph-pig
+title Polymorph: Pig
 category Class
 class Mage
 folder Mage
 levels 60-60
 zone Azshara
-keywords Archmage Xylem, Sanath Lim-yo, Warlord Krellian, Prismatic Shell, Ruins of Eldarath, Temple of Zin-Malor, Spitelash, Polymorph Clone, Polymorph, pig, Mage, class spell
+keywords Fragmented Magic, Archmage Xylem, Sanath Lim-yo, Warlord Krellian, Prismatic Shell, Ruins of Eldarath, Temple of Zin-Malor, Spitelash, Polymorph Clone, Polymorph, pig, Mage, class spell
+reward spell 28272 "Polymorph: Pig"
+why A new look for Polymorph: it turns the target into a pig rather than a sheep.
 
 # Archmage Xylem's level 60 pair, both factions: Warlord Krellian (9362) and
 # Fragmented Magic (9364), which teaches the pig Polymorph (spell 28272).

@@ -7,6 +7,9 @@ faction Alliance
 levels 30-33
 zone The Barrens
 keywords Summon Felhunter, Tome of the Cabal, Seeking Strahad, Strahad Farsan, Krom Stoutarm, Moldy Tome, Tattered Manuscript, Rod of Channeling, The Binding, Warlock, class pet
+reward text Summon Felhunter
+reward item 22244
+why The felhunter, the demon to bring against spellcasters, and a Box of Souls for your shards.
 
 # The felhunter for Alliance warlocks: Seeking Strahad (1798) from your
 # trainer to Strahad Farsan in Ratchet, Tome of the Cabal (1758, 1802, 1804)

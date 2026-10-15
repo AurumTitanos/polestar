@@ -6,6 +6,8 @@ folder Mage
 levels 30-40
 zone Dustwallow Marsh
 keywords Journey to the Marsh, Tabetha, Hidden Secrets, Magus Tirth, Get the Scoop, Plucky Johnson, Rituals of Power, Scarlet Monastery, Library, Items of Power, Jade, Witherbark Totem Stick, Bolt Charged Bramble, Arathi Highlands, Icefury Wand, Nether Force Wand, Ragefire Wand, Mage, class wand
+reward item 7514 11263 7513
+why A wand of your school for the 30s: frost, arcane or fire.
 
 # Tabetha's wand chain, both factions: Journey to the Marsh (1947), Hidden
 # Secrets (1949), Get the Scoop (1950), Rituals of Power (1951), Items of Power

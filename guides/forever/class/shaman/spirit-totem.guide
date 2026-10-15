@@ -7,6 +7,8 @@ faction Horde
 levels 50-52
 zone Orgrimmar
 keywords Elemental Mastery, Mastering the Elements, Spirit Totem, Da Voodoo, Bath'rah the Windwatcher, Elemental Air, Elemental Fire, Elemental Earth, Elemental Water, Bloodshot Spider Eye, Thick Black Claw, Voodoo Feather, Sunken Temple, Temple of Atal'Hakkar, Shaman, class quest
+reward text Experience and gold
+why Experience and gold at 50, ending in the Sunken Temple; Forever removed the Classic item choice.
 
 # The level 52 Shaman chain: Elemental Mastery (8410, from Sagorne
 # Creststrider in Orgrimmar or Beram Skychaser in Thunder Bluff: one of each

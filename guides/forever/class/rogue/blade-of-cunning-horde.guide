@@ -7,6 +7,8 @@ faction Horde
 levels 10-13
 zone Durotar
 keywords Blade of Cunning, Kaplak, Therzok, The Shattered Hand, Tazan, Tazan's Satchel, Tazan's Key, Gamon, Marion Call, Mennet Carkad, The Deathstalkers, Astor Hadren, Andron Gant, Andron's Ledger, Varimathras, Rogue, class weapon
+reward item 7298
+why A dagger at 10 from your home town's rogue quests.
 
 # The Horde Rogue level 10 quests, each ending with the Blade of Cunning
 # (7298), a dagger:

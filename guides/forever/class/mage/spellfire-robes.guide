@@ -7,6 +7,8 @@ faction Horde
 levels 15-18
 zone Undercity
 keywords Anastasia Hartwell, Report to Anastasia, Investigate the Alchemist Shop, Gathering Materials, Josef Gregorian, Rift Spawn, Dalaran Mana Gem, Ambermill, Silverpine Forest, Lesser Spellfire Robes, Mage, class robe
+reward item 7510
+why A robe at 15 for Horde mages, from the Undercity and Silverpine Forest.
 
 # The Horde mage robe at 15: Report to Anastasia (1959), Investigate the
 # Alchemist Shop (1960), Gathering Materials (1961) and Spellfire Robes (1962).

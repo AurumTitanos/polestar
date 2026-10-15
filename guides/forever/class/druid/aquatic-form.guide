@@ -3,6 +3,10 @@ title Aquatic Form
 category Class
 folder Druid
 keywords Aquatic Form, A Lesson to Learn, Trial of the Lake, Trial of the Sea Lion, Pendant of the Sea Lion, Strange Lockbox, Shrine of Remulos, Idol of Shifting Tides, Moonglade, class quest
+reward text Aquatic Form
+reward item 263411
+reward item 16608
+why Your water travel form: swim fast and breathe underwater, with a belt and an idol besides.
 class Druid
 levels 16-22
 zone Moonglade

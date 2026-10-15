@@ -3,6 +3,8 @@ title Warlock Felsteed
 category Class
 folder Warlock
 keywords Summon Felsteed, Strahad Farsan, Ratchet, Warlock, class mount
+reward spell 5784 "Summon Felsteed"
+why Your own mount at 40, summoned anywhere, with no gold spent on a riding horse.
 class Warlock
 levels 40-60
 zone The Barrens
@@ -10,7 +12,9 @@ zone The Barrens
 # Summon Felsteed: your class trainer's hand-off to Strahad Farsan in Ratchet.
 # Sources: Forever client 1.60.1.70338 tables via wago.tools (Mount: the spell
 # is still a Forever mount; ItemSparse); quests.json and npcs.json for the
-# chain.
+# chain; the codex's spell data (data/forever/codex/spells.json) for
+# Summon Felsteed as a Warlock mount, the `reward` line. Lint warns that
+# spell 5784 is not in the guide data; the explicit name is the codex's.
 # The hand-off quest comes from the warlock trainers of Stormwind (Humans),
 # Ironforge (Gnomes), Orgrimmar (Orcs, Trolls) and the
 # Undercity (Undead).

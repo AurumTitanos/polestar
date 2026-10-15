@@ -10878,6 +10878,8 @@ do
 			category = "Class",
 			folder = "Druid",
 			keywords = { "Aquatic Form", "A Lesson to Learn", "Trial of the Lake", "Trial of the Sea Lion", "Pendant of the Sea Lion", "Strange Lockbox", "Shrine of Remulos", "Idol of Shifting Tides", "Moonglade", "class quest" },
+			reward = { { text = "Aquatic Form" }, { item = 263411, itemName = "Idol of Shifting Tides" }, { item = 16608, itemName = "Aquarius Belt" } },
+			why = "Your water travel form: swim fast and breathe underwater, with a belt and an idol besides.",
 			zone = 1450,
 			zoneName = "Moonglade",
 			author = "Polestar",
@@ -11012,13 +11014,15 @@ do
 		Polestar.RegisterGuide({
 			id = "forever/class/druid/bear-form",
 			pack = "guides",
-			title = "Bear Form & Teleport: Moonglade",
+			title = "Bear Form and Moonglade",
 			classes = { "DRUID" },
 			minLevel = 10,
 			maxLevel = 12,
 			category = "Class",
 			folder = "Druid",
 			keywords = { "Bear Form", "Teleport: Moonglade", "Moonglade", "Heeding the Call", "Great Bear Spirit", "Body and Heart", "Moonkin Stone", "Lunaclaw", "Child of Nature", "Great Ursera Spirit", "Strength and Mercy", "Ur'endra", "Skyborne", "class quest" },
+			reward = { { text = "Bear Form" } },
+			why = "Your tanking form: Forever no longer trains Bear Form, these quests give it. Opens Moonglade too.",
 			zone = 1450,
 			zoneName = "Moonglade",
 			author = "Polestar",
@@ -11234,6 +11238,93 @@ do
 	register()
 end
 
+-- Source: forever/class/druid/bloodpetal-poison.guide
+do
+	local function register()
+		Polestar.RegisterGuide({
+			id = "forever/class/druid/bloodpetal-poison",
+			pack = "guides",
+			title = "Bloodpetal Poison",
+			classes = { "DRUID" },
+			minLevel = 50,
+			maxLevel = 54,
+			category = "Class",
+			folder = "Druid",
+			keywords = { "Torwa Pathfinder", "Bloodpetal Poison", "Toxic Test", "A Better Ingredient", "Putrid Vine", "Atal'alarion", "Sunken Temple", "Devilsaur", "Gorishi Sting", "Bloodcap", "Un'Goro Crater", "Loganaar", "class quest" },
+			reward = { { item = 13446, itemName = "Major Healing Potion" } },
+			why = "Experience in Un'Goro at 50 and two healing potions; Forever removed the Classic item choice.",
+			zone = 1449,
+			zoneName = "Un'Goro Crater",
+			author = "Polestar",
+			version = 1,
+			group = true,
+			steps = {
+				{
+					title = "Loganaar",
+					note = "Cast Teleport: Moonglade. Loganaar stands in Nighthaven; your class trainer offers the same quest.",
+					goals = {
+						{ t = "level", level = 50 },
+						{ t = "accept", quest = 9063, title = "Torwa Pathfinder", npc = 12042, npcName = "Loganaar", minLevel = 50, qlvl = 52, closedBy = { 9052 }, preTitles = { [9052] = "Bloodpetal Poison" }, map = 1450, x = 52.53, y = 40.57, f = "e", note = "Loganaar" },
+					},
+				},
+				{
+					title = "Torwa Pathfinder",
+					note = "Fly to Gadgetzan, ride west to the long ramp down into Un'Goro Crater: Torwa camps at its foot, in the south-east corner of the crater.",
+					goals = {
+						{ t = "turnin", quest = 9063, title = "Torwa Pathfinder", npc = 9619, npcName = "Torwa Pathfinder", map = 1449, x = 71.64, y = 75.96, f = "e", note = "Torwa Pathfinder" },
+						{ t = "accept", quest = 9052, title = "Bloodpetal Poison", npc = 9619, npcName = "Torwa Pathfinder", minLevel = 50, qlvl = 52, map = 1449, x = 71.64, y = 75.96, f = "e" },
+					},
+				},
+				{
+					title = "Gorishi Stings and Bloodcap",
+					note = "The Gorishi wasps, workers and reavers of the hive in the south of the crater drop the stings; the Bloodpetal Sprouts that give the Bloodcap grow all over the crater's western half.",
+					goals = {
+						{ t = "collect", quest = 9052, title = "Bloodpetal Poison", item = 22435, itemName = "Gorishi Sting", count = 8, oi = 1, map = 1449, x = 43.85, y = 81.39, f = "e", note = "Gorishi Sting" },
+						{ t = "collect", quest = 9052, title = "Bloodpetal Poison", item = 22434, itemName = "Bloodcap", count = 8, oi = 2, map = 1449, x = 35.92, y = 78.74, f = "e", spots = { { x = 41.1, y = 75.3, r = 210, n = 5 }, { x = 31.3, y = 67, r = 161, n = 5 }, { x = 27.1, y = 52.8, r = 170, n = 6 }, { x = 28.6, y = 37.1, r = 146, n = 3 }, { x = 36.6, y = 24.9, r = 162, n = 6 }, { x = 45.9, y = 21.5, r = 127, n = 3 }, { x = 63.8, y = 21.8, r = 188, n = 6 }, { x = 61.5, y = 41.5, r = 114, n = 2 }, { x = 73.1, y = 39.3, r = 128, n = 3 }, { x = 73.7, y = 63.1, r = 114, n = 2 }, { x = 56.9, y = 67.2, r = 114, n = 1 }, { x = 41.4, y = 50.3, r = 114, n = 1 }, { x = 41.2, y = 63.2, r = 145, n = 3, alt = true }, { x = 50.3, y = 69.9, r = 114, n = 2, alt = true }, { x = 34.6, y = 41.7, r = 123, n = 4, alt = true }, { x = 45.7, y = 37.7, r = 168, n = 4, alt = true }, { x = 67.1, y = 71.5, r = 168, n = 4, alt = true }, { x = 55.1, y = 33, r = 155, n = 3, alt = true }, { x = 72.9, y = 52.7, r = 136, n = 5, alt = true }, { x = 66.7, y = 31.7, r = 151, n = 3, alt = true }, { x = 52.3, y = 15.3, r = 162, n = 4, alt = true } }, spread = true, note = "Bloodcap" },
+					},
+				},
+				{
+					title = "Torwa Pathfinder",
+					goals = {
+						{ t = "turnin", quest = 9052, title = "Bloodpetal Poison", npc = 9619, npcName = "Torwa Pathfinder", map = 1449, x = 71.64, y = 75.96, f = "e", note = "Torwa Pathfinder" },
+						{ t = "accept", quest = 9051, title = "Toxic Test", npc = 9619, npcName = "Torwa Pathfinder", minLevel = 50, qlvl = 52, pre = { 9052 }, preTitles = { [9052] = "Bloodpetal Poison" }, map = 1449, x = 71.64, y = 75.96, f = "e" },
+					},
+				},
+				{
+					title = "Toxic Test",
+					note = "Use the Devilsaur Barb on a Devilsaur. Devilsaurs are elite (level 54-55) and roam the crater: grouping up is advised.",
+					goals = {
+						{ t = "kill", quest = 9051, title = "Toxic Test", target = "Devilsaur", npc = 6498, count = 1, oi = 1, map = 1449, x = 57.26, y = 23.68, f = "e", spots = { { x = 57.3, y = 23.7, r = 15, n = 1 }, { x = 34.6, y = 22.4, r = 15, n = 1 }, { x = 31.2, y = 36.4, r = 15, n = 1 } }, spread = true, note = "Devilsaur: stab it with the Devilsaur Barb", group = { kind = "elite", rank = 1 } },
+					},
+				},
+				{
+					title = "Torwa Pathfinder",
+					goals = {
+						{ t = "turnin", quest = 9051, title = "Toxic Test", npc = 9619, npcName = "Torwa Pathfinder", map = 1449, x = 71.64, y = 75.96, f = "e", note = "Torwa Pathfinder" },
+						{ t = "accept", quest = 9053, title = "A Better Ingredient", npc = 9619, npcName = "Torwa Pathfinder", minLevel = 50, qlvl = 52, pre = { 9051 }, preTitles = { [9051] = "Toxic Test" }, map = 1449, x = 71.64, y = 75.96, f = "e" },
+					},
+				},
+				{
+					title = "The Sunken Temple",
+					note = "The Temple of Atal'Hakkar lies in the Pool of Tears in the Swamp of Sorrows. Atal'alarion guards the bottom of the temple: a dungeon boss, so bring a group.",
+					goals = {
+						{ t = "goto", text = "The Temple of Atal'Hakkar", map = 1435, x = 69.9, y = 53.6, f = "e" },
+						{ t = "collect", quest = 9053, title = "A Better Ingredient", item = 22444, itemName = "Putrid Vine", count = 1, oi = 1, map = 1435, x = 69.9, y = 53.6, f = "e", note = "Putrid Vine: Atal'alarion", group = { kind = "elite", rank = 1 } },
+					},
+				},
+				{
+					title = "A Better Ingredient",
+					note = "Back to Torwa in the south-east corner of Un'Goro Crater.",
+					goals = {
+						{ t = "turnin", quest = 9053, title = "A Better Ingredient", npc = 9619, npcName = "Torwa Pathfinder", map = 1449, x = 71.64, y = 75.96, f = "e", note = "Torwa Pathfinder" },
+					},
+				},
+			},
+		})
+	end
+	register()
+end
+
 -- Source: forever/class/druid/cat-form.guide
 do
 	local function register()
@@ -11247,6 +11338,8 @@ do
 			category = "Class",
 			folder = "Druid",
 			keywords = { "Cat Form", "The Great Cat Spirit", "The Great Windborne Cat Spirit", "Avatar of Saeyleenan", "Blessings of the Great Cat Spirit", "Stormrage Barrow Dens", "Relic of the Fang", "Relic of the Claw", "Relic of the Silent Shadow", "Moonglade", "Skyborne", "class quest" },
+			reward = { { text = "Cat Form" } },
+			why = "Your stealth and melee form: in Forever this chain gives Cat Form at 20, not the trainer.",
 			zone = 1450,
 			zoneName = "Moonglade",
 			author = "Polestar",
@@ -11389,6 +11482,8 @@ do
 			category = "Class",
 			folder = "Druid",
 			keywords = { "Cure Poison", "Lessons Anew", "The Principal Source", "Gathering the Cure", "Curing the Sick", "Power over Poison", "Sickly Deer", "Sickly Gazelle", "Moonglade", "class quest" },
+			reward = { { text = "Cure Poison" }, { item = 15866, itemName = "Veildust Medicine Bag" } },
+			why = "Cure Poison is no longer trained in Forever: this chain teaches it, with a medicine bag on the way.",
 			zone = 1450,
 			zoneName = "Moonglade",
 			author = "Polestar",
@@ -11558,98 +11653,13 @@ do
 	register()
 end
 
--- Source: forever/class/druid/torwa-pathfinder.guide
-do
-	local function register()
-		Polestar.RegisterGuide({
-			id = "forever/class/druid/torwa-pathfinder",
-			pack = "guides",
-			title = "Torwa Pathfinder: Bloodpetal Poison",
-			classes = { "DRUID" },
-			minLevel = 50,
-			maxLevel = 54,
-			category = "Class",
-			folder = "Druid",
-			keywords = { "Torwa Pathfinder", "Bloodpetal Poison", "Toxic Test", "A Better Ingredient", "Putrid Vine", "Atal'alarion", "Sunken Temple", "Devilsaur", "Gorishi Sting", "Bloodcap", "Un'Goro Crater", "Loganaar", "class quest" },
-			zone = 1449,
-			zoneName = "Un'Goro Crater",
-			author = "Polestar",
-			version = 1,
-			group = true,
-			steps = {
-				{
-					title = "Loganaar",
-					note = "Cast Teleport: Moonglade. Loganaar stands in Nighthaven; your class trainer offers the same quest.",
-					goals = {
-						{ t = "level", level = 50 },
-						{ t = "accept", quest = 9063, title = "Torwa Pathfinder", npc = 12042, npcName = "Loganaar", minLevel = 50, qlvl = 52, closedBy = { 9052 }, preTitles = { [9052] = "Bloodpetal Poison" }, map = 1450, x = 52.53, y = 40.57, f = "e", note = "Loganaar" },
-					},
-				},
-				{
-					title = "Torwa Pathfinder",
-					note = "Fly to Gadgetzan, ride west to the long ramp down into Un'Goro Crater: Torwa camps at its foot, in the south-east corner of the crater.",
-					goals = {
-						{ t = "turnin", quest = 9063, title = "Torwa Pathfinder", npc = 9619, npcName = "Torwa Pathfinder", map = 1449, x = 71.64, y = 75.96, f = "e", note = "Torwa Pathfinder" },
-						{ t = "accept", quest = 9052, title = "Bloodpetal Poison", npc = 9619, npcName = "Torwa Pathfinder", minLevel = 50, qlvl = 52, map = 1449, x = 71.64, y = 75.96, f = "e" },
-					},
-				},
-				{
-					title = "Gorishi Stings and Bloodcap",
-					note = "The Gorishi wasps, workers and reavers of the hive in the south of the crater drop the stings; the Bloodpetal Sprouts that give the Bloodcap grow all over the crater's western half.",
-					goals = {
-						{ t = "collect", quest = 9052, title = "Bloodpetal Poison", item = 22435, itemName = "Gorishi Sting", count = 8, oi = 1, map = 1449, x = 43.85, y = 81.39, f = "e", note = "Gorishi Sting" },
-						{ t = "collect", quest = 9052, title = "Bloodpetal Poison", item = 22434, itemName = "Bloodcap", count = 8, oi = 2, map = 1449, x = 35.92, y = 78.74, f = "e", spots = { { x = 41.1, y = 75.3, r = 210, n = 5 }, { x = 31.3, y = 67, r = 161, n = 5 }, { x = 27.1, y = 52.8, r = 170, n = 6 }, { x = 28.6, y = 37.1, r = 146, n = 3 }, { x = 36.6, y = 24.9, r = 162, n = 6 }, { x = 45.9, y = 21.5, r = 127, n = 3 }, { x = 63.8, y = 21.8, r = 188, n = 6 }, { x = 61.5, y = 41.5, r = 114, n = 2 }, { x = 73.1, y = 39.3, r = 128, n = 3 }, { x = 73.7, y = 63.1, r = 114, n = 2 }, { x = 56.9, y = 67.2, r = 114, n = 1 }, { x = 41.4, y = 50.3, r = 114, n = 1 }, { x = 41.2, y = 63.2, r = 145, n = 3, alt = true }, { x = 50.3, y = 69.9, r = 114, n = 2, alt = true }, { x = 34.6, y = 41.7, r = 123, n = 4, alt = true }, { x = 45.7, y = 37.7, r = 168, n = 4, alt = true }, { x = 67.1, y = 71.5, r = 168, n = 4, alt = true }, { x = 55.1, y = 33, r = 155, n = 3, alt = true }, { x = 72.9, y = 52.7, r = 136, n = 5, alt = true }, { x = 66.7, y = 31.7, r = 151, n = 3, alt = true }, { x = 52.3, y = 15.3, r = 162, n = 4, alt = true } }, spread = true, note = "Bloodcap" },
-					},
-				},
-				{
-					title = "Torwa Pathfinder",
-					goals = {
-						{ t = "turnin", quest = 9052, title = "Bloodpetal Poison", npc = 9619, npcName = "Torwa Pathfinder", map = 1449, x = 71.64, y = 75.96, f = "e", note = "Torwa Pathfinder" },
-						{ t = "accept", quest = 9051, title = "Toxic Test", npc = 9619, npcName = "Torwa Pathfinder", minLevel = 50, qlvl = 52, pre = { 9052 }, preTitles = { [9052] = "Bloodpetal Poison" }, map = 1449, x = 71.64, y = 75.96, f = "e" },
-					},
-				},
-				{
-					title = "Toxic Test",
-					note = "Use the Devilsaur Barb on a Devilsaur. Devilsaurs are elite (level 54-55) and roam the crater: grouping up is advised.",
-					goals = {
-						{ t = "kill", quest = 9051, title = "Toxic Test", target = "Devilsaur", npc = 6498, count = 1, oi = 1, map = 1449, x = 57.26, y = 23.68, f = "e", spots = { { x = 57.3, y = 23.7, r = 15, n = 1 }, { x = 34.6, y = 22.4, r = 15, n = 1 }, { x = 31.2, y = 36.4, r = 15, n = 1 } }, spread = true, note = "Devilsaur: stab it with the Devilsaur Barb", group = { kind = "elite", rank = 1 } },
-					},
-				},
-				{
-					title = "Torwa Pathfinder",
-					goals = {
-						{ t = "turnin", quest = 9051, title = "Toxic Test", npc = 9619, npcName = "Torwa Pathfinder", map = 1449, x = 71.64, y = 75.96, f = "e", note = "Torwa Pathfinder" },
-						{ t = "accept", quest = 9053, title = "A Better Ingredient", npc = 9619, npcName = "Torwa Pathfinder", minLevel = 50, qlvl = 52, pre = { 9051 }, preTitles = { [9051] = "Toxic Test" }, map = 1449, x = 71.64, y = 75.96, f = "e" },
-					},
-				},
-				{
-					title = "The Sunken Temple",
-					note = "The Temple of Atal'Hakkar lies in the Pool of Tears in the Swamp of Sorrows. Atal'alarion guards the bottom of the temple: a dungeon boss, so bring a group.",
-					goals = {
-						{ t = "goto", text = "The Temple of Atal'Hakkar", map = 1435, x = 69.9, y = 53.6, f = "e" },
-						{ t = "collect", quest = 9053, title = "A Better Ingredient", item = 22444, itemName = "Putrid Vine", count = 1, oi = 1, map = 1435, x = 69.9, y = 53.6, f = "e", note = "Putrid Vine: Atal'alarion", group = { kind = "elite", rank = 1 } },
-					},
-				},
-				{
-					title = "A Better Ingredient",
-					note = "Back to Torwa in the south-east corner of Un'Goro Crater.",
-					goals = {
-						{ t = "turnin", quest = 9053, title = "A Better Ingredient", npc = 9619, npcName = "Torwa Pathfinder", map = 1449, x = 71.64, y = 75.96, f = "e", note = "Torwa Pathfinder" },
-					},
-				},
-			},
-		})
-	end
-	register()
-end
-
 -- Source: forever/class/hunter/rhokdelar.guide
 do
 	local function register()
 		Polestar.RegisterGuide({
 			id = "forever/class/hunter/rhokdelar",
 			pack = "guides",
-			title = "Stave of the Ancients (Rhok'delar)",
+			title = "Rhok'delar and Lok'delar",
 			classes = { "HUNTER" },
 			minLevel = 60,
 			maxLevel = 60,
@@ -11657,6 +11667,8 @@ do
 			folder = "Hunter",
 			keywords = { "Rhok'delar", "Lok'delar", "Ancient Sinew Wrapped Lamina", "Stave of the Ancients", "A Proper String", "Vartrus the Ancient", "Ancient Petrified Leaf", "Molten Core", "Onyxia", "Azuregos", "epic bow", "class quest" },
 			collects = { 18707, 18724, 18714 },
+			reward = { { item = 18707, itemName = "Ancient Rune Etched Stave" }, { item = 18724, itemName = "Enchanted Black Dragon Sinew" }, { item = 18714, itemName = "Ancient Sinew Wrapped Lamina" } },
+			why = "The hunter's epic bow chain: in Classic the stave and sinew became Rhok'delar and Lok'delar (unconfirmed in Forever).",
 			zone = 1448,
 			zoneName = "Felwood",
 			author = "Polestar",
@@ -11768,6 +11780,8 @@ do
 			category = "Class",
 			folder = "Hunter",
 			keywords = { "Ogtinc", "Courser Antlers", "Wavethrashing", "The Green Drake", "Morphaz", "Sunken Temple", "Temple of Atal'Hakkar", "Azshara", "class quest" },
+			reward = { { text = "Experience" } },
+			why = "Experience at 50 through Azshara and the Sunken Temple; Forever removed the Classic item choice.",
 			zone = 1447,
 			zoneName = "Azshara",
 			author = "Polestar",
@@ -11855,13 +11869,15 @@ do
 		Polestar.RegisterGuide({
 			id = "forever/class/mage/arcane-refreshment",
 			pack = "guides",
-			title = "Arcane Refreshment",
+			title = "Conjure Water (Arcane Refreshment)",
 			classes = { "MAGE" },
 			minLevel = 60,
 			maxLevel = 60,
 			category = "Class",
 			folder = "Mage",
-			keywords = { "Conjure Water", "Lorekeeper Lydros", "Athenaeum", "Hydrospawn", "Hydrospawn Essence", "Warpwood Quarter", "Dire Maul", "Shen'dralar", "Mage", "class spell" },
+			keywords = { "Arcane Refreshment", "Conjure Water", "Lorekeeper Lydros", "Athenaeum", "Hydrospawn", "Hydrospawn Essence", "Warpwood Quarter", "Dire Maul", "Shen'dralar", "Mage", "class spell" },
+			reward = { { spell = 10140, spellName = "Conjure Water" }, { text = "Shen'dralar reputation" } },
+			why = "The level 60 Conjure Water, from a Dire Maul library: drink for you and your group.",
 			zone = 1444,
 			zoneName = "Feralas",
 			author = "Polestar",
@@ -11910,6 +11926,8 @@ do
 			category = "Class",
 			folder = "Mage",
 			keywords = { "High Sorcerer Andromath", "Ur's Treatise on Shadow Magic", "Tower of Ilgalar", "Redridge Mountains", "Pristine Spider Silk", "Carrion Recluse", "Duskwood", "Wynne Larson", "Astral Knot Robe", "Astral Knot Blouse", "Mage", "class robe" },
+			reward = { { item = 7511, itemName = "Astral Knot Robe", choice = true }, { item = 9516, itemName = "Astral Knot Blouse", choice = true } },
+			why = "A robe or a blouse for Human and Gnome mages in their late 20s.",
 			zone = 1453,
 			zoneName = "Stormwind City",
 			author = "Polestar",
@@ -11983,13 +12001,15 @@ do
 		Polestar.RegisterGuide({
 			id = "forever/class/mage/celestial-orb",
 			pack = "guides",
-			title = "Celestial Power",
+			title = "Celestial Orb and Stave",
 			classes = { "MAGE" },
 			minLevel = 35,
 			maxLevel = 40,
 			category = "Class",
 			folder = "Mage",
 			keywords = { "Return to the Marsh", "Tabetha", "The Infernal Orb", "Burning Blade Summoner", "Mannoroc Coven", "Desolace", "The Exorcism", "Demon of the Orb", "Power in Uldaman", "Obsidian Sentinel", "Uldaman", "Mana Surges", "Celestial Power", "Celestial Orb", "Celestial Stave", "Mage", "class weapon" },
+			reward = { { item = 7515, itemName = "Celestial Orb", choice = true }, { item = 9517, itemName = "Celestial Stave", choice = true } },
+			why = "An off-hand orb or a staff for the late 30s, your pick.",
 			zone = 1445,
 			zoneName = "Dustwallow Marsh",
 			author = "Polestar",
@@ -12078,6 +12098,8 @@ do
 			category = "Class",
 			folder = "Mage",
 			keywords = { "Magecraft", "Archmage Xylem", "Sanath Lim-yo", "Magic Dust", "Glittering Dust", "Blood Elf", "The Siren's Coral", "Enchanted Coral", "Spitelash Siren", "Destroy Morphaz", "Arcane Shard", "Sunken Temple", "Temple of Atal'Hakkar", "Mage" },
+			reward = { { text = "Experience" } },
+			why = "Experience at 50 through Azshara and the Sunken Temple; Forever removed the Classic item choice.",
 			zone = 1447,
 			zoneName = "Azshara",
 			author = "Polestar",
@@ -12160,67 +12182,6 @@ do
 	register()
 end
 
--- Source: forever/class/mage/fragmented-magic.guide
-do
-	local function register()
-		Polestar.RegisterGuide({
-			id = "forever/class/mage/fragmented-magic",
-			pack = "guides",
-			title = "Fragmented Magic",
-			classes = { "MAGE" },
-			minLevel = 60,
-			maxLevel = 60,
-			category = "Class",
-			folder = "Mage",
-			keywords = { "Archmage Xylem", "Sanath Lim-yo", "Warlord Krellian", "Prismatic Shell", "Ruins of Eldarath", "Temple of Zin-Malor", "Spitelash", "Polymorph Clone", "Polymorph", "pig", "Mage", "class spell" },
-			zone = 1447,
-			zoneName = "Azshara",
-			author = "Polestar",
-			version = 1,
-			steps = {
-				{
-					title = "Sanath Lim-yo",
-					note = "Fly to Talrendis Point (Alliance) or Valormok (Horde). Sanath Lim-yo camps below Archmage Xylem's tower: from the fork of Azshara's main road at the Ruins of Eldarath, head straight north to the cliffs. He teleports you up to the Archmage.",
-					goals = {
-						{ t = "level", level = 60 },
-						{ t = "accept", quest = 9362, title = "Warlord Krellian", npc = 8379, npcName = "Archmage Xylem", minLevel = 60, qlvl = 60, map = 1447, x = 29.25, y = 40.21, f = "e", note = "Archmage Xylem" },
-					},
-				},
-				{
-					title = "Warlord Krellian",
-					note = "Krellian hides behind his Spitelash guards in the Temple of Zin-Malor, the biggest building in the middle of the Ruins of Eldarath. He drops the Prismatic Shell.",
-					goals = {
-						{ t = "collect", quest = 9362, title = "Warlord Krellian", item = 23250, itemName = "Prismatic Shell", count = 1, oi = 1, map = 1447, x = 41.02, y = 53.05, f = "e", note = "Prismatic Shell: Warlord Krellian" },
-					},
-				},
-				{
-					title = "Archmage Xylem",
-					note = "Back to Sanath Lim-yo and up to the tower.",
-					goals = {
-						{ t = "turnin", quest = 9362, title = "Warlord Krellian", npc = 8379, npcName = "Archmage Xylem", map = 1447, x = 29.25, y = 40.21, f = "e", note = "Archmage Xylem" },
-						{ t = "accept", quest = 9364, title = "Fragmented Magic", npc = 8379, npcName = "Archmage Xylem", minLevel = 60, qlvl = 60, pre = { 9362 }, preTitles = { [9362] = "Warlord Krellian" }, map = 1447, x = 29.25, y = 40.21, f = "e" },
-					},
-				},
-				{
-					title = "Polymorph Clones",
-					note = "Carry the Prismatic Shell back to the Ruins of Eldarath. Polymorph a Spitelash naga and wait a few seconds: it splits into small Polymorph Clones. Kill the clones quickly; the shell collects their essence.",
-					goals = {
-						{ t = "kill", quest = 9364, title = "Fragmented Magic", target = "Polymorph Clone", npc = 16479, count = 50, oi = 1, map = 1447, x = 29.94, y = 53.51, f = "e", spots = { { x = 29.9, y = 53.5, r = 15, n = 1 }, { x = 36.2, y = 54.6, r = 15, n = 1 } }, note = "Polymorph Clone" },
-					},
-				},
-				{
-					title = "Fragmented Magic",
-					note = "Back to Sanath Lim-yo and up to the tower.",
-					goals = {
-						{ t = "turnin", quest = 9364, title = "Fragmented Magic", npc = 8379, npcName = "Archmage Xylem", map = 1447, x = 29.25, y = 40.21, f = "e", note = "Archmage Xylem: Polymorph (pig)" },
-					},
-				},
-			},
-		})
-	end
-	register()
-end
-
 -- Source: forever/class/mage/ju-ju-heaps.guide
 do
 	local function register()
@@ -12235,6 +12196,8 @@ do
 			category = "Class",
 			folder = "Mage",
 			keywords = { "Un'thuwa", "Uthel'nay", "Thurston Xane", "Sen'jin Village", "Echo Isles", "Zalazane", "Ley Staff", "Ley Orb", "Mage", "class weapon" },
+			reward = { { item = 9513, itemName = "Ley Staff", choice = true }, { item = 7508, itemName = "Ley Orb", choice = true } },
+			why = "A staff or an orb at 10 for Horde mages, worth a short trip back to the Echo Isles.",
 			zone = 1411,
 			zoneName = "Durotar",
 			author = "Polestar",
@@ -12279,6 +12242,8 @@ do
 			category = "Class",
 			folder = "Mage",
 			keywords = { "Journey to the Marsh", "Tabetha", "Hidden Secrets", "Magus Tirth", "Get the Scoop", "Plucky Johnson", "Rituals of Power", "Scarlet Monastery", "Library", "Items of Power", "Jade", "Witherbark Totem Stick", "Bolt Charged Bramble", "Arathi Highlands", "Icefury Wand", "Nether Force Wand", "Ragefire Wand", "Mage", "class wand" },
+			reward = { { item = 7514, itemName = "Icefury Wand", choice = true }, { item = 11263, itemName = "Nether Force Wand", choice = true }, { item = 7513, itemName = "Ragefire Wand", choice = true } },
+			why = "A wand of your school for the 30s: frost, arcane or fire.",
 			zone = 1445,
 			zoneName = "Dustwallow Marsh",
 			author = "Polestar",
@@ -12378,6 +12343,8 @@ do
 			category = "Class",
 			folder = "Mage",
 			keywords = { "Jennea Cannon", "Investigate the Blue Recluse", "Gathering Materials", "Wynne Larson", "Rift Spawn", "Charged Rift Gem", "Silver Stream Mine", "Loch Modan", "Manaweave Robe", "Mage", "class robe" },
+			reward = { { item = 7509, itemName = "Manaweave Robe" } },
+			why = "A robe at 15 for Alliance mages, from Stormwind and Loch Modan.",
 			zone = 1453,
 			zoneName = "Stormwind City",
 			author = "Polestar",
@@ -12471,6 +12438,8 @@ do
 			category = "Class",
 			folder = "Mage",
 			keywords = { "Anastasia Hartwell", "Speak with Deino", "Waters of Xavian", "Laughing Sisters", "Raynewood Retreat", "Ashenvale", "Kil'hala", "Crossroads", "Nether-lace Robe", "Nether-lace Tunic", "Mage", "class robe" },
+			reward = { { item = 7512, itemName = "Nether-lace Robe", choice = true }, { item = 9515, itemName = "Nether-lace Tunic", choice = true } },
+			why = "A robe or a tunic for Undead and Troll mages in their late 20s.",
 			zone = 1454,
 			zoneName = "Orgrimmar",
 			author = "Polestar",
@@ -12528,6 +12497,69 @@ do
 	register()
 end
 
+-- Source: forever/class/mage/polymorph-pig.guide
+do
+	local function register()
+		Polestar.RegisterGuide({
+			id = "forever/class/mage/polymorph-pig",
+			pack = "guides",
+			title = "Polymorph: Pig",
+			classes = { "MAGE" },
+			minLevel = 60,
+			maxLevel = 60,
+			category = "Class",
+			folder = "Mage",
+			keywords = { "Fragmented Magic", "Archmage Xylem", "Sanath Lim-yo", "Warlord Krellian", "Prismatic Shell", "Ruins of Eldarath", "Temple of Zin-Malor", "Spitelash", "Polymorph Clone", "Polymorph", "pig", "Mage", "class spell" },
+			reward = { { spell = 28272, spellName = "Polymorph: Pig" } },
+			why = "A new look for Polymorph: it turns the target into a pig rather than a sheep.",
+			zone = 1447,
+			zoneName = "Azshara",
+			author = "Polestar",
+			version = 1,
+			steps = {
+				{
+					title = "Sanath Lim-yo",
+					note = "Fly to Talrendis Point (Alliance) or Valormok (Horde). Sanath Lim-yo camps below Archmage Xylem's tower: from the fork of Azshara's main road at the Ruins of Eldarath, head straight north to the cliffs. He teleports you up to the Archmage.",
+					goals = {
+						{ t = "level", level = 60 },
+						{ t = "accept", quest = 9362, title = "Warlord Krellian", npc = 8379, npcName = "Archmage Xylem", minLevel = 60, qlvl = 60, map = 1447, x = 29.25, y = 40.21, f = "e", note = "Archmage Xylem" },
+					},
+				},
+				{
+					title = "Warlord Krellian",
+					note = "Krellian hides behind his Spitelash guards in the Temple of Zin-Malor, the biggest building in the middle of the Ruins of Eldarath. He drops the Prismatic Shell.",
+					goals = {
+						{ t = "collect", quest = 9362, title = "Warlord Krellian", item = 23250, itemName = "Prismatic Shell", count = 1, oi = 1, map = 1447, x = 41.02, y = 53.05, f = "e", note = "Prismatic Shell: Warlord Krellian" },
+					},
+				},
+				{
+					title = "Archmage Xylem",
+					note = "Back to Sanath Lim-yo and up to the tower.",
+					goals = {
+						{ t = "turnin", quest = 9362, title = "Warlord Krellian", npc = 8379, npcName = "Archmage Xylem", map = 1447, x = 29.25, y = 40.21, f = "e", note = "Archmage Xylem" },
+						{ t = "accept", quest = 9364, title = "Fragmented Magic", npc = 8379, npcName = "Archmage Xylem", minLevel = 60, qlvl = 60, pre = { 9362 }, preTitles = { [9362] = "Warlord Krellian" }, map = 1447, x = 29.25, y = 40.21, f = "e" },
+					},
+				},
+				{
+					title = "Polymorph Clones",
+					note = "Carry the Prismatic Shell back to the Ruins of Eldarath. Polymorph a Spitelash naga and wait a few seconds: it splits into small Polymorph Clones. Kill the clones quickly; the shell collects their essence.",
+					goals = {
+						{ t = "kill", quest = 9364, title = "Fragmented Magic", target = "Polymorph Clone", npc = 16479, count = 50, oi = 1, map = 1447, x = 29.94, y = 53.51, f = "e", spots = { { x = 29.9, y = 53.5, r = 15, n = 1 }, { x = 36.2, y = 54.6, r = 15, n = 1 } }, note = "Polymorph Clone" },
+					},
+				},
+				{
+					title = "Fragmented Magic",
+					note = "Back to Sanath Lim-yo and up to the tower.",
+					goals = {
+						{ t = "turnin", quest = 9364, title = "Fragmented Magic", npc = 8379, npcName = "Archmage Xylem", map = 1447, x = 29.25, y = 40.21, f = "e", note = "Archmage Xylem: Polymorph (pig)" },
+					},
+				},
+			},
+		})
+	end
+	register()
+end
+
 -- Source: forever/class/mage/spellfire-robes.guide
 do
 	local function register()
@@ -12542,6 +12574,8 @@ do
 			category = "Class",
 			folder = "Mage",
 			keywords = { "Anastasia Hartwell", "Report to Anastasia", "Investigate the Alchemist Shop", "Gathering Materials", "Josef Gregorian", "Rift Spawn", "Dalaran Mana Gem", "Ambermill", "Silverpine Forest", "Lesser Spellfire Robes", "Mage", "class robe" },
+			reward = { { item = 7510, itemName = "Lesser Spellfire Robes" } },
+			why = "A robe at 15 for Horde mages, from the Undercity and Silverpine Forest.",
 			zone = 1458,
 			zoneName = "Undercity",
 			author = "Polestar",
@@ -12635,6 +12669,8 @@ do
 			folder = "Paladin",
 			keywords = { "A Strange Artifact", "Strange Orb", "Althalaxx Orb", "Tower of Althalaxx", "Delgren the Purifier", "Katherine the Pure", "Ursula Deline", "Summoner's Salt", "Mote of Mannoroth", "Spear of Mannoroth", "Demon Fall Canyon", "Divine Storm", "Paladin", "class quest" },
 			collects = { 277205 },
+			reward = { { item = 277205, itemName = "Cloak of the Divine Storm" } },
+			why = "A rare cloak at 30 from the old Divine Storm story; for now only Alliance paladins can finish it.",
 			zone = 1439,
 			zoneName = "Darkshore",
 			author = "Polestar",
@@ -12713,13 +12749,13 @@ do
 	register()
 end
 
--- Source: forever/class/paladin/forging-the-mightstone.guide
+-- Source: forever/class/paladin/holy-mightstone.guide
 do
 	local function register()
 		Polestar.RegisterGuide({
-			id = "forever/class/paladin/forging-the-mightstone",
+			id = "forever/class/paladin/holy-mightstone",
 			pack = "guides",
-			title = "Forging the Mightstone",
+			title = "Holy Mightstone",
 			faction = "Alliance",
 			classes = { "PALADIN" },
 			minLevel = 50,
@@ -12728,6 +12764,8 @@ do
 			folder = "Paladin",
 			keywords = { "Chillwind Point", "Dispelling Evil", "Inert Scourgestones", "Forging the Mightstone", "Holy Mightstone", "Commander Ashlam Valorfist", "High Priest Thel'danis", "Lord Grayson Shadowbreaker", "Brandur Ironhammer", "Minion's Scourgestone", "Voodoo Feather", "Sunken Temple", "Paladin", "class quest" },
 			collects = { 20620 },
+			reward = { { item = 20620, itemName = "Holy Mightstone" } },
+			why = "A one-use stone that makes you much stronger against undead for 10 minutes; the old choice rewards are gone.",
 			zone = 1453,
 			zoneName = "Stormwind City",
 			author = "Polestar",
@@ -12808,7 +12846,7 @@ do
 		Polestar.RegisterGuide({
 			id = "forever/class/paladin/lumina-windsinger",
 			pack = "guides",
-			title = "Lumina Windsinger",
+			title = "Rescuing Lumina Windsinger",
 			faction = "Horde",
 			races = { "Scourge" },
 			classes = { "PALADIN" },
@@ -12817,6 +12855,8 @@ do
 			category = "Class",
 			folder = "Paladin",
 			keywords = { "Lumina Windsinger", "Diplomatic Incident", "Trevan Rol", "Earthen Ring", "Fenris Isle", "Fenris Keep", "The Windshaper's Wrath", "The Debt", "Danitha Morr", "Forsaken Paladin", "class quest" },
+			reward = { { text = "Undercity and Earthen Ring reputation" } },
+			why = "No item yet: a Forsaken paladin rescue story; its sequel, the Moonsilver Blade, cannot be finished yet.",
 			zone = 1420,
 			zoneName = "Tirisfal Glades",
 			author = "Polestar",
@@ -12894,6 +12934,8 @@ do
 			category = "Class",
 			folder = "Paladin",
 			keywords = { "Tyr's Watch", "Bandarion Keep", "Danitha Morr", "Breton Samuels", "Shari Stilwell", "A Lesson in Divinity", "Redemption", "Symbol of Life", "Rudolph Gelhardt", "Forsaken Paladin", "class quest" },
+			reward = { { text = "Redemption" }, { item = 246164, itemName = "Skullthumper", choice = true }, { item = 246165, itemName = "Driftwood Smasher", choice = true }, { item = 246265, itemName = "Salvaged Wooden Tower Shield" } },
+			why = "Redemption to raise fallen allies, plus a weapon and a shield for a new Forsaken paladin.",
 			zone = 1420,
 			zoneName = "Tirisfal Glades",
 			author = "Polestar",
@@ -13045,6 +13087,8 @@ do
 			folder = "Paladin",
 			keywords = { "The Tome of Valor", "The Test of Righteousness", "Verigan's Fist", "Bastion of Stormwind", "Duthorian Rall", "Tiza Battleforge", "Daphne Stilwell", "Jordan Stilwell", "Bailor Stonehand", "Thundris Windweaver", "Seeking the Kor Gem", "Whitestone Oak Lumber", "Jordan's Smithing Hammer", "Deadmines", "Shadowfang Keep", "Blackfathom Deeps", "Paladin", "class weapon" },
 			collects = { 9607, 6953 },
+			reward = { { item = 6953, itemName = "Verigan's Fist" }, { item = 9607, itemName = "Bastion of Stormwind" } },
+			why = "The Alliance paladin's rare two-handed mace for the 20s, with a shield on the way.",
 			zone = 1453,
 			zoneName = "Stormwind City",
 			author = "Polestar",
@@ -13180,7 +13224,7 @@ do
 		Polestar.RegisterGuide({
 			id = "forever/class/priest/benediction",
 			pack = "guides",
-			title = "Benediction",
+			title = "Benediction and Anathema",
 			classes = { "PRIEST" },
 			minLevel = 60,
 			maxLevel = 60,
@@ -13188,6 +13232,8 @@ do
 			folder = "Priest",
 			keywords = { "Benediction", "Anathema", "The Balance of Light and Shadow", "A Warning", "Eris Havenfire", "The Eye of Divinity", "The Eye of Shadow", "Splinter of Nordrassil", "Molten Core", "epic staff", "class quest" },
 			collects = { 18608 },
+			reward = { { item = 18608, itemName = "Benediction" }, { item = 18659, itemName = "Splinter of Nordrassil" } },
+			why = "Eris's splinter and the two Eyes make Benediction, the epic priest staff that turns into Anathema.",
 			zone = 1423,
 			zoneName = "Eastern Plaguelands",
 			author = "Polestar",
@@ -13244,6 +13290,8 @@ do
 			category = "Class",
 			folder = "Priest",
 			keywords = { "Cenarion Aid", "Of Coursers We Know", "The Ichor of Undeath", "Blood of Morphaz", "Ogtinc", "Greta Mosshoof", "Morphaz", "Sunken Temple", "Temple of Atal'Hakkar", "Blessed Prayer Beads", "Circle of Hope", "Woestave", "class quest" },
+			reward = { { text = "Experience and gold" } },
+			why = "Experience and gold at 50 through Azshara and the Sunken Temple; Forever removed the Classic item choice.",
 			zone = 1447,
 			zoneName = "Azshara",
 			author = "Polestar",
@@ -13341,6 +13389,8 @@ do
 			category = "Class",
 			folder = "Priest",
 			keywords = { "Confounding Flash", "Contingency Plan", "High Priestess Mims", "Hall of Mysteries", "Mystic Ward", "Gnome", "racial", "Priest" },
+			reward = { { text = "Confounding Flash" }, { text = "Contingency Plan" } },
+			why = "The Gnome priest spells, new in Forever: one at 10, one at 20.",
 			zone = 1455,
 			zoneName = "Ironforge",
 			author = "Polestar",
@@ -13385,6 +13435,8 @@ do
 			category = "Class",
 			folder = "Priest",
 			keywords = { "Desperate Prayer", "Chastise", "A Lack of Fear", "High Priest Rohan", "High Priestess Laurena", "Hall of Mysteries", "Mystic Ward", "Dwarf", "Human", "racial", "Priest" },
+			reward = { { text = "Desperate Prayer" }, { text = "Chastise (Dwarves)" } },
+			why = "The Human and Dwarf priest spells: Desperate Prayer at 10, Chastise for Dwarves at 20.",
 			zone = 1455,
 			zoneName = "Ironforge",
 			author = "Polestar",
@@ -13436,6 +13488,8 @@ do
 			category = "Class",
 			folder = "Priest",
 			keywords = { "Divine Grace", "Feedback", "Arcane Feedback", "High Priestess Laurena", "Cathedral of Light", "Human", "racial", "Priest" },
+			reward = { { text = "Divine Grace" }, { text = "Feedback" } },
+			why = "The Human priest spells: Divine Grace at 10, Feedback at 20.",
 			zone = 1453,
 			zoneName = "Stormwind City",
 			author = "Polestar",
@@ -13480,6 +13534,8 @@ do
 			category = "Class",
 			folder = "Priest",
 			keywords = { "Hex of Weakness", "Shadowguard", "Ur'kyo", "Valley of Spirits", "Troll", "racial", "Priest" },
+			reward = { { text = "Hex of Weakness" }, { text = "Shadowguard" } },
+			why = "The Troll priest spells: Hex of Weakness at 10, Shadowguard at 20.",
 			zone = 1454,
 			zoneName = "Orgrimmar",
 			author = "Polestar",
@@ -13524,6 +13580,8 @@ do
 			category = "Class",
 			folder = "Priest",
 			keywords = { "Starshards", "Stars of Elune", "Elune's Grace", "Priestess Alathea", "Temple of the Moon", "Night Elf", "racial", "Priest" },
+			reward = { { text = "Starshards" }, { text = "Elune's Grace" } },
+			why = "The Night Elf priest spells: Starshards at 10, Elune's Grace at 20.",
 			zone = 1457,
 			zoneName = "Darnassus",
 			author = "Polestar",
@@ -13568,6 +13626,8 @@ do
 			category = "Class",
 			folder = "Priest",
 			keywords = { "Touch of Weakness", "Dark Sacrifice", "Devouring Plague", "Aelthalyste", "War Quarter", "Undead", "Forsaken", "racial", "Priest" },
+			reward = { { text = "Touch of Weakness" }, { text = "Dark Sacrifice" } },
+			why = "The Undead priest spells: Touch of Weakness at 10, Dark Sacrifice at 20.",
 			zone = 1458,
 			zoneName = "Undercity",
 			author = "Polestar",
@@ -13611,6 +13671,8 @@ do
 			category = "Class",
 			folder = "Rogue",
 			keywords = { "Blade of Cunning", "Keryn Sylvius", "Seek out SI: 7", "Snatch and Grab", "Mathias Shaw", "Defias Dockmaster", "Hogral Bakkan", "Road to Salvation", "Simple Subterfugin'", "Onin's Report", "Hulfdan Blackbeard", "Onin MacHammar", "Jannok Breezesong", "The Apple Falls", "Destiny Calls", "Syurna", "Sethir the Ancient", "Rogue", "class weapon" },
+			reward = { { item = 7298, itemName = "Blade of Cunning" } },
+			why = "A dagger at 10 from your home town's rogue quests.",
 			zone = 1429,
 			zoneName = "Elwynn Forest",
 			author = "Polestar",
@@ -13736,6 +13798,8 @@ do
 			category = "Class",
 			folder = "Rogue",
 			keywords = { "Blade of Cunning", "Kaplak", "Therzok", "The Shattered Hand", "Tazan", "Tazan's Satchel", "Tazan's Key", "Gamon", "Marion Call", "Mennet Carkad", "The Deathstalkers", "Astor Hadren", "Andron Gant", "Andron's Ledger", "Varimathras", "Rogue", "class weapon" },
+			reward = { { item = 7298, itemName = "Blade of Cunning" } },
+			why = "A dagger at 10 from your home town's rogue quests.",
 			zone = 1411,
 			zoneName = "Durotar",
 			author = "Polestar",
@@ -13867,6 +13931,8 @@ do
 			category = "Class",
 			folder = "Rogue",
 			keywords = { "Certificate of Thievery", "Lockpicking", "Renzik The Shiv", "Redridge Rendezvous", "Lucius", "Alther's Mill", "Lucius's Lockbox", "Token of Thievery", "Erion Shadewhisper", "Erion's Behest", "To Hulfdan!", "Kingly Shakedown", "SI:7", "Lakeshire", "Rogue", "lockpicking quest" },
+			reward = { { item = 7907, itemName = "Certificate of Thievery" } },
+			why = "Your first lockpicking job at 16: Lucius's lockbox at Alther's Mill, for SI:7.",
 			zone = 1453,
 			zoneName = "Stormwind City",
 			author = "Polestar",
@@ -13960,6 +14026,8 @@ do
 			category = "Class",
 			folder = "Rogue",
 			keywords = { "Plundering the Plunderers", "Find the Shattered Hand", "To Orgrimmar!", "Shenthul", "Zando'zan", "Wrenix of Ratchet", "Wrenix the Wretched", "Gizmotronic Apparatus", "E.C.A.C.", "Thieves' Tools", "Southsea Treasure", "Polly", "Thistle Tea", "Fenwick Thatros", "Tools of the Trade", "Ambermill Strongbox", "Dalaran Status Report", "Mennet Carkad", "Rogue", "lockpicking quest" },
+			reward = { { item = 7676, itemName = "Thistle Tea" } },
+			why = "Ten Thistle Tea, the rogue energy drink, from the Horde lockpicking jobs at 16.",
 			zone = 1454,
 			zoneName = "Orgrimmar",
 			author = "Polestar",
@@ -14070,6 +14138,8 @@ do
 			category = "Class",
 			folder = "Rogue",
 			keywords = { "Poisons", "Mathias and the Defias", "Klaven's Tower", "Agent Kearnen", "Klaven Mortwake", "Defias Tower Key", "Malformed Defias Drone", "Duskwood Chest", "The Touch of Zanzil", "Doc Mixilpixil", "Eau de Mixilpixil", "Thistle Tea", "Mathias Shaw", "SI:7", "Rogue", "class spell" },
+			reward = { { text = "Poisons" }, { item = 18160, itemName = "Recipe: Thistle Tea" }, { item = 8432, itemName = "Eau de Mixilpixil" } },
+			why = "Forever teaches Poisons through this chain, not the trainer; the Thistle Tea recipe comes with it.",
 			zone = 1453,
 			zoneName = "Stormwind City",
 			author = "Polestar",
@@ -14148,6 +14218,8 @@ do
 			category = "Class",
 			folder = "Rogue",
 			keywords = { "Poisons", "The Shattered Salute", "Deep Cover", "Shenthul", "Taskmaster Fizzule", "Flare Gun", "Fizzule's Whistle", "Mission: Possible But Not Probable", "Gallywix", "Foreman Silixiz", "Venture Co. tower", "Hinott's Assistance", "Serge Hinott", "Hinott's Oil", "Tarren Mill", "Thistle Tea", "Rogue", "class spell" },
+			reward = { { text = "Poisons" }, { item = 18160, itemName = "Recipe: Thistle Tea" }, { item = 8066, itemName = "Fizzule's Whistle" }, { item = 8095, itemName = "Hinott's Oil" } },
+			why = "Forever teaches Poisons through this chain, not the trainer; the Thistle Tea recipe comes with it.",
 			zone = 1454,
 			zoneName = "Orgrimmar",
 			author = "Polestar",
@@ -14224,6 +14296,8 @@ do
 			category = "Class",
 			folder = "Rogue",
 			keywords = { "Ravenholdt", "Ravenholdt Manor", "The Manor Ravenholdt", "Elegant Letter", "Seal of Ravenholdt", "Rite of Cunning", "Fahrad", "Myrokos Silentform", "Syndicate Sabotage", "Lord Tomas", "Durnholde Keep", "What's the Big Idea?", "Barton", "Barton's Scouting Report", "Strahnbrad", "Syndicate Emblems", "Rogue", "reputation" },
+			reward = { { text = "Ravenholdt reputation" } },
+			why = "Opens Ravenholdt Manor, the hidden rogue house in the Alterac hills, and its first jobs.",
 			zone = 1424,
 			zoneName = "Hillsbrad Foothills",
 			author = "Polestar",
@@ -14294,6 +14368,8 @@ do
 			category = "Class",
 			folder = "Rogue",
 			keywords = { "The Azure Key", "A Simple Request", "Sealed Azure Bag", "Encoded Fragments", "Lord Jorach Ravenholdt", "Ravenholdt Manor", "Archmage Xylem", "Timbermaw Shaman", "Forest Ooze", "Morphaz", "Sunken Temple", "Temple of Atal'Hakkar", "Azshara", "Rogue", "class quest" },
+			reward = { { text = "Ravenholdt reputation" } },
+			why = "Ravenholdt reputation and experience at 50; Forever removed the Classic item choice.",
 			zone = 1416,
 			zoneName = "Alterac Mountains",
 			author = "Polestar",
@@ -14388,6 +14464,8 @@ do
 			category = "Class",
 			folder = "Rogue",
 			keywords = { "The Eye of Bhossca", "C's dead drop", "Dead Drop", "Pyrewood Village", "Scarlet Monastery", "disguise", "Ruby-Adorned Blade", "Rogue", "solo dungeon" },
+			reward = { { item = 277246, itemName = "Ruby-Adorned Blade" } },
+			why = "The Ruby-Adorned Blade, C's payment for a solo job inside the Scarlet Monastery.",
 			zone = 1421,
 			zoneName = "Silverpine Forest",
 			author = "Polestar",
@@ -14437,6 +14515,8 @@ do
 			category = "Class",
 			folder = "Rogue",
 			keywords = { "The Horn of Xelthos", "C's dead drop", "Dead Drop", "Pyrewood Village", "Veenix", "Goblin Lockpicks", "Venture Co. Work Order", "Breaching Charge", "Shadowfang Keep", "Pyrewood Signet Ring", "Rogue", "solo dungeon" },
+			reward = { { item = 277210, itemName = "Pyrewood Signet Ring" } },
+			why = "The Pyrewood Signet Ring, C's payment for a solo job inside Shadowfang Keep.",
 			zone = 1421,
 			zoneName = "Silverpine Forest",
 			author = "Polestar",
@@ -14496,6 +14576,8 @@ do
 			category = "Class",
 			folder = "Shaman",
 			keywords = { "Air Totem", "Elemental Aid", "Storm", "Earth", "and Fire", "Heed My Call", "The Tempest's Weapons", "Eldrun Stormbreaker", "Veyric Thunderhame", "Bath'rah the Windwatcher", "Razorfen Kraul", "Charlga Razorflank", "Twisted Totem", "Ravaging Tempest", "Eye of the Tempest", "Lightning's Grasp", "Tidebringer's Claw", "Rage of the Storm", "Elementalist's Guard", "Shaman", "class quest", "totem", "weapon" },
+			reward = { { item = 5178, itemName = "Air Totem" }, { item = 280607, itemName = "Lightning's Grasp", choice = true }, { item = 280605, itemName = "Tidebringer's Claw", choice = true }, { item = 280604, itemName = "Rage of the Storm", choice = true }, { item = 280696, itemName = "Elementalist's Guard" } },
+			why = "The Air Totem that lets you place air totems, then a weapon of your choice at 40.",
 			zone = 1455,
 			zoneName = "Ironforge",
 			author = "Polestar",
@@ -14607,6 +14689,8 @@ do
 			category = "Class",
 			folder = "Shaman",
 			keywords = { "Air Totem", "Elemental Aid", "Eyes on the Sky", "Storm", "Earth", "and Fire", "Heed My Call", "The Tempest's Weapons", "Prate Cloudseer", "Rau Cliffrunner", "Bath'rah the Windwatcher", "Razorfen Kraul", "Charlga Razorflank", "Twisted Totem", "Ravaging Tempest", "Eye of the Tempest", "Lightning's Grasp", "Tidebringer's Claw", "Rage of the Storm", "Rune of the Storm", "Shaman", "class quest", "totem", "weapon" },
+			reward = { { item = 5178, itemName = "Air Totem" }, { item = 280607, itemName = "Lightning's Grasp", choice = true }, { item = 280605, itemName = "Tidebringer's Claw", choice = true }, { item = 280604, itemName = "Rage of the Storm", choice = true }, { item = 213086, itemName = "Rune of the Storm" } },
+			why = "The Air Totem that lets you place air totems, then a weapon of your choice at 40.",
 			zone = 1454,
 			zoneName = "Orgrimmar",
 			author = "Polestar",
@@ -14736,6 +14820,8 @@ do
 			category = "Class",
 			folder = "Shaman",
 			keywords = { "Water Totem", "Healing Stream Totem", "Water Sapta", "Eldrun Stormbreaker", "Norric Lochthane", "Hervdana Saegrund", "waterskin", "Stonewatch Falls", "Astranaar", "Stendel's Pond", "Forgotten Shrine", "Minor Manifestation of Water", "Shaman", "class quest", "totem" },
+			reward = { { item = 5177, itemName = "Water Totem" }, { text = "Healing Stream Totem" }, { item = 6637, itemName = "Water Sapta" } },
+			why = "The Water Totem that lets you place water totems, and Healing Stream Totem with it.",
 			zone = 1455,
 			zoneName = "Ironforge",
 			author = "Polestar",
@@ -14851,6 +14937,8 @@ do
 			category = "Class",
 			folder = "Shaman",
 			keywords = { "Water Totem", "Healing Stream Totem", "Water Sapta", "Searn Firewarder", "Xanis Flameweaver", "Islen Waterseer", "Brine", "waterskin", "Spring Well", "Ruins of Stardust", "Brazier of Everfount", "Minor Manifestation of Water", "Shaman", "class quest", "totem" },
+			reward = { { item = 5177, itemName = "Water Totem" }, { text = "Healing Stream Totem" }, { item = 6637, itemName = "Water Sapta" } },
+			why = "The Water Totem that lets you place water totems, and Healing Stream Totem with it.",
 			zone = 1454,
 			zoneName = "Orgrimmar",
 			author = "Polestar",
@@ -14965,6 +15053,8 @@ do
 			category = "Class",
 			folder = "Shaman",
 			keywords = { "Material Assistance", "The Darkreaver Menace", "Sagorne Creststrider", "Azerothian Diamond", "Pristine Black Diamond", "Divination Scryer", "Death Knight Darkreaver", "Great Ossuary", "Scholomance", "Skyfury Helm", "Shaman", "class quest" },
+			reward = { { text = "200 Horde reputation" } },
+			why = "A Scholomance fight at 60 for Horde reputation; Forever removed the Skyfury Helm.",
 			zone = 1454,
 			zoneName = "Orgrimmar",
 			author = "Polestar",
@@ -15028,6 +15118,8 @@ do
 			category = "Class",
 			folder = "Shaman",
 			keywords = { "Elemental Mastery", "Mastering the Elements", "Spirit Totem", "Da Voodoo", "Bath'rah the Windwatcher", "Elemental Air", "Elemental Fire", "Elemental Earth", "Elemental Water", "Bloodshot Spider Eye", "Thick Black Claw", "Voodoo Feather", "Sunken Temple", "Temple of Atal'Hakkar", "Shaman", "class quest" },
+			reward = { { text = "Experience and gold" } },
+			why = "Experience and gold at 50, ending in the Sunken Temple; Forever removed the Classic item choice.",
 			zone = 1454,
 			zoneName = "Orgrimmar",
 			author = "Polestar",
@@ -15103,71 +15195,6 @@ do
 	register()
 end
 
--- Source: forever/class/warlock/daio-the-decrepit.guide
-do
-	local function register()
-		Polestar.RegisterGuide({
-			id = "forever/class/warlock/daio-the-decrepit",
-			pack = "guides",
-			title = "Daio the Decrepit",
-			classes = { "WARLOCK" },
-			minLevel = 60,
-			maxLevel = 60,
-			category = "Class",
-			folder = "Warlock",
-			keywords = { "The Prison's Bindings", "The Prison's Casing", "Suppression", "Daio the Decrepit", "Tainted Scar", "Satyr Blood", "Tears of the Hederine", "Glowing Crystal Prison", "Doomguard Commander", "Tome of Sacrifice", "Dire Maul", "Warpwood Quarter", "Darkwhisper Gorge", "Warlock", "class quest" },
-			zone = 1419,
-			zoneName = "Blasted Lands",
-			author = "Polestar",
-			version = 1,
-			group = true,
-			steps = {
-				{
-					title = "Daio the Decrepit",
-					note = "At 60 Daio the Decrepit waits in the Tainted Scar, in western Blasted Lands.",
-					goals = {
-						{ t = "level", level = 60 },
-						{ t = "accept", quest = 7581, title = "The Prison's Bindings", npc = 14463, npcName = "Daio the Decrepit", minLevel = 60, qlvl = 60, map = 1419, x = 34.13, y = 50.14, f = "e", note = "Daio the Decrepit" },
-						{ t = "accept", quest = 7582, title = "The Prison's Casing", npc = 14463, npcName = "Daio the Decrepit", minLevel = 60, qlvl = 60, map = 1419, x = 34.13, y = 50.14, f = "e" },
-					},
-				},
-				{
-					title = "Satyr Blood",
-					note = "The Wildspawn satyrs of the Warpwood Quarter, Dire Maul's eastern wing, carry the blood. The back door at Lariss Pavilion, north of Camp Mojache, needs the Crescent Key; otherwise go in by Dire Maul's main entrance. Bring a group.",
-					goals = {
-						{ t = "collect", quest = 7581, title = "The Prison's Bindings", item = 18603, itemName = "Satyr Blood", count = 15, oi = 1, map = 1444, x = 76.9, y = 37.4, f = "e", note = "Satyr Blood, inside the Warpwood Quarter", group = { kind = "elite", rank = 1 } },
-					},
-				},
-				{
-					title = "Tears of the Hederine",
-					note = "The Hederine demons hold Darkwhisper Gorge, in southern Winterspring. They are elite: grouping up is advised.",
-					goals = {
-						{ t = "collect", quest = 7582, title = "The Prison's Casing", item = 18604, itemName = "Tears of the Hederine", count = 5, oi = 1, map = 1452, x = 58.3, y = 82.25, f = "e", spots = { { x = 58.7, y = 83.6, r = 40, n = 2 }, { x = 59.2, y = 87.6, r = 40, n = 2 }, { x = 57.5, y = 88.4, r = 70, n = 4 }, { x = 55.5, y = 84.2, r = 40, n = 1 }, { x = 52.8, y = 84.9, r = 46, n = 6 }, { x = 50.9, y = 88.2, r = 40, n = 1 }, { x = 55.8, y = 79.4, r = 69, n = 7 }, { x = 57.7, y = 79.8, r = 40, n = 1 }, { x = 61, y = 79.8, r = 40, n = 1 }, { x = 61.8, y = 83.9, r = 41, n = 3 }, { x = 64.3, y = 79.5, r = 51, n = 4 }, { x = 59.6, y = 75.1, r = 40, n = 2 }, { x = 60.5, y = 83.1, r = 40, n = 4, alt = true }, { x = 56.6, y = 85.6, r = 40, n = 2, alt = true }, { x = 60.3, y = 78.3, r = 40, n = 2, alt = true }, { x = 57.9, y = 87.3, r = 47, n = 4, alt = true }, { x = 59.3, y = 77, r = 40, n = 2, alt = true }, { x = 52.3, y = 89.8, r = 42, n = 5, alt = true } }, spread = true, note = "Tears of the Hederine", group = { kind = "elite", rank = 1 } },
-					},
-				},
-				{
-					title = "Suppression",
-					note = "Hand both in to Daio, then find the Doomguard Commander in the Tainted Scar and use the Glowing Crystal Prison on him. He is elite and fights to escape: grouping up is advised.",
-					goals = {
-						{ t = "turnin", quest = 7581, title = "The Prison's Bindings", npc = 14463, npcName = "Daio the Decrepit", map = 1419, x = 34.13, y = 50.14, f = "e", note = "Daio the Decrepit" },
-						{ t = "turnin", quest = 7582, title = "The Prison's Casing", npc = 14463, npcName = "Daio the Decrepit", map = 1419, x = 34.13, y = 50.14, f = "e", note = "Daio the Decrepit" },
-						{ t = "accept", quest = 7583, title = "Suppression", npc = 14463, npcName = "Daio the Decrepit", minLevel = 60, qlvl = 60, preAll = { 7581, 7582 }, preTitles = { [7581] = "The Prison's Bindings", [7582] = "The Prison's Casing" }, map = 1419, x = 34.13, y = 50.14, f = "e" },
-						{ t = "use", item = 18601, itemName = "Glowing Crystal Prison", map = 1419, x = 34.5, y = 63.7, f = "e", note = "Glowing Crystal Prison, on the Doomguard Commander" },
-						{ t = "collect", quest = 7583, title = "Suppression", item = 18605, itemName = "Imprisoned Doomguard", count = 1, oi = 1, map = 1419, x = 34.55, y = 63.73, f = "e", spots = { { x = 34.7, y = 63.7, r = 54, n = 2 }, { x = 39, y = 67.9, r = 54, n = 2 }, { x = 40.1, y = 63.3, r = 54, n = 1 }, { x = 44.2, y = 74, r = 54, n = 4 }, { x = 41.6, y = 78.1, r = 57, n = 3 }, { x = 58.2, y = 55.3, r = 54, n = 2 } }, spread = true, note = "Imprisoned Doomguard" },
-					},
-				},
-				{
-					title = "Back to Daio",
-					goals = {
-						{ t = "turnin", quest = 7583, title = "Suppression", npc = 14463, npcName = "Daio the Decrepit", map = 1419, x = 34.13, y = 50.14, f = "e", note = "Daio the Decrepit: Tome of Sacrifice" },
-					},
-				},
-			},
-		})
-	end
-	register()
-end
-
 -- Source: forever/class/warlock/enchanted-gold-bloodrobe.guide
 do
 	local function register()
@@ -15181,6 +15208,8 @@ do
 			category = "Class",
 			folder = "Warlock",
 			keywords = { "In Search of Menara Voidrender", "Components for the Enchanted Gold Bloodrobe", "Fine Gold Thread", "The Completed Robe", "Menara Voidrender", "Xizk Goodstitch", "Robes of Arcana", "Gold Bar", "Hatefury Blood", "Lesser Infernal Stone", "Smoldering Coal", "Warlock", "class armor" },
+			reward = { { item = 6900, itemName = "Enchanted Gold Bloodrobe" } },
+			why = "A rare cloth robe for your 30s, which Menara Voidrender makes from the parts you bring her.",
 			zone = 1413,
 			zoneName = "The Barrens",
 			author = "Polestar",
@@ -15316,6 +15345,8 @@ do
 			category = "Class",
 			folder = "Warlock",
 			keywords = { "Summon Felhunter", "Tome of the Cabal", "Seeking Strahad", "Strahad Farsan", "Krom Stoutarm", "Moldy Tome", "Tattered Manuscript", "Rod of Channeling", "The Binding", "Warlock", "class pet" },
+			reward = { { text = "Summon Felhunter" }, { item = 22244, itemName = "Box of Souls" } },
+			why = "The felhunter, the demon to bring against spellcasters, and a Box of Souls for your shards.",
 			zone = 1413,
 			zoneName = "The Barrens",
 			author = "Polestar",
@@ -15414,6 +15445,8 @@ do
 			category = "Class",
 			folder = "Warlock",
 			keywords = { "Summon Felhunter", "Tome of the Cabal", "Seeking Strahad", "Strahad Farsan", "Jorah Annison", "Moldy Tome", "Tattered Manuscript", "Rod of Channeling", "The Binding", "Warlock", "class pet" },
+			reward = { { text = "Summon Felhunter" }, { item = 22244, itemName = "Box of Souls" } },
+			why = "The felhunter, the demon to bring against spellcasters, and a Box of Souls for your shards.",
 			zone = 1413,
 			zoneName = "The Barrens",
 			author = "Polestar",
@@ -15512,6 +15545,8 @@ do
 			category = "Class",
 			folder = "Warlock",
 			keywords = { "An Imp's Request", "Hot and Itchy", "The Wrong Stuff", "Trolls of a Feather", "Impsy", "Felcloth", "Rotting Wood", "Bloodvenom Essence", "Voodoo Feather", "Sunken Temple", "Temple of Atal'Hakkar", "Soul Harvester", "Abyss Shard", "Robes of Servitude", "Warlock", "class quest" },
+			reward = { { item = 20536, itemName = "Soul Harvester", choice = true }, { item = 20534, itemName = "Abyss Shard", choice = true }, { item = 20530, itemName = "Robes of Servitude", choice = true } },
+			why = "A staff, off-hand or robe for your 50s; Impsy's own errand, not a step of the Dreadsteed chain.",
 			zone = 1448,
 			zoneName = "Felwood",
 			author = "Polestar",
@@ -15562,7 +15597,7 @@ do
 				},
 				{
 					title = "Impsy",
-					note = "Impsy waits beside Niby the Almighty in central Felwood, just east of Jaedenar.",
+					note = "Impsy waits beside Niby the Almighty in central Felwood, just east of Jaedenar. This chain is Impsy's own and is not part of the Dreadsteed chain; Niby and Impsy also give the Shard of the Green Flame chain here.",
 					goals = {
 						{ t = "turnin", quest = 8419, title = "An Imp's Request", npc = 14470, npcName = "Impsy", map = 1448, x = 41.36, y = 45.02, f = "e", note = "Impsy" },
 						{ t = "accept", quest = 8421, title = "The Wrong Stuff", npc = 14470, npcName = "Impsy", minLevel = 50, qlvl = 52, pre = { 8419, 8420 }, preTitles = { [8419] = "An Imp's Request", [8420] = "Hot and Itchy" }, map = 1448, x = 41.36, y = 45.02, f = "e" },
@@ -15618,6 +15653,8 @@ do
 			category = "Class",
 			folder = "Warlock",
 			keywords = { "Summon Incubus", "sayaad", "What Is Love?", "Wooden Figurine", "Devourer of Souls", "Gakin the Darkbinder", "Takar the Seer", "The Binding", "Warlock", "class pet" },
+			reward = { { text = "Summon Incubus" }, { item = 22243, itemName = "Small Soul Pouch" } },
+			why = "A second seducer demon, the male sayaad, and a soul shard bag to carry your shards.",
 			zone = 1453,
 			zoneName = "Stormwind City",
 			author = "Polestar",
@@ -15662,28 +15699,30 @@ do
 	register()
 end
 
--- Source: forever/class/warlock/incubus-orgrimmar.guide
+-- Source: forever/class/warlock/incubus-horde.guide
 do
 	local function register()
 		Polestar.RegisterGuide({
-			id = "forever/class/warlock/incubus-orgrimmar",
+			id = "forever/class/warlock/incubus-horde",
 			pack = "guides",
-			title = "Incubus (Orgrimmar)",
+			title = "Incubus (Horde)",
 			faction = "Horde",
 			classes = { "WARLOCK" },
 			minLevel = 20,
 			maxLevel = 28,
 			category = "Class",
 			folder = "Warlock",
-			keywords = { "Summon Incubus", "sayaad", "Love Hurts", "Wish You Were Here", "Withered Scarf", "Magar", "Krilge", "Fallen Sky Lake", "Devourer of Souls", "Gan'rul Bloodeye", "Cazul", "The Binding", "Warlock", "class pet" },
+			keywords = { "Summon Incubus", "sayaad", "Incubus (Orgrimmar)", "Incubus (Undercity)", "Love Hurts", "Wish You Were Here", "Withered Scarf", "Magar", "Krilge", "Fallen Sky Lake", "Hearts of the Lovers", "Avelina Lilly", "Isaac Pearson", "Ambermill", "Ratchet", "Devourer of Souls", "Gan'rul Bloodeye", "Cazul", "Carendin Halgar", "Godrick Farsan", "The Binding", "Warlock", "class pet" },
+			reward = { { text = "Summon Incubus" }, { item = 22243, itemName = "Small Soul Pouch" } },
+			why = "A second seducer demon, the male sayaad, and a soul shard bag to carry your shards.",
 			zone = 1454,
 			zoneName = "Orgrimmar",
 			author = "Polestar",
 			version = 1,
 			steps = {
 				{
-					title = "Devourer of Souls",
-					note = "At 20 Gan'rul Bloodeye, in the Cleft of Shadow under the Valley of Strength, sends you to Cazul a few steps away.",
+					title = "Devourer of Souls (Orgrimmar)",
+					note = "At 20 Gan'rul Bloodeye, in the Cleft of Shadow under the Valley of Strength, sends you to Cazul a few steps away. Two trainers offer the incubus, Gan'rul here and Carendin Halgar in the Undercity, and you can take only one: this guide follows whichever Devourer of Souls you took.",
 					goals = {
 						{ t = "level", level = 20 },
 						{ t = "accept", quest = 1507, title = "Devourer of Souls", npc = 5875, npcName = "Gan'rul Bloodeye", minLevel = 20, closedBy = { 1472 }, preTitles = { [1472] = "Devourer of Souls" }, map = 1454, x = 48.25, y = 45.28, f = "e", note = "Gan'rul Bloodeye" },
@@ -15707,7 +15746,7 @@ do
 					},
 				},
 				{
-					title = "The Binding",
+					title = "The Binding (Orgrimmar)",
 					note = "Back to Gan'rul in the Cleft of Shadow. Take the scarf to the summoning circle in Neeru Fireblade's tent nearby and defeat the incubus it calls.",
 					goals = {
 						{ t = "turnin", quest = 65610, title = "Wish You Were Here", npc = 5875, npcName = "Gan'rul Bloodeye", map = 1454, x = 48.25, y = 45.28, f = "e", note = "Gan'rul Bloodeye" },
@@ -15716,34 +15755,9 @@ do
 						{ t = "turnin", quest = 65604, title = "The Binding", npc = 5875, npcName = "Gan'rul Bloodeye", map = 1454, x = 48.25, y = 45.28, f = "e", note = "Gan'rul Bloodeye: he binds the incubus to you" },
 					},
 				},
-			},
-		})
-	end
-	register()
-end
-
--- Source: forever/class/warlock/incubus-undercity.guide
-do
-	local function register()
-		Polestar.RegisterGuide({
-			id = "forever/class/warlock/incubus-undercity",
-			pack = "guides",
-			title = "Incubus (Undercity)",
-			faction = "Horde",
-			classes = { "WARLOCK" },
-			minLevel = 20,
-			maxLevel = 24,
-			category = "Class",
-			folder = "Warlock",
-			keywords = { "Summon Incubus", "sayaad", "Hearts of the Lovers", "Avelina Lilly", "Isaac Pearson", "Ambermill", "Ratchet", "Devourer of Souls", "Carendin Halgar", "Godrick Farsan", "The Binding", "Warlock", "class pet" },
-			zone = 1458,
-			zoneName = "Undercity",
-			author = "Polestar",
-			version = 1,
-			steps = {
 				{
-					title = "Devourer of Souls",
-					note = "At 20 Carendin Halgar, in the Magic Quarter, sends you to Godrick Farsan in the Temple of the Damned, just north of him.",
+					title = "Devourer of Souls (Undercity)",
+					note = "The Undercity's version, for warlocks who took Carendin Halgar's Devourer of Souls instead of Gan'rul's. At 20 Carendin, in the Magic Quarter, sends you to Godrick Farsan in the Temple of the Damned, just north of him.",
 					goals = {
 						{ t = "level", level = 20 },
 						{ t = "accept", quest = 1472, title = "Devourer of Souls", npc = 5675, npcName = "Carendin Halgar", minLevel = 20, closedBy = { 1507 }, preTitles = { [1507] = "Devourer of Souls" }, map = 1458, x = 85.06, y = 25.99, f = "e", note = "Carendin Halgar" },
@@ -15755,7 +15769,7 @@ do
 					title = "Avelina Lilly",
 					note = "Avelina Lilly works as a tailor for the Dalaran wizards at Ambermill, in eastern Silverpine Forest. Take her heart.",
 					goals = {
-						{ t = "collect", item = 190179, itemName = "Avelina's Heart", map = 1421, x = 63.48, y = 65.27, f = "e", note = "Avelina's Heart", from = "Avelina Lilly", fromKind = "npc" },
+						{ t = "collect", quest = 65593, title = "Hearts of the Lovers", item = 190179, itemName = "Avelina's Heart", map = 1421, x = 63.48, y = 65.27, f = "e", note = "Avelina's Heart" },
 					},
 				},
 				{
@@ -15766,7 +15780,7 @@ do
 					},
 				},
 				{
-					title = "The Binding",
+					title = "The Binding (Undercity)",
 					note = "Back to Carendin in the Magic Quarter. Place the hearts at the summoning circle below him and defeat the incubus they call.",
 					goals = {
 						{ t = "turnin", quest = 65593, title = "Hearts of the Lovers", npc = 5675, npcName = "Carendin Halgar", map = 1458, x = 85.06, y = 25.99, f = "e", note = "Carendin Halgar" },
@@ -15781,19 +15795,205 @@ do
 	register()
 end
 
--- Source: forever/class/warlock/niby-the-almighty.guide
+-- Source: forever/class/warlock/orb-of-orahil.guide
 do
 	local function register()
 		Polestar.RegisterGuide({
-			id = "forever/class/warlock/niby-the-almighty",
+			id = "forever/class/warlock/orb-of-orahil",
 			pack = "guides",
-			title = "Niby the Almighty",
+			title = "Orb of Orahil",
+			classes = { "WARLOCK" },
+			minLevel = 35,
+			maxLevel = 40,
+			category = "Class",
+			folder = "Warlock",
+			keywords = { "The Orb of Orahil", "Knowledge of the Orb of Orahil", "Fragments of the Orb of Orahil", "Cleansing of the Orb of Orahil", "Returning the Cleansed Orb", "Menara Voidrender", "Infernal Orb", "Tabetha", "Shard of a Felhound", "Acolyte Wytula", "Felhas Ruby", "Imprisoned Felhound Spirit", "Mana Eater", "Shard of an Infernal", "Acolyte Magaz", "Infus Emerald", "Imprisoned Infernal Spirit", "Lesser Infernal", "The Orb of Dar'Orahil", "The Orb of Noh'Orahil", "Orb of Dar'Orahil", "Orb of Noh'Orahil", "Staff of Dar'Orahil", "Staff of Noh'Orahil", "Warlock", "class weapon" },
+			reward = { { item = 15108, itemName = "Orb of Dar'Orahil", choice = true }, { item = 15106, itemName = "Staff of Dar'Orahil", choice = true }, { item = 15107, itemName = "Orb of Noh'Orahil", choice = true }, { item = 15105, itemName = "Staff of Noh'Orahil", choice = true } },
+			why = "An off-hand orb or a staff for your late 30s, down the felhound's or the infernal's path, your pick.",
+			zone = 1413,
+			zoneName = "The Barrens",
+			author = "Polestar",
+			version = 1,
+			group = true,
+			steps = {
+				{
+					title = "Knowledge of the Orb of Orahil (Stormwind)",
+					note = "At 35 Demisette Cloyce in the Slaughtered Lamb, in the Mage Quarter, sends you to Menara Voidrender in Ratchet.",
+					only = { races = { "Human" } },
+					goals = {
+						{ t = "level", level = 35 },
+						{ t = "accept", quest = 4968, title = "Knowledge of the Orb of Orahil", npc = 461, npcName = "Demisette Cloyce", minLevel = 35, qlvl = 35, closedBy = { 1799, 4965, 4967, 4969 }, preTitles = { [1799] = "Fragments of the Orb of Orahil", [4965] = "Knowledge of the Orb of Orahil", [4967] = "Knowledge of the Orb of Orahil", [4969] = "Knowledge of the Orb of Orahil" }, map = 1453, x = 39.24, y = 84.96, note = "Demisette Cloyce" },
+					},
+				},
+				{
+					title = "Knowledge of the Orb of Orahil (Ironforge)",
+					note = "At 35 Briarthorn in Ironforge sends you to Menara Voidrender in Ratchet.",
+					only = { races = { "Gnome" } },
+					goals = {
+						{ t = "level", level = 35 },
+						{ t = "accept", quest = 4965, title = "Knowledge of the Orb of Orahil", npc = 5172, npcName = "Briarthorn", minLevel = 35, qlvl = 35, closedBy = { 1799, 4967, 4968, 4969 }, preTitles = { [1799] = "Fragments of the Orb of Orahil", [4967] = "Knowledge of the Orb of Orahil", [4968] = "Knowledge of the Orb of Orahil", [4969] = "Knowledge of the Orb of Orahil" }, map = 1455, x = 50.35, y = 5.66, f = "e", note = "Briarthorn" },
+					},
+				},
+				{
+					title = "Knowledge of the Orb of Orahil (Orgrimmar)",
+					note = "At 35 Zevrost in the Cleft of Shadow sends you to Menara Voidrender in Ratchet.",
+					only = { races = { "Orc", "Troll" } },
+					goals = {
+						{ t = "level", level = 35 },
+						{ t = "accept", quest = 4967, title = "Knowledge of the Orb of Orahil", npc = 3326, npcName = "Zevrost", minLevel = 35, qlvl = 35, closedBy = { 1799, 4965, 4968, 4969 }, preTitles = { [1799] = "Fragments of the Orb of Orahil", [4965] = "Knowledge of the Orb of Orahil", [4968] = "Knowledge of the Orb of Orahil", [4969] = "Knowledge of the Orb of Orahil" }, map = 1454, x = 48.47, y = 45.43, f = "e", note = "Zevrost" },
+					},
+				},
+				{
+					title = "Knowledge of the Orb of Orahil (Undercity)",
+					note = "At 35 Kaal Soulreaper in the Magic Quarter sends you to Menara Voidrender in Ratchet. The zeppelin from Tirisfal Glades flies to Durotar.",
+					only = { races = { "Scourge" } },
+					goals = {
+						{ t = "level", level = 35 },
+						{ t = "accept", quest = 4969, title = "Knowledge of the Orb of Orahil", npc = 4563, npcName = "Kaal Soulreaper", minLevel = 35, qlvl = 35, closedBy = { 1799, 4965, 4967, 4968 }, preTitles = { [1799] = "Fragments of the Orb of Orahil", [4965] = "Knowledge of the Orb of Orahil", [4967] = "Knowledge of the Orb of Orahil", [4968] = "Knowledge of the Orb of Orahil" }, map = 1458, x = 86.21, y = 15.93, f = "e", note = "Kaal Soulreaper" },
+					},
+				},
+				{
+					title = "Menara Voidrender",
+					note = "Menara Voidrender and her two acolytes stand in the tower on the hill above Ratchet, beside Strahad Farsan.",
+					goals = {
+						{ t = "turnin", quest = 4968, title = "Knowledge of the Orb of Orahil", npc = 6266, npcName = "Menara Voidrender", map = 1413, x = 62.51, y = 35.45, f = "e", only = { races = { "Human" } }, note = "Menara Voidrender" },
+						{ t = "turnin", quest = 4965, title = "Knowledge of the Orb of Orahil", npc = 6266, npcName = "Menara Voidrender", map = 1413, x = 62.51, y = 35.45, f = "e", only = { races = { "Gnome" } }, note = "Menara Voidrender" },
+						{ t = "turnin", quest = 4967, title = "Knowledge of the Orb of Orahil", npc = 6266, npcName = "Menara Voidrender", map = 1413, x = 62.51, y = 35.45, f = "e", only = { races = { "Orc", "Troll" } }, note = "Menara Voidrender" },
+						{ t = "turnin", quest = 4969, title = "Knowledge of the Orb of Orahil", npc = 6266, npcName = "Menara Voidrender", map = 1413, x = 62.51, y = 35.45, f = "e", only = { races = { "Scourge" } }, note = "Menara Voidrender" },
+						{ t = "accept", quest = 1799, title = "Fragments of the Orb of Orahil", npc = 6266, npcName = "Menara Voidrender", minLevel = 35, qlvl = 40, map = 1413, x = 62.51, y = 35.45, f = "e" },
+					},
+				},
+				{
+					title = "Choose an acolyte",
+					note = "Pick one acolyte: you can take only one of their quests. Acolyte Wytula's felhound path ends with the Orb or Staff of Dar'Orahil, Acolyte Magaz's infernal path with the Orb or Staff of Noh'Orahil. The guide follows the one you take.",
+					goals = {
+						{ t = "accept", quest = 4962, title = "Shard of a Felhound", npc = 6254, npcName = "Acolyte Wytula", minLevel = 35, qlvl = 40, closedBy = { 4963 }, preTitles = { [4963] = "Shard of an Infernal" }, map = 1413, x = 62.64, y = 35.3, f = "e", note = "Acolyte Wytula: she gives you the Felhas Ruby" },
+						{ t = "accept", quest = 4963, title = "Shard of an Infernal", npc = 6252, npcName = "Acolyte Magaz", minLevel = 35, qlvl = 40, closedBy = { 4962 }, preTitles = { [4962] = "Shard of a Felhound" }, map = 1413, x = 62.56, y = 35.23, f = "e", note = "Acolyte Magaz: he gives you the Infus Emerald" },
+					},
+				},
+				{
+					title = "Mannoroc Coven",
+					note = "The demons of Mannoroc Coven, in southern Desolace, have all you need. Burning Blade Summoners carry the Infernal Orb. On the felhound path, use the Felhas Ruby on a Mana Eater, a felhound, and kill it for its spirit; on the infernal path, use the Infus Emerald on a Lesser Infernal and kill it.",
+					goals = {
+						{ t = "collect", quest = 1799, title = "Fragments of the Orb of Orahil", item = 7291, itemName = "Infernal Orb", count = 1, oi = 1, map = 1443, x = 66.49, y = 77.94, f = "e", spots = { { x = 54.9, y = 71.7, r = 58, n = 1 }, { x = 50.3, y = 72.3, r = 58, n = 1 }, { x = 49.6, y = 77.2, r = 58, n = 1 }, { x = 52.7, y = 80.2, r = 75, n = 3 }, { x = 80.5, y = 77.1, r = 58, n = 3 }, { x = 81.2, y = 80.8, r = 80, n = 3 } }, spread = true, note = "Infernal Orb, from the Burning Blade Summoners" },
+						{ t = "collect", quest = 4962, title = "Shard of a Felhound", item = 12648, itemName = "Imprisoned Felhound Spirit", count = 1, oi = 1, map = 1443, x = 52.91, y = 68.14, f = "e", spots = { { x = 52.2, y = 68.1, r = 37, n = 2 } }, note = "Imprisoned Felhound Spirit, from a Mana Eater" },
+						{ t = "collect", quest = 4963, title = "Shard of an Infernal", item = 12649, itemName = "Imprisoned Infernal Spirit", count = 1, oi = 1, map = 1443, x = 54.31, y = 71.14, f = "e", spots = { { x = 53.1, y = 71.8, r = 113, n = 4 }, { x = 50, y = 76.1, r = 76, n = 4 }, { x = 54.3, y = 80.1, r = 43, n = 3 }, { x = 53.7, y = 84, r = 69, n = 3 }, { x = 56.8, y = 71.1, r = 15, n = 1, alt = true }, { x = 57.6, y = 77.1, r = 15, n = 1, alt = true } }, note = "Imprisoned Infernal Spirit, from a Lesser Infernal" },
+					},
+				},
+				{
+					title = "The demon's spirit",
+					note = "Back to Menara Voidrender in the tower above Ratchet with the spirit first: Tabetha's cleansing follows it.",
+					goals = {
+						{ t = "turnin", quest = 4962, title = "Shard of a Felhound", npc = 6266, npcName = "Menara Voidrender", map = 1413, x = 62.51, y = 35.45, f = "e", note = "Menara Voidrender" },
+						{ t = "turnin", quest = 4963, title = "Shard of an Infernal", npc = 6266, npcName = "Menara Voidrender", map = 1413, x = 62.51, y = 35.45, f = "e", note = "Menara Voidrender" },
+					},
+				},
+				{
+					title = "Tabetha",
+					note = "Tabetha lives at her farm in western Dustwallow Marsh. She calls the Demon of the Orb out of the Infernal Orb; it is elite: grouping up is advised.",
+					goals = {
+						{ t = "turnin", quest = 1799, title = "Fragments of the Orb of Orahil", npc = 6546, npcName = "Tabetha", map = 1445, x = 46.06, y = 57.09, f = "e", note = "Tabetha" },
+						{ t = "accept", quest = 4961, title = "Cleansing of the Orb of Orahil", npc = 6546, npcName = "Tabetha", minLevel = 35, qlvl = 40, preAll = { 1799, 4962 }, preTitles = { [1799] = "Fragments of the Orb of Orahil", [4962] = "Shard of a Felhound" }, map = 1445, x = 46.06, y = 57.09, f = "e" },
+						{ t = "kill", quest = 4961, title = "Cleansing of the Orb of Orahil", target = "Demon of the Orb", npc = 6549, oi = 1, map = 1445, x = 45.79, y = 56.97, f = "e", note = "Demon of the Orb", group = { kind = "elite", rank = 1 } },
+						{ t = "turnin", quest = 4961, title = "Cleansing of the Orb of Orahil", npc = 6546, npcName = "Tabetha", map = 1445, x = 46.06, y = 57.09, f = "e", note = "Tabetha" },
+						{ t = "accept", quest = 4976, title = "Returning the Cleansed Orb", npc = 6546, npcName = "Tabetha", minLevel = 35, qlvl = 40, pre = { 4961 }, preTitles = { [4961] = "Cleansing of the Orb of Orahil" }, map = 1445, x = 46.06, y = 57.09, f = "e" },
+					},
+				},
+				{
+					title = "The Orb of Dar'Orahil",
+					note = "Back to Menara in the tower above Ratchet with the cleansed orb. On the felhound path, wait while she completes the Orb of Dar'Orahil, then speak to her again.",
+					goals = {
+						{ t = "turnin", quest = 4976, title = "Returning the Cleansed Orb", npc = 6266, npcName = "Menara Voidrender", map = 1413, x = 62.51, y = 35.45, f = "e", note = "Menara Voidrender" },
+						{ t = "accept", quest = 4964, title = "The Completed Orb of Dar'Orahil", npc = 6266, npcName = "Menara Voidrender", minLevel = 35, qlvl = 40, preAll = { 4976 }, closedBy = { 4963 }, preTitles = { [4963] = "Shard of an Infernal", [4976] = "Returning the Cleansed Orb" }, map = 1413, x = 62.51, y = 35.45, f = "e" },
+						{ t = "complete", quest = 4964, title = "The Completed Orb of Dar'Orahil", note = "Wait for the orb" },
+						{ t = "turnin", quest = 4964, title = "The Completed Orb of Dar'Orahil", npc = 6266, npcName = "Menara Voidrender", map = 1413, x = 62.51, y = 35.45, f = "e", note = "Menara Voidrender", rewards = { choices = { { item = 15108, itemName = "Orb of Dar'Orahil" }, { item = 15106, itemName = "Staff of Dar'Orahil" } } } },
+					},
+				},
+				{
+					title = "The Orb of Noh'Orahil",
+					note = "On the infernal path, wait while Menara completes the Orb of Noh'Orahil, then speak to her again.",
+					goals = {
+						{ t = "accept", quest = 4975, title = "The Completed Orb of Noh'Orahil", npc = 6266, npcName = "Menara Voidrender", minLevel = 35, qlvl = 40, preAll = { 4976 }, closedBy = { 4962 }, preTitles = { [4962] = "Shard of a Felhound", [4976] = "Returning the Cleansed Orb" }, map = 1413, x = 62.51, y = 35.45, f = "e" },
+						{ t = "complete", quest = 4975, title = "The Completed Orb of Noh'Orahil", note = "Wait for the orb" },
+						{ t = "turnin", quest = 4975, title = "The Completed Orb of Noh'Orahil", npc = 6266, npcName = "Menara Voidrender", map = 1413, x = 62.51, y = 35.45, f = "e", note = "Menara Voidrender", rewards = { choices = { { item = 15107, itemName = "Orb of Noh'Orahil" }, { item = 15105, itemName = "Staff of Noh'Orahil" } } } },
+					},
+				},
+			},
+		})
+	end
+	register()
+end
+
+-- Source: forever/class/warlock/orb-of-soranruk.guide
+do
+	local function register()
+		Polestar.RegisterGuide({
+			id = "forever/class/warlock/orb-of-soranruk",
+			pack = "guides",
+			title = "Orb of Soran'ruk",
+			classes = { "WARLOCK" },
+			minLevel = 25,
+			maxLevel = 30,
+			category = "Class",
+			folder = "Warlock",
+			keywords = { "The Orb of Soran'ruk", "Doan Karhan", "Soran'ruk Fragment", "Large Soran'ruk Fragment", "Orb of Soran'ruk", "Staff of Soran'ruk", "Blackfathom Deeps", "Shadowfang Keep", "Twilight Acolyte", "Shadowfang Darksoul", "Warlock", "class weapon" },
+			reward = { { item = 6898, itemName = "Orb of Soran'ruk", choice = true }, { item = 15109, itemName = "Staff of Soran'ruk", choice = true } },
+			why = "A rare off-hand orb or staff for your late 20s, for fragments from two dungeons.",
+			zone = 1413,
+			zoneName = "The Barrens",
+			author = "Polestar",
+			version = 1,
+			group = true,
+			steps = {
+				{
+					title = "Doan Karhan",
+					note = "Doan Karhan camps in the southern Barrens, east of the road north-east of Camp Taurajo.",
+					goals = {
+						{ t = "level", level = 20 },
+						{ t = "accept", quest = 1740, title = "The Orb of Soran'ruk", npc = 6247, npcName = "Doan Karhan", minLevel = 20, qlvl = 25, map = 1413, x = 49.31, y = 57.21, f = "e", note = "Doan Karhan" },
+					},
+				},
+				{
+					title = "Blackfathom Deeps",
+					note = "The Twilight Acolytes inside Blackfathom Deeps, a level 24-32 dungeon, each drop a Soran'ruk Fragment: bring a group. The entrance is in the ruins on the north-west coast of Ashenvale.",
+					goals = {
+						{ t = "collect", quest = 1740, title = "The Orb of Soran'ruk", item = 6914, itemName = "Soran'ruk Fragment", count = 3, oi = 1, map = 1440, x = 14.5, y = 14.2, note = "Soran'ruk Fragment, from the Twilight Acolytes", group = { kind = "elite", rank = 1 } },
+					},
+				},
+				{
+					title = "Shadowfang Keep",
+					note = "The Shadowfang Darksouls inside Shadowfang Keep, a level 20-30 dungeon, drop the Large Fragment about one time in five: bring a group. The keep stands south of the Sepulcher.",
+					goals = {
+						{ t = "collect", quest = 1740, title = "The Orb of Soran'ruk", item = 6915, itemName = "Large Soran'ruk Fragment", count = 1, oi = 2, map = 1421, x = 44.8, y = 67.8, note = "Large Soran'ruk Fragment, from the Shadowfang Darksouls", group = { kind = "elite", rank = 1 } },
+					},
+				},
+				{
+					title = "Back to Doan Karhan",
+					goals = {
+						{ t = "turnin", quest = 1740, title = "The Orb of Soran'ruk", npc = 6247, npcName = "Doan Karhan", map = 1413, x = 49.31, y = 57.21, f = "e", note = "Doan Karhan", rewards = { choices = { { item = 6898, itemName = "Orb of Soran'ruk" }, { item = 15109, itemName = "Staff of Soran'ruk" } } } },
+					},
+				},
+			},
+		})
+	end
+	register()
+end
+
+-- Source: forever/class/warlock/shard-of-the-green-flame.guide
+do
+	local function register()
+		Polestar.RegisterGuide({
+			id = "forever/class/warlock/shard-of-the-green-flame",
+			pack = "guides",
+			title = "Shard of the Green Flame",
 			classes = { "WARLOCK" },
 			minLevel = 50,
 			maxLevel = 56,
 			category = "Class",
 			folder = "Warlock",
-			keywords = { "What Niby Commands", "Flawless Fel Essence", "Kroshius' Infernal Core", "Kroshius", "Fel Fire", "Impsy", "Shard of the Green Flame", "Jaedenar", "Legashi", "Felguard Sentry", "Shatter Scar Vale", "Warlock", "class quest" },
+			keywords = { "Niby the Almighty", "What Niby Commands", "Flawless Fel Essence", "Kroshius' Infernal Core", "Kroshius", "Fel Fire", "Impsy", "Shard of the Green Flame", "Jaedenar", "Legashi", "Felguard Sentry", "Shatter Scar Vale", "Warlock", "class quest" },
+			reward = { { item = 18762, itemName = "Shard of the Green Flame" } },
+			why = "A rare off-hand for your 50s from Niby and Impsy in Felwood, the camp that also offers An Imp's Request.",
 			zone = 1448,
 			zoneName = "Felwood",
 			author = "Polestar",
@@ -15859,264 +16059,65 @@ do
 	register()
 end
 
--- Source: forever/class/warlock/orb-of-dar-orahil.guide
+-- Source: forever/class/warlock/tome-of-sacrifice.guide
 do
 	local function register()
 		Polestar.RegisterGuide({
-			id = "forever/class/warlock/orb-of-dar-orahil",
+			id = "forever/class/warlock/tome-of-sacrifice",
 			pack = "guides",
-			title = "The Orb of Dar'Orahil",
+			title = "Tome of Sacrifice",
 			classes = { "WARLOCK" },
-			minLevel = 38,
-			maxLevel = 40,
+			minLevel = 60,
+			maxLevel = 60,
 			category = "Class",
 			folder = "Warlock",
-			keywords = { "Shard of a Felhound", "Acolyte Wytula", "Felhas Ruby", "Imprisoned Felhound Spirit", "Mana Eater", "Fragments of the Orb of Orahil", "Cleansing of the Orb of Orahil", "Tabetha", "Orb of Dar'Orahil", "Staff of Dar'Orahil", "Warlock", "class weapon" },
-			zone = 1413,
-			zoneName = "The Barrens",
-			pitch = "Acolyte Wytula's path: a felhound's spirit, for the Orb or Staff of Dar'Orahil.",
-			pros = { "Ends with your choice of an off-hand orb or a staff" },
+			keywords = { "The Prison's Bindings", "The Prison's Casing", "Suppression", "Daio the Decrepit", "Tainted Scar", "Satyr Blood", "Tears of the Hederine", "Glowing Crystal Prison", "Doomguard Commander", "Tome of Sacrifice", "Dire Maul", "Warpwood Quarter", "Darkwhisper Gorge", "Warlock", "class quest" },
+			reward = { { item = 18602, itemName = "Tome of Sacrifice" } },
+			why = "A rare off-hand at 60, Daio's payment for capturing a Doomguard Commander in the Blasted Lands.",
+			zone = 1419,
+			zoneName = "Blasted Lands",
 			author = "Polestar",
 			version = 1,
 			group = true,
 			steps = {
 				{
-					title = "Acolyte Wytula",
-					note = "Acolyte Wytula stands beside Menara Voidrender in the tower above Ratchet. She gives you the Felhas Ruby.",
+					title = "Daio the Decrepit",
+					note = "At 60 Daio the Decrepit waits in the Tainted Scar, in western Blasted Lands.",
 					goals = {
-						{ t = "accept", quest = 4962, title = "Shard of a Felhound", npc = 6254, npcName = "Acolyte Wytula", minLevel = 35, qlvl = 40, closedBy = { 4963 }, preTitles = { [4963] = "Shard of an Infernal" }, map = 1413, x = 62.64, y = 35.3, f = "e", note = "Acolyte Wytula" },
+						{ t = "level", level = 60 },
+						{ t = "accept", quest = 7581, title = "The Prison's Bindings", npc = 14463, npcName = "Daio the Decrepit", minLevel = 60, qlvl = 60, map = 1419, x = 34.13, y = 50.14, f = "e", note = "Daio the Decrepit" },
+						{ t = "accept", quest = 7582, title = "The Prison's Casing", npc = 14463, npcName = "Daio the Decrepit", minLevel = 60, qlvl = 60, map = 1419, x = 34.13, y = 50.14, f = "e" },
 					},
 				},
 				{
-					title = "Mannoroc Coven",
-					note = "The demons of Mannoroc Coven, in southern Desolace, have both. Burning Blade Summoners carry the Infernal Orb. Use the Felhas Ruby on a Mana Eater, a felhound, and kill it for its spirit.",
+					title = "Satyr Blood",
+					note = "The Wildspawn satyrs of the Warpwood Quarter, Dire Maul's eastern wing, carry the blood. The back door at Lariss Pavilion, north of Camp Mojache, needs the Crescent Key; otherwise go in by Dire Maul's main entrance. Bring a group.",
 					goals = {
-						{ t = "collect", quest = 1799, title = "Fragments of the Orb of Orahil", item = 7291, itemName = "Infernal Orb", count = 1, oi = 1, map = 1443, x = 66.49, y = 77.94, f = "e", spots = { { x = 54.9, y = 71.7, r = 58, n = 1 }, { x = 50.3, y = 72.3, r = 58, n = 1 }, { x = 49.6, y = 77.2, r = 58, n = 1 }, { x = 52.7, y = 80.2, r = 75, n = 3 }, { x = 80.5, y = 77.1, r = 58, n = 3 }, { x = 81.2, y = 80.8, r = 80, n = 3 } }, spread = true, note = "Infernal Orb, from the Burning Blade Summoners" },
-						{ t = "collect", quest = 4962, title = "Shard of a Felhound", item = 12648, itemName = "Imprisoned Felhound Spirit", count = 1, oi = 1, map = 1443, x = 52.91, y = 68.14, f = "e", spots = { { x = 52.2, y = 68.1, r = 37, n = 2 } }, note = "Imprisoned Felhound Spirit, from a Mana Eater" },
+						{ t = "collect", quest = 7581, title = "The Prison's Bindings", item = 18603, itemName = "Satyr Blood", count = 15, oi = 1, map = 1444, x = 76.9, y = 37.4, f = "e", note = "Satyr Blood, inside the Warpwood Quarter", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
-					title = "The felhound's spirit",
-					note = "Back to Menara Voidrender in the tower above Ratchet with the spirit first: Tabetha's cleansing follows it.",
+					title = "Tears of the Hederine",
+					note = "The Hederine demons hold Darkwhisper Gorge, in southern Winterspring. They are elite: grouping up is advised.",
 					goals = {
-						{ t = "turnin", quest = 4962, title = "Shard of a Felhound", npc = 6266, npcName = "Menara Voidrender", map = 1413, x = 62.51, y = 35.45, f = "e", note = "Menara Voidrender" },
+						{ t = "collect", quest = 7582, title = "The Prison's Casing", item = 18604, itemName = "Tears of the Hederine", count = 5, oi = 1, map = 1452, x = 58.3, y = 82.25, f = "e", spots = { { x = 58.7, y = 83.6, r = 40, n = 2 }, { x = 59.2, y = 87.6, r = 40, n = 2 }, { x = 57.5, y = 88.4, r = 70, n = 4 }, { x = 55.5, y = 84.2, r = 40, n = 1 }, { x = 52.8, y = 84.9, r = 46, n = 6 }, { x = 50.9, y = 88.2, r = 40, n = 1 }, { x = 55.8, y = 79.4, r = 69, n = 7 }, { x = 57.7, y = 79.8, r = 40, n = 1 }, { x = 61, y = 79.8, r = 40, n = 1 }, { x = 61.8, y = 83.9, r = 41, n = 3 }, { x = 64.3, y = 79.5, r = 51, n = 4 }, { x = 59.6, y = 75.1, r = 40, n = 2 }, { x = 60.5, y = 83.1, r = 40, n = 4, alt = true }, { x = 56.6, y = 85.6, r = 40, n = 2, alt = true }, { x = 60.3, y = 78.3, r = 40, n = 2, alt = true }, { x = 57.9, y = 87.3, r = 47, n = 4, alt = true }, { x = 59.3, y = 77, r = 40, n = 2, alt = true }, { x = 52.3, y = 89.8, r = 42, n = 5, alt = true } }, spread = true, note = "Tears of the Hederine", group = { kind = "elite", rank = 1 } },
 					},
 				},
 				{
-					title = "Tabetha",
-					note = "Tabetha lives at her farm in western Dustwallow Marsh. She calls the Demon of the Orb out of the Infernal Orb; it is elite: grouping up is advised.",
+					title = "Suppression",
+					note = "Hand both in to Daio, then find the Doomguard Commander in the Tainted Scar and use the Glowing Crystal Prison on him. He is elite and fights to escape: grouping up is advised.",
 					goals = {
-						{ t = "turnin", quest = 1799, title = "Fragments of the Orb of Orahil", npc = 6546, npcName = "Tabetha", map = 1445, x = 46.06, y = 57.09, f = "e", note = "Tabetha" },
-						{ t = "accept", quest = 4961, title = "Cleansing of the Orb of Orahil", npc = 6546, npcName = "Tabetha", minLevel = 35, qlvl = 40, preAll = { 1799, 4962 }, preTitles = { [1799] = "Fragments of the Orb of Orahil", [4962] = "Shard of a Felhound" }, map = 1445, x = 46.06, y = 57.09, f = "e" },
-						{ t = "kill", quest = 4961, title = "Cleansing of the Orb of Orahil", target = "Demon of the Orb", npc = 6549, oi = 1, map = 1445, x = 45.79, y = 56.97, f = "e", note = "Demon of the Orb", group = { kind = "elite", rank = 1 } },
-						{ t = "turnin", quest = 4961, title = "Cleansing of the Orb of Orahil", npc = 6546, npcName = "Tabetha", map = 1445, x = 46.06, y = 57.09, f = "e", note = "Tabetha" },
-						{ t = "accept", quest = 4976, title = "Returning the Cleansed Orb", npc = 6546, npcName = "Tabetha", minLevel = 35, qlvl = 40, pre = { 4961 }, preTitles = { [4961] = "Cleansing of the Orb of Orahil" }, map = 1445, x = 46.06, y = 57.09, f = "e" },
+						{ t = "turnin", quest = 7581, title = "The Prison's Bindings", npc = 14463, npcName = "Daio the Decrepit", map = 1419, x = 34.13, y = 50.14, f = "e", note = "Daio the Decrepit" },
+						{ t = "turnin", quest = 7582, title = "The Prison's Casing", npc = 14463, npcName = "Daio the Decrepit", map = 1419, x = 34.13, y = 50.14, f = "e", note = "Daio the Decrepit" },
+						{ t = "accept", quest = 7583, title = "Suppression", npc = 14463, npcName = "Daio the Decrepit", minLevel = 60, qlvl = 60, preAll = { 7581, 7582 }, preTitles = { [7581] = "The Prison's Bindings", [7582] = "The Prison's Casing" }, map = 1419, x = 34.13, y = 50.14, f = "e" },
+						{ t = "use", item = 18601, itemName = "Glowing Crystal Prison", map = 1419, x = 34.5, y = 63.7, f = "e", note = "Glowing Crystal Prison, on the Doomguard Commander" },
+						{ t = "collect", quest = 7583, title = "Suppression", item = 18605, itemName = "Imprisoned Doomguard", count = 1, oi = 1, map = 1419, x = 34.55, y = 63.73, f = "e", spots = { { x = 34.7, y = 63.7, r = 54, n = 2 }, { x = 39, y = 67.9, r = 54, n = 2 }, { x = 40.1, y = 63.3, r = 54, n = 1 }, { x = 44.2, y = 74, r = 54, n = 4 }, { x = 41.6, y = 78.1, r = 57, n = 3 }, { x = 58.2, y = 55.3, r = 54, n = 2 } }, spread = true, note = "Imprisoned Doomguard" },
 					},
 				},
 				{
-					title = "Menara Voidrender",
-					note = "Back to Menara in the tower above Ratchet with the cleansed orb. Wait while she completes the Orb of Dar'Orahil, then speak to her again.",
+					title = "Back to Daio",
 					goals = {
-						{ t = "turnin", quest = 4976, title = "Returning the Cleansed Orb", npc = 6266, npcName = "Menara Voidrender", map = 1413, x = 62.51, y = 35.45, f = "e", note = "Menara Voidrender" },
-						{ t = "accept", quest = 4964, title = "The Completed Orb of Dar'Orahil", npc = 6266, npcName = "Menara Voidrender", minLevel = 35, qlvl = 40, preAll = { 4976 }, closedBy = { 4963 }, preTitles = { [4963] = "Shard of an Infernal", [4976] = "Returning the Cleansed Orb" }, map = 1413, x = 62.51, y = 35.45, f = "e" },
-						{ t = "complete", quest = 4964, title = "The Completed Orb of Dar'Orahil", note = "Wait for the orb" },
-						{ t = "turnin", quest = 4964, title = "The Completed Orb of Dar'Orahil", npc = 6266, npcName = "Menara Voidrender", map = 1413, x = 62.51, y = 35.45, f = "e", note = "Menara Voidrender", rewards = { choices = { { item = 15108, itemName = "Orb of Dar'Orahil" }, { item = 15106, itemName = "Staff of Dar'Orahil" } } } },
-					},
-				},
-			},
-		})
-	end
-	register()
-end
-
--- Source: forever/class/warlock/orb-of-noh-orahil.guide
-do
-	local function register()
-		Polestar.RegisterGuide({
-			id = "forever/class/warlock/orb-of-noh-orahil",
-			pack = "guides",
-			title = "The Orb of Noh'Orahil",
-			classes = { "WARLOCK" },
-			minLevel = 38,
-			maxLevel = 40,
-			category = "Class",
-			folder = "Warlock",
-			keywords = { "Shard of an Infernal", "Acolyte Magaz", "Infus Emerald", "Imprisoned Infernal Spirit", "Lesser Infernal", "Fragments of the Orb of Orahil", "Cleansing of the Orb of Orahil", "Tabetha", "Orb of Noh'Orahil", "Staff of Noh'Orahil", "Warlock", "class weapon" },
-			zone = 1413,
-			zoneName = "The Barrens",
-			pitch = "Acolyte Magaz's path: an infernal's spirit, for the Orb or Staff of Noh'Orahil.",
-			pros = { "Ends with your choice of an off-hand orb or a staff" },
-			author = "Polestar",
-			version = 1,
-			group = true,
-			steps = {
-				{
-					title = "Acolyte Magaz",
-					note = "Acolyte Magaz stands beside Menara Voidrender in the tower above Ratchet. He gives you the Infus Emerald.",
-					goals = {
-						{ t = "accept", quest = 4963, title = "Shard of an Infernal", npc = 6252, npcName = "Acolyte Magaz", minLevel = 35, qlvl = 40, closedBy = { 4962 }, preTitles = { [4962] = "Shard of a Felhound" }, map = 1413, x = 62.56, y = 35.23, f = "e", note = "Acolyte Magaz" },
-					},
-				},
-				{
-					title = "Mannoroc Coven",
-					note = "The demons of Mannoroc Coven, in southern Desolace, have both. Burning Blade Summoners carry the Infernal Orb. Use the Infus Emerald on a Lesser Infernal and kill it for its spirit.",
-					goals = {
-						{ t = "collect", quest = 1799, title = "Fragments of the Orb of Orahil", item = 7291, itemName = "Infernal Orb", count = 1, oi = 1, map = 1443, x = 66.49, y = 77.94, f = "e", spots = { { x = 54.9, y = 71.7, r = 58, n = 1 }, { x = 50.3, y = 72.3, r = 58, n = 1 }, { x = 49.6, y = 77.2, r = 58, n = 1 }, { x = 52.7, y = 80.2, r = 75, n = 3 }, { x = 80.5, y = 77.1, r = 58, n = 3 }, { x = 81.2, y = 80.8, r = 80, n = 3 } }, spread = true, note = "Infernal Orb, from the Burning Blade Summoners" },
-						{ t = "collect", quest = 4963, title = "Shard of an Infernal", item = 12649, itemName = "Imprisoned Infernal Spirit", count = 1, oi = 1, map = 1443, x = 57.59, y = 77.08, f = "e", spots = { { x = 54.3, y = 80.1, r = 43, n = 3 }, { x = 53.1, y = 71.8, r = 113, n = 4 }, { x = 53.7, y = 84, r = 69, n = 3 }, { x = 50, y = 76.1, r = 76, n = 4 }, { x = 57.6, y = 77.1, r = 15, n = 1, alt = true }, { x = 56.8, y = 71.1, r = 15, n = 1, alt = true } }, note = "Imprisoned Infernal Spirit, from a Lesser Infernal" },
-					},
-				},
-				{
-					title = "The infernal's spirit",
-					note = "Back to Menara Voidrender in the tower above Ratchet with the spirit first: Tabetha's cleansing follows it.",
-					goals = {
-						{ t = "turnin", quest = 4963, title = "Shard of an Infernal", npc = 6266, npcName = "Menara Voidrender", map = 1413, x = 62.51, y = 35.45, f = "e", note = "Menara Voidrender" },
-					},
-				},
-				{
-					title = "Tabetha",
-					note = "Tabetha lives at her farm in western Dustwallow Marsh. She calls the Demon of the Orb out of the Infernal Orb; it is elite: grouping up is advised.",
-					goals = {
-						{ t = "turnin", quest = 1799, title = "Fragments of the Orb of Orahil", npc = 6546, npcName = "Tabetha", map = 1445, x = 46.06, y = 57.09, f = "e", note = "Tabetha" },
-						{ t = "accept", quest = 4961, title = "Cleansing of the Orb of Orahil", npc = 6546, npcName = "Tabetha", minLevel = 35, qlvl = 40, preAll = { 1799, 4962 }, preTitles = { [1799] = "Fragments of the Orb of Orahil", [4962] = "Shard of a Felhound" }, map = 1445, x = 46.06, y = 57.09, f = "e" },
-						{ t = "kill", quest = 4961, title = "Cleansing of the Orb of Orahil", target = "Demon of the Orb", npc = 6549, oi = 1, map = 1445, x = 45.79, y = 56.97, f = "e", note = "Demon of the Orb", group = { kind = "elite", rank = 1 } },
-						{ t = "turnin", quest = 4961, title = "Cleansing of the Orb of Orahil", npc = 6546, npcName = "Tabetha", map = 1445, x = 46.06, y = 57.09, f = "e", note = "Tabetha" },
-						{ t = "accept", quest = 4976, title = "Returning the Cleansed Orb", npc = 6546, npcName = "Tabetha", minLevel = 35, qlvl = 40, pre = { 4961 }, preTitles = { [4961] = "Cleansing of the Orb of Orahil" }, map = 1445, x = 46.06, y = 57.09, f = "e" },
-					},
-				},
-				{
-					title = "Menara Voidrender",
-					note = "Back to Menara in the tower above Ratchet with the cleansed orb. Wait while she completes the Orb of Noh'Orahil, then speak to her again.",
-					goals = {
-						{ t = "turnin", quest = 4976, title = "Returning the Cleansed Orb", npc = 6266, npcName = "Menara Voidrender", map = 1413, x = 62.51, y = 35.45, f = "e", note = "Menara Voidrender" },
-						{ t = "accept", quest = 4975, title = "The Completed Orb of Noh'Orahil", npc = 6266, npcName = "Menara Voidrender", minLevel = 35, qlvl = 40, preAll = { 4976 }, closedBy = { 4962 }, preTitles = { [4962] = "Shard of a Felhound", [4976] = "Returning the Cleansed Orb" }, map = 1413, x = 62.51, y = 35.45, f = "e" },
-						{ t = "complete", quest = 4975, title = "The Completed Orb of Noh'Orahil", note = "Wait for the orb" },
-						{ t = "turnin", quest = 4975, title = "The Completed Orb of Noh'Orahil", npc = 6266, npcName = "Menara Voidrender", map = 1413, x = 62.51, y = 35.45, f = "e", note = "Menara Voidrender", rewards = { choices = { { item = 15107, itemName = "Orb of Noh'Orahil" }, { item = 15105, itemName = "Staff of Noh'Orahil" } } } },
-					},
-				},
-			},
-		})
-	end
-	register()
-end
-
--- Source: forever/class/warlock/orb-of-orahil.guide
-do
-	local function register()
-		Polestar.RegisterGuide({
-			id = "forever/class/warlock/orb-of-orahil",
-			pack = "guides",
-			title = "The Orb of Orahil",
-			classes = { "WARLOCK" },
-			minLevel = 35,
-			maxLevel = 40,
-			category = "Class",
-			folder = "Warlock",
-			keywords = { "Knowledge of the Orb of Orahil", "Fragments of the Orb of Orahil", "Menara Voidrender", "Infernal Orb", "Tabetha", "Orb of Dar'Orahil", "Orb of Noh'Orahil", "Staff of Dar'Orahil", "Staff of Noh'Orahil", "Warlock", "class weapon" },
-			zone = 1413,
-			zoneName = "The Barrens",
-			next = "forever/class/warlock/orb-of-dar-orahil",
-			nextChoices = { "forever/class/warlock/orb-of-dar-orahil", "forever/class/warlock/orb-of-noh-orahil" },
-			author = "Polestar",
-			version = 1,
-			steps = {
-				{
-					title = "Knowledge of the Orb of Orahil (Stormwind)",
-					note = "At 35 Demisette Cloyce in the Slaughtered Lamb, in the Mage Quarter, sends you to Menara Voidrender in Ratchet.",
-					only = { races = { "Human" } },
-					goals = {
-						{ t = "level", level = 35 },
-						{ t = "accept", quest = 4968, title = "Knowledge of the Orb of Orahil", npc = 461, npcName = "Demisette Cloyce", minLevel = 35, qlvl = 35, closedBy = { 1799, 4965, 4967, 4969 }, preTitles = { [1799] = "Fragments of the Orb of Orahil", [4965] = "Knowledge of the Orb of Orahil", [4967] = "Knowledge of the Orb of Orahil", [4969] = "Knowledge of the Orb of Orahil" }, map = 1453, x = 39.24, y = 84.96, note = "Demisette Cloyce" },
-					},
-				},
-				{
-					title = "Knowledge of the Orb of Orahil (Ironforge)",
-					note = "At 35 Briarthorn in Ironforge sends you to Menara Voidrender in Ratchet.",
-					only = { races = { "Gnome" } },
-					goals = {
-						{ t = "level", level = 35 },
-						{ t = "accept", quest = 4965, title = "Knowledge of the Orb of Orahil", npc = 5172, npcName = "Briarthorn", minLevel = 35, qlvl = 35, closedBy = { 1799, 4967, 4968, 4969 }, preTitles = { [1799] = "Fragments of the Orb of Orahil", [4967] = "Knowledge of the Orb of Orahil", [4968] = "Knowledge of the Orb of Orahil", [4969] = "Knowledge of the Orb of Orahil" }, map = 1455, x = 50.35, y = 5.66, f = "e", note = "Briarthorn" },
-					},
-				},
-				{
-					title = "Knowledge of the Orb of Orahil (Orgrimmar)",
-					note = "At 35 Zevrost in the Cleft of Shadow sends you to Menara Voidrender in Ratchet.",
-					only = { races = { "Orc", "Troll" } },
-					goals = {
-						{ t = "level", level = 35 },
-						{ t = "accept", quest = 4967, title = "Knowledge of the Orb of Orahil", npc = 3326, npcName = "Zevrost", minLevel = 35, qlvl = 35, closedBy = { 1799, 4965, 4968, 4969 }, preTitles = { [1799] = "Fragments of the Orb of Orahil", [4965] = "Knowledge of the Orb of Orahil", [4968] = "Knowledge of the Orb of Orahil", [4969] = "Knowledge of the Orb of Orahil" }, map = 1454, x = 48.47, y = 45.43, f = "e", note = "Zevrost" },
-					},
-				},
-				{
-					title = "Knowledge of the Orb of Orahil (Undercity)",
-					note = "At 35 Kaal Soulreaper in the Magic Quarter sends you to Menara Voidrender in Ratchet. The zeppelin from Tirisfal Glades flies to Durotar.",
-					only = { races = { "Scourge" } },
-					goals = {
-						{ t = "level", level = 35 },
-						{ t = "accept", quest = 4969, title = "Knowledge of the Orb of Orahil", npc = 4563, npcName = "Kaal Soulreaper", minLevel = 35, qlvl = 35, closedBy = { 1799, 4965, 4967, 4968 }, preTitles = { [1799] = "Fragments of the Orb of Orahil", [4965] = "Knowledge of the Orb of Orahil", [4967] = "Knowledge of the Orb of Orahil", [4968] = "Knowledge of the Orb of Orahil" }, map = 1458, x = 86.21, y = 15.93, f = "e", note = "Kaal Soulreaper" },
-					},
-				},
-				{
-					title = "Menara Voidrender",
-					note = "Menara Voidrender and her two acolytes stand in the tower on the hill above Ratchet, beside Strahad Farsan. Next, choose one acolyte's path: the next guide is that choice.",
-					goals = {
-						{ t = "turnin", quest = 4968, title = "Knowledge of the Orb of Orahil", npc = 6266, npcName = "Menara Voidrender", map = 1413, x = 62.51, y = 35.45, f = "e", only = { races = { "Human" } }, note = "Menara Voidrender" },
-						{ t = "turnin", quest = 4965, title = "Knowledge of the Orb of Orahil", npc = 6266, npcName = "Menara Voidrender", map = 1413, x = 62.51, y = 35.45, f = "e", only = { races = { "Gnome" } }, note = "Menara Voidrender" },
-						{ t = "turnin", quest = 4967, title = "Knowledge of the Orb of Orahil", npc = 6266, npcName = "Menara Voidrender", map = 1413, x = 62.51, y = 35.45, f = "e", only = { races = { "Orc", "Troll" } }, note = "Menara Voidrender" },
-						{ t = "turnin", quest = 4969, title = "Knowledge of the Orb of Orahil", npc = 6266, npcName = "Menara Voidrender", map = 1413, x = 62.51, y = 35.45, f = "e", only = { races = { "Scourge" } }, note = "Menara Voidrender" },
-						{ t = "accept", quest = 1799, title = "Fragments of the Orb of Orahil", npc = 6266, npcName = "Menara Voidrender", minLevel = 35, qlvl = 40, map = 1413, x = 62.51, y = 35.45, f = "e" },
-					},
-				},
-			},
-		})
-	end
-	register()
-end
-
--- Source: forever/class/warlock/orb-of-soranruk.guide
-do
-	local function register()
-		Polestar.RegisterGuide({
-			id = "forever/class/warlock/orb-of-soranruk",
-			pack = "guides",
-			title = "The Orb of Soran'ruk",
-			classes = { "WARLOCK" },
-			minLevel = 25,
-			maxLevel = 30,
-			category = "Class",
-			folder = "Warlock",
-			keywords = { "Doan Karhan", "Soran'ruk Fragment", "Large Soran'ruk Fragment", "Orb of Soran'ruk", "Staff of Soran'ruk", "Blackfathom Deeps", "Shadowfang Keep", "Twilight Acolyte", "Shadowfang Darksoul", "Warlock", "class weapon" },
-			zone = 1413,
-			zoneName = "The Barrens",
-			author = "Polestar",
-			version = 1,
-			group = true,
-			steps = {
-				{
-					title = "Doan Karhan",
-					note = "Doan Karhan camps in the southern Barrens, east of the road north-east of Camp Taurajo.",
-					goals = {
-						{ t = "level", level = 20 },
-						{ t = "accept", quest = 1740, title = "The Orb of Soran'ruk", npc = 6247, npcName = "Doan Karhan", minLevel = 20, qlvl = 25, map = 1413, x = 49.31, y = 57.21, f = "e", note = "Doan Karhan" },
-					},
-				},
-				{
-					title = "Blackfathom Deeps",
-					note = "The Twilight Acolytes inside Blackfathom Deeps, a level 24-32 dungeon, each drop a Soran'ruk Fragment: bring a group. The entrance is in the ruins on the north-west coast of Ashenvale.",
-					goals = {
-						{ t = "collect", quest = 1740, title = "The Orb of Soran'ruk", item = 6914, itemName = "Soran'ruk Fragment", count = 3, oi = 1, map = 1440, x = 14.5, y = 14.2, note = "Soran'ruk Fragment, from the Twilight Acolytes", group = { kind = "elite", rank = 1 } },
-					},
-				},
-				{
-					title = "Shadowfang Keep",
-					note = "The Shadowfang Darksouls inside Shadowfang Keep, a level 20-30 dungeon, drop the Large Fragment about one time in five: bring a group. The keep stands south of the Sepulcher.",
-					goals = {
-						{ t = "collect", quest = 1740, title = "The Orb of Soran'ruk", item = 6915, itemName = "Large Soran'ruk Fragment", count = 1, oi = 2, map = 1421, x = 44.8, y = 67.8, note = "Large Soran'ruk Fragment, from the Shadowfang Darksouls", group = { kind = "elite", rank = 1 } },
-					},
-				},
-				{
-					title = "Back to Doan Karhan",
-					goals = {
-						{ t = "turnin", quest = 1740, title = "The Orb of Soran'ruk", npc = 6247, npcName = "Doan Karhan", map = 1413, x = 49.31, y = 57.21, f = "e", note = "Doan Karhan", rewards = { choices = { { item = 6898, itemName = "Orb of Soran'ruk" }, { item = 15109, itemName = "Staff of Soran'ruk" } } } },
+						{ t = "turnin", quest = 7583, title = "Suppression", npc = 14463, npcName = "Daio the Decrepit", map = 1419, x = 34.13, y = 50.14, f = "e", note = "Daio the Decrepit: Tome of Sacrifice" },
 					},
 				},
 			},
@@ -16139,6 +16140,8 @@ do
 			category = "Class",
 			folder = "Warrior",
 			keywords = { "Ruga Ragetotem", "Trial at the Field of Giants", "Ruga's Bulwark", "Thun'grim Firegaze", "Brutal Hauberk", "Brutal Gauntlets", "Brutal Helm", "Brutal Legguards", "Roogug", "Razorfen Kraul", "Warrior", "class armor" },
+			reward = { { item = 7133, itemName = "Brutal Hauberk" }, { item = 7130, itemName = "Brutal Helm" }, { item = 7129, itemName = "Brutal Gauntlets" }, { item = 7132, itemName = "Brutal Legguards" }, { item = 7120, itemName = "Ruga's Bulwark" } },
+			why = "Four armor pieces at 30 (hauberk, helm, gauntlets, legguards) and a shield on the way.",
 			zone = 1413,
 			zoneName = "The Barrens",
 			author = "Polestar",
@@ -16319,6 +16322,8 @@ do
 			category = "Class",
 			folder = "Warrior",
 			keywords = { "Yorus Barleybrew", "The Rethban Gauntlet", "Furen Longbeard", "Furen's Favor", "Fire Hardened Mail", "Grimand Elmore", "Mathiel", "Klockmort Spannerspan", "Fire Hardened Coif", "Fire Hardened Leggings", "Fire Hardened Gauntlets", "Roogug", "Razorfen Kraul", "Warrior", "class armor" },
+			reward = { { item = 6972, itemName = "Fire Hardened Hauberk" }, { item = 6971, itemName = "Fire Hardened Coif", choice = true }, { item = 6973, itemName = "Fire Hardened Leggings", choice = true }, { item = 6974, itemName = "Fire Hardened Gauntlets", choice = true }, { item = 6970, itemName = "Furen's Favor" } },
+			why = "A hauberk at 28, a coif, leggings or gauntlets by race, and a shield on the way.",
 			zone = 1433,
 			zoneName = "Redridge Mountains",
 			author = "Polestar",
@@ -16504,6 +16509,8 @@ do
 			category = "Class",
 			folder = "Warrior",
 			keywords = { "Defensive Stance", "Bartleby", "Harry Burlguard", "Marshal Haggard", "Dead-tooth Jack", "Haggard's Axe", "Haggard's Hammer", "Haggard's Dagger", "Haggard's Sword", "Warrior", "class weapon" },
+			reward = { { item = 6979, itemName = "Haggard's Axe", choice = true }, { item = 6983, itemName = "Haggard's Hammer", choice = true }, { item = 6980, itemName = "Haggard's Dagger", choice = true }, { item = 6985, itemName = "Haggard's Sword", choice = true }, { text = "Defensive Stance" } },
+			why = "Defensive Stance and a one-hand weapon of your choice at 10.",
 			zone = 1453,
 			zoneName = "Stormwind City",
 			author = "Polestar",
@@ -16568,6 +16575,8 @@ do
 			category = "Class",
 			folder = "Warrior",
 			keywords = { "Defensive Stance", "Ulag the Cleaver", "Deathguard Dillinger", "Coleman Farthing", "Agamand Heirlooms", "Agamand Mills", "Heirloom Axe", "Heirloom Hammer", "Heirloom Dagger", "Heirloom Sword", "Warrior", "class weapon" },
+			reward = { { item = 7115, itemName = "Heirloom Axe", choice = true }, { item = 7117, itemName = "Heirloom Hammer", choice = true }, { item = 7116, itemName = "Heirloom Dagger", choice = true }, { item = 7118, itemName = "Heirloom Sword", choice = true }, { text = "Defensive Stance" } },
+			why = "Defensive Stance and a one-hand weapon of your choice at 10.",
 			zone = 1420,
 			zoneName = "Tirisfal Glades",
 			author = "Polestar",
@@ -16628,6 +16637,8 @@ do
 			category = "Class",
 			folder = "Warrior",
 			keywords = { "A Troubled Spirit", "Fallen Hero of the Horde", "Warrior Kinship", "War on the Shadowsworn", "Voodoo Feathers", "Sunken Temple", "Temple of Atal'Hakkar", "Blasted Lands", "Helboar", "Warrior", "class quest" },
+			reward = { { text = "Experience" } },
+			why = "Experience at 50, ending in the Sunken Temple; Forever removed the Classic item choice.",
 			zone = 1435,
 			zoneName = "Swamp of Sorrows",
 			author = "Polestar",
@@ -16759,6 +16770,8 @@ do
 			category = "Class",
 			folder = "Warrior",
 			keywords = { "Berserker Stance", "The Islander", "The Affray", "Klannoc Macleod", "Fray Island", "Big Will", "Bath'rah the Windwatcher", "Cyclonian", "Essence of the Exile", "Whirlwind Axe", "Whirlwind Sword", "Whirlwind Warhammer", "Warrior", "class weapon" },
+			reward = { { item = 6975, itemName = "Whirlwind Axe", choice = true }, { item = 6977, itemName = "Whirlwind Sword", choice = true }, { item = 6976, itemName = "Whirlwind Warhammer", choice = true }, { text = "Berserker Stance" } },
+			why = "Berserker Stance at 30 and a Whirlwind axe, sword or warhammer at 40.",
 			zone = 1413,
 			zoneName = "The Barrens",
 			author = "Polestar",
@@ -17059,11 +17072,14 @@ do
 			maxLevel = 60,
 			category = "Class",
 			folder = "Paladin",
-			keywords = { "Summon Charger", "Lord Grayson Shadowbreaker", "Judgment and Redemption", "Darkreaver", "Scholomance", "Paladin", "class mount" },
+			keywords = { "Summon Charger", "Lord Grayson Shadowbreaker", "Emphasis on Sacrifice", "Exorcising Terrordale", "Grimand Elmore", "Collection of Goods", "Arcanite Barding", "Ancient Equine Spirit", "Manna-Enriched Horse Feed", "Divination Scryer", "Judgment and Redemption", "Darkreaver", "Dire Maul", "Scholomance", "Paladin", "class mount" },
+			reward = { { spell = 23214, spellName = "Summon Charger" } },
+			why = "Your epic mount at 60, summoned at will: the faster step up from the Warhorse.",
 			zone = 1453,
 			zoneName = "Stormwind City",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "Lord Grayson Shadowbreaker (Ironforge)",
@@ -17076,13 +17092,139 @@ do
 				},
 				{
 					title = "Lord Grayson Shadowbreaker",
-					note = "The Summon Charger chain is long and needs Scholomance. After this hand-off, Lord Grayson sends you on Emphasis on Sacrifice (High Priest Rohan in Ironforge), To Show Due Judgment and Exorcising Terrordale (25 Terrordale Spirits), The Work of Grimand Elmore (Collection of Goods: 40 Runecloth, 6 Arcanite Bars, 10 Arthas' Tears, 5 Stratholme Holy Water), Ancient Equine Spirit (Manna-Enriched Horse Feed from Merideth Carlson in Southshore), The Divination Scryer (an Azerothian Diamond and a Pristine Black Diamond) and Judgment and Redemption, which ends with Darkreaver's Fallen Charger in Scholomance.",
+					note = "The Summon Charger chain is long: it takes you through Stratholme, Dire Maul and Scholomance, and costs about 350 gold in donations on top of the materials. Lord Grayson stands in the Cathedral of Light.",
 					goals = {
 						{ t = "level", level = 60 },
 						{ t = "accept", quest = 7638, title = "Lord Grayson Shadowbreaker", npc = 6171, npcName = "Duthorian Rall", minLevel = 60, qlvl = 60, closedBy = { 7670 }, preTitles = { [7670] = "Lord Grayson Shadowbreaker" }, map = 1453, x = 50.48, y = 47.49, only = { races = { "Human" } }, note = "Duthorian Rall, Cathedral of Light" },
 						{ t = "turnin", quest = 7638, title = "Lord Grayson Shadowbreaker", npc = 928, npcName = "Lord Grayson Shadowbreaker", map = 1453, x = 48.43, y = 50.22, only = { races = { "Human" } } },
 						{ t = "turnin", quest = 7670, title = "Lord Grayson Shadowbreaker", npc = 928, npcName = "Lord Grayson Shadowbreaker", map = 1453, x = 48.43, y = 50.22, only = { races = { "Dwarf" } } },
-						{ t = "learn", spell = 23214, spellName = "Summon Charger", note = "Ticks once you finish the chain" },
+						{ t = "accept", quest = 7637, title = "Emphasis on Sacrifice", npc = 928, npcName = "Lord Grayson Shadowbreaker", minLevel = 60, qlvl = 60, pre = { 7638 }, preTitles = { [7638] = "Lord Grayson Shadowbreaker" }, map = 1453, x = 48.43, y = 50.22 },
+					},
+				},
+				{
+					title = "High Priest Rohan",
+					note = "High Priest Rohan is in Ironforge's Mystic Ward. Bring 150 gold: the censer is yours for a donation.",
+					goals = {
+						{ t = "turnin", quest = 7637, title = "Emphasis on Sacrifice", npc = 11406, npcName = "High Priest Rohan", map = 1455, x = 24.73, y = 8.16, f = "e", note = "High Priest Rohan: 150 gold" },
+						{ t = "accept", quest = 7639, title = "To Show Due Judgment", npc = 11406, npcName = "High Priest Rohan", minLevel = 60, qlvl = 60, pre = { 7637 }, preTitles = { [7637] = "Emphasis on Sacrifice" }, map = 1455, x = 24.73, y = 8.16, f = "e" },
+					},
+				},
+				{
+					title = "Back to Lord Grayson",
+					goals = {
+						{ t = "turnin", quest = 7639, title = "To Show Due Judgment", npc = 928, npcName = "Lord Grayson Shadowbreaker", map = 1453, x = 48.43, y = 50.22, note = "Lord Grayson Shadowbreaker" },
+						{ t = "accept", quest = 7640, title = "Exorcising Terrordale", npc = 928, npcName = "Lord Grayson Shadowbreaker", minLevel = 60, qlvl = 60, pre = { 7639 }, preTitles = { [7639] = "To Show Due Judgment" }, map = 1453, x = 48.43, y = 50.22 },
+					},
+				},
+				{
+					title = "Exorcising Terrordale",
+					note = "Terrordale lies in the far north-west of the Eastern Plaguelands, by the Western Plaguelands border. Use the Exorcism Censer there to drive out the spirits, then defeat them.",
+					goals = {
+						{ t = "kill", quest = 7640, title = "Exorcising Terrordale", target = "Terrordale Spirit", npc = 14564, count = 25, oi = 1, map = 1423, x = 11.61, y = 21.36, spots = { { x = 11.4, y = 20.5, r = 64, n = 7 }, { x = 11.8, y = 23.1, r = 37, n = 5 }, { x = 10.9, y = 17.7, r = 54, n = 4 }, { x = 8.9, y = 21.2, r = 38, n = 7 }, { x = 14.8, y = 21.5, r = 39, n = 5 }, { x = 14.3, y = 24.9, r = 46, n = 3 } }, note = "Terrordale Spirits" },
+					},
+				},
+				{
+					title = "Lord Grayson Shadowbreaker",
+					goals = {
+						{ t = "turnin", quest = 7640, title = "Exorcising Terrordale", npc = 928, npcName = "Lord Grayson Shadowbreaker", map = 1453, x = 48.43, y = 50.22, note = "Lord Grayson Shadowbreaker" },
+						{ t = "accept", quest = 7641, title = "The Work of Grimand Elmore", npc = 928, npcName = "Lord Grayson Shadowbreaker", minLevel = 60, qlvl = 60, pre = { 7640 }, preTitles = { [7640] = "Exorcising Terrordale" }, map = 1453, x = 48.43, y = 50.22 },
+					},
+				},
+				{
+					title = "Grimand Elmore",
+					note = "Grimand Elmore works in Stormwind's Dwarven District.",
+					goals = {
+						{ t = "turnin", quest = 7641, title = "The Work of Grimand Elmore", npc = 1416, npcName = "Grimand Elmore", map = 1453, x = 59.73, y = 33.78, note = "Grimand Elmore" },
+						{ t = "accept", quest = 7642, title = "Collection of Goods", npc = 1416, npcName = "Grimand Elmore", minLevel = 60, qlvl = 60, pre = { 7641 }, preTitles = { [7641] = "The Work of Grimand Elmore" }, map = 1453, x = 59.73, y = 33.78 },
+					},
+				},
+				{
+					title = "Grimand's materials",
+					note = "Runecloth drops from humanoids around level 50 and up; Arthas' Tears is an herb of the Plaguelands and Felwood; Arcanite Bars are an Alchemy transmute. The Auction House in Stormwind's Trade District sells all three, and so do crafters.",
+					goals = {
+						{ t = "collect", quest = 7642, title = "Collection of Goods", item = 14047, itemName = "Runecloth", count = 40, oi = 3, map = 1453, x = 73.09, y = 33.93, spots = { { x = 74.3, y = 32.8, r = 22, n = 4 }, { x = 80.1, y = 38.3, r = 34, n = 12 }, { x = 74.4, y = 46.2, r = 35, n = 7 }, { x = 69.2, y = 82.7, r = 15, n = 1, alt = true } }, note = "Runecloth" },
+						{ t = "collect", quest = 7642, title = "Collection of Goods", item = 8836, itemName = "Arthas' Tears", count = 10, oi = 2, map = 1423, x = 45.06, y = 45.59, spots = { { x = 44.2, y = 51.8, r = 135, n = 1 }, { x = 41.4, y = 32.8, r = 138, n = 3 }, { x = 47.2, y = 19.9, r = 135, n = 1 }, { x = 54.8, y = 26.9, r = 135, n = 2 }, { x = 65.2, y = 27.5, r = 135, n = 1 }, { x = 58.8, y = 46, r = 135, n = 2 }, { x = 57.8, y = 59.5, r = 135, n = 1 }, { x = 69.5, y = 52.6, r = 135, n = 2 }, { x = 38.6, y = 70.1, r = 135, n = 4 }, { x = 21.6, y = 76.5, r = 135, n = 1 }, { x = 26.2, y = 23.8, r = 135, n = 1 }, { x = 34.1, y = 13.5, r = 135, n = 1 }, { x = 37.1, y = 58.8, r = 151, n = 6, alt = true }, { x = 58.9, y = 34.5, r = 135, n = 1, alt = true }, { x = 27.1, y = 66, r = 206, n = 10, alt = true } }, spread = true, note = "Arthas' Tears" },
+						{ t = "collect", quest = 7642, title = "Collection of Goods", item = 12360, itemName = "Arcanite Bar", count = 6, oi = 4, map = 1453, x = 61.2, y = 71.3, note = "Arcanite Bars: the Auction House" },
+					},
+				},
+				{
+					title = "Stratholme Holy Water",
+					note = "Stratholme is a group of five, level 58-60, at the north end of the Eastern Plaguelands. The Supply Crates scattered through the city hold the Stratholme Holy Water.",
+					goals = {
+						{ t = "goto", text = "Stratholme", map = 1423, x = 26.5, y = 10.4 },
+						{ t = "collect", quest = 7642, title = "Collection of Goods", item = 13180, itemName = "Stratholme Holy Water", count = 5, oi = 1, map = 1423, x = 26.5, y = 10.4, note = "Supply Crates, inside" },
+					},
+				},
+				{
+					title = "Grimand Elmore",
+					note = "Bring 150 gold for Grimand along with the materials.",
+					goals = {
+						{ t = "turnin", quest = 7642, title = "Collection of Goods", npc = 1416, npcName = "Grimand Elmore", map = 1453, x = 59.73, y = 33.78, note = "Grimand Elmore: 150 gold" },
+						{ t = "accept", quest = 7648, title = "Grimand's Finest Work", npc = 1416, npcName = "Grimand Elmore", minLevel = 60, qlvl = 60, pre = { 7642 }, preTitles = { [7642] = "Collection of Goods" }, map = 1453, x = 59.73, y = 33.78 },
+					},
+				},
+				{
+					title = "Lord Grayson Shadowbreaker",
+					goals = {
+						{ t = "turnin", quest = 7648, title = "Grimand's Finest Work", npc = 928, npcName = "Lord Grayson Shadowbreaker", map = 1453, x = 48.43, y = 50.22, note = "Lord Grayson Shadowbreaker: the Arcanite Barding" },
+						{ t = "accept", quest = 7643, title = "Ancient Equine Spirit", npc = 928, npcName = "Lord Grayson Shadowbreaker", minLevel = 60, qlvl = 60, pre = { 7642 }, preTitles = { [7642] = "Collection of Goods" }, map = 1453, x = 48.43, y = 50.22 },
+					},
+				},
+				{
+					title = "Enriched Manna Biscuits",
+					note = "The Argent Dawn quartermasters sell the biscuits in fives once the Argent Dawn is Friendly with you: Argent Quartermaster Lightspark at Chillwind Camp, Quartermaster Miranda Breechlock at Light's Hope Chapel, Argent Quartermaster Hasana at the Bulwark.",
+					goals = {
+						{ t = "collect", item = 13724, itemName = "Enriched Manna Biscuit", count = 20, map = 1422, x = 42.8, y = 83.7, f = "e", note = "Enriched Manna Biscuits: Argent Quartermaster Lightspark, Chillwind Camp" },
+					},
+				},
+				{
+					title = "Merideth Carlson",
+					note = "Merideth Carlson breeds horses in Southshore. She also wants 50 gold.",
+					goals = {
+						{ t = "accept", quest = 7645, title = "Manna-Enriched Horse Feed", npc = 2357, npcName = "Merideth Carlson", minLevel = 60, qlvl = 60, map = 1424, x = 52.19, y = 55.48, f = "e", note = "Merideth Carlson" },
+						{ t = "turnin", quest = 7645, title = "Manna-Enriched Horse Feed", npc = 2357, npcName = "Merideth Carlson", map = 1424, x = 52.19, y = 55.48, f = "e", note = "Manna-Enriched Horse Feed" },
+					},
+				},
+				{
+					title = "Dire Maul: Tendris Warpwood",
+					note = "Dire Maul lies in central Feralas; Tendris Warpwood guards the start of the West wing. Defeat him to free the Ancient Equine Spirit, feed it the Manna-Enriched Horse Feed and hand it the Arcanite Barding to bless. Bring a group.",
+					goals = {
+						{ t = "goto", text = "Dire Maul", map = 1444, x = 59.2, y = 45.1, f = "e" },
+						{ t = "kill", target = "Tendris Warpwood", npc = 11489, map = 1444, x = 59.2, y = 45.1, f = "e", note = "Tendris Warpwood, inside the West wing", group = { kind = "elite", rank = 1 } },
+						{ t = "turnin", quest = 7643, title = "Ancient Equine Spirit", npc = 14566, npcName = "Ancient Equine Spirit", map = 1444, x = 59.2, y = 45.1, f = "e", note = "Ancient Equine Spirit" },
+						{ t = "accept", quest = 7644, title = "Blessed Arcanite Barding", npc = 14566, npcName = "Ancient Equine Spirit", minLevel = 60, qlvl = 60, pre = { 7643 }, preTitles = { [7643] = "Ancient Equine Spirit" }, map = 1444, x = 59.2, y = 45.1, f = "e" },
+					},
+				},
+				{
+					title = "Lord Grayson Shadowbreaker",
+					goals = {
+						{ t = "turnin", quest = 7644, title = "Blessed Arcanite Barding", npc = 928, npcName = "Lord Grayson Shadowbreaker", map = 1453, x = 48.43, y = 50.22, note = "Lord Grayson Shadowbreaker" },
+						{ t = "accept", quest = 7646, title = "The Divination Scryer", npc = 928, npcName = "Lord Grayson Shadowbreaker", minLevel = 60, qlvl = 60, pre = { 7644 }, preTitles = { [7644] = "Blessed Arcanite Barding" }, map = 1453, x = 48.43, y = 50.22 },
+					},
+				},
+				{
+					title = "Two diamonds",
+					note = "An Azerothian Diamond comes from Thorium veins, a Pristine Black Diamond from the elites of the Western Plaguelands, both rarely: the Auction House is the usual source.",
+					goals = {
+						{ t = "collect", quest = 7646, title = "The Divination Scryer", item = 12800, itemName = "Azerothian Diamond", count = 1, oi = 1, map = 1444, x = 54.39, y = 66.38, f = "e", spots = { { x = 62.2, y = 69.3, r = 150, n = 2 }, { x = 61.6, y = 84.1, r = 150, n = 2 }, { x = 73.5, y = 63.6, r = 150, n = 3 }, { x = 47.8, y = 57.5, r = 150, n = 1 }, { x = 45.4, y = 69.4, r = 150, n = 1 } }, spread = true, note = "Azerothian Diamond" },
+						{ t = "collect", quest = 7646, title = "The Divination Scryer", item = 18335, itemName = "Pristine Black Diamond", count = 1, oi = 2, map = 1424, x = 15.49, y = 82.46, f = "e", spots = { { x = 15, y = 82, r = 51, n = 3 }, { x = 16.9, y = 83.8, r = 15, n = 1 } }, note = "Pristine Black Diamond" },
+					},
+				},
+				{
+					title = "Lord Grayson Shadowbreaker",
+					goals = {
+						{ t = "turnin", quest = 7646, title = "The Divination Scryer", npc = 928, npcName = "Lord Grayson Shadowbreaker", map = 1453, x = 48.43, y = 50.22, note = "Lord Grayson Shadowbreaker" },
+						{ t = "accept", quest = 7647, title = "Judgment and Redemption", npc = 928, npcName = "Lord Grayson Shadowbreaker", minLevel = 60, qlvl = 60, pre = { 7646 }, preTitles = { [7646] = "The Divination Scryer" }, map = 1453, x = 48.43, y = 50.22, note = "he hands you the Divination Scryer" },
+					},
+				},
+				{
+					title = "The Great Ossuary",
+					note = "Scholomance lies under Caer Darrow, the island town in the south-east of the Western Plaguelands. Use the Divination Scryer in the heart of the Great Ossuary's basement, defeat the spirits it calls and then Death Knight Darkreaver, and give his Fallen Charger the Charger's Redeemed Soul and the Blessed Arcanite Barding. All are elite: bring a group. If the attempt fails, Lord Grayson gives you a new scryer through Again Into the Great Ossuary.",
+					goals = {
+						{ t = "goto", text = "Scholomance", map = 1422, x = 69.7, y = 73.2, f = "e" },
+						{ t = "collect", quest = 7647, title = "Judgment and Redemption", item = 18799, itemName = "Charger's Redeemed Soul", count = 1, oi = 1, map = 1422, x = 69.7, y = 73.2, f = "e", note = "Charger's Redeemed Soul: Death Knight Darkreaver" },
+						{ t = "turnin", quest = 7647, title = "Judgment and Redemption", npc = 14568, npcName = "Darkreaver's Fallen Charger", map = 1422, x = 69.7, y = 73.2, f = "e", note = "Darkreaver's Fallen Charger" },
+						{ t = "learn", spell = 23214, spellName = "Summon Charger" },
 					},
 				},
 			},
@@ -17105,6 +17247,8 @@ do
 			category = "Class",
 			folder = "Paladin",
 			keywords = { "Summon Warhorse", "Tome of Nobility", "Paladin", "Duthorian Rall", "class mount" },
+			reward = { { spell = 13819, spellName = "Summon Warhorse" } },
+			why = "Your first mount at 40, summoned at will: a paladin buys no horse.",
 			zone = 1453,
 			zoneName = "Stormwind City",
 			author = "Polestar",
@@ -18169,11 +18313,14 @@ do
 			maxLevel = 60,
 			category = "Class",
 			folder = "Warlock",
-			keywords = { "Summon Dreadsteed", "Mor'zul Bloodbringer", "Dreadsteed of Xoroth", "Dire Maul", "Warlock", "class mount" },
+			keywords = { "Summon Dreadsteed", "Mor'zul Bloodbringer", "Rage of Blood", "Raging Beast's Blood", "Wildeyes", "Gorzeeki Wildeyes", "Lord Banehollow", "Shadowy Potion", "Jaedenar", "Shadow Hold", "Ulathek the Traitor", "Xorothian Stardust", "Ur'dan", "Bell of Dethmoora", "Wheel of the Black March", "Doomsday Candle", "Arcanite", "Imp Delivery", "J'eevee", "Imp in a Jar", "Scholomance", "Dreadsteed of Xoroth", "Xorothian Dreadsteed", "Dire Maul", "Warlock", "class mount" },
+			reward = { { spell = 23161, spellName = "Summon Dreadsteed" } },
+			why = "Your epic mount at 60: summoned anywhere, with no gold spent on an epic horse.",
 			zone = 1428,
 			zoneName = "Burning Steppes",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "Mor'zul Bloodbringer (Stormwind)",
@@ -18213,10 +18360,113 @@ do
 				},
 				{
 					title = "Mor'zul Bloodbringer",
-					note = "The Summon Dreadsteed chain is long and needs Dire Maul. After this hand-off: Rage of Blood (30 Raging Beast's Blood), Wildeyes, Lord Banehollow in Felwood, Ulathek the Traitor, Xorothian Stardust, Bell of Dethmoora (10 Elixir of Shadow Power), Wheel of the Black March (6 Large Brilliant Shards, 25 Dark Iron Ore), Doomsday Candle (35 Black Dragonscales), Arcanite (3 Arcanite Bars), Imp Delivery (J'eevee) and Dreadsteed of Xoroth, the ritual in Dire Maul.",
+					note = "Mor'zul Bloodbringer and his goblin Gorzeeki Wildeyes camp at the Altar of Storms, in the north-west of the Burning Steppes, west of Blackrock Mountain. The chain is long, costs gold at Gorzeeki's and ends in two dungeons.",
 					goals = {
-						{ t = "turnin", quest = 7562, title = "Mor'zul Bloodbringer", npc = 14436, npcName = "Mor'zul Bloodbringer", map = 1428, x = 12.69, y = 31.64, f = "e" },
-						{ t = "learn", spell = 23161, spellName = "Summon Dreadsteed", note = "Ticks once you finish the chain" },
+						{ t = "turnin", quest = 7562, title = "Mor'zul Bloodbringer", npc = 14436, npcName = "Mor'zul Bloodbringer", map = 1428, x = 12.69, y = 31.64, f = "e", note = "Mor'zul Bloodbringer" },
+						{ t = "accept", quest = 7563, title = "Rage of Blood", npc = 14436, npcName = "Mor'zul Bloodbringer", minLevel = 60, qlvl = 58, map = 1428, x = 12.69, y = 31.64, f = "e" },
+					},
+				},
+				{
+					title = "Raging Beast's Blood",
+					note = "The owlbeasts of Winterspring drop the blood, about one in three: the Ragged and Raging Owlbeasts west of and around Everlook, the Crazed, Moontouched and Berserk ones in the east. While you hunt, start on the materials of the next step: the Auction House has them all.",
+					goals = {
+						{ t = "collect", quest = 7563, title = "Rage of Blood", item = 18590, itemName = "Raging Beast's Blood", count = 30, oi = 1, map = 1452, x = 43.16, y = 39.43, f = "e", spots = { { x = 44.4, y = 38, r = 44, n = 2 }, { x = 48.2, y = 46.4, r = 44, n = 1 }, { x = 51.5, y = 39.3, r = 44, n = 1 }, { x = 56.6, y = 32.1, r = 44, n = 1 }, { x = 62.2, y = 31.8, r = 44, n = 1 }, { x = 67.2, y = 22.4, r = 59, n = 6 }, { x = 62.4, y = 16.6, r = 71, n = 5 }, { x = 37, y = 35.6, r = 44, n = 1 }, { x = 36.2, y = 44.3, r = 44, n = 1 }, { x = 28.6, y = 48.3, r = 44, n = 1 }, { x = 58.9, y = 59.6, r = 47, n = 7 }, { x = 64.8, y = 64.6, r = 56, n = 3 }, { x = 42.6, y = 36.8, r = 44, n = 1, alt = true }, { x = 45, y = 42.9, r = 44, n = 2, alt = true }, { x = 43.2, y = 34.5, r = 44, n = 1, alt = true }, { x = 45.5, y = 35.9, r = 44, n = 1, alt = true }, { x = 41.1, y = 34.7, r = 45, n = 2, alt = true }, { x = 46.8, y = 37.5, r = 44, n = 1, alt = true }, { x = 38.8, y = 37.5, r = 58, n = 3, alt = true }, { x = 47.4, y = 42.8, r = 44, n = 1, alt = true }, { x = 45.6, y = 46.3, r = 44, n = 1, alt = true }, { x = 47.8, y = 35.5, r = 44, n = 1, alt = true }, { x = 37.8, y = 40.6, r = 44, n = 1, alt = true }, { x = 49.7, y = 39.9, r = 44, n = 1, alt = true }, { x = 49.4, y = 35.1, r = 44, n = 1, alt = true }, { x = 51.3, y = 33.8, r = 44, n = 1, alt = true }, { x = 52.5, y = 38.1, r = 44, n = 1, alt = true }, { x = 33.2, y = 39.5, r = 44, n = 2, alt = true }, { x = 54.5, y = 37.5, r = 44, n = 2, alt = true }, { x = 55, y = 32, r = 44, n = 2, alt = true }, { x = 55.5, y = 28.3, r = 44, n = 3, alt = true }, { x = 29, y = 45, r = 44, n = 1, alt = true }, { x = 58.4, y = 34.5, r = 44, n = 3, alt = true }, { x = 59.7, y = 36.8, r = 44, n = 1, alt = true }, { x = 60.2, y = 33, r = 68, n = 3, alt = true }, { x = 59.1, y = 28, r = 44, n = 2, alt = true }, { x = 60.9, y = 29.9, r = 44, n = 2, alt = true }, { x = 64.3, y = 25, r = 44, n = 1, alt = true }, { x = 63.8, y = 22.8, r = 62, n = 4, alt = true }, { x = 64.1, y = 21.4, r = 82, n = 8, alt = true }, { x = 63.4, y = 19.5, r = 44, n = 2, alt = true }, { x = 64.3, y = 59.3, r = 66, n = 5, alt = true }, { x = 65.7, y = 23.2, r = 54, n = 6, alt = true }, { x = 64.2, y = 17.2, r = 58, n = 3, alt = true }, { x = 67.1, y = 25.2, r = 44, n = 2, alt = true }, { x = 65.7, y = 58.4, r = 49, n = 4, alt = true }, { x = 66.1, y = 20.3, r = 51, n = 6, alt = true }, { x = 64.8, y = 61.8, r = 75, n = 7, alt = true }, { x = 65.5, y = 18.6, r = 44, n = 3, alt = true }, { x = 66, y = 60.7, r = 56, n = 5, alt = true } }, spread = true, note = "Raging Beast's Blood" },
+					},
+				},
+				{
+					title = "Wildeyes",
+					note = "Back to Mor'zul, then hand his Case of Blood to Gorzeeki Wildeyes beside him. Mor'zul then asks for three ritual pieces and Gorzeeki sends you to Felwood: buy two Shadowy Potions from Gorzeeki for that trip.",
+					goals = {
+						{ t = "turnin", quest = 7563, title = "Rage of Blood", npc = 14436, npcName = "Mor'zul Bloodbringer", map = 1428, x = 12.69, y = 31.64, f = "e", note = "Mor'zul Bloodbringer" },
+						{ t = "accept", quest = 7564, title = "Wildeyes", npc = 14436, npcName = "Mor'zul Bloodbringer", minLevel = 60, qlvl = 58, pre = { 7563 }, preTitles = { [7563] = "Rage of Blood" }, map = 1428, x = 12.69, y = 31.64, f = "e", note = "he gives you the Case of Blood" },
+						{ t = "turnin", quest = 7564, title = "Wildeyes", npc = 14437, npcName = "Gorzeeki Wildeyes", map = 1428, x = 12.44, y = 31.63, f = "e", note = "Gorzeeki Wildeyes" },
+						{ t = "accept", quest = 7626, title = "Bell of Dethmoora", npc = 14436, npcName = "Mor'zul Bloodbringer", minLevel = 60, qlvl = 60, pre = { 7564 }, preTitles = { [7564] = "Wildeyes" }, map = 1428, x = 12.69, y = 31.64, f = "e", note = "Mor'zul Bloodbringer" },
+						{ t = "accept", quest = 7627, title = "Wheel of the Black March", npc = 14436, npcName = "Mor'zul Bloodbringer", minLevel = 60, qlvl = 60, pre = { 7564 }, preTitles = { [7564] = "Wildeyes" }, map = 1428, x = 12.69, y = 31.64, f = "e", note = "Mor'zul Bloodbringer" },
+						{ t = "accept", quest = 7628, title = "Doomsday Candle", npc = 14436, npcName = "Mor'zul Bloodbringer", minLevel = 60, qlvl = 60, pre = { 7564 }, preTitles = { [7564] = "Wildeyes" }, map = 1428, x = 12.69, y = 31.64, f = "e", note = "Mor'zul Bloodbringer" },
+						{ t = "accept", quest = 7623, title = "Lord Banehollow", npc = 14437, npcName = "Gorzeeki Wildeyes", minLevel = 60, qlvl = 58, pre = { 7564 }, preTitles = { [7564] = "Wildeyes" }, map = 1428, x = 12.44, y = 31.63, f = "e", note = "Gorzeeki Wildeyes" },
+						{ t = "buy", npc = 14437, npcName = "Gorzeeki Wildeyes", item = 18802, itemName = "Shadowy Potion", count = 2, map = 1428, x = 12.44, y = 31.63, f = "e", note = "Shadowy Potion, from Gorzeeki" },
+					},
+				},
+				{
+					title = "The ritual pieces",
+					note = "Gorzeeki wants 10 Elixirs of Shadow Power (Alchemy), 6 Large Brilliant Shards (Enchanting), 25 Dark Iron Ore (Mining, in Blackrock Depths and the Searing Gorge) and 35 Black Dragonscales (Skinning, black dragonkin of the Burning Steppes). Make or gather what your professions allow; buy the rest at the Auction House.",
+					goals = {
+						{ t = "collect", quest = 7626, title = "Bell of Dethmoora", item = 9264, itemName = "Elixir of Shadow Power", count = 10, oi = 1, note = "Elixir of Shadow Power" },
+						{ t = "collect", quest = 7627, title = "Wheel of the Black March", item = 14344, itemName = "Large Brilliant Shard", count = 6, oi = 1, note = "Large Brilliant Shard" },
+						{ t = "collect", quest = 7627, title = "Wheel of the Black March", item = 11370, itemName = "Dark Iron Ore", count = 25, oi = 2, map = 1428, x = 12.2, y = 30.16, f = "e", spots = { { x = 12.1, y = 31.1, r = 40, n = 2 }, { x = 16.9, y = 58.1, r = 40, n = 1 }, { x = 30.7, y = 70.7, r = 40, n = 2 }, { x = 48.6, y = 62.9, r = 40, n = 4 }, { x = 38.2, y = 41.5, r = 44, n = 4 }, { x = 55.1, y = 32.6, r = 51, n = 4 }, { x = 71.8, y = 29.5, r = 46, n = 4 }, { x = 81.4, y = 47.9, r = 46, n = 5 }, { x = 94.8, y = 58.7, r = 40, n = 1 }, { x = 84, y = 71.2, r = 40, n = 2 }, { x = 69.3, y = 62.8, r = 40, n = 4 }, { x = 87.1, y = 22.9, r = 40, n = 3 }, { x = 14.9, y = 30.4, r = 40, n = 2, alt = true }, { x = 21.1, y = 43, r = 40, n = 4, alt = true }, { x = 16.4, y = 50.6, r = 40, n = 3, alt = true }, { x = 18.7, y = 53.1, r = 40, n = 1, alt = true }, { x = 26.1, y = 45.8, r = 40, n = 1, alt = true }, { x = 26.3, y = 54.7, r = 40, n = 1, alt = true }, { x = 22.5, y = 63.2, r = 40, n = 3, alt = true }, { x = 30.3, y = 58.6, r = 40, n = 1, alt = true }, { x = 22.4, y = 67.8, r = 45, n = 3, alt = true }, { x = 39.4, y = 29.3, r = 40, n = 4, alt = true }, { x = 39.1, y = 38.3, r = 40, n = 1, alt = true }, { x = 27.3, y = 64.6, r = 48, n = 4, alt = true }, { x = 35.8, y = 56.3, r = 57, n = 3, alt = true }, { x = 25.5, y = 70.5, r = 40, n = 3, alt = true }, { x = 41.1, y = 44.4, r = 44, n = 4, alt = true }, { x = 23, y = 73.2, r = 40, n = 1, alt = true }, { x = 42.6, y = 37.8, r = 40, n = 2, alt = true }, { x = 36.9, y = 63.4, r = 40, n = 4, alt = true }, { x = 35, y = 67.8, r = 40, n = 5, alt = true }, { x = 46, y = 35, r = 50, n = 4, alt = true }, { x = 46.2, y = 39.8, r = 58, n = 5, alt = true }, { x = 47, y = 43.8, r = 42, n = 3, alt = true }, { x = 45.4, y = 53.5, r = 40, n = 1, alt = true }, { x = 42.7, y = 61.7, r = 48, n = 5, alt = true }, { x = 47.5, y = 50.8, r = 40, n = 1, alt = true }, { x = 49.7, y = 43.3, r = 40, n = 2, alt = true }, { x = 47.2, y = 59.5, r = 40, n = 1, alt = true }, { x = 52.7, y = 53.5, r = 40, n = 3, alt = true }, { x = 56.9, y = 42.9, r = 40, n = 2, alt = true }, { x = 57.6, y = 37.8, r = 40, n = 2, alt = true }, { x = 54, y = 60.4, r = 40, n = 2, alt = true }, { x = 58.5, y = 25.2, r = 40, n = 1, alt = true }, { x = 56.7, y = 59.3, r = 40, n = 1, alt = true }, { x = 60.1, y = 45.6, r = 40, n = 3, alt = true }, { x = 60.9, y = 39.4, r = 40, n = 3, alt = true }, { x = 54.3, y = 68.7, r = 40, n = 1, alt = true }, { x = 61.8, y = 31.2, r = 40, n = 1, alt = true }, { x = 63.3, y = 26, r = 40, n = 4, alt = true }, { x = 60.4, y = 58.5, r = 40, n = 3, alt = true }, { x = 64.4, y = 29.3, r = 40, n = 1, alt = true }, { x = 64.5, y = 34.9, r = 40, n = 5, alt = true }, { x = 62.2, y = 54.8, r = 40, n = 1, alt = true }, { x = 64.7, y = 43.9, r = 40, n = 3, alt = true }, { x = 61.8, y = 61.3, r = 40, n = 2, alt = true }, { x = 65.9, y = 21.9, r = 40, n = 5, alt = true }, { x = 65, y = 57.9, r = 40, n = 1, alt = true }, { x = 67.7, y = 44.4, r = 40, n = 1, alt = true }, { x = 67, y = 53.6, r = 40, n = 1, alt = true }, { x = 69.5, y = 35.9, r = 40, n = 2, alt = true }, { x = 71.2, y = 39.7, r = 50, n = 5, alt = true }, { x = 72.1, y = 24.3, r = 40, n = 3, alt = true }, { x = 70, y = 56.3, r = 40, n = 1, alt = true }, { x = 76.6, y = 37.8, r = 40, n = 1, alt = true }, { x = 73, y = 64.3, r = 40, n = 2, alt = true }, { x = 77.1, y = 23.4, r = 40, n = 3, alt = true }, { x = 75.2, y = 55.9, r = 40, n = 4, alt = true }, { x = 77.8, y = 44.1, r = 78, n = 16, alt = true }, { x = 79.2, y = 25.3, r = 40, n = 1, alt = true }, { x = 76.3, y = 63.2, r = 40, n = 1, alt = true }, { x = 78.5, y = 51.5, r = 40, n = 2, alt = true }, { x = 80.6, y = 37.1, r = 40, n = 3, alt = true }, { x = 81.2, y = 42.2, r = 54, n = 9, alt = true }, { x = 81.6, y = 52.5, r = 40, n = 2, alt = true }, { x = 83.6, y = 34.3, r = 40, n = 2, alt = true }, { x = 83.4, y = 39.5, r = 42, n = 3, alt = true }, { x = 83.3, y = 44.5, r = 40, n = 5, alt = true }, { x = 84.8, y = 48.8, r = 40, n = 1, alt = true }, { x = 85.9, y = 61.2, r = 40, n = 1, alt = true }, { x = 87, y = 69.4, r = 40, n = 1, alt = true }, { x = 92.5, y = 43.8, r = 40, n = 1, alt = true }, { x = 91.5, y = 61.3, r = 40, n = 1, alt = true }, { x = 93.4, y = 51.8, r = 40, n = 3, alt = true }, { x = 95.4, y = 31.6, r = 40, n = 2, alt = true } }, spread = true, note = "Dark Iron Ore" },
+						{ t = "collect", quest = 7628, title = "Doomsday Candle", item = 15416, itemName = "Black Dragonscale", count = 35, oi = 1, map = 1428, x = 19.91, y = 45.36, f = "e", spots = { { x = 21.1, y = 46.4, r = 55, n = 6 }, { x = 31.1, y = 61.3, r = 48, n = 8 }, { x = 33.1, y = 69.1, r = 66, n = 7 }, { x = 36.1, y = 48.5, r = 42, n = 5 }, { x = 56.3, y = 60.6, r = 40, n = 1 }, { x = 76.9, y = 62.1, r = 41, n = 5 }, { x = 91.8, y = 55.2, r = 76, n = 8 }, { x = 91, y = 51.3, r = 40, n = 2 }, { x = 89.9, y = 43.9, r = 40, n = 1 }, { x = 87.8, y = 39.9, r = 40, n = 2 }, { x = 90.5, y = 37.9, r = 40, n = 2 }, { x = 84.2, y = 27.6, r = 58, n = 7 }, { x = 23.4, y = 47.6, r = 40, n = 1, alt = true }, { x = 57.5, y = 62.3, r = 58, n = 6, alt = true }, { x = 86.9, y = 27.3, r = 40, n = 2, alt = true }, { x = 88.4, y = 36.4, r = 43, n = 5, alt = true } }, spread = true, note = "Black Dragonscale" },
+					},
+				},
+				{
+					title = "Arcanite",
+					note = "Hand the three pieces to Gorzeeki. He then wants 3 Arcanite Bars: alchemists transmute them, everyone else buys them at the Auction House.",
+					goals = {
+						{ t = "turnin", quest = 7626, title = "Bell of Dethmoora", npc = 14437, npcName = "Gorzeeki Wildeyes", map = 1428, x = 12.44, y = 31.63, f = "e", note = "Gorzeeki Wildeyes" },
+						{ t = "turnin", quest = 7627, title = "Wheel of the Black March", npc = 14437, npcName = "Gorzeeki Wildeyes", map = 1428, x = 12.44, y = 31.63, f = "e", note = "Gorzeeki Wildeyes" },
+						{ t = "turnin", quest = 7628, title = "Doomsday Candle", npc = 14437, npcName = "Gorzeeki Wildeyes", map = 1428, x = 12.44, y = 31.63, f = "e", note = "Gorzeeki Wildeyes" },
+						{ t = "accept", quest = 7630, title = "Arcanite", npc = 14437, npcName = "Gorzeeki Wildeyes", minLevel = 60, qlvl = 60, preAll = { 7626, 7627, 7628 }, preTitles = { [7626] = "Bell of Dethmoora", [7627] = "Wheel of the Black March", [7628] = "Doomsday Candle" }, map = 1428, x = 12.44, y = 31.63, f = "e" },
+						{ t = "collect", quest = 7630, title = "Arcanite", item = 12360, itemName = "Arcanite Bar", count = 3, oi = 1, note = "Arcanite Bar" },
+						{ t = "turnin", quest = 7630, title = "Arcanite", npc = 14437, npcName = "Gorzeeki Wildeyes", map = 1428, x = 12.44, y = 31.63, f = "e", note = "Gorzeeki Wildeyes" },
+					},
+				},
+				{
+					title = "Lord Banehollow",
+					note = "Jaedenar is in western Felwood. Drink a Shadowy Potion before you go in: the Shadow Council cultists turn friendly for a while, the demons do not. Lord Banehollow waits deep inside Shadow Hold, the cave above Jaedenar, across a bridge in the great root chamber.",
+					goals = {
+						{ t = "turnin", quest = 7623, title = "Lord Banehollow", npc = 9516, npcName = "Lord Banehollow", map = 1448, x = 35.9, y = 44.4, f = "e", note = "Lord Banehollow" },
+						{ t = "accept", quest = 7624, title = "Ulathek the Traitor", npc = 9516, npcName = "Lord Banehollow", minLevel = 60, qlvl = 58, pre = { 7623 }, preTitles = { [7623] = "Lord Banehollow" }, map = 1448, x = 35.93, y = 44.42, f = "e" },
+					},
+				},
+				{
+					title = "Ulathek the Traitor",
+					note = "Ulathek waits in a side chamber by a bridge on the way back up. Speak to him and he and his four guards attack; none are elite. Take his heart back to Lord Banehollow, drinking another potion if the first wore off.",
+					goals = {
+						{ t = "kill", target = "Ulathek", npc = 14523, map = 1448, x = 40.76, y = 48.42, f = "e", optional = true, note = "Ulathek" },
+						{ t = "collect", quest = 7624, title = "Ulathek the Traitor", item = 18719, itemName = "The Traitor's Heart", oi = 1, map = 1448, x = 40.76, y = 48.42, f = "e", note = "The Traitor's Heart" },
+						{ t = "turnin", quest = 7624, title = "Ulathek the Traitor", npc = 9516, npcName = "Lord Banehollow", map = 1448, x = 35.9, y = 44.4, f = "e", note = "Lord Banehollow" },
+						{ t = "accept", quest = 7625, title = "Xorothian Stardust", npc = 9516, npcName = "Lord Banehollow", minLevel = 60, qlvl = 60, pre = { 7624 }, preTitles = { [7624] = "Ulathek the Traitor" }, map = 1448, x = 35.93, y = 44.42, f = "e" },
+					},
+				},
+				{
+					title = "Xorothian Stardust",
+					note = "Ur'dan, beside Lord Banehollow, sells the Xorothian Stardust; he only deals with you while a Shadowy Potion is active. Bring plenty of gold.",
+					goals = {
+						{ t = "collect", quest = 7625, title = "Xorothian Stardust", item = 18687, itemName = "Xorothian Stardust", oi = 1, map = 1448, x = 36.2, y = 44.5, f = "e", note = "Xorothian Stardust, bought from Ur'dan" },
+					},
+				},
+				{
+					title = "Imp Delivery",
+					note = "Back to Gorzeeki with the stardust. He gives you the Imp in a Jar for the Scholomance.",
+					goals = {
+						{ t = "turnin", quest = 7625, title = "Xorothian Stardust", npc = 14437, npcName = "Gorzeeki Wildeyes", map = 1428, x = 12.44, y = 31.63, f = "e", note = "Gorzeeki Wildeyes" },
+						{ t = "accept", quest = 7629, title = "Imp Delivery", npc = 14437, npcName = "Gorzeeki Wildeyes", minLevel = 60, qlvl = 60, pre = { 7625 }, preTitles = { [7625] = "Xorothian Stardust" }, map = 1428, x = 12.44, y = 31.63, f = "e" },
+					},
+				},
+				{
+					title = "The Scholomance",
+					note = "The Scholomance lies under Caer Darrow, the island town in the south-east of the Western Plaguelands: you need its key or a rogue to open the door, and Rattlegore's Viewing Room Key to go deeper. Use the Imp in a Jar at the alchemy lab in Ras Frostwhisper's room; J'eevee makes the parchment. Bring a group.",
+					goals = {
+						{ t = "complete", quest = 7629, title = "Imp Delivery", map = 1422, x = 69.7, y = 73.2, f = "e", note = "Use the Imp in a Jar at the alchemy lab" },
+					},
+				},
+				{
+					title = "Dreadsteed of Xoroth",
+					note = "Back to Gorzeeki, then Mor'zul hands you his instructions for the ritual. Buy J'eevee's Jar, the Black Lodestone and the Xorothian Glyphs from Gorzeeki, and carry ten or more Soul Shards.",
+					goals = {
+						{ t = "turnin", quest = 7629, title = "Imp Delivery", npc = 14437, npcName = "Gorzeeki Wildeyes", map = 1428, x = 12.44, y = 31.63, f = "e", note = "Gorzeeki Wildeyes" },
+						{ t = "accept", quest = 7631, title = "Dreadsteed of Xoroth", npc = 14436, npcName = "Mor'zul Bloodbringer", minLevel = 60, qlvl = 60, preAll = { 7629, 7630 }, preTitles = { [7629] = "Imp Delivery", [7630] = "Arcanite" }, map = 1428, x = 12.69, y = 31.64, f = "e", note = "Mor'zul Bloodbringer" },
+						{ t = "buy", npc = 14437, npcName = "Gorzeeki Wildeyes", item = 18663, itemName = "J'eevee's Jar", map = 1428, x = 12.44, y = 31.63, f = "e", note = "J'eevee's Jar" },
+						{ t = "buy", npc = 14437, npcName = "Gorzeeki Wildeyes", item = 18629, itemName = "Black Lodestone", map = 1428, x = 12.44, y = 31.63, f = "e", note = "Black Lodestone" },
+						{ t = "buy", npc = 14437, npcName = "Gorzeeki Wildeyes", item = 18670, itemName = "Xorothian Glyphs", map = 1428, x = 12.44, y = 31.63, f = "e", note = "Xorothian Glyphs" },
+					},
+				},
+				{
+					title = "The ritual in Dire Maul",
+					note = "Dire Maul stands in the ruins of central Feralas; the ritual circle is in its west wing, past Immol'thar, and the door needs the Crescent Key or a rogue. Use J'eevee's Jar to start; when the bell, the wheel or the candle fades, click it with the Black Lodestone (a Soul Shard each). When the demons stop coming, use the Xorothian Glyphs, defeat the Xorothian Dreadsteed and its dreadlord master, and speak to the Dreadsteed Spirit. Bring a group.",
+					goals = {
+						{ t = "kill", quest = 7631, title = "Dreadsteed of Xoroth", target = "Xorothian Dreadsteed", npc = 14502, count = 1, oi = 1, map = 1444, x = 59.2, y = 45.1, f = "e", note = "Xorothian Dreadsteed", group = { kind = "elite", rank = 1 } },
+						{ t = "turnin", quest = 7631, title = "Dreadsteed of Xoroth", npc = 14504, npcName = "Dreadsteed Spirit", map = 1444, x = 59.2, y = 45.1, f = "e", note = "Dreadsteed Spirit: it binds itself to you" },
+						{ t = "learn", spell = 23161, spellName = "Summon Dreadsteed" },
 					},
 				},
 			},
@@ -18238,6 +18488,8 @@ do
 			category = "Class",
 			folder = "Warlock",
 			keywords = { "Summon Felsteed", "Strahad Farsan", "Ratchet", "Warlock", "class mount" },
+			reward = { { spell = 5784, spellName = "Summon Felsteed" } },
+			why = "Your own mount at 40, summoned anywhere, with no gold spent on a riding horse.",
 			zone = 1413,
 			zoneName = "The Barrens",
 			author = "Polestar",

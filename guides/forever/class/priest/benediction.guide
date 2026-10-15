@@ -1,5 +1,5 @@
 guide forever/class/priest/benediction
-title Benediction
+title Benediction and Anathema
 category Class
 class Priest
 folder Priest
@@ -7,6 +7,9 @@ levels 60-60
 zone Eastern Plaguelands
 keywords Benediction, Anathema, The Balance of Light and Shadow, A Warning, Eris Havenfire, The Eye of Divinity, The Eye of Shadow, Splinter of Nordrassil, Molten Core, epic staff, class quest
 collects 18608
+reward item 18608
+reward item 18659
+why Eris's splinter and the two Eyes make Benediction, the epic priest staff that turns into Anathema.
 
 # The level 60 Priest staff: A Warning and The Balance of Light and Shadow
 # (7621, 7622) from Eris Havenfire in the Eastern Plaguelands give the

@@ -6,6 +6,8 @@ folder Warrior
 levels 50-52
 zone Swamp of Sorrows
 keywords A Troubled Spirit, Fallen Hero of the Horde, Warrior Kinship, War on the Shadowsworn, Voodoo Feathers, Sunken Temple, Temple of Atal'Hakkar, Blasted Lands, Helboar, Warrior, class quest
+reward text Experience
+why Experience at 50, ending in the Sunken Temple; Forever removed the Classic item choice.
 
 # The level 50-52 Warrior quests: A Troubled Spirit (8417) from any warrior
 # trainer of the capitals, then Warrior Kinship, War on the Shadowsworn and

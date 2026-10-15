@@ -6,6 +6,8 @@ folder Rogue
 levels 24-36
 zone Hillsbrad Foothills
 keywords Ravenholdt, Ravenholdt Manor, The Manor Ravenholdt, Elegant Letter, Seal of Ravenholdt, Rite of Cunning, Fahrad, Myrokos Silentform, Syndicate Sabotage, Lord Tomas, Durnholde Keep, What's the Big Idea?, Barton, Barton's Scouting Report, Strahnbrad, Syndicate Emblems, Rogue, reputation
+reward text Ravenholdt reputation
+why Opens Ravenholdt Manor, the hidden rogue house in the Alterac hills, and its first jobs.
 
 # Ravenholdt for Rogues of both factions: The Manor, Ravenholdt (6681, from
 # the Elegant Letter at 24) to Fahrad, then Forever's new jobs for Myrokos

@@ -60,15 +60,23 @@
   the Bluff, The Kolkar of Desolace and Draenethyst Crystals; the Tauren
   start no longer walks to Durotar. Elite quests on the way (Aggor the Young,
   Riptear, Carnage, The Offering of Blood) are optional.
-- A Class category in the guide menu, after Leveling, with 65 guides for the
-  class quest chains of every class: Druid forms and Cure Poison, Rhok'delar
-  and The Hunter's Charm, the Mage robes, orbs and wands, Verigan's Fist and
-  the Paladin's Tyr's Watch and Lumina Windsinger chains, the Priest spell
-  quests and Benediction, Ravenholdt, Poisons and the Rogue's key and horn
-  chains, the Shaman totems and Darkreaver, the Warlock pets (felhunter,
-  incubus) and orbs, and the Warrior's armour and weapon chains. The four
-  class mounts (Paladin Warhorse and Charger, Warlock Felsteed and
-  Dreadsteed) moved there from Collectibles.
+- A Class category in the guide menu, after Leveling, with 62 guides for the
+  class quest chains of every class, one guide per goal and named after it:
+  Druid forms and Cure Poison, Rhok'delar and Lok'delar and The Hunter's
+  Charm, the Mage robes, orbs, wands and Polymorph: Pig, Verigan's Fist, the
+  Holy Mightstone and the Paladin's Tyr's Watch and Lumina Windsinger
+  chains, the Priest spell quests and Benediction and Anathema, Ravenholdt,
+  Poisons and the Rogue's key and horn chains, the Shaman totems and
+  Darkreaver, the Warlock's felhunter, incubus, Orb of Orahil (both
+  acolytes' paths in one guide), Shard of the Green Flame and Tome of
+  Sacrifice, and the Warrior's armour and weapon chains. The details in the
+  guide menu lead with what each one gives (the item or spell with its icon
+  and the game's tooltip on hover, a choice of items under "Choose one") and
+  one line on why it is worth doing. The four class mounts (Paladin
+  Warhorse and Charger, Warlock Felsteed and Dreadsteed) moved there from
+  Collectibles, and the Charger and Dreadsteed guides now walk their whole
+  chains (Emphasis on Sacrifice to Judgment and Redemption; Rage of Blood
+  to Dreadsteed of Xoroth) instead of naming them in a tip.
 - Class quests on the leveling route: every start takes its level 1 class
   letter to the trainer; Night Elf and Tauren Druids learn Cure Poison on
   the way (Darkshore, the Barrens), Mages do Mirror Lake (Alliance) and The
@@ -222,7 +230,11 @@
 
 - `category Class` files a guide under the new Class category (class quest
   chains, mounts and weapons; pair it with a `class` header), listed after
-  Leveling in the guide menu with the trainer icon.
+  Leveling in the guide menu with the trainer icon. Two header keys say what
+  the guide's goal gives and why, shown first in the guide menu's details:
+  `reward item <item> ...` (several on one line are a choice of one),
+  `reward spell <id> "Name"` or `reward text <words>`, repeatable, and `why
+  <one line>` (format 2; lint warns when a Class guide lacks either).
 - `data build` applies Wowhead Forever's "Renamed from Y" notes too: a quest
   whose title is still Y takes Forever's name (its `source` gains
   `wowhead:title`). It also reads Wowhead Forever's class quest pages, so

@@ -7,6 +7,8 @@ faction Alliance
 levels 16-20
 zone Stormwind City
 keywords Certificate of Thievery, Lockpicking, Renzik The Shiv, Redridge Rendezvous, Lucius, Alther's Mill, Lucius's Lockbox, Token of Thievery, Erion Shadewhisper, Erion's Behest, To Hulfdan!, Kingly Shakedown, SI:7, Lakeshire, Rogue, lockpicking quest
+reward item 7907
+why Your first lockpicking job at 16: Lucius's lockbox at Alther's Mill, for SI:7.
 
 # The Alliance Rogue level 16 lockpicking chain: one breadcrumb per home town
 # to Renzik "The Shiv" at SI:7 in Stormwind (SI:7 2300 from Keryn Sylvius in

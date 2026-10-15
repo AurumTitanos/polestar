@@ -6,6 +6,8 @@ folder Warlock
 levels 50-54
 zone Felwood
 keywords An Imp's Request, Hot and Itchy, The Wrong Stuff, Trolls of a Feather, Impsy, Felcloth, Rotting Wood, Bloodvenom Essence, Voodoo Feather, Sunken Temple, Temple of Atal'Hakkar, Soul Harvester, Abyss Shard, Robes of Servitude, Warlock, class quest
+reward item 20536 20534 20530
+why A staff, off-hand or robe for your 50s; Impsy's own errand, not a step of the Dreadsteed chain.
 
 # The level 52 Warlock class chain: An Imp's Request (8419) from your class
 # trainer to Impsy in Felwood, The Wrong Stuff (8421) and Trolls of a Feather
@@ -24,6 +26,13 @@ keywords An Imp's Request, Hot and Itchy, The Wrong Stuff, Trolls of a Feather, 
 # no position for the trolls or the dungeon entrance; the entrance point
 # (69,54, the temple in the middle of the Pool of Tears) is from a comment on
 # Wowhead's Sunken Temple zone page (wowhead.com/zone=1477).
+# Not part of the Dreadsteed chain: An Imp's Request (8419 or 8420) -> The
+# Wrong Stuff (8421) -> Trolls of a Feather (8422) ends there (8422 has no
+# `next`, and no Dreadsteed quest needs any of them; Wowhead's series box for
+# 8419 shows the same four). The imp of the Dreadsteed road is J'eevee in
+# the Scholomance (Imp Delivery), not Impsy. Impsy's camp also runs Niby the
+# Almighty's chain for the Shard of the Green Flame
+# (forever/class/warlock/shard-of-the-green-flame), at the same spot.
 # Based on data, not play: the beta caps at level 30 until launch on
 # 4 November, so nothing here has been checked in game.
 
@@ -61,7 +70,7 @@ step Felcloth
   collect 14256 quest 8419.1          -- Felcloth
 
 step Impsy
-  tip Impsy waits beside Niby the Almighty in central Felwood, just east of Jaedenar.
+  tip Impsy waits beside Niby the Almighty in central Felwood, just east of Jaedenar. This chain is Impsy's own and is not part of the Dreadsteed chain; Niby and Impsy also give the Shard of the Green Flame chain here.
   turnin 8419                         -- Impsy
   accept 8421
 

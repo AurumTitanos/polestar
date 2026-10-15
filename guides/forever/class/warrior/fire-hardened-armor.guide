@@ -7,6 +7,10 @@ faction Alliance
 levels 20-30
 zone Redridge Mountains
 keywords Yorus Barleybrew, The Rethban Gauntlet, Furen Longbeard, Furen's Favor, Fire Hardened Mail, Grimand Elmore, Mathiel, Klockmort Spannerspan, Fire Hardened Coif, Fire Hardened Leggings, Fire Hardened Gauntlets, Roogug, Razorfen Kraul, Warrior, class armor
+reward item 6972
+reward item 6971 6973 6974
+reward item 6970
+why A hauberk at 28, a coif, leggings or gauntlets by race, and a shield on the way.
 
 # The Alliance Warrior armor chain: Yorus Barleybrew, The Rethban Gauntlet and
 # The Shieldsmith (1698, 1699, 1702, level 20-22: Furen's Favor), Fire Hardened

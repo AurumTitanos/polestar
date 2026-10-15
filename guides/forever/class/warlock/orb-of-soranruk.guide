@@ -1,11 +1,13 @@
 guide forever/class/warlock/orb-of-soranruk
-title The Orb of Soran'ruk
+title Orb of Soran'ruk
 category Class
 class Warlock
 folder Warlock
 levels 25-30
 zone The Barrens
-keywords Doan Karhan, Soran'ruk Fragment, Large Soran'ruk Fragment, Orb of Soran'ruk, Staff of Soran'ruk, Blackfathom Deeps, Shadowfang Keep, Twilight Acolyte, Shadowfang Darksoul, Warlock, class weapon
+keywords The Orb of Soran'ruk, Doan Karhan, Soran'ruk Fragment, Large Soran'ruk Fragment, Orb of Soran'ruk, Staff of Soran'ruk, Blackfathom Deeps, Shadowfang Keep, Twilight Acolyte, Shadowfang Darksoul, Warlock, class weapon
+reward item 6898 15109
+why A rare off-hand orb or staff for your late 20s, for fragments from two dungeons.
 
 # The Orb of Soran'ruk (1740): Doan Karhan in the Barrens wants three Soran'ruk
 # Fragments from the Twilight Acolytes in Blackfathom Deeps and a Large

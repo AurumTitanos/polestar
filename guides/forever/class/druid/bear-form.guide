@@ -1,12 +1,18 @@
 guide forever/class/druid/bear-form
-title Bear Form & Teleport: Moonglade
+title Bear Form and Moonglade
 category Class
 folder Druid
 keywords Bear Form, Teleport: Moonglade, Moonglade, Heeding the Call, Great Bear Spirit, Body and Heart, Moonkin Stone, Lunaclaw, Child of Nature, Great Ursera Spirit, Strength and Mercy, Ur'endra, Skyborne, class quest
+reward text Bear Form
+why Your tanking form: Forever no longer trains Bear Form, these quests give it. Opens Moonglade too.
 class Druid
 levels 10-12
 zone Moonglade
 
+# Titled "Bear Form and Moonglade" (was "Bear Form & Teleport: Moonglade"):
+# the guide casts Teleport: Moonglade, it does not give it; its Moonglade
+# quests pay Cenarion Circle (and, for Skyborne, Nightclaw Druids) reputation and the
+# Moonglade flight path, so the reward line names Bear Form only.
 # The level-10 druid quests: Teleport: Moonglade and Bear Form. In Forever
 # Bear Form is no longer trained: Body and Heart (6001 Night Elf, 6002 Tauren)
 # and Strength and Mercy (94638, Skyborne) reward it (Wowhead Forever's druid

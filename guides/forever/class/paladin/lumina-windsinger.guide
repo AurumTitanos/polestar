@@ -1,5 +1,5 @@
 guide forever/class/paladin/lumina-windsinger
-title Lumina Windsinger
+title Rescuing Lumina Windsinger
 category Class
 class Paladin
 folder Paladin
@@ -8,6 +8,8 @@ race Undead
 levels 18-24
 zone Tirisfal Glades
 keywords Lumina Windsinger, Diplomatic Incident, Trevan Rol, Earthen Ring, Fenris Isle, Fenris Keep, The Windshaper's Wrath, The Debt, Danitha Morr, Forsaken Paladin, class quest
+reward text Undercity and Earthen Ring reputation
+why No item yet: a Forsaken paladin rescue story; its sequel, the Moonsilver Blade, cannot be finished yet.
 
 # The Forsaken Paladins' Silverpine chain, new in Forever: Diplomatic
 # Incident (91858) from Danitha Morr at Bandarion Keep, A Curious Pair
@@ -18,6 +20,10 @@ keywords Lumina Windsinger, Diplomatic Incident, Trevan Rol, Earthen Ring, Fenri
 # the order of the chain (the data has no prerequisites for these quests) and
 # for where things are: the pyre "on the shores of Fenris Isle", Lumina caged
 # in Fenris Keep, the Fenris Isle Key on the Rot Hide gnolls.
+# No quest of this half rewards an item (codex quests.json); the reward line
+# is from quests.json: experience and, in its Wowhead Forever fields,
+# Undercity and Earthen Ring reputation. Titled after the goal, Lumina's
+# rescue.
 # Left out: the rest of the chain, the Moonsilver Blade. A Moon-Kissed Blade
 # (95036) asks for an Enchanted Silver Ingot (item 267361) that no source
 # places: our data has no spawn for the object it comes from (629065), and

@@ -7,6 +7,8 @@ faction Alliance
 levels 10-12
 zone Elwynn Forest
 keywords Blade of Cunning, Keryn Sylvius, Seek out SI: 7, Snatch and Grab, Mathias Shaw, Defias Dockmaster, Hogral Bakkan, Road to Salvation, Simple Subterfugin', Onin's Report, Hulfdan Blackbeard, Onin MacHammar, Jannok Breezesong, The Apple Falls, Destiny Calls, Syurna, Sethir the Ancient, Rogue, class weapon
+reward item 7298
+why A dagger at 10 from your home town's rogue quests.
 
 # The Alliance Rogue level 10 quests, one chain per home town, each ending
 # with the Blade of Cunning (7298), a dagger:

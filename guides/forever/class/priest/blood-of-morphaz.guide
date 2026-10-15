@@ -6,6 +6,8 @@ folder Priest
 levels 50-52
 zone Azshara
 keywords Cenarion Aid, Of Coursers We Know, The Ichor of Undeath, Blood of Morphaz, Ogtinc, Greta Mosshoof, Morphaz, Sunken Temple, Temple of Atal'Hakkar, Blessed Prayer Beads, Circle of Hope, Woestave, class quest
+reward text Experience and gold
+why Experience and gold at 50 through Azshara and the Sunken Temple; Forever removed the Classic item choice.
 
 # The level 52 Priest class chain: Cenarion Aid (8254) from your class
 # trainer to Ogtinc in Azshara, then Of Coursers We Know (8255), The Ichor
