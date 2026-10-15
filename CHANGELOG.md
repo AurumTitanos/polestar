@@ -53,6 +53,9 @@
 - Without the Codex, Lookup and Dungeons say which case it is: not installed
   (get the Polestar zip from CurseForge or the GitHub Releases page, not
   GitHub's "Source code" download) or turned off in the AddOns list.
+- `/polestar way` takes decimal commas (`/polestar way 45,5 30,2`) as well as
+  decimal points, and `45,30` still reads as x and y. Coordinates outside
+  0-100 show the usage line instead of setting a waypoint.
 
 ### For guide authors
 
