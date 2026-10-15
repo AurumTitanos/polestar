@@ -129,6 +129,12 @@
   bloodmages' beasts, and Horde Warriors in the Barrens gather the Twitching
   Antennae (fifteen minutes) on the way back from Gann Stonespire and hearth
   to Ruga at once. Teldrassil says Iverron's Antidote lasts five minutes.
+- Dun Morogh: Grund and Gozwin is done from Anvilmar and handed in on the
+  way to the troll cave, The Adventurer is taken from Thalos on the way out,
+  the arrow leads to the troll cave's mouth where it is in game, and the Crag
+  Boars on the road to Kharanos count toward Ragnar's ribs: the valley is
+  never walked back to, about two minutes sooner to level 10 (thanks
+  thmastin).
 
 ### For guide authors
 
