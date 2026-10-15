@@ -73,6 +73,9 @@ step Lar'korwi Mates and the raft
   accept 3844                         -- A Wrecked Raft
   turnin 3844                         -- A Small Pack
   accept 3845
+  collect 11104 quest 3845 @63.1,69.1
+  collect 11105 quest 3845 @63.1,69.1
+  collect 11106 quest 3845 @63.1,69.1
   collect 11116 x1 optional           -- A Mangled Journal
   accept 3884 optional
 

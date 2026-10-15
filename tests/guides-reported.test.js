@@ -344,3 +344,25 @@ test('the leveling guides with profession quests play to the end for a character
 		pack.dispose();
 	}
 });
+
+// --- Quests the guide accepted and turned in with nothing between waiting for
+// their objectives, so the guide moved on to the turn-in with the quest
+// unfinished: Camping 101: Cooking in Mulgore and Dun Morogh (speak with the
+// cook) and, for the Alliance, It's a Secret to Everybody in Un'Goro (the
+// Horde guide collects the compass, map and key).
+
+const UN_GORO_ALLIANCE = 'forever/alliance/40-50/07-un-goro-crater.guide';
+
+test('a quest with objectives is completed or collected between its accept and its turn-in', { skip }, () => {
+	for (const [guide, quest, t, count] of [
+		[MULGORE, 96661, 'complete', 1],
+		[DUN_MOROGH, 96629, 'complete', 1],
+		[UN_GORO_ALLIANCE, 3845, 'collect', 3],
+	]) {
+		const list = goals(guide);
+		const accept = at(list, `${guide}: accept ${quest}`, is('accept', quest));
+		const turnin = at(list, `${guide}: turnin ${quest}`, is('turnin', quest));
+		const between = list.slice(accept + 1, turnin).filter(({ goal }) => is(t, quest)(goal));
+		assert.equal(between.length, count, `${guide}: ${count} ${t} goal(s) for ${quest} between its accept and its turn-in`);
+	}
+});
