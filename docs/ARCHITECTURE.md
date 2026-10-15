@@ -3491,6 +3491,18 @@ fileDataID from wago.tools into `data/sources/casc` (local, never shipped):
   rules, slope, fall and lift costs) with a direct search for near ends and
   the per-tile graph otherwise, then smooths the path; `los` tests a
   straight walkable line. `nav path` prints one route.
+- **Packing for the in-game engine** (`nav pack`, `tools/lib/nav/pack.js`,
+  rules in its header): the grid in Shortest Path Forever's walking-map
+  format (his baker's HPA* and encodings, ported), so his engine in
+  `Polestar_Nav` routes on it. Each SPF cell (128 per tile by default, 4.17
+  yd) holds the connected pieces of our surfaces in its columns (base plus
+  floors; a wall inside a cell keeps its sides apart); a step between cells
+  is open only where one of our links (not a climb) crosses it, so walls,
+  cliffs and one-way climbs close it; falls and lifts stay out (lifts are
+  his transports). `chokepoints.js` adds `Chokepoints.lua`
+  (`PolestarNavChokepoints[map]`: lift landings, bridges, gates at passages,
+  tunnels, cave and building mouths, passes, each named by its AreaTable
+  area) for the journey's named walk steps.
 
 ## Tests
 
