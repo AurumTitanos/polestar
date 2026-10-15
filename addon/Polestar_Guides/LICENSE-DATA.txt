@@ -62,7 +62,7 @@ World of Warcraft (c) Blizzard Entertainment, Inc.
 Wowhead Forever database: zone quest lists (XP, levels, Forever change notes)
 -----------------------------------------------------------------------------
 URL: https://www.wowhead.com/forever
-Revision: 3619 listed quests read 2026-10-14T13:33:14.734Z; cache data/sources/wowhead/zones.json
+Revision: 3619 listed quests read 2026-10-14T18:33:09.601Z; cache data/sources/wowhead/zones.json
 License: Public web pages; facts (ids, XP, levels) only, used locally
 
 Guide pack permission
