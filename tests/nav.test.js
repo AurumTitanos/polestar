@@ -540,7 +540,7 @@ test('SetTarget overrides the engine waypoint until the step changes', () => {
 	assert.equal(out.override, false);
 });
 
-test('/polestar way: decimal points or commas, a comma separator, labels, range 0..100, empty clears', () => {
+test('/polestar way: decimal points or commas in both, a comma separator, labels, range 0..100, empty clears; a decimal comma in one is refused (it could be x,y and a numeric label)', () => {
 	const [out] = run(`
 		nav.place(0, 0)
 		local function way(line)
@@ -551,8 +551,9 @@ test('/polestar way: decimal points or commas, a comma separator, labels, range 
 			return { t and t.x or false, t and t.y or false, t and t.label or false, #stub.messages > before }
 		end
 		local r = {}
-		for _, line in ipairs({ "45 30", "45,30", "45, 30", "45.5 30.2", "45,5 30,2", "45,5 30", "45 30,2",
-			"45 30 Camp", "45,30 Camp", "45,5 30,2 Camp", "45,30 2nd camp", "45,30 50", "45,30 2 camp", "45 30 50", "0 100",
+		for _, line in ipairs({ "45 30", "45,30", "45, 30", "45.5 30.2", "45.5 30", "45 30.2", "45,5 30,2",
+			"45 30 Camp", "45,30 Camp", "45, 30 Camp", "45,5 30,2 Camp", "45,30 2nd camp", "45 30 50", "0 100",
+			"45,5 30", "45 30,2", "45,30 50", "45,30 2 camp", "45,5 30 Camp", "45.5 30,2",
 			"100.5 30", "45 101", "45,5 300,2", "abc", "45", "45 .", "45.5.5 30", "" }) do
 			r[line] = way(line)
 		end
@@ -566,18 +567,20 @@ test('/polestar way: decimal points or commas, a comma separator, labels, range 
 	at(out['45,30'], 45, 30);
 	at(out['45, 30'], 45, 30);
 	at(out['45.5 30.2'], 45.5, 30.2);
+	at(out['45.5 30'], 45.5, 30);
+	at(out['45 30.2'], 45, 30.2);
 	at(out['45,5 30,2'], 45.5, 30.2);
-	at(out['45,5 30'], 45, 5, '30'); // a comma in x alone is the separator
-	at(out['45 30,2'], 45, 30.2);
 	at(out['45 30 Camp'], 45, 30, 'Camp');
 	at(out['45,30 Camp'], 45, 30, 'Camp');
+	at(out['45, 30 Camp'], 45, 30, 'Camp');
 	at(out['45,5 30,2 Camp'], 45.5, 30.2, 'Camp');
 	at(out['45,30 2nd camp'], 45, 30, '2nd camp');
-	at(out['45,30 50'], 45, 30, '50');
-	at(out['45,30 2 camp'], 45, 30, '2 camp');
 	at(out['45 30 50'], 45, 30, '50');
 	at(out['0 100'], 0, 100);
-	for (const line of ['100.5 30', '45 101', '45,5 300,2', 'abc', '45', '45 .', '45.5.5 30']) {
+	// A decimal comma in one coordinate only is x,y and a numeric label or a
+	// decimal x and y: refused rather than guessed.
+	for (const line of ['45,5 30', '45 30,2', '45,30 50', '45,30 2 camp', '45,5 30 Camp', '45.5 30,2',
+		'100.5 30', '45 101', '45,5 300,2', 'abc', '45', '45 .', '45.5.5 30']) {
 		assert.ok(usage(out[line]), `${line}: usage, target kept (${JSON.stringify(out[line])})`);
 	}
 	assert.deepEqual(out[''], [false, false, false, false], 'empty clears without a message');
