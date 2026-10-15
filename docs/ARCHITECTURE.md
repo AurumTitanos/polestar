@@ -1117,6 +1117,30 @@ of at most 600 yd; captions plain text of at most 160 characters (no `|`
 escape codes). `travel route` runs the addon planner and includes
 Polestar_Travel when it is built (`--crossings-lua none` leaves it out).
 
+**Chains from recordings.** `travel chain --to <map,x,y> [--name <place>]`
+drafts an approach chain from the recorded walks that pass within 30 yd of a
+target, for a person to check in game before it goes into the crossings
+file (`--session <id>`, repeatable, keeps only those sessions' walks). Each
+pass by the target is an approach on the way in and, with `--reverse`, on the
+way out reversed (a way out is not always a way in), followed back `--within`
+yd (300); a shorter one does not count. It leaves the straight line where it has walked 20 yd more than a straight walk
+to the target would have, and its path from there to the target, simplified
+into nodes (Douglas-Peucker, `--tolerance` 8 yd), is its chain. Walks from
+different sides meet at the real mouth, so the shortest chain is printed,
+with every approach's departure point beside it. An approach that keeps to
+the straight line is reported with a warning but does not stop the draft:
+recordings have no height, so a walk that followed the arrow onto the hill
+above a cave looks straight too; only when every approach is straight is
+there no chain. Radii are at most 15 yd at
+the mouth and 10 inside, and under half the shortest hop; captions are
+left unset, so the addon's translated "Follow the path" applies (the mouth's
+is "Go to <place>" with `--name`). A single
+walk from the side away from the mouth starts the chain where it turned off
+the straight line, around the mountain: a walk from the open side, or the
+reviewer, moves the mouth. The walks are `tools/lib/travel/paths.js`
+`recordedWalks`, the ones learned paths are built from; the chain is
+`crossings.js` `recordedChain`.
+
 ## Quests — quest database, markers, tooltips, quest levels
 
 `addon/Polestar/Quests/` loads the load-on-demand data addon

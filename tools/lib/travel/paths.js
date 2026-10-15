@@ -44,12 +44,56 @@ function toWorld(map, x, y, rec, frames) {
 	};
 }
 
+// Each session's breadcrumbs, cut into walks: a walk is a run of points
+// someone actually walked, broken at a flight, a death or a bind, at a point
+// on a map without bounds, and at a step that is too long or too fast for
+// walking. -> { walks: [{ session, points: [{ c, wx, wy, map, t }] }], unplaced }
+function recordedWalks({ recordings, frames }) {
+	const walks = [];
+	let unplaced = 0;
+	for (const { file, rec } of recordings) {
+		const session = String(rec.session || file.replace(/\.json$/, ''));
+		let walk = null;
+		const cut = () => {
+			if (walk && walk.points.length) walks.push(walk);
+			walk = null;
+		};
+		for (const ev of rec.events || []) {
+			if (BREAKS.has(ev.e)) {
+				cut();
+				continue;
+			}
+			if (ev.e !== 'pos') continue;
+			const map = Number(ev.map);
+			const x = Number(ev.x);
+			const y = Number(ev.y);
+			if (!Number.isInteger(map) || !Number.isFinite(x) || !Number.isFinite(y)) continue;
+			const w = toWorld(map, x, y, rec, frames);
+			if (!w) {
+				unplaced++;
+				cut();
+				continue;
+			}
+			const p = { ...w, map, t: Number(ev.t) || 0 };
+			const prev = walk && walk.points[walk.points.length - 1];
+			if (prev) {
+				const d = Math.hypot(p.wx - prev.wx, p.wy - prev.wy);
+				const dt = p.t - prev.t;
+				if (prev.c !== p.c || d > MAX_STEP || (dt > 0 && d / dt > MAX_SPEED)) cut();
+			}
+			if (!walk) walk = { session, points: [] };
+			walk.points.push(p);
+		}
+		cut();
+	}
+	return { walks, unplaced };
+}
+
 function buildPaths({ recordings, frames }) {
 	const warnings = [];
 	const cells = new Map(); // key -> { c, gx, gy, sx, sy, n, maps: Map, gateway: Set }
 	const edges = new Map(); // "k1|k2" -> { a, b, n, sessions: Set }
 	const zoneSteps = []; // { c, from: { map, wx, wy }, to: { map, wx, wy }, session }: one step across a zone border
-	let unplaced = 0;
 
 	const cellOf = (p) => {
 		const gx = Math.floor(p.wx / CELL);
@@ -67,55 +111,29 @@ function buildPaths({ recordings, frames }) {
 		return cell;
 	};
 
-	for (const { file, rec } of recordings) {
-		const session = String(rec.session || file.replace(/\.json$/, ''));
+	const { walks, unplaced } = recordedWalks({ recordings, frames });
+	for (const { session, points } of walks) {
 		let prev = null;
-		for (const ev of rec.events || []) {
-			if (BREAKS.has(ev.e)) {
-				prev = null;
-				continue;
-			}
-			if (ev.e !== 'pos') continue;
-			const map = Number(ev.map);
-			const x = Number(ev.x);
-			const y = Number(ev.y);
-			if (!Number.isInteger(map) || !Number.isFinite(x) || !Number.isFinite(y)) continue;
-			const w = toWorld(map, x, y, rec, frames);
-			if (!w) {
-				unplaced++;
-				prev = null;
-				continue;
-			}
-			const p = { ...w, map, t: Number(ev.t) || 0 };
-			if (prev && prev.c === p.c) {
-				const d = Math.hypot(p.wx - prev.wx, p.wy - prev.wy);
-				const dt = p.t - prev.t;
-				if (d <= MAX_STEP && (dt <= 0 || d / dt <= MAX_SPEED)) {
-					const a = prev.cell;
-					const b = cellOf(p);
-					p.cell = b;
-					if (a !== b) {
-						if (prev.map !== p.map) {
-							a.gateway.add(prev.map).add(p.map);
-							b.gateway.add(prev.map).add(p.map);
-							zoneSteps.push({ c: p.c, from: { map: prev.map, wx: prev.wx, wy: prev.wy }, to: { map: p.map, wx: p.wx, wy: p.wy }, session });
-						}
-						const [k1, k2] = a.key < b.key ? [a.key, b.key] : [b.key, a.key];
-						const ek = `${k1}|${k2}`;
-						let e = edges.get(ek);
-						if (!e) {
-							e = { a: k1, b: k2, n: 0, sessions: new Set() };
-							edges.set(ek, e);
-						}
-						e.n += 1;
-						e.sessions.add(session);
-					}
-					prev = p;
-					continue;
+		for (const p of points) {
+			const b = cellOf(p);
+			const a = prev && prev.cell;
+			if (a && a !== b) {
+				if (prev.map !== p.map) {
+					a.gateway.add(prev.map).add(p.map);
+					b.gateway.add(prev.map).add(p.map);
+					zoneSteps.push({ c: p.c, from: { map: prev.map, wx: prev.wx, wy: prev.wy }, to: { map: p.map, wx: p.wx, wy: p.wy }, session });
 				}
+				const [k1, k2] = a.key < b.key ? [a.key, b.key] : [b.key, a.key];
+				const ek = `${k1}|${k2}`;
+				let e = edges.get(ek);
+				if (!e) {
+					e = { a: k1, b: k2, n: 0, sessions: new Set() };
+					edges.set(ek, e);
+				}
+				e.n += 1;
+				e.sessions.add(session);
 			}
-			p.cell = cellOf(p);
-			prev = p;
+			prev = { ...p, cell: b };
 		}
 	}
 	if (unplaced) warnings.push(`learned paths: ${unplaced} breadcrumb(s) on maps without bounds skipped`);
@@ -208,4 +226,4 @@ function buildPaths({ recordings, frames }) {
 	return { nodes, edges: edgeList, sessions, zoneSteps, warnings };
 }
 
-module.exports = { buildPaths, liveFramesOf, CELL, MAX_STEP, MAX_SPEED };
+module.exports = { buildPaths, recordedWalks, liveFramesOf, CELL, MAX_STEP, MAX_SPEED };
