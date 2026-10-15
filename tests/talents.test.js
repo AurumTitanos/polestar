@@ -235,11 +235,24 @@ emit(view().marks)
 stub.inCombat = false
 stub.fire("PLAYER_REGEN_ENABLED")
 stub.runTimers()
+emit(view().marks)
+-- Marks up, then inspecting someone mid-fight.
+stub.inCombat = true
+TS.inspecting = true
+EventRegistry:TriggerEvent("TalentFrameBase.ConfigUpdated")
+stub.runTimers()
+emit(view().marks)
+TS.inspecting = nil
+stub.inCombat = false
+stub.fire("PLAYER_REGEN_ENABLED")
+stub.runTimers()
 emit(view().marks)`);
 	assert.equal(outs[0], 0, 'inspecting');
 	assert.equal(outs[1], 0, 'another loadout');
 	assert.equal(outs[2], 0, 'still hidden: the redraw waits for combat to end');
 	assert.ok(outs[3] > 0, 'drawn after combat');
+	assert.equal(outs[4], 0, 'marks come down when the frame changes in combat');
+	assert.ok(outs[5] > 0, 'and come back after combat');
 });
 
 // ------------------------------------------------------------ reminder

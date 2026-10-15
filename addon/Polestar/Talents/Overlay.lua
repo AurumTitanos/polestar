@@ -95,9 +95,11 @@ local onEnter
 function O.Draw()
 	local f = frame()
 	if not f then return end
+	-- In combat the frame may show someone else or another loadout: take
+	-- the marks down now and draw again once combat ends.
 	if T.Client.InCombat() then
 		pending = true
-		return
+		return hideAll()
 	end
 	pending = false
 	local c = T.Current()
