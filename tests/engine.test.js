@@ -942,3 +942,49 @@ test('slash commands drive the engine and report status', () => {
 	assert.equal(out.header, 'Polestar');
 	assert.equal(out.binding, 'Next step');
 });
+
+// A `complete` goal counts its quest's objectives from the log (summed, so the
+// window redraws on every loot or kill) and, for a quest with several, lists
+// the open ones in the game's words under the goal (a player's report: The
+// Hunt Begins showed no x of y).
+const HUNT = `
+Polestar.RegisterGuide({
+	id = "test/hunt", pack = "test", title = "Camp Narache", faction = "Alliance", minLevel = 1, maxLevel = 4, zone = 1429,
+	steps = {
+		{ title = "The Hunt Begins", goals = {
+			{ t = "complete", quest = 747, title = "The Hunt Begins" },
+			{ t = "complete", quest = 752, title = "A Humble Task" },
+		} },
+		{ title = "Grull Hawkwind", goals = {
+			{ t = "turnin", quest = 747, title = "The Hunt Begins", npc = 2980, npcName = "Grull Hawkwind" },
+		} },
+	},
+})
+`;
+
+test('a quest to complete shows its objectives\' count, and the open ones when it has several', () => {
+	const [log, start, meat, fed] = run({
+		guides: NORTHSHIRE + HUNT,
+		before: `w.onQuest(747, { { text = "Plainstrider Meat", required = 7 }, { text = "Plainstrider Feathers: 0/7", required = 7, type = "item" } })
+			w.onQuest(752, { { text = "Water Pitcher", required = 1, type = "item" } })`,
+		script: `
+			local w = stub.world
+			E.SetGuide("test/hunt"); flush(); takeLog()
+			local function goals()
+				local v = E.GetStepView(1)
+				return { v.goals[1].progress, v.goals[1].objectives or false, v.goals[2].progress or false, v.goals[2].objectives or false }
+			end
+			local start = goals()
+			w.progress(747, 1, 3); flush()
+			local meat = goals()
+			w.progress(747, 1, 9); flush()
+			local fed = goals()
+			emit(takeLog()); emit(start); emit(meat); emit(fed)
+		`,
+	});
+	assert.deepEqual(start, [{ cur: 0, max: 14, kind: 'count' }, ['Plainstrider Meat 0/7', 'Plainstrider Feathers: 0/7'], { cur: 0, max: 1, kind: 'count' }, false]);
+	assert.deepEqual(meat, [{ cur: 3, max: 14, kind: 'count' }, ['Plainstrider Meat 3/7', 'Plainstrider Feathers: 0/7'], { cur: 0, max: 1, kind: 'count' }, false]);
+	// Looting past the need counts the need; a finished objective leaves the list.
+	assert.deepEqual(fed, [{ cur: 7, max: 14, kind: 'count' }, ['Plainstrider Feathers: 0/7'], { cur: 0, max: 1, kind: 'count' }, false]);
+	assert.deepEqual(log, ['STEP_UPDATED 1', 'STEP_UPDATED 1'], 'each count change redraws the step');
+});

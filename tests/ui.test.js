@@ -1053,3 +1053,12 @@ test('a collect whose line already names its source has no source line under it;
 	assert.equal(out.named, false);
 	assert.equal(out.authored, 'Kill Grell or Grellkin');
 });
+
+test('a quest to complete with several objectives lists the open ones under it, before its note', () => {
+	const [out] = run(`
+		local goal = { t = "complete", quest = 747, status = "active", progress = { cur = 3, max = 14, kind = "count" },
+			objectives = { "Plainstrider Meat: 3/7", "Plainstrider Feathers: 0/7" }, note = "Plainstriders roam the grass" }
+		emit({ sub = UI.GoalSubline(goal), count = UI.GoalProgress(goal) })`);
+	assert.equal(out.sub, 'Plainstrider Meat: 3/7  \u00b7  Plainstrider Feathers: 0/7  \u00b7  Plainstriders roam the grass');
+	assert.equal(out.count, '3/14');
+});
