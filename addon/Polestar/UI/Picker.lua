@@ -541,9 +541,16 @@ local function paintRow(r, g, note, width)
 	r.Bar:SetShown(sel)
 	local done = guideState(g.id) == "done"
 	r.Check:SetShown(done)
+	-- A Class guide this character cannot start yet recedes and says when.
+	local E = ns.Engine
+	local gate = not done and E and E.StartGate and E.StartGate(g.id)
+	if gate then
+		local when = gate.level and string.format(L["From level %d"], gate.level) or L["Not available yet"]
+		note = note and (note .. DOT .. when) or when
+	end
 	r.Title:SetWidth(0) -- measured below from scratch, as the note
 	r.Title:SetText(g.title or g.id)
-	W.Color(r.Title, sel and "text" or (done and "textDim" or "text"))
+	W.Color(r.Title, sel and "text" or ((done or gate) and "textDim" or "text"))
 	local lv = UI.LevelRange(g.minLevel, g.maxLevel)
 	r.Range:SetText(lv and ("(" .. lv .. ")") or "")
 	local groupW = g.group == true and (W.SetChip(r.Group, L["Group"], "dungeon") + 6) or 0

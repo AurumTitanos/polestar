@@ -69,7 +69,7 @@ local focusGroup -- the group on screen
 local shownIndex, shownGuide, shownFocus -- what the card shows, to tell a change from an update
 local tipOpen = false
 local inCombat = false
-local state = "none" -- "steps" | "noguides" | "noguide" | "complete"
+local state = "none" -- "steps" | "noguides" | "noguide" | "notyet" | "complete"
 local texts = {} -- every string the window draws, for transparent-mode outlines
 local chrome = {} -- frames that hide in transparent mode until hovered
 
@@ -1144,6 +1144,28 @@ local function setEmpty(kind)
 			empty.Primary.psAction = function() UI.ShowPicker() end
 			empty.Primary:Show()
 		end
+	elseif kind == "notyet" then
+		-- A Class guide the character cannot start yet (Engine.StartGate):
+		-- when it opens, who starts it; the guide picks up by itself.
+		glyph = "icon-level"
+		local guide = E and E.GetGuide and E.GetGuide()
+		local gate = guide and E.StartGate and E.StartGate(guide.id) or {}
+		local lines = {}
+		if gate.giver then
+			local zone = gate.map and UI.MapName(gate.map) or nil
+			lines[1] = string.format(L["%s starts it."], zone and (gate.giver .. ", " .. zone) or gate.giver)
+		end
+		if gate.level then
+			empty.Title:SetText(string.format(L["Available from level %d"], gate.level))
+			lines[#lines + 1] = string.format(L["Come back at level %d: the guide picks up by itself then."], gate.level)
+		else
+			empty.Title:SetText(L["Not available yet"])
+			lines[#lines + 1] = string.format(L["Finish %s first: the guide picks up by itself then."], gate.preTitle or "")
+		end
+		empty.Text:SetText(table.concat(lines, "\n"))
+		W.SetButtonText(empty.Primary, L["Choose a guide"])
+		empty.Primary.psAction = function() UI.ShowPicker() end
+		empty.Primary:Show()
 	elseif kind == "complete" then
 		glyph, color = "check", "success"
 		local guide = E and E.GetGuide and E.GetGuide()
@@ -1416,6 +1438,15 @@ function GF.Render()
 		showSteps(false)
 		GF.Layout()
 		GF.PaintProgress(true)
+		return
+	end
+	-- A Class guide the character cannot start yet: its notice on the live
+	-- step; Next still looks at the steps ahead.
+	if index == (E.GetLiveStep and E.GetLiveStep()) and E.StartGate and E.StartGate(guide.id) then
+		view, shownIndex, shownGuide, shownFocus = nil, nil, guide.id, nil
+		setEmpty("notyet")
+		showSteps(false)
+		GF.Layout()
 		return
 	end
 	local stepChanged = shownGuide ~= guide.id or shownIndex ~= index
