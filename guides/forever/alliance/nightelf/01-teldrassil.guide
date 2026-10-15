@@ -309,6 +309,7 @@ step Ban'ethil Barrow Den
 step Escaping Ban'ethil
   tip Escort Sentinel Lynessa Duskblossom out of the barrow; Sentinel Kyra Starsong in Dolanaar takes the report.
   goto 46.4,57.3 "Ban'ethil Hollow, outside the barrow" r 25 -- Walk Lynessa out and keep her alive
+  complete 99053
 
 step The Pools of Arlithrien
   tip South-west of the barrow. The moonwell sits by the pools.

@@ -9924,6 +9924,7 @@ do
 					note = "Escort Sentinel Lynessa Duskblossom out of the barrow; Sentinel Kyra Starsong in Dolanaar takes the report.",
 					goals = {
 						{ t = "goto", text = "Ban'ethil Hollow, outside the barrow", map = 1438, x = 46.4, y = 57.3, f = "e", r = 25, note = "Walk Lynessa out and keep her alive" },
+						{ t = "complete", quest = 99053, title = "Escaping Ban'ethil" },
 					},
 				},
 				{
@@ -30480,6 +30481,7 @@ do
 						{ t = "interact", quest = 786, title = "Thwarting Kolkar Aggression", object = 3192, objName = "Attack Plan: Orgrimmar", oi = 3, map = 1411, x = 46.2, y = 78.9, f = "e" },
 						{ t = "accept", quest = 99123, title = "Lost in the Shadows", npc = 275811, npcName = "Pal'juh", minLevel = 4, qlvl = 8, map = 1411, x = 46.3, y = 78.7, f = "e" },
 						{ t = "goto", text = "Kolkar Crag", map = 1411, x = 46.3, y = 78.7, f = "e", note = "Free Pal'juh and see her safely out of the crag" },
+						{ t = "complete", quest = 99123, title = "Lost in the Shadows" },
 					},
 				},
 				{
@@ -32593,6 +32595,7 @@ do
 						{ t = "kill", quest = 380, title = "Night Web's Hollow", target = "Night Web Spider", npc = 1505, count = 8, oi = 2, map = 1420, x = 26.6, y = 59.5, f = "e", spots = { { x = 25.8, y = 59.8, r = 38, n = 8 }, { x = 24, y = 59.7, r = 47, n = 12 } } },
 						{ t = "goto", text = "Night Web's Hollow", map = 1420, x = 26, y = 60, f = "e" },
 						{ t = "goto", text = "Webbed Victims", map = 1420, x = 24.8, y = 59.6, f = "e", note = "Free six Webbed Victims inside the cave for Aramis" },
+						{ t = "complete", quest = 98389, title = "A Light in the Darkness" },
 					},
 				},
 				{
@@ -32692,6 +32695,7 @@ do
 					title = "Discipline",
 					goals = {
 						{ t = "goto", text = "Brill", map = 1420, x = 60.6, y = 52, f = "e", note = "Use the Executor's Motivator on five idle Deathguards around town" },
+						{ t = "complete", quest = 99134, title = "Discipline" },
 					},
 				},
 				{
@@ -32873,6 +32877,7 @@ do
 						{ t = "kill", quest = 427, title = "At War With The Scarlet Crusade", target = "Scarlet Warrior", npc = 1535, count = 10, oi = 1, map = 1420, x = 37.4, y = 47.71, f = "e", spots = { { x = 36.8, y = 47.8, r = 31, n = 3 }, { x = 33.7, y = 48.4, r = 47, n = 6 }, { x = 33.3, y = 46, r = 26, n = 2 }, { x = 32, y = 50.5, r = 36, n = 4 }, { x = 31.6, y = 46.4, r = 57, n = 9 }, { x = 30.4, y = 49.7, r = 56, n = 5 }, { x = 34.1, y = 51.4, r = 15, n = 1, alt = true } } },
 						{ t = "accept", quest = 99144, title = "Seeking Refuge", npc = 275954, npcName = "Bareth Dawnstone", minLevel = 5, qlvl = 7, map = 1420, x = 31.96, y = 46.32, f = "e", note = "Bareth Dawnstone" },
 						{ t = "goto", text = "Crusader's Outpost", map = 1420, x = 32, y = 46.3, f = "e", note = "Escort Bareth out of the outpost" },
+						{ t = "complete", quest = 99144, title = "Seeking Refuge" },
 					},
 				},
 				{
