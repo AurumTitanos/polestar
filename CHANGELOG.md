@@ -322,6 +322,10 @@
   `/polestar gear`'s spec source. The item qualities in Lookup are
   `"quality: Rare"` and so on, apart from the rare mobs. Nothing changes in
   English.
+- The docs say what the code does: ARCHITECTURE (startup, refused guides,
+  waypoints, which code calls the client outside Compat), GUIDE_FORMAT (the
+  guide id rule), README, SIMULATION, THIRD_PARTY and the tools README
+  (thanks CDVolvik).
 
 ## 0.2.3 (2026-10-14)
 
