@@ -4,6 +4,10 @@
 
 ### For players
 
+- The Undead Tirisfal Glades guide sends only Paladins to Bandarion Keep for
+  As Above, So Below and The One That Got Away: Hilda the Breaker and Ephram
+  Barbaro offer them to Paladins only. Other classes still collect the
+  Shadowvale elixir bottles (thanks Mike_).
 - Quests Forever renamed carry their Forever names in the guides: Chastise
   (once A Lack of Fear), Dark Sacrifice (once Devouring Plague), Look to the
   Stars, Onu is Meditating and the others Wowhead Forever lists as renamed.
