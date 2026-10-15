@@ -129,6 +129,12 @@
   bloodmages' beasts, and Horde Warriors in the Barrens gather the Twitching
   Antennae (fifteen minutes) on the way back from Gann Stonespire and hearth
   to Ruga at once. Teldrassil says Iverron's Antidote lasts five minutes.
+- Western Plaguelands (Alliance): the Arcane Quickeners vanish 30 minutes
+  after you buy them, so the guide no longer buys all four at the first
+  Chillwind Camp stop, where they ran out before the cauldrons: one is
+  bought on the stop right before Felstone Field's cauldron and two on the
+  one before the Writhing Haunt's and Dalson's Tears', and the steps say
+  they last 30 minutes.
 
 ### For guide authors
 
