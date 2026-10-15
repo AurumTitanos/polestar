@@ -58,7 +58,7 @@ Every line before the first `step`.
 
 | Key | Required | Value |
 |---|---|---|
-| `guide` | yes, first line | id: `[a-z0-9/_-]+`, unique across all guides; it starts with the pack's id and `/` (`joe-routes/elwynn`; Polestar's own guides: `forever/`) |
+| `guide` | yes, first line | id: `[a-z0-9_-]+` parts joined by single `/` (none leading or trailing), unique across all guides; it starts with the pack's id and `/` (`joe-routes/elwynn`; Polestar's own guides: `forever/`) |
 | `title` | yes | rest of line |
 | `levels` | yes | `<min>-<max>` |
 | `zone` | yes | default zone: map name from `data/forever/zones.json`, or `map <uiMapID>` |
@@ -373,6 +373,11 @@ Warnings:
   known places (`did you mean "Feathermoon Stronghold"?`). Inns and flight
   points come from `data/forever/travel.json`; without it (or without the
   inns or the flight points in it) those goals are not checked
+- a `|` in text the player sees (`title`, `folder`, `pitch`, `pro`, `con`,
+  `author`, step titles and tips, goal texts and notes, quoted names): it
+  prints literally in game
+- another pack's Era frame for a map Polestar's guides also use, with other
+  bounds: in game Polestar's wins, so coordinates on that map may be off
 - `lint` only, with a simulator world cached in `data/sim` (or `--sim <dir>`): a
   non-`optional` quest goal in a `Leveling` guide on a quest the solo filter
   excludes (dungeon, raid, pvp, rare drop, reputation, repeatable or profession;
