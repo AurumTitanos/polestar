@@ -283,7 +283,7 @@ stub.login()
 local TV = Polestar.UI.TalentsSection
 TV.Show()
 local s = TV.Shown()
-emit({ rows = s.rows, spec = s.spec, mine = s.mine, status = s.status, follow = s.follow, auto = s.auto, notes = #s.notes })
+emit({ rows = s.rows, spec = s.spec, mine = s.mine, status = s.status, follow = s.follow, auto = s.auto, notes = #s.notes, first = s.notes[1] })
 local nav, active = TV.Nav()
 local labels = {}
 for _, n in ipairs(nav) do labels[#labels + 1] = n.label end
@@ -295,7 +295,8 @@ TV.Follow()
 emit({ choice = T.Choice(), followed = TV.Shown().followed })
 TV.FollowSpec()
 emit(T.Choice())`, { files: WITH_UI, stubs: ['stub_ui.lua'] });
-	assert.deepEqual(outs[0], { rows: 51, spec: 'Retribution', mine: true, status: 'behind', follow: true, auto: false, notes: outs[0].notes });
+	assert.deepEqual(outs[0], { rows: 51, spec: 'Retribution', mine: true, status: 'behind', follow: true, auto: false, notes: outs[0].notes, first: outs[0].first });
+	assert.match(outs[0].first, /^1 point to spend\. Next: Vengeance 1\/3\.$/, 'one point: the talent, not the count');
 	assert.ok(outs[0].notes >= 10, 'status, summary, the plan notes and the source');
 	assert.deepEqual(outs[1], { labels: ['Holy', 'Protection', 'Retribution'], active: '3' });
 	assert.deepEqual(outs[2], { spec: 'Holy', mine: false, status: 'other', follow: true });
