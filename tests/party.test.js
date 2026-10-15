@@ -321,3 +321,76 @@ emit(texts())`, { stubs: LIVE.stubs, login: false });
 	assert.deepEqual(mine, ['1R|33:0/8']);
 	assert.deepEqual(replies, ['1S|33:0/8']);
 });
+
+// What the guide shows, with the guide window's own files loaded.
+const SHOWN = { stubs: LIVE.stubs, login: true, files: ['Core/Core.xml', 'Theme/Theme.xml', 'UI/UI.xml', 'Quests/Party.lua'] };
+const DOT = '  ·  ';
+
+test('party: an objective goal lists party members\' counts', () => {
+	const [line] = run(`${SENT}
+p.join("Ben"); p.join("Ana")
+p.receive("Ana-TestRealm", "1|33:5/8")
+p.receive("Ben-TestRealm", "1|33:8/8")
+emit(P.Line({ t = "kill", quest = 33, oi = 1, status = "active" }))`, SHOWN);
+	assert.equal(line, `Ana 5/8${DOT}Ben done`);
+});
+
+test('party: members without the quest, or showing off, add nothing', () => {
+	const [other, off] = run(`${SENT}
+p.join("Ana")
+p.receive("Ana-TestRealm", "1|60:1/4")
+emit(P.Line({ t = "kill", quest = 33, oi = 1, status = "active" }) == nil)
+p.receive("Ana-TestRealm", "1|33:1/8")
+Polestar.Set("party.show", false)
+emit(P.Line({ t = "kill", quest = 33, oi = 1, status = "active" }) == nil)`, SHOWN);
+	assert.deepEqual([other, off], [true, true]);
+});
+
+test('party: an accepted quest names party members who lack it', () => {
+	const [line] = run(`${SENT}
+w.onQuest(33, { 8 })
+p.join("Ana"); p.join("Ben")
+p.onQuest.Ana = { [33] = true }
+p.onQuest.Ben = { [33] = false }
+emit(P.Line({ t = "accept", quest = 33, status = "done" }))`, SHOWN);
+	assert.equal(line, 'Not on this quest: Ben');
+});
+
+test('party: without the client\'s party check, synced members still count; unknown ones are not guessed', () => {
+	const [line] = run(`${SENT}
+p.noUnitQuestAPI()
+w.onQuest(33, { 8 })
+p.join("Ana"); p.join("Ben")
+p.receive("Ana-TestRealm", "1|60:1/4")
+emit(P.Line({ t = "accept", quest = 33, status = "done" }))`, SHOWN);
+	assert.equal(line, 'Not on this quest: Ana');
+});
+
+test('party: before you have the quest, no nudge', () => {
+	const [none] = run(`${SENT}
+p.join("Ben")
+p.onQuest.Ben = { [33] = false }
+emit(P.Line({ t = "accept", quest = 33, status = "active" }) == nil)`, SHOWN);
+	assert.equal(none, true);
+});
+
+test('party: the goal\'s grey line carries the party part', () => {
+	const [sub] = run(`${SENT}
+p.join("Ana")
+p.receive("Ana-TestRealm", "1|33:5/8")
+emit(Polestar.UI.GoalSubline({ t = "kill", quest = 33, oi = 1, status = "active" }))`, SHOWN);
+	assert.equal(sub, 'Ana 5/8');
+});
+
+test('party: the Questing page has the two party switches, both on', () => {
+	const [keys, share, show] = run(`
+local keys = {}
+Polestar.Widgets.OnOptionsRegistered(function(spec)
+	for _, c in ipairs(spec.controls) do
+		if c.key and c.key:sub(1, 6) == "party." then keys[#keys + 1] = spec.page .. "/" .. c.key end
+	end
+end)
+emit(keys); emit(Polestar.Get("party.share")); emit(Polestar.Get("party.show"))`, SHOWN);
+	assert.deepEqual(keys, ['Questing/party.share', 'Questing/party.show']);
+	assert.deepEqual([share, show], [true, true]);
+});

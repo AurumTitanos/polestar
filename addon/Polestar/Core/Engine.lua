@@ -1530,7 +1530,7 @@ local function goalView(s, g, goal, stepStatus, group)
 		optional = goal.optional and true or false,
 		note = goal.note,
 		map = map, x = x, y = y, f = f,
-		quest = goal.quest, npc = npc, npcName = npcName, item = goal.item,
+		quest = goal.quest, oi = goal.oi, npc = npc, npcName = npcName, item = goal.item,
 		alternatives = alternatives,
 		spots = goal.spots and #goal.spots or nil, spread = goal.spread or nil,
 		lvl = goal.candidates and chosen(goal) and chosen(goal).lvl or nil,

@@ -406,6 +406,9 @@ function UI.GoalSubline(goal, shownMap, noParty)
 	local note = goal.note
 	if note and source and (note == goal.source.name or note == goal.subject) then note = nil end
 	if note then parts[#parts + 1] = note end
+	-- Party members' counts on this quest (Quests/Party.lua).
+	local together = ns.Party and ns.Party.Line(goal)
+	if together then parts[#parts + 1] = together end
 	local rewards = goal.t == "turnin" and goal.status ~= "done" and goal.status ~= "skipped" and UI.GoalRewards(goal) or nil
 	if #parts == 0 then return rewards end
 	local line = table.concat(parts, "  \194\183  ")

@@ -364,3 +364,77 @@ ns.On("SETTING_CHANGED", function(path)
 		Party.Apply()
 	end
 end)
+
+---------------------------------------------------------------------------
+-- What the guide shows
+---------------------------------------------------------------------------
+
+local L = ns.L
+local DOT = "  \194\183  "
+
+-- Party members (connected) who lack quest `q`, by name: the client's own
+-- party check first; without it, what a member running Polestar sent us;
+-- never a guess about the rest.
+function Party.Missing(q)
+	local out = {}
+	local check = C_QuestLog and C_QuestLog.IsUnitOnQuest
+	local n = GetNumSubgroupMembers and GetNumSubgroupMembers() or 0
+	for i = 1, n do
+		local unit = "party" .. i
+		local key, short = memberKey(unit)
+		if key and not (UnitIsConnected and not UnitIsConnected(unit)) then
+			local on
+			if check then on = check(unit, q) end
+			if on == nil and members[key] then on = members[key].quests[q] ~= nil end
+			if on == false then out[#out + 1] = short end
+		end
+	end
+	table.sort(out)
+	return out
+end
+
+-- The party part of a goal's line (UI.GoalSubline), or nil: on an objective
+-- goal each member's count ("Ana 5/8", "Ben done"); on the accept of a quest
+-- you have, who lacks it ("Not on this quest: Ben").
+function Party.Line(goal)
+	if type(goal) ~= "table" or not goal.quest or goal.status == "skipped" then return nil end
+	if not ns.Get("party.show") or not grouped() then return nil end
+	if goal.t == "accept" then
+		if not ns.Compat.IsOnQuest(goal.quest) then return nil end
+		local missing = Party.Missing(goal.quest)
+		if #missing == 0 then return nil end
+		return L["Not on this quest: %s"]:format(concat(missing, ", "))
+	end
+	if not goal.oi then return nil end
+	local parts = {}
+	for _, m in ipairs(Party.Members()) do
+		local counts = m.quests[goal.quest]
+		local c = counts and counts[goal.oi]
+		if c then
+			parts[#parts + 1] = c[1] >= c[2] and L["%s done"]:format(m.name) or (m.name .. " " .. c[1] .. "/" .. c[2])
+		end
+	end
+	if #parts == 0 then return nil end
+	return concat(parts, DOT)
+end
+
+-- The Party section of the Questing page (its Quests tab), after the quest
+-- settings (Quests/Options.lua registers first: this file loads after it).
+Party.OPTIONS = {
+	page = L["Questing"], tab = L["Quests"], section = L["Party"],
+	controls = {
+		{ kind = "toggle", key = "party.share", label = L["Share my quest progress with my party"],
+			help = L["Party members who run Polestar see your counts under their quest goals. Nothing goes to chat."] },
+		{ kind = "toggle", key = "party.show", label = L["Show my party's progress in the guide"],
+			help = L["Their counts under your quest goals, and who lacks a quest you took."] },
+	},
+}
+
+local registered = false
+local function register()
+	if registered or not ns.RegisterOptions then return end
+	registered = true
+	ns.RegisterOptions(Party.OPTIONS)
+end
+ns.OnInit(register)
+ns.OnLogin(register)
