@@ -16,7 +16,7 @@ class Scene {
 		this.north = (32 - row) * ADT;
 		this.tris = [];
 		this.kind = [];
-		this.liquid = { type: new Uint8Array(16384), z: new Float32Array(16384) };
+		this.liquid = { type: new Uint8Array(16384), z: new Float32Array(16384), deep: new Uint8Array(16384) };
 		// Terrain: 128 x 128 quads, two triangles each.
 		for (let qy = 0; qy < 128; qy++) {
 			for (let qx = 0; qx < 128; qx++) {
@@ -63,12 +63,14 @@ class Scene {
 		return this.quad([x0, y0, z], [x1, y0, z], [x1, y1, z], [x0, y1, z], kind);
 	}
 
-	// Liquid over quads covering [x0, x1] x [y0, y1] at height z (type 1 water, 2 ocean, 3 magma).
-	water(x0, y0, x1, y1, z, type = 1) {
+	// Liquid over quads covering [x0, x1] x [y0, y1] at height z (type 1 water, 2 ocean, 3 magma);
+	// deep: fatigue water (MH2O's deep bit).
+	water(x0, y0, x1, y1, z, type = 1, deep = false) {
 		for (let qy = Math.floor(y0 / QUAD); qy < Math.ceil(y1 / QUAD); qy++) {
 			for (let qx = Math.floor(x0 / QUAD); qx < Math.ceil(x1 / QUAD); qx++) {
 				this.liquid.type[qy * 128 + qx] = type;
 				this.liquid.z[qy * 128 + qx] = z;
+				this.liquid.deep[qy * 128 + qx] = deep ? 1 : 0;
 			}
 		}
 		return this;

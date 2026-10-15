@@ -118,6 +118,29 @@ test('swimming: mounts do not swim, the swim leg runs at swim speed', async () =
 	assert.ok(epic.seconds < onFoot.seconds);
 });
 
+test('open sea: fatigue water (MH2O deep) is never swum; the coast, shallow sea, still is', async () => {
+	// A strait of ocean across the tile (x 150..350, sea bed 6 yd down): deep in the middle 100 yd, or not at all.
+	const sea = (deep) => {
+		const s = new Scene({ height: (x) => (x > 150 && x < 350 ? -6 : 0) });
+		s.water(150, 0, 350, ADT, 0, 2);
+		if (deep) s.water(200, 0, 300, ADT, 0, 2, true);
+		return s;
+	};
+	const open = sea(true);
+	const { nav, dir } = await navOf(open);
+	const r = nav.route(open.world(100, 250), open.world(400, 250), foot);
+	assert.equal(r.ok, false, 'no way across the open sea');
+	const near = nav.route(open.world(100, 250), open.world(175, 250), foot);
+	assert.ok(near.ok && near.byClass.swim > 0, 'a swim near the coast');
+	const { decodeTile, FLAG } = require('../tools/lib/nav/grid/format');
+	const t = decodeTile(fs.readFileSync(path.join(dir, 'tiles', '0', '32_32.nav.gz')));
+	const k = 120 * 256 + 120; // x 251, y 251: deep
+	assert.equal(t.flags[t.first[k]] & (FLAG.SWIM | FLAG.BLOCKED), FLAG.SWIM | FLAG.BLOCKED, 'fatigue water is a blocked swim surface');
+	const shallow = sea(false);
+	const across = (await navOf(shallow)).nav.route(shallow.world(100, 250), shallow.world(400, 250), foot);
+	assert.ok(across.ok && across.byClass.swim > 0, 'the same strait without fatigue is swum');
+});
+
 test('indoors: no mount speed, a remount on the way out', async () => {
 	const s = new Scene({ height: () => 0 });
 	// A long indoor floor (WMO indoor) raised half a yard, walled along both sides.
@@ -280,7 +303,8 @@ test('abstract graph: slope links cost their yards, no lift ride, so the graph p
 });
 
 const NAV = path.join(__dirname, '..', 'data', 'local', 'nav');
-const realSkip = fs.existsSync(path.join(NAV, 'index.json')) ? false : 'no navigation build in data/local/nav (node tools/polestar.js nav build)';
+const navIndex = fs.existsSync(path.join(NAV, 'index.json')) ? JSON.parse(fs.readFileSync(path.join(NAV, 'index.json'), 'utf8')) : null;
+const realSkip = !navIndex ? 'no navigation build in data/local/nav (node tools/polestar.js nav build)' : navIndex.version !== require('../tools/lib/nav/grid/format').VERSION ? `data/local/nav is tile version ${navIndex.version}: rebuild it (node tools/polestar.js nav build)` : false;
 
 test('real: Kharanos to inside Frostmane Hold goes through the cave mouth, not over the hills', { skip: realSkip }, () => {
 	const nav = openNav({ dir: NAV });

@@ -1,0 +1,291 @@
+'use strict';
+// Chokepoints of each continent for the journey's named walk steps
+// (docs/ARCHITECTURE.md, "Navigation grid", "Packing for the in-game
+// engine"): lift landings, gates, bridges, tunnels, cave and building mouths
+// and passes, found by the rules below on the grid and the arrow's aids; no
+// place is named by hand.
+//
+//   const { chokepoints, chokepointsLua } = require('tools/lib/nav/chokepoints');
+//   const list = chokepoints({ nav, c, aids, lifts, geo, areas });   // -> [entry]
+//   chokepointsLua({ [c]: list }, source)                            // -> Nav/Chokepoints.lua
+//
+// An entry: { wx, wy, z, r, kind, name, zone, sides?, liftEnd?, lift?, pair? }
+// in UnitPosition's frame (wx north, wy west), yards. name: the area
+// (AreaTable, the chunk's area id) at the point, never empty (the zone's
+// name when the area has none); zone: the zone the area belongs to.
+//
+// Rules (decided 2026-10-15):
+// - lift: both landings of every lift of the grid (lifts.json, build.js
+//   liftLinks), one entry per landing (landings within LIFT_SAME yd and
+//   STEP in height are one); liftEnd 'top' or 'bottom' by height against the
+//   other end, `pair` the index of the other end, `lift` the object's name.
+// - cave, building, pass: the mouth (first node) of each approach chain of
+//   the aids (aids.js): 'Enter the cave' a cave, 'Go inside' a building,
+//   'Follow the path' / 'Follow the path up' a pass; 'Take the lift' chains
+//   are lifts already. Mouths of one kind within MERGE yd are one.
+// - bridge, tunnel, pass: each zone crossing of the aids at the middle of
+//   its two ends, by its caption ('Cross the bridge', 'Walk through the
+//   tunnel', else a pass), sides the two ends with their zones.
+// - bridge (from the grid): a deck of model surfaces (WMO or M2, outdoors,
+//   not swum) over a swim surface or with at least BRIDGE_DROP yd of air
+//   under it, at least DECK_MIN columns, on average at most DECK_WIDTH yd
+//   wide, at least SPAN_MIN yd long, whose links to other ground form
+//   exactly two separate groups (its two ends: a pier has one, a quay along
+//   a shore one long one).
+// - gate (from the grid): outdoor ground under a model (WMO) span at most
+//   COVER yd above it, the covered stretch at least GATE_MIN columns, on
+//   average at most GATE_WIDTH yd wide, whose links to uncovered outdoor
+//   ground form exactly two groups (in and out through the arch; a porch
+//   along a house front has one).
+// - A grid bridge or gate within MERGE yd of an aids entry of the same kind
+//   is that entry; an aids pass there becomes the gate or bridge.
+// r is the radius the path must pass within: at least R_MIN, at most R_MAX.
+
+const { CELL, TILE_CELLS, NO_LINK, FLAG, DIRS, STEP, cellCentre, cellOf } = require('./grid/format');
+
+const LIFT_SAME = 8; // yd
+const MERGE = 25; // yd
+const BRIDGE_DROP = 8; // yd of air under a deck
+const DECK_THICK = 2; // yd: blocked spans this close under a deck are the deck itself
+const DECK_MIN = 20; // columns (about 87 yd²)
+const DECK_WIDTH = 15; // yd on average
+const SPAN_MIN = 12; // yd from end to end
+const COVER = 12; // yd from the ground to the span over it
+const GATE_MIN = 6; // columns
+const GATE_WIDTH = 14; // yd on average
+const R_MIN = 6;
+const R_MAX = 30;
+const CAPTION_KIND = { 'Enter the cave': 'cave', 'Go inside': 'building', 'Follow the path up': 'pass', 'Follow the path': 'pass' };
+const round1 = (v) => Math.round(v * 10) / 10;
+
+// AreaTable rows -> (areaId) -> { name, zone } with names, never empty.
+function areaNames(areaRows) {
+	const rows = new Map(areaRows.map((r) => [Number(r.ID), r]));
+	return (id) => {
+		let r = rows.get(Number(id));
+		if (!r) return null;
+		const name = r.AreaName_lang || r.ZoneName;
+		const seen = new Set();
+		while (Number(r.ParentAreaID) > 0 && rows.has(Number(r.ParentAreaID)) && !seen.has(r.ID)) {
+			seen.add(r.ID);
+			r = rows.get(Number(r.ParentAreaID));
+		}
+		const zone = r.AreaName_lang || r.ZoneName;
+		return { name: name || zone, zone: zone || name };
+	};
+}
+
+// Grid scan of one continent: deck (bridge) and covered (gate) columns -> components -> entries.
+function gridChokepoints(nav, c, place) {
+	const tiles = nav.index.continents[c].tiles;
+	const deck = new Map(); // `${col}_${row}:${k}` -> { e, z, wx, wy }
+	const cover = new Map();
+	const key = (col, row, k) => `${col}_${row}:${k}`;
+	for (const tk of tiles) {
+		const [col, row] = tk.split('_').map(Number);
+		const t = nav.tile(c, col, row);
+		if (!t) continue;
+		const { first, z, ceil, flags } = t;
+		for (let k = 0; k < TILE_CELLS * TILE_CELLS; k++) {
+			let haveDeck = false;
+			let haveCover = false;
+			for (let e = first[k + 1] - 1; e >= first[k]; e--) {
+				const f = flags[e];
+				if (f & (FLAG.BLOCKED | FLAG.SWIM | FLAG.INDOOR)) continue;
+				const model = f & (FLAG.WMO | FLAG.M2);
+				if (model && !haveDeck) {
+					// Under it, past the deck's own (model) spans: a swim surface, or air down to BRIDGE_DROP.
+					let below = e - 1;
+					while (below >= first[k] && flags[below] & FLAG.BLOCKED && !(flags[below] & (FLAG.SWIM | FLAG.TERRAIN)) && z[e] - z[below] <= DECK_THICK) below--;
+					if (below >= first[k] && (flags[below] & FLAG.SWIM || z[e] - z[below] >= BRIDGE_DROP)) {
+						const p = cellCentre(col, row, k & 255, k >> 8);
+						deck.set(key(col, row, k), { e, z: z[e], wx: p.wx, wy: p.wy, col, row, k });
+						haveDeck = true;
+					}
+				}
+				if (!model && !haveCover && e + 1 < first[k + 1] && flags[e + 1] & FLAG.WMO && ceil[e] - z[e] <= COVER) {
+					const p = cellCentre(col, row, k & 255, k >> 8);
+					cover.set(key(col, row, k), { e, z: z[e], wx: p.wx, wy: p.wy, col, row, k });
+					haveCover = true;
+				}
+			}
+		}
+	}
+	const neighbour = (q, d) => {
+		let i = (q.k & 255) + DIRS[d][0];
+		let j = (q.k >> 8) + DIRS[d][1];
+		let { col, row } = q;
+		if (i < 0) (col--, (i += 256));
+		else if (i > 255) (col++, (i -= 256));
+		if (j < 0) (row--, (j += 256));
+		else if (j > 255) (row++, (j -= 256));
+		return { col, row, k: j * 256 + i };
+	};
+	const out = [];
+	for (const [set, kind, min, width] of [[deck, 'bridge', DECK_MIN, DECK_WIDTH], [cover, 'gate', GATE_MIN, GATE_WIDTH]]) {
+		const seen = new Set();
+		for (const [start, q0] of [...set].sort((a, b) => (a[0] < b[0] ? -1 : 1))) {
+			if (seen.has(start)) continue;
+			seen.add(start);
+			const comp = [q0];
+			const contacts = [];
+			for (let x = 0; x < comp.length; x++) {
+				const q = comp[x];
+				const t = nav.tile(c, q.col, q.row);
+				for (let d = 0; d < 8; d++) {
+					const code = t.links[q.e * 8 + d];
+					if (code === NO_LINK) continue;
+					const n = neighbour(q, d);
+					const nk = key(n.col, n.row, n.k);
+					const other = set.get(nk);
+					if (other && Math.abs(other.z - q.z) <= 1.6) {
+						if (!seen.has(nk)) {
+							seen.add(nk);
+							comp.push(other);
+						}
+						continue;
+					}
+					const t2 = nav.tile(c, n.col, n.row);
+					if (!t2) continue;
+					const e2 = t2.first[n.k] + (code & 31);
+					if (t2.flags[e2] & (FLAG.SWIM | FLAG.INDOOR | FLAG.BLOCKED)) continue;
+					const p = cellCentre(n.col, n.row, n.k & 255, n.k >> 8);
+					contacts.push({ wx: p.wx, wy: p.wy, z: t2.z[e2] });
+				}
+			}
+			if (comp.length < min) continue;
+			// Extent: the two columns furthest apart (from the first, then from that one).
+			const far = (a) => comp.reduce((b, q) => (Math.hypot(q.wx - a.wx, q.wy - a.wy) > Math.hypot(b.wx - a.wx, b.wy - a.wy) ? q : b), a);
+			const A = far(comp[0]);
+			const B = far(A);
+			const span = Math.hypot(A.wx - B.wx, A.wy - B.wy) + CELL;
+			if ((comp.length * CELL * CELL) / span > width) continue;
+			if (kind === 'bridge' && span < SPAN_MIN) continue;
+			// Contact groups (columns within 2 cells are one group).
+			const groups = [];
+			for (const p of contacts) {
+				const g = groups.filter((gr) => gr.some((x) => Math.hypot(x.wx - p.wx, x.wy - p.wy) <= 2.5 * CELL));
+				if (!g.length) groups.push([p]);
+				else {
+					const merged = [].concat(...g, [p]);
+					for (const gr of g) groups.splice(groups.indexOf(gr), 1);
+					groups.push(merged);
+				}
+			}
+			if (groups.length !== 2) continue;
+			const mx = comp.reduce((s, q) => s + q.wx, 0) / comp.length;
+			const my = comp.reduce((s, q) => s + q.wy, 0) / comp.length;
+			const mid = comp.reduce((b, q) => (Math.hypot(q.wx - mx, q.wy - my) < Math.hypot(b.wx - mx, b.wy - my) ? q : b), comp[0]);
+			const sides = groups.map((gr) => {
+				const p = gr[gr.length >> 1];
+				return { wx: round1(p.wx), wy: round1(p.wy), area: place(p.wx, p.wy).name };
+			});
+			out.push({ wx: round1(mid.wx), wy: round1(mid.wy), z: round1(mid.z), r: Math.round(Math.min(R_MAX, Math.max(R_MIN, span / 2))), kind, ...place(mid.wx, mid.wy), sides });
+		}
+	}
+	return out;
+}
+
+// One continent's chokepoints.
+// nav: openNav on the grid; aids: aids.json's doc (or null); lifts: lifts.json's list for c;
+// geo: planner Geo (aids points are map percent, frame 'e'); areas: areaNames(AreaTable rows).
+function chokepoints({ nav, c, aids, lifts = [], geo, areas }) {
+	const place = (wx, wy) => {
+		const p = cellOf(wx, wy);
+		const t = nav.tile(c, p.col, p.row);
+		return (t && areas(t.areas[(p.j >> 4) * 16 + (p.i >> 4)])) || { name: '', zone: '' };
+	};
+	const zOf = (wx, wy) => {
+		const s = nav.snap({ c, wx, wy, radius: 15 });
+		return s ? round1(s.z) : null;
+	};
+	const list = [];
+	// Lifts.
+	const landings = [];
+	for (const L of lifts) {
+		const ends = [L.a, L.b].map((x) => {
+			const p = cellCentre(x.col, x.row, x.k & 255, x.k >> 8);
+			let i = landings.findIndex((y) => y.id === L.id && Math.hypot(y.wx - p.wx, y.wy - p.wy) <= LIFT_SAME && Math.abs(y.z - x.z) <= STEP);
+			if (i < 0) {
+				landings.push({ id: L.id, lift: L.name, wx: p.wx, wy: p.wy, z: x.z });
+				i = landings.length - 1;
+			}
+			return i;
+		});
+		const [a, b] = ends;
+		landings[a].pair ??= b;
+		landings[b].pair ??= a;
+		landings[a].liftEnd = landings[a].z > landings[b].z ? 'top' : 'bottom';
+		landings[b].liftEnd = landings[b].z > landings[a].z ? 'top' : 'bottom';
+	}
+	const base = list.length;
+	for (const L of landings) {
+		list.push({ wx: round1(L.wx), wy: round1(L.wy), z: round1(L.z), r: R_MIN, kind: 'lift', ...place(L.wx, L.wy), lift: L.lift, liftEnd: L.liftEnd, pair: base + L.pair });
+	}
+	const near = (wx, wy, kind) => list.findIndex((x) => x.kind === kind && Math.hypot(x.wx - wx, x.wy - wy) <= MERGE);
+	const world = (p) => geo.toWorld(p.map, p.x, p.y, 'e');
+	// Aids: chain mouths.
+	for (const ch of (aids && aids.chains) || []) {
+		const n0 = ch.nodes[0];
+		const kind = CAPTION_KIND[n0.caption];
+		const w = kind && world(n0);
+		if (!w || w.c !== c || near(w.wx, w.wy, kind) >= 0) continue;
+		list.push({ wx: round1(w.wx), wy: round1(w.wy), z: zOf(w.wx, w.wy), r: Math.max(R_MIN, Math.min(R_MAX, n0.radius || R_MIN)), kind, ...place(w.wx, w.wy) });
+	}
+	// Aids: zone crossings.
+	for (const x of (aids && aids.crossings) || []) {
+		const a = world(x.a);
+		const b = world(x.b);
+		if (!a || !b || a.c !== c || b.c !== c) continue;
+		const caption = x.ab || x.ba || '';
+		if (/lift/i.test(caption)) continue;
+		const kind = /bridge/i.test(caption) ? 'bridge' : /tunnel/i.test(caption) ? 'tunnel' : 'pass';
+		const wx = (a.wx + b.wx) / 2;
+		const wy = (a.wy + b.wy) / 2;
+		if (near(wx, wy, kind) >= 0) continue;
+		const sides = [[a, x.a], [b, x.b]].map(([p]) => ({ wx: round1(p.wx), wy: round1(p.wy), area: place(p.wx, p.wy).zone }));
+		list.push({ wx: round1(wx), wy: round1(wy), z: zOf(wx, wy), r: Math.max(R_MIN, Math.min(R_MAX, x.a.radius || R_MIN)), kind, ...place(wx, wy), sides });
+	}
+	// The grid's bridges and gates; an aids pass where one stands becomes it.
+	for (const g of gridChokepoints(nav, c, place)) {
+		if (near(g.wx, g.wy, g.kind) >= 0) continue;
+		const pass = near(g.wx, g.wy, 'pass');
+		if (pass >= 0) {
+			list[pass] = { ...list[pass], kind: g.kind, wx: g.wx, wy: g.wy, z: g.z, ...place(g.wx, g.wy) };
+			continue;
+		}
+		list.push(g);
+	}
+	for (const x of list) {
+		if (x.z === null) delete x.z;
+		if (!x.name) x.name = x.zone || x.kind;
+		if (!x.zone) x.zone = x.name;
+		for (const s of x.sides || []) if (!s.area) s.area = x.zone;
+	}
+	return list;
+}
+
+const luaStr = (s) => `"${String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+
+// { [c]: entries } -> Chokepoints.lua (global PolestarNavChokepoints).
+function chokepointsLua(byMap, source, global = 'PolestarNavChokepoints') {
+	const field = (k, v) => (typeof v === 'number' ? `${k} = ${v}` : typeof v === 'string' ? `${k} = ${luaStr(v)}` : `${k} = { ${v.map((s) => `{ ${Object.entries(s).map(([a, b]) => field(a, b)).join(', ')} }`).join(', ')} }`);
+	const lines = [
+		'-- Generated by tools/lib/nav/chokepoints.js (Polestar) from the navigation grid and its aids. Do not edit.',
+		`-- Source: ${source}.`,
+		'-- Per continent: { wx, wy, z, r, kind, name, zone, sides?, liftEnd?, lift?, pair? } in UnitPosition\'s frame',
+		'-- (wx north, wy west), yards; kind lift | gate | bridge | tunnel | cave | building | pass; pair indexes this list.',
+		`${global} = ${global} or {}`,
+	];
+	for (const c of Object.keys(byMap).map(Number).sort((a, b) => a - b)) {
+		lines.push(`${global}[${c}] = {`);
+		for (const x of byMap[c]) {
+			const keys = ['wx', 'wy', 'z', 'r', 'kind', 'name', 'zone', 'lift', 'liftEnd', 'pair', 'sides'].filter((k) => x[k] !== undefined);
+			lines.push(`\t{ ${keys.map((k) => field(k, k === 'pair' ? x[k] + 1 : x[k])).join(', ')} },`);
+		}
+		lines.push('}');
+	}
+	return `${lines.join('\n')}\n`;
+}
+
+module.exports = { chokepoints, chokepointsLua, areaNames, gridChokepoints, MERGE, R_MIN, R_MAX };
