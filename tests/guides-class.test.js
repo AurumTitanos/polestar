@@ -129,3 +129,42 @@ test('An Imp\'s Request, Niby\'s and Daio\'s chains are not on the Dreadsteed ro
 	for (const q of [8419, 8420, 8421, 8422, 7601, 7602, 7603, 7581, 7582, 7583]) assert.notEqual(root(q), dread, `quest ${q}`);
 	for (const q of [8419, 7601, 7581]) assert.ok(!byRel(DREADSTEED).quests.has(q), `quest ${q} stays out of the Dreadsteed guide`);
 });
+
+// The client's spell tables (data/sources/wago/<newest 1.60 build>, cached by
+// data build): a `reward spell` id the client does not have shows no icon or
+// tooltip, and a spell written as `reward text` shows the fallback glyph.
+const { parseCsv } = require('../tools/lib/data/csv');
+const { PRODUCTS, compareVersions } = require('../tools/lib/data/wago');
+const WAGO = path.join(__dirname, '..', 'data', 'sources', 'wago');
+const SPELL_TABLES = ['SpellName', 'SpellMisc', 'SkillLineAbility'];
+const spellBuild = fs.existsSync(WAGO)
+	? fs.readdirSync(WAGO).filter((b) => PRODUCTS.forever.family.test(b) && SPELL_TABLES.every((t) => fs.existsSync(path.join(WAGO, b, `${t}.csv`)))).sort(compareVersions).pop()
+	: null;
+const CLASS_BIT = { Warrior: 1, Paladin: 2, Hunter: 4, Rogue: 8, Priest: 16, Shaman: 64, Mage: 128, Warlock: 256, Druid: 1024 };
+
+test('reward spells are the client\'s: each id is in the Forever spell tables under its name, with an icon; no class spell is left as words', { skip: spellBuild ? false : 'no cached Forever wago build with SpellName, SpellMisc and SkillLineAbility (node tools/polestar.js data build)' }, () => {
+	const table = (t) => parseCsv(fs.readFileSync(path.join(WAGO, spellBuild, `${t}.csv`), 'utf8'));
+	const names = new Map(table('SpellName').map((r) => [Number(r.ID), r.Name_lang]));
+	const icons = new Map(table('SpellMisc').map((r) => [Number(r.SpellID), Number(r.SpellIconFileDataID)]));
+	const classSpells = new Map(); // name -> class mask
+	for (const r of table('SkillLineAbility')) {
+		const name = names.get(Number(r.Spell));
+		if (name) classSpells.set(name, (classSpells.get(name) || 0) | Number(r.ClassMask));
+	}
+	let spells = 0;
+	for (const g of GUIDES) {
+		const mask = (g.ast.header.classes || []).reduce((m, c) => m | (CLASS_BIT[c] || 0), 0);
+		for (const r of g.ast.header.reward || []) {
+			if (r.spell !== undefined) {
+				spells++;
+				const name = names.get(r.spell);
+				assert.ok(name, `${g.rel}: reward spell ${r.spell} is not in ${spellBuild} SpellName`);
+				assert.ok(r.spellName.startsWith(name), `${g.rel}: reward spell ${r.spell} is "${name}" in the client, not "${r.spellName}"`);
+				assert.ok(icons.get(r.spell) > 0, `${g.rel}: reward spell ${r.spell} has no icon in ${spellBuild} SpellMisc`);
+			} else if (r.text !== undefined) {
+				assert.ok(!(classSpells.get(r.text) & mask), `${g.rel}: "reward text ${r.text}" is a class spell: write it as \`reward spell <id> "${r.text}"\``);
+			}
+		}
+	}
+	assert.ok(spells >= 30, `${spells} reward spells checked`);
+});

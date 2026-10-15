@@ -3,7 +3,7 @@ title Cure Poison
 category Class
 folder Druid
 keywords Cure Poison, Lessons Anew, The Principal Source, Gathering the Cure, Curing the Sick, Power over Poison, Sickly Deer, Sickly Gazelle, Moonglade, class quest
-reward text Cure Poison
+reward spell 8946 "Cure Poison"
 reward item 15866
 why Cure Poison is no longer trained in Forever: this chain teaches it, with a medicine bag on the way.
 class Druid

@@ -7,7 +7,7 @@ faction Horde
 levels 30-33
 zone The Barrens
 keywords Summon Felhunter, Tome of the Cabal, Seeking Strahad, Strahad Farsan, Jorah Annison, Moldy Tome, Tattered Manuscript, Rod of Channeling, The Binding, Warlock, class pet
-reward text Summon Felhunter
+reward spell 691 "Summon Felhunter"
 reward item 22244
 why The felhunter, the demon to bring against spellcasters, and a Box of Souls for your shards.
 

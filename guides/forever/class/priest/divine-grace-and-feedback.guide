@@ -8,8 +8,8 @@ race Human
 levels 10-20
 zone Stormwind City
 keywords Divine Grace, Feedback, Arcane Feedback, High Priestess Laurena, Cathedral of Light, Human, racial, Priest
-reward text Divine Grace
-reward text Feedback
+reward spell 1277370 "Divine Grace"
+reward spell 13896 "Feedback"
 why The Human priest spells: Divine Grace at 10, Feedback at 20.
 
 # The Human Priest spell quests: Divine Grace at 10 (94773, new in Forever)

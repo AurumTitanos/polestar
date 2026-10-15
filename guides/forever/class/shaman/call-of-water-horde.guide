@@ -8,7 +8,7 @@ levels 20-23
 zone Orgrimmar
 keywords Water Totem, Healing Stream Totem, Water Sapta, Searn Firewarder, Xanis Flameweaver, Islen Waterseer, Brine, waterskin, Spring Well, Ruins of Stardust, Brazier of Everfount, Minor Manifestation of Water, Shaman, class quest, totem
 reward item 5177
-reward text Healing Stream Totem
+reward spell 5394 "Healing Stream Totem"
 reward item 6637
 why The Water Totem that lets you place water totems, and Healing Stream Totem with it.
 

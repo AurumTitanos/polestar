@@ -7,7 +7,7 @@ faction Horde
 levels 20-28
 zone Orgrimmar
 keywords Summon Incubus, sayaad, Incubus (Orgrimmar), Incubus (Undercity), Love Hurts, Wish You Were Here, Withered Scarf, Magar, Krilge, Fallen Sky Lake, Hearts of the Lovers, Avelina Lilly, Isaac Pearson, Ambermill, Ratchet, Devourer of Souls, Gan'rul Bloodeye, Cazul, Carendin Halgar, Godrick Farsan, The Binding, Warlock, class pet
-reward text Summon Incubus
+reward spell 713 "Summon Incubus"
 reward item 22243
 why A second seducer demon, the male sayaad, and a soul shard bag to carry your shards.
 

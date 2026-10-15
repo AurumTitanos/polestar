@@ -701,20 +701,28 @@ end
 -- The guide's reward: one tile per entry in the facts' value column, an
 -- item or spell icon (a glyph for words) and its name; items in their
 -- quality's colour and border. Hovering shows the game's item or spell
--- tooltip.
+-- tooltip, a modified click acts as on any item or spell button
+-- (W.ItemClick, W.SpellClick); the pane asks for the items and spells as it
+-- paints them, so the first hover usually finds them cached.
 local REWARD_H, REWARD_GAP = 22, 4
 
 local function rewardEnter(self)
 	local e = self.psReward
-	if not (e and GameTooltip) then return end
+	if not e then return end
 	if e.item then
-		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-		GameTooltip:SetHyperlink("item:" .. e.item)
-		GameTooltip:Show()
-	elseif e.spell and GameTooltip.SetSpellByID then
-		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-		GameTooltip:SetSpellByID(e.spell)
-		GameTooltip:Show()
+		W.ItemTip(self, e.item)
+	elseif e.spell then
+		W.SpellTip(self, e.spell)
+	end
+end
+
+local function rewardClick(self)
+	local e = self.psReward
+	if not e then return end
+	if e.item then
+		W.ItemClick(e.item)
+	elseif e.spell then
+		W.SpellClick(e.spell)
 	end
 end
 
@@ -736,6 +744,7 @@ local function rewardTile(i)
 	t.Name:SetWidth(DETAIL_W - DPAD * 2 - FACT_W - REWARD_H - 8)
 	t:SetScript("OnEnter", rewardEnter)
 	t:SetScript("OnLeave", W.HideTip)
+	t:SetScript("OnClick", rewardClick)
 	details.Rewards[i] = t
 	return t
 end
@@ -753,11 +762,13 @@ local function paintReward(t, e)
 	t.psReward = e
 	local icon, name, hex
 	if e.item then
+		W.PrefetchItem(e.item)
 		icon = C.ItemIcon and C.ItemIcon(e.item)
 		name = e.itemName or (L["Item"] .. " " .. e.item)
 		local q = (C.GetItemQuality and C.GetItemQuality(e.item)) or e.quality
 		hex = q and C.ItemQualityHex and C.ItemQualityHex(q)
 	elseif e.spell then
+		W.PrefetchSpell(e.spell)
 		icon = C.SpellIcon and C.SpellIcon(e.spell)
 		name = e.spellName or (L["Spell"] .. " " .. e.spell)
 	else

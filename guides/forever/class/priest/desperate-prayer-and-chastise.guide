@@ -8,8 +8,8 @@ race Human,Dwarf
 levels 10-20
 zone Ironforge
 keywords Desperate Prayer, Chastise, A Lack of Fear, High Priest Rohan, High Priestess Laurena, Hall of Mysteries, Mystic Ward, Dwarf, Human, racial, Priest
-reward text Desperate Prayer
-reward text Chastise (Dwarves)
+reward spell 13908 "Desperate Prayer"
+reward spell 1277331 "Chastise (Dwarves)"
 why The Human and Dwarf priest spells: Desperate Prayer at 10, Chastise for Dwarves at 20.
 
 # The Desperate Prayer quest at 10 (5639, Humans and Dwarves) and the Dwarf

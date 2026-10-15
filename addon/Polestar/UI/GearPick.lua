@@ -63,10 +63,8 @@ end
 
 local function onEnter(self)
 	local e = self.psEntry
-	if not (e and GameTooltip) then return end
-	GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-	GameTooltip:SetHyperlink("item:" .. e.id)
-	GameTooltip:Show()
+	if not e then return end
+	W.ItemTip(self, e.id)
 	if UI.GuideFrame and UI.GuideFrame.HoverIn then UI.GuideFrame.HoverIn() end
 end
 
@@ -76,13 +74,7 @@ end
 
 local function onClick(self)
 	local e = self.psEntry
-	if not e then return end
-	local link
-	if C_Item and C_Item.GetItemInfo then
-		local ok, _, l = pcall(C_Item.GetItemInfo, e.id)
-		if ok then link = l end
-	end
-	if link and HandleModifiedItemClick then HandleModifiedItemClick(link) end
+	if e then W.ItemClick(e.id) end
 end
 
 local function frameOf(row)

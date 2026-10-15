@@ -237,7 +237,7 @@ Guide keys (the compiler writes them in this order):
 | `folder` | no | the guide menu folder |
 | `keywords` | no | list of extra search words |
 | `collects` | no | list of item ids the guide obtains |
-| `reward` | no | format 2: what the guide's goal gives, shown first in the guide menu's details, in order: `{ item = 20536, itemName = "Soul Harvester", quality = 3, choice = true }` (an item; `choice` when one of several to choose from; the name shows in the client's quality colour when the item is cached, else the compiled `quality`'s), `{ spell = 23161, spellName = "Summon Dreadsteed" }` or `{ text = "Summon Incubus" }`; an entry with none of `item`, `spell` or `text` refuses the guide |
+| `reward` | no | format 2: what the guide's goal gives, shown first in the guide menu's details, in order: `{ item = 20536, itemName = "Soul Harvester", quality = 3, choice = true }` (an item; `choice` when one of several to choose from; the name shows in the client's quality colour when the item is cached, else the compiled `quality`'s), `{ spell = 23161, spellName = "Summon Dreadsteed" }` or `{ text = "Shen'dralar reputation" }`; an entry with none of `item`, `spell` or `text` refuses the guide |
 | `why` | no | format 2: one line on why the goal is worth doing, shown under the reward |
 | `zone`, `zoneName` | no | the default zone's uiMapID and name |
 | `next` | no | the id of the guide that follows: one of the pack's or one of Polestar's |

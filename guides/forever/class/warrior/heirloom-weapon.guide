@@ -9,7 +9,7 @@ levels 10-11
 zone Tirisfal Glades
 keywords Defensive Stance, Ulag the Cleaver, Deathguard Dillinger, Coleman Farthing, Agamand Heirlooms, Agamand Mills, Heirloom Axe, Heirloom Hammer, Heirloom Dagger, Heirloom Sword, Warrior, class weapon
 reward item 7115 7117 7116 7118
-reward text Defensive Stance
+reward spell 71 "Defensive Stance"
 why Defensive Stance and a one-hand weapon of your choice at 10.
 
 # Speak with Coleman, Agamand Heirlooms and Heirloom Weapon (1820, 1821,

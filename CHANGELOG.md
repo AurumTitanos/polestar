@@ -83,11 +83,17 @@
   Sacrifice, and the Warrior's armour and weapon chains. The details in the
   guide menu lead with what each one gives (the item or spell with its icon
   and the game's tooltip on hover, a choice of items under "Choose one") and
-  one line on why it is worth doing. The four class mounts (Paladin
-  Warhorse and Charger, Warlock Felsteed and Dreadsteed) moved there from
-  Collectibles, and the Charger and Dreadsteed guides now walk their whole
-  chains (Emphasis on Sacrifice to Judgment and Redemption; Rage of Blood
-  to Dreadsteed of Xoroth) instead of naming them in a tip.
+  one line on why it is worth doing. A reward behaves like any item: Shift-
+  click links it (a spell too), Ctrl-click tries it on, Alt-click guides you
+  to it, and its tooltip fills in when the game has not loaded the item yet
+  instead of staying at "Retrieving item information" (the Dungeons loot,
+  the guide window's gear picks and rare drops too). The spells the chains
+  teach (forms, demons, stances, the Priest racials) show their own icon and
+  tooltip. The four class mounts (Paladin Warhorse and Charger, Warlock
+  Felsteed and Dreadsteed) moved there from Collectibles, and the Charger
+  and Dreadsteed guides now walk their whole chains (Emphasis on Sacrifice
+  to Judgment and Redemption; Rage of Blood to Dreadsteed of Xoroth)
+  instead of naming them in a tip.
 - Class quests on the leveling route: every start takes its level 1 class
   letter to the trainer; Night Elf and Tauren Druids learn Cure Poison on
   the way (Darkshore, the Barrens), Mages do Mirror Lake (Alliance) and The

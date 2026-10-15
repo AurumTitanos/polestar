@@ -172,14 +172,14 @@ local function note(i, parent)
 	return n
 end
 
-local function itemEnter(self)
-	if not (self.psID and GameTooltip) then return end
-	GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-	GameTooltip:SetHyperlink("item:" .. self.psID)
+local function itemLines(tip)
 	local r, g, b = Theme.Color("textDim")
-	GameTooltip:AddLine(L["Click: every way to get it in Lookup"], r, g, b, true)
-	GameTooltip:AddLine(L["Alt-click: a guide to get it"], r, g, b, true)
-	GameTooltip:Show()
+	tip:AddLine(L["Click: every way to get it in Lookup"], r, g, b, true)
+	tip:AddLine(L["Alt-click: a guide to get it"], r, g, b, true)
+end
+
+local function itemEnter(self)
+	W.ItemTip(self, self.psID, itemLines)
 end
 
 local function itemLeave(self)
@@ -193,13 +193,7 @@ function RV.ItemClick(id)
 		Lookup.Guide("item", id)
 		return
 	end
-	if IsModifiedClick and IsModifiedClick() and HandleModifiedItemClick and C_Item and C_Item.GetItemInfo then
-		local ok, _, link = pcall(C_Item.GetItemInfo, id)
-		if ok and link and not secret(link) then
-			HandleModifiedItemClick(link)
-			return
-		end
-	end
+	if W.ItemClick(id) then return end
 	if Lookup and Lookup.Show then Lookup.Show(nil, "item", id) end
 end
 

@@ -682,7 +682,7 @@ class("forever/class/warlock/incubus-horde", "Incubus (Horde)", nil, {
 })
 local INCUBUS = uistub.guides["forever/class/warlock/incubus-horde"]
 INCUBUS.minLevel, INCUBUS.maxLevel, INCUBUS.faction, INCUBUS.zone, INCUBUS.zoneName = 20, 28, "Horde", 1454, "Orgrimmar"
-INCUBUS.reward = { { text = "Summon Incubus" }, { item = 22243, itemName = "Small Soul Pouch", quality = 2 } }
+INCUBUS.reward = { { spell = 713, spellName = "Summon Incubus" }, { item = 22243, itemName = "Small Soul Pouch", quality = 2 } }
 INCUBUS.why = "A second seducer demon, the male sayaad, and a soul shard bag to carry your shards."`;
 const SCENES = [
 	{

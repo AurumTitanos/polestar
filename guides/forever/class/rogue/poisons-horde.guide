@@ -7,7 +7,7 @@ faction Horde
 levels 20-26
 zone Orgrimmar
 keywords Poisons, The Shattered Salute, Deep Cover, Shenthul, Taskmaster Fizzule, Flare Gun, Fizzule's Whistle, Mission: Possible But Not Probable, Gallywix, Foreman Silixiz, Venture Co. tower, Hinott's Assistance, Serge Hinott, Hinott's Oil, Tarren Mill, Thistle Tea, Rogue, class spell
-reward text Poisons
+reward spell 2842 "Poisons"
 reward item 18160
 reward item 8066
 reward item 8095

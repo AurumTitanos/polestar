@@ -428,22 +428,17 @@ local function chainRow(b, i)
 end
 
 local function tileEnter(self)
-	if not (self.psID and GameTooltip) then return end
-	GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-	GameTooltip:SetHyperlink("item:" .. self.psID)
-	GameTooltip:Show()
+	W.ItemTip(self, self.psID)
 end
 
 local function tileLeave(self)
 	W.HideTooltip(self)
 end
 
--- Shift-click links it in chat, Ctrl-click tries it on (the client's own
--- modified-click handling).
+-- Shift-click links it in chat, Ctrl-click tries it on, Alt-click guides
+-- (W.ItemClick: the client's own modified-click handling).
 local function tileClick(self)
-	if not (self.psID and IsModifiedClick and IsModifiedClick() and HandleModifiedItemClick and C_Item and C_Item.GetItemInfo) then return end
-	local ok, _, link = pcall(C_Item.GetItemInfo, self.psID)
-	if ok and link and not secret(link) then HandleModifiedItemClick(link) end
+	W.ItemClick(self.psID)
 end
 
 local function tile(b, i)

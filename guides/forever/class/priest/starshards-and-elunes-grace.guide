@@ -8,8 +8,8 @@ race NightElf
 levels 10-20
 zone Darnassus
 keywords Starshards, Stars of Elune, Elune's Grace, Priestess Alathea, Temple of the Moon, Night Elf, racial, Priest
-reward text Starshards
-reward text Elune's Grace
+reward spell 10797 "Starshards"
+reward spell 2651 "Elune's Grace"
 why The Night Elf priest spells: Starshards at 10, Elune's Grace at 20.
 
 # The Night Elf Priest spell quests: Stars of Elune at 10 (5627, Starshards)

@@ -145,6 +145,89 @@ end
 local function hideTip(self) W.HideTooltip(self) end
 W.SimpleTip, W.HideTip = simpleTip, hideTip
 
+-- The game's own item and spell tooltips on Polestar's buttons (reward
+-- tiles, loot tiles, gear picks, rare drops), and their modified clicks.
+--   W.ItemTip(owner, itemID, extra?)   -- extra(tooltip): lines after the game's
+--   W.SpellTip(owner, spellID, extra?)
+--   W.ItemClick(itemID) -> handled     -- Shift links, Ctrl tries on, Alt guides
+--   W.SpellClick(spellID) -> handled   -- Shift links
+--   W.PrefetchItem(itemID), W.PrefetchSpell(spellID)
+-- An item or spell the client has not cached yet shows "Retrieving item
+-- information" and the client's own refresh does not reliably redraw it, so
+-- the tooltip is set again when GET_ITEM_INFO_RECEIVED / SPELL_DATA_LOAD_RESULT
+-- brings that ID while the same button still owns it.
+local gameTip -- { owner, kind, id, extra } of the tooltip last set here
+
+local function setGameTip(owner, kind, id, extra)
+	local tip = GameTooltip
+	if not (tip and owner and type(id) == "number") then return end
+	local C = ns.Compat
+	if kind == "item" then
+		if C.RequestItem then C.RequestItem(id) end
+	elseif not tip.SetSpellByID then
+		return
+	elseif C.RequestSpell then
+		C.RequestSpell(id)
+	end
+	tip:SetOwner(owner, "ANCHOR_RIGHT")
+	if kind == "item" then tip:SetHyperlink("item:" .. id) else tip:SetSpellByID(id) end
+	if extra then extra(tip) end
+	tip:Show()
+	gameTip = { owner = owner, kind = kind, id = id, extra = extra }
+end
+
+function W.ItemTip(owner, itemID, extra) setGameTip(owner, "item", itemID, extra) end
+function W.SpellTip(owner, spellID, extra) setGameTip(owner, "spell", spellID, extra) end
+
+local function owns(owner)
+	local tip = GameTooltip
+	if not tip then return false end
+	if tip.IsOwned then return tip:IsOwned(owner) and true or false end
+	return tip.GetOwner and tip:GetOwner() == owner or false
+end
+
+local function arrived(kind, id)
+	local g = gameTip
+	if not (g and g.kind == kind and (id == nil or id == g.id)) then return end
+	if GameTooltip and GameTooltip.IsShown and not GameTooltip:IsShown() then gameTip = nil return end
+	if not owns(g.owner) then gameTip = nil return end
+	setGameTip(g.owner, kind, g.id, g.extra)
+end
+
+if ns.RegisterEvent then
+	ns.RegisterEvent("GET_ITEM_INFO_RECEIVED", function(_, itemID) arrived("item", itemID) end)
+	ns.RegisterEvent("SPELL_DATA_LOAD_RESULT", function(_, spellID) arrived("spell", spellID) end)
+end
+
+function W.PrefetchItem(itemID) if ns.Compat.RequestItem then ns.Compat.RequestItem(itemID) end end
+function W.PrefetchSpell(spellID) if ns.Compat.RequestSpell then ns.Compat.RequestSpell(spellID) end end
+
+-- A modified click on an item button, as on a bag item: the client's
+-- HandleModifiedItemClick (Shift: chat link, Ctrl: dressing room), whose
+-- post-hook (Core/Hooks.lua) runs Polestar's Alt-click guide. An item not
+-- cached yet has no link: it is requested, and the Alt-click still guides.
+function W.ItemClick(itemID)
+	if type(itemID) ~= "number" or not (IsModifiedClick and IsModifiedClick()) then return false end
+	local C = ns.Compat
+	local link = C.ItemLink and C.ItemLink(itemID)
+	if link and HandleModifiedItemClick then
+		HandleModifiedItemClick(link)
+	else
+		if C.RequestItem then C.RequestItem(itemID) end
+		if ns.Hooks and ns.Hooks.OnItemClick then ns.Hooks.OnItemClick("item:" .. itemID) end
+	end
+	return true
+end
+
+-- Shift-click on a spell button links the spell in chat.
+function W.SpellClick(spellID)
+	if type(spellID) ~= "number" or not (IsModifiedClick and IsModifiedClick("CHATLINK")) then return false end
+	local link = ns.Compat.SpellLink and ns.Compat.SpellLink(spellID)
+	local insert = (ChatFrameUtil and ChatFrameUtil.InsertLink) or ChatEdit_InsertLink
+	if link and insert then insert(link) end
+	return true
+end
+
 ---------------------------------------------------------------------------
 -- Buttons
 ---------------------------------------------------------------------------
