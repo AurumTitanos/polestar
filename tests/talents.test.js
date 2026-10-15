@@ -6,7 +6,7 @@
 // plan out of date), the marks on the talent frame (next ring while a point
 // waits, pick numbers, off-plan flags, the tooltip line; no levels; nothing
 // while inspecting, for another loadout or in combat until it ends), the
-// reminder and the hub section. The client is tests/lua/stub_talents.lua.
+// reminder and the hub section (client names on every tab). The client is tests/lua/stub_talents.lua.
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
@@ -427,6 +427,28 @@ emit(T.Choice())`, { files: WITH_UI, stubs: ['stub_ui.lua'] });
 	assert.deepEqual(outs[2], { spec: 'Holy', mine: false, status: 'other', follow: true });
 	assert.deepEqual(outs[3], { choice: 'holy', followed: 'Holy' });
 	assert.equal(outs[4], 'auto');
+});
+
+test('View: every spec tab shows the client\'s talent names, not only the followed plan', () => {
+	const outs = run(`
+for id, n in pairs(TS.nodes) do n.name = "es:" .. n.name end
+TS.learn(plan("retribution"), 20)
+stub.login()
+local TV = Polestar.UI.TalentsSection
+TV.Show()
+local function english()
+	local n = 0
+	for _, t in ipairs(TV.Shown().titles) do if not t:find("^es:") then n = n + 1 end end
+	return { rows = TV.Shown().rows, mine = TV.Shown().mine, english = n }
+end
+emit(english())
+TV.SetTab("1")
+emit(english())
+TV.SetTab("2")
+emit(english())`, { files: WITH_UI, stubs: ['stub_ui.lua'] });
+	assert.deepEqual(outs[0], { rows: 51, mine: true, english: 0 });
+	assert.deepEqual(outs[1], { rows: 51, mine: false, english: 0 }, 'Holy tab');
+	assert.deepEqual(outs[2], { rows: 51, mine: false, english: 0 }, 'Protection tab');
 });
 
 test('View: another class sees why there is no plan', () => {

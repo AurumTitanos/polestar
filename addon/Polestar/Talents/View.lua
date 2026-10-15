@@ -7,7 +7,8 @@
 -- bands of ten; learned picks muted, the next one marked) and the plan's
 -- page (right, on the panel ground): where you stand, "Follow this plan" /
 -- "Follow my spec", the plan's notes (at approximate levels: points can come
--- earlier than one a level), and its source.
+-- earlier than one a level), and its source. Talent names are the client's
+-- on every tab, not only the followed plan's.
 --
 -- Registered with UI.RegisterSection; opened by SHOW_TALENTS.
 
@@ -292,7 +293,7 @@ function TV.Render()
 		W.ShellTitle(shellRef, L["Talents"], format(L["%s plan for %s"], followed.specName, UnitClass("player") or "")
 			.. (c and c.state and (DOT .. format(L["%d of %d picks"], c.state.done, c.state.total)) or ""))
 	end
-	renderList(build, mine and c and c.state and c or nil, mine and c and c.valid)
+	renderList(build, mine and c and c.state and c or nil, c and c.valid)
 	w.title(format(L["%s plan"], build.specName), build.split .. DOT .. format(L["%d picks, in order"], #build.picks))
 	shown.spec, shown.followed, shown.mine = build.specName, followed.specName, mine
 	if reason == "stale" then
