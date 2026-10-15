@@ -4,6 +4,7 @@
 --
 --   local TS = stub.talents
 --   TS.class, TS.level, TS.cap, TS.config        -- the player (PALADIN, 30, 30, 7)
+--   TS.currency = { quantity = 2, spent = 18 }   -- the tree's points (C_Traits.GetTreeCurrencyInfo); nil: the client gives none
 --   TS.useSnapshot(data)                         -- the live tree = Builds.lua's nodes
 --   TS.nodes[id] = { max = 3, spell = 123, name = "..." } -- edit the live tree (the client's language)
 --   TS.learn(build, n)                           -- learned ranks: the plan's first n picks
@@ -46,6 +47,10 @@ function C_Traits.GetNodeInfo(config, id)
 	if not n or config ~= TS.config then return { ID = 0 } end
 	local r = TS.ranks[id] or 0
 	return { ID = id, activeRank = r, currentRank = TS.staged[id] or r, maxRanks = n.max, entryIDs = { id } }
+end
+function C_Traits.GetTreeCurrencyInfo(config, tree)
+	if not TS.currency or config ~= TS.config then return {} end
+	return { { traitCurrencyID = 1, quantity = TS.currency.quantity, maxQuantity = nil, spent = TS.currency.spent } }
 end
 function C_Traits.GetEntryInfo(_, entry) return { definitionID = entry } end
 function C_Traits.GetDefinitionInfo(def) return TS.nodes[def] and { spellID = TS.nodes[def].spell, overrideName = TS.nodes[def].name } end

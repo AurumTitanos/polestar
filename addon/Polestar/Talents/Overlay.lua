@@ -1,8 +1,9 @@
 -- Marks on the client's talent frame (PlayerSpellsFrame.TalentsFrame, from
--- Blizzard_PlayerSpells): a ring on the plan's next talent, the level the
--- plan takes each talent's next rank at (muted past the level cap: planned
--- ahead), a flag on ranks the plan does not spend, and a line in the
--- talent's tooltip. Post-hooks only (EventRegistry callbacks, HookScript):
+-- Blizzard_PlayerSpells): a ring on the plan's next talent whenever a point
+-- is unspent, the pick number of each talent's next planned rank (an order,
+-- not a level: points can come earlier than one a level), a flag on ranks
+-- the plan does not spend, and a line in the talent's tooltip. Nothing is
+-- muted as "not yet": if the game has given a point, the next pick takes it. Post-hooks only (EventRegistry callbacks, HookScript):
 -- nothing Blizzard's frame does is replaced, so its secure paths stay clean.
 --
 -- Nothing is drawn while inspecting someone, for a loadout the frame shows
@@ -116,12 +117,12 @@ function O.Draw()
 		if id and (pick or off) then
 			local m = mark(button)
 			seen[m] = true
-			m.Ring:SetShown(isNext == true)
+			m.Ring:SetShown(isNext == true and c.staged.unspent > 0)
 			local badge = pick and T.Get("badges")
 			m.Badge:SetShown(badge and true or false)
 			if badge then
-				m.Badge.Text:SetText(tostring(pick.level))
-				W.Color(m.Badge.Text, T.Projected(pick, c.staged) and "textMuted" or (isNext and "accent" or "text"))
+				m.Badge.Text:SetText(tostring(pick.order))
+				W.Color(m.Badge.Text, isNext and "accent" or "text")
 			end
 			m.Flag:SetShown(off ~= nil)
 			m.psNode = id
@@ -153,9 +154,8 @@ function O.TooltipLine(liveID)
 	if off then return format(L["Polestar: not in your %s plan"], spec), "danger" end
 	if not pick then return format(L["Polestar: done for your %s plan"], spec), "textMuted" end
 	local n = c.data.nodes[id]
-	local text = format(L["Polestar: level %d, rank %d/%d (%s plan)"], pick.level, pick.rank, n.max, spec)
+	local text = format(L["Polestar: pick #%d, rank %d/%d (%s plan)"], pick.order, pick.rank, n.max, spec)
 	if isNext then return text .. "  " .. L["next"], "accent" end
-	if T.Projected(pick, c.staged) then return text .. "  " .. L["(past the level cap)"], "textMuted" end
 	return text, "text"
 end
 

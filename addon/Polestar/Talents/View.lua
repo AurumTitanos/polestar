@@ -3,11 +3,11 @@
 -- stands on the one being followed (Talents.lua).
 --
 -- Tabs: one per spec (the sidebar index). Under them two panes on the guide
--- menu's grid, as Rares: the plan (left, a row per point under level
--- bands; learned picks muted, the next one marked, picks past the level cap
--- marked as planned ahead) and the plan's page (right, on the panel ground):
--- where you stand, "Follow this plan" / "Follow my spec", the plan's notes
--- by level, and its source.
+-- menu's grid, as Rares: the plan (left, its picks in order, numbered, in
+-- bands of ten; learned picks muted, the next one marked) and the plan's
+-- page (right, on the panel ground): where you stand, "Follow this plan" /
+-- "Follow my spec", the plan's notes (at approximate levels: points can come
+-- earlier than one a level), and its source.
 --
 -- Registered with UI.RegisterSection; opened by SHOW_TALENTS.
 
@@ -29,7 +29,7 @@ local FOOT_PAD = 24
 local FOOT_H = 28 + FOOT_PAD * 2
 local DPAD = SH.side
 local DOT = "  \194\183  "
-local BAND = 10 -- levels per list heading
+local BAND = 10 -- picks per list heading
 
 local TV = {}
 UI.TalentsSection = TV
@@ -186,7 +186,7 @@ end
 local function statusText(c)
 	local s = c.state
 	local data, nxt = c.data, s.next
-	if s.status == "early" then return format(L["Talent points start at level %d."], T.FIRST_LEVEL), "textDim" end
+	if s.status == "early" then return L["No talent points yet. The first pick is marked once the game gives you one."], "textDim" end
 	if s.status == "complete" then return L["Every pick in this plan is learned."], "success" end
 	if s.status == "offplan" then
 		local n = 0
@@ -197,10 +197,7 @@ local function statusText(c)
 		if s.unspent == 1 then return format(L["1 point to spend. Next: %s."], T.PickText(data, nxt, c.valid)), "accent" end
 		return format(L["%d points to spend. Next: %s."], s.unspent, T.PickText(data, nxt, c.valid)), "accent"
 	end
-	if s.status == "capped" then
-		return format(L["On plan up to the level cap (%d). The rest is planned ahead for when the cap rises."], s.cap), "text"
-	end
-	return format(L["On plan. Next at level %d: %s."], nxt.level, T.PickText(data, nxt, c.valid)), "text"
+	return format(L["On plan. Next point: %s."], T.PickText(data, nxt, c.valid)), "text"
 end
 
 local REASONS = {
@@ -210,12 +207,14 @@ local REASONS = {
 	notree = L["The talent tree is not loaded yet. It will be once you are in the world."],
 }
 
-local function renderList(build, c)
+-- c: the current state when this is the followed plan (progress marks);
+-- valid: the live tree's names, for every plan.
+local function renderList(build, c, valid)
 	local s = c and c.state
 	local y, nr, nb = 0, 0, 0
 	local lastBand
 	for _, p in ipairs(build.picks) do
-		local b = floor(p.level / BAND) * BAND
+		local b = floor((p.order - 1) / BAND) * BAND + 1
 		if b ~= lastBand then
 			lastBand = b
 			nb = nb + 1
@@ -223,9 +222,7 @@ local function renderList(build, c)
 			h:ClearAllPoints()
 			h:SetPoint("TOPLEFT", list.Scroll.Child, "TOPLEFT", ROW_X, -y)
 			h:SetWidth(LIST_W - ROW_X * 2)
-			local cap = c and c.cap or T.CAP_FALLBACK
-			h.Text:SetText(b + BAND - 1 > cap and b <= cap and format(L["Levels %d-%d (cap %d)"], max(b, T.FIRST_LEVEL), min(b + BAND - 1, T.MAX_LEVEL), cap)
-				or format(L["Levels %d-%d"], max(b, T.FIRST_LEVEL), min(b + BAND - 1, T.MAX_LEVEL)))
+			h.Text:SetText(format(L["Picks %d-%d"], b, min(b + BAND - 1, #build.picks)))
 			h:Show()
 			y = y + HEAD_H
 		end
@@ -235,14 +232,13 @@ local function renderList(build, c)
 		r:SetPoint("TOPLEFT", list.Scroll.Child, "TOPLEFT", ROW_X, -y)
 		r:SetWidth(LIST_W - ROW_X * 2)
 		local n = build.data.nodes[p.node]
-		local done = s and (p.level < (s.next and s.next.level or math.huge))
+		local done = s and (p.order < (s.next and s.next.order or math.huge))
 		local isNext = s and s.next == p
-		local ahead = p.level > (c and c.cap or T.CAP_FALLBACK)
 		r.Selected:SetShown(isNext or false)
 		r.Bar:SetShown(isNext or false)
-		r.Level:SetText(tostring(p.level))
-		r.Title:SetText(T.NodeName(build.data, p.node, c and c.valid))
-		W.Color(r.Title, isNext and "accent" or ((done or ahead) and "textMuted" or "text"))
+		r.Level:SetText(tostring(p.order))
+		r.Title:SetText(T.NodeName(build.data, p.node, valid))
+		W.Color(r.Title, isNext and "accent" or (done and "textMuted" or "text"))
 		r.Sub:SetText(format("%d/%d", p.rank, n.max))
 		r.Title:SetWidth(max(40, min(LIST_W - ROW_X * 2 - TEXT_X - 50, floor(r.Title:GetStringWidth() + 1))))
 		r.psPick = p
@@ -254,6 +250,8 @@ local function renderList(build, c)
 	list.Empty:SetShown(nr == 0)
 	W.SetScrollContent(list.Scroll, y + 16)
 	shown.rows = nr
+	shown.titles = {}
+	for i = 1, nr do shown.titles[i] = rows[i].Title:GetText() end
 end
 
 local function actions(follow, auto)
@@ -275,7 +273,7 @@ function TV.Render()
 	local c, reason = T.Current()
 	if not data or reason == "off" then
 		reason = reason or "class"
-		if shellRef then W.ShellTitle(shellRef, L["Talents"], L["A talent plan for every level"]) end
+		if shellRef then W.ShellTitle(shellRef, L["Talents"], L["A talent plan, pick by pick"]) end
 		renderList({ picks = {} }, nil)
 		list.Empty:SetText(L["No plan for this character."])
 		w.title(L["Talents"])
@@ -294,8 +292,8 @@ function TV.Render()
 		W.ShellTitle(shellRef, L["Talents"], format(L["%s plan for %s"], followed.specName, UnitClass("player") or "")
 			.. (c and c.state and (DOT .. format(L["%d of %d picks"], c.state.done, c.state.total)) or ""))
 	end
-	renderList(build, mine and c and c.state and c or nil)
-	w.title(format(L["%s plan"], build.specName), build.split .. DOT .. format(L["levels %d-%d"], T.FIRST_LEVEL, T.MAX_LEVEL))
+	renderList(build, mine and c and c.state and c or nil, mine and c and c.valid)
+	w.title(format(L["%s plan"], build.specName), build.split .. DOT .. format(L["%d picks, in order"], #build.picks))
 	shown.spec, shown.followed, shown.mine = build.specName, followed.specName, mine
 	if reason == "stale" then
 		w.note(format(L["This plan no longer matches the game's talent tree (missing: %s). It is shown as written, without marks on the talent frame, until Polestar is updated."], table.concat(c.valid.missing, ", ")), "warning")
@@ -313,10 +311,12 @@ function TV.Render()
 	end
 	if data.summary and mine then w.note(data.summary) end
 	w.head(L["Notes"])
-	for lv = T.FIRST_LEVEL, T.MAX_LEVEL do
-		local text = build.notes[lv]
-		if text then w.note(format(L["Level %d: %s"], lv, text), "text") end
-	end
+	-- Keyed by the level the source plan reaches them at; shown as a rough
+	-- guide only, since points can come sooner.
+	local lvs = {}
+	for lv in pairs(build.notes) do lvs[#lvs + 1] = lv end
+	table.sort(lvs)
+	for _, lv in ipairs(lvs) do w.note(format(L["Around level %d: %s"], lv, build.notes[lv]), "text") end
 	w.head(L["Source"])
 	w.note(format(L["Picks from %s (%s), checked against the game's talent tree; notes in Polestar's words."], data.source, data.url))
 	local choice = T.Choice()

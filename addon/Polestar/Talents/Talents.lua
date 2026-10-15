@@ -1,5 +1,4 @@
--- Talent plans: one point a level from 10, picked by a plan for the
--- player's class and spec, shown in the hub's Talents section (View.lua) and
+-- Talent plans: an ordered list of picks for the player's class and spec, shown in the hub's Talents section (View.lua) and
 -- on the client's talent frame (Overlay.lua).
 --
 -- Forever's talents are a C_Traits tree per class (three spec columns, tier
@@ -11,10 +10,17 @@
 -- talent that is gone is shown as out of date instead of guessing. Names
 -- shown to the player are the client's, so they follow its language.
 --
---   T.Current() -> { data, build, valid, state, staged } | nil, reason
+-- Plans are a sequence, not a schedule: the addon does not assume when a
+-- point arrives (a Legacy talent such as Talented (Adventure) grants them
+-- earlier). Points granted and spent come from the game
+-- (C_Traits.GetTreeCurrencyInfo); one point a level from 10 is only the
+-- fallback when the client cannot say. Whenever a point is unspent the next
+-- pick is the one to take.
+--
+--   T.Current() -> { data, build, valid, granted, state, staged } | nil, reason
 --     state: the plan against learned ranks; staged: against the ranks
 --     shown in the frame (learned plus not yet applied)
---   T.State(build, ranks, level, cap) -> plan progress (pure)
+--   T.State(build, ranks, level, granted) -> plan progress (pure)
 --   T.Replay(data, build) -> errors under the snapshot's rules (pure)
 --   T.Validate(data, live) -> { map = plan node -> live node, names = plan node -> live name, moved, missing, ok }
 --
@@ -28,14 +34,12 @@ local max, min, pairs, ipairs, type, pcall, format = math.max, math.min, pairs, 
 local T = {}
 ns.Talents = T
 
-T.FIRST_LEVEL = 10
-T.MAX_LEVEL = 60 -- the plans' last pick
-T.CAP_FALLBACK = 30 -- the beta's level cap, when the client cannot say
+T.FIRST_LEVEL = 10 -- the fallback only: one point a level from here
 
 ns.RegisterDefaults("talents", {
 	enabled = true,
 	overlay = true, -- marks on the talent frame
-	badges = true, -- the planned level on each talent
+	badges = true, -- the pick number on each talent
 	tooltip = true,
 	reminder = true, -- a chat line when a point is waiting
 })
@@ -55,7 +59,7 @@ function T.Register(data)
 	end
 	for _, b in ipairs(data.builds) do
 		local picks = {}
-		for i, p in ipairs(b.picks) do picks[i] = { level = T.FIRST_LEVEL + i - 1, node = p[1], rank = p[2] } end
+		for i, p in ipairs(b.picks) do picks[i] = { order = i, node = p[1], rank = p[2] } end
 		b.picks, b.data, b.specName = picks, data, data.specs[b.spec]
 	end
 	registry[data.class] = data
@@ -74,7 +78,7 @@ function T.PrereqRank(data, node)
 end
 
 -- Every pick under the snapshot's rules (the tool's replay, again here so a
--- hand-edited Builds.lua cannot slip through): one point a level, the next
+-- hand-edited Builds.lua cannot slip through): one point a pick, the next
 -- rank, the tier gate met, the arrows into it satisfied.
 function T.Replay(data, build)
 	local errors, ranks = {}, {}
@@ -85,7 +89,7 @@ function T.Replay(data, build)
 	end
 	for i, p in ipairs(build.picks) do
 		local n = data.nodes[p.node]
-		local function err(text) errors[#errors + 1] = format("%s %d (%s): %s", build.key, p.level, n and n.name or tostring(p.node), text) end
+		local function err(text) errors[#errors + 1] = format("%s #%d (%s): %s", build.key, p.order, n and n.name or tostring(p.node), text) end
 		if not n then
 			err("not in the tree")
 		else
@@ -106,13 +110,22 @@ function T.Replay(data, build)
 	return errors
 end
 
--- Plan progress for ranks (node -> rank, plan IDs) at a level.
+-- Points granted at a level when the client cannot say: one a level from
+-- FIRST_LEVEL, up to the plan's length.
+function T.FallbackPoints(level, total)
+	return max(0, min(level - T.FIRST_LEVEL + 1, total))
+end
+
+-- Plan progress for ranks (node -> rank, plan IDs). granted: the points the
+-- game has given (spent plus unspent, from the tree's currency); nil falls
+-- back to the level.
 --   done, total, next (the first pick not met), nodeNext (node -> its first
---   pick not met), offPlan (node -> ranks beyond the plan), spent, points,
---   unspent, cap, status: "early" | "offplan" | "complete" | "capped" |
---   "behind" (a point to spend) | "onplan"
-function T.State(build, ranks, level, cap)
-	local s = { done = 0, total = #build.picks, offPlan = {}, nodeNext = {}, spent = 0, cap = cap, level = level }
+--   pick not met), offPlan (node -> ranks beyond the plan), spent, points
+--   (granted), unspent, source ("currency" | "level"), status: "early" (no
+--   points yet) | "offplan" | "complete" | "behind" (a point to spend: take
+--   the next pick) | "onplan" (waiting for the next point)
+function T.State(build, ranks, level, granted)
+	local s = { done = 0, total = #build.picks, offPlan = {}, nodeNext = {}, spent = 0, level = level }
 	local planned = {}
 	for _, p in ipairs(build.picks) do planned[p.node] = max(planned[p.node] or 0, p.rank) end
 	local off = false
@@ -131,9 +144,13 @@ function T.State(build, ranks, level, cap)
 			s.nodeNext[p.node] = s.nodeNext[p.node] or p
 		end
 	end
-	s.points = max(0, min(level, T.MAX_LEVEL) - T.FIRST_LEVEL + 1)
+	if type(granted) == "number" then
+		s.points, s.source = max(granted, s.spent), "currency"
+	else
+		s.points, s.source = max(T.FallbackPoints(level or 0, s.total), s.spent), "level"
+	end
 	s.unspent = max(0, s.points - s.spent)
-	if level < T.FIRST_LEVEL then
+	if s.points == 0 then
 		s.status = "early"
 	elseif off then
 		s.status = "offplan"
@@ -141,16 +158,11 @@ function T.State(build, ranks, level, cap)
 		s.status = "complete"
 	elseif s.unspent > 0 then
 		s.status = "behind"
-	elseif s.next.level > cap then
-		s.status = "capped"
 	else
 		s.status = "onplan"
 	end
 	return s
 end
-
--- A pick past the level cap: planned ahead, not learnable yet.
-function T.Projected(pick, s) return pick.level > s.cap end
 
 ---------------------------------------------------------------------------
 -- The live tree
@@ -171,11 +183,18 @@ function Client.NodeInfo(config, id) return C_Traits and call(C_Traits.GetNodeIn
 function Client.Level() return UnitLevel("player") or 1 end
 function Client.InCombat() return InCombatLockdown and InCombatLockdown() or false end
 
-function Client.Cap()
-	local cap = GetMaxLevelForPlayerExpansion and call(GetMaxLevelForPlayerExpansion)
-	if type(cap) ~= "number" or cap < T.FIRST_LEVEL then cap = GetMaxPlayerLevel and call(GetMaxPlayerLevel) end
-	if type(cap) ~= "number" or cap < T.FIRST_LEVEL then cap = T.CAP_FALLBACK end
-	return min(cap, T.MAX_LEVEL)
+-- The points the game has granted on the tree (spent plus unspent), from
+-- its currency as the Recorder reads it; nil when the client cannot say.
+function Client.Granted(config, tree)
+	local list = C_Traits and C_Traits.GetTreeCurrencyInfo and call(C_Traits.GetTreeCurrencyInfo, config, tree, false)
+	if type(list) ~= "table" or not list[1] then return nil end
+	local total
+	for _, c in ipairs(list) do
+		if type(c) == "table" and type(c.quantity) == "number" then
+			total = (total or 0) + c.quantity + (type(c.spent) == "number" and c.spent or 0)
+		end
+	end
+	return total
 end
 
 -- An entry's spell ID and its name in the client's language.
@@ -205,7 +224,7 @@ function T.Read(data)
 			nodes[id] = { active = info.activeRank or 0, current = info.currentRank or info.activeRank or 0, max = info.maxRanks or 0, spell = spell, name = name }
 		end
 	end
-	return { config = config, nodes = nodes }
+	return { config = config, nodes = nodes, granted = Client.Granted(config, data.tree) }
 end
 
 -- Whether a live node is the snapshot's talent: the spell ID when the
@@ -329,11 +348,14 @@ function T.Refresh()
 			local valid = T.Validate(data, live)
 			local active = ranksOf(valid, live, "active")
 			local build = T.ActiveBuild(data, active)
-			local level, cap = Client.Level(), Client.Cap()
-			current = { data = data, build = build, live = live, valid = valid, level = level, cap = cap }
+			local level = Client.Level()
+			-- Granted points do not change with staged ranks: the frame's
+			-- unspent count is granted minus the ranks it shows.
+			local granted = live.granted
+			current = { data = data, build = build, live = live, valid = valid, level = level, granted = granted }
 			if valid.ok then
-				current.state = T.State(build, active, level, cap)
-				current.staged = T.State(build, ranksOf(valid, live, "current"), level, cap)
+				current.state = T.State(build, active, level, granted)
+				current.staged = T.State(build, ranksOf(valid, live, "current"), level, granted)
 			else
 				reason = "stale"
 			end
@@ -369,11 +391,12 @@ function T.PickText(data, pick, valid)
 	return format("%s %d/%d", T.NodeName(data, pick.node, valid), pick.rank, n.max)
 end
 
--- After a level-up, once the client has granted the point.
+-- After a level-up, once the client has granted the point (if any: points
+-- can come earlier or later than one a level).
 local function remind()
 	local c = T.Refresh()
 	local s = c and c.state
-	if not (s and T.Get("reminder")) or s.unspent == 0 or not s.next or T.Projected(s.next, s) then return end
+	if not (s and T.Get("reminder")) or s.unspent == 0 or not s.next or s.status ~= "behind" then return end
 	ns.Print(format(L["Talent point: %s (%s plan)."], T.PickText(c.data, s.next, c.valid), c.build.specName))
 end
 

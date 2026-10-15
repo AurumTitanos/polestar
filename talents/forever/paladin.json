@@ -461,7 +461,7 @@
 					"tree": "Protection",
 					"talent": "Swift Judgement",
 					"rank": 1,
-					"note": "By 29 (20 points) you match the usual dungeon-tank setup: Shield Specialization, Sacred Duty and Swift Judgement are complete."
+					"note": "Around 20 points in, you match the usual dungeon-tank setup: Shield Specialization, Sacred Duty and Swift Judgement are complete."
 				},
 				{
 					"level": 30,
@@ -486,7 +486,7 @@
 					"tree": "Protection",
 					"talent": "Templar's Bulwark",
 					"rank": 1,
-					"note": "Templar's Bulwark is an absorb cooldown that scales with your health, and Holy Shield at 40 requires it."
+					"note": "Templar's Bulwark is an absorb cooldown that scales with your health, and Holy Shield later in the plan requires it."
 				},
 				{
 					"level": 34,

@@ -1,11 +1,12 @@
 'use strict';
 // Talent plans (addon/Polestar/Talents): the plans in Builds.lua replayed
-// under the snapshot's rules, plan progress (T.State), the snapshot checked
+// under the snapshot's rules, plan progress (T.State: points from the
+// tree's currency, the level only as a fallback), the snapshot checked
 // against the live tree (moved IDs found by name, a missing talent makes the
-// plan out of date), the marks on the talent frame (next ring, planned
-// levels, off-plan flags, the tooltip line; nothing while inspecting, for
-// another loadout or in combat until it ends), the level-up reminder and the
-// hub section. The client is tests/lua/stub_talents.lua.
+// plan out of date), the marks on the talent frame (next ring while a point
+// waits, pick numbers, off-plan flags, the tooltip line; no levels; nothing
+// while inspecting, for another loadout or in combat until it ends), the
+// reminder and the hub section. The client is tests/lua/stub_talents.lua.
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
@@ -35,7 +36,7 @@ test('Builds.lua: three Paladin plans, 51 picks each, every one legal under the 
 	const [out] = run(`
 local o = { prereq = data.prereq, tree = data.tree, specs = data.specs, plans = {} }
 for _, b in ipairs(data.builds) do
-	o.plans[#o.plans + 1] = { key = b.key, spec = b.specName, picks = #b.picks, first = b.picks[1].level, last = b.picks[#b.picks].level, errors = T.Replay(data, b) }
+	o.plans[#o.plans + 1] = { key = b.key, spec = b.specName, picks = #b.picks, first = b.picks[1].order, last = b.picks[#b.picks].order, level = b.picks[1].level, errors = T.Replay(data, b) }
 end
 emit(o)`);
 	assert.equal(out.tree, 1100);
@@ -43,8 +44,9 @@ emit(o)`);
 	assert.deepEqual(out.specs, ['Holy', 'Protection', 'Retribution']);
 	for (const p of out.plans) {
 		assert.equal(p.picks, 51, p.key);
-		assert.equal(p.first, 10);
-		assert.equal(p.last, 60);
+		assert.equal(p.first, 1);
+		assert.equal(p.last, 51);
+		assert.equal(p.level, undefined, 'picks carry an order, not a level');
 		assert.equal(Object.keys(p.errors).length, 0, `${p.key}: ${JSON.stringify(p.errors)}`);
 	}
 });
@@ -54,7 +56,7 @@ test('Replay: a skipped arrow, an early tier and a skipped rank are caught; "sta
 local ret = plan("retribution")
 local function copy(b, edit)
 	local c = { key = b.key, picks = {} }
-	for i, p in ipairs(b.picks) do c.picks[i] = { level = p.level, node = p.node, rank = p.rank } end
+	for i, p in ipairs(b.picks) do c.picks[i] = { order = p.order, node = p.node, rank = p.rank } end
 	edit(c.picks)
 	return c
 end
@@ -65,9 +67,9 @@ local fromNode = arrow[1]
 local broken = copy(ret, function(p)
 	local first
 	for i, x in ipairs(p) do if x.node == fromNode and x.rank == data.nodes[fromNode].max then first = i end end
-	p[first] = { level = p[first].level, node = p[1].node, rank = 99 }
+	p[first] = { order = p[first].order, node = p[1].node, rank = 99 }
 end)
-local early = copy(ret, function(p) p[1], p[25] = p[25], p[1]; p[1].level, p[25].level = 10, 34 end)
+local early = copy(ret, function(p) p[1], p[25] = p[25], p[1]; p[1].order, p[25].order = 1, 25 end)
 local errs = T.Replay(data, broken)
 local arrowErr = false
 for _, e in ipairs(errs) do if e:find("needs " .. data.nodes[fromNode].name, 1, true) then arrowErr = true end end
@@ -76,35 +78,78 @@ data.prereq = "started"
 emit(#T.Replay(data, ret))`);
 	assert.ok(out.rankErr);
 	assert.ok(out.arrowErr, 'the arrow into Vengeance');
-	assert.ok(out.early, 'a deep talent at level 10');
+	assert.ok(out.early, 'a deep talent first');
 	assert.equal(started, 0, 'the plans also hold if one rank opens an arrow');
 });
 
 // ------------------------------------------------------------ progress
 
-test('State: next pick, unspent points, projected past the cap, off-plan ranks, complete', () => {
+test('State: next pick, unspent points, off-plan ranks, complete; the level is only a fallback', () => {
 	const outs = run(`
 local b = plan("retribution")
-local function at(n, level, cap, extra)
+local function at(n, level, granted, extra)
 	local ranks = {}
 	for i = 1, n do ranks[b.picks[i].node] = b.picks[i].rank end
 	for id, r in pairs(extra or {}) do ranks[id] = r end
-	local s = T.State(b, ranks, level, cap)
-	return { status = s.status, done = s.done, unspent = s.unspent, nextLevel = s.next and s.next.level, projected = s.next and T.Projected(s.next, s) or false, off = next(s.offPlan) ~= nil }
+	local s = T.State(b, ranks, level, granted)
+	return { status = s.status, done = s.done, unspent = s.unspent, nextOrder = s.next and s.next.order, source = s.source, off = next(s.offPlan) ~= nil }
 end
-emit(at(0, 5, 30))
-emit(at(10, 20, 30))
-emit(at(11, 20, 30))
-emit(at(21, 30, 30))
+emit(at(0, 5))
+emit(at(10, 20))
+emit(at(11, 20))
+emit(at(21, 31))
 local holy = plan("holy").picks[1].node
-emit(at(11, 20, 30, { [holy] = 5 }))
-emit(at(51, 60, 60))`);
+emit(at(11, 20, nil, { [holy] = 5 }))
+emit(at(51, 60))
+emit(at(0, 5, 1))
+emit(at(10, 15, 20))
+emit(at(21, 30, 22))
+emit(at(21, 30, 21))`);
 	assert.equal(outs[0].status, 'early');
-	assert.deepEqual([outs[1].status, outs[1].unspent, outs[1].nextLevel], ['behind', 1, 20]);
-	assert.deepEqual([outs[2].status, outs[2].unspent, outs[2].nextLevel], ['onplan', 0, 21]);
-	assert.deepEqual([outs[3].status, outs[3].nextLevel, outs[3].projected], ['capped', 31, true]);
+	assert.deepEqual([outs[1].status, outs[1].unspent, outs[1].nextOrder, outs[1].source], ['behind', 1, 11, 'level']);
+	assert.deepEqual([outs[2].status, outs[2].unspent, outs[2].nextOrder], ['onplan', 0, 12]);
+	assert.deepEqual([outs[3].status, outs[3].unspent], ['behind', 1]);
 	assert.equal(outs[4].status, 'offplan');
 	assert.equal(outs[5].status, 'complete');
+	assert.deepEqual([outs[6].status, outs[6].unspent, outs[6].source], ['behind', 1, 'currency'], 'a point at level 5 (Talented): no longer "early"');
+	assert.deepEqual([outs[7].status, outs[7].unspent, outs[7].nextOrder], ['behind', 10, 11], 'granted points, not the level, give the unspent count');
+	assert.deepEqual([outs[8].status, outs[8].unspent, outs[8].nextOrder], ['behind', 1, 22], 'at the level cap a granted point is still a point');
+	assert.deepEqual([outs[9].status, outs[9].unspent], ['onplan', 0]);
+});
+
+test('Current: unspent points come from the tree currency (early points), else from the level', () => {
+	const outs = run(`
+local b = plan("retribution")
+local function state()
+	local c = T.Refresh()
+	local s = c.state
+	return { status = s.status, unspent = s.unspent, points = s.points, source = s.source, staged = c.staged.unspent }
+end
+-- Talented (Adventure): level 14 with 11 points granted, 10 spent.
+TS.level = 14
+TS.learn(b, 10)
+TS.currency = { quantity = 1, spent = 10 }
+stub.login()
+emit(state())
+-- A point staged in the frame uses it up.
+TS.staged[b.picks[11].node] = b.picks[11].rank
+emit(state())
+TS.staged = {}
+-- No currency from the client: one point a level from 10.
+TS.currency = nil
+emit(state())
+TS.level = 20
+emit(state())
+-- No API at all.
+local api = C_Traits.GetTreeCurrencyInfo
+C_Traits.GetTreeCurrencyInfo = nil
+emit(state())
+C_Traits.GetTreeCurrencyInfo = api`);
+	assert.deepEqual(outs[0], { status: 'behind', unspent: 1, points: 11, source: 'currency', staged: 1 });
+	assert.deepEqual([outs[1].unspent, outs[1].staged], [1, 0]);
+	assert.deepEqual(outs[2], { status: 'onplan', unspent: 0, points: 10, source: 'level', staged: 0 }, 'fallback: level 14 is 5 points, all spent');
+	assert.deepEqual(outs[3], { status: 'behind', unspent: 1, points: 11, source: 'level', staged: 1 });
+	assert.deepEqual(outs[4], outs[3], 'missing API falls back the same way');
 });
 
 // ------------------------------------------------------------ the live tree
@@ -176,9 +221,12 @@ local function view()
 end
 `;
 
-test('Overlay: a ring on the next pick, its level as a badge, a flag off the plan; staged ranks move the ring', () => {
+test('Overlay: a ring on the next pick while a point waits, its pick number as a badge, a flag off the plan; staged ranks move the ring', () => {
 	const outs = run(`${FRAME}
 emit(view())
+TS.currency = { quantity = 2, spent = 20 }
+T.Refresh()
+stub.runTimers()
 local nxt = T.Current().staged.next
 -- Stage the next pick in the frame (not applied yet).
 TS.staged[nxt.node] = nxt.rank
@@ -189,6 +237,12 @@ stub.runTimers()
 local after = view()
 after.moved = T.Current().staged.next ~= nxt
 emit(after)
+-- Both points staged: nothing left to spend, no ring.
+local second = T.Current().staged.next
+TS.staged[second.node] = second.rank
+T.Refresh()
+stub.runTimers()
+emit(view())
 -- A point outside the plan.
 local holy = plan("holy").picks[1].node
 TS.ranks[holy] = 1
@@ -198,19 +252,35 @@ stub.runTimers()
 local m = markOf(holy)
 emit({ flag = m and m:IsShown() and m.Flag:IsShown() or false })`, { stubs: [] });
 	assert.equal(outs[0].ring, true);
-	assert.equal(outs[0].badge, '30');
+	assert.equal(outs[0].badge, '21', 'pick #21, not level 30');
 	assert.ok(outs[0].marks > 1, 'every planned talent with a rank to come has a badge');
 	assert.equal(outs[1].moved, true);
 	assert.equal(outs[1].ring, true, 'the ring is on the new next pick');
-	assert.equal(outs[2].flag, true);
+	assert.equal(outs[2].ring, false, 'no point left: no ring');
+	assert.equal(outs[3].flag, true);
 });
 
-test('Overlay: projected picks are muted; tooltip line names the level and rank', () => {
+test('Overlay: no level labels and nothing muted at the level cap; badges and tooltips give pick numbers', () => {
 	const outs = run(`${FRAME}
+-- Early points: level 30 is the cap, yet the game has given a 22nd point.
+TS.learn(b, 21)
+TS.currency = { quantity = 1, spent = 21 }
+T.Refresh()
+stub.runTimers()
 local s = T.Current().staged
+local nxt = markOf(s.next.node)
 local later
-for _, p in ipairs(b.picks) do if p.level > 30 and s.nodeNext[p.node] == p then later = p break end end
-emit({ projected = T.Projected(later, s) })
+for _, p in ipairs(b.picks) do if p.order > s.next.order and s.nodeNext[p.node] == p then later = p break end end
+local badges, muted = {}, 0
+local mr, mg, mb = Polestar.Theme.Color("textMuted")
+for id, m in pairs(O.marks) do
+	if m:IsShown() and m.Badge:IsShown() then
+		badges[#badges + 1] = m.Badge.Text:GetText()
+		local r, g, bl = m.Badge.Text:GetTextColor()
+		if r == mr and g == mg and bl == mb then muted = muted + 1 end
+	end
+end
+emit({ ring = nxt:IsShown() and nxt.Ring:IsShown(), badge = nxt.Badge.Text:GetText(), badges = badges, muted = muted, projected = T.Projected ~= nil, status = s.status })
 local btn = TS.button(s.next.node)
 GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
 stub.RunScript(btn, "OnEnter")
@@ -218,15 +288,18 @@ emit(GameTooltip.lines)
 local other = TS.button(later.node)
 GameTooltip:SetOwner(other, "ANCHOR_RIGHT")
 stub.RunScript(other, "OnEnter")
-emit(GameTooltip.lines)
+emit({ lines = GameTooltip.lines, order = later.order })
 Polestar.Set("talents.tooltip", false)
 GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
 stub.RunScript(btn, "OnEnter")
 emit(#GameTooltip.lines)`);
-	assert.equal(outs[0].projected, true);
+	assert.deepEqual([outs[0].ring, outs[0].badge, outs[0].status, outs[0].projected], [true, '22', 'behind', false], 'the point at the cap is highlighted');
+	for (const t of outs[0].badges) assert.match(t, /^\d+$/);
+	assert.equal(outs[0].muted, 0, 'no badge muted as "past the cap"');
 	assert.equal(outs[1].length, 1);
-	assert.match(outs[1][0], /^Polestar: level 30, rank \d\/\d \(Retribution plan\)  next$/);
-	assert.match(outs[2][0], /\(past the level cap\)$/);
+	assert.match(outs[1][0], /^Polestar: pick #22, rank \d\/\d \(Retribution plan\)  next$/);
+	assert.equal(outs[2].lines[0], outs[2].lines[0].replace(/level|cap/gi, ''), 'no level or cap wording');
+	assert.match(outs[2].lines[0], new RegExp(`^Polestar: pick #${outs[2].order}, rank \\d/\\d \\(Retribution plan\\)$`));
 	assert.equal(outs[3], 0);
 });
 
@@ -271,7 +344,7 @@ emit(view().marks)`);
 
 // ------------------------------------------------------------ reminder
 
-test('Reminder: a chat line on level-up when a point waits, none past the cap or when switched off', () => {
+test('Reminder: a chat line when a point waits, from the currency even below the old schedule; none when switched off', () => {
 	const outs = run(`
 local b = plan("retribution")
 TS.learn(b, 10)
@@ -281,22 +354,40 @@ stub.messages = {}
 stub.fire("PLAYER_LEVEL_UP", 20)
 stub.advance(2)
 emit(stub.messages)
-TS.learn(b, 21)
-TS.level, TS.cap = 31, 30
+-- Talented: level 14, 11 points granted, 10 spent.
+TS.level = 14
+TS.currency = { quantity = 1, spent = 10 }
 stub.messages = {}
-stub.fire("PLAYER_LEVEL_UP", 31)
+stub.fire("PLAYER_LEVEL_UP", 14)
+stub.advance(2)
+emit(stub.messages)
+-- At the level cap with a point granted.
+TS.learn(b, 21)
+TS.level, TS.cap = 30, 30
+TS.currency = { quantity = 1, spent = 21 }
+stub.messages = {}
+stub.fire("PLAYER_LEVEL_UP", 30)
 stub.advance(2)
 emit(#stub.messages)
-TS.cap = 60
+-- Nothing granted: nothing to say.
+TS.currency = { quantity = 0, spent = 21 }
+stub.messages = {}
+stub.fire("PLAYER_LEVEL_UP", 30)
+stub.advance(2)
+emit(#stub.messages)
+TS.currency = { quantity = 1, spent = 21 }
 Polestar.Set("talents.reminder", false)
 stub.messages = {}
-stub.fire("PLAYER_LEVEL_UP", 31)
+stub.fire("PLAYER_LEVEL_UP", 30)
 stub.advance(2)
 emit(#stub.messages)`);
 	assert.equal(outs[0].length, 1);
 	assert.match(outs[0][0], /Talent point: Seal of Command 1\/1 \(Retribution plan\)\./);
-	assert.equal(outs[1], 0, 'the next pick is past the cap');
-	assert.equal(outs[2], 0);
+	assert.equal(outs[1].length, 1, 'an early point is reminded');
+	assert.match(outs[1][0], /Talent point: Seal of Command 1\/1/);
+	assert.equal(outs[2], 1, 'not muted at the level cap');
+	assert.equal(outs[3], 0);
+	assert.equal(outs[4], 0);
 });
 
 // ------------------------------------------------------------ the hub section
@@ -310,7 +401,12 @@ stub.login()
 local TV = Polestar.UI.TalentsSection
 TV.Show()
 local s = TV.Shown()
-emit({ rows = s.rows, spec = s.spec, mine = s.mine, status = s.status, follow = s.follow, auto = s.auto, notes = #s.notes, first = s.notes[1] })
+local approx, exact = 0, 0
+for _, n in ipairs(s.notes) do
+	if n:find("^Around level %d+: ") then approx = approx + 1 end
+	if n:find("^Level %d+") or n:find("[Bb]y %d%d ") or n:find(" at %d%d ") then exact = exact + 1 end
+end
+emit({ rows = s.rows, spec = s.spec, mine = s.mine, status = s.status, follow = s.follow, auto = s.auto, notes = #s.notes, first = s.notes[1], noteLevels = approx, exactLevels = exact })
 local nav, active = TV.Nav()
 local labels = {}
 for _, n in ipairs(nav) do labels[#labels + 1] = n.label end
@@ -322,9 +418,11 @@ TV.Follow()
 emit({ choice = T.Choice(), followed = TV.Shown().followed })
 TV.FollowSpec()
 emit(T.Choice())`, { files: WITH_UI, stubs: ['stub_ui.lua'] });
-	assert.deepEqual(outs[0], { rows: 51, spec: 'Retribution', mine: true, status: 'behind', follow: true, auto: false, notes: outs[0].notes, first: outs[0].first });
+	assert.deepEqual(outs[0], { rows: 51, spec: 'Retribution', mine: true, status: 'behind', follow: true, auto: false, notes: outs[0].notes, first: outs[0].first, noteLevels: outs[0].noteLevels, exactLevels: outs[0].exactLevels });
 	assert.match(outs[0].first, /^1 point to spend\. Next: Vengeance 1\/3\.$/, 'one point: the talent, not the count');
 	assert.ok(outs[0].notes >= 10, 'status, summary, the plan notes and the source');
+	assert.ok(outs[0].noteLevels > 0, 'plan notes give approximate levels');
+	assert.equal(outs[0].exactLevels, 0, 'no exact "Level N:" labels');
 	assert.deepEqual(outs[1], { labels: ['Holy', 'Protection', 'Retribution'], active: '3' });
 	assert.deepEqual(outs[2], { spec: 'Holy', mine: false, status: 'other', follow: true });
 	assert.deepEqual(outs[3], { choice: 'holy', followed: 'Holy' });

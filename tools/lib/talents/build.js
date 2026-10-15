@@ -190,7 +190,7 @@ function emitLua(header, facts, source, builds, prereq = PREREQ_RULE) {
 	for (const b of builds) {
 		L.push('\t\t{');
 		L.push(`\t\t\tkey = ${luaStr(b.key)}, spec = ${source.order.indexOf(b.spec) + 1}, split = ${luaStr(b.split)}, link = ${luaStr(b.link)},`);
-		L.push('\t\t\t-- one per level from 10: { node, rank }');
+		L.push('\t\t\t-- in order, one point each: { node, rank }');
 		const rows = [];
 		for (let i = 0; i < b.picks.length; i += 6) rows.push(`\t\t\t\t${b.picks.slice(i, i + 6).map((p) => `{ ${p.node}, ${p.rank} },`).join(' ')}`);
 		L.push('\t\t\tpicks = {', ...rows, '\t\t\t},');

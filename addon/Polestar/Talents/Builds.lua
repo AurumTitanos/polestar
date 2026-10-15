@@ -133,7 +133,7 @@ T.Register({
 	builds = {
 		{
 			key = "holy", spec = 1, split = "31/0/20", link = "https://foreverdb.net/class/Paladin/talents?lvl=60&t=055fe0.05323003025101051--052250312",
-			-- one per level from 10: { node, rank }
+			-- in order, one point each: { node, rank }
 			picks = {
 				{ 105332, 1 }, { 105332, 2 }, { 105332, 3 }, { 105332, 4 }, { 105332, 5 }, { 105334, 1 },
 				{ 105334, 2 }, { 105334, 3 }, { 105333, 1 }, { 105333, 2 }, { 110871, 1 }, { 110871, 2 },
@@ -158,7 +158,7 @@ T.Register({
 		},
 		{
 			key = "protection", spec = 2, split = "10/41/0", link = "https://foreverdb.net/class/Paladin/talents?lvl=60&t=055fe0.50203-5530513321331051",
-			-- one per level from 10: { node, rank }
+			-- in order, one point each: { node, rank }
 			picks = {
 				{ 105626, 1 }, { 105626, 2 }, { 105626, 3 }, { 105626, 4 }, { 105626, 5 }, { 105638, 1 },
 				{ 105638, 2 }, { 105638, 3 }, { 105636, 1 }, { 105636, 2 }, { 110875, 1 }, { 105634, 1 },
@@ -174,8 +174,8 @@ T.Register({
 				[10] = "Open with Redoubt: blocking pays off at once, and Shield Specialization needs all five ranks.",
 				[15] = "Precision and Anticipation help you land hits and dodge them while questing with a shield.",
 				[20] = "Improved Seal of Fury and Improved Righteous Fury begin the mana and mitigation cycle Forever tanking is built on.",
-				[29] = "By 29 (20 points) you match the usual dungeon-tank setup: Shield Specialization, Sacred Duty and Swift Judgement are complete.",
-				[33] = "Templar's Bulwark is an absorb cooldown that scales with your health, and Holy Shield at 40 requires it.",
+				[29] = "Around 20 points in, you match the usual dungeon-tank setup: Shield Specialization, Sacred Duty and Swift Judgement are complete.",
+				[33] = "Templar's Bulwark is an absorb cooldown that scales with your health, and Holy Shield later in the plan requires it.",
 				[37] = "Iron Creed adds threat and damage reduction to Holy Strike while Righteous Fury is active.",
 				[42] = "Holy Shield is the capstone: more block uptime, with Holy damage each time you block. Ideal for pulling packs.",
 				[43] = "Leftover points buy armor, a quicker Hammer of Justice, and Holy Strength and seal damage for leveling.",
@@ -183,7 +183,7 @@ T.Register({
 		},
 		{
 			key = "retribution", spec = 3, split = "10/0/41", link = "https://foreverdb.net/class/Paladin/talents?lvl=60&t=055fe0.50203--55225331221331021",
-			-- one per level from 10: { node, rank }
+			-- in order, one point each: { node, rank }
 			picks = {
 				{ 105706, 1 }, { 105706, 2 }, { 105706, 3 }, { 105706, 4 }, { 105706, 5 }, { 105705, 1 },
 				{ 105705, 2 }, { 105703, 1 }, { 105703, 2 }, { 105703, 3 }, { 105696, 1 }, { 105701, 1 },
