@@ -1049,9 +1049,22 @@ function resolveGoal(g, zoneMap, prev, data, err, warn, ctx = { sides: ['Allianc
 					q.objectives.length ? `write \`quest ${g.quest}.<n>\` with one of these (\`polestar find ${g.quest}\` lists them)` : `drop the \`.${oi}\`: write \`quest ${g.quest}\``,
 				);
 			}
+			const kind = v === 'kill' ? 'kill' : v === 'collect' ? 'item' : v === 'interact' ? 'object' : null;
+			const id = v === 'kill' ? g.npc : v === 'interact' ? g.object : g.item;
+			// `quest Q.O` naming an objective of the same kind for another
+			// target: progress and count would follow that one.
+			const named = oi !== undefined && kind && id !== undefined ? data.questObjectives(g.quest)[oi - 1] : null;
+			if (named && named.kind === kind && named.id != null && named.id !== id) {
+				const right = objectiveFor(q, kind, id);
+				const noun = v === 'kill' ? 'npc' : v === 'interact' ? 'object' : 'item';
+				const own = right ? data.questObjectives(g.quest)[right - 1] : null;
+				warn(
+					ln,
+					`${objectiveLabel(g.quest, named).replace(/^(\S+) = /, 'quest $1 is ')}, not this ${noun}${own ? `; ${own.name || `${noun} ${id}`} is ${g.quest}.${right}` : ''}`,
+					right ? `write \`quest ${g.quest}.${right}\`, or \`quest ${g.quest}\` to take the index from the ${noun}` : `its objectives: ${listed()}`,
+				);
+			}
 			if (oi === undefined) {
-				const kind = v === 'kill' ? 'kill' : v === 'collect' ? 'item' : v === 'interact' ? 'object' : null;
-				const id = v === 'kill' ? g.npc : v === 'interact' ? g.object : g.item;
 				if (id !== undefined) oi = objectiveFor(q, kind, id) || undefined;
 				if (oi === undefined && q.objectives.length) {
 					warn(ln, `quest ${g.quest} has no objective for this ${v === 'kill' ? 'npc' : v === 'interact' ? 'object' : 'item'}; write \`quest ${g.quest}.<objective>\``, `its objectives: ${listed()}`);

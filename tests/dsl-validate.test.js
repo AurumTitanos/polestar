@@ -5,7 +5,8 @@
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { compile, guideText, lineOf } = require('./helpers/dsl');
+const { compile, guideText, lineOf, fixtureData } = require('./helpers/dsl');
+const { Data } = require('../tools/lib/dsl/data');
 
 function header(id, extra = []) {
 	return [`guide ${id}`, `title ${id}`, 'faction Alliance', 'levels 1-10', 'zone Elwynn Forest', ...extra, ''];
@@ -328,6 +329,31 @@ test('an objective index past the quest\'s objectives names them, with a hint', 
 	assert.equal(d.line, lineOf(src, '  kill 6 quest 7.2'));
 	assert.equal(d.message, 'quest 7 has 1 objective(s) in data, not 2: 7.1 = kill Kobold Vermin x10');
 	assert.equal(d.hint, 'write `quest 7.<n>` with one of these (`polestar find 7` lists them)');
+});
+
+// A quest with two item objectives, to name the wrong one by index.
+function twoItemData() {
+	const base = fixtureData();
+	const items = {
+		...base.items,
+		95100: { id: 95100, name: 'Elite Tusk', drops: { npc: { 95003: 60 }, object: {} }, vendors: [] },
+		95101: { id: 95101, name: 'Kobold Tusk', drops: { npc: { 95003: 60, 95002: 10 }, object: {} }, vendors: [] },
+	};
+	const quests = {
+		...base.quests,
+		9700: { ...base.quests[7], id: 9700, title: 'Tusks', pre: [], objectives: [{ type: 'item', id: 95100, count: 6 }, { type: 'item', id: 95101, count: 3 }] },
+	};
+	return new Data({ quests, npcs: base.npcs, objects: base.objects, items, zones: base.zones, 'map-frames': base.mapFrames, meta: base.meta }, { dir: base.dir });
+}
+
+test('an objective index that names another item warns and says which index is the item\'s', () => {
+	const src = guideText(['step S', '  accept 9700', '  collect 95101 quest 9700.1', '  collect 95100 quest 9700.1', '  turnin 9700']);
+	const r = compile(src, twoItemData());
+	const d = r.diag.warnings.filter((x) => /9700\.1 is/.test(x.message));
+	assert.equal(d.length, 1, 'only the line whose item is not objective 1');
+	assert.equal(d[0].line, lineOf(src, '  collect 95101 quest 9700.1'));
+	assert.equal(d[0].message, 'quest 9700.1 is collect Elite Tusk x6, not this item; Kobold Tusk is 9700.2');
+	assert.equal(d[0].hint, 'write `quest 9700.2`, or `quest 9700` to take the index from the item');
 });
 
 test('`complete` on a quest without objectives warns: the turn-in is the action', () => {
