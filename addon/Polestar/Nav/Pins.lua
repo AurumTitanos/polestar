@@ -1,15 +1,18 @@
 -- Polestar.Pins: map and minimap icons for every module (quests, maps, QoL,
 -- Nav's own target). Contract: docs/ARCHITECTURE.md, "Pins".
 --
---   Pins.SetLayer(layer, pins, opts)   replace a layer; opts = { world = true, minimap = true, edge = false, scale = 1 }
+--   Pins.SetLayer(layer, pins, opts)   replace a layer; opts = { world = true, minimap = true, edge = false, scale = 1,
+--                                      minimapAreas = false }
 --   Pins.ClearLayer(layer)
 --   Pins.SetLayerVisible(layer, visible)
 --   pin = { map, x, y, f, icon, size, color = { r, g, b, a }, tooltip = string | function(tooltip),
 --           onClick = function(button), priority }
 --   Additive pin fields: c, wx, wy (world position instead of map/x/y), glow (soft halo),
---   area (yards: a soft disc of that radius under the pin, world map only, in the pin's colour),
---   backdrop (true: icon pins sit on a dark Theme "scrim" disc), ring ({ r, g, b, a }: a thin
---   circle around the pin), minimapSize (size on the minimap instead of size).
+--   area (yards: a soft disc of that radius under the pin, in the pin's colour, on the world
+--   map; on the minimap too in a layer with minimapAreas, cut at the minimap's rim),
+--   areaOnly (true: only the area draws, no pin), backdrop (true: icon pins sit on a dark
+--   Theme "scrim" disc), ring ({ r, g, b, a }: a thin circle around the pin), minimapSize
+--   (size on the minimap instead of size).
 --   Pins.SetTrail(runs, opts)          the travel route's dots; runs = { { live = true, point, ... }, ... },
 --                                      point = { c, wx, wy }; opts = { world = true, minimap = true, color }
 --   Pins.ClearTrail()
@@ -150,6 +153,16 @@ function Pins.SetLayer(name, pins, opts)
 	layer.minimap = opts.minimap ~= false
 	layer.edge = opts.edge == true
 	layer.scale = tonumber(opts.scale) or 1
+	-- The widest area decides how far past the minimap's view a pin's disc
+	-- may still reach into it.
+	local maxArea = 0
+	if opts.minimapAreas == true then
+		for _, p in ipairs(layer.pins) do
+			local r = tonumber(p.area)
+			if r and r > maxArea then maxArea = r end
+		end
+	end
+	layer.maxArea = maxArea
 	layer.c, layer.wx, layer.wy = {}, {}, {}
 	resolveLayer(layer)
 	layer.version = (layer.version or 0) + 1
@@ -642,7 +655,7 @@ local function buildWorldMixins()
 		self:SetSize(d, d)
 	end
 
-	-- data = { pin, x, y, dx } (dx: the radius in percent of the map's width)
+	-- data = { pin, layer, x, y, dx } (dx: the radius in percent of the map's width)
 	function areaMixin:OnAcquired(data)
 		self.data = data
 		local r, g, b, a = pinColor(data.pin)
@@ -727,11 +740,13 @@ local function buildWorldMixins()
 						x, y = C.WorldToMap(layer.c[i], layer.wx[i], layer.wy[i], mapID)
 					end
 					if x and x >= 0 and x <= 100 and y >= 0 and y <= 100 then
-						n = n + 1
-						queue[n], qPin[n], qLayer[n], qX[n], qY[n], qPri[n] = n, p, layer, x, y, tonumber(p.priority) or 0
+						if not p.areaOnly then
+							n = n + 1
+							queue[n], qPin[n], qLayer[n], qX[n], qY[n], qPri[n] = n, p, layer, x, y, tonumber(p.priority) or 0
+						end
 						if p.area then
 							local dx = areaRadius(p, layer, i, x, mapID, C)
-							if dx then map:AcquirePin(AREA_TEMPLATE, { pin = p, x = x, y = y, dx = dx }) end
+							if dx then map:AcquirePin(AREA_TEMPLATE, { pin = p, layer = layer, x = x, y = y, dx = dx }) end
 						end
 					end
 				end
@@ -1004,15 +1019,89 @@ local function drawTrailMinimap(frac)
 	mmTrailAt = GetTime()
 end
 
+-- Areas on the minimap (layers with minimapAreas): textures on one frame
+-- just under the trail, masked to the minimap's shape so a disc reaching past
+-- the rim is cut there (a round minimap: pin-fill's disc, which covers 42 of
+-- its 64 pixels; a square one: a plain square). A client without mask
+-- textures shows only the discs that fit inside.
+local SQUARE_MASK = "Interface\\Buttons\\WHITE8X8"
+local mmArea, mmMask, mmMaskSquare, mmMaskHalf
+local mmAreas, mmAreaCount = {}, 0
+
+-- The mask follows the minimap's shape and size.
+local function shapeMask(square, half)
+	if not mmMask or (square == mmMaskSquare and half == mmMaskHalf) then return end
+	mmMaskSquare, mmMaskHalf = square, half
+	local d = square and half * 2 or half * 2 * 64 / 42
+	mmMask:SetTexture(square and SQUARE_MASK or MEDIA .. "pin-fill", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+	mmMask:SetSize(d, d)
+end
+
+local function areaFrame()
+	if mmArea then return end
+	mmArea = CreateFrame("Frame", nil, Minimap)
+	mmArea:SetAllPoints(Minimap)
+	mmArea:SetFrameLevel((Minimap:GetFrameLevel() or 1) + 3)
+	if mmArea.CreateMaskTexture then
+		mmMask = mmArea:CreateMaskTexture()
+		mmMask:SetPoint("CENTER", mmArea, "CENTER", 0, 0)
+		shapeMask(sSquare, sHalf)
+	end
+end
+
+local function minimapArea(i)
+	local t = mmArea:CreateTexture(nil, "BACKGROUND")
+	t:SetTexture(MEDIA .. "area")
+	if mmMask and t.AddMaskTexture then t:AddMaskTexture(mmMask) end
+	mmAreas[i] = t
+	return t
+end
+
+-- Place pin p's area (yards) at the world offset (dn, dw) from the player as
+-- the count-th disc; returns the new count.
+local function placeArea(count, p, layer, dn, dw, area)
+	local half, radius = sHalf, sRadius
+	areaFrame()
+	if not mmMask and sqrt(dn * dn + dw * dw) + area > radius then return count end
+	count = count + 1
+	local t = mmAreas[count] or minimapArea(count)
+	if t.pin ~= p or t.version ~= layer.version then
+		local r, g, b, a = pinColor(p)
+		t:SetVertexColor(r, g, b, a * AREA_ALPHA)
+		t.pin, t.layer, t.version = p, layer, layer.version
+	end
+	local d = 2 * area * half / radius
+	local x, y = Pins.Project(dn, dw, sFacing, radius, half, sRotate, sSquare, nil)
+	t:SetSize(d, d)
+	t:ClearAllPoints()
+	t:SetPoint("CENTER", Minimap, "CENTER", x, y)
+	t:Show()
+	return count
+end
+
+local function hideAreasFrom(count)
+	for i = count + 1, mmAreaCount do
+		local t = mmAreas[i]
+		t:Hide()
+		t.pin, t.layer = nil, nil
+	end
+	mmAreaCount = count
+end
+
 -- Place every visible pin for the current state (sPc, sPx, ...).
 local function drawMinimap()
 	gen = gen + 1
 	stats.draws = stats.draws + 1
 	local half = sHalf
 	local base = (Minimap:GetFrameLevel() or 1) + 5
+	local areas = 0
 	if sPc then
 		local reach = sRadius * MINIMAP_REACH
 		local reach2 = reach * reach
+		-- How far from the player the view reaches: a square's corners reach
+		-- radius * sqrt(2).
+		local view = sSquare and sRadius * 1.415 or sRadius
+		shapeMask(sSquare, half)
 		for _, name in ipairs(order) do
 			local layer = layers[name]
 			if layer and layer.minimap and not hidden[name] then
@@ -1020,13 +1109,21 @@ local function drawMinimap()
 				local pins, lx, ly = layer.pins, layer.wx, layer.wy
 				local edge = layer.edge
 				local size = MINIMAP_SIZE * layer.scale
-				local list, n = nearPins(layer, reach)
+				local maxArea = layer.maxArea or 0
+				local list, n = nearPins(layer, maxArea > 0 and max(reach, view + maxArea) or reach)
 				stats.visited = stats.visited + n
 				for k = 1, n do
 					local i = list[k]
 					local dn, dw = lx[i] - sPx, ly[i] - sPy
-					if edge or dn * dn + dw * dw <= reach2 then
-						local p = pins[i]
+					local d2 = dn * dn + dw * dw
+					local p = pins[i]
+					if maxArea > 0 then
+						local area = tonumber(p.area)
+						if area and area > 0 and d2 <= (view + area) * (view + area) then
+							areas = placeArea(areas, p, layer, dn, dw, area)
+						end
+					end
+					if not p.areaOnly and (edge or d2 <= reach2) then
 						local f = assigned[p]
 						local own = tonumber(p.minimapSize) or tonumber(p.size)
 						local psize = (own or MINIMAP_SIZE) * layer.scale
@@ -1059,6 +1156,7 @@ local function drawMinimap()
 	for i = #mmActive, 1, -1 do
 		if mmActive[i].gen ~= gen then releaseAt(i) end
 	end
+	hideAreasFrom(areas)
 	drawTrailMinimap(trailFrac())
 	-- Held still, the world map's dots follow the player with these redraws.
 	if wDotCount > 0 and installedOn and installedOn:IsShown() and stillTrail() then drawTrailWorld(TRAIL_STILL) end
@@ -1133,6 +1231,7 @@ local function redraw(force)
 	updateWatcher()
 	if not hasMinimapPins() then
 		releaseAllMinimap()
+		hideAreasFrom(0)
 		drawTrailMinimap(0) -- no trail: hides its dots
 		dirty = true
 		return
@@ -1173,6 +1272,18 @@ function Pins.GetMinimapFrames(name)
 	local out = {}
 	for _, f in ipairs(mmActive) do
 		if f.layer and f.layer.name == name then out[#out + 1] = f end
+	end
+	return out
+end
+
+-- Area discs currently drawn on the minimap for a layer (diagnostics and
+-- tests; a redraw still queued for this frame runs first).
+function Pins.GetMinimapAreas(name)
+	flushQueued()
+	local out = {}
+	for i = 1, mmAreaCount do
+		local t = mmAreas[i]
+		if t.layer and t.layer.name == name then out[#out + 1] = t end
 	end
 	return out
 end

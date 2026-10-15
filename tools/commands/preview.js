@@ -589,6 +589,28 @@ Polestar.Nav.RegisterCrossings({ complete = true,
 	crossings = { { id = "border", a = { map = 1429, c = 0, wx = -700, wy = 1460, r = 15 }, b = { map = 1436, c = 0, wx = -700, wy = 1540, r = 15 } } } })
 Polestar.Nav.SetTarget(1436, 60, 45, "Sentinel Hill")
 stub.advance(1)`;
+// Spawn areas: a guide step whose goals spawn at several camps (compiled
+// `spots`) around the player at the abbey, with no quest markers on: the
+// candles (the arrow's goal: the camp it points at, its other camps, one
+// other place they spawn fainter) and the kobolds (the step's other goal).
+const AREAS = `local w = stub.world
+w.accept(7, { { text = "Kobold Vermin slain: 0/10", type = "monster", required = 10 } }); w.progress(7, 1, 3)
+w.accept(60, { { text = "Large Candle: 0/8", type = "item", required = 8 } }); w.progress(60, 1, 2)
+stub.advance(0.3)
+Polestar.RegisterPack({ addon = "Polestar_Preview", id = "preview", format = 1, title = "Preview", author = "Polestar", version = "1", license = "GPL-3.0-only" })
+Polestar.RegisterGuide({ id = "preview/areas", pack = "preview", title = "Elwynn Forest", faction = "Alliance", minLevel = 1, maxLevel = 10, zone = 1429, steps = {
+	{ title = "Kobold Camp", goals = {
+		{ t = "collect", quest = 60, title = "Kobold Candles", item = 772, itemName = "Large Candle", count = 8, oi = 1, map = 1429, x = 44.6, y = 42.4, spread = true, spots = {
+			{ x = 44.6, y = 42.4, r = 35, n = 4 }, { x = 47.8, y = 35.8, r = 40, n = 6 }, { x = 50.6, y = 40.8, r = 45, n = 5 },
+			{ x = 42.2, y = 35.4, r = 30, n = 3 }, { x = 49.0, y = 46.5, r = 25, n = 1, alt = true },
+		} },
+		{ t = "kill", quest = 7, title = "Kobold Camp Cleanup", target = "Kobold Vermin", npc = 6, count = 10, oi = 1, map = 1429, x = 52.5, y = 33.0, spots = {
+			{ x = 52.5, y = 33.0, r = 50, n = 7 }, { x = 39.8, y = 44.6, r = 40, n = 5 }, { x = 45.2, y = 30.8, r = 35, n = 3 },
+		} },
+	} },
+} })
+Polestar.Engine.SetGuide("preview/areas")
+stub.advance(0.3)`;
 function questScene(roots, script) {
 	// `before` is read when the panel runs, so the database is only built for these scenes.
 	return { roots, stubs: QUEST_STUBS, files: QUEST_FILES, get before() { return questWorld(); }, script };
@@ -975,6 +997,14 @@ Polestar.UI.Picker.SetCategory("Leveling"); Polestar.UI.Picker.Select("forever/h
 			questScene(['PolestarNavArrow'], `Polestar.Set("nav.arrowScale", 1.6)\n${TRAVEL}`),
 			questScene(['WorldMapFrame'], TRAVEL),
 			questScene(['PolestarNavArrow'], `Polestar.Set("nav.arrowScale", 1.6)\n${TRAVEL}\nstub.world.map = nil\nstub.advance(0.2)`),
+		],
+	},
+	{
+		file: 'nav-areas.svg',
+		title: "Spawn areas: a guide step whose goals spawn at several camps, every camp a zone on the world map (the arrow's goal in the arrow's colour, the camp it points at under the target pin, another place it spawns fainter; the step's other goal fainter in the goals' colour); on the minimap the arrow's goal's camps around the player, cut at the rim",
+		panels: [
+			questScene(['WorldMapFrame'], AREAS),
+			questScene(['Minimap'], AREAS),
 		],
 	},
 	{

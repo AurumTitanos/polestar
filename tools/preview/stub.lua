@@ -231,6 +231,7 @@ local function entry(o)
 		e.checked = o.checked
 		e.checkedTexture = idOf(o.checkedTexture)
 		e.thumbTexture = idOf(o.thumbTexture)
+		e.mask = idOf(o.mask)
 		e.value, e.minValue, e.maxValue = o.value, o.minValue, o.maxValue
 		e.euiSkin = o.euiSkin
 		e.euiOpts = o.euiOpts

@@ -217,6 +217,12 @@
 - `/polestar way 40 60` where the game gives no map position (an instance,
   another continent) says "No position here" instead of how to type the
   command (thanks meellm).
+- Every place the guide step's mobs and objects spawn is a zone on the map
+  now, not one point: all the camps of the goal the arrow follows, in the
+  arrow's colour on the world map and the minimap, and the step's other
+  goals' camps, fainter, on the world map. If the first camp is crowded, the
+  next one is in sight; the next-spot button, or a click on a camp's mark on
+  the world map, moves the arrow there (thanks Pynte).
 
 ### For guide authors
 

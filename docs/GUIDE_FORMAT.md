@@ -255,7 +255,7 @@ gets no `spots`.
   a walk from the goal's point, and the rest follow as alternatives. At runtime
   the player searches spot by spot: the arrow says "Search here" inside a spot
   (never "Arrived"), moves on to the nearest spot not visited lately once the
-  player leaves it, and the world map marks every spot.
+  player leaves it, and the map shows every spot as an area.
 - **Hand-placed** (`@x,y`): the author's point is the spot the arrow takes,
   wide enough for any place of the target it stands in, and every other place
   the data knows follows as an alternative. Only where the data agrees: a point
