@@ -190,8 +190,14 @@
   Each shows what it opens and who needs it, whether you hold the key, and
   every step with your progress: done, in your log, open now, waiting on an
   earlier step, too low or short of standing. "Guide me through it" opens a
-  guide through what is left, from where you stand. Forever took the Seal of
-  Ascension out, so Upper Blackrock Spire has no key (thanks Shockp).
+  guide through what is left, from where you stand: every quest of the
+  chain in turn, including the ones given, ended or done inside a dungeon
+  (Marshal Windsor in Blackrock Depths, Blackhand's Command at Drakkisath's
+  Brand, the Core Fragment by the Molten Core portal), which send you to
+  that dungeon's entrance and say what is inside; a quest still above your
+  level stays in the guide, its accept saying from which level. Forever took
+  the Seal of Ascension out, so Upper Blackrock Spire has no key (thanks
+  Shockp).
 - A step that asks you to buy something can buy it for you at a merchant
   that sells it, after selling greys and repairing: Options, Quality of
   Life, Vendors, Buy for the guide (off by default; Shift skips). Only what

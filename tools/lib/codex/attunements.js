@@ -12,17 +12,21 @@
 // adds the item's own sources (drops and chests for a dropped key, the
 // standing and the NPC that hands it out for Aqual Quintessence). `links`
 // in the table add a prerequisite our quest data lacks, each with its public
-// source (Forever's City of Dalaran chain); `removed` lists what Forever took
-// out (the Seal of Ascension), shown in the local comparison only.
+// source (Forever's City of Dalaran chain); `inside` places an NPC or object
+// of a chain with no open-world spawn that the Codex puts in no instance
+// (Marshal Windsor, the Core Fragment), each with its public source, so the
+// guide sends the player to that instance's entrance; `removed` lists what
+// Forever took out (the Seal of Ascension), shown in the local comparison only.
 //
-//   loadAttunementTable(file?)          -> { attunements: [Entry], removed: [Removed] }
+//   loadAttunementTable(file?)          -> { attunements: [Entry], inside: [Inside], removed: [Removed] }
 //   attunementsOf(codex, { table })     -> { byKey: { instanceKey: [Attunement] }, warnings: [string] }
 //   auditReport(journal, attune, codex, { verdicts }) -> markdown: our chains against Attune's
 //                                          (local only; `attune` from tools/lib/consume/attune.js;
 //                                          verdicts default to data/local/attunements-verdicts.md)
 //
 // Attunement: { id, name, kind: 'attunement'|'key'|'item', need: 'each'|'one', faction: 'A'|'H'|null,
-//   item: { id, name, quality }|null, note, level, any: bool, goal: [questIds], steps: [Step] }
+//   item: { id, name, quality }|null, note, level, any: bool, goal: [questIds], steps: [Step],
+//   inside: [{ kind: 'npc'|'object', id, instance }]|null }   (the table's `inside` its steps use)
 // Step: { kind: 'quest', id, title, level, minLevel, faction, classes, start, finish, startItem,
 //          after: [ids], afterAny: [ids], goal: bool, rep: { faction, name, standing }|null }
 //     | { kind: 'drop', item: { id, name }, npc: Place, chance, instance }
@@ -48,7 +52,7 @@ const MAX_SOURCES = 3;
 
 function loadAttunementTable(file = TABLE) {
 	const raw = JSON.parse(fs.readFileSync(file, 'utf8'));
-	return { attunements: raw.attunements || [], removed: raw.removed || [] };
+	return { attunements: raw.attunements || [], inside: raw.inside || [], removed: raw.removed || [] };
 }
 
 function placeOf(kind, id, codex) {
@@ -119,8 +123,39 @@ function questStep(q, codex, after, afterAny) {
 	};
 }
 
-// One table entry -> Attunement | null (warnings pushed).
-function buildOne(entry, codex, warn) {
+// The NPCs and objects a chain's steps meet ("npc:<id>", "object:<id>"):
+// quest givers and turn-ins, kill and click targets, the drop and chest
+// sources of objective items, and the item steps' own NPC or object.
+function entitiesOf(steps, codex) {
+	const quests = codex.quests || {};
+	const items = codex.items || {};
+	const out = new Set();
+	const add = (kind, id) => id && out.add(`${kind}:${id}`);
+	for (const s of steps) {
+		if (s.kind === 'quest') {
+			const q = quests[s.id] || {};
+			for (const e of [q.start || {}, q.end || {}]) {
+				for (const id of e.npc || []) add('npc', id);
+				for (const id of e.object || []) add('object', id);
+			}
+			for (const o of q.objectives || []) {
+				if (o.type === 'kill') add('npc', o.id);
+				else if (o.type === 'object') add('object', o.id);
+				else if (o.type === 'item') {
+					for (const src of (items[o.id] && items[o.id].sources) || []) {
+						if (src.type === 'drop') add('npc', src.npc);
+						else if (src.type === 'object') add('object', src.object);
+					}
+				}
+			}
+		} else if (s.npc) add('npc', s.npc.id);
+		else if (s.object) add('object', s.object.id);
+	}
+	return out;
+}
+
+// One table entry -> Attunement | null (warnings pushed). inside: the table's `inside`.
+function buildOne(entry, codex, warn, inside = []) {
 	const quests = codex.quests || {};
 	const links = entry.links || {};
 	const side = SIDE[entry.faction] || null;
@@ -190,7 +225,16 @@ function buildOne(entry, codex, warn) {
 		any: !!entry.any,
 		goal,
 		steps,
+		inside: placedInside(steps, codex, inside),
 	};
+}
+
+// The table's `inside` entries this chain meets, in an instance of the Codex.
+function placedInside(steps, codex, inside) {
+	const met = entitiesOf(steps, codex);
+	const instances = codex.instances || {};
+	const out = inside.filter((e) => met.has(`${e.kind}:${e.id}`) && instances[e.instance]).map((e) => ({ kind: e.kind, id: e.id, instance: e.instance }));
+	return out.length ? out : null;
 }
 
 function attunementsOf(codex = {}, { table } = {}) {
@@ -202,7 +246,7 @@ function attunementsOf(codex = {}, { table } = {}) {
 		const warn = (m) => warnings.push(m);
 		// An instance this build lacks (a fixture, a build without the client) has no page.
 		if (!instances[entry.key]) continue;
-		const a = buildOne(entry, codex, warn);
+		const a = buildOne(entry, codex, warn, t.inside || []);
 		if (a) (byKey[entry.key] = byKey[entry.key] || []).push(a);
 	}
 	return { byKey, warnings };

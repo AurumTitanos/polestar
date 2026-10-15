@@ -1338,12 +1338,18 @@ local function fmt(pattern, value)
 	return pattern:format(value)
 end
 
--- verb, subject, subjectKind, detail
+-- verb, subject, subjectKind, detail. An accept above the character's level
+-- says from which level (an attunement's quests stay in its guide until then).
 local function describe(goal)
 	local t = goal.t
 	local C = Compat()
 	if t == "accept" then
-		return L["Accept"], questTitle(goal), "quest", fmt(L["from %s"], goal.npcName or goal.objName or goal.itemName)
+		local detail = fmt(L["from %s"], goal.npcName or goal.objName or goal.itemName)
+		local lvl = tonumber(goal.minLevel)
+		if lvl and player and (player.level or 1) < lvl then
+			detail = detail and L["%s, from level %d"]:format(detail, lvl) or L["From level %d"]:format(lvl)
+		end
+		return L["Accept"], questTitle(goal), "quest", detail
 	elseif t == "turnin" then
 		return L["Turn in"], questTitle(goal), "quest", fmt(L["at %s"], goal.npcName or goal.objName)
 	elseif t == "complete" then

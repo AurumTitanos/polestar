@@ -1,5 +1,5 @@
 {
-	"_about": "Attunements and keys per Codex instance (tools/lib/codex/attunements.js, docs/ARCHITECTURE.md, 'Codex'). Each entry names only its goal (the quests that end the chain, or the key item) and our own one-line note; the steps are built from the Codex's quests (pre, preAny), items (sources) and npcs. `links` adds a prerequisite our quest data lacks, each with its public source. `removed` lists what Forever took out, with the evidence. Sources checked on 2026-10-15 against client build 1.60.1.70374.",
+	"_about": "Attunements and keys per Codex instance (tools/lib/codex/attunements.js, docs/ARCHITECTURE.md, 'Codex'). Each entry names only its goal (the quests that end the chain, or the key item) and our own one-line note; the steps are built from the Codex's quests (pre, preAny), items (sources) and npcs. `links` adds a prerequisite our quest data lacks, each with its public source. `inside` places an NPC or object of a chain that has no open-world spawn and that the Codex places in no instance (a quest giver, turn-in or objective inside a dungeon), with its public source. `removed` lists what Forever took out, with the evidence. Sources checked on 2026-10-15 against client build 1.60.1.70374.",
 	"attunements": [
 		{
 			"key": "molten-core",
@@ -168,6 +168,14 @@
 			},
 			"sources": ["https://www.wowhead.com/forever/item=277507", "https://www.wowhead.com/forever/quest=96984", "https://www.wowhead.com/forever/guide/city-of-dalaran-dungeon-overview-location-rewards"]
 		}
+	],
+	"inside": [
+		{ "kind": "npc", "id": 9023, "name": "Marshal Windsor", "instance": "blackrock-depths", "sources": ["https://www.wowhead.com/forever/npc=9023 ('can be found in Blackrock Depths')"] },
+		{ "kind": "object", "id": 164689, "name": "Monument of Franclorn Forgewright", "instance": "blackrock-depths", "sources": ["https://www.wowhead.com/forever/object=164689 ('can be found in Blackrock Depths')"] },
+		{ "kind": "object", "id": 179553, "name": "Core Fragment", "instance": "blackrock-depths", "sources": ["https://www.wowhead.com/forever/object=179553 ('can be found in Blackrock Depths')", "https://www.wowhead.com/forever/quest=7848 ('the Molten Core entry portal in Blackrock Depths')"] },
+		{ "kind": "object", "id": 175785, "name": "Inconspicuous Documents", "instance": "blackrock-spire", "sources": ["https://www.wowhead.com/forever/object=175785 ('can be found in Blackrock Spire')"] },
+		{ "kind": "object", "id": 179880, "name": "Drakkisath's Brand", "instance": "blackrock-spire", "sources": ["https://www.wowhead.com/forever/object=179880 ('can be found in Blackrock Spire')"] },
+		{ "kind": "object", "id": 103821, "name": "Doan's Strongbox", "instance": "scarlet-monastery", "sources": ["https://www.wowhead.com/forever/object=103821 ('can be found in Scarlet Monastery')"] }
 	],
 	"removed": [
 		{

@@ -36,7 +36,8 @@
 --   Dungeons.Register(group, a, b)  -- pack files only
 --   Dungeons.Attunements(key, faction) -> { attunement, ... }   -- faction "A" | "H" | nil (all)
 --       attunement = { id, name, kind = "attunement"|"key"|"item", need = "each"|"one", faction,
---         item = { id, name, quality }, note, level, any, goal = { questIds }, steps = { step, ... } }
+--         item = { id, name, quality }, note, level, any, goal = { questIds }, steps = { step, ... },
+--         inside = { { kind = "npc"|"object", id, instance }, ... } | nil }   -- spawnless NPCs and objects it meets, placed
 --       step: { kind = "quest", id, title, level, minLevel, faction, classes, start, finish,
 --         startItem, after = { ids }, afterAny = { ids }, goal, rep = { faction, name, standing } }
 --         | { kind = "drop", item, npc = point, chance, instance } | { kind = "object", item, object = point, chance }

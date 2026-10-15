@@ -1556,12 +1556,19 @@ Aqual Quintessence) or, item-less, when its goals are done (one of them with
 makes a stop per quest still to do (`Lookup.QuestStep`, with any open
 prerequisite `Lookup.QuestChain` finds that the list lacks), each after the
 stops it waits on, ordered by `Dungeons.OrderStops` from where the player
-stands with no fixed end (`CharState().dungeonAttune["<key>:<id>"]`); a drop
+stands with no fixed end (`CharState().dungeonAttune["<key>:<id>"]`). Each
+quest step is whole (accept, objectives, turn-in): `Lookup.QuestStep`'s
+`opts.inside` places a giver, target, chest or turn-in without a spawn at
+the entrance of the instance it is in (the Codex NPC's `instance`, else the
+attunement's `inside` from the cited table) and the step's note says what is
+inside where; without it such a quest would be a lone "First do the quest"
+note, which the Engine passes as done. An accept above the character's
+level stays, the Engine's detail adding "from level N". A drop
 or chest is a collect step at its NPC or object (inside an instance: at its
 entrance, with a note naming it), a standing a rep step, a gift a talk step,
 each after the quest before it in the list; the last step holds the note and
-the entrance. Nothing left: nil, "done". `Dungeons.Attune(key, id)` opens it
-in a new tab.
+the entrance. Nothing left: nil, "done"; the other side's attunement: nil,
+"nothing". `Dungeons.Attune(key, id)` opens it in a new tab.
 
 ## UI — guide window, hub and options
 
@@ -2172,9 +2179,15 @@ built.
   standing and the NPC handing it out). `links` add a prerequisite our quest
   data lacks, with its source (Forever's City of Dalaran: Blood in the
   Streets after Dalaran Patrols and Key to the City, Heart of Disruption
-  after it). `removed` lists what Forever took out, with its evidence (the
-  Seal of Ascension: 4743 no longer rewards it, no Forever `ItemSparse`
-  row), read only by the local comparison. Covered: Molten Core (Attunement
+  after it). `inside` places an NPC or object of a chain that has no
+  open-world spawn and no Codex instance in the instance it is in, each with
+  its Wowhead Forever page (Marshal Windsor, the Monument of Franclorn
+  Forgewright and the Core Fragment in Blackrock Depths; the Inconspicuous
+  Documents and Drakkisath's Brand in Blackrock Spire; Doan's Strongbox in
+  Scarlet Monastery); each attunement carries the entries its steps meet as
+  `inside: [{ kind, id, instance }]`. `removed` lists what Forever took out,
+  with its evidence (the Seal of Ascension: 4743 no longer rewards it, no
+  Forever `ItemSparse` row), read only by the local comparison. Covered: Molten Core (Attunement
   to the Core; Aqual Quintessence), Onyxia's Lair (the Drakefire Amulet,
   each side's chain), Blackwing Lair (Blackhand's Command), Naxxramas (one
   of the three Dread Citadel quests), Scholomance (the Skeleton Key, each
