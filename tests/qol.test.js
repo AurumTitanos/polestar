@@ -56,7 +56,7 @@ test('options: every qol setting is registered, on Questing or Quality of Life, 
 		for _, k in ipairs({ "itemButton", "targetButton", "hearthButton", "buttonScale", "xpTracker", "sellJunk", "autoRepair",
 			"rewardHighlight", "rewardAutoPick", "flightAutoOpen", "flightHighlight", "deathHelper", "instantQuestText",
 			"skipGossip", "fastLoot", "declineDuels", "repairGuild", "hideErrors", "autoReleasePvP", "declineGuildInvites",
-			"declinePartyStrangers", "acceptPartyFriends", "acceptSummon", "acceptResurrect" }) do keys[k] = Polestar.GetDefault("qol." .. k) end
+			"declinePartyStrangers", "acceptPartyFriends", "acceptSummon", "acceptResurrect", "rewardEquip" }) do keys[k] = Polestar.GetDefault("qol." .. k) end
 		emit(keys)
 	`);
 	const registered = new Set(specs.filter((c) => c.key).map((c) => c.key.replace(/^qol\./, '')));
@@ -67,6 +67,7 @@ test('options: every qol setting is registered, on Questing or Quality of Life, 
 		assert.ok(c.tab && c.section);
 	}
 	assert.equal(defaults.rewardAutoPick, false, 'auto-pick is off by default');
+	assert.equal(defaults.rewardEquip, false, 'wearing rewards is off by default');
 	assert.equal(defaults.sellJunk, true);
 });
 
@@ -684,6 +685,243 @@ test('rewards: auto-pick takes the best when on; Shift, quest cost and a disable
 	assert.deepEqual(out[0], [2], 'disabled Gear: vendor value decides');
 	assert.equal(out[1], 0);
 	assert.equal(out[2], 0);
+});
+
+const WEAR = `
+	q.items[11] = { name = "Sturdy Boots", quality = 2 }
+	q.items[12] = { name = "Light Gloves", quality = 2 }
+	q.items[13] = { name = "Old Belt", quality = 1 }
+	q.landRewards = true
+	-- A quest offering the boots or the gloves, the belt with every turn-in;
+	-- the panel empties after each turn-in, as the client's does.
+	local function offer(choices, rewards)
+		q.choices, q.rewards = choices or { { id = 11 }, { id = 12 } }, rewards or { { id = 13 } }
+		q.questComplete(); stub.runTimers()
+	end
+	local function turnIn(i, choices, rewards)
+		offer(choices, rewards)
+		GetQuestReward(i)
+		stub.advance(1)
+	end
+	Polestar.Gear = {
+		IsEnabled = function() return true end,
+		IsUpgrade = function(link)
+			if link:find("item:11|", 1, true) then return true, 6, 12.5 end
+			if link:find("item:13|", 1, true) then return true, 2, nil end
+			return false, -1
+		end,
+		CompareToEquipped = function(link) return { slot = link:find("item:11|", 1, true) and 8 or 6 } end,
+		Client = { InventoryLink = function(slot) return q.worn[slot] and ("|Hitem:" .. q.worn[slot] .. "|h") end },
+		GetItemInfo = function() end,
+	}
+	local function worn()
+		local out = {}
+		for _, c in ipairs(q.calls) do
+			if c[1] == "EquipItemByName" then out[#out + 1] = c[2]:match("item:(%d+)") .. "@" .. tostring(c[3]) end
+		end
+		return out
+	end
+`;
+
+test('rewards: what a turn-in gives is worn once it reaches the bags, when it is an upgrade', () => {
+	const [out] = run(`${WEAR}
+		set("rewardEquip", true)
+		offer()
+		GetQuestReward(1)                 -- the player's pick; the belt comes with every turn-in
+		local early = #worn()
+		stub.advance(1)
+		emit({ early = early, worn = worn(), boots = printed("Wearing |Hitem:11|h%[Sturdy Boots%]|h %(12%% better%)"), belt = printed("Wearing |Hitem:13|h%[Old Belt%]|h%.") })
+	`);
+	assert.deepEqual(out, { early: 0, worn: ['11@8', '13@6'], boots: true, belt: true });
+});
+
+test('rewards: wearing waits for combat to end; off by default, Shift at the turn-in, a pick that is no upgrade and a disabled Gear module wear nothing', () => {
+	const out = run(`${WEAR}
+		turnIn(1)
+		emit(#worn())                       -- off by default
+
+		set("rewardEquip", true)
+		q.combat(true)
+		turnIn(1)
+		local inCombat = #worn()
+		q.combat(false)
+		stub.advance(1)
+		emit({ inCombat = inCombat, after = worn() })
+
+		q.calls = {}
+		stub.keys.shift = true
+		turnIn(1)
+		stub.keys.shift = false
+		emit(#worn())
+
+		turnIn(2, nil, {})
+		emit(#worn())                       -- the gloves are no upgrade
+
+		Polestar.Gear.IsEnabled = function() return false end
+		turnIn(1)
+		emit(#worn())
+	`);
+	assert.equal(out[0], 0, 'off by default');
+	assert.deepEqual(out[1], { inCombat: 0, after: ['11@8', '13@6'] });
+	assert.equal(out[2], 0, 'Shift');
+	assert.equal(out[3], 0, 'no upgrade');
+	assert.equal(out[4], 0, 'Gear disabled');
+});
+
+test('rewards: a turn-in made before anything else sees the panel wears that quest\'s item, not the last quest\'s', () => {
+	const [out] = run(`${WEAR}
+		set("rewardEquip", true)
+		turnIn(2, nil, {})                  -- the gloves: nothing worn, but this panel offered the boots too
+		q.calls = {}
+		q.early = true                      -- turns in on QUEST_COMPLETE, ahead of Polestar, as automation does
+		offer({ { id = 13 } }, {})          -- the only reward: the belt
+		stub.advance(1)
+		emit(worn())
+	`, {
+		before: `
+			local f = CreateFrame("Frame")
+			f:RegisterEvent("QUEST_COMPLETE")
+			f:SetScript("OnEvent", function() if stub.qol.early then GetQuestReward(1) end end)
+		`,
+	});
+	assert.deepEqual(out, ['13@6']);
+});
+
+test('rewards: only a new copy counts: an older one in the bags, or a turn-in that never delivers, wears nothing', () => {
+	const [out] = run(`${WEAR}
+		set("rewardEquip", true)
+		q.addItem(0, 9, 11, 1)              -- boots from before
+		q.landRewards = false               -- the turn-in never delivers
+		offer()
+		GetQuestReward(1)
+		stub.fire("BAG_UPDATE_DELAYED")     -- something else moves in the bags
+		stub.advance(12)
+		q.addItem(0, 10, 11, 1)             -- boots from elsewhere, long after the turn-in
+		stub.fire("BAG_UPDATE_DELAYED")
+		emit(worn())
+	`);
+	assert.deepEqual(out, {});
+});
+
+// Gear answering from what is worn now (q.worn) and fixed scores, as the real
+// one does: a ring replaces the weaker finger, and a one-hand or off-hand
+// piece against a worn two-hander is weighed together with the best partner
+// in the bags (q.bagPartner).
+const GEAR = `
+	local score, inv = {}, {} -- item ID -> score, inventory type
+	local function linkOf(id) return id and ("|Hitem:" .. id .. "|h[" .. ((q.items[id] or {}).name or "?") .. "]|h") end
+	local function idOf(link) return tonumber(link:match("item:(%d+)")) end
+	local function at(slot) return score[q.worn[slot]] or 0 end
+	Polestar.Gear = {
+		IsEnabled = function() return true end,
+		Client = { InventoryLink = function(slot) return linkOf(q.worn[slot]) end },
+		GetItemInfo = function(link) local id = idOf(link); return inv[id] and { id = id, inv = inv[id] } end,
+		CompareToEquipped = function(link)
+			local id = idOf(link)
+			local s, t, r = score[id], inv[id]
+			if t == 11 then
+				local slot = at(12) < at(11) and 12 or 11
+				r = { slot = slot, old = at(slot), new = s }
+			elseif (t == 13 or t == 14) and inv[q.worn[16]] == 17 then
+				r = { slot = t == 14 and 17 or 16, old = at(16), new = s + (q.bagPartner or 0) }
+			else
+				local slot = ({ [8] = 8, [13] = 16, [14] = 17 })[t]
+				r = { slot = slot, old = at(slot), new = s }
+			end
+			r.score, r.delta = s, r.new - r.old
+			r.pct = r.old > 0 and r.delta / r.old * 100 or nil
+			return r
+		end,
+	}
+	Polestar.Gear.IsUpgrade = function(link)
+		local r = Polestar.Gear.CompareToEquipped(link)
+		return r.delta > 0, r.delta, r.pct
+	end
+`;
+
+test('rewards: with a two-hander worn, a one-hand or off-hand reward is worn only when it beats the two-hander by itself', () => {
+	const out = run(`${WEAR}${GEAR}
+		set("rewardEquip", true)
+		q.items[30], q.items[31], q.items[32] = { name = "Greatsword" }, { name = "Short Sword" }, { name = "Buckler" }
+		score[30], inv[30] = 10, 17
+		score[31], inv[31] = 7, 13
+		score[32], inv[32] = 6, 14
+		q.worn[16] = 30
+		q.bagPartner = 5                    -- 7 + 5 and 6 + 5 beat the 10 only with a bag piece
+		turnIn(1, { { id = 31 } }, { { id = 32 } })
+		emit({ worn = worn(), main = q.worn[16] })
+
+		score[31] = 11                      -- beats the two-hander by itself
+		turnIn(1, { { id = 31 } }, {})
+		emit({ worn = worn(), main = q.worn[16], said = printed("Wearing |Hitem:31|h%[Short Sword%]|h %(10%% better%)") })
+	`);
+	assert.deepEqual(out[0], { worn: {}, main: 30 }, 'the two-hander stays on');
+	assert.deepEqual(out[1], { worn: ['31@16'], main: 31, said: true });
+});
+
+test('rewards: with a two-hander worn, a reward for any other slot goes in its own slot', () => {
+	const [out] = run(`${WEAR}${GEAR}
+		set("rewardEquip", true)
+		score[30], inv[30] = 10, 17
+		score[11], inv[11] = 4, 8           -- the boots, for the feet
+		q.worn[16] = 30
+		turnIn(1, { { id = 11 } }, {})
+		emit(worn())
+	`);
+	assert.deepEqual(out, ['11@8']);
+});
+
+test('rewards: two rings from one turn-in go on one at a time, the second on the other finger only when it beats the ring there', () => {
+	const fingers = (worn11) => run(`${WEAR}${GEAR}
+		set("rewardEquip", true)
+		for id, s in pairs({ [20] = ${worn11}, [21] = 10, [22] = 8, [23] = 3 }) do score[id], inv[id] = s, 11 end
+		q.worn[11], q.worn[12] = 20, 23
+		turnIn(1, { { id = 21 } }, { { id = 22 } })   -- the pick (10) and a ring every turn-in gives (8)
+		emit({ worn = worn(), fingers = { q.worn[11], q.worn[12] } })
+	`)[0];
+	assert.deepEqual(fingers(5), { worn: ['21@12', '22@11'], fingers: [22, 21] }, 'the second ring beats the 5 on the other finger');
+	assert.deepEqual(fingers(9), { worn: ['21@12'], fingers: [20, 21] }, 'the second ring loses to the 9 and leaves the first alone');
+});
+
+test('rewards: another slot changing while a ring is still going on does not send the next ring to the same finger', () => {
+	const [out] = run(`${WEAR}${GEAR}
+		set("rewardEquip", true)
+		for id, s in pairs({ [20] = 5, [21] = 10, [22] = 8, [23] = 3 }) do score[id], inv[id] = s, 11 end
+		q.worn[11], q.worn[12] = 20, 23
+		offer({ { id = 21 } }, { { id = 22 } })
+		GetQuestReward(1)
+		stub.advance(0.1)                   -- both rings land; the first is on its way to a finger
+		stub.fire("PLAYER_EQUIPMENT_CHANGED", 1, true)
+		stub.advance(1)
+		emit({ worn = worn(), fingers = { q.worn[11], q.worn[12] } })
+	`);
+	assert.deepEqual(out, { worn: ['21@12', '22@11'], fingers: [22, 21] });
+});
+
+test('rewards: a reward that never goes on (its bind confirmation cancelled) holds up the next one only for a while', () => {
+	const [out] = run(`${WEAR}${GEAR}
+		set("rewardEquip", true)
+		for id, s in pairs({ [20] = 5, [21] = 10, [22] = 8, [23] = 3 }) do score[id], inv[id] = s, 11 end
+		q.worn[11], q.worn[12] = 20, 23
+		q.refuse[21] = true
+		turnIn(1, { { id = 21 } }, { { id = 22 } })
+		stub.advance(12)
+		emit({ worn = worn(), fingers = { q.worn[11], q.worn[12] } })
+	`);
+	assert.deepEqual(out, { worn: ['21@12', '22@12'], fingers: [20, 22] });
+});
+
+test('rewards: turning wearing off while a reward waits for combat to end wears nothing', () => {
+	const [out] = run(`${WEAR}
+		set("rewardEquip", true)
+		q.combat(true)
+		turnIn(1)
+		set("rewardEquip", false)
+		q.combat(false)
+		stub.advance(1)
+		emit(worn())
+	`);
+	assert.deepEqual(out, {});
 });
 
 test('rewards: waits for uncached item data before ranking; an upgrade is marked from its item ID meanwhile, the frame once it settles', () => {

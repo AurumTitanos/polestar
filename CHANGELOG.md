@@ -129,6 +129,9 @@
   bloodmages' beasts, and Horde Warriors in the Barrens gather the Twitching
   Antennae (fifteen minutes) on the way back from Gann Stonespire and hearth
   to Ruga at once. Teldrassil says Iverron's Antidote lasts five minutes.
+- Quest rewards that are upgrades can go on by themselves once they reach
+  your bags, out of combat: Options, Questing, Rewards & gear, Wear reward
+  upgrades (off by default; Shift at the turn-in skips).
 
 ### For guide authors
 
