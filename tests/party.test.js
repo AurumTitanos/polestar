@@ -201,3 +201,123 @@ emit(registered())`, LIVE);
 	assert.ok(on.includes('CHAT_MSG_ADDON') && on.includes('GROUP_ROSTER_UPDATE'));
 	assert.deepEqual(off.filter((e) => e !== 'QUEST_LOG_UPDATE'), []);
 });
+
+const MEMBERS = `
+local function members()
+	local out = {}
+	for _, m in ipairs(P.Members()) do
+		local qs = {}
+		for q, counts in pairs(m.quests) do
+			local parts = {}
+			for i, c in ipairs(counts) do parts[i] = c[1] .. "/" .. c[2] end
+			qs[#qs + 1] = q .. ":" .. table.concat(parts, ",")
+		end
+		table.sort(qs)
+		out[#out + 1] = m.name .. " " .. table.concat(qs, ";")
+	end
+	return out
+end`;
+
+test('party: progress from a party member is kept by quest', () => {
+	const [got] = run(`${SENT}${MEMBERS}
+p.join("Ana")
+p.receive("Ana-TestRealm", "1|33:5/8,0/1")
+emit(members())`, LIVE);
+	assert.deepEqual(got, ['Ana 33:5/8,0/1']);
+});
+
+test('party: a member on another realm is matched by name and realm', () => {
+	const [got] = run(`${SENT}${MEMBERS}
+p.join("Ben", "Other")
+p.receive("Ben-Other", "1|60:2/4")
+emit(members())`, LIVE);
+	assert.deepEqual(got, ['Ben 60:2/4']);
+});
+
+test('party: messages from outside the party, from yourself, on another channel or prefix are ignored', () => {
+	const [got] = run(`${SENT}${MEMBERS}
+p.join("Ana")
+p.receive("Zed-TestRealm", "1|33:5/8")
+p.receive("Testchar-TestRealm", "1|33:5/8")
+p.receive("Ana-TestRealm", "1|33:5/8", "GUILD")
+p.receive("Ana-TestRealm", "1|33:5/8", "PARTY", "Other")
+p.receive("Ana-TestRealm", "garbage")
+emit(#P.Members())`, LIVE);
+	assert.equal(got, 0);
+});
+
+test('party: a snapshot replaces what was known; a plain message merges', () => {
+	const [merged, replaced] = run(`${SENT}${MEMBERS}
+p.join("Ana")
+p.receive("Ana-TestRealm", "1S|33:1/8")
+p.receive("Ana-TestRealm", "1|60:2/4")
+emit(members())
+p.receive("Ana-TestRealm", "1S|60:3/4")
+emit(members())`, LIVE);
+	assert.deepEqual(merged, ['Ana 33:1/8;60:2/4']);
+	assert.deepEqual(replaced, ['Ana 60:3/4']);
+});
+
+test('party: a dropped quest disappears', () => {
+	const [got] = run(`${SENT}${MEMBERS}
+p.join("Ana")
+p.receive("Ana-TestRealm", "1|33:1/8;60:2/4")
+p.receive("Ana-TestRealm", "1|33:-")
+emit(members())`, LIVE);
+	assert.deepEqual(got, ['Ana 60:2/4']);
+});
+
+test('party: a member who leaves is forgotten, and everyone when the group ends', () => {
+	const [left, ended, again] = run(`${SENT}${MEMBERS}
+p.join("Ana"); p.join("Ben")
+p.receive("Ana-TestRealm", "1|33:1/8")
+p.receive("Ben-TestRealm", "1|33:2/8")
+p.leave("Ana")
+emit(members())
+p.disband()
+emit(#P.Members())
+p.join("Ana")
+p.receive("Ana-TestRealm", "1|60:1/4")
+emit(members())`, LIVE);
+	assert.deepEqual(left, ['Ben 33:2/8']);
+	assert.equal(ended, 0);
+	assert.deepEqual(again, ['Ana 60:1/4']);
+});
+
+test('party: with showing off, incoming progress is ignored', () => {
+	const [got] = run(`${SENT}
+Polestar.Set("party.show", false)
+p.join("Ana")
+p.receive("Ana-TestRealm", "1|33:1/8")
+emit(#P.Members())`, LIVE);
+	assert.equal(got, 0);
+});
+
+test('party: a burst of messages refreshes the guide once', () => {
+	const [fires] = run(`${SENT}
+local fires = 0
+Polestar.On("PARTY_PROGRESS", function() fires = fires + 1 end)
+p.join("Ana")
+for i = 1, 5 do p.receive("Ana-TestRealm", "1|33:" .. i .. "/8"); stub.advance(0.02) end
+stub.advance(1)
+emit(fires)`, LIVE);
+	assert.equal(fires, 1);
+});
+
+test('party: after a reload in a party, the others are asked for their progress once', () => {
+	const [mine, replies] = run(`${SENT}
+p.members = { { name = "Ana", online = true } }
+w.onQuest(33, { 8 })
+stub.login()
+stub.advance(6)
+emit(texts())
+p.sent = {}
+stub.advance(10)
+p.receive("Ana-TestRealm", "1R|60:1/4")
+stub.advance(6)
+p.receive("Ana-TestRealm", "1R|60:1/4")
+stub.advance(6)
+emit(texts())`, { stubs: LIVE.stubs, login: false });
+	assert.deepEqual(mine, ['1R|33:0/8']);
+	assert.deepEqual(replies, ['1S|33:0/8']);
+});

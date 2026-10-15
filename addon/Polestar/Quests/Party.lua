@@ -10,12 +10,14 @@
 -- with both off nothing is registered. Every client API is checked first.
 --
 -- Message: "1|33:5/8,0/1;60:-", version first; "1S|" marks a snapshot that
--- replaces what is known of the sender. "33:-" is a quest that left the log;
--- "33:" one without objectives. Split by whole quests under 255 bytes.
+-- replaces what is known of the sender; "1R|" is a snapshot sent after a
+-- login or reload in a party, asking the others for theirs. "33:-" is a quest
+-- that left the log; "33:" one without objectives. Split by whole quests
+-- under 255 bytes.
 
 local ADDON, ns = ...
 
-local tonumber, tostring, ipairs, pairs, type = tonumber, tostring, ipairs, pairs, type
+local tonumber, ipairs, pairs, next, type = tonumber, ipairs, pairs, next, type
 local concat = table.concat
 
 local Party = {}
@@ -38,11 +40,15 @@ local function piece(e)
 end
 
 -- entries: { { q = id, counts = { { cur, max }, ... } or false }, ... } ->
--- the messages to send, in order (only the first carries the snapshot mark),
--- and for each message the index of the last entry it carries.
-function Party.Encode(entries, snapshot)
+-- the messages to send, in order (only the first carries the snapshot mark,
+-- "R" when it also asks the party for theirs), and for each message the index
+-- of the last entry it carries.
+function Party.Encode(entries, snapshot, asks)
 	local out, ends, parts, size = {}, {}, {}, 0
-	local function header() return VERSION .. ((snapshot and #out == 0) and "S|" or "|") end
+	local function header()
+		if #out > 0 or not (snapshot or asks) then return VERSION .. "|" end
+		return VERSION .. (asks and "R|" or "S|")
+	end
 	for i, e in ipairs(entries) do
 		local p = piece(e)
 		local extra = (#parts > 0 and 1 or 0) + #p
@@ -66,10 +72,11 @@ local function count(s)
 	return n and n <= MAX_COUNT and n or nil
 end
 
--- Returns snapshot, entries; nil for anything malformed or of another version.
+-- Returns snapshot, entries, asks; nil for anything malformed or of another
+-- version.
 function Party.Decode(text)
 	if type(text) ~= "string" then return nil end
-	local mark, body = text:match("^" .. VERSION .. "(S?)|(.*)$")
+	local mark, body = text:match("^" .. VERSION .. "([SR]?)|(.*)$")
 	if not mark then return nil end
 	local entries = {}
 	if body ~= "" then
@@ -94,7 +101,7 @@ function Party.Decode(text)
 			entries[#entries + 1] = { q = q, counts = counts }
 		end
 	end
-	return mark == "S", entries
+	return mark ~= "", entries, mark == "R"
 end
 
 ---------------------------------------------------------------------------
@@ -165,10 +172,10 @@ end
 
 -- Sends quests `ids` (sorted) as they are in `now`; what went out becomes
 -- lastSent, the rest stays pending for the next change.
-local function sendQuests(ids, now, snapshot)
+local function sendQuests(ids, now, snapshot, asks)
 	local entries = {}
 	for i, q in ipairs(ids) do entries[i] = { q = q, counts = countsOf(now[q]) } end
-	local msgs, ends = Party.Encode(entries, snapshot)
+	local msgs, ends = Party.Encode(entries, snapshot, asks)
 	local n = send(msgs)
 	if n == 0 then return false end
 	if snapshot then lastSent = {} end
@@ -194,25 +201,52 @@ local function flush()
 	sendQuests(ids, now, false)
 end
 
-local function snapshot()
+local REPLY_GAP = 10 -- seconds: a request for our snapshot within this of the last one is already answered
+local lastSnapshotAt -- GetTime() of our last snapshot
+
+local function snapshot(asks)
 	snapPending = false
 	if not sharing() then return end
 	local now, ids = Party.ReadLog(), {}
 	for q in pairs(now) do ids[#ids + 1] = q end
 	table.sort(ids)
-	sendQuests(ids, now, true)
+	if sendQuests(ids, now, true, asks) then lastSnapshotAt = GetTime() end
 end
 
-local function scheduleSnapshot()
+local function scheduleSnapshot(asks)
 	if snapPending or not C_Timer then return end
 	snapPending = true
-	C_Timer.After(JOIN_MIN + math.random() * JOIN_SPREAD, snapshot)
+	C_Timer.After(JOIN_MIN + math.random() * JOIN_SPREAD, function() snapshot(asks) end)
 end
 
 local function onLog()
 	if flushPending or not sharing() or not C_Timer then return end
 	flushPending = true
 	C_Timer.After(DEBOUNCE, flush)
+end
+
+---------------------------------------------------------------------------
+-- Receiving
+---------------------------------------------------------------------------
+
+local members = {} -- roster key -> { name = short name, quests = { [q] = { { cur, max }, ... } }, n = quests }
+local progressPending = false
+local PROGRESS_DELAY = 0.5 -- seconds: a burst of messages refreshes the guide once
+
+local function progressChanged()
+	if progressPending then return end
+	if not C_Timer then return ns.Fire("PARTY_PROGRESS") end
+	progressPending = true
+	C_Timer.After(PROGRESS_DELAY, function()
+		progressPending = false
+		ns.Fire("PARTY_PROGRESS")
+	end)
+end
+
+local function forgetAll()
+	local had = next(members) ~= nil
+	roster, lastSent, members = {}, {}, {}
+	if had then progressChanged() end
 end
 
 local function memberKey(unit)
@@ -222,11 +256,10 @@ local function memberKey(unit)
 	return name, name
 end
 
-local function onRoster()
-	if not grouped() then
-		roster, lastSent = {}, {}
-		return
-	end
+-- `asks`: the roster is read after a login, a reload or the settings coming
+-- back on, when we know nobody's progress: the snapshot asks for theirs.
+local function readRoster(asks)
+	if not grouped() then return forgetAll() end
 	local now, gained = {}, false
 	local n = GetNumSubgroupMembers and GetNumSubgroupMembers() or 0
 	for i = 1, n do
@@ -237,14 +270,61 @@ local function onRoster()
 		end
 	end
 	roster = now
-	if gained and ns.Get("party.share") then scheduleSnapshot() end
+	local dropped = false
+	for key in pairs(members) do
+		if not now[key] then
+			members[key] = nil
+			dropped = true
+		end
+	end
+	if dropped then progressChanged() end
+	if gained and ns.Get("party.share") then scheduleSnapshot(asks) end
 end
 
-local function onLeft()
-	roster, lastSent = {}, {}
+local function onRoster() readRoster(false) end
+
+local function apply(m, entries, snap)
+	if snap then m.quests, m.n = {}, 0 end
+	for _, e in ipairs(entries) do
+		local had = m.quests[e.q] ~= nil
+		if e.counts == false then
+			if had then
+				m.quests[e.q] = nil
+				m.n = m.n - 1
+			end
+		elseif had or m.n < MAX_QUESTS then
+			if not had then m.n = m.n + 1 end
+			m.quests[e.q] = e.counts
+		end
+	end
 end
 
-local function onAddonMessage() end
+local function onAddonMessage(_, prefix, text, channel, sender)
+	if prefix ~= Party.PREFIX or channel ~= "PARTY" or type(sender) ~= "string" then return end
+	local key = Ambiguate and Ambiguate(sender, "none") or sender
+	local short = roster[key]
+	if not short then return end
+	local snap, entries, asks = Party.Decode(text)
+	if snap == nil then return end
+	if asks and sharing() and not (lastSnapshotAt and GetTime() - lastSnapshotAt < REPLY_GAP) then scheduleSnapshot(false) end
+	if not ns.Get("party.show") then return end
+	local m = members[key]
+	if not m then
+		m = { name = short, quests = {}, n = 0 }
+		members[key] = m
+	end
+	apply(m, entries, snap)
+	progressChanged()
+end
+
+-- The party members whose progress we have, by name:
+-- { { name = "Ana", quests = { [q] = { { cur, max }, ... } } }, ... }.
+function Party.Members()
+	local out = {}
+	for _, m in pairs(members) do out[#out + 1] = m end
+	table.sort(out, function(a, b) return a.name < b.name end)
+	return out
+end
 
 ---------------------------------------------------------------------------
 -- Settings
@@ -262,18 +342,20 @@ function Party.Apply()
 	local share, show = ns.Get("party.share") and true or false, ns.Get("party.show") and true or false
 	local any = share or show
 	want("GROUP_ROSTER_UPDATE", any, onRoster)
-	want("GROUP_LEFT", any, onLeft)
+	want("GROUP_LEFT", any, forgetAll)
 	want("QUEST_LOG_UPDATE", share, onLog)
-	want("CHAT_MSG_ADDON", show, onAddonMessage)
-	if not any then
-		onLeft()
-		return
+	-- Received with showing off too: a request for our snapshot still counts.
+	want("CHAT_MSG_ADDON", any, onAddonMessage)
+	if not any then return forgetAll() end
+	if not show and next(members) then
+		members = {}
+		progressChanged()
 	end
 	if not prefixed and C_ChatInfo and C_ChatInfo.RegisterAddonMessagePrefix then
 		prefixed = true
 		C_ChatInfo.RegisterAddonMessagePrefix(Party.PREFIX)
 	end
-	onRoster()
+	readRoster(true)
 end
 
 ns.OnLogin(Party.Apply)
