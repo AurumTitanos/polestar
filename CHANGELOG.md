@@ -217,6 +217,9 @@
 - `/polestar way 40 60` where the game gives no map position (an instance,
   another continent) says "No position here" instead of how to type the
   command (thanks meellm).
+- `/polestar way` takes decimal commas (`/polestar way 45,5 30,2`) as well as
+  decimal points, and `45,30` still reads as x and y. Coordinates outside
+  0-100 show the usage line instead of setting a waypoint (thanks meellm).
 
 ### For guide authors
 

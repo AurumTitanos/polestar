@@ -572,6 +572,49 @@ test('SetTarget overrides the engine waypoint until the step changes', () => {
 	assert.equal(out.override, false);
 });
 
+test('/polestar way: decimal points or commas, a comma separator, labels, range 0..100, empty clears', () => {
+	const [out] = run(`
+		nav.place(0, 0)
+		local function way(line)
+			N.SetTarget(9000, 1, 1, "Before")
+			local before = #stub.messages
+			SlashCmdList.POLESTAR("way " .. line)
+			local t = N.GetTarget()
+			return { t and t.x or false, t and t.y or false, t and t.label or false, #stub.messages > before }
+		end
+		local r = {}
+		for _, line in ipairs({ "45 30", "45,30", "45, 30", "45.5 30.2", "45,5 30,2", "45,5 30", "45 30,2",
+			"45 30 Camp", "45,30 Camp", "45,5 30,2 Camp", "45,30 2nd camp", "45,30 50", "45,30 2 camp", "45 30 50", "0 100",
+			"100.5 30", "45 101", "45,5 300,2", "abc", "45", "45 .", "45.5.5 30", "" }) do
+			r[line] = way(line)
+		end
+		emit(r)`);
+	const usage = (o) => o[2] === 'Before' && o[3] === true;
+	const at = (o, x, y, label = 'Waypoint') => {
+		near(o[0], x, 1e-9, 'x'); near(o[1], y, 1e-9, 'y');
+		assert.equal(o[2], label); assert.equal(o[3], false, 'no usage message');
+	};
+	at(out['45 30'], 45, 30);
+	at(out['45,30'], 45, 30);
+	at(out['45, 30'], 45, 30);
+	at(out['45.5 30.2'], 45.5, 30.2);
+	at(out['45,5 30,2'], 45.5, 30.2);
+	at(out['45,5 30'], 45, 5, '30'); // a comma in x alone is the separator
+	at(out['45 30,2'], 45, 30.2);
+	at(out['45 30 Camp'], 45, 30, 'Camp');
+	at(out['45,30 Camp'], 45, 30, 'Camp');
+	at(out['45,5 30,2 Camp'], 45.5, 30.2, 'Camp');
+	at(out['45,30 2nd camp'], 45, 30, '2nd camp');
+	at(out['45,30 50'], 45, 30, '50');
+	at(out['45,30 2 camp'], 45, 30, '2 camp');
+	at(out['45 30 50'], 45, 30, '50');
+	at(out['0 100'], 0, 100);
+	for (const line of ['100.5 30', '45 101', '45,5 300,2', 'abc', '45', '45 .', '45.5.5 30']) {
+		assert.ok(usage(out[line]), `${line}: usage, target kept (${JSON.stringify(out[line])})`);
+	}
+	assert.deepEqual(out[''], [false, false, false, false], 'empty clears without a message');
+});
+
 test('minimap projection honours view radius, rotation and clamps to the rim', () => {
 	const [out] = run(`
 		local r = {}

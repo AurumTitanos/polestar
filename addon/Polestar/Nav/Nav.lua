@@ -498,9 +498,22 @@ ns.RegisterCommand("arrow", function(rest)
 	end
 end, L["Waypoint arrow: show, hide, reset"])
 
+-- Two whitespace-separated coordinates may use a decimal comma ("45,5 30,2");
+-- otherwise a comma separates x and y ("45,30"). A comma in x alone stays the
+-- separator, so "45,30 50" keeps its numeric label.
+local function parseWay(s)
+	local x, y, label = s:match("^%s*(%d+[,%.]?%d*)%s+(%d+[,%.]?%d*)(.*)$")
+	if x and (label == "" or label:match("^%s")) and (y:find(",") or not x:find(",")) then
+		x, y = x:gsub(",", "."), y:gsub(",", ".")
+	else
+		x, y, label = s:match("^%s*([%d%.]+)[%s,]+([%d%.]+)(.*)$")
+	end
+	return tonumber(x), tonumber(y), label and label:match("^%s*(.-)%s*$")
+end
+
 ns.RegisterCommand("way", function(rest)
-	local x, y, label = (rest or ""):match("^%s*([%d%.]+)[%s,]+([%d%.]+)%s*(.-)%s*$")
-	x, y = tonumber(x), tonumber(y)
+	local x, y, label = parseWay(rest or "")
+	if x and y and (x > 100 or y > 100) then x = nil end
 	if not (x and y) then
 		if (rest or ""):match("^%s*$") then
 			Nav.ClearTarget()
