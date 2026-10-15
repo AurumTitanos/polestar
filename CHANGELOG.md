@@ -76,6 +76,9 @@
   `tools/lib/sim/solo.js`) is shared with the compiler's group content
   (`tools/lib/dsl/group.js`), and `preview` renders the group line
   (`docs/preview/guide-group.svg`).
+- `trainers build` reads the same guides as `compile`: Recorder drafts under
+  `guides/drafts/` and build output under `dist/` no longer add class
+  trainers to `trainers.json`.
 
 ## 0.2.3 (2026-10-14)
 

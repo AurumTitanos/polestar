@@ -282,6 +282,25 @@ test('trainers build: guide goals, recordings and the curated list, verified and
 	assert.deepEqual(nearest('Orc', 'Horde', 1411, 43, 68), { npc: 3153, faction: 'H' });
 });
 
+test('trainers build reads the pack guides only: Recorder drafts and dist/ are skipped', async () => {
+	const guides = tmpdir();
+	fs.writeFileSync(path.join(guides, 'a.guide'), guideText(['step S', '  train 152 only Rogue']));
+	// 3175 is a profession trainer: a draft's `only Warrior` must not make it a class trainer.
+	for (const dir of ['drafts', 'dist']) {
+		fs.mkdirSync(path.join(guides, dir));
+		fs.writeFileSync(path.join(guides, dir, 'x.guide'), guideText(['step S', '  train 3175 only Warrior']));
+	}
+	const data = tmpdir();
+	for (const f of fs.readdirSync(DATA_DIR)) fs.copyFileSync(path.join(DATA_DIR, f), path.join(data, f));
+	const args = ['build', '--guides', guides, '--data', data, '--recordings', tmpdir(), '--lua', path.join(tmpdir(), 'ClassTrainers.lua')];
+	const { result, out } = await quiet(() => trainersCmd.run(args));
+	assert.equal(result, 0, out);
+	assert.match(out, /from guides 1 goals/);
+	const t = JSON.parse(fs.readFileSync(path.join(data, 'trainers.json'), 'utf8'));
+	assert.deepEqual(t[152] && t[152].sources, ['guide']);
+	assert.ok(!t[3175]);
+});
+
 test('every Era-frame coordinate in an emitted pack, candidates included, has its map frame registered', () => {
 	// A Durotar guide whose trainer candidates stand in Elwynn, Stormwind and
 	// Dun Morogh: those maps' frames must ship too, or the engine cannot place them.
