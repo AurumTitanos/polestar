@@ -363,6 +363,77 @@ function Own.key(s, g)
 	return k
 end
 
+-- A Class guide this character cannot start yet: nothing of it played (no
+-- step skipped, no goal ticked, none of its quests taken or done) and its
+-- opening, the first step for this character with an accept or a `level`
+-- goal, waits on them: a `level` goal above their level, or accepts none of
+-- which they can take yet (level first, then a missing prerequisite). Such a
+-- guide shows a notice instead of its steps, points nowhere and marks
+-- nothing unavailable, and starts by itself once the gate opens (level-up,
+-- turn-in). { step, level } or { step, pre, preTitles }, with the opening's
+-- first accept as `giver`; else nil. Cached per evaluation.
+Own.gateCache = setmetatable({}, { __mode = "k" })
+function Own.startGate(g)
+	if not (g and g.category == "Class" and player) then return nil end
+	local level = player.level or 1
+	local c = Own.gateCache[g]
+	if c and c.gen == generation and c.level == level then return c.gate or nil end
+	local gate = Own.findGate(g, level)
+	Own.gateCache[g] = { gen = generation, level = level, gate = gate or false }
+	return gate
+end
+
+function Own.findGate(g, level)
+	local s = ns.CharState()
+	local sk, ticks = s.skipped[g.id], s.manual[g.id]
+	if (type(sk) == "table" and next(sk)) or (type(ticks) == "table" and next(ticks)) then return nil end
+	local C = Compat()
+	for _, step in ipairs(g.steps) do
+		for _, goal in ipairs(step.goals) do
+			local q = goal.quest
+			if q and (C.IsOnQuest(q) or questDone(q)) then return nil end
+		end
+	end
+	for i, step in ipairs(g.steps) do
+		if Guides.Matches(step.only, player) then
+			local opening, need, doable, acceptLevel, pre, giver = false, 0, false, nil, nil, nil
+			for _, goal in ipairs(step.goals) do
+				if Guides.Matches(goal.only, player) then
+					if goal.t == "level" then
+						opening = true
+						if (goal.level or 0) > need then need = goal.level end
+					elseif goal.t == "accept" then
+						opening = true
+						giver = giver or goal
+						local lvl = tonumber(goal.minLevel)
+						if lvl and level < lvl then
+							if not acceptLevel or lvl < acceptLevel then acceptLevel = lvl end
+						else
+							local p = missingPre(goal)
+							if p then
+								pre = pre or { quest = p, titles = goal.preTitles }
+							else
+								local closed = false
+								for _, by in ipairs(type(goal.closedBy) == "table" and goal.closedBy or NONE) do
+									if C.IsOnQuest(by) or questDone(by) then closed = true end
+								end
+								if not closed then doable = true end
+							end
+						end
+					end
+				end
+			end
+			if opening then
+				if not doable and acceptLevel and acceptLevel > need then need = acceptLevel end
+				if need > level then return { step = i, level = need, giver = giver } end
+				if not doable and pre then return { step = i, pre = pre.quest, preTitles = pre.titles, giver = giver } end
+				return nil
+			end
+		end
+	end
+	return nil
+end
+
 local MANUAL = { talk = true, hearth = true, getfp = true, fly = true, train = true, vendor = true }
 
 -- Whether the client can answer for a feature (Compat.Supports); a missing
@@ -1534,9 +1605,10 @@ end
 -- else the header's; else the focus group's first open located goal
 -- (blocking, then optional, then notes). The arrow only ever points at a goal
 -- the guide window shows. A done step (no focus, e.g. viewed with Prev) has
--- nothing to point at, even when optional goals are left open.
+-- nothing to point at, even when optional goals are left open; nor has a
+-- Class guide the character cannot start yet (Own.startGate), on its live step.
 local function findWaypoint()
-	if not current then return nil end
+	if not current or (current == computed and Own.startGate(guide)) then return nil end
 	local goals = guide.steps[current].goals
 	if aim then
 		for g, goal in ipairs(goals) do
@@ -1994,6 +2066,9 @@ local sigParts = {}
 local function signature()
 	local n = 0
 	if current then
+		-- A gate opening (level-up, turn-in) changes the view, not the step.
+		n = n + 1
+		sigParts[n] = Own.startGate(guide) and "gated" or "open"
 		local goals = guide.steps[current].goals
 		for g = 1, #goals do
 			local goal = goals[g]
@@ -2272,7 +2347,10 @@ local function evaluateLoaded(active)
 		end
 		return
 	end
-	computed = computeCurrent()
+	-- A Class guide the character cannot start yet holds at its opening
+	-- without placing (which would mark its accepts unavailable and move on).
+	local gate = Own.startGate(guide)
+	computed = gate and gate.step or computeCurrent()
 	-- Placed once the quest log could be read (it can lag PLAYER_LOGIN).
 	local wasPlacing = placing
 	if placing and (logReady or GetTime() >= placing) then placing = nil end
@@ -2831,6 +2909,27 @@ end
 -- The live step: the first applicable, not skipped, not done one (nil when
 -- the guide is complete), whatever step the player is looking at.
 function Engine.GetLiveStep() return computed end
+
+-- What a Class guide waits on before this character can start it
+-- (Own.startGate), for the guide window's notice and the guide menu's row:
+-- { level } or { pre, preTitle }, with who starts it (giver: the opening's
+-- first accept's NPC, object or item name, and its map); nil when it can be
+-- started (or is under way).
+function Engine.StartGate(id)
+	local g = id and Guides.Get(id)
+	if not g then return nil end
+	if not player then refreshPlayer() end
+	local gate = Own.startGate(g)
+	if not gate then return nil end
+	local a = gate.giver
+	return {
+		level = gate.level,
+		pre = gate.pre,
+		preTitle = gate.pre and titleOfQuest(gate.pre, gate.preTitles) or nil,
+		giver = a and (a.npcName or a.objName or a.itemName) or nil,
+		map = a and a.map or nil,
+	}
+end
 
 -- Look at step s instead of the live one (nil, or the live step: back to it).
 function Own.view(s)

@@ -541,6 +541,7 @@ Polestar.Engine.Next() / Prev() / Goto(i)    -- look at another step; changes no
 Polestar.Engine.Skip() -> stepIndex         -- skip the step shown, saved; fires PLAYER_SKIPPED_STEP
 Polestar.Engine.Unskip(i) -> bool           -- undo a skip
 Polestar.Engine.GetLiveStep() -> i | nil    -- the first open step, whatever step is shown
+Polestar.Engine.StartGate(id) -> gate | nil -- a Class guide this character cannot start yet: { level } or { pre, preTitle }, with giver, map (see "Not yet available")
 Polestar.Engine.ToggleGoal(stepIndex, goalIndex) -> bool   -- tick any goal but a note done, or clear its check-off
 Polestar.Engine.SkipGoal(stepIndex, goalIndex) -> bool     -- skip an optional goal, or bring it back
 Polestar.Engine.AimGoal(stepIndex, goalIndex) -> bool      -- lead the arrow to a goal of the current step (row click)
@@ -643,6 +644,20 @@ Polestar.Engine.GetProgress() -> doneSteps, totalSteps
   <reason>" (one line per quest) until the step changes again, it is
   dismissed, or 20 seconds pass. With the window hidden it goes to chat
   instead. Placement at load never fires it.
+- **Not yet available.** A Class guide (`category = "Class"`) the character
+  has not played (no step skipped, no goal ticked, none of its quests in the
+  log or done) whose opening, the first step for this character with an
+  accept or a `level` goal, waits on them (a `level` goal above their level,
+  or accepts none of which they can take yet: the lowest `minLevel`, else a
+  missing `pre`/`preAll`) holds at that step without placing: no waypoint, no
+  unavailable marks moving it on, never complete. `Engine.StartGate(id)`
+  gives the gate from the guide's data (no table kept by hand); the guide
+  window shows "Available from level N" (or "Not available yet" and the
+  quest to finish first) with who starts it, in place of the step, and the
+  guide menu's row dims with "From level N". Next still looks at the steps.
+  The gate is part of the step signature, so a level-up or turn-in that opens
+  it re-renders the window and the guide starts by itself. Leveling and other
+  guides are unchanged.
 - **Farm spots.** `collect <item> xN nearest` (no quest) compiles `candidates` of
   farm spots `{ map, x, y, f, faction, npcName, lvl = { min, max }, rate, spawns }`
   (clustered item droppers; `faction` is zone safety; no `npc`). Among the
@@ -849,7 +864,8 @@ Placement: when a tab loads a guide (login and reload, `SetGuide`/`OpenTab`,
 auto-chaining to `next`, `/polestar reset`), the evaluations until the quest
 log is readable (the first `QUEST_LOG_UPDATE` of the session), at most 10 s,
 and ended early by the player's own Next/Prev/Skip/Goto or check-off, place
-it from the quest log:
+it from the quest log (a Class guide not yet available is not placed: it
+holds at its opening, see "Not yet available"):
 
 - **Start** = the first open step with work the player has *started* (an open
   goal of a quest in the log: objectives in progress, ready to turn in) or

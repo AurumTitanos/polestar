@@ -620,6 +620,25 @@ class("forever/collectibles/mounts/neutral/warlock-felsteed", "Warlock Felsteed"
 })
 local DREADSTEED = "forever/collectibles/mounts/neutral/warlock-dreadsteed"
 uistub.player.class, uistub.player.level = "WARLOCK", 60`;
+// A level 12 shaman and two Class guides: Call of Water opens at 20
+// (Engine.StartGate, stubbed as the engine would answer), Call of Earth now.
+const NOT_YET_GUIDES = `local function G(t, f) f.t = t; return f end
+local function class(id, title, lo, hi, steps)
+	uistub.guides[id] = { id = id, pack = "guides", title = title, classes = { "SHAMAN" }, minLevel = lo, maxLevel = hi, category = "Class", folder = "Shaman",
+		zone = 1411, zoneName = "Durotar", author = "Polestar", version = 1, steps = steps }
+	table.insert(uistub.order, id)
+end
+class("forever/class/shaman/call-of-water-horde", "Call of Water (Horde)", 20, 23, {
+	{ title = "Searn Firewarder", goals = { G("accept", { verb = "Accept", subject = "Call of Water", subjectKind = "quest", quest = 1528, status = "active" }) } },
+})
+class("forever/class/shaman/call-of-earth-horde", "Call of Earth (Horde)", 4, 10, {
+	{ title = "Canaga Earthcaller", goals = { G("accept", { verb = "Accept", subject = "Call of Earth", subjectKind = "quest", quest = 1516, status = "active" }) } },
+})
+local WATER = "forever/class/shaman/call-of-water-horde"
+Polestar.Engine.StartGate = function(id)
+	if id == WATER then return { level = 20, giver = "Searn Firewarder", map = 1454 } end
+end
+uistub.player.class, uistub.player.level = "SHAMAN", 12`;
 const SCENES = [
 	{
 		file: 'guide.svg',
@@ -716,6 +735,18 @@ uistub.update()`,
 				roots: PICKER,
 				script: pickerScene(`${GROUP_GUIDES}; uistub.openTabs({ { DREADSTEED, 2 } }, 1); Polestar.UI.ShowPicker(); Polestar.UI.Picker.SetCategory("Class")
 Polestar.UI.Picker.Select(DREADSTEED)`),
+			},
+		],
+	},
+	{
+		file: 'class-not-yet.svg',
+		title: 'A Class guide opened too early: the guide window says from which level and who starts it; the guide menu\'s row says "From level 20"',
+		panels: [
+			{ roots: GUIDE, script: `${NOT_YET_GUIDES}; uistub.openTabs({ { WATER, 1 } }, 1)` },
+			{
+				roots: PICKER,
+				script: pickerScene(`${NOT_YET_GUIDES}; Polestar.Set("ui.pickerFaction", "Horde"); Polestar.UI.ShowPicker(); Polestar.UI.Picker.SetCategory("Class")
+Polestar.UI.Picker.Select("forever/class/shaman/call-of-earth-horde")`),
 			},
 		],
 	},

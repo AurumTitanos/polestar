@@ -4,6 +4,12 @@
 
 ### For players
 
+- A class guide opened before your level says so: the guide window shows
+  "Available from level 20" with who starts it (or the quest to finish
+  first), instead of sending you to a trainer who has nothing for you, then
+  skipping its quests one by one until it called itself complete. The guide
+  starts by itself on the level-up, and the guide menu's row reads "From
+  level 20".
 - "Skip grey quests" (Options, Guide, Automation) leaves out grey quests now:
   it kept every quest the guide also turns in, which is nearly all of them,
   so a character ahead of the route still saw them. A grey quest goes with
