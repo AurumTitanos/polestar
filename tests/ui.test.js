@@ -6,6 +6,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { runAddon } = require('./helpers/lua');
+const { fakeLocale } = require('./helpers/locale');
 
 const FILES = ['Core/Core.xml', 'Theme/Theme.xml', 'UI/UI.xml'];
 
@@ -990,4 +991,18 @@ test('the next spot of an area objective takes the arrow there, over a point pic
 	assert.deepEqual(out.cycle, ['CycleSpot', 3, 3]);
 	assert.deepEqual(out.release, ['ReleaseTarget']);
 	assert.notEqual(out.target, 'By hand');
+});
+
+test('labels kept in tables are in the client language: the group line and the guide menu\'s tabs', () => {
+	const [out] = run(
+		`
+		UI.ShowPicker()
+		local tabs = {}
+		for _, b in ipairs(PolestarPicker.tabButtons) do if b:IsShown() then tabs[#tabs + 1] = b.Label:GetText() end end
+		emit({ elite = UI.GroupLine({ party = { kind = "elite", rank = 2 } }), tabs = tabs, title = PolestarPicker.Title:GetText() })`,
+		{ before: fakeLocale('deDE', { 'Rare elite: group advised': 'Rarer Elite: Gruppe empfohlen', Home: 'Start', Browse: 'Stöbern', Current: 'Aktuell', Recent: 'Zuletzt' }) },
+	);
+	assert.match(out.elite, /\|c\w+Rarer Elite: Gruppe empfohlen\|r/);
+	assert.deepEqual(out.tabs, ['Start', 'Stöbern', 'Aktuell', 'Zuletzt']);
+	assert.equal(out.title, 'Start');
 });

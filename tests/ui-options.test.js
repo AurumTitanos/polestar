@@ -6,6 +6,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { runAddon } = require('./helpers/lua');
+const { fakeLocale } = require('./helpers/locale');
 
 const FILES = ['Core/Core.xml', 'Theme/Theme.xml', 'UI/UI.xml'];
 
@@ -121,6 +122,50 @@ test('old page keys open the page and tab that hold their settings now', () => {
 	});
 });
 
+// A translated client: the page titles change, the keys players type do not.
+test('page keys stay English on a translated client: /polestar options quests, gear, lookup and /polestar packs', () => {
+	const [out] = runAddon({
+		stubs: ['stub_ui.lua'],
+		before: fakeLocale('deDE', {
+			Guide: 'Leitfaden',
+			Appearance: 'Darstellung',
+			Questing: 'Questen',
+			Discovery: 'Entdecken',
+			'Quality of Life': 'Komfort',
+			'Guide packs': 'Guide-Pakete',
+			About: 'Über',
+			Quests: 'Aufträge',
+			'Rewards & gear': 'Belohnungen & Ausrüstung',
+			Lookup: 'Nachschlagen',
+		}),
+		addons: [{ name: 'Polestar', files: ['Core/Core.xml', 'Theme/Theme.xml', 'Quests/Quests.xml', 'Gear/Gear.xml', 'Maps/Maps.xml', 'QoL/QoL.xml',
+			'Lookup/Lookup.xml', 'Dungeons/Dungeons.xml', 'UI/UI.xml', 'Rares/Rares.xml'] }],
+		script: `uistub.install()\nstub.login()\nlocal O = Polestar.UI.Options
+		local function at(cmd)
+			SlashCmdList.POLESTAR(cmd)
+			local tab
+			for name, v in pairs(O.page.views) do if v == O.view then tab = name end end
+			return O.page.key .. ": " .. PolestarOptions.Title:GetText() .. " > " .. tab
+		end
+		local out = {}
+		for _, cmd in ipairs({ "options quests", "options gear", "options lookup", "options appearance", "options qualityoflife", "options about", "packs" }) do out[cmd] = at(cmd) end
+		local keys = {}
+		for _, p in ipairs(O.Pages()) do keys[#keys + 1] = p.key end
+		out.keys = keys
+		emit(out)`,
+	}).emitted;
+	assert.deepEqual(out, {
+		'options quests': 'questing: Questen > Aufträge',
+		'options gear': 'questing: Questen > Belohnungen & Ausrüstung',
+		'options lookup': 'discovery: Entdecken > Nachschlagen',
+		'options appearance': 'appearance: Darstellung > Colour & type',
+		'options qualityoflife': 'qualityoflife: Komfort > Travel',
+		'options about': 'about: Über > ',
+		packs: 'guidepacks: Guide-Pakete > ',
+		keys: ['guide', 'appearance', 'map', 'questing', 'discovery', 'qualityoflife', 'guidepacks', 'recorder', 'about'],
+	});
+});
+
 test('registered controls read and write settings; disabled functions follow other settings', () => {
 	const [out] = run(`
 		UI.ShowOptions("quests")
@@ -164,6 +209,16 @@ test('a registration made after the window exists shows up; a malformed one is r
 	assert.equal(out.bad2, false);
 	assert.ok(out.nav.includes('Maps') && !out.nav.includes('Broken'));
 	assert.equal(out.controls, 1);
+});
+
+test('a registered page may give its own key, which opens it whatever its title; a key that is not a string is refused', () => {
+	const [out] = run(`
+		Polestar.RegisterDefaults("mine", { thing = true })
+		local ok = Polestar.RegisterOptions({ page = "Mein Addon", key = "myaddon", controls = { { kind = "toggle", key = "mine.thing", label = "Thing" } } })
+		local bad, err = Polestar.RegisterOptions({ page = "Broken", key = 5, controls = {} })
+		UI.ShowOptions("myaddon")
+		emit({ ok = ok, bad = bad, err = err, key = O.page.key, title = PolestarOptions.Title:GetText() })`);
+	assert.deepEqual(out, { ok: true, bad: false, err: 'RegisterOptions: key must be a string', key: 'myaddon', title: 'Mein Addon' });
 });
 
 test('built-in controls write settings and follow changes made elsewhere', () => {

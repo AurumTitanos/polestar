@@ -291,6 +291,33 @@
   `auditReport` compares them with the Attune addon's for the local
   `data/local/attunements-audit.md` (thanks Shockp).
 - `preview` renders the Attunement tab (`docs/preview/dungeons-attune.svg`).
+- Translations: `/polestar help` prints every line in the client's language,
+  the show, hide, guides, options and debug commands' too: Init.lua, which
+  loads before the locale file, registered them in English; they register
+  in Core/Commands.lua now. `tests/helpers/locale.js` fakes a translation in
+  the addon's tests.
+- Translations: a word with two meanings has a key per meaning
+  (`Polestar.LC`): the gear slots on the tooltip line are `"slot: Back"`,
+  `"slot: Chest"` and so on, and a dungeon boss that is a chest is
+  `"boss: Chest"`, so they no longer share "Back" with the welcome's button
+  or "Chest" with each other.
+- Translations: the options pages keep English keys whatever their titles
+  read, so `/polestar options quests`, `gear`, `lookup` and the others and
+  `/polestar packs` open the right page on a translated client instead of
+  the first one. `Polestar.RegisterOptions` takes an optional `key` for a
+  page's stable key.
+- Translations: the travel route's boat, zeppelin and tram captions ("Take
+  the tram to %s") are written as `L["..."]` keys in Nav/Travel.lua like the
+  flight one, so a translator finds them.
+- Translations: every label kept in a table is written as a literal
+  `L["..."]` where it is defined, so a translator finds it by searching:
+  the gear tooltip's reasons, the Dungeons journal's boss roles, quest ties
+  and Codex messages, Lookup's kinds, standings, factions and statuses, the
+  guide menu's tabs, the group lines, source ranks, the welcome's feature
+  columns, the step details ("from %s", "at %s"), the hand-in notes, the
+  travel map's boat tooltips, the rare alert sounds and `/polestar gear`'s
+  spec source. The item qualities in Lookup are `"quality: Rare"` and so on,
+  apart from the rare mobs. Nothing changes in English.
 
 ## 0.2.3 (2026-10-14)
 

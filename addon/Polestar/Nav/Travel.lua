@@ -353,15 +353,17 @@ local function crossCaption(e)
 	return e.caption or format(L["Go to %s"], zoneName(e.partner.map))
 end
 
+-- The captions of the legs to and on a boat, zeppelin or tram, translated
+-- (this file loads after the locale file).
 local WALK_TO = {
-	boat = "Walk to the boat",
-	zeppelin = "Walk to the zeppelin tower",
-	tram = "Walk to the Deeprun Tram",
+	boat = L["Walk to the boat"],
+	zeppelin = L["Walk to the zeppelin tower"],
+	tram = L["Walk to the Deeprun Tram"],
 }
 local TAKE = {
-	boat = "Take the boat to %s",
-	zeppelin = "Take the zeppelin to %s",
-	tram = "Take the tram to %s",
+	boat = L["Take the boat to %s"],
+	zeppelin = L["Take the zeppelin to %s"],
+	tram = L["Take the tram to %s"],
 }
 
 function Nav.PlanRoute(p)
@@ -728,7 +730,7 @@ function Nav.PlanRoute(p)
 			elseif k == TAXI then
 				leg.label = L["Walk to the flight master"]
 			elseif k == DOCK then
-				leg.label = L[WALK_TO[dockOf[to].kind] or "Walk to the boat"]
+				leg.label = WALK_TO[dockOf[to].kind] or WALK_TO.boat
 			elseif k == TARGET then
 				leg.label = tg.label
 			else
@@ -740,7 +742,7 @@ function Nav.PlanRoute(p)
 		elseif how == RIDE then
 			local t = dockOf[u]
 			leg.kind = t.kind
-			leg.label = format(L[TAKE[t.kind] or TAKE.boat], dockEnd[to].name)
+			leg.label = format(TAKE[t.kind] or TAKE.boat, dockEnd[to].name)
 		else
 			leg.kind = "hearth"
 			leg.seconds = HEARTH_SECONDS

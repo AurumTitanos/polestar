@@ -189,7 +189,8 @@ Polestar.RegisterCommand(name, fn(argString), help)
 ```
 
 `/polestar` and `/pole`. No argument fires `TOGGLE_FRAME`. `help` lists
-registered commands. Core registers: `guides`, `options`, `show`, `hide`,
+registered commands with their `help` lines (already translated:
+`L["..."]`). Core registers (Core/Commands.lua): `guides`, `options`, `show`, `hide`,
 `next`, `prev` (look at the next/previous step; nothing changes), `skip`
 (skip the step shown, for good), `reset` (clear ticks, latches, skips and
 the saved view for the current guide), `guide <id>`, `status`, `tabs`,
@@ -223,7 +224,27 @@ the game's error handler: wrapping it would shift the stack the game and
 
 ### Localisation
 
-`Polestar.L[key]` (enUS only for now; missing keys return the key).
+`Polestar.L[key]`: a key is the English text, and a missing key returns
+itself, so a client without a translation reads English. A locale file
+(`Locales/<locale>.lua`, loaded right after `Core/Init.lua`) fills `L` for its
+client, so every file after it may read `L` at load; Init.lua, which loads
+before it, reads `L` only when it prints (the commands register in
+Core/Commands.lua).
+
+A word with more than one meaning gets a key per meaning:
+`Polestar.LC(context, text)` is the translation of `"<context>: <text>"`,
+and `text` while there is none. The gear slots on the tooltip line are
+`LC("slot", …)` (`"slot: Back"`, `"slot: Chest"`), a dungeon boss that is
+a chest is `LC("boss", "Chest")` and the item qualities are
+`LC("quality", …)` (`"quality: Rare"` is not a rare mob), so they translate
+apart from the welcome's `L["Back"]` button and the rares.
+
+Every player-facing string is written as a literal `L["..."]` or `LC(...)`
+where it appears, so a translator finds every key by searching for them: a
+table of labels holds `L["Home"]`, not `"Home"` translated later through
+`L[VIEW_LABEL[v]]`. `L[variable]` is left only for text that comes from data
+(a guide's category, a faction, race and class names, profession and spec
+names, the release stage).
 
 ### Compat — every client API call goes through here
 
@@ -1505,7 +1526,8 @@ Any module adds settings to the options window without touching UI files:
 
 ```lua
 Polestar.RegisterOptions({
-  page = "Quests", icon = "icon-accept", order = 30,      -- sidebar page (created on first use)
+  page = "Quests", icon = "icon-accept", order = 30,      -- sidebar page (created on first use), its title as shown
+  key = "quests",                                           -- optional: the page's stable key (default: made from page)
   tab = "Map", section = "Markers",                         -- tab row entry and section header
   controls = {
     { kind = "toggle",   key = "qol.mapObjectives", label = "Objective markers", help = "One line." },
@@ -1540,10 +1562,16 @@ Gear fill Questing; Lookup, Dungeons and Rares fill Discovery; QoL and Maps
 (flight timer, instances) fill Quality of Life. On the **Map** page (Guide &
 quests: Guide, Quest markers; Rares & travel: Rares and treasures, Dungeons and
 travel; Zones: Zones, Coordinates) Nav, Quests, Rares and Maps place every map
-and minimap setting. Old page keys (`guidewindow`, `navigation`, `automation`,
-`quests`, `gear`, `lookup`, `dungeons`, `rares`, …) reach the page and tab that
-now hold their settings (`ALIASES` in UI/Options.lua); a page's own key wins
-over an alias.
+and minimap setting.
+
+A page is opened by its key (`/polestar options <key>`, `UI.ShowOptions(key)`,
+`Options.Select`), not its title: the built-in pages give English keys
+(`guide`, `appearance`, `map`, `questing`, `discovery`, `qualityoflife`,
+`guidepacks`, `recorder`, `about`) so a translated title does not move them;
+a registered page without `key` takes one made from its title. Old page keys
+(`guidewindow`, `navigation`, `automation`, `quests`, `gear`, `lookup`,
+`dungeons`, `rares`, …) reach the page and tab that now hold their settings
+(`ALIASES` in UI/Options.lua); a page's own key wins over an alias.
 
 The sidebar's page list is its own scroll area (`f.NavScroll`, `W.ShellNav`)
 from 12px under the search to the footer bar's line, so the version and stage

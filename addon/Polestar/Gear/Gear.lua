@@ -752,6 +752,9 @@ function Gear.GainText(pct)
 	return (pct >= 0 and "+" or "-") .. n .. "%", false
 end
 
+-- Where the spec in use came from (Gear.GetSpec's source).
+local SPEC_SOURCE = { setting = L["setting"], talents = L["talents"], default = L["default"] }
+
 ns.RegisterCommand("gear", function(rest)
 	local key, label, source = Gear.GetSpec()
 	if not key then
@@ -759,7 +762,7 @@ ns.RegisterCommand("gear", function(rest)
 		return
 	end
 	if rest == nil or rest == "" then
-		ns.Print(L["Gear weights"] .. ": " .. tostring(label) .. " (" .. L[source] .. ")")
+		ns.Print(L["Gear weights"] .. ": " .. tostring(label) .. " (" .. (SPEC_SOURCE[source] or tostring(source)) .. ")")
 		return
 	end
 	local r = Gear.CompareToEquipped(rest)

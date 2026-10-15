@@ -267,10 +267,12 @@ end
 
 -- 1. Welcome --------------------------------------------------------------
 
+-- Glyph, title, first line (a slash command, shown as one, is not
+-- translated), second line.
 local FEATURES = {
-	{ "window", "The guide window", "The step you are on.", "Goals tick off as you play." },
-	{ "icon-goto", "The arrow", "Points the way.", "The map marks each place." },
-	{ "guides", "Every guide", "/polestar guides", "Leveling, professions, reputations, mounts and pets." },
+	{ "window", L["The guide window"], L["The step you are on."], L["Goals tick off as you play."] },
+	{ "icon-goto", L["The arrow"], L["Points the way."], L["The map marks each place."] },
+	{ "guides", L["Every guide"], "/polestar guides", L["Leveling, professions, reputations, mounts and pets."] },
 }
 local COL_GAP = 24
 local COL_W = floor((CW - COL_GAP * (#FEATURES - 1)) / #FEATURES)
@@ -300,10 +302,10 @@ PAGES[#PAGES + 1] = {
 			col.Glyph = W.Tex(p, "ARTWORK", f[1], "accent")
 			col.Glyph:SetSize(20, 20)
 			col.Title = para(p, "title", "text", COL_W, 2)
-			col.Title:SetText(L[f[2]])
+			col.Title:SetText(f[2])
 			col.Text = para(p, "small", "textMuted", COL_W, 3)
-			local first = f[3]:sub(1, 1) == "/" and cmd(f[3]) or L[f[3]]
-			col.Text:SetText(first .. "\n" .. L[f[4]])
+			local first = f[3]:sub(1, 1) == "/" and cmd(f[3]) or f[3]
+			col.Text:SetText(first .. "\n" .. f[4])
 			if i > 1 then col.Rule = W.Divider(p, true) end
 			p.Cols[i] = col
 		end

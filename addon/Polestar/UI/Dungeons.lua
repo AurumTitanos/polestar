@@ -1468,20 +1468,21 @@ local function renderQuests(key, f, plevel)
 end
 
 local TIE = {
-	kill = { "icon-kill", "Kill it for %s" },
-	item = { "icon-collect", "Drops %s for %s" },
-	starts = { "icon-accept", "Drops %s, which starts %s" },
-	involved = { "icon-note", "Part of %s" },
+	kill = { "icon-kill", L["Kill it for %s"] },
+	item = { "icon-collect", L["Drops %s for %s"] },
+	starts = { "icon-accept", L["Drops %s, which starts %s"] },
+	involved = { "icon-note", L["Part of %s"] },
 }
 
-local BOSS_ROLE = { rare = "Rare", event = "Event", optional = "Optional" }
+local BOSS_ROLE = { rare = L["Rare"], event = L["Event"], optional = L["Optional"] }
 
--- The facts beside a boss's name: level, Chest (an object boss), its role.
+-- The facts beside a boss's name: level, Chest (an object boss, under its
+-- own key: "Chest" is also the gear slot), its role.
 local function bossFacts(boss)
 	local t = {}
 	if boss.level then t[#t + 1] = format(L["Level %d"], boss.level) end
-	if boss.object then t[#t + 1] = L["Chest"] end
-	if BOSS_ROLE[boss.role] then t[#t + 1] = L[BOSS_ROLE[boss.role]] end
+	if boss.object then t[#t + 1] = ns.LC("boss", "Chest") end
+	if BOSS_ROLE[boss.role] then t[#t + 1] = BOSS_ROLE[boss.role] end
 	return concat(t, DOT)
 end
 
@@ -1511,9 +1512,9 @@ local function renderBosses(key, f, plevel)
 				local qh = "|c" .. hexOf(difficulty(q.level, plevel)) .. (q.title or "") .. "|r"
 				local ih = "|c" .. Theme.Hex("item") .. (t.itemName or L["an item"]) .. "|r"
 				if t.how == "item" or t.how == "starts" then
-					row.Text:SetText(format(L[spec[2]], ih, qh))
+					row.Text:SetText(format(spec[2], ih, qh))
 				else
-					row.Text:SetText(format(L[spec[2]], qh))
+					row.Text:SetText(format(spec[2], qh))
 				end
 				row.psQuest = q.id
 				row:ClearAllPoints()
@@ -1867,9 +1868,9 @@ end
 ---------------------------------------------------------------------------
 
 local REASON = {
-	nodata = "The Polestar_Codex addon is older than this Polestar: reinstall Polestar, then /reload.",
-	missing = "The Polestar_Codex addon is not installed. Get Polestar from CurseForge or the GitHub Releases page (the Polestar zip under Assets, not \"Source code\"), install it and restart the game.",
-	disabled = "The Polestar_Codex addon is turned off: enable it in the AddOns list, then /reload.",
+	nodata = L["The Polestar_Codex addon is older than this Polestar: reinstall Polestar, then /reload."],
+	missing = L["The Polestar_Codex addon is not installed. Get Polestar from CurseForge or the GitHub Releases page (the Polestar zip under Assets, not \"Source code\"), install it and restart the game."],
+	disabled = L["The Polestar_Codex addon is turned off: enable it in the AddOns list, then /reload."],
 }
 
 local function renderEmpty(reason)
@@ -1887,7 +1888,7 @@ local function renderEmpty(reason)
 		text = L["The Dungeons section is turned off. Turn it on under Options > Discovery > Dungeons."]
 	else
 		local LK = UI.Lookup
-		text = REASON[reason] and L[REASON[reason]] or (LK and LK.ReasonText and LK.ReasonText(reason)) or tostring(reason)
+		text = REASON[reason] or (LK and LK.ReasonText and LK.ReasonText(reason)) or tostring(reason)
 	end
 	home.EmptyTitle:SetText(reason == "off" and L["Dungeons are off"] or L["Dungeons need the Codex"])
 	home.EmptyNote:SetText(text)
