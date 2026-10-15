@@ -498,9 +498,25 @@ ns.RegisterCommand("arrow", function(rest)
 	end
 end, L["Waypoint arrow: show, hide, reset"])
 
+-- Two whitespace-separated coordinates take decimal points ("45.5 30.2") or a
+-- decimal comma in both ("45,5 30,2"); otherwise a comma separates x and y
+-- ("45,30", "45, 30 Camp"). A decimal comma in only one ("45,5 30", "45 30,2")
+-- is refused: it reads just as well as x,y with a numeric label ("45,30 50"),
+-- and either guess can point the arrow at a plausible wrong spot.
+local function parseWay(s)
+	local x, y, label = s:match("^%s*(%d+[,%.]?%d*)%s+(%d+[,%.]?%d*)(.*)$")
+	if x and (label == "" or label:match("^%s")) then
+		if (x:find("%d,%d") ~= nil) ~= (y:find("%d,%d") ~= nil) then return end
+		x, y = x:gsub(",", "."), y:gsub(",", ".")
+	else
+		x, y, label = s:match("^%s*([%d%.]+)[%s,]+([%d%.]+)(.*)$")
+	end
+	return tonumber(x), tonumber(y), label and label:match("^%s*(.-)%s*$")
+end
+
 ns.RegisterCommand("way", function(rest)
-	local x, y, label = (rest or ""):match("^%s*([%d%.]+)[%s,]+([%d%.]+)%s*(.-)%s*$")
-	x, y = tonumber(x), tonumber(y)
+	local x, y, label = parseWay(rest or "")
+	if x and y and (x > 100 or y > 100) then x = nil end
 	if not (x and y) then
 		if (rest or ""):match("^%s*$") then
 			Nav.ClearTarget()
