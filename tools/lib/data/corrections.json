@@ -37,28 +37,6 @@
 			},
 			"note": "A Scribbled Letter is the Human Hunter letter: it ends at Tordrin Sternblade 248415 <Hunter Trainer> in Northshire (Wowhead Forever npc=248415, checked 2026-10-12). QuestieDB 1.0.5 has requiredClasses 1 (Warrior)."
 		},
-		"92744": {
-			"set": {
-				"pre": [
-					92742
-				],
-				"preAny": [
-					92742
-				]
-			},
-			"note": "Murloc Gills (92744) is step 2 of Alba Fairmoon's Westfall storyline \"Toxic Soil\" 92742 -> 92744 -> 92745 -> 92747 -> 92748 -> 92749 -> 92750 -> 92751 -> 92752 -> 92753 -> 92819 (foreverchanges.pro https://foreverchanges.pro/quest/92753 Storyline box, from Wowhead's Forever database, checked 2026-10-15). QuestieDB 1.0.5 has no chain links for it."
-		},
-		"92745": {
-			"set": {
-				"pre": [
-					92744
-				],
-				"preAny": [
-					92744
-				]
-			},
-			"note": "The State of the Mines (92745) is step 3 of Alba Fairmoon's Westfall storyline \"Toxic Soil\" 92742 -> 92744 -> 92745 -> 92747 -> 92748 -> 92749 -> 92750 -> 92751 -> 92752 -> 92753 -> 92819 (foreverchanges.pro https://foreverchanges.pro/quest/92753 Storyline box, from Wowhead's Forever database, checked 2026-10-15). QuestieDB 1.0.5 has no chain links for it."
-		},
 		"92747": {
 			"set": {
 				"pre": [
@@ -68,7 +46,7 @@
 					92745
 				]
 			},
-			"note": "Moonbrook Espionage (92747) is step 4 of Alba Fairmoon's Westfall storyline \"Toxic Soil\" 92742 -> 92744 -> 92745 -> 92747 -> 92748 -> 92749 -> 92750 -> 92751 -> 92752 -> 92753 -> 92819 (foreverchanges.pro https://foreverchanges.pro/quest/92753 Storyline box, from Wowhead's Forever database, checked 2026-10-15). QuestieDB 1.0.5 has no chain links for it."
+			"note": "Moonbrook Espionage (92747) is step 4 of Alba Fairmoon's Westfall storyline \"Toxic Soil\" 92742 -> 92744 -> 92745 -> 92747 -> 92748 -> 92749 -> 92750 -> 92751 -> 92752 -> 92753 -> 92819 (foreverchanges.pro https://foreverchanges.pro/quest/92753 Storyline box, from Wowhead's Forever database, checked 2026-10-15). QuestieDB 1.0.5 has no chain links for it. Testing the Wells (92742), Murloc Gills (92744) and The State of the Mines (92745) get no prerequisite links among themselves: a storyline box groups quests, it does not prove one gates the next, and the Westfall guide has taken all three from Alba at once since 0.2.0 with no 'Not offered' report. Add them only with in-game evidence (a recording of Alba's offer list)."
 		},
 		"92748": {
 			"set": {
