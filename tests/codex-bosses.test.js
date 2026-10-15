@@ -17,6 +17,7 @@ const { buildJournal, emitJournal } = require('../tools/lib/codex/journal');
 const { parseEntity, wowheadWants } = require('../tools/lib/codex/wowhead');
 const { runAddon } = require('./helpers/lua');
 const { writeCodexPack, sampleCodex } = require('./helpers/codex');
+const { fakeLocale } = require('./helpers/locale');
 
 const TABLES = {
 	Map: [{ ID: '230', MapName_lang: 'Blackrock Depths', InstanceType: '1', MaxPlayers: '5', AreaTableID: '1584', CorpseMapID: '-1', Corpse_0: '0', Corpse_1: '0' }],
@@ -181,13 +182,14 @@ test('buildJournal: a chest boss and the roles reach the page; the chest ties th
 	assert.deepEqual(page.bosses[1].quests, [{ id: 914, how: 'item', item: 9738, itemName: 'Gem of Cobrahn' }]);
 });
 
-test('Bosses tab: a chest says Chest, the bosses after the encounters their role; an encounter shows its level alone', () => {
+// The Wailing Caverns' Bosses tab, each shown row's name and facts.
+function bossRows(before = '') {
 	const { inputs, codex } = releaseFixture();
 	const pack = writeCodexPack(codex, { extraFiles: emitJournal(buildJournal(inputs, codex)) });
 	try {
-		const [out] = runAddon({
+		return runAddon({
 			stubs: ['stub_ui.lua'],
-			before: pack.stubLua,
+			before: `${pack.stubLua}\n${before}`,
 			addons: [{ name: 'Polestar', files: ['Core/Core.xml', 'Theme/Theme.xml', 'Gear/Gear.xml', 'Lookup/Lookup.xml', 'Dungeons/Dungeons.xml', 'UI/UI.xml'] }],
 			script: `uistub.install()
 stub.login()
@@ -197,15 +199,24 @@ DS.SetTab("bosses")
 local out = {}
 for _, r in ipairs(DS.bossRows) do if r:IsShown() then out[#out + 1] = { r.Name:GetText(), r.Level:GetText() } end end
 emit(out)`,
-		}).emitted;
-		assert.deepEqual(out, [
-			['Lady Anacondra', 'Level 20'],
-			['Serpent Cache', 'Chest  \u00b7  Optional'],
-			['Kresh', 'Level 20  \u00b7  Rare'],
-		]);
+		}).emitted[0];
 	} finally {
 		pack.cleanup();
 	}
+}
+
+test('Bosses tab: a chest says Chest, the bosses after the encounters their role; an encounter shows its level alone', () => {
+	assert.deepEqual(bossRows(), [
+		['Lady Anacondra', 'Level 20'],
+		['Serpent Cache', 'Chest  \u00b7  Optional'],
+		['Kresh', 'Level 20  \u00b7  Rare'],
+	]);
+});
+
+test('Bosses tab: a chest boss is translated under its own key, apart from the Chest gear slot', () => {
+	const rows = bossRows(fakeLocale('deDE', { Chest: 'Brust', 'slot: Chest': 'Brust', 'boss: Chest': 'Truhe', Optional: 'Optional', 'Level %d': 'Stufe %d' }));
+	assert.deepEqual(rows[1], ['Serpent Cache', 'Truhe  \u00b7  Optional']);
+	assert.deepEqual(rows[0], ['Lady Anacondra', 'Stufe 20']);
 });
 
 test('compareCodex: a chest boss matches by its object name; a confirmed missing boss Forever places outside or ranks ordinary says so', () => {

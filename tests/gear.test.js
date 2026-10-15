@@ -6,6 +6,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { runAddon } = require('./helpers/lua');
+const { fakeLocale } = require('./helpers/locale');
 
 const ADDON = { name: 'Polestar', files: ['Core/Core.xml', 'Gear/Gear.xml'] };
 
@@ -251,6 +252,21 @@ test('tooltip line: upgrade and downgrade percentages, empty slot, later level; 
 	assert.deepEqual(off, {});
 	assert.ok(colors[0][1] > colors[0][0], 'upgrade is green');
 	assert.ok(colors[1][0] > colors[1][1], 'downgrade is red');
+});
+
+test('tooltip line: the slot is named by its own key, so "Back" and "Chest" translate apart from the button and the boss chest', () => {
+	const [back, chest] = run(
+		`
+		Polestar.ItemDB.Register(nil, { [9041] = "16 25 20 2 4 1 sta8", [9060] = "5 20 15 2 4 3 str5 sta3 armor200", [9061] = "5 25 20 2 4 3 str10 sta4 armor260" })
+		g.equip(15, "item:9040")
+		g.equip(5, "item:9060")
+		emit(g.showTooltip(GameTooltip, "item:9041"))
+		emit(g.showTooltip(GameTooltip, "item:9061"))
+	`,
+		{ before: fakeLocale('esMX', { Back: 'Atrás', Chest: 'Cofre', 'slot: Back': 'Espalda', 'slot: Chest': 'Pecho' }) },
+	);
+	assert.match(back[0], /^Polestar · Arms \| .*upgrade · Espalda$/);
+	assert.match(chest[0], /^Polestar · Arms \| .*upgrade · Pecho$/);
 });
 
 test('quest reward tooltips: hovering a choice (SetQuestItem, SetQuestLogItem) shows the % upgrade line, also before its link is cached', () => {

@@ -231,6 +231,13 @@ client, so every file after it may read `L` at load; Init.lua, which loads
 before it, reads `L` only when it prints (the commands register in
 Core/Commands.lua).
 
+A word with more than one meaning gets a key per meaning:
+`Polestar.LC(context, text)` is the translation of `"<context>: <text>"`,
+and `text` while there is none. The gear slots on the tooltip line are
+`LC("slot", …)` (`"slot: Back"`, `"slot: Chest"`) and a dungeon boss that is
+a chest is `LC("boss", "Chest")`, so they translate apart from the welcome's
+`L["Back"]` button.
+
 ### Compat — every client API call goes through here
 
 UI, Nav and Engine never call quest/map/unit client APIs directly; they call

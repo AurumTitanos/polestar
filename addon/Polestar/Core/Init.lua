@@ -42,6 +42,14 @@ local pcall, type, pairs, select, tostring = pcall, type, pairs, select, tostrin
 local L = setmetatable({}, { __index = function(_, key) return key end })
 ns.L = L
 
+-- A word with more than one meaning ("Back": the welcome's button and the
+-- cloak slot) gets a key per meaning, so each can be translated on its own:
+-- ns.LC("slot", "Back") is the translation of "slot: Back", and "Back" while
+-- there is none.
+function ns.LC(context, text)
+	return rawget(L, context .. ": " .. text) or text
+end
+
 -- Text that prints literally in a FontString: every `|` (the client's escape
 -- character) doubled. Packs' strings go through this once, at registration.
 function ns.EscapeText(s)

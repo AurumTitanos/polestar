@@ -1412,11 +1412,12 @@ local TIE = {
 
 local BOSS_ROLE = { rare = "Rare", event = "Event", optional = "Optional" }
 
--- The facts beside a boss's name: level, Chest (an object boss), its role.
+-- The facts beside a boss's name: level, Chest (an object boss, under its
+-- own key: "Chest" is also the gear slot), its role.
 local function bossFacts(boss)
 	local t = {}
 	if boss.level then t[#t + 1] = format(L["Level %d"], boss.level) end
-	if boss.object then t[#t + 1] = L["Chest"] end
+	if boss.object then t[#t + 1] = ns.LC("boss", "Chest") end
 	if BOSS_ROLE[boss.role] then t[#t + 1] = L[BOSS_ROLE[boss.role]] end
 	return concat(t, DOT)
 end

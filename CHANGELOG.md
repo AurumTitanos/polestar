@@ -186,6 +186,11 @@
   loads before the locale file, registered them in English; they register
   in Core/Commands.lua now. `tests/helpers/locale.js` fakes a translation in
   the addon's tests.
+- Translations: a word with two meanings has a key per meaning
+  (`Polestar.LC`): the gear slots on the tooltip line are `"slot: Back"`,
+  `"slot: Chest"` and so on, and a dungeon boss that is a chest is
+  `"boss: Chest"`, so they no longer share "Back" with the welcome's button
+  or "Chest" with each other.
 
 ## 0.2.3 (2026-10-14)
 
