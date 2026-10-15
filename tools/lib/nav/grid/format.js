@@ -135,6 +135,7 @@ const LIFT_MIN = 10; // yd of height a lift must span (shorter animations are do
 const LIFT_FIT = 2; // yd between the landings' height difference and the car's rise
 const LIFT_OPEN = 200; // surfaces a landing reaches (and is reached from) inside its tile
 
+// SWIM | BLOCKED: fatigue water (MH2O deep quads, surfaces.js), never swum.
 const FLAG = { TERRAIN: 1, WMO: 2, M2: 4, INDOOR: 8, SWIM: 16, OCEAN: 32, STEEP: 64, BLOCKED: 128 };
 // The route's segment classes (path.js). Stored link codes (3 bits) are the
 // same numbers for walk, steep, swim, jump and climb, plus LINK_SLOPE (walk
@@ -156,7 +157,7 @@ const FALL_SLIDE = 12; // cells a fall may carry in all, sliding over unstable g
 const RUN_MAX = 32; // border columns per abstract entrance at most
 const REF_PROFILES = ['foot', 'mount'];
 
-const VERSION = 2; // TILE
+const VERSION = 3; // TILE; 3: fatigue water is blocked (surfaces.js)
 const WALLS_VERSION = 1;
 const GRAPH_VERSION = 5; // 5: slope links are no lift rides (CODE_LIFT); 4: move.js costs of 2026-10-15 (fall comfort, slope x2 / x4 / x10)
 const MAGIC_TILE = 0x564e4150; // 'PNAV'

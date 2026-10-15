@@ -2788,6 +2788,10 @@ fileDataID from wago.tools into `data/sources/casc` (local, never shipped):
   ground and 60 yd into water; landing only on stable ground), swims and
   lifts (elevator objects of `data/forever` at their car's travel from the
   client's TransportAnimation); regions; a per-tile graph per movement class.
+  Fatigue water is never swum: MH2O's deep quads (the server's fatigue; a
+  chunk of ocean without attributes is deep throughout, `geom/mh2o.js`)
+  give a blocked swim surface (`SWIM | BLOCKED`), so no route crosses open
+  sea while swims along a coast and across shallow water stay.
 - **Routes** (`tools/lib/nav/path.js`, API in its header; `move.js` the
   profiles): `snap` picks the surface for a map point (without a height, a
   point over an indoor floor takes that floor or one level with it beside

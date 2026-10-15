@@ -261,6 +261,15 @@
   legs the arrow walks straight over ground the grid cannot walk, without
   and with them. Not used by the addon yet: with these aids the arrow still
   walks straight inside a zone, and some cities' gates are not yet found.
+- `node tools/polestar.js nav pack` writes the navigation grid in Shortest
+  Path Forever's walking-map format, so his in-game engine (in
+  `Polestar_Nav`) routes on our grid: walls, cliffs, climbs and floors
+  become his per-cell steps and floors, his HPA* graph is built the way his
+  baker builds it, and `Chokepoints.lua` lists the lifts, gates, bridges,
+  tunnels, cave and building mouths and passes a walk passes, each with the
+  area's name, for the journey's named steps. The grid no longer swims
+  through fatigue water (the client's deep-water marks): no route crosses
+  open sea, coast and shallow-water swims stay (rebuild with `nav build`).
 
 ### For contributors
 

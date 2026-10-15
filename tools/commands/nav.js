@@ -18,6 +18,7 @@ const usage = `usage: node tools/polestar.js nav build [--continents 0,1] [--for
        node tools/polestar.js nav path <map> <x>,<y> <map> <x>,<y> [--class C] [--level N] [--frame era|forever] [--json] [--dir <dir>]
        node tools/polestar.js nav aids [--out <file>] [--lua <file>] [--report] [--continents 0,1] [--workers N] [--reference <file>] [--dir <dir>]
        node tools/polestar.js nav via [<pack dir>] [--guide <id>] [--force] [--report] [--workers N] [--dir <dir>]
+       node tools/polestar.js nav pack [--cells N] [--out <dir>] [--continents 0,1] [--global <name>] [--dir <dir>]
 
 build   the navigation grid of every continent map-frames.json names (or
         --continents): client geometry per ADT tile through the CASC cache
@@ -51,7 +52,13 @@ via     the arrow's waypoints for every leg of a pack's guides (default
         --guide regenerates one guide. Routes in --workers threads (default:
         up to 3), cached in data/local/nav/routes-<build>.jsonl
         with the planner's. --report prints counts per guide and measures the
-        arrow without and with the waypoints into data/local/nav/via-report.md.`;
+        arrow without and with the waypoints into data/local/nav/via-report.md.
+pack    the grid in Shortest Path Forever's walking-map format for his
+        in-game engine (tools/lib/nav/pack.js): NavN.lua, its compressed
+        parts NavN_i.lua and Nav.xml in --out (default
+        data/local/nav/pack-<cells>), pack.json the sizes. --cells cuts each
+        ADT tile into N x N cells (default 128, 4.17 yd; his own maps use
+        67); --global names the data table (default PolestarPathData).`;
 
 const usageError = (msg) => Object.assign(new Error(msg), { exit: 2 });
 
@@ -143,6 +150,52 @@ async function route(argv) {
 		const where = q.x === null ? `${q.wx.toFixed(1)} ${q.wy.toFixed(1)}` : `${q.x.toFixed(2)},${q.y.toFixed(2)}`;
 		console.log(`  ${where} z ${q.z.toFixed(1)}${i < r.cls.length ? `  -> ${CLS_NAMES[r.cls[i]]}` : ''}`);
 	});
+	return 0;
+}
+
+// The chokepoints' inputs (tools/lib/nav/chokepoints.js): the grid's aids
+// (aids.json, when built) and lifts, the map frames, the client's AreaTable.
+function packPlaces(dir) {
+	const { Geo } = require('../lib/planner/geo');
+	const { areaNames } = require('../lib/nav/chokepoints');
+	const { parseCsv } = require('../lib/data/csv');
+	const optional = (file) => (fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : null);
+	const wago = path.join(SOURCES, 'wago');
+	const builds = fs.existsSync(wago) ? fs.readdirSync(wago).filter((b) => fs.existsSync(path.join(wago, b, 'AreaTable.csv'))) : [];
+	if (!builds.length) throw Object.assign(new Error(`no AreaTable.csv under ${wago} (node tools/polestar.js data build)`), { exit: 1 });
+	builds.sort((a, b) => a.localeCompare(b, 'en', { numeric: true }));
+	return {
+		aids: optional(path.join(dir, 'aids.json')),
+		lifts: optional(path.join(dir, 'lifts.json')) || {},
+		geo: new Geo(readJson(path.join(DATA, 'map-frames.json')), readJson(path.join(DATA, 'zones.json'))),
+		areas: areaNames(parseCsv(fs.readFileSync(path.join(wago, builds[builds.length - 1], 'AreaTable.csv'), 'utf8'))),
+	};
+}
+
+async function pack(argv) {
+	const { opts: o, positional, error } = parseArgs(argv, { options: ['--cells', '--out', '--continents', '--global', '--dir'] });
+	if (error || positional.length) throw usageError(error || `unexpected argument "${positional[0]}"`);
+	const cells = o.cells === undefined ? 128 : Number(o.cells);
+	if (!Number.isInteger(cells) || cells < 8 || cells > 256) throw usageError('--cells needs a whole number from 8 to 256');
+	let continents = null;
+	if (o.continents !== undefined) {
+		continents = String(o.continents).split(',').map((s) => Number(s.trim()));
+		if (continents.some((c) => !Number.isInteger(c) || c < 0)) throw usageError('--continents needs map ids, e.g. 0,1');
+	}
+	const global = o.global || 'PolestarPathData';
+	if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(global)) throw usageError('--global needs a Lua name');
+	const dir = o.dir ? path.resolve(o.dir) : DEFAULT_DIR;
+	if (!fs.existsSync(path.join(dir, 'index.json'))) throw Object.assign(new Error('no navigation grid: run `node tools/polestar.js nav build`'), { exit: 1 });
+	const outDir = o.out ? path.resolve(o.out) : path.join(dir, `pack-${cells}`);
+	const { packNav } = require('../lib/nav/pack');
+	const places = packPlaces(dir);
+	const files = await packNav({ dir, cells, continents, global, places, log: (m) => console.error(m) });
+	fs.mkdirSync(outDir, { recursive: true });
+	for (const old of fs.readdirSync(outDir)) if (/^Nav\d+(_\d+)?\.lua$|^Nav\.xml$|^Chokepoints\.lua$|^pack\.json$/.test(old)) fs.rmSync(path.join(outDir, old));
+	for (const [name, content] of files) fs.writeFileSync(path.join(outDir, name), content);
+	fs.writeFileSync(path.join(outDir, 'pack.json'), `${JSON.stringify(files.stats, null, '\t')}\n`);
+	const bytes = [...files.values()].reduce((s, c) => s + Buffer.byteLength(c), 0);
+	console.log(`nav pack: ${files.size} files, ${(bytes / 1e6).toFixed(1)} MB at ${cells} cells per tile in ${path.relative(process.cwd(), outDir) || '.'}`);
 	return 0;
 }
 
@@ -295,7 +348,7 @@ async function via(argv) {
 	return 0;
 }
 
-const SUBCOMMANDS = { build, path: route, aids, via };
+const SUBCOMMANDS = { build, path: route, aids, via, pack };
 
 async function run(argv) {
 	const [sub, ...rest] = argv;
