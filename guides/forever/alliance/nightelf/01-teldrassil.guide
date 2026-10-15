@@ -64,6 +64,9 @@ next forever/alliance/02-westfall
 #   lake visit.
 # - Easing Suffering (99073) is now taken after The Great Tree Provides
 #   (99050) is turned in, and handed to Eralya on the way to Darnassus.
+# - Recipe of the Kaldorei (4161) is taken from Zarrin after he teaches
+#   Cooking (Camping 101: Cooking, 96634), not with the other Dolanaar
+#   pickups: he offers it to cooks only (QuestieDB lists Cooking 1).
 #
 # Left out: Crown of the Earth (934): its Vial of Blessed Water has no known
 # source, and 935 needs only the Amethyst Phial. Rellian's Tumors (923)
@@ -223,7 +226,6 @@ step Dolanaar quests
   accept 933
   accept 489                                  -- Sentinel Kyra Starsong
   accept 99046
-  accept 4161                                 -- Zarrin
   accept 475                                  -- Athridas Bearmantle
   accept 87288                                -- Aldia
   accept 932                                  -- Tallonkai Swiftroot
@@ -236,7 +238,9 @@ step The Great Outdoors
   turnin 96606
   accept 96634
   kill 6286 quest 96634.1                     -- Speak with Zarrin, south of the inn
-  turnin 96634
+  turnin 96634                                -- Zarrin
+  train Cooking
+  accept 4161                                 -- Zarrin
 
 # ---------------------------------------------------------------- East: Starbreeze and Lake Al'Ameth
 

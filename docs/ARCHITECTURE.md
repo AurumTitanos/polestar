@@ -484,8 +484,15 @@ from the data when the author gave none, `qlvl` (quest level), the blocking
 prerequisites `pre` (one of) and `preAll` (every one), `closedBy` (the quest
 its breadcrumb leads to and the quests exclusive with it: once any of them is
 taken or done the giver never offers it again) and `preTitles` (titles of the
-quests those name, for the reason texts). `only !Class` compiles to the list of
-the other eight classes, so compiled guides never contain negations.
+quests those name, for the reason texts). Every goal of a quest only
+characters with a profession can take (quests.json `skill`, `skillLevel`)
+carries `profLine` (skill line), `profName` and `profRank` (1 when the data
+has no level): the Engine treats the goal as not this character's (status
+`"na"`, like another class's goal) while `Compat.GetSkillRank` reports no rank
+or a lower one, unless the quest is in the log or done or the client cannot
+read skills, and checks again on `SKILL_LINES_CHANGED`. `only !Class` compiles
+to the list of the other eight classes, so compiled guides never contain
+negations.
 
 ### The guide registry (`Core/Guides.lua`)
 

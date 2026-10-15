@@ -8371,13 +8371,12 @@ do
 						{ t = "train", class = true, candidates = { { npc = 1226, npcName = "Maxan Anvol", map = 1426, x = 47.34, y = 52.19, f = "e", faction = "A", classes = { "PRIEST" } }, { npc = 1228, npcName = "Magis Sparkmantle", map = 1426, x = 47.5, y = 52.08, f = "e", faction = "A", classes = { "MAGE" } }, { npc = 1229, npcName = "Granis Swiftaxe", map = 1426, x = 47.36, y = 52.65, f = "e", faction = "A", classes = { "WARRIOR" } }, { npc = 1232, npcName = "Azar Stronghammer", map = 1426, x = 47.6, y = 52.07, f = "e", faction = "A", classes = { "PALADIN" } }, { npc = 258113, npcName = "Ingrid Dunwald", map = 1426, x = 47.58, y = 51.95, f = "e", faction = "A", classes = { "SHAMAN" } }, { npc = 1234, npcName = "Hogral Bakkan", map = 1426, x = 47.56, y = 52.61, f = "e", faction = "A", classes = { "ROGUE" } }, { npc = 5612, npcName = "Gimrizz Shadowcog", map = 1426, x = 47.33, y = 53.69, f = "e", faction = "A", classes = { "WARLOCK" } }, { npc = 1231, npcName = "Grif Wildheart", map = 1426, x = 45.81, y = 53.04, f = "e", faction = "A", classes = { "HUNTER" } }, { npc = 5114, npcName = "Bilban Tosslespanner", map = 1455, x = 65.9, y = 88.41, f = "e", faction = "A", classes = { "WARRIOR" } }, { npc = 5115, npcName = "Daera Brightspear", map = 1455, x = 70.97, y = 89.8, f = "e", faction = "A", classes = { "HUNTER" } }, { npc = 257446, npcName = "Teo Hammerstorm", map = 1426, x = 28.79, y = 66.18, f = "e", faction = "A", classes = { "SHAMAN" } }, { npc = 895, npcName = "Thorgas Grimson", map = 1426, x = 29.18, y = 67.45, f = "e", faction = "A", classes = { "HUNTER" } }, { npc = 460, npcName = "Alamar Grimm", map = 1426, x = 28.65, y = 66.14, f = "e", faction = "A", classes = { "WARLOCK" } }, { npc = 944, npcName = "Marryk Nurribit", map = 1426, x = 28.71, y = 66.37, f = "e", faction = "A", classes = { "MAGE" } }, { npc = 837, npcName = "Branstock Khalder", map = 1426, x = 28.6, y = 66.39, f = "e", faction = "A", classes = { "PRIEST" } }, { npc = 912, npcName = "Thran Khorman", map = 1426, x = 28.83, y = 67.24, f = "e", faction = "A", classes = { "WARRIOR" } }, { npc = 5143, npcName = "Toldren Deepiron", map = 1455, x = 25.21, y = 10.76, f = "e", faction = "A", classes = { "PRIEST" } }, { npc = 926, npcName = "Bromos Grummner", map = 1426, x = 28.83, y = 68.33, f = "e", faction = "A", classes = { "PALADIN" } }, { npc = 916, npcName = "Solm Hargrin", map = 1426, x = 28.37, y = 67.51, f = "e", faction = "A", classes = { "ROGUE" } }, { npc = 7312, npcName = "Dink", map = 1455, x = 27.16, y = 8.57, f = "e", faction = "A", classes = { "MAGE" } }, { npc = 5149, npcName = "Brandur Ironhammer", map = 1455, x = 23.13, y = 6.14, f = "e", faction = "A", classes = { "PALADIN" } }, { npc = 258098, npcName = "Eldrun Stormbreaker", map = 1455, x = 47.17, y = 13.37, f = "e", faction = "A", classes = { "SHAMAN" } }, { npc = 5167, npcName = "Fenthwick", map = 1455, x = 51.5, y = 15.33, f = "e", faction = "A", classes = { "ROGUE" } }, { npc = 5173, npcName = "Alexander Calder", map = 1455, x = 50.08, y = 7.45, f = "e", faction = "A", classes = { "WARLOCK" } }, { npc = 5516, npcName = "Ulfir Ironbeard", map = 1453, x = 67.59, y = 35.78, faction = "A", classes = { "HUNTER" } }, { npc = 198, npcName = "Khelden Bremen", map = 1429, x = 49.66, y = 39.4, f = "e", faction = "A", classes = { "MAGE" } }, { npc = 375, npcName = "Priestess Anetta", map = 1429, x = 49.81, y = 39.49, f = "e", faction = "A", classes = { "PRIEST" } }, { npc = 915, npcName = "Jorik Kerridan", map = 1429, x = 50.31, y = 39.92, f = "e", faction = "A", classes = { "ROGUE" } }, { npc = 248415, npcName = "Tordrin Sternblade", map = 1429, x = 51.21, y = 40.8, f = "e", faction = "A", classes = { "HUNTER" } }, { npc = 376, npcName = "High Priestess Laurena", map = 1453, x = 49.53, y = 44.6, faction = "A", classes = { "PRIEST" } }, { npc = 5480, npcName = "Ilsa Corbin", map = 1453, x = 80.41, y = 59.8, faction = "A", classes = { "WARRIOR" } }, { npc = 925, npcName = "Brother Sammuel", map = 1429, x = 50.43, y = 42.12, f = "e", faction = "A", classes = { "PALADIN" } }, { npc = 911, npcName = "Llane Beshere", map = 1429, x = 50.24, y = 42.29, f = "e", faction = "A", classes = { "WARRIOR" } }, { npc = 459, npcName = "Drusilla La Salle", map = 1429, x = 49.87, y = 42.65, f = "e", faction = "A", classes = { "WARLOCK" } }, { npc = 5492, npcName = "Katherine the Pure", map = 1453, x = 48.48, y = 49.09, faction = "A", classes = { "PALADIN" } }, { npc = 918, npcName = "Osborne the Night Man", map = 1453, x = 77.43, y = 65.31, faction = "A", classes = { "ROGUE" } }, { npc = 5505, npcName = "Theridran", map = 1453, x = 36.11, y = 64.39, faction = "A", classes = { "DRUID" } }, { npc = 5497, npcName = "Jennea Cannon", map = 1453, x = 49.56, y = 85.8, faction = "A", classes = { "MAGE" } }, { npc = 5495, npcName = "Ursula Deline", map = 1453, x = 39.89, y = 84.19, faction = "A", classes = { "WARLOCK" } }, { npc = 377, npcName = "Priestess Josetta", map = 1429, x = 43.28, y = 65.72, f = "e", faction = "A", classes = { "PRIEST" } }, { npc = 917, npcName = "Keryn Sylvius", map = 1429, x = 43.87, y = 65.94, f = "e", faction = "A", classes = { "ROGUE" } }, { npc = 906, npcName = "Maximillian Crowe", map = 1429, x = 44.39, y = 66.24, f = "e", faction = "A", classes = { "WARLOCK" } }, { npc = 328, npcName = "Zaldimar Wefhellt", map = 1429, x = 43.25, y = 66.19, f = "e", faction = "A", classes = { "MAGE" } }, { npc = 913, npcName = "Lyria Du Lac", map = 1429, x = 41.09, y = 65.77, f = "e", faction = "A", classes = { "WARRIOR" } }, { npc = 927, npcName = "Brother Wilhelm", map = 1429, x = 41.1, y = 66.04, f = "e", faction = "A", classes = { "PALADIN" } }, { npc = 251507, npcName = "Josephine Carson", map = 1429, x = 41.18, y = 66.3, f = "e", faction = "A", classes = { "HUNTER" } }, { npc = 3593, npcName = "Alyissia", map = 1438, x = 59.64, y = 38.44, f = "e", faction = "A", classes = { "WARRIOR" } }, { npc = 3594, npcName = "Frahun Shadewhisper", map = 1438, x = 59.64, y = 38.66, f = "e", faction = "A", classes = { "ROGUE" } }, { npc = 3595, npcName = "Shanda", map = 1438, x = 59.17, y = 40.44, f = "e", faction = "A", classes = { "PRIEST" } }, { npc = 3596, npcName = "Ayanna Everstride", map = 1438, x = 58.66, y = 40.45, f = "e", faction = "A", classes = { "HUNTER" } }, { npc = 3597, npcName = "Mardant Strongoak", map = 1438, x = 58.63, y = 40.29, f = "e", faction = "A", classes = { "DRUID" } }, { npc = 3598, npcName = "Kyra Windblade", map = 1438, x = 56.22, y = 59.2, f = "e", faction = "A", classes = { "WARRIOR" } }, { npc = 3599, npcName = "Jannok Breezesong", map = 1438, x = 56.38, y = 60.14, f = "e", faction = "A", classes = { "ROGUE" } }, { npc = 3600, npcName = "Laurna Morninglight", map = 1438, x = 55.56, y = 56.75, f = "e", faction = "A", classes = { "PRIEST" } }, { npc = 3601, npcName = "Dazalar", map = 1438, x = 56.68, y = 59.49, f = "e", faction = "A", classes = { "HUNTER" } }, { npc = 3602, npcName = "Kal", map = 1438, x = 55.95, y = 61.56, f = "e", faction = "A", classes = { "DRUID" } }, { npc = 4087, npcName = "Arias'ta Bladesinger", map = 1457, x = 58.71, y = 34.9, f = "e", faction = "A", classes = { "WARRIOR" } }, { npc = 4090, npcName = "Astarii Starseeker", map = 1457, x = 38.33, y = 80.95, f = "e", faction = "A", classes = { "PRIEST" } }, { npc = 4138, npcName = "Jeen'ra Nightrunner", map = 1457, x = 39.72, y = 5.39, f = "e", faction = "A", classes = { "HUNTER" } }, { npc = 4163, npcName = "Syurna", map = 1457, x = 36.99, y = 21.91, f = "e", faction = "A", classes = { "ROGUE" } }, { npc = 4217, npcName = "Mathrengyl Bearwalker", map = 1457, x = 35.37, y = 8.4, f = "e", faction = "A", classes = { "DRUID" } }, { npc = 251373, npcName = "Xyton Silverwind", map = 2521, x = 41.71, y = 23.36, faction = "AH", classes = { "DRUID" } }, { npc = 251376, npcName = "Tai'ree Farsight", map = 2521, x = 42.46, y = 23.67, faction = "AH", classes = { "HUNTER" } }, { npc = 251379, npcName = "Dorii Brightwhisper", map = 2521, x = 41.57, y = 23.65, faction = "A", classes = { "MAGE" } }, { npc = 251389, npcName = "Akeri Duskblade", map = 2521, x = 43.73, y = 24.3, faction = "AH", classes = { "ROGUE" } }, { npc = 251964, npcName = "Blademaster Ren", map = 2521, x = 43.65, y = 24.17, faction = "AH", classes = { "WARRIOR" } }, { npc = 254086, npcName = "Shenaan Spellwind", map = 2521, x = 44.89, y = 45.26, faction = "AH", classes = { "MAGE" } } } },
 						{ t = "accept", quest = 400, title = "Tools for Steelgrill", npc = 1872, npcName = "Tharek Blackstone", minLevel = 2, qlvl = 5, map = 1426, x = 46.02, y = 51.68, f = "e", note = "Tharek Blackstone" },
 						{ t = "accept", quest = 99158, title = "Dawn in the Mountains", npc = 1226, npcName = "Maxan Anvol", minLevel = 5, qlvl = 8, closedBy = { 99159 }, preTitles = { [99159] = "Finding Warmth" }, map = 1426, x = 47.34, y = 52.19, f = "e", note = "Maxan Anvol" },
-						{ t = "accept", quest = 384, title = "Beer Basted Boar Ribs", npc = 1267, npcName = "Ragnar Thunderbrew", minLevel = 5, qlvl = 7, map = 1426, x = 46.83, y = 52.36, f = "e", note = "Ragnar Thunderbrew" },
 						{ t = "accept", quest = 98322, title = "Secure the Mountain", npc = 1252, npcName = "Senir Whitebeard", minLevel = 4, qlvl = 8, map = 1426, x = 46.73, y = 53.83, f = "e", note = "Senir Whitebeard" },
 					},
 				},
 				{
 					title = "The Great Outdoors",
-					note = "Sit by Eric's campfire (type /sit) and wait for the buff, then Gremlock Pilsnor in the distillery teaches you cooking.",
+					note = "Sit by Eric's campfire (type /sit) and wait for the buff, then Gremlock Pilsnor in the distillery teaches you cooking. Ragnar Thunderbrew, inside too, offers Beer Basted Boar Ribs only to cooks.",
 					goals = {
 						{ t = "turnin", quest = 96628, title = "The Adventurer", npc = 265813, npcName = "Eric Brighthammer", map = 1426, x = 46.69, y = 53.92, f = "e", note = "Eric Brighthammer: The Adventurer" },
 						{ t = "accept", quest = 96608, title = "The Great Outdoors", npc = 265813, npcName = "Eric Brighthammer", minLevel = 4, qlvl = 6, closedBy = { 95998, 96101, 96604, 96605, 96606, 96607 }, preTitles = { [95998] = "The Great Outdoors", [96101] = "The Great Outdoors", [96604] = "The Great Outdoors", [96605] = "The Great Outdoors", [96606] = "The Great Outdoors", [96607] = "The Great Outdoors" }, map = 1426, x = 46.69, y = 53.92, f = "e", note = "Eric Brighthammer" },
@@ -8385,6 +8384,8 @@ do
 						{ t = "turnin", quest = 96608, title = "The Great Outdoors", npc = 265813, npcName = "Eric Brighthammer", map = 1426, x = 46.69, y = 53.92, f = "e" },
 						{ t = "accept", quest = 96629, title = "Camping 101: Cooking", npc = 265813, npcName = "Eric Brighthammer", minLevel = 4, qlvl = 6, pre = { 95998, 96101, 96604, 96605, 96606, 96607, 96608 }, closedBy = { 96626, 96634, 96646, 96655, 96658, 96661 }, preTitles = { [95998] = "The Great Outdoors", [96101] = "The Great Outdoors", [96604] = "The Great Outdoors", [96605] = "The Great Outdoors", [96606] = "The Great Outdoors", [96607] = "The Great Outdoors", [96608] = "The Great Outdoors", [96626] = "Camping 101: Cooking", [96634] = "Camping 101: Cooking", [96646] = "Camping 101: Cooking", [96655] = "Camping 101: Cooking", [96658] = "Camping 101: Cooking", [96661] = "Camping 101: Cooking" }, map = 1426, x = 46.69, y = 53.92, f = "e" },
 						{ t = "turnin", quest = 96629, title = "Camping 101: Cooking", npc = 1699, npcName = "Gremlock Pilsnor", map = 1426, x = 47.67, y = 52.31, f = "e", note = "Gremlock Pilsnor" },
+						{ t = "train", skill = "Cooking", skillLine = 185, rank = 1, rankMax = 75, candidates = { { npc = 1699, npcName = "Gremlock Pilsnor", map = 1426, x = 47.67, y = 52.31, f = "e", faction = "A" }, { npc = 5159, npcName = "Daryl Riknussun", map = 1455, x = 60.08, y = 36.43, f = "e", faction = "A" }, { npc = 5482, npcName = "Stephen Ryback", map = 1453, x = 78.17, y = 53.1, faction = "A" }, { npc = 1430, npcName = "Tomas", map = 1429, x = 44.37, y = 65.99, f = "e", faction = "A" }, { npc = 6286, npcName = "Zarrin", map = 1438, x = 57.12, y = 61.3, f = "e", faction = "A" }, { npc = 4210, npcName = "Alegorn", map = 1457, x = 49.03, y = 21.24, f = "e", faction = "A" } } },
+						{ t = "accept", quest = 384, title = "Beer Basted Boar Ribs", npc = 1267, npcName = "Ragnar Thunderbrew", minLevel = 5, qlvl = 7, map = 1426, x = 46.83, y = 52.36, f = "e", profLine = 185, profName = "Cooking", profRank = 1, note = "Ragnar Thunderbrew" },
 					},
 				},
 				{
@@ -8401,14 +8402,14 @@ do
 					title = "Boars and bears",
 					note = "Crag Boars and Young Black Bears roam the fields around Kharanos and the depot. Buy the Rhapsody Malt from the innkeeper in the distillery.",
 					goals = {
-						{ t = "complete", quest = 384, title = "Beer Basted Boar Ribs" },
+						{ t = "complete", quest = 384, title = "Beer Basted Boar Ribs", profLine = 185, profName = "Cooking", profRank = 1 },
 						{ t = "complete", quest = 317, title = "Stocking Jetsteam" },
 					},
 				},
 				{
 					title = "Kharanos",
 					goals = {
-						{ t = "turnin", quest = 384, title = "Beer Basted Boar Ribs", npc = 1267, npcName = "Ragnar Thunderbrew", map = 1426, x = 46.83, y = 52.36, f = "e", note = "Ragnar Thunderbrew" },
+						{ t = "turnin", quest = 384, title = "Beer Basted Boar Ribs", npc = 1267, npcName = "Ragnar Thunderbrew", map = 1426, x = 46.83, y = 52.36, f = "e", profLine = 185, profName = "Cooking", profRank = 1, note = "Ragnar Thunderbrew" },
 						{ t = "accept", quest = 98321, title = "Flintfire's Shipment", npc = 1241, npcName = "Tognus Flintfire", minLevel = 4, qlvl = 7, map = 1426, x = 45.34, y = 51.94, f = "e", note = "Tognus Flintfire" },
 					},
 				},
@@ -8588,7 +8589,7 @@ do
 					title = "Gol'Bolar Quarry",
 					note = "The quarry lies south-east of the ranch.",
 					goals = {
-						{ t = "accept", quest = 95217, title = "The Quarry's Smith", npc = 1698, npcName = "Frast Dokner", minLevel = 7, qlvl = 10, map = 1426, x = 69, y = 55.89, f = "e", optional = true, note = "Frast Dokner: blacksmiths only" },
+						{ t = "accept", quest = 95217, title = "The Quarry's Smith", npc = 1698, npcName = "Frast Dokner", minLevel = 7, qlvl = 10, map = 1426, x = 69, y = 55.89, f = "e", optional = true, profLine = 164, profName = "Blacksmithing", profRank = 1, note = "Frast Dokner: blacksmiths only" },
 						{ t = "accept", quest = 432, title = "Those Blasted Troggs!", npc = 1254, npcName = "Foreman Stonebrow", minLevel = 5, qlvl = 9, map = 1426, x = 69.08, y = 56.33, f = "e", note = "Foreman Stonebrow" },
 					},
 				},
@@ -8621,13 +8622,13 @@ do
 					note = "Snow Leopards and boars roam the snow between the ranch and the quarry. Blacksmiths: Copper Bars come from smelting Copper Ore or the trade vendors.",
 					goals = {
 						{ t = "complete", quest = 95212, title = "Never Saddle on Quality" },
-						{ t = "complete", quest = 95217, title = "The Quarry's Smith", optional = true },
+						{ t = "complete", quest = 95217, title = "The Quarry's Smith", optional = true, profLine = 164, profName = "Blacksmithing", profRank = 1 },
 					},
 				},
 				{
 					title = "Gol'Bolar Quarry",
 					goals = {
-						{ t = "turnin", quest = 95217, title = "The Quarry's Smith", npc = 1698, npcName = "Frast Dokner", map = 1426, x = 69, y = 55.89, f = "e", optional = true, note = "Frast Dokner" },
+						{ t = "turnin", quest = 95217, title = "The Quarry's Smith", npc = 1698, npcName = "Frast Dokner", map = 1426, x = 69, y = 55.89, f = "e", optional = true, profLine = 164, profName = "Blacksmithing", profRank = 1, note = "Frast Dokner" },
 						{ t = "turnin", quest = 95214, title = "Stolen Blasting Powder", npc = 1256, npcName = "Quarrymaster Thesten", map = 1426, x = 69.16, y = 54.8, f = "e", note = "Quarrymaster Thesten" },
 					},
 				},
@@ -9126,7 +9127,7 @@ do
 						{ t = "complete", quest = 95998, title = "The Great Outdoors", map = 1429, x = 44.9, y = 63.2, f = "e", note = "Sit (/sit) by his campfire until you have Boosted Rest" },
 						{ t = "turnin", quest = 95998, title = "The Great Outdoors", npc = 263399, npcName = "Sam Sarsaparilla", map = 1429, x = 44.9, y = 63.36, f = "e" },
 						{ t = "accept", quest = 96626, title = "Camping 101: Cooking", npc = 263399, npcName = "Sam Sarsaparilla", minLevel = 4, qlvl = 6, pre = { 95998, 96101, 96604, 96605, 96606, 96607, 96608 }, closedBy = { 96629, 96634, 96646, 96655, 96658, 96661 }, preTitles = { [95998] = "The Great Outdoors", [96101] = "The Great Outdoors", [96604] = "The Great Outdoors", [96605] = "The Great Outdoors", [96606] = "The Great Outdoors", [96607] = "The Great Outdoors", [96608] = "The Great Outdoors", [96629] = "Camping 101: Cooking", [96634] = "Camping 101: Cooking", [96646] = "Camping 101: Cooking", [96655] = "Camping 101: Cooking", [96658] = "Camping 101: Cooking", [96661] = "Camping 101: Cooking" }, map = 1429, x = 44.9, y = 63.36, f = "e" },
-						{ t = "accept", quest = 91751, title = "Rough Wolf Pelts", npc = 6306, npcName = "Helene Peltskinner", minLevel = 5, qlvl = 7, map = 1429, x = 46.24, y = 62.24, f = "e", optional = true, note = "Helene Peltskinner: skinners only, the pelts are skinned" },
+						{ t = "accept", quest = 91751, title = "Rough Wolf Pelts", npc = 6306, npcName = "Helene Peltskinner", minLevel = 5, qlvl = 7, map = 1429, x = 46.24, y = 62.24, f = "e", optional = true, profLine = 393, profName = "Skinning", profRank = 1, note = "Helene Peltskinner: skinners only, the pelts are skinned" },
 						{ t = "accept", quest = 99127, title = "A Net Disaster", npc = 383, npcName = "Jason Mathers", minLevel = 4, qlvl = 7, map = 1429, x = 47.46, y = 62.18, f = "e", note = "Jason Mathers" },
 						{ t = "accept", quest = 99143, title = "Bottles and Baubles", npc = 1651, npcName = "Lee Brown", minLevel = 4, qlvl = 7, map = 1429, x = 47.61, y = 62.32, f = "e", note = "Lee Brown" },
 					},
@@ -9286,7 +9287,7 @@ do
 					note = "The murlocs on the east shore drop the kelp. Skinners: Gray Forest Wolves roam the woods between the lake and the Tower of Azora; Prowlers further east give pelts too.",
 					goals = {
 						{ t = "collect", quest = 112, title = "Collecting Kelp", item = 1256, itemName = "Crystal Kelp Frond", count = 4, oi = 1, map = 1429, x = 49.83, y = 66.41, f = "e", spots = { { x = 51.1, y = 66.9, r = 65, n = 13 }, { x = 54.4, y = 67.3, r = 78, n = 11 }, { x = 54.3, y = 64.1, r = 47, n = 5 }, { x = 56.9, y = 67, r = 64, n = 10 }, { x = 57.2, y = 63, r = 17, n = 2 }, { x = 50.5, y = 62.3, r = 15, n = 1, alt = true } }, note = "Crystal Kelp Fronds" },
-						{ t = "collect", quest = 91751, title = "Rough Wolf Pelts", item = 247877, itemName = "Rough Wolf Pelt", count = 7, oi = 1, map = 1429, x = 58.44, y = 62.13, f = "e", spots = { { x = 59.8, y = 64.4, r = 71, n = 10 }, { x = 64.6, y = 60.3, r = 40, n = 1 }, { x = 70.6, y = 62.1, r = 50, n = 6 }, { x = 78.1, y = 62.1, r = 63, n = 5 }, { x = 84.7, y = 61, r = 61, n = 4 }, { x = 85.9, y = 72.3, r = 40, n = 1 }, { x = 90, y = 82.4, r = 40, n = 1 }, { x = 82.9, y = 84.5, r = 40, n = 3 }, { x = 76.3, y = 75.9, r = 52, n = 6 }, { x = 77.7, y = 41, r = 45, n = 3 }, { x = 71.4, y = 37.5, r = 40, n = 1 }, { x = 64.6, y = 43.3, r = 40, n = 1 }, { x = 61, y = 60.8, r = 40, n = 3, alt = true }, { x = 60.2, y = 67.5, r = 56, n = 6, alt = true }, { x = 64.6, y = 63.9, r = 50, n = 3, alt = true }, { x = 61.3, y = 70.8, r = 40, n = 3, alt = true }, { x = 63.1, y = 69, r = 40, n = 1, alt = true }, { x = 66.2, y = 66.7, r = 40, n = 2, alt = true }, { x = 67.8, y = 63, r = 42, n = 4, alt = true }, { x = 68, y = 58.3, r = 56, n = 4, alt = true }, { x = 68.7, y = 65, r = 40, n = 3, alt = true }, { x = 69.9, y = 69.5, r = 40, n = 1, alt = true }, { x = 66.7, y = 45.2, r = 40, n = 1, alt = true }, { x = 72.8, y = 65, r = 54, n = 9, alt = true }, { x = 73.4, y = 68.2, r = 40, n = 2, alt = true }, { x = 70.8, y = 40.8, r = 47, n = 4, alt = true }, { x = 74.4, y = 39.1, r = 54, n = 7, alt = true }, { x = 81, y = 60.7, r = 40, n = 2, alt = true }, { x = 79.4, y = 78.2, r = 57, n = 5, alt = true }, { x = 81.6, y = 77.5, r = 40, n = 2, alt = true }, { x = 80.4, y = 81.7, r = 50, n = 7, alt = true }, { x = 83.8, y = 72, r = 40, n = 1, alt = true }, { x = 86.8, y = 64.4, r = 40, n = 4, alt = true }, { x = 87.6, y = 68.8, r = 40, n = 4, alt = true }, { x = 88.4, y = 71.5, r = 40, n = 2, alt = true }, { x = 85.5, y = 84, r = 40, n = 3, alt = true }, { x = 87.7, y = 78.1, r = 41, n = 4, alt = true }, { x = 87.5, y = 81.6, r = 40, n = 2, alt = true }, { x = 90.4, y = 77.2, r = 58, n = 3, alt = true } }, spread = true, optional = true, note = "Rough Wolf Pelts" },
+						{ t = "collect", quest = 91751, title = "Rough Wolf Pelts", item = 247877, itemName = "Rough Wolf Pelt", count = 7, oi = 1, map = 1429, x = 58.44, y = 62.13, f = "e", spots = { { x = 59.8, y = 64.4, r = 71, n = 10 }, { x = 64.6, y = 60.3, r = 40, n = 1 }, { x = 70.6, y = 62.1, r = 50, n = 6 }, { x = 78.1, y = 62.1, r = 63, n = 5 }, { x = 84.7, y = 61, r = 61, n = 4 }, { x = 85.9, y = 72.3, r = 40, n = 1 }, { x = 90, y = 82.4, r = 40, n = 1 }, { x = 82.9, y = 84.5, r = 40, n = 3 }, { x = 76.3, y = 75.9, r = 52, n = 6 }, { x = 77.7, y = 41, r = 45, n = 3 }, { x = 71.4, y = 37.5, r = 40, n = 1 }, { x = 64.6, y = 43.3, r = 40, n = 1 }, { x = 61, y = 60.8, r = 40, n = 3, alt = true }, { x = 60.2, y = 67.5, r = 56, n = 6, alt = true }, { x = 64.6, y = 63.9, r = 50, n = 3, alt = true }, { x = 61.3, y = 70.8, r = 40, n = 3, alt = true }, { x = 63.1, y = 69, r = 40, n = 1, alt = true }, { x = 66.2, y = 66.7, r = 40, n = 2, alt = true }, { x = 67.8, y = 63, r = 42, n = 4, alt = true }, { x = 68, y = 58.3, r = 56, n = 4, alt = true }, { x = 68.7, y = 65, r = 40, n = 3, alt = true }, { x = 69.9, y = 69.5, r = 40, n = 1, alt = true }, { x = 66.7, y = 45.2, r = 40, n = 1, alt = true }, { x = 72.8, y = 65, r = 54, n = 9, alt = true }, { x = 73.4, y = 68.2, r = 40, n = 2, alt = true }, { x = 70.8, y = 40.8, r = 47, n = 4, alt = true }, { x = 74.4, y = 39.1, r = 54, n = 7, alt = true }, { x = 81, y = 60.7, r = 40, n = 2, alt = true }, { x = 79.4, y = 78.2, r = 57, n = 5, alt = true }, { x = 81.6, y = 77.5, r = 40, n = 2, alt = true }, { x = 80.4, y = 81.7, r = 50, n = 7, alt = true }, { x = 83.8, y = 72, r = 40, n = 1, alt = true }, { x = 86.8, y = 64.4, r = 40, n = 4, alt = true }, { x = 87.6, y = 68.8, r = 40, n = 4, alt = true }, { x = 88.4, y = 71.5, r = 40, n = 2, alt = true }, { x = 85.5, y = 84, r = 40, n = 3, alt = true }, { x = 87.7, y = 78.1, r = 41, n = 4, alt = true }, { x = 87.5, y = 81.6, r = 40, n = 2, alt = true }, { x = 90.4, y = 77.2, r = 58, n = 3, alt = true } }, spread = true, optional = true, profLine = 393, profName = "Skinning", profRank = 1, note = "Rough Wolf Pelts" },
 					},
 				},
 				{
@@ -9397,7 +9398,7 @@ do
 					title = "Goldshire",
 					note = "Follow the road west back to Goldshire; Helene and Jason stand on the lake shore before town.",
 					goals = {
-						{ t = "turnin", quest = 91751, title = "Rough Wolf Pelts", npc = 6306, npcName = "Helene Peltskinner", map = 1429, x = 46.24, y = 62.24, f = "e", optional = true, note = "Helene Peltskinner" },
+						{ t = "turnin", quest = 91751, title = "Rough Wolf Pelts", npc = 6306, npcName = "Helene Peltskinner", map = 1429, x = 46.24, y = 62.24, f = "e", optional = true, profLine = 393, profName = "Skinning", profRank = 1, note = "Helene Peltskinner" },
 						{ t = "turnin", quest = 99131, title = "Baited for Success", npc = 383, npcName = "Jason Mathers", map = 1429, x = 47.46, y = 62.18, f = "e", note = "Jason Mathers" },
 						{ t = "turnin", quest = 112, title = "Collecting Kelp", npc = 253, npcName = "William Pestle", map = 1429, x = 43.32, y = 65.7, f = "e", note = "William Pestle" },
 						{ t = "accept", quest = 114, title = "The Escape", npc = 253, npcName = "William Pestle", minLevel = 5, qlvl = 7, pre = { 112 }, preTitles = { [112] = "Collecting Kelp" }, map = 1429, x = 43.32, y = 65.7, f = "e" },
@@ -9817,7 +9818,6 @@ do
 						{ t = "accept", quest = 933, title = "Crown of the Earth", npc = 3515, npcName = "Corithras Moonrage", minLevel = 1, qlvl = 9, pre = { 929 }, preTitles = { [929] = "Crown of the Earth" }, map = 1438, x = 56.14, y = 61.71, f = "e" },
 						{ t = "accept", quest = 489, title = "Seek Redemption!", npc = 2081, npcName = "Sentinel Kyra Starsong", minLevel = 4, qlvl = 7, pre = { 488 }, preTitles = { [488] = "Zenn's Bidding" }, map = 1438, x = 56, y = 59.52, f = "e", note = "Sentinel Kyra Starsong" },
 						{ t = "accept", quest = 99046, title = "The Lost Runner", npc = 2081, npcName = "Sentinel Kyra Starsong", minLevel = 4, qlvl = 9, closedBy = { 99047 }, preTitles = { [99047] = "Not Dead Yet" }, map = 1438, x = 56, y = 59.52, f = "e" },
-						{ t = "accept", quest = 4161, title = "Recipe of the Kaldorei", npc = 6286, npcName = "Zarrin", minLevel = 1, qlvl = 7, map = 1438, x = 57.12, y = 61.3, f = "e", note = "Zarrin" },
 						{ t = "accept", quest = 475, title = "A Troubling Breeze", npc = 2078, npcName = "Athridas Bearmantle", minLevel = 4, qlvl = 6, map = 1438, x = 55.96, y = 57.27, f = "e", note = "Athridas Bearmantle" },
 						{ t = "accept", quest = 87288, title = "Soft Saber Pelts", npc = 3608, npcName = "Aldia", minLevel = 4, qlvl = 7, map = 1438, x = 55.51, y = 57.15, f = "e", note = "Aldia" },
 						{ t = "accept", quest = 932, title = "Twisted Hatred", npc = 3567, npcName = "Tallonkai Swiftroot", minLevel = 4, qlvl = 8, map = 1438, x = 55.57, y = 56.95, f = "e", note = "Tallonkai Swiftroot" },
@@ -9833,7 +9833,9 @@ do
 						{ t = "turnin", quest = 96606, title = "The Great Outdoors", npc = 265811, npcName = "Lyreena Duskblade", map = 1438, x = 57.58, y = 56.64, f = "e" },
 						{ t = "accept", quest = 96634, title = "Camping 101: Cooking", npc = 265811, npcName = "Lyreena Duskblade", minLevel = 4, qlvl = 6, pre = { 95998, 96101, 96604, 96605, 96606, 96607, 96608 }, closedBy = { 96626, 96629, 96646, 96655, 96658, 96661 }, preTitles = { [95998] = "The Great Outdoors", [96101] = "The Great Outdoors", [96604] = "The Great Outdoors", [96605] = "The Great Outdoors", [96606] = "The Great Outdoors", [96607] = "The Great Outdoors", [96608] = "The Great Outdoors", [96626] = "Camping 101: Cooking", [96629] = "Camping 101: Cooking", [96646] = "Camping 101: Cooking", [96655] = "Camping 101: Cooking", [96658] = "Camping 101: Cooking", [96661] = "Camping 101: Cooking" }, map = 1438, x = 57.58, y = 56.64, f = "e" },
 						{ t = "kill", quest = 96634, title = "Camping 101: Cooking", target = "Zarrin", npc = 6286, oi = 1, map = 1438, x = 57.12, y = 61.3, f = "e", note = "Speak with Zarrin, south of the inn" },
-						{ t = "turnin", quest = 96634, title = "Camping 101: Cooking", npc = 6286, npcName = "Zarrin", map = 1438, x = 57.12, y = 61.3, f = "e" },
+						{ t = "turnin", quest = 96634, title = "Camping 101: Cooking", npc = 6286, npcName = "Zarrin", map = 1438, x = 57.12, y = 61.3, f = "e", note = "Zarrin" },
+						{ t = "train", skill = "Cooking", skillLine = 185, rank = 1, rankMax = 75, candidates = { { npc = 6286, npcName = "Zarrin", map = 1438, x = 57.12, y = 61.3, f = "e", faction = "A" }, { npc = 4210, npcName = "Alegorn", map = 1457, x = 49.03, y = 21.24, f = "e", faction = "A" }, { npc = 1699, npcName = "Gremlock Pilsnor", map = 1426, x = 47.67, y = 52.31, f = "e", faction = "A" }, { npc = 1430, npcName = "Tomas", map = 1429, x = 44.37, y = 65.99, f = "e", faction = "A" }, { npc = 5482, npcName = "Stephen Ryback", map = 1453, x = 78.17, y = 53.1, faction = "A" }, { npc = 5159, npcName = "Daryl Riknussun", map = 1455, x = 60.08, y = 36.43, f = "e", faction = "A" } } },
+						{ t = "accept", quest = 4161, title = "Recipe of the Kaldorei", npc = 6286, npcName = "Zarrin", minLevel = 1, qlvl = 7, map = 1438, x = 57.12, y = 61.3, f = "e", profLine = 185, profName = "Cooking", profRank = 1, note = "Zarrin" },
 					},
 				},
 				{
@@ -9842,7 +9844,7 @@ do
 					goals = {
 						{ t = "collect", quest = 489, title = "Seek Redemption!", item = 3418, itemName = "Fel Cone", count = 3, oi = 1, map = 1438, x = 60.2, y = 62.27, f = "e", spots = { { x = 58.3, y = 62.6, r = 98, n = 6 }, { x = 61.6, y = 53.4, r = 66, n = 1 }, { x = 68.8, y = 58.8, r = 66, n = 2 }, { x = 62.3, y = 73.7, r = 66, n = 1 }, { x = 51.3, y = 77.1, r = 66, n = 2 }, { x = 45.2, y = 74.7, r = 66, n = 2 }, { x = 41.5, y = 80.2, r = 66, n = 1 }, { x = 41.6, y = 69, r = 66, n = 1 }, { x = 40.4, y = 56, r = 100, n = 3 }, { x = 46.4, y = 52.7, r = 66, n = 2 }, { x = 50.5, y = 57.8, r = 98, n = 7 }, { x = 50.6, y = 65.9, r = 92, n = 6 }, { x = 62.8, y = 63.1, r = 66, n = 2, alt = true }, { x = 60.3, y = 69, r = 66, n = 1, alt = true }, { x = 58.7, y = 55.7, r = 66, n = 3, alt = true }, { x = 66, y = 62.8, r = 90, n = 4, alt = true }, { x = 54.6, y = 66, r = 94, n = 4, alt = true }, { x = 52.9, y = 60.8, r = 80, n = 4, alt = true }, { x = 54.2, y = 71.1, r = 66, n = 2, alt = true }, { x = 66.7, y = 53.5, r = 66, n = 1, alt = true }, { x = 59.3, y = 75.4, r = 66, n = 2, alt = true }, { x = 64.8, y = 50.8, r = 66, n = 1, alt = true }, { x = 48.8, y = 74.6, r = 66, n = 1, alt = true }, { x = 47.3, y = 78.7, r = 101, n = 4, alt = true }, { x = 38.3, y = 63.3, r = 66, n = 1, alt = true } }, spread = true },
 						{ t = "collect", quest = 87288, title = "Soft Saber Pelts", item = 280087, itemName = "Soft Nightsaber Pelt", count = 6, oi = 1, map = 1438, x = 59.54, y = 61.4, f = "e", spots = { { x = 59.5, y = 62.4, r = 40, n = 4 }, { x = 58.7, y = 58.3, r = 40, n = 1 }, { x = 57.6, y = 54.7, r = 40, n = 1 }, { x = 53.6, y = 55.6, r = 40, n = 1 }, { x = 49.8, y = 55.6, r = 40, n = 2 }, { x = 48.8, y = 50.5, r = 40, n = 3 }, { x = 51.2, y = 61.9, r = 40, n = 2 }, { x = 54.8, y = 65.2, r = 40, n = 1 }, { x = 62.3, y = 60.4, r = 62, n = 5 }, { x = 64.1, y = 56, r = 40, n = 1 }, { x = 66.7, y = 51.2, r = 40, n = 2 }, { x = 68.4, y = 54.7, r = 40, n = 2 }, { x = 53.4, y = 62.9, r = 47, n = 4, alt = true }, { x = 52.9, y = 58.5, r = 40, n = 1, alt = true }, { x = 66.3, y = 53.9, r = 40, n = 2, alt = true }, { x = 51.2, y = 59, r = 62, n = 4, alt = true }, { x = 49.7, y = 52.4, r = 40, n = 1, alt = true } }, spread = true, note = "Nightsabers" },
-						{ t = "collect", quest = 4161, title = "Recipe of the Kaldorei", item = 5465, itemName = "Small Spider Leg", count = 7, oi = 1, map = 1438, x = 59.55, y = 59.7, f = "e", spots = { { x = 60.3, y = 59.3, r = 79, n = 6 }, { x = 65.2, y = 69.1, r = 48, n = 1 }, { x = 69.8, y = 60.3, r = 48, n = 2 }, { x = 51.7, y = 58.9, r = 48, n = 2 }, { x = 46.5, y = 46.8, r = 48, n = 2 }, { x = 45.1, y = 35.1, r = 48, n = 1 }, { x = 47.7, y = 24.9, r = 79, n = 4 }, { x = 33.8, y = 32, r = 48, n = 3 }, { x = 38, y = 47.6, r = 48, n = 2 }, { x = 39.2, y = 60.4, r = 48, n = 3 }, { x = 42, y = 75.2, r = 51, n = 3 }, { x = 54.4, y = 76.8, r = 48, n = 2 }, { x = 58.2, y = 55.8, r = 48, n = 1, alt = true }, { x = 61, y = 54.8, r = 48, n = 3, alt = true }, { x = 63.8, y = 61.9, r = 49, n = 3, alt = true }, { x = 53.9, y = 62.5, r = 62, n = 4, alt = true }, { x = 67.2, y = 62, r = 48, n = 1, alt = true }, { x = 52.3, y = 66, r = 71, n = 5, alt = true }, { x = 51.6, y = 54.8, r = 48, n = 2, alt = true }, { x = 67.9, y = 64.6, r = 72, n = 3, alt = true }, { x = 69.5, y = 57.2, r = 48, n = 1, alt = true }, { x = 60.6, y = 74.9, r = 66, n = 4, alt = true }, { x = 54.7, y = 73.7, r = 48, n = 2, alt = true }, { x = 48.8, y = 75.6, r = 48, n = 2, alt = true }, { x = 48.2, y = 44.7, r = 48, n = 2, alt = true }, { x = 45.9, y = 70.9, r = 48, n = 2, alt = true }, { x = 43.3, y = 53.4, r = 48, n = 2, alt = true }, { x = 45, y = 73.8, r = 48, n = 2, alt = true }, { x = 45.8, y = 43.4, r = 48, n = 1, alt = true }, { x = 43.1, y = 46.4, r = 48, n = 3, alt = true }, { x = 45.2, y = 78.1, r = 48, n = 3, alt = true }, { x = 43.5, y = 44, r = 48, n = 2, alt = true }, { x = 40.6, y = 48.7, r = 48, n = 2, alt = true }, { x = 47.7, y = 33.1, r = 48, n = 2, alt = true }, { x = 47.8, y = 26.6, r = 48, n = 1, alt = true }, { x = 45.7, y = 27.5, r = 48, n = 1, alt = true }, { x = 39.9, y = 31.4, r = 48, n = 1, alt = true }, { x = 41.2, y = 28.9, r = 48, n = 1, alt = true }, { x = 36.3, y = 32.3, r = 48, n = 1, alt = true }, { x = 40.8, y = 25.4, r = 72, n = 5, alt = true }, { x = 38, y = 27.9, r = 48, n = 1, alt = true } }, spread = true, note = "Webwood Lurkers" },
+						{ t = "collect", quest = 4161, title = "Recipe of the Kaldorei", item = 5465, itemName = "Small Spider Leg", count = 7, oi = 1, map = 1438, x = 59.55, y = 59.7, f = "e", spots = { { x = 60.3, y = 59.3, r = 79, n = 6 }, { x = 65.2, y = 69.1, r = 48, n = 1 }, { x = 69.8, y = 60.3, r = 48, n = 2 }, { x = 51.7, y = 58.9, r = 48, n = 2 }, { x = 46.5, y = 46.8, r = 48, n = 2 }, { x = 45.1, y = 35.1, r = 48, n = 1 }, { x = 47.7, y = 24.9, r = 79, n = 4 }, { x = 33.8, y = 32, r = 48, n = 3 }, { x = 38, y = 47.6, r = 48, n = 2 }, { x = 39.2, y = 60.4, r = 48, n = 3 }, { x = 42, y = 75.2, r = 51, n = 3 }, { x = 54.4, y = 76.8, r = 48, n = 2 }, { x = 58.2, y = 55.8, r = 48, n = 1, alt = true }, { x = 61, y = 54.8, r = 48, n = 3, alt = true }, { x = 63.8, y = 61.9, r = 49, n = 3, alt = true }, { x = 53.9, y = 62.5, r = 62, n = 4, alt = true }, { x = 67.2, y = 62, r = 48, n = 1, alt = true }, { x = 52.3, y = 66, r = 71, n = 5, alt = true }, { x = 51.6, y = 54.8, r = 48, n = 2, alt = true }, { x = 67.9, y = 64.6, r = 72, n = 3, alt = true }, { x = 69.5, y = 57.2, r = 48, n = 1, alt = true }, { x = 60.6, y = 74.9, r = 66, n = 4, alt = true }, { x = 54.7, y = 73.7, r = 48, n = 2, alt = true }, { x = 48.8, y = 75.6, r = 48, n = 2, alt = true }, { x = 48.2, y = 44.7, r = 48, n = 2, alt = true }, { x = 45.9, y = 70.9, r = 48, n = 2, alt = true }, { x = 43.3, y = 53.4, r = 48, n = 2, alt = true }, { x = 45, y = 73.8, r = 48, n = 2, alt = true }, { x = 45.8, y = 43.4, r = 48, n = 1, alt = true }, { x = 43.1, y = 46.4, r = 48, n = 3, alt = true }, { x = 45.2, y = 78.1, r = 48, n = 3, alt = true }, { x = 43.5, y = 44, r = 48, n = 2, alt = true }, { x = 40.6, y = 48.7, r = 48, n = 2, alt = true }, { x = 47.7, y = 33.1, r = 48, n = 2, alt = true }, { x = 47.8, y = 26.6, r = 48, n = 1, alt = true }, { x = 45.7, y = 27.5, r = 48, n = 1, alt = true }, { x = 39.9, y = 31.4, r = 48, n = 1, alt = true }, { x = 41.2, y = 28.9, r = 48, n = 1, alt = true }, { x = 36.3, y = 32.3, r = 48, n = 1, alt = true }, { x = 40.8, y = 25.4, r = 72, n = 5, alt = true }, { x = 38, y = 27.9, r = 48, n = 1, alt = true } }, spread = true, profLine = 185, profName = "Cooking", profRank = 1, note = "Webwood Lurkers" },
 						{ t = "turnin", quest = 475, title = "A Troubling Breeze", npc = 2107, npcName = "Gaerolas Talvethren", map = 1438, x = 66.26, y = 58.52, f = "e", note = "Gaerolas Talvethren" },
 						{ t = "accept", quest = 476, title = "Gnarlpine Corruption", npc = 2107, npcName = "Gaerolas Talvethren", minLevel = 4, qlvl = 6, pre = { 475 }, preTitles = { [475] = "A Troubling Breeze" }, map = 1438, x = 66.26, y = 58.52, f = "e" },
 						{ t = "collect", quest = 2438, title = "The Emerald Dreamcatcher", item = 8048, itemName = "Emerald Dreamcatcher", count = 1, oi = 1, map = 1438, x = 68, y = 59.6, f = "e", note = "Tallonkai's Dresser" },
@@ -9871,7 +9873,7 @@ do
 					title = "Dolanaar",
 					goals = {
 						{ t = "turnin", quest = 87288, title = "Soft Saber Pelts", npc = 3608, npcName = "Aldia", map = 1438, x = 55.51, y = 57.15, f = "e", note = "Aldia" },
-						{ t = "turnin", quest = 4161, title = "Recipe of the Kaldorei", npc = 6286, npcName = "Zarrin", map = 1438, x = 57.12, y = 61.3, f = "e", note = "Zarrin" },
+						{ t = "turnin", quest = 4161, title = "Recipe of the Kaldorei", npc = 6286, npcName = "Zarrin", map = 1438, x = 57.12, y = 61.3, f = "e", profLine = 185, profName = "Cooking", profRank = 1, note = "Zarrin" },
 						{ t = "turnin", quest = 476, title = "Gnarlpine Corruption", npc = 2078, npcName = "Athridas Bearmantle", map = 1438, x = 55.96, y = 57.27, f = "e", note = "Athridas Bearmantle" },
 						{ t = "accept", quest = 483, title = "The Relics of Wakening", npc = 2078, npcName = "Athridas Bearmantle", minLevel = 4, qlvl = 9, pre = { 476 }, preTitles = { [476] = "Gnarlpine Corruption" }, map = 1438, x = 55.96, y = 57.27, f = "e" },
 						{ t = "turnin", quest = 2438, title = "The Emerald Dreamcatcher", npc = 3567, npcName = "Tallonkai Swiftroot", map = 1438, x = 55.57, y = 56.95, f = "e", note = "Tallonkai Swiftroot" },
@@ -30411,7 +30413,7 @@ do
 				{
 					title = "Sen'jin Village",
 					goals = {
-						{ t = "accept", quest = 96873, title = "A Pain in the Neck", npc = 266881, npcName = "Pa'zula", minLevel = 5, qlvl = 8, map = 1411, x = 56.66, y = 73.73, f = "e", optional = true, note = "Pa'zula: enchanters only, the residue is disenchanted from Hexed Pendants" },
+						{ t = "accept", quest = 96873, title = "A Pain in the Neck", npc = 266881, npcName = "Pa'zula", minLevel = 5, qlvl = 8, map = 1411, x = 56.66, y = 73.73, f = "e", optional = true, profLine = 333, profName = "Enchanting", profRank = 1, note = "Pa'zula: enchanters only, the residue is disenchanted from Hexed Pendants" },
 						{ t = "accept", quest = 817, title = "Practical Prey", npc = 3194, npcName = "Vel'rin Fang", minLevel = 5, qlvl = 8, map = 1411, x = 55.96, y = 73.93, f = "e", note = "Vel'rin Fang" },
 						{ t = "accept", quest = 818, title = "A Solvent Spirit", npc = 3304, npcName = "Master Vornal", minLevel = 5, qlvl = 7, map = 1411, x = 55.94, y = 74.39, f = "e", note = "Master Vornal" },
 						{ t = "accept", quest = 97225, title = "Forgotten Loa Idols", npc = 3304, npcName = "Master Vornal", minLevel = 4, qlvl = 9, map = 1411, x = 55.94, y = 74.39, f = "e" },
@@ -30444,7 +30446,7 @@ do
 						{ t = "collect", quest = 97225, title = "Forgotten Loa Idols", item = 277135, itemName = "Forgotten Loa Idol", count = 8, oi = 1, map = 1411, x = 67.8, y = 81.4, f = "e", spots = { { x = 67.5, y = 82.4, r = 45, n = 4 }, { x = 68.7, y = 84, r = 39, n = 4 }, { x = 65.1, y = 82.8, r = 28, n = 3 }, { x = 67.8, y = 86.1, r = 35, n = 2 }, { x = 65.1, y = 85.1, r = 47, n = 5 }, { x = 66, y = 87.8, r = 53, n = 4 } } },
 						{ t = "kill", quest = 826, title = "Zalazane", target = "Voodoo Troll", npc = 3206, count = 8, oi = 2, map = 1411, x = 67.82, y = 82.06, f = "e", spots = { { x = 68.1, y = 83, r = 55, n = 5 }, { x = 67, y = 87.1, r = 59, n = 6 }, { x = 65.9, y = 82.8, r = 15, n = 1, alt = true } } },
 						{ t = "kill", quest = 826, title = "Zalazane", target = "Hexed Troll", npc = 3207, count = 8, oi = 1, map = 1411, x = 68.29, y = 83.23, f = "e", spots = { { x = 68.2, y = 83.5, r = 30, n = 4 }, { x = 66.6, y = 84, r = 46, n = 3 }, { x = 67.3, y = 87, r = 62, n = 6 } } },
-						{ t = "complete", quest = 96873, title = "A Pain in the Neck", optional = true },
+						{ t = "complete", quest = 96873, title = "A Pain in the Neck", optional = true, profLine = 333, profName = "Enchanting", profRank = 1 },
 						{ t = "collect", quest = 826, title = "Zalazane", item = 4866, itemName = "Zalazane's Head", oi = 3, map = 1411, x = 67.55, y = 87.81, f = "e" },
 						{ t = "collect", quest = 808, title = "Minshina's Skull", item = 4864, itemName = "Minshina's Skull", oi = 1, map = 1411, x = 67.4, y = 87.8, f = "e" },
 					},
@@ -30460,7 +30462,7 @@ do
 				{
 					title = "Sen'jin Village",
 					goals = {
-						{ t = "turnin", quest = 96873, title = "A Pain in the Neck", npc = 266881, npcName = "Pa'zula", map = 1411, x = 56.66, y = 73.73, f = "e", optional = true, note = "Pa'zula" },
+						{ t = "turnin", quest = 96873, title = "A Pain in the Neck", npc = 266881, npcName = "Pa'zula", map = 1411, x = 56.66, y = 73.73, f = "e", optional = true, profLine = 333, profName = "Enchanting", profRank = 1, note = "Pa'zula" },
 						{ t = "turnin", quest = 817, title = "Practical Prey", npc = 3194, npcName = "Vel'rin Fang", map = 1411, x = 55.96, y = 73.93, f = "e", note = "Vel'rin Fang" },
 						{ t = "turnin", quest = 818, title = "A Solvent Spirit", npc = 3304, npcName = "Master Vornal", map = 1411, x = 55.94, y = 74.39, f = "e", note = "Master Vornal" },
 						{ t = "turnin", quest = 97225, title = "Forgotten Loa Idols", npc = 3188, npcName = "Master Gadrin", map = 1411, x = 55.95, y = 74.72, f = "e", note = "Master Gadrin" },
@@ -34890,7 +34892,7 @@ do
 					goals = {
 						{ t = "skill", skill = "Cooking", skillLine = 185, level = 225 },
 						{ t = "level", level = 35 },
-						{ t = "accept", quest = 6612, title = "I Know A Guy...", npc = 5159, npcName = "Daryl Riknussun", minLevel = 35, qlvl = 45, closedBy = { 6610 }, preTitles = { [6610] = "Clamlette Surprise" }, map = 1455, x = 60.08, y = 36.43, f = "e", note = "Daryl Riknussun, Ironforge" },
+						{ t = "accept", quest = 6612, title = "I Know A Guy...", npc = 5159, npcName = "Daryl Riknussun", minLevel = 35, qlvl = 45, closedBy = { 6610 }, preTitles = { [6610] = "Clamlette Surprise" }, map = 1455, x = 60.08, y = 36.43, f = "e", profLine = 185, profName = "Cooking", profRank = 225, note = "Daryl Riknussun, Ironforge" },
 					},
 				},
 				{
@@ -34900,15 +34902,15 @@ do
 					goals = {
 						{ t = "skill", skill = "Cooking", skillLine = 185, level = 225 },
 						{ t = "level", level = 35 },
-						{ t = "accept", quest = 6611, title = "To Gadgetzan You Go!", npc = 3399, npcName = "Zamja", minLevel = 35, qlvl = 45, closedBy = { 6610 }, preTitles = { [6610] = "Clamlette Surprise" }, map = 1454, x = 57.4, y = 53.96, f = "e", note = "Zamja, Orgrimmar" },
+						{ t = "accept", quest = 6611, title = "To Gadgetzan You Go!", npc = 3399, npcName = "Zamja", minLevel = 35, qlvl = 45, closedBy = { 6610 }, preTitles = { [6610] = "Clamlette Surprise" }, map = 1454, x = 57.4, y = 53.96, f = "e", profLine = 185, profName = "Cooking", profRank = 225, note = "Zamja, Orgrimmar" },
 					},
 				},
 				{
 					title = "Clamlette Surprise",
 					goals = {
-						{ t = "turnin", quest = 6612, title = "I Know A Guy...", npc = 8125, npcName = "Dirge Quikcleave", map = 1446, x = 52.63, y = 28.11, f = "e", only = { factions = { "Alliance" } } },
-						{ t = "turnin", quest = 6611, title = "To Gadgetzan You Go!", npc = 8125, npcName = "Dirge Quikcleave", map = 1446, x = 52.63, y = 28.11, f = "e", only = { factions = { "Horde" } } },
-						{ t = "accept", quest = 6610, title = "Clamlette Surprise", npc = 8125, npcName = "Dirge Quikcleave", minLevel = 35, qlvl = 45, map = 1446, x = 52.63, y = 28.11, f = "e" },
+						{ t = "turnin", quest = 6612, title = "I Know A Guy...", npc = 8125, npcName = "Dirge Quikcleave", map = 1446, x = 52.63, y = 28.11, f = "e", only = { factions = { "Alliance" } }, profLine = 185, profName = "Cooking", profRank = 225 },
+						{ t = "turnin", quest = 6611, title = "To Gadgetzan You Go!", npc = 8125, npcName = "Dirge Quikcleave", map = 1446, x = 52.63, y = 28.11, f = "e", only = { factions = { "Horde" } }, profLine = 185, profName = "Cooking", profRank = 225 },
+						{ t = "accept", quest = 6610, title = "Clamlette Surprise", npc = 8125, npcName = "Dirge Quikcleave", minLevel = 35, qlvl = 45, map = 1446, x = 52.63, y = 28.11, f = "e", profLine = 185, profName = "Cooking", profRank = 225 },
 					},
 				},
 				{
@@ -34922,20 +34924,20 @@ do
 					title = "Giant Eggs",
 					note = "Giant Eggs drop from the Ironbeak owls of Felwood.",
 					goals = {
-						{ t = "collect", quest = 6610, title = "Clamlette Surprise", item = 12207, itemName = "Giant Egg", oi = 1, map = 1448, x = 69.3, y = 23.1, f = "e", spots = { { x = 69.3, y = 23.1, r = 130, n = 1 }, { x = 63.2, y = 18.9, r = 130, n = 4 }, { x = 55.6, y = 24.5, r = 146, n = 4 }, { x = 50.4, y = 32, r = 130, n = 3 }, { x = 48.6, y = 16.3, r = 204, n = 4 }, { x = 55.1, y = 13.6, r = 164, n = 4 }, { x = 39.3, y = 37.8, r = 174, n = 3 }, { x = 39.9, y = 53.7, r = 182, n = 7 }, { x = 43.6, y = 65, r = 130, n = 3 }, { x = 46.5, y = 73.6, r = 170, n = 3 }, { x = 46.5, y = 87.7, r = 130, n = 1 }, { x = 56.8, y = 83.6, r = 130, n = 1 }, { x = 51.2, y = 83.4, r = 153, n = 4, alt = true }, { x = 38.8, y = 70.9, r = 130, n = 2, alt = true }, { x = 43.8, y = 81.9, r = 130, n = 3, alt = true }, { x = 56.7, y = 90.9, r = 130, n = 1, alt = true } }, spread = true },
+						{ t = "collect", quest = 6610, title = "Clamlette Surprise", item = 12207, itemName = "Giant Egg", oi = 1, map = 1448, x = 69.3, y = 23.1, f = "e", spots = { { x = 69.3, y = 23.1, r = 130, n = 1 }, { x = 63.2, y = 18.9, r = 130, n = 4 }, { x = 55.6, y = 24.5, r = 146, n = 4 }, { x = 50.4, y = 32, r = 130, n = 3 }, { x = 48.6, y = 16.3, r = 204, n = 4 }, { x = 55.1, y = 13.6, r = 164, n = 4 }, { x = 39.3, y = 37.8, r = 174, n = 3 }, { x = 39.9, y = 53.7, r = 182, n = 7 }, { x = 43.6, y = 65, r = 130, n = 3 }, { x = 46.5, y = 73.6, r = 170, n = 3 }, { x = 46.5, y = 87.7, r = 130, n = 1 }, { x = 56.8, y = 83.6, r = 130, n = 1 }, { x = 51.2, y = 83.4, r = 153, n = 4, alt = true }, { x = 38.8, y = 70.9, r = 130, n = 2, alt = true }, { x = 43.8, y = 81.9, r = 130, n = 3, alt = true }, { x = 56.7, y = 90.9, r = 130, n = 1, alt = true } }, spread = true, profLine = 185, profName = "Cooking", profRank = 225 },
 					},
 				},
 				{
 					title = "Zesty Clam Meat",
 					note = "Zesty Clam Meat has no drop data: buy it at the Gadgetzan Auction House, next to Dirge, or open clams looted from coastal creatures.",
 					goals = {
-						{ t = "collect", quest = 6610, title = "Clamlette Surprise", item = 7974, itemName = "Zesty Clam Meat", oi = 2, map = 1446, x = 52.6, y = 28.1, f = "e" },
+						{ t = "collect", quest = 6610, title = "Clamlette Surprise", item = 7974, itemName = "Zesty Clam Meat", oi = 2, map = 1446, x = 52.6, y = 28.1, f = "e", profLine = 185, profName = "Cooking", profRank = 225 },
 					},
 				},
 				{
 					title = "Dirge Quikcleave",
 					goals = {
-						{ t = "turnin", quest = 6610, title = "Clamlette Surprise", npc = 8125, npcName = "Dirge Quikcleave", map = 1446, x = 52.63, y = 28.11, f = "e", note = "Artisan Cooking" },
+						{ t = "turnin", quest = 6610, title = "Clamlette Surprise", npc = 8125, npcName = "Dirge Quikcleave", map = 1446, x = 52.63, y = 28.11, f = "e", profLine = 185, profName = "Cooking", profRank = 225, note = "Artisan Cooking" },
 					},
 				},
 				{
@@ -35948,7 +35950,7 @@ do
 					goals = {
 						{ t = "skill", skill = "First Aid", skillLine = 129, level = 225 },
 						{ t = "level", level = 40 },
-						{ t = "accept", quest = 6625, title = "Alliance Trauma", npc = 5150, npcName = "Nissa Firestone", minLevel = 35, qlvl = 45, closedBy = { 6624 }, preTitles = { [6624] = "Triage" }, map = 1455, x = 55.09, y = 58.26, f = "e", note = "Nissa Firestone, Ironforge" },
+						{ t = "accept", quest = 6625, title = "Alliance Trauma", npc = 5150, npcName = "Nissa Firestone", minLevel = 35, qlvl = 45, closedBy = { 6624 }, preTitles = { [6624] = "Triage" }, map = 1455, x = 55.09, y = 58.26, f = "e", profLine = 129, profName = "First Aid", profRank = 225, note = "Nissa Firestone, Ironforge" },
 					},
 				},
 				{
@@ -35958,7 +35960,7 @@ do
 					goals = {
 						{ t = "skill", skill = "First Aid", skillLine = 129, level = 225 },
 						{ t = "level", level = 40 },
-						{ t = "accept", quest = 6623, title = "Horde Trauma", npc = 3373, npcName = "Arnok", minLevel = 35, qlvl = 45, closedBy = { 6622 }, preTitles = { [6622] = "Triage" }, map = 1454, x = 34.18, y = 84.58, f = "e", note = "Arnok, Orgrimmar" },
+						{ t = "accept", quest = 6623, title = "Horde Trauma", npc = 3373, npcName = "Arnok", minLevel = 35, qlvl = 45, closedBy = { 6622 }, preTitles = { [6622] = "Triage" }, map = 1454, x = 34.18, y = 84.58, f = "e", profLine = 129, profName = "First Aid", profRank = 225, note = "Arnok, Orgrimmar" },
 					},
 				},
 				{
@@ -35966,10 +35968,10 @@ do
 					note = "Triage: treat the wounded soldiers in the doctor's tent with the bandages the doctor gives you, the most critical first, before any of them die.",
 					only = { factions = { "Alliance" } },
 					goals = {
-						{ t = "turnin", quest = 6625, title = "Alliance Trauma", npc = 12939, npcName = "Doctor Gustaf VanHowzen", map = 1445, x = 67.76, y = 48.97, f = "e", note = "Doctor Gustaf VanHowzen, Theramore Isle" },
-						{ t = "accept", quest = 6624, title = "Triage", npc = 12939, npcName = "Doctor Gustaf VanHowzen", minLevel = 35, qlvl = 45, map = 1445, x = 67.76, y = 48.97, f = "e" },
-						{ t = "complete", quest = 6624, title = "Triage" },
-						{ t = "turnin", quest = 6624, title = "Triage", npc = 12939, npcName = "Doctor Gustaf VanHowzen", map = 1445, x = 67.76, y = 48.97, f = "e", note = "Artisan First Aid" },
+						{ t = "turnin", quest = 6625, title = "Alliance Trauma", npc = 12939, npcName = "Doctor Gustaf VanHowzen", map = 1445, x = 67.76, y = 48.97, f = "e", profLine = 129, profName = "First Aid", profRank = 225, note = "Doctor Gustaf VanHowzen, Theramore Isle" },
+						{ t = "accept", quest = 6624, title = "Triage", npc = 12939, npcName = "Doctor Gustaf VanHowzen", minLevel = 35, qlvl = 45, map = 1445, x = 67.76, y = 48.97, f = "e", profLine = 129, profName = "First Aid", profRank = 225 },
+						{ t = "complete", quest = 6624, title = "Triage", profLine = 129, profName = "First Aid", profRank = 225 },
+						{ t = "turnin", quest = 6624, title = "Triage", npc = 12939, npcName = "Doctor Gustaf VanHowzen", map = 1445, x = 67.76, y = 48.97, f = "e", profLine = 129, profName = "First Aid", profRank = 225, note = "Artisan First Aid" },
 					},
 				},
 				{
@@ -35977,10 +35979,10 @@ do
 					note = "Triage: treat the wounded soldiers in the doctor's tent with the bandages the doctor gives you, the most critical first, before any of them die.",
 					only = { factions = { "Horde" } },
 					goals = {
-						{ t = "turnin", quest = 6623, title = "Horde Trauma", npc = 12920, npcName = "Doctor Gregory Victor", map = 1417, x = 73.41, y = 36.89, f = "e", note = "Doctor Gregory Victor, Hammerfall" },
-						{ t = "accept", quest = 6622, title = "Triage", npc = 12920, npcName = "Doctor Gregory Victor", minLevel = 35, qlvl = 45, map = 1417, x = 73.41, y = 36.89, f = "e" },
-						{ t = "complete", quest = 6622, title = "Triage" },
-						{ t = "turnin", quest = 6622, title = "Triage", npc = 12920, npcName = "Doctor Gregory Victor", map = 1417, x = 73.41, y = 36.89, f = "e", note = "Artisan First Aid" },
+						{ t = "turnin", quest = 6623, title = "Horde Trauma", npc = 12920, npcName = "Doctor Gregory Victor", map = 1417, x = 73.41, y = 36.89, f = "e", profLine = 129, profName = "First Aid", profRank = 225, note = "Doctor Gregory Victor, Hammerfall" },
+						{ t = "accept", quest = 6622, title = "Triage", npc = 12920, npcName = "Doctor Gregory Victor", minLevel = 35, qlvl = 45, map = 1417, x = 73.41, y = 36.89, f = "e", profLine = 129, profName = "First Aid", profRank = 225 },
+						{ t = "complete", quest = 6622, title = "Triage", profLine = 129, profName = "First Aid", profRank = 225 },
+						{ t = "turnin", quest = 6622, title = "Triage", npc = 12920, npcName = "Doctor Gregory Victor", map = 1417, x = 73.41, y = 36.89, f = "e", profLine = 129, profName = "First Aid", profRank = 225, note = "Artisan First Aid" },
 					},
 				},
 				{
@@ -36205,7 +36207,7 @@ do
 					goals = {
 						{ t = "skill", skill = "Fishing", skillLine = 356, level = 225 },
 						{ t = "level", level = 35 },
-						{ t = "accept", quest = 6609, title = "I Got Nothin' Left!", npc = 5161, npcName = "Grimnur Stonebrand", minLevel = 35, qlvl = 45, closedBy = { 6607 }, preTitles = { [6607] = "Nat Pagle, Angler Extreme" }, map = 1455, x = 48.07, y = 6.91, f = "e", note = "Grimnur Stonebrand, Ironforge" },
+						{ t = "accept", quest = 6609, title = "I Got Nothin' Left!", npc = 5161, npcName = "Grimnur Stonebrand", minLevel = 35, qlvl = 45, closedBy = { 6607 }, preTitles = { [6607] = "Nat Pagle, Angler Extreme" }, map = 1455, x = 48.07, y = 6.91, f = "e", profLine = 356, profName = "Fishing", profRank = 225, note = "Grimnur Stonebrand, Ironforge" },
 					},
 				},
 				{
@@ -36215,50 +36217,50 @@ do
 					goals = {
 						{ t = "skill", skill = "Fishing", skillLine = 356, level = 225 },
 						{ t = "level", level = 35 },
-						{ t = "accept", quest = 6608, title = "You Too Good.", npc = 3332, npcName = "Lumak", minLevel = 35, qlvl = 45, closedBy = { 6607 }, preTitles = { [6607] = "Nat Pagle, Angler Extreme" }, map = 1454, x = 69.8, y = 29.21, f = "e", note = "Lumak, Orgrimmar" },
+						{ t = "accept", quest = 6608, title = "You Too Good.", npc = 3332, npcName = "Lumak", minLevel = 35, qlvl = 45, closedBy = { 6607 }, preTitles = { [6607] = "Nat Pagle, Angler Extreme" }, map = 1454, x = 69.8, y = 29.21, f = "e", profLine = 356, profName = "Fishing", profRank = 225, note = "Lumak, Orgrimmar" },
 					},
 				},
 				{
 					title = "Nat Pagle",
 					note = "Nat Pagle fishes from the shore of a small island off the east coast, south of Theramore.",
 					goals = {
-						{ t = "turnin", quest = 6609, title = "I Got Nothin' Left!", npc = 12919, npcName = "Nat Pagle", map = 1445, x = 58.61, y = 60.06, f = "e", only = { factions = { "Alliance" } } },
-						{ t = "turnin", quest = 6608, title = "You Too Good.", npc = 12919, npcName = "Nat Pagle", map = 1445, x = 58.61, y = 60.06, f = "e", only = { factions = { "Horde" } } },
-						{ t = "accept", quest = 6607, title = "Nat Pagle, Angler Extreme", npc = 12919, npcName = "Nat Pagle", minLevel = 35, qlvl = 45, map = 1445, x = 58.61, y = 60.06, f = "e" },
+						{ t = "turnin", quest = 6609, title = "I Got Nothin' Left!", npc = 12919, npcName = "Nat Pagle", map = 1445, x = 58.61, y = 60.06, f = "e", only = { factions = { "Alliance" } }, profLine = 356, profName = "Fishing", profRank = 225 },
+						{ t = "turnin", quest = 6608, title = "You Too Good.", npc = 12919, npcName = "Nat Pagle", map = 1445, x = 58.61, y = 60.06, f = "e", only = { factions = { "Horde" } }, profLine = 356, profName = "Fishing", profRank = 225 },
+						{ t = "accept", quest = 6607, title = "Nat Pagle, Angler Extreme", npc = 12919, npcName = "Nat Pagle", minLevel = 35, qlvl = 45, map = 1445, x = 58.61, y = 60.06, f = "e", profLine = 356, profName = "Fishing", profRank = 225 },
 					},
 				},
 				{
 					title = "Sar'theris Striker",
 					note = "Fish in Sar'theris Strand, the north-west coast of Desolace (Slitherblade naga shore) until you catch a Sar'theris Striker; it only bites there.",
 					goals = {
-						{ t = "collect", quest = 6607, title = "Nat Pagle, Angler Extreme", item = 16968, itemName = "Sar'theris Striker", oi = 3, map = 1443, x = 33, y = 22.4, f = "e" },
+						{ t = "collect", quest = 6607, title = "Nat Pagle, Angler Extreme", item = 16968, itemName = "Sar'theris Striker", oi = 3, map = 1443, x = 33, y = 22.4, f = "e", profLine = 356, profName = "Fishing", profRank = 225 },
 					},
 				},
 				{
 					title = "Feralas Ahi",
 					note = "Fish in the Verdantis River in Feralas until you catch a Feralas Ahi; it only bites there.",
 					goals = {
-						{ t = "collect", quest = 6607, title = "Nat Pagle, Angler Extreme", item = 16967, itemName = "Feralas Ahi", oi = 1, map = 1444, x = 62.86, y = 51.55, f = "e", spots = { { x = 62.7, y = 52.1, r = 29, n = 3 }, { x = 62.4, y = 50.3, r = 56, n = 5 }, { x = 63.7, y = 53.1, r = 33, n = 3 } } },
+						{ t = "collect", quest = 6607, title = "Nat Pagle, Angler Extreme", item = 16967, itemName = "Feralas Ahi", oi = 1, map = 1444, x = 62.86, y = 51.55, f = "e", spots = { { x = 62.7, y = 52.1, r = 29, n = 3 }, { x = 62.4, y = 50.3, r = 56, n = 5 }, { x = 63.7, y = 53.1, r = 33, n = 3 } }, profLine = 356, profName = "Fishing", profRank = 225 },
 					},
 				},
 				{
 					title = "Savage Coast Blue Sailfin",
 					note = "Fish in the Savage Coast, the north-west shore of Stranglethorn Vale until you catch a Savage Coast Blue Sailfin; it only bites there.",
 					goals = {
-						{ t = "collect", quest = 6607, title = "Nat Pagle, Angler Extreme", item = 16969, itemName = "Savage Coast Blue Sailfin", oi = 4, map = 1434, x = 22, y = 17.3, f = "e" },
+						{ t = "collect", quest = 6607, title = "Nat Pagle, Angler Extreme", item = 16969, itemName = "Savage Coast Blue Sailfin", oi = 4, map = 1434, x = 22, y = 17.3, f = "e", profLine = 356, profName = "Fishing", profRank = 225 },
 					},
 				},
 				{
 					title = "Misty Reed Mahi Mahi",
 					note = "Fish in the Misty Reed Strand, the south-east shore of Swamp of Sorrows until you catch a Misty Reed Mahi Mahi; it only bites there.",
 					goals = {
-						{ t = "collect", quest = 6607, title = "Nat Pagle, Angler Extreme", item = 16970, itemName = "Misty Reed Mahi Mahi", oi = 2, map = 1435, x = 86.5, y = 84, f = "e" },
+						{ t = "collect", quest = 6607, title = "Nat Pagle, Angler Extreme", item = 16970, itemName = "Misty Reed Mahi Mahi", oi = 2, map = 1435, x = 86.5, y = 84, f = "e", profLine = 356, profName = "Fishing", profRank = 225 },
 					},
 				},
 				{
 					title = "Nat Pagle",
 					goals = {
-						{ t = "turnin", quest = 6607, title = "Nat Pagle, Angler Extreme", npc = 12919, npcName = "Nat Pagle", map = 1445, x = 58.61, y = 60.06, f = "e", note = "Artisan Fishing" },
+						{ t = "turnin", quest = 6607, title = "Nat Pagle, Angler Extreme", npc = 12919, npcName = "Nat Pagle", map = 1445, x = 58.61, y = 60.06, f = "e", profLine = 356, profName = "Fishing", profRank = 225, note = "Artisan Fishing" },
 					},
 				},
 				{
