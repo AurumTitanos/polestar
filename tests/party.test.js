@@ -81,3 +81,123 @@ for q, s in pairs(P.ReadLog()) do out[tostring(q)] = s end
 emit(out)`);
 	assert.deepEqual(log, { 33: '5/8,0/1', 60: '' });
 });
+
+// Sending and receiving run with the party stub, logged in.
+const LIVE = { stubs: ['stub_world.lua', 'stub_party.lua'], login: true };
+const SENT = `
+local p = stub.party
+local function texts()
+	local out = {}
+	for i, m in ipairs(p.sent) do out[i] = m.text end
+	return out
+end`;
+
+test('party: progress goes to the party 2 seconds after the log changes, once per burst', () => {
+	const [before, after, chat] = run(`${SENT}
+w.onQuest(33, { 8 })
+p.join("Ana")
+stub.advance(6)
+emit(texts())
+w.progress(33, 1, 1); stub.advance(0.3)
+w.progress(33, 1, 2); stub.advance(0.3)
+w.progress(33, 1, 3)
+stub.advance(2)
+emit(texts())
+emit(p.sent[#p.sent].chatType .. " " .. p.sent[#p.sent].prefix)`, LIVE);
+	assert.deepEqual(before, ['1S|33:0/8']);
+	assert.deepEqual(after, ['1S|33:0/8', '1|33:3/8']);
+	assert.equal(chat, 'PARTY Polestar');
+});
+
+test('party: unchanged quests are not sent again', () => {
+	const [n] = run(`${SENT}
+w.onQuest(33, { 8 })
+p.join("Ana")
+stub.advance(6)
+stub.fire("QUEST_LOG_UPDATE")
+stub.advance(3)
+emit(#p.sent)`, LIVE);
+	assert.equal(n, 1);
+});
+
+test('party: a quest that leaves the log is sent as dropped', () => {
+	const [last] = run(`${SENT}
+w.onQuest(33, { 8 })
+w.onQuest(60, { 2 })
+p.join("Ana")
+stub.advance(6)
+w.abandon(33)
+stub.advance(2)
+emit(p.sent[#p.sent].text)`, LIVE);
+	assert.equal(last, '1|33:-');
+});
+
+test('party: a member joining gets a snapshot within 6 seconds', () => {
+	const [early, late] = run(`${SENT}
+w.onQuest(33, { 8 })
+w.onQuest(60, {})
+p.join("Ana")
+stub.advance(2.9)
+emit(#p.sent)
+stub.advance(3.2)
+emit(texts())`, LIVE);
+	assert.equal(early, 0);
+	assert.deepEqual(late, ['1S|33:0/8;60:']);
+});
+
+test('party: solo, in a raid, or with sharing off, nothing is sent', () => {
+	const [solo, raid, off] = run(`${SENT}
+w.onQuest(33, { 8 })
+w.progress(33, 1, 2)
+stub.advance(10)
+emit(#p.sent)
+p.join("Ana"); p.raid(true)
+w.progress(33, 1, 3)
+stub.advance(10)
+emit(#p.sent)
+p.disband()
+Polestar.Set("party.share", false)
+p.join("Ben")
+w.progress(33, 1, 4)
+stub.advance(10)
+emit(#p.sent)`, LIVE);
+	assert.deepEqual([solo, raid, off], [0, 0, 0]);
+});
+
+test('party: a refused send keeps the change for the next one, without retrying on its own', () => {
+	const [attempts, last] = run(`${SENT}
+w.onQuest(33, { 8 })
+w.onQuest(60, { 4 })
+p.join("Ana")
+stub.advance(6)
+p.result = Enum.SendAddonMessageResult.AddonMessageThrottle
+w.progress(33, 1, 5)
+stub.advance(10)
+emit(#p.sent)
+p.result = 0
+w.progress(60, 1, 1)
+stub.advance(2)
+emit(p.sent[#p.sent].text)`, LIVE);
+	assert.equal(attempts, 2);
+	assert.equal(last, '1|33:5/8;60:1/4');
+});
+
+test('party: both settings off registers no events', () => {
+	const [on, off] = run(`${SENT}
+local EVENTS = { "GROUP_ROSTER_UPDATE", "GROUP_LEFT", "QUEST_LOG_UPDATE", "CHAT_MSG_ADDON" }
+local function registered()
+	local out = {}
+	for _, ev in ipairs(EVENTS) do
+		for _, f in ipairs(stub.frames) do
+			if f.events and f.events[ev] then out[#out + 1] = ev break end
+		end
+	end
+	return out
+end
+emit(registered())
+Polestar.Set("party.share", false)
+Polestar.Set("party.show", false)
+emit(registered())`, LIVE);
+	assert.ok(on.includes('CHAT_MSG_ADDON') && on.includes('GROUP_ROSTER_UPDATE'));
+	assert.deepEqual(off.filter((e) => e !== 'QUEST_LOG_UPDATE'), []);
+});
