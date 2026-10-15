@@ -89,7 +89,7 @@ be prefixed `Polestar`.
 ### Lifecycle
 
 ```lua
-Polestar.OnInit(fn)    -- ADDON_LOADED("Polestar"). Settings defaults are merged.
+Polestar.OnInit(fn)    -- ADDON_LOADED("Polestar"). Saved settings are loaded; Get falls back to defaults.
 Polestar.OnLogin(fn)   -- PLAYER_LOGIN, in registration order. Player info valid.
 ```
 
@@ -228,8 +228,12 @@ the game's error handler: wrapping it would shift the stack the game and
 ### Compat — every client API call goes through here
 
 UI, Nav and Engine never call quest/map/unit client APIs directly; they call
-`Polestar.Compat`. That keeps Forever specifics in one file and lets other
-modules' tests replace Compat with a fake.
+`Polestar.Compat`. Three exceptions call the client themselves: Nav's
+Blizzard user waypoint (`C_Map.SetUserWaypoint`, `C_SuperTrack`;
+`Nav/Bridges.lua`), the zone art's map art layers (`UI/ZoneArt.lua`) and the
+class name in the options (`UnitClass`, `UI/Options.lua`). That keeps
+Forever specifics in one file and lets other modules' tests replace Compat
+with a fake.
 
 Coordinates: map percent `x, y` in **0–100**. World coordinates follow
 `C_Map.GetWorldPosFromMapPos`: `wx` is the north–south axis (larger is north),
@@ -453,8 +457,9 @@ implements them:
   internal `lookup` pack, registered with `internal = true` and never listed
   or switchable, `<id>/` for every other pack).
 - Clashes: guides and map frames a refused pack's files register are dropped
-  until that addon's `ADDON_LOADED`; guides registered before their pack wait
-  in a per-pack list until it comes.
+  until that addon's `ADDON_LOADED`; guides registered before their pack are
+  refused, their ids kept in a per-pack list and listed as `guide-refused`
+  problems when it comes.
 - Format: `Guides.FORMATS` (the formats this Polestar reads, `1` and `2`);
   `Guides.Validate` checks each guide against the `REQUIRED` verb table
   (`Guides.VERBS`).
@@ -856,9 +861,13 @@ Waypoint:
 { map = 1429, x = 47.6, y = 35.1, f = nil, label = "Kill Kobold Vermin", stepIndex = 3, goalIndex = 2, kind = "kill", r = 8 }
 ```
 
-= the first goal in the current step that has coordinates and is `active` or
-`pending`. Re-evaluation is event-driven and coalesced (≤ 10 per second);
-`goto` arrival is polled only while the current step has an active `goto`.
+= the goal of the current step the player aimed at (`AimGoal`) while it is
+open; else the current goal (the focus group's first open blocking goal, else
+its first open optional one, else its header); else the focus group's first
+open goal with coordinates (blocking, then optional, then notes). A done step
+has none. Re-evaluation is event-driven and coalesced (≤ 10 per second);
+`goto` and `explore` arrival is polled only while some tab's current step has
+one open, or while the waypoint's goal has spots.
 
 Automation (setting `behavior.autoAccept`, `behavior.autoTurnin`, default
 on; holding Shift suppresses): accept only quests that are `accept` goals, and
@@ -2127,9 +2136,9 @@ exclusive group: pfQuest `close` united with QuestieDB `exclusiveTo`.
    all rights reserved, Questie issue #4447). The data stays in `data/`, and
    only the importer is in this repository.
 3. **Wowhead Forever's change notes** (`tools/lib/data/wowhead.js`,
-   `--no-wowhead` skips them): the quest list of every zone and city page and
-   of the nine class pages (class quests are filed there, not under a zone) on
-   wowhead.com/forever (cached a day in `data/sources/wowhead/zones.json`;
+   `--no-wowhead` skips them, as does a build without QuestieDB): the quest
+   list of every zone and city page and of the nine class pages (class
+   quests are filed there, not under a zone) on wowhead.com/forever (cached a day in `data/sources/wowhead/zones.json`;
    `--offline` reads the cache). A quest Wowhead marks updated with "Experience
    X instead of Y", "Level X instead of Y" or "Requires level X instead of Y"
    gets X where its value is still the old Y (for XP, also where it has none),
@@ -2147,7 +2156,8 @@ exclusive group: pfQuest `close` united with QuestieDB `exclusiveTo`.
    npc/object fields (`set`: the Forever elite and rare ranks QuestieDB's
    Forever store lacks, since it gives every Forever npc rank 0, and renamed
    Era records) and npc/object spawn maps (`addSpawns`). They are applied
-   after the merge, and the record's `source` gains `polestar-correction`. One
+   after the merge, only in a build that reads QuestieDB, and the record's
+   `source` gains `polestar-correction`. One
    cleanup is general rather than per quest: `pre`, `preAll` and `preAny`
    never contain the quest itself or an id from its `excl`. QuestieDB
    preQuestSingle sometimes lists the whole exclusive group.
@@ -2156,7 +2166,7 @@ exclusive group: pfQuest `close` united with QuestieDB `exclusiveTo`.
    the rules of their own paragraph there.
 
 `source` on every quest, npc, object and item lists its contributors in
-that order: `pfquest`, `questie-forever`, `wowhead:*`, `polestar-correction`, `recorder`, plus the XP source tag.
+that order: `pfquest`, `questie-forever`, `wowhead:*` (change notes), `polestar-correction`, the web XP tag, `recorder`, then the recorded XP tag (`recorder:xp-*`).
 Blizzard map tables come from wago.tools: Classic Era (`wow_classic_era`) for
 the Era frames pfQuest's coordinates use, and the Forever client
 (`wow_classic_beta` builds 1.60+, `--forever-build`, `--no-forever`) for
