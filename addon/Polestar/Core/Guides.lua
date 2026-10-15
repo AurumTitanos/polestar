@@ -283,6 +283,15 @@ local function validate(def)
 			if not isNum(def.collects[i]) then return "bad collects" end
 		end
 	end
+	-- reward = { { item, itemName?, quality?, choice? } | { spell, spellName } | { text } }
+	if def.reward ~= nil then
+		if type(def.reward) ~= "table" then return "bad reward" end
+		for i = 1, #def.reward do
+			local r = def.reward[i]
+			if type(r) ~= "table" or not (isNum(r.item) or isNum(r.spell) or isStr(r.text)) then return "bad reward " .. i end
+		end
+	end
+	if def.why ~= nil and not isStr(def.why) then return "bad why" end
 	for _, key in ipairs({ "races", "classes", "nextChoices", "pros", "cons", "keywords" }) do
 		local list = def[key]
 		if list ~= nil then

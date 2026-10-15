@@ -375,6 +375,31 @@ function resolveGuide(ast, data, diag, opts = {}) {
 			if (haveItems && !data.item(id)) warn(ast.lines.collects, `\`collects\` item ${id} is not in data (new Forever content?)`);
 		}
 	}
+	// `reward` / `why`: what the guide's goal gives and why it is worth it,
+	// shown in the guide menu. Display only: an item's name from the line,
+	// else items.json (an id with neither is an error); a spell needs its name.
+	if (h.reward) {
+		guide.reward = h.reward.map((e) => {
+			if (e.text !== undefined) return { text: e.text };
+			if (e.spell !== undefined) {
+				if (!e.spellName) err(e.line, `reward spell ${e.spell} needs its name: \`reward spell ${e.spell} "Spell name"\``);
+				return { spell: e.spell, spellName: e.spellName };
+			}
+			const known = data.item(e.item);
+			const out = { item: e.item };
+			const name = e.itemName || (known && known.name ? String(known.name) : null);
+			if (!name) err(e.line, `reward item ${e.item} is not in data; give its name: \`${e.item} "Item name"\``, FIND_ID_HINT);
+			else out.itemName = name;
+			setIf(out, 'quality', e.quality);
+			if (e.choice) out.choice = true;
+			return out;
+		});
+	}
+	setIf(guide, 'why', h.why);
+	if (guide.category === 'Class') {
+		if (!h.reward) warn(ast.line, 'a Class guide needs `reward`: what its chain gives (`reward item <id>`, `reward spell <id> "Name"` or `reward text <words>`), shown in the guide menu');
+		if (!h.why) warn(ast.line, 'a Class guide needs `why`: one short line on why the chain is worth doing, shown in the guide menu');
+	}
 	const hz = resolveZone(h.zone);
 	if (hz) {
 		guide.zone = hz.id;
