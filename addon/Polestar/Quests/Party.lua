@@ -218,7 +218,9 @@ end
 
 local function flush()
 	flushPending = false
-	if not sharing() then return end
+	-- A snapshot on its way carries every change; sending them first would
+	-- send the log twice (after a join, nothing has been sent yet).
+	if not sharing() or snapPending then return end
 	if owed then return snapshot(owed.asks) end
 	local now, ids = Party.ReadLog(), {}
 	for q, s in pairs(now) do

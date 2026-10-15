@@ -146,6 +146,18 @@ emit(texts())`, LIVE);
 	assert.deepEqual(late, ['1R|33:0/8;60:']);
 });
 
+test('party: a change while a snapshot is on its way goes out in the snapshot, not before it', () => {
+	const [out] = run(`${SENT}
+w.onQuest(33, { 8 })
+w.onQuest(60, { 2 })
+p.join("Ana")
+stub.advance(0.5)
+w.progress(33, 1, 1)
+stub.advance(6)
+emit(texts())`, LIVE);
+	assert.deepEqual(out, ['1R|33:1/8;60:0/2']);
+});
+
 test('party: solo, in a raid, or with sharing off, nothing is sent', () => {
 	const [solo, raid, off] = run(`${SENT}
 w.onQuest(33, { 8 })
