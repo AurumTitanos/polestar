@@ -1431,9 +1431,14 @@ or that end its story (a follow-up with the same title, no objectives, taken
 where the quest ends: Hidden Enemies, The Lord of Blackrock); plus, with
 `--local-extras`, `dungeons.json`'s. An objective item that is sold, crafted,
 or dropped or held outside every instance ties no quest to a dungeon (the
-false-positive rule: Murloc Poachers, Craftsman's Writs). What no rule can
-catch is in the cited table `tools/lib/codex/journal-quests.json` (Shards of
-the Felvine). Each quest has giver and ender and their positions, our own
+false-positive rule: Murloc Poachers, Craftsman's Writs), nor does a stray
+drop, one only Wowhead's lists record and under 5% (The Ectoplasmic
+Distiller's Greater Eternal Essence from Gri'lek and Maexxna); a quest of a
+game event (pfQuest's `event`: the Darkmoon Faire, the holidays, the war
+efforts) is on a page only where QuestieDB or Wowhead files it (Copper
+Modulator, Rinling's Faire turn-in, is on none). What no rule can catch is
+in the cited table `tools/lib/codex/journal-quests.json` (Shards of the
+Felvine). Each quest has giver and ender and their positions, our own
 objective line, chain (every prerequisite and breadcrumb of the quest's side,
 all of `pre` and `preAny`, oldest first, at most 20), rewards (items with
 quality, count and choice from recordings and ForeverLevelingBiS, else

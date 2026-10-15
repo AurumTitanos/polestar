@@ -178,3 +178,36 @@ emit({ loaded = loaded, item = first("Linen Cloth", "item"), mount = first("Deat
 	assert.equal(out.dm[1], 1436, 'the Deadmines entrance is in Westfall');
 	assert.ok(out.dm[2] > 0, "VanCleef's loot");
 });
+
+test("kp's report: the Deadmines pick-up guide of a level 21 Gnome Rogue in Lakeshire has no Darkmoon Faire quest, and no dungeon page carries one or a quest tied by a stray drop", { skip }, () => {
+	const [out] = runAddon({
+		stubs: ['stub_world.lua'],
+		before: `${packLua()}
+local w = stub.world
+${mapsLua()}
+w.race, w.raceName, w.class, w.className, w.faction = "Gnome", "Gnome", "ROGUE", "ROGUE", "Alliance"
+w.level = 21
+w.moveTo(1433, 26.5, 45.0)`,
+		addons: ['Polestar'],
+		script: `
+stub.login()
+local D = Polestar.Dungeons
+D.Load()
+local plan = D.PickupPlan("deadmines")
+local take = {}
+for i, t in ipairs(plan and plan.take or {}) do take[i] = t.quest.id end
+local pages = {}
+for _, d in ipairs(D.List()) do
+	for _, q in ipairs(D.Quests(d.key)) do pages[#pages + 1] = d.key .. ":" .. q.id end
+end
+emit({ take = take, pages = pages })`,
+	}).emitted;
+	assert.ok(out.take.length > 0, 'the Deadmines quests are offered');
+	assert.ok(!out.take.includes(7894), `no Copper Modulator (Rinling, the Faire): ${out.take}`);
+	// The Faire's quests: pfQuest's game events 4 and 5 (Chronos, Rinling, Yebb Neblegear, Kerri Hicks, Morja, Gelvas Grimegate).
+	const quests = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'forever', 'quests.json'), 'utf8'));
+	const faire = out.pages.filter((p) => [4, 5].includes((quests[p.split(':')[1]] || {}).event));
+	assert.deepEqual(faire, [], 'no Darkmoon Faire quest on a dungeon page');
+	const stray = ['naxxramas:8921', 'zulgurub:8921', 'blackwing-lair:9121', 'blackwing-lair:9122'];
+	assert.deepEqual(out.pages.filter((p) => stray.includes(p)), [], "The Ectoplasmic Distiller (Mux, Tanaris) and The Dread Citadel (Dosantos, Light's Hope) are on no raid page through a boss's stray essence or crystal");
+});

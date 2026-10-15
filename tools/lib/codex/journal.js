@@ -266,10 +266,17 @@ function buildPages(inputs, codex, warnings = []) {
 	// Tube of Look to the Stars (sold, and one Gnomeregan drop), Rite of
 	// Vision's Well Stone (a Mulgore object, one Maraudon drop), the Indurium
 	// Flakes of the Badlands' Stonevault, the Kor Gem the Blackfathom ruins'
-	// priestesses drop.
+	// priestesses drop. Nor does a stray drop: one only Wowhead's lists
+	// record, under 5% (QuestieDB and pfQuest hold the quest drops), such as
+	// a boss's trade good: the Nexus Crystal in Blackwing Lair (The Dread
+	// Citadel), the Greater Eternal Essence from Gri'lek and Maexxna (The
+	// Ectoplasmic Distiller), the Copper Modulator from Sneed's Shredder.
+	const STRAY = 5;
+	const stray = (s) => Array.isArray(s.from) && s.from.length > 0 && s.from.every((f) => f === 'wowhead') && typeof s.chance === 'number' && s.chance < STRAY;
 	const npcInstance = {};
 	for (const [id, n] of Object.entries(npcs)) if (n.instance) npcInstance[id] = n.instance;
 	const itemInstances = {};
+	const itemLinks = {}; // itemInstances without stray drops: what ties an objective
 	const itemObjectInstances = {};
 	const outside = new Set();
 	const dropNpcs = {};
@@ -279,8 +286,10 @@ function buildPages(inputs, codex, warnings = []) {
 			if (s.type === 'drop') {
 				(dropNpcs[id] = dropNpcs[id] || new Set()).add(s.npc);
 				const key = s.instance || npcInstance[s.npc];
-				if (key) (itemInstances[id] = itemInstances[id] || new Set()).add(key);
-				else out++;
+				if (key) {
+					(itemInstances[id] = itemInstances[id] || new Set()).add(key);
+					if (!stray(s)) (itemLinks[id] = itemLinks[id] || new Set()).add(key);
+				} else out++;
 			} else if (s.type === 'object') {
 				const maps = (fv.objects && fv.objects[s.object] && fv.objects[s.object].instances) || [];
 				if (!maps.length) out++;
@@ -299,7 +308,7 @@ function buildPages(inputs, codex, warnings = []) {
 		const keys = startItemKeys(q);
 		for (const o of q.objectives || []) {
 			if (o.type === 'kill' && npcInstance[o.id]) keys.add(npcInstance[o.id]);
-			if (o.type === 'item' && itemInstances[o.id] && !outside.has(String(o.id))) for (const k of itemInstances[o.id]) keys.add(k);
+			if (o.type === 'item' && itemLinks[o.id] && !outside.has(String(o.id))) for (const k of itemLinks[o.id]) keys.add(k);
 		}
 		return keys;
 	};
@@ -399,7 +408,13 @@ function buildPages(inputs, codex, warnings = []) {
 	//    area, plus the instance their start item drops or lies in (An Unholy
 	//    Alliance starts with Charlga Razorflank's scroll in Razorfen Kraul and
 	//    is filed under Razorfen Downs); 3. quests whose objectives or start
-	//    item point into at most two instances.
+	//    item point into at most two instances. A quest of a game event
+	//    (pfQuest's `event`: the Darkmoon Faire's turn-ins, the holidays, the
+	//    war efforts) is on a page only where it is filed (the Cenarion
+	//    Circle's Qiraji rings and cloaks under Ahn'Qiraj): an item of it that
+	//    drops inside ties it to nothing (Rinling's Copper Modulator, a Faire
+	//    ticket turn-in in Mulgore or Elwynn, was on the Deadmines and
+	//    Gnomeregan pages in 0.2.3: the modulator drops in both).
 	for (const sid of new Set([...Object.keys(cq), ...Object.keys(fq)])) {
 		const id = Number(sid);
 		const q = cq[id] || fq[id];
@@ -413,9 +428,10 @@ function buildPages(inputs, codex, warnings = []) {
 			const narrowed = keys.filter((k) => byLink.includes(k));
 			if (narrowed.length) keys = narrowed;
 		}
-		const byStart = [...startItemKeys(q)];
+		const event = !!f.event;
+		const byStart = event ? [] : [...startItemKeys(q)];
 		if (keys.length && byStart.length <= 2) for (const k of byStart) if (!keys.includes(k)) keys.push(k);
-		if (!keys.length) keys = byLink.length <= 2 ? byLink : [];
+		if (!keys.length && !event) keys = byLink.length <= 2 ? byLink : [];
 		for (const key of keys) {
 			if (onPage[key].has(id)) continue;
 			const rec = codexQuest(id);

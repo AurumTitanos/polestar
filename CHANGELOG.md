@@ -31,6 +31,13 @@
   standing some quests ask for, such as +3000), the money, the rewards of
   108 quests that showed none, how many of an item ("5 x"), and Deviate
   Hides gives both of its items now (thanks Shockp)
+- A dungeon's pick-up guide no longer sends you to the Darkmoon Faire: the
+  Deadmines guide started with Copper Modulator, Rinling's Faire ticket
+  turn-in, because the modulator drops there. Darkmoon Faire, holiday and
+  war effort quests are on a dungeon's page only where the game files them,
+  and an item a boss drops only rarely by Wowhead's count no longer ties a
+  quest to it: The Ectoplasmic Distiller left Naxxramas and Zul'Gurub, The
+  Dread Citadel left Blackwing Lair (thanks kp)
 - Quests Forever renamed carry their Forever names in the guides: Chastise
   (once A Lack of Fear), Dark Sacrifice (once Devouring Plague), Look to the
   Stars, Onu is Meditating and the others Wowhead Forever lists as renamed.

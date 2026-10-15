@@ -109,6 +109,53 @@ test('buildJournal: pages with quests from DungeonJournal, area and objectives; 
 	assert.deepEqual([bh.quests, bh.bosses, bh.entrance], [[], [], null]);
 });
 
+test("buildJournal: kp's report: a game event's quest (the Darkmoon Faire's Copper Modulator) is on no page through an item that drops inside", () => {
+	const c = structuredClone(codex);
+	const i = structuredClone(inputs);
+	// Copper Modulator: here only Sneed's Shredder in the Deadmines drops it.
+	c.npcs[642] = { id: 642, name: "Sneed's Shredder", level: 20, faction: null, instance: 'deadmines', roles: [], spawns: [] };
+	c.npcs[14841] = { id: 14841, name: 'Rinling', level: 55, faction: null, instance: null, roles: [], spawns: [{ map: 1412, x: 38, y: 44.3, f: 'e' }] };
+	c.items[4363] = { id: 4363, name: 'Copper Modulator', quality: 1, kind: 'item', sources: [{ type: 'drop', npc: 642, instance: 'deadmines', chance: 0.54 }] };
+	const quest = (id, title) => ({
+		id, title, level: 60, minLevel: 1, faction: null, races: null, classes: null,
+		start: { npc: [14841], object: [], item: [] }, end: { npc: [14841], object: [] },
+		objectives: [{ type: 'item', id: 4363, count: null, text: 'Copper Modulator' }], pre: [], preAny: [], rewards: [], choices: [],
+	});
+	c.quests[7894] = quest(7894, 'Copper Modulator');
+	i.forever.quests[7894] = { event: 5, repeatable: true, source: ['pfquest', 'questie-forever'] };
+	c.quests[90001] = quest(90001, 'Spare Parts');
+	c.quests[90002] = quest(90002, 'Filed Under the Mines');
+	i.forever.quests[90002] = { area: 1581, event: 86, source: ['questie-forever'] };
+	const pages = buildJournal(i, c).dungeons;
+	const on = (id) => Object.keys(pages).filter((k) => pages[k].quests.some((q) => q.id === id));
+	assert.deepEqual(on(7894), [], 'the Faire ticket turn-in is on no page');
+	assert.deepEqual(on(90001), ['deadmines'], 'without an event the same item ties the quest to the Deadmines');
+	assert.deepEqual(on(90002), ['deadmines'], 'an event quest filed under the instance stays');
+});
+
+test('buildJournal: a stray drop (only Wowhead records it, under 5%) ties no quest to a dungeon; a quest drop does', () => {
+	const c = structuredClone(codex);
+	const i = structuredClone(inputs);
+	c.npcs[16014] = { id: 16014, name: 'Mux Manascrambler', level: 60, faction: null, instance: null, roles: [], spawns: [{ map: 1446, x: 52, y: 28, f: 'e' }] };
+	c.npcs[642] = { id: 642, name: "Sneed's Shredder", level: 20, faction: null, instance: 'deadmines', roles: [], spawns: [] };
+	const item = (id, name, from, chance) => ({ id, name, quality: 1, kind: 'item', sources: [{ type: 'drop', npc: 642, instance: 'deadmines', chance, from }] });
+	c.items[16203] = item(16203, 'Greater Eternal Essence', ['wowhead'], 1.2);
+	c.items[90010] = item(90010, 'Shredder Gear', ['questie', 'pfquest', 'wowhead'], 1.2);
+	c.items[90011] = item(90011, 'Shredder Plate', ['wowhead'], 40);
+	const quest = (id, title, itemId) => ({
+		id, title, level: 60, minLevel: 55, faction: null, races: null, classes: null,
+		start: { npc: [16014], object: [], item: [] }, end: { npc: [16014], object: [] },
+		objectives: [{ type: 'item', id: itemId, count: 4 }], pre: [], preAny: [], rewards: [], choices: [],
+	});
+	c.quests[8921] = quest(8921, 'The Ectoplasmic Distiller', 16203);
+	c.quests[90012] = quest(90012, 'Gears', 90010);
+	c.quests[90013] = quest(90013, 'Plates', 90011);
+	const dm = buildJournal(i, c).dungeons.deadmines.quests.map((q) => q.id);
+	assert.ok(!dm.includes(8921), "the essence a boss drops 1.2% of the time on Wowhead's list ties nothing");
+	assert.ok(dm.includes(90012), 'a drop QuestieDB or pfQuest records does');
+	assert.ok(dm.includes(90013), 'and a common one only Wowhead records');
+});
+
 test('buildJournal tolerates missing inputs; emitJournal writes one file of summaries and page sources', () => {
 	assert.deepEqual(buildJournal({}, {}).dungeons, {});
 	const [file] = emitJournal(buildJournal(inputs, codex));
