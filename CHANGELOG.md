@@ -314,13 +314,14 @@
   flight one, so a translator finds them.
 - Translations: every label kept in a table is written as a literal
   `L["..."]` where it is defined, so a translator finds it by searching:
-  the gear tooltip's reasons, the Dungeons journal's boss roles, quest ties
-  and Codex messages, Lookup's kinds, standings, factions and statuses, the
-  guide menu's tabs, the group lines, source ranks, the welcome's feature
-  columns, the step details ("from %s", "at %s"), the hand-in notes, the
-  travel map's boat tooltips, the rare alert sounds and `/polestar gear`'s
-  spec source. The item qualities in Lookup are `"quality: Rare"` and so on,
-  apart from the rare mobs. Nothing changes in English.
+  the gear tooltip's reasons, the Dungeons journal's boss roles, attunement
+  kinds, quest ties and Codex messages, Lookup's kinds, standings, factions
+  and statuses, the guide menu's tabs, the group lines, source ranks, the
+  welcome's feature columns, the step details ("from %s", "at %s"), the
+  hand-in notes, the travel map's boat tooltips, the rare alert sounds and
+  `/polestar gear`'s spec source. The item qualities in Lookup are
+  `"quality: Rare"` and so on, apart from the rare mobs. Nothing changes in
+  English.
 
 ## 0.2.3 (2026-10-14)
 

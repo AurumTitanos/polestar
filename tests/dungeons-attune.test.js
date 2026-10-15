@@ -20,6 +20,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { runAddon } = require('./helpers/lua');
+const { fakeLocale } = require('./helpers/locale');
 const { writeCodexPack } = require('./helpers/codex');
 const { DATA, needs } = require('./helpers/data');
 const { luaValue } = require('../tools/lib/playtest');
@@ -257,10 +258,10 @@ emit({ none = none == nil, why = why })`, { faction: 'Alliance', race: 'Human' }
 
 const UI_FILES = ['Core/Core.xml', 'Theme/Theme.xml', 'Gear/Gear.xml', 'Lookup/Lookup.xml', 'Dungeons/Dungeons.xml', 'UI/UI.xml'];
 
-function runUI(script) {
+function runUI(script, { locale = '' } = {}) {
 	return runAddon({
 		stubs: ['stub_ui.lua'],
-		before: pack.stubLua,
+		before: `${pack.stubLua}\n${locale}`,
 		addons: [{ name: 'Polestar', files: UI_FILES }],
 		script: `uistub.install()
 stub.login()
@@ -323,4 +324,15 @@ emit({ tabs = tabsDm, heads = { DS.atts[1].Title:GetText(), DS.atts[2] and DS.at
 	assert.deepEqual(deadmines.heads, ['Smelting Key', false]);
 	assert.deepEqual(deadmines.rows, [['Smelting Key from Edwin VanCleef', '100% chance  \u00b7  inside The Deadmines', false]]);
 	assert.equal(deadmines.owned, 'Not in your bags or bank');
+});
+
+test('the Attunement tab: the kind beside the title is in the client language', () => {
+	const [meta] = runUI(
+		`
+Polestar.Dungeons.Open("wailing-caverns")
+DS.SetTab("attune")
+emit(DS.atts[1].Meta:GetText())`,
+		{ locale: fakeLocale('deDE', { Attunement: 'Zugangsquest', 'Everyone entering needs it': 'Jeder braucht sie', 'From level %d': 'Ab Stufe %d' }) },
+	);
+	assert.equal(meta, 'Zugangsquest  \u00b7  Jeder braucht sie  \u00b7  Ab Stufe 17');
 });
