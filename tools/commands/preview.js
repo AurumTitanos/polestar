@@ -455,14 +455,17 @@ const MAP_W = 700, MAP_H = 470;
 // it) sized like the world map's, and the minimap's ground. Map percent to
 // canvas pixels: x * MAP_W, y * MAP_H from the top left.
 const QUEST_PLAYER = { x: 46.4, y: 39.6 };
-function questWorld() {
+// The zone a scene plays in (default: Elwynn at the abbey); `frame` its
+// world bounds, the same in the Era frame.
+const ELWYNN = { map: 1429, name: 'Elwynn Forest', frame: 'c = 0, left = 1500, right = -1500, top = 500, bottom = -1500', player: QUEST_PLAYER };
+function questWorld(place = ELWYNN) {
 	return `${questDbLua()}
 local w = stub.world
-w.addMap(1429, { name = "Elwynn Forest", c = 0, left = 1500, right = -1500, top = 500, bottom = -1500 })
-w.moveTo(1429, ${QUEST_PLAYER.x}, ${QUEST_PLAYER.y})
+w.addMap(${place.map}, { name = "${place.name}", ${place.frame} })
+w.moveTo(${place.map}, ${place.player.x}, ${place.player.y})
 for q, t in pairs({ [7] = "Kobold Camp Cleanup", [18] = "Gathering Wood", [33] = "Wolves Across the Border", [60] = "Kobold Candles" }) do w.titles[q] = t end
 w.complete({ 14 }); w.setLevel(4)
-stub.worldMapID = 1429
+stub.worldMapID = ${place.map}
 local FONT = "Interface\\\\AddOns\\\\Polestar\\\\Media\\\\Fonts\\\\Inter-SemiBold.ttf"
 local NAV = "Interface\\\\AddOns\\\\Polestar\\\\Media\\\\Nav\\\\"
 
@@ -506,7 +509,7 @@ for i = 1, 9 do
 end
 local name = canvas:CreateFontString(nil, "ARTWORK")
 name:SetFont(FONT, 15, ""); name:SetTextColor(0.93, 0.89, 0.78, 0.6)
-name:SetPoint("TOPLEFT", canvas, "TOPLEFT", 14, -12); name:SetText("Elwynn Forest")
+name:SetPoint("TOPLEFT", canvas, "TOPLEFT", 14, -12); name:SetText("${place.name}")
 function map.GetCanvas() return canvas end
 function map.SetPinPosition(self, pin, x, y)
 	pin:ClearAllPoints()
@@ -537,7 +540,7 @@ function map.UnregisterPin() end
 -- The player, as the world map's own unit pin draws it: above every pin.
 local me = CreateFrame("Frame", nil, canvas)
 me:SetFrameLevel(100); me:SetSize(22, 22)
-me:SetPoint("CENTER", canvas, "TOPLEFT", ${(QUEST_PLAYER.x / 100) * MAP_W}, ${-(QUEST_PLAYER.y / 100) * MAP_H})
+me:SetPoint("CENTER", canvas, "TOPLEFT", ${(place.player.x / 100) * MAP_W}, ${-(place.player.y / 100) * MAP_H})
 local meArrow = me:CreateTexture(nil, "OVERLAY")
 meArrow:SetAllPoints(me); meArrow:SetTexture(NAV .. "arrow"); meArrow:SetRotation(0.4)
 
@@ -589,31 +592,41 @@ Polestar.Nav.RegisterCrossings({ complete = true,
 	crossings = { { id = "border", a = { map = 1429, c = 0, wx = -700, wy = 1460, r = 15 }, b = { map = 1436, c = 0, wx = -700, wy = 1540, r = 15 } } } })
 Polestar.Nav.SetTarget(1436, 60, 45, "Sentinel Hill")
 stub.advance(1)`;
-// Spawn areas: a guide step whose goals spawn at several camps (compiled
-// `spots`) around the player at the abbey, with no quest markers on: the
-// candles (the arrow's goal: the camp it points at, its other camps, one
-// other place they spawn fainter) and the kobolds (the step's other goal).
+// Spawn areas: Teldrassil's "The Balance of Nature" as the pack compiles it
+// (`spots`: every place each goal's mobs and objects spawn), the player in
+// the Grells' woods west of Aldrassil, no quest markers on. The arrow on the
+// Fel Moss: the woods its Grells roam as one region and a lone Grell's place,
+// in the arrow's colour; the Nightsabers', Thistle Boars' and Gnarlpine
+// Totems' regions fainter (a place only the Nightsabers' other spawn covers
+// fainter still). On the minimap the Fel Moss region, cut at the rim.
+const TELDRASSIL = {
+	map: 1438, name: 'Teldrassil', frame: 'c = 1, left = 3814.583, right = -1277.083, top = 11831.25, bottom = 8437.5', player: { x: 55.3, y: 42.4 },
+};
 const AREAS = `local w = stub.world
-w.accept(7, { { text = "Kobold Vermin slain: 0/10", type = "monster", required = 10 } }); w.progress(7, 1, 3)
-w.accept(60, { { text = "Large Candle: 0/8", type = "item", required = 8 } }); w.progress(60, 1, 2)
+Polestar.RegisterMapFrames({ era = { [1438] = { ${TELDRASSIL.frame} } } })
+w.setLevel(3)
+w.titles[456], w.titles[459], w.titles[97977] = "The Balance of Nature", "The Woodland Protector", "Nature's Call"
+w.accept(456, { { text = "Young Nightsaber slain: 0/7", type = "monster", required = 7 }, { text = "Young Thistle Boar slain: 0/4", type = "monster", required = 4 } })
+w.progress(456, 1, 2)
+w.accept(459, { { text = "Fel Moss: 0/8", type = "item", required = 8 } }); w.progress(459, 1, 3)
+w.accept(97977, { { text = "Gnarlpine Totem destroyed: 0/1", type = "object", required = 1 } })
 stub.advance(0.3)
 Polestar.RegisterPack({ addon = "Polestar_Preview", id = "preview", format = 1, title = "Preview", author = "Polestar", version = "1", license = "GPL-3.0-only" })
-Polestar.RegisterGuide({ id = "preview/areas", pack = "preview", title = "Elwynn Forest", faction = "Alliance", minLevel = 1, maxLevel = 10, zone = 1429, steps = {
-	{ title = "Kobold Camp", goals = {
-		{ t = "collect", quest = 60, title = "Kobold Candles", item = 772, itemName = "Large Candle", count = 8, oi = 1, map = 1429, x = 44.6, y = 42.4, spread = true, spots = {
-			{ x = 44.6, y = 42.4, r = 35, n = 4 }, { x = 47.8, y = 35.8, r = 40, n = 6 }, { x = 50.6, y = 40.8, r = 45, n = 5 },
-			{ x = 42.2, y = 35.4, r = 30, n = 3 }, { x = 49.0, y = 46.5, r = 25, n = 1, alt = true },
-		} },
-		{ t = "kill", quest = 7, title = "Kobold Camp Cleanup", target = "Kobold Vermin", npc = 6, count = 10, oi = 1, map = 1429, x = 52.5, y = 33.0, spots = {
-			{ x = 52.5, y = 33.0, r = 50, n = 7 }, { x = 39.8, y = 44.6, r = 40, n = 5 }, { x = 45.2, y = 30.8, r = 35, n = 3 },
-		} },
+Polestar.RegisterGuide({ id = "preview/areas", pack = "preview", title = "Teldrassil", faction = "Alliance", minLevel = 1, maxLevel = 10, zone = 1438, steps = {
+	{ title = "The Balance of Nature", goals = {
+		{ t = "kill", quest = 456, title = "The Balance of Nature", target = "Young Nightsaber", npc = 2031, count = 7, oi = 1, map = 1438, x = 57.87, y = 44.69, f = "e", spots = { { x = 57.2, y = 44.6, r = 35, n = 2 }, { x = 58.5, y = 46.1, r = 23, n = 3 }, { x = 61.3, y = 44.9, r = 63, n = 7 }, { x = 61.5, y = 40.1, r = 30, n = 2 }, { x = 62.4, y = 42.1, r = 50, n = 5 }, { x = 64.3, y = 41.3, r = 29, n = 2 }, { x = 57.9, y = 39, r = 15, n = 1, alt = true } } },
+		{ t = "kill", quest = 456, title = "The Balance of Nature", target = "Young Thistle Boar", npc = 1984, count = 4, oi = 2, map = 1438, x = 57.44, y = 45.02, f = "e", spots = { { x = 57.1, y = 45, r = 34, n = 3 }, { x = 59, y = 44.7, r = 47, n = 4 }, { x = 55.7, y = 42.4, r = 48, n = 6 }, { x = 60.9, y = 46, r = 18, n = 2 }, { x = 61.7, y = 42.6, r = 51, n = 4 }, { x = 57.8, y = 42.4, r = 15, n = 1, alt = true }, { x = 57.6, y = 39.5, r = 15, n = 1, alt = true }, { x = 63.2, y = 42.2, r = 15, n = 1, alt = true } } },
+		{ t = "collect", quest = 459, title = "The Woodland Protector", item = 3297, itemName = "Fel Moss", count = 8, oi = 1, map = 1438, x = 56.16, y = 45.81, f = "e", spots = { { x = 55.9, y = 45.9, r = 40, n = 6 }, { x = 54.6, y = 44.1, r = 40, n = 6 }, { x = 55.8, y = 41.6, r = 40, n = 1 }, { x = 56.2, y = 38.5, r = 40, n = 1 }, { x = 54.4, y = 39.1, r = 40, n = 7 }, { x = 56.3, y = 34.6, r = 40, n = 1 }, { x = 59.6, y = 35, r = 40, n = 1 }, { x = 62.3, y = 35.7, r = 40, n = 1 }, { x = 64.2, y = 42.2, r = 40, n = 1 } }, spread = true, from = "Grellkin", fromKind = "npc", fromAlso = "Grell" },
+		{ t = "interact", quest = 97977, title = "Nature's Call", object = 668482, objName = "Gnarlpine Totem", oi = 1, map = 1438, x = 56, y = 46.1, f = "e", spots = { { x = 56, y = 46.1, r = 15, n = 1 }, { x = 55.2, y = 44.2, r = 36, n = 2 }, { x = 56.2, y = 39.4, r = 15, n = 1 }, { x = 54.6, y = 39.7, r = 26, n = 2 } }, note = "Gnarlpine Totem" },
 	} },
 } })
 Polestar.Engine.SetGuide("preview/areas")
+stub.advance(0.3)
+Polestar.Engine.AimGoal(1, 3)
 stub.advance(0.3)`;
-function questScene(roots, script) {
+function questScene(roots, script, place) {
 	// `before` is read when the panel runs, so the database is only built for these scenes.
-	return { roots, stubs: QUEST_STUBS, files: QUEST_FILES, get before() { return questWorld(); }, script };
+	return { roots, stubs: QUEST_STUBS, files: QUEST_FILES, get before() { return questWorld(place); }, script };
 }
 // Group content (the compiled `group`, the goal view's `party`): a class
 // guide whose route needs a group, its Felwood step (elites; the author's
@@ -1076,10 +1089,10 @@ Polestar.UI.Picker.SetCategory("Leveling"); Polestar.UI.Picker.Select("forever/h
 	},
 	{
 		file: 'nav-areas.svg',
-		title: "Spawn areas: a guide step whose goals spawn at several camps, every camp a zone on the world map (the arrow's goal in the arrow's colour, the camp it points at under the target pin, another place it spawns fainter; the step's other goal fainter in the goals' colour); on the minimap the arrow's goal's camps around the player, cut at the rim",
+		title: "Spawn regions: Teldrassil's The Balance of Nature, the arrow on the Fel Moss. On the world map every place the step's mobs and objects spawn is a region: the Grells' woods west and north of Aldrassil and a lone Grell's place in the arrow's colour, the Nightsabers', Thistle Boars' and Gnarlpine Totems' regions fainter; on the minimap the Fel Moss region around the player, cut at the rim",
 		panels: [
-			questScene(['WorldMapFrame'], AREAS),
-			questScene(['Minimap'], AREAS),
+			questScene(['WorldMapFrame'], AREAS, TELDRASSIL),
+			questScene(['Minimap'], AREAS, TELDRASSIL),
 		],
 	},
 	{

@@ -296,6 +296,15 @@ function Methods.GetRotation(self) return self.rotation or 0 end
 function Methods.SetDesaturated(self, v) self.desaturated = v and true or false end
 function Methods.SetBlendMode(self, m) self.blend = m end
 function Methods.AddMaskTexture(self, m) self.mask = m end
+-- SetVertexOffset(i, x, y): corner i (1 upper left, 2 lower left, 3 upper
+-- right, 4 lower right) moved by x, y (UI units, y up) from its place.
+function Methods.SetVertexOffset(self, i, x, y)
+	assert(i >= 1 and i <= 4 and type(x) == "number" and type(y) == "number", "SetVertexOffset(" .. tostring(i) .. ")")
+	self.vertexOffset = self.vertexOffset or { 0, 0, 0, 0, 0, 0, 0, 0 }
+	self.vertexOffset[2 * i - 1], self.vertexOffset[2 * i] = x, y
+end
+function Methods.SetSnapToPixelGrid(self, v) self.snapToPixelGrid = v and true or false end
+function Methods.SetTexelSnappingBias(self, v) self.texelSnappingBias = v end
 
 -- Backdrop (BackdropTemplate)
 function Methods.SetBackdrop(self, t)
