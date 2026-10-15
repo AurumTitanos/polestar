@@ -126,5 +126,17 @@
   "id": 750,
   "name": "Tough Wolf Meat",
   "vendors": []
+ },
+ "3299": {
+  "drops": {
+   "npc": {
+    "299": 60,
+    "69": 70
+   },
+   "object": {}
+  },
+  "id": 3299,
+  "name": "Fractured Canine",
+  "vendors": []
  }
 }

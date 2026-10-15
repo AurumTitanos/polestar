@@ -308,13 +308,16 @@ end
 -- Where a collected item comes from, when one source has it (the goal's
 -- `source`): "Kill Aean Swiftriver (rare elite)" for an enemy, "From <name>"
 -- for a friend or an object. An object named as the item is the item lying
--- there: nothing to add.
+-- there: nothing to add. Nil when the goal's text already names the source
+-- ("Kill Grell or Grellkin for Fel Moss"); this line serves author text.
 function UI.SourceLine(goal)
 	local src = goal.source
-	if goal.t ~= "collect" or type(src) ~= "table" or type(src.name) ~= "string" then return nil end
+	if goal.t ~= "collect" or type(src) ~= "table" or type(src.name) ~= "string" or src.inText then return nil end
 	if goal.status == "done" or goal.status == "skipped" then return nil end
 	if src.kind == "object" and src.name == goal.subject then return nil end
-	return format(src.enemy and L["Kill %s"] or L["From %s"], sourceName(src))
+	local who = sourceName(src)
+	if type(src.also) == "string" then who = format(L["%s or %s"], who, src.also) end
+	return format(src.enemy and L["Kill %s"] or L["From %s"], who)
 end
 
 -- Group content (the goal's `party`, the compiled `group`): "Elite: group

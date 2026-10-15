@@ -51,7 +51,8 @@ local elwynn = {
 			G("accept", { verb = "Accept", subject = "Wolves Across the Border", subjectKind = "quest", quest = 33, npc = 196, npcName = "Eagan Peltskinner", map = ELWYNN, x = 48.2, y = 40.0, status = "done" }),
 			G("goto", { verb = "Go to", subject = "the Kobold Camp", subjectKind = "place", map = ELWYNN, x = 47.6, y = 35.1, status = "done" }),
 			G("kill", { verb = "Kill", subject = "Kobold Vermin", subjectKind = "npc", npc = 6, quest = 7, detail = "for Kobold Camp Cleanup", progress = { cur = 7, max = 10 }, map = ELWYNN, x = 47.6, y = 35.1, status = "active" }),
-			G("collect", { verb = "Collect", subject = "Tough Wolf Meat", subjectKind = "item", item = 750, quest = 33, detail = "from Young Wolves", progress = { cur = 3, max = 8 }, map = ELWYNN, x = 46.0, y = 38.5, status = "active" }),
+			G("collect", { verb = "Collect", subject = "Tough Wolf Meat", subjectKind = "item", item = 750, quest = 33, text = "Kill Young Wolf for Tough Wolf Meat",
+				source = { name = "Young Wolf", kind = "npc", enemy = true, inText = true }, detail = "for Wolves Across the Border", progress = { cur = 3, max = 8 }, map = ELWYNN, x = 46.0, y = 38.5, status = "active" }),
 		} },
 		-- A hub: three people, walked one at a time.
 		{ title = "Back to the Abbey", goals = {

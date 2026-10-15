@@ -614,6 +614,45 @@ test('a quest started by a dropped item is one line: the collect stands for it, 
 	assert.equal(out.taken.cFolded, true);
 });
 
+// The game's objective names only the item ("Fel Moss: 0/8"); the goal line
+// says where it comes from.
+test('a collect with a known source names it: kill an enemy for the item, collect from a friend or an object', () => {
+	const guides = `
+		Polestar.RegisterGuide({ id = "test/src", pack = "test", title = "Src", faction = "Alliance", minLevel = 1, maxLevel = 10, steps = {
+			{ title = "Woods", goals = {
+				{ t = "collect", quest = 459, title = "The Woodland Protector", item = 3297, itemName = "Fel Moss", count = 8, oi = 1, map = 1438, x = 56, y = 45,
+					from = "Grell", fromAlso = "Grellkin", fromKind = "npc", fromFaction = "H" },
+				{ t = "collect", item = 159, itemName = "Refreshing Spring Water", count = 2, map = 1429, x = 40, y = 40,
+					from = "Innkeeper Farley", fromKind = "npc", fromFaction = "A" },
+				{ t = "collect", quest = 36, title = "Westfall Stew", item = 1, itemName = "Oats", count = 1, oi = 1, map = 1436, x = 50, y = 30,
+					from = "Sack of Oats", fromKind = "object" },
+				{ t = "collect", quest = 36, title = "Westfall Stew", item = 2, itemName = "Peacebloom", count = 1, oi = 2, map = 1436, x = 50, y = 30,
+					from = "Peacebloom", fromKind = "object" },
+				{ t = "collect", quest = 36, title = "Westfall Stew", item = 3, itemName = "Runed Scroll", count = 1, oi = 3, map = 1436, x = 50, y = 30,
+					from = "Aean Swiftriver", fromKind = "npc", fromRank = 2, fromFaction = "A", text = "Get the scroll" },
+			} },
+		} })
+	`;
+	const [out] = run({
+		guides,
+		before: 'stub.world.faction = "Alliance"; stub.world.race = "NightElf"; stub.world.class = "DRUID"; stub.world.level = 5',
+		script: `
+			E.SetGuide("test/src"); flush()
+			local v = E.GetStepView(1)
+			local r = {}
+			for i = 1, 5 do local g = v.goals[i]; r[i] = { g.text, g.source and g.source.inText or false } end
+			emit(r)
+		`,
+	});
+	assert.deepEqual(out, [
+		['Kill Grell or Grellkin for Fel Moss', true],
+		['Collect Refreshing Spring Water from Innkeeper Farley', true],
+		['Collect Oats from Sack of Oats', true],
+		['Collect Peacebloom', false],
+		['Get the scroll', false],
+	]);
+});
+
 test('RegisterGuide rejects malformed guides with a debug message instead of erroring', () => {
 	const [out] = run({
 		guides: '',

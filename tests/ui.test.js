@@ -1036,3 +1036,13 @@ test('labels kept in tables are in the client language: the group line and the g
 	assert.deepEqual(out.tabs, ['Start', 'Stöbern', 'Aktuell', 'Zuletzt']);
 	assert.equal(out.title, 'Start');
 });
+
+test('a collect whose line already names its source has no source line under it; author text keeps it', () => {
+	const [out] = run(`
+		local src = { name = "Grell", also = "Grellkin", kind = "npc", enemy = true }
+		local named = { t = "collect", text = "Kill Grell or Grellkin for Fel Moss", subject = "Fel Moss", status = "active", source = setmetatable({ inText = true }, { __index = src }) }
+		local authored = { t = "collect", text = "Get the moss", subject = "Fel Moss", status = "active", source = src }
+		emit({ named = UI.GoalSubline(named) or false, authored = UI.GoalSubline(authored) or false })`);
+	assert.equal(out.named, false);
+	assert.equal(out.authored, 'Kill Grell or Grellkin');
+});

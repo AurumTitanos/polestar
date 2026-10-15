@@ -217,6 +217,12 @@
 - `/polestar way 40 60` where the game gives no map position (an instance,
   another continent) says "No position here" instead of how to type the
   command (thanks meellm).
+- A quest item's goal says where it comes from: "Kill Grellkin or Grell for
+  Fel Moss" instead of "Collect Fel Moss", and "Collect Handful of Oats from
+  Sack of Oats" for one you pick up, on the goal line and the arrow. Up to
+  two creatures that drop it at 50% or more are named; cloth and other items
+  that drop everywhere are not. Two tips that said "click" for picking up an
+  item now say so (thanks Pynte).
 
 ### For guide authors
 
