@@ -23,7 +23,9 @@
 --       Dungeons' "pickup", "handin" and "attune" kinds are three (Dungeons/Pickup.lua, Handin.lua, Attune.lua).
 --   Lookup.QuestChain(questId, player) -> { quest, ... }, truncated
 --       the quest after its open prerequisites, in the order they are done
---   Lookup.QuestStep(quest, from) -> step   -- accept, objectives, turn-in
+--   Lookup.QuestStep(quest, from, opts) -> step   -- accept, objectives, turn-in
+--       opts.inside(kind, id): where an NPC or object without a known spawn
+--       is; with it the step is always whole (see questStep)
 --
 -- Generated guides are not saved. A tab holding one survives /reload: at
 -- ADDON_LOADED (before the Engine reopens saved tabs at login) every saved
@@ -38,13 +40,14 @@ local Lookup = ns.Lookup
 local L = ns.L
 
 local type, pairs, ipairs, tostring, tonumber = type, pairs, ipairs, tostring, tonumber
-local lower, find, format = string.lower, string.find, string.format
+local lower, find, format, concat = string.lower, string.find, string.format, table.concat
 
 local planners = {} -- kind -> build(id): guide kinds other modules build
 
 local ITEM_KINDS = Lookup.ITEM_KINDS
 local PREFIX = "lookup/"
 local MAX_CHAIN, MAX_DEPTH = 12, 8
+local INSIDE_CHANCE = 10 -- percent: an inside source rarer than this is no place to send the player (itemSpot)
 
 local function Codex() return ns.Codex end
 
@@ -156,29 +159,34 @@ local function percent(n)
 	return format("%.3g%%", n)
 end
 
--- Where to collect a quest item: the nearest spawn of its best drop or object source.
-local function itemSpot(itemId, from)
+-- Where to collect a quest item: the nearest spawn of its best drop or object
+-- source; else, with `inside` (see questStep), where its best source without
+-- a known spawn is, unless that source rarely gives it (under INSIDE_CHANCE
+-- percent: Razorgore's 1.5% Nexus Crystal is no errand) -> point, its name.
+local function itemSpot(itemId, from, inside)
 	local C = Codex()
 	local item = C.Item(itemId)
 	if not item then return nil end
-	local best, bestChance
+	local best, bestChance, placed, placedChance, placedName
 	for _, src in ipairs(item.sources or {}) do
-		local spawns
+		local rec, kind, id
 		if src.type == "drop" and src.npc then
-			local npc = C.Npc(src.npc)
-			spawns = npc and npc.spawns
+			rec, kind, id = C.Npc(src.npc), "npc", src.npc
 		elseif src.type == "object" and src.object then
-			local obj = C.Object(src.object)
-			spawns = obj and obj.spawns
+			rec, kind, id = C.Object(src.object), "object", src.object
 		end
-		if spawns and #spawns > 0 then
-			local chance = src.chance or 0
+		local chance = src.chance or 0
+		if rec and rec.spawns and #rec.spawns > 0 then
 			if not best or chance > bestChance then
-				best, bestChance = Lookup.Nearest(spawns, from), chance
+				best, bestChance = Lookup.Nearest(rec.spawns, from), chance
 			end
+		elseif kind and inside and not best and (src.chance == nil or chance >= INSIDE_CHANCE) and (not placed or chance > placedChance) then
+			local p = inside(kind, id)
+			if p then placed, placedChance, placedName = p, chance, (rec and rec.name) or (C.Name(kind, id)) end
 		end
 	end
-	return best
+	if best then return best end
+	return placed, placedName
 end
 
 -- Quests to do in order to get questId, prerequisites first: every one of
@@ -227,12 +235,72 @@ local function endGoal(t, q, e)
 	return at(g, e.spawn)
 end
 
--- One step per quest: accept, objectives, turn-in. -> step | nil, reason
-local function questStep(q, from, isTarget)
+-- The first NPC or object of `ends` that inside(kind, id) places (see
+-- questStep) -> { npc|object, name, spawn } | nil.
+local function insideEnd(ends, inside)
+	if not (inside and type(ends) == "table") then return nil end
 	local C = Codex()
+	for _, id in ipairs(ends.npc or {}) do
+		local p = inside("npc", id)
+		if p then return { npc = id, name = (C.Name("npc", id)) or npcName(id), spawn = p } end
+	end
+	for _, id in ipairs(ends.object or {}) do
+		local p = inside("object", id)
+		if p then return { object = id, name = (C.Name("object", id)) or (L["Object"] .. " " .. id), spawn = p } end
+	end
+	return nil
+end
+
+-- The first NPC or object of `ends`, with no place -> { npc|object, name } | nil.
+local function bareEnd(ends)
+	if type(ends) ~= "table" then return nil end
+	local C = Codex()
+	local id = (ends.npc or {})[1]
+	if id then return { npc = id, name = (C.Name("npc", id)) or npcName(id) } end
+	id = (ends.object or {})[1]
+	if id then return { object = id, name = (C.Name("object", id)) or (L["Object"] .. " " .. id) } end
+	return nil
+end
+
+-- One step per quest: accept, objectives, turn-in. -> step | nil, reason
+-- opts.inside(kind, id) -> point { map, x, y, f, name } | nil: where an NPC
+-- or object without a known spawn is (Dungeons' attunement guides: the
+-- entrance of the instance it is inside, `name` the instance's). With it the
+-- step is always whole, its giver, targets and turn-in at those points (or
+-- unplaced) and step.note saying what is inside where; without it a quest
+-- whose giver or turn-in has no place is a "First do the quest" note.
+local function questStep(q, from, isTarget, opts)
+	local C = Codex()
+	local inside = opts and opts.inside
+	local within, order = {}, {}
+	local function mark(p, name)
+		if not (p and p.name and name) then return end
+		local list = within[p.name]
+		if not list then
+			list = {}
+			within[p.name] = list
+			order[#order + 1] = p.name
+		end
+		for _, n in ipairs(list) do
+			if n == name then return end
+		end
+		list[#list + 1] = name
+	end
 	local giver = Lookup.QuestEnd(q.start, from)
+	if not giver then
+		giver = insideEnd(q.start, inside)
+		if giver then mark(giver.spawn, giver.name) end
+	end
 	local startItem = q.start and q.start.item and q.start.item[1]
 	local finish = Lookup.QuestEnd(q["end"], giver and giver.spawn or from)
+	if not finish then
+		finish = insideEnd(q["end"], inside)
+		if finish then mark(finish.spawn, finish.name) end
+	end
+	if inside then
+		giver = giver or (not startItem and bareEnd(q.start)) or nil
+		finish = finish or bareEnd(q["end"])
+	end
 	if not finish or not (giver or startItem) then
 		if isTarget then return nil, "nolocation" end
 		return { title = q.title, goals = { { t = "note", text = L["First do the quest"] .. " " .. q.title } } }
@@ -252,16 +320,29 @@ local function questStep(q, from, isTarget)
 		local count = o.count or 1
 		if o.type == "kill" and o.id then
 			local npc = C.Npc(o.id)
+			local target = (npc and npc.name) or o.text or npcName(o.id)
 			local s = npc and Lookup.Nearest(npc.spawns, here)
-			goals[#goals + 1] = at({ t = "kill", target = (npc and npc.name) or o.text or npcName(o.id), npc = o.id,
+			if not s and inside then
+				s = inside("npc", o.id)
+				mark(s, target)
+			end
+			goals[#goals + 1] = at({ t = "kill", target = target, npc = o.id,
 				quest = q.id, oi = oi, count = count, title = q.title }, s)
 		elseif o.type == "item" and o.id then
-			goals[#goals + 1] = at({ t = "collect", item = o.id, itemName = (C.Name("item", o.id)) or o.text or itemName(o.id),
-				quest = q.id, oi = oi, count = count, title = q.title }, itemSpot(o.id, here))
+			local name = (C.Name("item", o.id)) or o.text or itemName(o.id)
+			local s, source = itemSpot(o.id, here, inside)
+			if source then mark(s, name) end
+			goals[#goals + 1] = at({ t = "collect", item = o.id, itemName = name,
+				quest = q.id, oi = oi, count = count, title = q.title }, s)
 		elseif o.type == "object" and o.id then
 			local obj = C.Object(o.id)
+			local objName = (obj and obj.name) or o.text or (L["Object"] .. " " .. o.id)
 			local s = obj and Lookup.Nearest(obj.spawns, here)
-			goals[#goals + 1] = at({ t = "interact", object = o.id, objName = (obj and obj.name) or o.text or (L["Object"] .. " " .. o.id),
+			if not s and inside then
+				s = inside("object", o.id)
+				mark(s, objName)
+			end
+			goals[#goals + 1] = at({ t = "interact", object = o.id, objName = objName,
 				quest = q.id, oi = oi, count = count, title = q.title }, s)
 		else
 			event = event or o
@@ -271,7 +352,15 @@ local function questStep(q, from, isTarget)
 		goals[#goals + 1] = { t = "complete", quest = q.id, title = q.title, text = event.text }
 	end
 	goals[#goals + 1] = endGoal("turnin", q, finish)
-	return { title = q.title, goals = goals }
+	local step = { title = q.title, goals = goals }
+	if #order > 0 then
+		local lines = {}
+		for i, inst in ipairs(order) do
+			lines[i] = format(L["%s: inside %s."], concat(within[inst], ", "), inst)
+		end
+		step.note = concat(lines, " ")
+	end
+	return step
 end
 
 -- Steps for a quest and its unfinished prerequisites. -> steps | nil, reason
@@ -291,7 +380,7 @@ local function questSteps(questId, player, from)
 	return steps
 end
 Lookup.QuestChain = questChain
-Lookup.QuestStep = function(q, from) return questStep(q, from, false) end
+Lookup.QuestStep = function(q, from, opts) return questStep(q, from, false, opts) end
 
 local RANK_CAPS = { 75, 150, 225, 300 }
 

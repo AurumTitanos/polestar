@@ -86,6 +86,11 @@ test('the goal table: every entry cites public sources, names a goal or an item,
 		assert.doesNotMatch(JSON.stringify(a), /Attune(?!ment)/i, `${a.id} names Attune`);
 	}
 	for (const r of t.removed) assert.ok(r.why && r.sources.length, r.id);
+	for (const e of t.inside) {
+		assert.ok(['npc', 'object'].includes(e.kind) && Number.isInteger(e.id) && e.name && e.instance, JSON.stringify(e));
+		assert.ok(e.sources.length && e.sources.every((s) => /^https:\/\/www\.wowhead\.com\/forever\//.test(s)), `${e.kind} ${e.id}`);
+		assert.doesNotMatch(JSON.stringify(e), /Attune(?!ment)/i, `${e.kind} ${e.id} names Attune`);
+	}
 });
 
 const CODEX_FILES = ['quests', 'items', 'npcs', 'objects', 'factions', 'instances'].map((n) => `codex/${n}.json`);
@@ -103,6 +108,15 @@ test('with the local Codex: the Onyxia, Blackwing Lair, Naxxramas and Dalaran ch
 	assert.equal(shape(get('blackwing-lair', 'blackhand')), 'drop:18987 > 7761*', 'the Quartermaster drops the letter that starts it');
 	assert.equal(shape(get('naxxramas', 'dread-citadel')), '9121* > 9122* > 9123*');
 	assert.equal(byKey['blackrock-spire'], undefined, 'Forever removed the Seal of Ascension');
+	// Every cited `inside` place is one a chain meets, of an NPC or object
+	// that still has no spawn and no Codex instance.
+	const used = new Set(Object.values(byKey).flat().flatMap((a) => (a.inside || []).map((e) => `${e.kind}:${e.id}:${e.instance}`)));
+	for (const e of loadAttunementTable().inside) {
+		assert.ok(used.has(`${e.kind}:${e.id}:${e.instance}`), `${e.name} is in no chain`);
+		const rec = (e.kind === 'npc' ? real.npcs : real.objects)[e.id];
+		assert.ok(rec && !(rec.spawns || []).length && !rec.instance, `${e.name}: the Codex places it now`);
+	}
+	assert.deepEqual(get('molten-core', 'core').inside, [{ kind: 'object', id: 179553, instance: 'blackrock-depths' }], 'the Core Fragment, by the Molten Core portal in Blackrock Depths');
 });
 
 test('auditReport compares our chains with Attune\'s by their quests', () => {
@@ -157,10 +171,10 @@ local function describe(g)
 end
 `;
 
-function run(script, { faction = 'Horde', race = 'Tauren', level = 18, done = [], at = [1413, 50, 40] } = {}) {
+function run(script, { faction = 'Horde', race = 'Tauren', level = 18, done = [], at = [1413, 50, 40], with: pk = pack } = {}) {
 	return runAddon({
 		stubs: ['stub_world.lua'],
-		before: `${pack.stubLua}
+		before: `${pk.stubLua}
 local w = stub.world
 ${MAPS}
 w.level, w.race, w.raceName, w.faction = ${level}, ${JSON.stringify(race)}, ${JSON.stringify(race)}, ${JSON.stringify(faction)}
@@ -250,6 +264,108 @@ emit({ none = none == nil, why = why })`, { faction: 'Alliance', race: 'Human' }
 	assert.deepEqual(guide.at, [1436, 42.5, 71.7, 'Edwin VanCleef']);
 	assert.equal(guide.note, 'Edwin VanCleef drops it inside The Deadmines.');
 	assert.deepEqual(owned, { none: true, why: 'done' });
+});
+
+// The serpent's heart: Tonga sends you into the caverns to the Deviate Keeper,
+// who has no spawn; the table's cited `inside` places him and the scale pile
+// there, the Codex places Kresh. Above the level 18 character's level.
+function heartFixture() {
+	const c = structuredClone(codex);
+	const quest = (id, title, start, end, objectives, pre) => ({ id, title, level: 26, minLevel: 25, faction: null, races: null, classes: null,
+		start: { npc: [start], object: [], item: [] }, end: { npc: [end], object: [] }, objectives, pre, preAny: [], rewards: [], choices: [] });
+	c.npcs[90040] = { id: 90040, name: 'Deviate Keeper', level: 22, levelMax: null, faction: null, rare: false, elite: false, boss: false, instance: null, roles: [], spawns: [] };
+	c.objects[90050] = { id: 90050, name: 'Glowing Scale Pile', treasure: false, spawns: [] };
+	c.items[90031] = { id: 90031, name: 'Shimmering Scale', quality: 1, kind: 'item', spell: null, reqLevel: null, sources: [{ type: 'object', object: 90050, chance: 100 }] };
+	c.quests[90030] = quest(90030, 'Into the Caverns', 3448, 90040, [{ type: 'kill', id: 3653, count: 1, text: 'Kresh' }, { type: 'item', id: 90031, count: 1, text: 'Shimmering Scale' }], []);
+	c.quests[90032] = quest(90032, 'Heart of the Serpent', 90040, 3448, [], [90030]);
+	const table = structuredClone(inputs.attunementTable);
+	table.attunements.push({ key: 'wailing-caverns', id: 'heart', name: 'Heart of the Serpent', kind: 'attunement', need: 'each', goal: [90032], note: 'Opens the heart.' });
+	table.inside = [
+		{ kind: 'npc', id: 90040, name: 'Deviate Keeper', instance: 'wailing-caverns', sources: ['synthetic'] },
+		{ kind: 'object', id: 90050, name: 'Glowing Scale Pile', instance: 'wailing-caverns', sources: ['synthetic'] },
+		{ kind: 'npc', id: 90041, name: 'Not in the chain', instance: 'wailing-caverns', sources: ['synthetic'] },
+	];
+	return { codex: c, inputs: { ...inputs, attunementTable: table } };
+}
+
+test('a quest whose turn-in, targets or chest are inside an instance stays whole in the guide, at the entrance, and the engine walks every quest; an accept above the level says from which', () => {
+	const heart = heartFixture();
+	const { byKey } = attunementsOf(heart.codex, { table: heart.inputs.attunementTable });
+	assert.deepEqual(byKey['wailing-caverns'].find((a) => a.id === 'heart').inside, [
+		{ kind: 'npc', id: 90040, instance: 'wailing-caverns' },
+		{ kind: 'object', id: 90050, instance: 'wailing-caverns' },
+	], 'only the table\'s entries the chain meets');
+	assert.equal(byKey['wailing-caverns'].find((a) => a.id === 'fang').inside, null);
+	const pk = writeCodexPack(heart.codex, { extraFiles: emitJournal(buildJournal(heart.inputs, heart.codex)) });
+	try {
+		const [built, walk] = run(`
+local def = D.AttuneGuide("wailing-caverns", "heart")
+local at = {}
+for i, s in ipairs(def.steps) do
+	local g = {}
+	for j, goal in ipairs(s.goals) do g[j] = goal.map and table.concat({ goal.map, goal.x, goal.y }, " ") or false end
+	at[i] = g
+end
+local notes = {}
+for i, s in ipairs(def.steps) do notes[i] = s.note or false end
+emit({ steps = describe(def), at = at, notes = notes })
+local E = Polestar.Engine
+D.Attune("wailing-caverns", "heart")
+stub.advance(0.6)
+local walk = {}
+local function look()
+	local v = E.GetStepView(1)
+	walk[#walk + 1] = { step = E.GetStepIndex() or false, accept = v.goals[1].detail }
+end
+look()
+stub.world.setLevel(25)
+stub.advance(0.6)
+look()
+stub.world.accept(90030, { { required = 1 }, { required = 1 } })
+stub.world.finish(90030)
+stub.world.turnIn(90030)
+stub.advance(0.6)
+look()
+stub.world.accept(90032, {})
+stub.world.finish(90032)
+stub.world.turnIn(90032)
+stub.advance(0.6)
+look()
+emit(walk)`, { with: pk });
+		assert.deepEqual(built.steps, [
+			{ title: 'Into the Caverns', goals: 'accept:90030 kill:90030 collect:90030 turnin:90030' },
+			{ title: 'Heart of the Serpent', goals: 'accept:90032 turnin:90032' },
+			{ title: 'Wailing Caverns', goals: 'note goto' },
+		], 'both quests whole, not "First do the quest" notes the engine passes as done');
+		const entrance = '1413 46 36.4';
+		assert.deepEqual(built.at[0], ['1413 52.2 31.9', entrance, entrance, entrance], 'Tonga in the Barrens; Kresh, the scale pile and the Keeper at the entrance');
+		assert.deepEqual(built.at[1], [entrance, '1413 52.2 31.9']);
+		assert.deepEqual(built.notes, ['Deviate Keeper, Kresh, Shimmering Scale: inside Wailing Caverns.', 'Deviate Keeper: inside Wailing Caverns.', false]);
+		assert.deepEqual(walk, [
+			{ step: 1, accept: 'from Tonga Runetotem, from level 25' },
+			{ step: 1, accept: 'from Tonga Runetotem' },
+			{ step: 2, accept: 'from Tonga Runetotem' },
+			{ step: 3, accept: 'from Tonga Runetotem' },
+		], 'the guide stays on the gated quest, then walks each quest in turn to the entrance');
+	} finally {
+		pk.cleanup();
+	}
+});
+
+test('the other side\'s attunement builds no guide', () => {
+	const heart = heartFixture();
+	heart.inputs.attunementTable.attunements.push({ key: 'wailing-caverns', id: 'heart-a', name: 'Heart of the Serpent', kind: 'attunement', need: 'each', faction: 'A', goal: [90032] });
+	const pk = writeCodexPack(heart.codex, { extraFiles: emitJournal(buildJournal(heart.inputs, heart.codex)) });
+	try {
+		const [other, mine] = run(`
+local none, why = D.AttuneGuide("wailing-caverns", "heart-a")
+emit({ none = none == nil, why = why })
+emit({ some = D.AttuneGuide("wailing-caverns", "heart") ~= nil })`, { with: pk });
+		assert.deepEqual(other, { none: true, why: 'nothing' });
+		assert.deepEqual(mine, { some: true });
+	} finally {
+		pk.cleanup();
+	}
 });
 
 // ---------------------------------------------------------------------------

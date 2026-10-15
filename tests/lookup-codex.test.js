@@ -246,3 +246,102 @@ test("Tabetha's Task: a level 44 Alliance mage in Stormwind is sent to an Allian
 	const undead = tabetha('Scourge', 'Horde', [1458, 66, 44]);
 	assert.deepEqual({ ...undead, map: [1420, 1458].includes(undead.map) }, { giver: 'Anastasia Hartwell', map: true, side: 'H', target: 'Anastasia Hartwell' }, 'in the Undercity (the Codex also places her on its Tirisfal Glades map)');
 });
+
+// "Guide me through it" for an attunement or key: the guide (Dungeons.AttuneGuide)
+// as a character of `faction` at `level` in their capital, and SIMULATE playing it.
+function attuneGuide(ref, { race, faction, level, at, script = SIMULATE }) {
+	const [key, id] = ref.split(':');
+	return runAddon({
+		stubs: ['stub_world.lua'],
+		before: `${packLua()}
+local w = stub.world
+${mapsLua()}
+w.race, w.raceName, w.class, w.className, w.faction = ${luaValue(race)}, ${luaValue(race)}, "WARRIOR", "WARRIOR", ${luaValue(faction)}
+w.level = ${level}
+w.moveTo(${at.join(', ')})`,
+		addons: ['Polestar'],
+		script: `
+stub.login()
+Polestar.Set("behavior.autoNextGuide", false)
+local D = Polestar.Dungeons
+D.Load()
+local a
+for _, x in ipairs(D.Attunements(${luaValue(key)})) do if x.id == ${luaValue(id)} then a = x end end
+local st = D.AttunementState(a)
+local quests = 0
+for _, e in ipairs(st.steps) do
+	if e.step.kind == "quest" and e.state ~= "na" and e.state ~= "skip" and e.state ~= "done" then quests = quests + 1 end
+end
+local def, why = D.AttuneGuide(${luaValue(key)}, ${luaValue(id)})
+local accepts, bare = 0, {}
+for _, s in ipairs(def and def.steps or {}) do
+	local quest = false
+	for _, g in ipairs(s.goals) do if g.t == "accept" then accepts = accepts + 1; quest = true end end
+	if not quest and #s.goals == 1 and s.goals[1].t == "note" then bare[#bare + 1] = s.title end
+end
+emit({ quests = quests, accepts = accepts, bare = table.concat(bare, ", "), why = why or false })
+if def then
+	D.Attune(${luaValue(key)}, ${luaValue(id)})
+	stub.advance(0.6)
+	SIM_GUIDE = Polestar.Engine.GetGuide()
+	${script}
+end`,
+	}).emitted;
+}
+
+const ORGRIMMAR = { race: 'Orc', faction: 'Horde', at: [1454, 50, 50] };
+const STORMWIND = { race: 'Human', faction: 'Alliance', at: [1453, 50, 60] };
+
+test('every attunement and key: the guide has a step per quest still to do, none a bare note, and plays to the end for both sides', { skip }, () => {
+	const refs = {
+		'molten-core:core': [ORGRIMMAR, STORMWIND],
+		'molten-core:aqual': [ORGRIMMAR, STORMWIND],
+		'onyxias-lair:drakefire-h': [ORGRIMMAR],
+		'onyxias-lair:drakefire-a': [STORMWIND],
+		'blackwing-lair:blackhand': [ORGRIMMAR, STORMWIND],
+		'naxxramas:dread-citadel': [ORGRIMMAR, STORMWIND],
+		'scholomance:skeleton-key-h': [ORGRIMMAR],
+		'scholomance:skeleton-key-a': [STORMWIND],
+		'blackrock-depths:shadowforge-key': [ORGRIMMAR, STORMWIND],
+		'city-of-dalaran:sewer-key': [ORGRIMMAR],
+		'scarlet-monastery:scarlet-key': [ORGRIMMAR, STORMWIND],
+	};
+	for (const [ref, who] of Object.entries(refs)) {
+		for (const p of who) {
+			const [count, out] = attuneGuide(ref, { ...p, level: 60 });
+			const as = `${ref} (${p.faction})`;
+			assert.equal(count.why, false, `${as}: a guide`);
+			assert.equal(count.accepts, count.quests, `${as}: one accept per quest left`);
+			assert.equal(count.bare, '', `${as}: no quest is a bare "First do the quest" note`);
+			assert.ok(!out.stuck, `${as} stuck: ${JSON.stringify(out.stuck)}`);
+			assert.equal(out.done, true, as);
+			assert.equal(out.visited, out.steps, `${as}: the engine stops at every step, none passed as done`);
+		}
+	}
+	const [other] = attuneGuide('onyxias-lair:drakefire-a', { ...ORGRIMMAR, level: 60 });
+	assert.deepEqual(other, { quests: 0, accepts: 0, bare: '', why: 'nothing' }, "the Alliance amulet's guide is not a Horde character's");
+});
+
+test("the maintainer's level 20 Undead in the Undercity: Molten Core's guide sends him to the Core Fragment inside Blackrock Depths, and its accept says from level 55", { skip }, () => {
+	const [count, view] = attuneGuide('molten-core:core', {
+		race: 'Scourge',
+		faction: 'Horde',
+		level: 20,
+		at: [1458, 66, 44],
+		script: `
+local E = Polestar.Engine
+local v = E.GetStepView(1)
+local goals = {}
+for i, g in ipairs(v.goals) do goals[i] = { t = g.t, text = g.text, detail = g.detail or false, at = g.map and { g.map, g.x, g.y } or false } end
+local brd = D.Get("blackrock-depths").entrance
+emit({ step = E.GetStepIndex(), count = E.GetStepCount(), title = v.title, note = v.note or false, goals = goals, brd = { brd.map, brd.x, brd.y } })`,
+	});
+	assert.deepEqual([count.quests, count.accepts], [1, 1], 'one quest: Attunement to the Core (7848, the Forever id)');
+	assert.equal(view.step, 1);
+	assert.equal(view.count, 2, 'the quest, then the way in');
+	assert.deepEqual(view.goals.map((g) => g.t), ['accept', 'collect', 'turnin']);
+	assert.equal(view.goals[0].detail, 'from Lothos Riftwaker, from level 55');
+	assert.equal(view.goals[1].text, 'Collect Core Fragment');
+	assert.deepEqual(view.goals[1].at, view.brd, 'at the Blackrock Depths entrance');
+	assert.equal(view.note, 'Core Fragment: inside Blackrock Depths.');
+});

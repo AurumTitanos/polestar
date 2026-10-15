@@ -21,13 +21,18 @@
 --
 -- Guide: one stop per quest still to do (Lookup.QuestStep, with the open
 -- prerequisites Lookup.QuestChain finds that the list lacks), after the
--- steps it waits on; a drop or chest as a collect step at its NPC or object
--- (inside an instance: at its entrance); a standing as a rep step; a gift
--- as a talk step. The quests are ordered as the cheapest path from where the
+-- steps it waits on, each whole: its accept, objectives and turn-in, also
+-- when the giver, a target or the turn-in is inside an instance (the Codex's
+-- NPC instance, else the attunement's cited `inside`): sent to that
+-- instance's entrance, the step's note saying what is inside; a quest above
+-- the character's level stays, its accept saying from which level (Engine).
+-- A drop or chest as a collect step at its NPC or object (inside an
+-- instance: at its entrance); a standing as a rep step; a gift as a talk
+-- step. The quests are ordered as the cheapest path from where the
 -- player stands (Dungeons.OrderStops, kept per character as
 -- CharState().dungeonAttune["<key>:<id>"]); the item steps follow the quests
 -- they come after. Of `any` alternatives the guide takes the one this
--- character's standing fits best.
+-- character's standing fits best. The other side's attunement builds none.
 
 local ADDON, ns = ...
 local L = ns.L
@@ -190,14 +195,49 @@ local function endPoint(e)
 	return { kind = e.npc and "npc" or "object", id = e.npc or e.object, name = e.name, map = s.map, x = s.x, y = s.y, f = s.f }
 end
 
+-- inside(kind, id) for Lookup.QuestStep: where an NPC or object without a
+-- spawn is, the entrance of its instance (the Codex's NPC instance, else the
+-- attunement's `inside`) -> { map, x, y, f, name = instance name } | nil.
+local function insideOf(a)
+	local listed = {}
+	for _, e in ipairs(a.inside or {}) do listed[e.kind .. ":" .. tostring(e.id)] = e.instance end
+	local C = ns.Codex
+	return function(kind, id)
+		local key = listed[kind .. ":" .. tostring(id)]
+		if not key and kind == "npc" and C and C.Npc then
+			local npc = C.Npc(id)
+			key = npc and npc.instance
+		end
+		local inst = key and Dungeons.Get(key)
+		local e = inst and inst.entrance
+		if not located(e) then return nil end
+		return { map = e.map, x = e.x, y = e.y, f = e.f, name = inst.name }
+	end
+end
+
+-- A quest's giver or turn-in as a point: its nearest spawn, else inside.
+local function questPoint(ends, from, inside)
+	local p = endPoint(LK().QuestEnd(ends, from))
+	if p or type(ends) ~= "table" then return p end
+	for _, kind in ipairs({ "npc", "object" }) do
+		for _, id in ipairs(ends[kind] or {}) do
+			local e = inside(kind, id)
+			if e then return { kind = kind, id = id, name = ns.Codex.Name(kind, id), map = e.map, x = e.x, y = e.y, f = e.f } end
+		end
+	end
+	return nil
+end
+
 -- Where an item step happens: its NPC's or object's spawn, else (inside an
--- instance) the instance's entrance.
-local function itemPoint(s)
+-- instance) the instance's entrance -> point, the instance's name when inside.
+local function itemPoint(s, inside)
 	local who = s.npc or s.object
-	if located(who) then return who end
 	local inst = s.instance and Dungeons.Get(s.instance)
+	if located(who) then return who, inst and inst.name end
 	local e = inst and inst.entrance
-	if located(e) then return { map = e.map, x = e.x, y = e.y, f = e.f, name = inst.name } end
+	if located(e) then return { map = e.map, x = e.x, y = e.y, f = e.f, name = inst.name }, inst.name end
+	local p = who and inside(s.npc and "npc" or "object", who.id)
+	if p then return p, p.name end
 	return nil
 end
 
@@ -207,28 +247,30 @@ local function at(goal, p)
 end
 
 -- A drop or chest: one collect step at its source.
-local function itemStep(s)
+local function itemStep(s, inside)
 	local where = s.npc or s.object
-	local goal = at({ t = "collect", item = s.item.id, itemName = s.item.name, count = 1 }, itemPoint(s))
+	local p, instName = itemPoint(s, inside)
+	local goal = at({ t = "collect", item = s.item.id, itemName = s.item.name, count = 1 }, p)
 	if s.npc then goal.npc, goal.npcName = s.npc.id, s.npc.name end
 	if s.object then goal.object, goal.objName = s.object.id, s.object.name end
 	local step = { title = s.item.name or L["Item"], goals = { goal } }
-	local inst = s.instance and Dungeons.Get(s.instance)
-	if inst then
-		step.goals[#step.goals + 1] = { t = "note", text = format(L["%s drops it inside %s."], where and where.name or "?", inst.name) }
+	if instName then
+		local text = s.npc and format(L["%s drops it inside %s."], where and where.name or "?", instName)
+			or format(L["%s: inside %s."], where and where.name or "?", instName)
+		step.goals[#step.goals + 1] = { t = "note", text = text }
 	end
 	return step
 end
 
 -- The quest stops: every quest step still to do (and the open prerequisites
 -- QuestChain adds), each after the quest steps it waits on.
-local function questStops(a, st, p, from)
+local function questStops(a, st, p, from, inside)
 	local Lk, C = LK(), ns.Codex
 	local stops, byId = {}, {}
 	local function add(rec, deps)
 		if byId[rec.id] then return byId[rec.id] end
-		local start = endPoint(Lk.QuestEnd(rec.start, from))
-		local finish = endPoint(Lk.QuestEnd(rec["end"], start or from))
+		local start = questPoint(rec.start, from, inside)
+		local finish = questPoint(rec["end"], start or from, inside)
 		stops[#stops + 1] = { key = "q" .. rec.id, rec = rec, inP = start, outP = finish or start, deps = deps or {} }
 		byId[rec.id] = #stops
 		return #stops
@@ -271,8 +313,10 @@ function Dungeons.AttuneGuide(key, id)
 	local st = Dungeons.AttunementState(a)
 	if st.done then return nil, "done" end
 	local p = Lk.PlayerInfo()
+	if a.faction and p.code and a.faction ~= p.code then return nil, "nothing" end
 	local from = ns.PlayerPoint()
-	local stops = questStops(a, st, p, from)
+	local inside = insideOf(a)
+	local stops = questStops(a, st, p, from, inside)
 	local order = Dungeons.OrderStops(stops, from, nil, "dungeonAttune", key .. ":" .. id)
 	local steps = {}
 	-- Item, standing and gift steps follow the quest step before them in the list.
@@ -290,7 +334,7 @@ function Dungeons.AttuneGuide(key, id)
 						local o = a.steps[j]
 						dup = dup or ((o.kind == "drop" or o.kind == "object") and o.item.id == s.item.id and placed[j])
 					end
-					if not dup then steps[#steps + 1] = itemStep(s) end
+					if not dup then steps[#steps + 1] = itemStep(s, inside) end
 				elseif s.kind == "rep" then
 					steps[#steps + 1] = { title = s.name or L["Reputation"], goals = { { t = "rep", faction = s.faction, factionName = s.name, standing = s.standing } } }
 				elseif s.kind == "gift" then
@@ -302,7 +346,7 @@ function Dungeons.AttuneGuide(key, id)
 	for _, si in ipairs(order) do
 		local stop = stops[si]
 		extras((stop.index or 1) - 1)
-		steps[#steps + 1] = Lk.QuestStep(stop.rec, stop.inP or from)
+		steps[#steps + 1] = Lk.QuestStep(stop.rec, stop.inP or from, { inside = inside })
 	end
 	extras(#st.steps)
 	if #steps == 0 then return nil, "nothing" end
