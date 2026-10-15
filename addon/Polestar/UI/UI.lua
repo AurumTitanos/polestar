@@ -384,7 +384,8 @@ end
 -- lives in the tooltip.
 -- `shownMap`: a zone the window already names above (the person's), not repeated.
 -- `noParty`: the group line already shows on a goal above (said once per card).
-function UI.GoalSubline(goal, shownMap, noParty)
+-- `noMissing`: so do the party members who lack this goal's quest.
+function UI.GoalSubline(goal, shownMap, noParty, noMissing)
 	if goal.unavailable then return UI.GoalDetail(goal) end
 	local parts = {}
 	local party = not noParty and UI.GroupLine(goal)
@@ -407,7 +408,7 @@ function UI.GoalSubline(goal, shownMap, noParty)
 	if note and source and (note == goal.source.name or note == goal.subject) then note = nil end
 	if note then parts[#parts + 1] = note end
 	-- Party members' counts on this quest (Quests/Party.lua).
-	local together = ns.Party and ns.Party.Line(goal)
+	local together = ns.Party and ns.Party.Line(goal, noMissing)
 	if together then parts[#parts + 1] = together end
 	local rewards = goal.t == "turnin" and goal.status ~= "done" and goal.status ~= "skipped" and UI.GoalRewards(goal) or nil
 	if #parts == 0 then return rewards end

@@ -10,10 +10,14 @@ const { runAddon } = require('./helpers/lua');
 
 const FILES = ['Core/Core.xml', 'Quests/Party.lua'];
 
-function run(script, { stubs = ['stub_world.lua'], files = FILES, login = false, before = '' } = {}) {
+// Both switches start off; most tests play a player who turned them on.
+const ON = 'PolestarDB = { schema = 1, settings = { party = { share = true, show = true } } }';
+
+function run(script, { stubs = ['stub_world.lua'], files = FILES, login = false, before = '', saved = ON } = {}) {
 	return runAddon({
 		stubs,
 		before,
+		saved: saved ? { Polestar: saved } : undefined,
 		addons: [{ name: 'Polestar', files }],
 		login,
 		script: `local P, w = Polestar.Party, stub.world\n${script}`,
@@ -158,7 +162,7 @@ emit(texts())`, LIVE);
 	assert.deepEqual(out, ['1R|33:1/8;60:0/2']);
 });
 
-test('party: solo, in a raid, or with sharing off, nothing is sent', () => {
+test('party: solo, in a raid, or with sharing off, none of your progress is sent', () => {
 	const [solo, raid, off] = run(`${SENT}
 w.onQuest(33, { 8 })
 w.progress(33, 1, 2)
@@ -173,8 +177,9 @@ Polestar.Set("party.share", false)
 p.join("Ben")
 w.progress(33, 1, 4)
 stub.advance(10)
-emit(#p.sent)`, LIVE);
-	assert.deepEqual([solo, raid, off], [0, 0, 0]);
+emit(texts())`, LIVE);
+	assert.deepEqual([solo, raid], [0, 0]);
+	assert.deepEqual(off, ['1Q|'], 'with showing on, only the request for theirs');
 });
 
 test('party: a refused send keeps the change for the next one, without retrying on its own', () => {
@@ -358,14 +363,20 @@ emit(P.Line({ t = "kill", quest = 33, oi = 1, status = "active" }) == nil)`, SHO
 	assert.deepEqual([other, off], [true, true]);
 });
 
-test('party: an accepted quest names party members who lack it', () => {
-	const [line] = run(`${SENT}
+test('party: on a quest you have, its objective names party members who lack it, after their counts', () => {
+	const [line, again, accept] = run(`${SENT}
 w.onQuest(33, { 8 })
 p.join("Ana"); p.join("Ben")
 p.onQuest.Ana = { [33] = true }
 p.onQuest.Ben = { [33] = false }
-emit(P.Line({ t = "accept", quest = 33, status = "done" }))`, SHOWN);
-	assert.equal(line, 'Not on this quest: Ben');
+p.receive("Ana-TestRealm", "1|33:5/8")
+emit(P.Line({ t = "kill", quest = 33, oi = 1, status = "active" }))
+emit(P.Line({ t = "kill", quest = 33, oi = 2, status = "active" }, true))
+emit(P.Line({ t = "accept", quest = 33, status = "done" }) == nil)`, SHOWN);
+	assert.equal(line, `Ana 5/8${DOT}Not on this quest: Ben`);
+	assert.equal(again, null, 'a row above already names them');
+	// Taking the quest moves the window past its accept.
+	assert.equal(accept, true, 'not on the accept');
 });
 
 test('party: without the client\'s party check, synced members still count; unknown ones are not guessed', () => {
@@ -374,7 +385,7 @@ p.noUnitQuestAPI()
 w.onQuest(33, { 8 })
 p.join("Ana"); p.join("Ben")
 p.receive("Ana-TestRealm", "1|60:1/4")
-emit(P.Line({ t = "accept", quest = 33, status = "done" }))`, SHOWN);
+emit(P.Line({ t = "kill", quest = 33, oi = 1, status = "active" }))`, SHOWN);
 	assert.equal(line, 'Not on this quest: Ana');
 });
 
@@ -382,7 +393,7 @@ test('party: before you have the quest, no nudge', () => {
 	const [none] = run(`${SENT}
 p.join("Ben")
 p.onQuest.Ben = { [33] = false }
-emit(P.Line({ t = "accept", quest = 33, status = "active" }) == nil)`, SHOWN);
+emit(P.Line({ t = "kill", quest = 33, oi = 1, status = "active" }) == nil)`, SHOWN);
 	assert.equal(none, true);
 });
 
@@ -394,7 +405,7 @@ emit(Polestar.UI.GoalSubline({ t = "kill", quest = 33, oi = 1, status = "active"
 	assert.equal(sub, 'Ana 5/8');
 });
 
-test('party: the Questing page has the two party switches, both on', () => {
+test('party: the Questing page has the two party switches, both off until turned on', () => {
 	const [keys, share, show] = run(`
 local keys = {}
 Polestar.Widgets.OnOptionsRegistered(function(spec)
@@ -402,9 +413,9 @@ Polestar.Widgets.OnOptionsRegistered(function(spec)
 		if c.key and c.key:sub(1, 6) == "party." then keys[#keys + 1] = spec.page .. "/" .. c.key end
 	end
 end)
-emit(keys); emit(Polestar.Get("party.share")); emit(Polestar.Get("party.show"))`, SHOWN);
+emit(keys); emit(Polestar.Get("party.share")); emit(Polestar.Get("party.show"))`, { ...SHOWN, saved: null });
 	assert.deepEqual(keys, ['Questing/party.share', 'Questing/party.show']);
-	assert.deepEqual([share, show], [true, true]);
+	assert.deepEqual([share, show], [false, false]);
 });
 
 // Found by the final review (Codex and a fresh reviewer).
@@ -511,6 +522,98 @@ emit(texts())`, LIVE);
 	assert.deepEqual(showOn, ['1R|33:2/8']);
 });
 
+test('party: turning sharing off before anything went out sends nothing', () => {
+	const [sent] = run(`${SENT}
+w.onQuest(33, { 8 })
+p.join("Ana")
+Polestar.Set("party.share", false)
+stub.advance(10)
+emit(texts())`, LIVE);
+	// No empty snapshot: the party has nothing of ours to forget.
+	assert.deepEqual(sent, ['1Q|']);
+});
+
+test('party: sharing turned off while a resync is on its way still clears what the party has', () => {
+	const [sent] = run(`${SENT}
+w.onQuest(33, { 8 })
+p.join("Ana")
+stub.advance(6)
+p.sent = {}
+Polestar.Set("party.show", false)
+Polestar.Set("party.show", true)
+Polestar.Set("party.share", false)
+stub.advance(10)
+emit(texts())`, LIVE);
+	assert.deepEqual(sent, ['1S|', '1Q|']);
+});
+
+test('party: sharing turned off right after a reload in a party clears what the party had from before it', () => {
+	const [sent] = run(`${SENT}
+p.members = { { name = "Ana", online = true } }
+w.onQuest(33, { 8 })
+stub.login()
+Polestar.Set("party.share", false)
+stub.advance(10)
+emit(texts())`, { stubs: LIVE.stubs, login: false });
+	assert.deepEqual(sent, ['1S|', '1Q|']);
+});
+
+test('party: showing without sharing asks for the party\'s progress and sends none of yours', () => {
+	const [asked, kept, answered] = run(`${SENT}${MEMBERS}
+Polestar.Set("party.share", false)
+w.onQuest(33, { 8 })
+p.join("Ana")
+stub.advance(6)
+emit(texts())
+p.receive("Ana-TestRealm", "1R|33:4/8")
+w.progress(33, 1, 1)
+stub.advance(3)
+emit({ texts(), members() })
+p.sent = {}
+Polestar.Set("party.share", true)
+stub.advance(6)
+p.sent = {}
+stub.advance(5)
+p.receive("Ana-TestRealm", "1Q|")
+stub.advance(6)
+emit({ texts(), members() })`, LIVE);
+	// After a reload or a join from solo: a bare request, nothing of ours.
+	assert.deepEqual(asked, ['1Q|']);
+	assert.deepEqual(kept, [['1Q|'], ['Ana 33:4/8']]);
+	// A sharer answers a bare request; it changes nothing of the asker's counts.
+	assert.deepEqual(answered, [['1S|33:1/8'], ['Ana 33:4/8']]);
+});
+
+test('party: a refused bare request is asked again when a member\'s quest log changes', () => {
+	const [refused, again, once] = run(`${SENT}
+Polestar.Set("party.share", false)
+p.result = Enum.SendAddonMessageResult.AddonMessageThrottle
+p.join("Ana")
+stub.advance(6)
+emit(texts())
+p.result = 0
+p.sent = {}
+p.questLogChanged("Ana")
+stub.advance(6)
+emit(texts())
+p.sent = {}
+p.questLogChanged("Ana")
+stub.advance(6)
+emit(#p.sent)`, LIVE);
+	assert.deepEqual(refused, ['1Q|']);
+	assert.deepEqual(again, ['1Q|']);
+	assert.equal(once, 0, 'once it went out, a log change asks nothing');
+});
+
+test('party: a bare request carries nothing', () => {
+	const [ok, bad] = run(`
+local snap, entries, asks = P.Decode("1Q|")
+emit({ snap, #entries, asks })
+emit(P.Decode("1Q|33:1/2") == nil)`);
+	assert.deepEqual(ok, [false, 0, true]);
+	assert.equal(bad, true);
+});
+
 test('party: a request soon after a snapshot the requester may have missed is answered', () => {
 	const [replies] = run(`${SENT}
 w.onQuest(33, { 8 })
@@ -538,8 +641,8 @@ w.onQuest(33, { 8 })
 p.join("Ben")
 p.onQuest.Ben = { [33] = false }
 p.receive("Ben-TestRealm", "1|33:0/8")
-emit(P.Line({ t = "accept", quest = 33, status = "done" }) == nil)`, SHOWN);
-	assert.equal(none, true);
+emit(P.Line({ t = "kill", quest = 33, oi = 1, status = "active" }))`, SHOWN);
+	assert.equal(none, 'Ben 0/8');
 });
 
 test('party: a member\'s quest log changing, or someone joining, refreshes the guide', () => {

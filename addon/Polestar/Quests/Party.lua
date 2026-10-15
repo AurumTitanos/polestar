@@ -6,12 +6,14 @@
 -- Rules: hidden addon messages to the party only (never chat, never a raid),
 -- sent when a count changes (QUEST_LOG_UPDATE, 2 s debounce) and as a full
 -- snapshot a few seconds after someone joins; never on a timer. Settings
--- party.share (send) and party.show (receive and show), both on by default;
--- with both off nothing is registered. Every client API is checked first.
+-- party.share (send) and party.show (receive and show), both off until the
+-- player turns them on; with both off nothing is registered. Every client
+-- API is checked first.
 --
 -- Message: "1|33:5/8,0/1;60:-", version first; "1S|" marks a snapshot that
 -- replaces what is known of the sender; "1R|" is a snapshot sent after a
--- login or reload in a party, asking the others for theirs. "33:-" is a quest
+-- login or reload in a party, asking the others for theirs; "1Q|" asks for
+-- theirs and carries nothing (showing without sharing). "33:-" is a quest
 -- that left the log; "33:" one without objectives. Split by whole quests
 -- under 255 bytes.
 
@@ -78,8 +80,8 @@ end
 -- version.
 function Party.Decode(text)
 	if type(text) ~= "string" then return nil end
-	local mark, body = text:match("^" .. VERSION .. "([SR]?)|(.*)$")
-	if not mark then return nil end
+	local mark, body = text:match("^" .. VERSION .. "([SRQ]?)|(.*)$")
+	if not mark or (mark == "Q" and body ~= "") then return nil end
 	local entries = {}
 	if body ~= "" then
 		for p in (body .. ";"):gmatch("([^;]*);") do
@@ -103,8 +105,11 @@ function Party.Decode(text)
 			entries[#entries + 1] = { q = q, counts = counts }
 		end
 	end
-	return mark ~= "", entries, mark == "R"
+	return mark == "S" or mark == "R", entries, mark == "R" or mark == "Q"
 end
+
+-- The request for the party's snapshots that shares nothing of ours.
+Party.ASK = VERSION .. "Q|"
 
 ---------------------------------------------------------------------------
 -- Your quest log
@@ -137,7 +142,7 @@ end
 -- Sending
 ---------------------------------------------------------------------------
 
-ns.RegisterDefaults("party", { share = true, show = true })
+ns.RegisterDefaults("party", { share = false, show = false })
 
 local DEBOUNCE = 2 -- seconds after a quest log change
 local JOIN_MIN, JOIN_SPREAD = 3, 3 -- snapshot 3-6 s after the roster gains someone
@@ -146,8 +151,10 @@ local JOIN_MIN, JOIN_SPREAD = 3, 3 -- snapshot 3-6 s after the roster gains some
 local REPLY_GAP = JOIN_MIN
 
 local lastSent = {} -- quest id -> counts string the party last got from us
+local shared = false -- the party holds counts of ours (lastSent empties on a resync)
 local flushPending, snapPending, pendingAsks = false, false, false
 local owed -- a snapshot the client refused (throttle, instance lockdown): { asks = bool }
+local askOwed = false -- a bare request the client refused: asked again when a member's log changes
 local lastSnapshotAt -- GetTime() of our last snapshot
 local roster = {} -- "Name" or "Name-Realm" -> short name: the party but you, online
 
@@ -191,6 +198,7 @@ local function sendQuests(ids, now, snapshot, asks)
 		local q = ids[i]
 		lastSent[q] = now[q]
 	end
+	if ends[n] > 0 then shared = true elseif snapshot then shared = false end
 	return true
 end
 
@@ -198,7 +206,13 @@ end
 -- for theirs.
 local function snapshot(asks)
 	snapPending, pendingAsks = false, false
-	if not sharing() then return end
+	if not grouped() then return end
+	if not ns.Get("party.share") then
+		-- Showing without sharing: ask for theirs, send nothing of ours.
+		if asks and ns.Get("party.show") then askOwed = send({ Party.ASK }) == 0 end
+		return
+	end
+	askOwed = false
 	local now, ids = Party.ReadLog(), {}
 	for q in pairs(now) do ids[#ids + 1] = q end
 	table.sort(ids)
@@ -260,7 +274,7 @@ end
 
 local function forgetAll()
 	local had = next(members) ~= nil or next(roster) ~= nil
-	roster, lastSent, members, owed = {}, {}, {}, nil
+	roster, lastSent, members, owed, shared, askOwed = {}, {}, {}, nil, false, false
 	if had then progressChanged() end
 end
 
@@ -313,7 +327,10 @@ end
 -- A party member's log changed: the "Not on this quest" nudge may be stale
 -- (their client tells ours even without Polestar).
 local function onUnitQuestLog(_, unit)
-	if type(unit) == "string" and unit:match("^party%d$") then progressChanged() end
+	if type(unit) == "string" and unit:match("^party%d$") then
+		if askOwed then scheduleSnapshot(true) end
+		progressChanged()
+	end
 end
 
 local function apply(m, entries, snap)
@@ -342,7 +359,8 @@ local function onAddonMessage(_, prefix, text, channel, sender)
 	if asks and sharing() and not snapPending and not (lastSnapshotAt and GetTime() - lastSnapshotAt < REPLY_GAP) then
 		scheduleSnapshot(false)
 	end
-	if not ns.Get("party.show") then return end
+	-- A bare request (showing without sharing) is no member's progress.
+	if not ns.Get("party.show") or (not snap and #entries == 0) then return end
 	local m = members[key]
 	if not m then
 		m = { name = short, quests = {}, n = 0 }
@@ -374,11 +392,13 @@ end
 
 -- Registers what the settings need and nothing else; at login and whenever
 -- a party setting changes. Sharing turned off in a group sends one empty
--- snapshot, so the party drops our counts rather than showing them frozen;
--- a setting turned back on resyncs.
+-- snapshot when the party has counts of ours, so it drops them rather than
+-- showing them frozen; a setting turned back on resyncs.
 function Party.Apply()
 	local share, show = ns.Get("party.share") and true or false, ns.Get("party.show") and true or false
 	local any = share or show
+	-- After a reload in a party, the others may still hold counts sent before it.
+	if wasShare == nil and share and grouped() then shared = true end
 	want("GROUP_ROSTER_UPDATE", any, onRoster)
 	want("GROUP_LEFT", any, forgetAll)
 	want("UNIT_CONNECTION", any, onConnection)
@@ -389,9 +409,9 @@ function Party.Apply()
 	local turnedOff = wasShare and not share
 	local turnedOn = (wasShare == false and share) or (wasShow == false and show)
 	wasShare, wasShow = share, show
-	if turnedOff and grouped() then
-		send(Party.Encode({}, true))
-		lastSent, owed = {}, nil
+	if turnedOff then
+		if grouped() and shared then send(Party.Encode({}, true)) end
+		lastSent, owed, shared = {}, nil, false
 	end
 	if not any then return forgetAll() end
 	if not show and next(members) then
@@ -448,18 +468,13 @@ function Party.Missing(q)
 end
 
 -- The party part of a goal's line (UI.GoalSubline), or nil: on an objective
--- goal each member's count ("Ana 5/8", "Ben done"); on the accept of a quest
--- you have, who lacks it ("Not on this quest: Ben").
-function Party.Line(goal)
-	if type(goal) ~= "table" or not goal.quest or goal.status == "skipped" then return nil end
+-- goal each member's count ("Ana 5/8", "Ben done"), then, on a quest you
+-- have, who lacks it ("Not on this quest: Ben"). Not on the accept: taking
+-- the quest moves the window past it. `noMissing`: a row above already
+-- names them (said once per card).
+function Party.Line(goal, noMissing)
+	if type(goal) ~= "table" or not goal.quest or not goal.oi or goal.status == "skipped" then return nil end
 	if not ns.Get("party.show") or not grouped() then return nil end
-	if goal.t == "accept" then
-		if not ns.Compat.IsOnQuest(goal.quest) then return nil end
-		local missing = Party.Missing(goal.quest)
-		if #missing == 0 then return nil end
-		return L["Not on this quest: %s"]:format(concat(missing, ", "))
-	end
-	if not goal.oi then return nil end
 	local parts = {}
 	for _, m in ipairs(Party.Members()) do
 		local counts = m.quests[goal.quest]
@@ -467,6 +482,10 @@ function Party.Line(goal)
 		if c then
 			parts[#parts + 1] = c[1] >= c[2] and L["%s done"]:format(m.name) or (m.name .. " " .. c[1] .. "/" .. c[2])
 		end
+	end
+	if not noMissing and ns.Compat.IsOnQuest(goal.quest) then
+		local missing = Party.Missing(goal.quest)
+		if #missing > 0 then parts[#parts + 1] = L["Not on this quest: %s"]:format(concat(missing, ", ")) end
 	end
 	if #parts == 0 then return nil end
 	return concat(parts, DOT)

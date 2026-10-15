@@ -59,7 +59,7 @@
   you took, who in the party lacks it, even without Polestar. Quest IDs and
   counts only, through hidden party messages when a count changes, so it
   works across guides and client languages; nothing goes to chat. Two
-  switches in Questing > Quests > Party, both on.
+  switches in Questing > Quests > Party, both off until you turn them on.
 - Quests Forever renamed carry their Forever names in the guides: Chastise
   (once A Lack of Fear), Dark Sacrifice (once Devouring Plague), Look to the
   Stars, Onu is Meditating and the others Wowhead Forever lists as renamed.
