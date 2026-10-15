@@ -462,7 +462,8 @@ possible, so the claim is narrower and checked:
 > recorded play exists yet, so time parameters such as kill time and travel
 > detours keep their priors, and Forever's 30-60 content is not in the data.
 > Comparisons between routes are what the numbers support; absolute hours
-> are not. Recordings from the Recorder are what will calibrate them.
+> are not. Recordings from the Recorder are what will calibrate kill time
+> (`sim calibrate`); travel detours keep their priors even then.
 
 The whole method, every parameter and its known limitations are in
 [docs/SIMULATION.md](docs/SIMULATION.md).
