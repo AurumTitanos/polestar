@@ -229,6 +229,7 @@ test('built-in controls write settings and follow changes made elsewhere', () =>
 		local compact = Polestar.Get("ui.compact")
 		Polestar.Set("ui.showNotes", false)
 		local followed = c["ui.showNotes"].checked
+		local notesOpen = c["ui.notesOpen"]:IsEnabled()
 		O.Select("guide", "Automation")
 		O.Controls("guide", "Automation")["behavior.skipGrey"]:Click()
 		O.Select("guide", "Arrow & routes")
@@ -248,11 +249,12 @@ test('built-in controls write settings and follow changes made elsewhere', () =>
 		for _, r in ipairs(PolestarMenu.rows) do if r:IsShown() and r.Text:GetText() == "Transparent" then r:Click() end end
 		stub.RunScript(win["ui.scale"].Slider, "OnValueChanged", 1.234, true)
 		O.Select("appearance", "Arrow")
-		emit({ compact = compact, followed = followed, style = Polestar.Get("ui.style"),
+		emit({ compact = compact, followed = followed, notesOpen = notesOpen, style = Polestar.Get("ui.style"),
 			scale = Polestar.Get("ui.scale"), picked = picked, cancelled = Polestar.Get("ui.accent"), skipGrey = Polestar.Get("behavior.skipGrey"),
 			tomtomArrow = nav["nav.useTomTomArrow"]:IsEnabled(), arrowStyle = O.Controls("appearance", "Arrow")["nav.arrowStyle"].Button.Label:GetText() })`);
 	assert.equal(out.compact, true);
 	assert.equal(out.followed, false);
+	assert.equal(out.notesOpen, false, 'Expand step tips greys out with the tips off');
 	assert.equal(out.style, 'transparent');
 	assert.equal(out.scale, 1.25, 'slider values snap to the step');
 	assert.deepEqual(out.picked, [0.9, 0.3, 0.1]);

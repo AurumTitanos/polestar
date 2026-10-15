@@ -182,6 +182,25 @@ test('the tip is one line until clicked', () => {
 	assert.deepEqual(out.reset, out.closed, 'a new step starts with the tip collapsed');
 });
 
+test('with Expand step tips on, each step starts with its tip open', () => {
+	const [out] = run(`
+		Polestar.Set("ui.width", 300)
+		uistub.setGuide(uistub.elwynn, 3)
+		local tip = GF.parts.tip
+		local closedH = tip:GetHeight()
+		Polestar.Set("ui.notesOpen", true)
+		local now = tip.psOpen
+		tip:Click()
+		local clicked = tip.psOpen
+		uistub.setStep(4)
+		uistub.setStep(3)
+		emit({ closedH = closedH, now = now, clicked = clicked, next = tip.psOpen, h = tip:GetHeight() })`);
+	assert.equal(out.now, true, 'turning it on opens the tip on screen');
+	assert.equal(out.clicked, false, 'a click still folds it');
+	assert.equal(out.next, true, 'the next step starts open again');
+	assert.ok(out.h > out.closedH);
+});
+
 test('STEP_UPDATED refills the same rows in place, and a newly done goal pops', () => {
 	const [out] = run(`
 		uistub.setGuide(uistub.elwynn, 3)

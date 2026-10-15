@@ -1450,7 +1450,7 @@ function GF.Render()
 		return
 	end
 	local stepChanged = shownGuide ~= guide.id or shownIndex ~= index
-	if stepChanged then tipOpen = false end
+	if stepChanged then tipOpen = ns.Get("ui.notesOpen") and true or false end
 	view = v
 	if v.skipped then GF.PaintSkip(true, false) end
 	state = "steps"
@@ -1685,6 +1685,7 @@ local APPLY = {
 	["ui.upcoming"] = function() GF.Render() end,
 	["ui.upcomingOpen"] = function() GF.Render() end,
 	["ui.showNotes"] = function() GF.Render() end,
+	["ui.notesOpen"] = function() tipOpen = ns.Get("ui.notesOpen") and true or false; GF.Render() end,
 	["ui.combat"] = function() GF.ApplyVisibility(); GF.ApplyAlpha(false) end,
 	["ui.font"] = function() GF.Layout() end,
 }
