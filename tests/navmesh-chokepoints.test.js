@@ -10,7 +10,7 @@ const { Scene, ADT } = require('./helpers/navscene');
 const { tmpdir } = require('./helpers/tmp');
 const { buildGrid } = require('../tools/lib/nav/grid/build');
 const { openNav } = require('../tools/lib/nav/path');
-const { chokepoints, chokepointsLua, areaNames } = require('../tools/lib/nav/chokepoints');
+const { chokepoints, chokepointsLua, areaNames, gridChokepoints } = require('../tools/lib/nav/chokepoints');
 const { cellOf } = require('../tools/lib/nav/grid/format');
 
 const areas = areaNames([
@@ -46,10 +46,17 @@ test('chokepoints: a bridge over a river and a gate through a wall, from the gri
 	assert.equal(bridge.length, 1, `one bridge over the river: ${JSON.stringify(list.map((e) => [e.kind, e.wx, e.wy]))}`);
 	assert.equal(bridge[0].sides.length, 2, 'its two ends');
 	assert.ok(bridge[0].r >= 6);
-	const gate = near('gate', 400, 256, 15);
-	assert.equal(gate.length, 1, 'one gate through the wall');
-	assert.deepEqual(gate[0].sides.map((x) => x.area).sort(), ['Riverwatch', 'Test Vale'], 'in from the vale, out into the subzone');
-	assert.equal(list.filter((e) => e.kind === 'gate').length, 1, 'no gate along the plain wall');
+	// Gates come from the grid's rule; the list keeps them only where an aids passage is (none here).
+	const place = (wx, wy) => {
+		const p = cellOf(wx, wy);
+		return areas(nav.tile(0, p.col, p.row).areas[(p.j >> 4) * 16 + (p.i >> 4)]);
+	};
+	const gates = gridChokepoints(nav, 0, place).filter((e) => e.kind === 'gate');
+	const w = s.world(400, 256);
+	assert.equal(gates.length, 1, 'one gate through the wall, none along the plain wall');
+	assert.ok(Math.hypot(gates[0].wx - w.wx, gates[0].wy - w.wy) <= 15);
+	assert.deepEqual(gates[0].sides.map((x) => x.area).sort(), ['Riverwatch', 'Test Vale'], 'in from the vale, out into the subzone');
+	assert.equal(list.filter((e) => e.kind === 'gate').length, 0, 'no gate without a passage of the aids');
 	const landings = list.filter((e) => e.kind === 'lift');
 	assert.equal(landings.length, 2);
 	const bottom = landings.find((e) => e.liftEnd === 'bottom');

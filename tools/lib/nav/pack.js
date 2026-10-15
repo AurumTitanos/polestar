@@ -414,7 +414,8 @@ function cellGrid({ tiles, loadTile, regions, C, log = () => {} }) {
 				}
 				p.size = Math.max(p.size, regions.regionSize[regions.region[base + comp[e]]]);
 			}
-			let list = [...pieces.values()].filter((p) => p.joined);
+			// Joined pieces whose height the format stores (floors: -2048..2047 yd).
+			let list = [...pieces.values()].filter((p) => p.joined && z[p.rep] >= -2048 && z[p.rep] <= 2047);
 			if (!list.length) {
 				for (let a = 0; a < m; a++) loc[ents[2 * a]] = -1;
 				continue;
@@ -843,13 +844,16 @@ function encodeMaps(cg, hpa) {
 		return x;
 	};
 	for (const [a, b] of [...edges.values()].sort((p, q) => p[0] - q[0] || p[1] - q[1])) parent.set(find(a), find(b));
-	const roots = new Map();
+	// Component ids (2 digits, < 4096) by size, largest first; past 4094 the
+	// smallest share 4095 (decided 2026-10-15: Kalimdor has 4,346 at 67 cells,
+	// most of them islets of a few entrances; a shared id only costs the
+	// runtime a failed abstract search instead of its quick "not connected").
+	const size = new Map();
+	for (const c of all) size.set(find(c), (size.get(find(c)) || 0) + 1);
+	const ranked = [...size].sort((p, q) => q[1] - p[1] || p[0] - q[0]);
+	const roots = new Map(ranked.map(([r], i) => [r, Math.min(i, 4095)]));
 	const comp = new Map();
-	for (const c of all) {
-		const r = find(c);
-		if (!roots.has(r)) roots.set(r, roots.size);
-		comp.set(c, roots.get(r));
-	}
+	for (const c of all) comp.set(c, roots.get(find(c)));
 	const order = new Map();
 	const local = new Map();
 	for (const [k, set] of nodes) {
