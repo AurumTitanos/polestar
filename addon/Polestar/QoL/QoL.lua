@@ -58,6 +58,7 @@ local defaults = {
 	trainAll = false,        -- learn every spell a class trainer offers now
 	rewardHighlight = true,
 	rewardAutoPick = false,
+	rewardEquip = false,     -- wear what a turn-in gives when it is an upgrade
 	flightAutoOpen = true,
 	flightHighlight = true,
 	deathHelper = true,

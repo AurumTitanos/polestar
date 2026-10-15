@@ -171,6 +171,29 @@ end
 function C_Item.GetItemIconByID(id) return (q.items[id] and q.items[id].icon) or 134400 end
 function C_Item.IsItemInRange() return q.inRange end
 function C_Item.IsUsableItem(id) return true end
+-- Wearing lands a moment later, once the server answers: one copy leaves the
+-- bags for q.worn[slot] (slot -> item ID), BAG_UPDATE_DELAYED, then
+-- PLAYER_EQUIPMENT_CHANGED. q.refuse[id]: that item never goes on (its bind
+-- confirmation cancelled).
+q.worn, q.refuse = {}, {}
+function C_Item.EquipItemByName(item, slot)
+	call("EquipItemByName", item, slot)
+	local id = tonumber(tostring(item):match("item:(%d+)"))
+	if q.refuse[id] then return end
+	C_Timer.After(0.1, function()
+		for bag = 0, 4 do
+			for s, it in pairs(q.bags[bag].slots) do
+				if it.itemID == id then
+					q.bags[bag].slots[s] = nil
+					if slot then q.worn[slot] = id end
+					stub.fire("BAG_UPDATE_DELAYED")
+					stub.fire("PLAYER_EQUIPMENT_CHANGED", slot, false)
+					return
+				end
+			end
+		end
+	end)
+end
 function C_Item.GetItemSpell(id) local it = q.items[id]; if it and it.spell then return "Use", it.spell end end
 function C_Item.GetItemInfoInstant(id)
 	local it = q.items[id] or {}
@@ -314,20 +337,47 @@ QuestInfoRewardsFrame.RewardButtons = {}
 QuestInfoFrame = CreateFrame("Frame", "QuestInfoFrame", UIParent)
 QuestInfoFrame.rewardsFrame = QuestInfoRewardsFrame
 
+-- q.rewards = { { id, count }, ... }: the items every turn-in gives. With
+-- q.landRewards, a turn-in puts the chosen item and those in the first free
+-- slots of bag 0 a moment later, then BAG_UPDATE_DELAYED, and the reward
+-- panel empties (QUEST_FINISHED).
+q.rewards = {}
+local function rewardOf(kind, i)
+	if kind == "choice" then return q.choices[i] end
+	if kind == "reward" then return q.rewards[i] end
+end
 function GetNumQuestChoices() return #q.choices end
+function GetNumQuestRewards() return #q.rewards end
 function GetQuestItemInfo(kind, i)
-	local c = kind == "choice" and q.choices[i]
+	local c = rewardOf(kind, i)
 	if not c then return nil end
 	local it = q.items[c.id] or {}
 	return it.name, 134400, c.count or 1, it.quality, true, c.id
 end
 function GetQuestItemLink(kind, i)
-	local c = kind == "choice" and q.choices[i]
+	local c = rewardOf(kind, i)
 	if not c or (q.items[c.id] and q.items[c.id].uncached) then return nil end
 	return "|Hitem:" .. c.id .. "|h[" .. ((q.items[c.id] or {}).name or "?") .. "]|h"
 end
 function GetQuestMoneyToGet() return q.questMoney end
-function GetQuestReward(i) call("GetQuestReward", i) end
+function GetQuestReward(i)
+	call("GetQuestReward", i)
+	if not q.landRewards then return end
+	local given = {}
+	if q.choices[i] then given[#given + 1] = q.choices[i] end
+	for _, r in ipairs(q.rewards) do given[#given + 1] = r end
+	C_Timer.After(0.1, function()
+		local slots = q.bags[0].slots
+		for _, r in ipairs(given) do
+			for slot = 1, q.bags[0].size do
+				if not slots[slot] then q.addItem(0, slot, r.id, r.count); break end
+			end
+		end
+		stub.fire("BAG_UPDATE_DELAYED")
+		q.choices, q.rewards = {}, {}
+		stub.fire("QUEST_FINISHED")
+	end)
+end
 
 -- Open the reward panel with the current q.choices, laying out buttons the way
 -- QuestInfo does (LargeQuestRewardItemButtonTemplate: a 39px Icon at TOPLEFT).

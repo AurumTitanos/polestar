@@ -294,7 +294,7 @@ and each section says what is missing.
 Quest item, target and Hearthstone buttons; XP per hour and time to level;
 selling greys and repairing (optionally from the guild bank first); buying
 what a step asks you to buy; learning new spells at class trainers; taking
-the best quest reward; instant quest
+the best quest reward and wearing rewards that are upgrades; instant quest
 text, single-option gossip and faster auto-loot; hiding combat error spam;
 flight map and death helpers, and releasing at once in battlegrounds.
 Requests from other players: accept summons, resurrections and friends' or

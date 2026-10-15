@@ -189,6 +189,11 @@
   (a weapon merchant), and Polestar knows twenty more class trainers in the
   capitals and Mulgore (Ander Germaine, Grezz Ragefist, Sian'tsu, Hana
   Lighthoof...), so learning new spells works at every class trainer.
+- Quest rewards that are upgrades can go on by themselves once they reach
+  your bags, out of combat: Options, Questing, Rewards & gear, Wear reward
+  upgrades (off by default; Shift at the turn-in skips). Chat says
+  "Wearing [item] (+12%)" once it is on, and nothing when you cancel its
+  bind confirmation (thanks CDVolvik).
 
 ### For guide authors
 
