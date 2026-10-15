@@ -3,7 +3,7 @@ title Cat Form
 category Class
 folder Druid
 keywords Cat Form, The Great Cat Spirit, The Great Windborne Cat Spirit, Avatar of Saeyleenan, Blessings of the Great Cat Spirit, Stormrage Barrow Dens, Relic of the Fang, Relic of the Claw, Relic of the Silent Shadow, Moonglade, Skyborne, class quest
-reward text Cat Form
+reward spell 768 "Cat Form"
 why Your stealth and melee form: in Forever this chain gives Cat Form at 20, not the trainer.
 class Druid
 levels 20-22

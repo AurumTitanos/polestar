@@ -7,7 +7,7 @@ levels 30-40
 zone The Barrens
 keywords Berserker Stance, The Islander, The Affray, Klannoc Macleod, Fray Island, Big Will, Bath'rah the Windwatcher, Cyclonian, Essence of the Exile, Whirlwind Axe, Whirlwind Sword, Whirlwind Warhammer, Warrior, class weapon
 reward item 6975 6977 6976
-reward text Berserker Stance
+reward spell 2458 "Berserker Stance"
 why Berserker Stance at 30 and a Whirlwind axe, sword or warhammer at 40.
 
 # Berserker Stance and the Whirlwind weapon: The Islander and The Affray

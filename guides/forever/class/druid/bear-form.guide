@@ -3,7 +3,7 @@ title Bear Form and Moonglade
 category Class
 folder Druid
 keywords Bear Form, Teleport: Moonglade, Moonglade, Heeding the Call, Great Bear Spirit, Body and Heart, Moonkin Stone, Lunaclaw, Child of Nature, Great Ursera Spirit, Strength and Mercy, Ur'endra, Skyborne, class quest
-reward text Bear Form
+reward spell 5487 "Bear Form"
 why Your tanking form: Forever no longer trains Bear Form, these quests give it. Opens Moonglade too.
 class Druid
 levels 10-12

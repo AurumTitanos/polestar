@@ -8,8 +8,8 @@ race Troll
 levels 10-20
 zone Orgrimmar
 keywords Hex of Weakness, Shadowguard, Ur'kyo, Valley of Spirits, Troll, racial, Priest
-reward text Hex of Weakness
-reward text Shadowguard
+reward spell 9035 "Hex of Weakness"
+reward spell 18137 "Shadowguard"
 why The Troll priest spells: Hex of Weakness at 10, Shadowguard at 20.
 
 # The Troll Priest spell quests: Hex of Weakness at 10 (5652) and

@@ -7,7 +7,7 @@ faction Alliance
 levels 20-24
 zone Stormwind City
 keywords Poisons, Mathias and the Defias, Klaven's Tower, Agent Kearnen, Klaven Mortwake, Defias Tower Key, Malformed Defias Drone, Duskwood Chest, The Touch of Zanzil, Doc Mixilpixil, Eau de Mixilpixil, Thistle Tea, Mathias Shaw, SI:7, Rogue, class spell
-reward text Poisons
+reward spell 2842 "Poisons"
 reward item 18160
 reward item 8432
 why Forever teaches Poisons through this chain, not the trainer; the Thistle Tea recipe comes with it.

@@ -256,10 +256,13 @@ the run speed, taxi nodes and hearthstone cooldown (`GetUnitSpeed`,
 `C_TaxiMap`, item cooldown; `Nav/Travel.lua`), the zone art's map art
 layers and exploration (`UI/ZoneArt.lua`), the class name in the options
 (`UnitClass`, `UI/Options.lua`), quest level colours
-(`GetQuestDifficultyColor`, `UI/Dungeons.lua`) and item names, icons,
-quality colours and links (`C_Item`; `UI/Dungeons.lua`, `UI/GearPick.lua`,
-`UI/Lookup.lua`), and the item and spell tooltips of the guide menu's
-rewards (`GameTooltip:SetHyperlink`, `SetSpellByID`; `UI/Picker.lua`). Frame and system calls (`GetTime`, `C_Timer`,
+(`GetQuestDifficultyColor`, `UI/Dungeons.lua`), item names, icons and
+quality colours (`C_Item`; `UI/Dungeons.lua`, `UI/GearPick.lua`,
+`UI/Lookup.lua`, `Rares/View.lua`), and the game's item and spell tooltips
+and modified clicks on Polestar's item and spell buttons
+(`GameTooltip:SetHyperlink`, `SetSpellByID`, `HandleModifiedItemClick`,
+`ChatFrameUtil.InsertLink`; `W.ItemTip`, `W.SpellTip`, `W.ItemClick`,
+`W.SpellClick` in `Theme/Widgets.lua`). Frame and system calls (`GetTime`, `C_Timer`,
 `InCombatLockdown`, the cursor, CVars, addon loading, the build and locale)
 are not routed either. Routing the rest keeps Forever specifics in few
 places and lets other modules' tests replace Compat with a fake.
@@ -296,6 +299,10 @@ Compat.GetItemQuality(itemID)          -> 0..7 | nil (nil while not cached)
 Compat.ItemQualityHex(quality)         -> "ffrrggbb" | nil
 Compat.ItemIcon(itemID)                -> icon | nil (C_Item.GetItemIconByID; no cache needed)
 Compat.SpellIcon(spellID)              -> icon | nil
+Compat.ItemLink(itemID)                -> link | nil (nil while not cached)
+Compat.RequestItem(itemID)             -> bool   (cached; else requested: GET_ITEM_INFO_RECEIVED follows)
+Compat.SpellLink(spellID)              -> link | nil
+Compat.RequestSpell(spellID)           -> bool   (cached; else requested: SPELL_DATA_LOAD_RESULT follows)
 Compat.GetBindLocation()               -> string | nil
 Compat.IsOnTaxi()                      -> bool
 Compat.GetCurrentTaxiNode()            -> name of the open taxi map's node | nil
@@ -448,7 +455,11 @@ outright under "Reward", the `choice` ones under "Choose one", each a tile
 with the item's or spell's icon (`Compat.ItemIcon`, `Compat.SpellIcon`; a
 glyph for words and unknown ids), an item's name in its quality colour
 (the client's when cached, else the compiled `quality`) and the game's item
-or spell tooltip on hover; then "Why".
+or spell tooltip on hover (`W.ItemTip`, `W.SpellTip`: set again when an
+uncached item or spell arrives while the tile still owns the tooltip; the
+pane requests its items and spells as it paints them); a modified click acts
+as on a bag item (`W.ItemClick`: Shift links, Ctrl tries it on, Alt guides;
+`W.SpellClick`: Shift links the spell); then "Why".
 
 | `t` | Required | Optional | Done when (Engine) |
 |---|---|---|---|

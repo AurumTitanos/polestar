@@ -288,6 +288,52 @@ function Compat.SpellIcon(spellID)
 	return nil
 end
 
+-- An item's link ("|cff...|Hitem:...|h[Name]|h|r"), or nil while the item
+-- is not cached (C_Item.GetItemInfo answers only from the cache).
+function Compat.ItemLink(itemID)
+	local fn = type(itemID) == "number" and ((C_Item and C_Item.GetItemInfo) or GetItemInfo)
+	if not fn then return nil end
+	local ok, _, link = pcall(fn, itemID)
+	if ok and type(link) == "string" and not isSecret(link) then return link end
+	return nil
+end
+
+-- true when the item is in the client's cache; otherwise asks the server for
+-- it (GET_ITEM_INFO_RECEIVED fires with the item ID when it arrives) and
+-- returns false.
+function Compat.RequestItem(itemID)
+	if type(itemID) ~= "number" or not C_Item then return false end
+	local cached = C_Item.IsItemDataCachedByID
+	if cached then
+		local ok, yes = pcall(cached, itemID)
+		if ok and yes == true then return true end
+	end
+	if C_Item.RequestLoadItemDataByID then pcall(C_Item.RequestLoadItemDataByID, itemID) end
+	return false
+end
+
+-- A spell's chat link, or nil.
+function Compat.SpellLink(spellID)
+	local fn = type(spellID) == "number" and ((C_Spell and C_Spell.GetSpellLink) or GetSpellLink)
+	if not fn then return nil end
+	local ok, link = pcall(fn, spellID)
+	if ok and type(link) == "string" and not isSecret(link) then return link end
+	return nil
+end
+
+-- The spell twin of RequestItem: true when cached, else asks for it
+-- (SPELL_DATA_LOAD_RESULT fires with the spell ID) and returns false.
+function Compat.RequestSpell(spellID)
+	if type(spellID) ~= "number" or not C_Spell then return false end
+	local cached = C_Spell.IsSpellDataCached
+	if cached then
+		local ok, yes = pcall(cached, spellID)
+		if ok and yes == true then return true end
+	end
+	if C_Spell.RequestLoadSpellData then pcall(C_Spell.RequestLoadSpellData, spellID) end
+	return false
+end
+
 ---------------------------------------------------------------------------
 -- Maps and world coordinates
 ---------------------------------------------------------------------------
