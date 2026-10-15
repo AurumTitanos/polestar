@@ -29,8 +29,9 @@
 // - bridge (from the grid): a deck of model surfaces (WMO or M2, outdoors,
 //   not swum) over a swim surface or with at least BRIDGE_DROP yd of air
 //   under it, at least DECK_MIN columns, on average at most DECK_WIDTH yd
-//   wide, at least SPAN_MIN yd long, whose links to other ground form
-//   exactly two separate groups (its two ends: a pier has one, a quay along
+//   wide, at least SPAN_MIN yd long, at least WET_SHARE of it over a swim
+//   surface, whose links to other ground form exactly two separate groups
+//   at least ENDS_APART of its length apart (its two ends: a pier has one, a quay along
 //   a shore one long one).
 // - gate (from the grid): outdoor ground under a model (WMO) span at most
 //   COVER yd above it, the covered stretch at least GATE_MIN columns, on
@@ -38,7 +39,9 @@
 //   ground form exactly two groups (in and out through the arch; a porch
 //   along a house front has one).
 // - A grid bridge or gate within MERGE yd of an aids entry of the same kind
-//   is that entry; an aids pass there becomes the gate or bridge.
+//   is that entry; an aids pass there becomes the gate or bridge. A grid
+//   gate elsewhere is left out (covered outdoor ground is common in towns:
+//   market stalls, arcades; a gate matters where the aids find a passage).
 // r is the radius the path must pass within: at least R_MIN, at most R_MAX.
 
 const { CELL, TILE_CELLS, NO_LINK, FLAG, DIRS, STEP, cellCentre, cellOf } = require('./grid/format');
@@ -50,6 +53,8 @@ const DECK_THICK = 2; // yd: blocked spans this close under a deck are the deck 
 const DECK_MIN = 20; // columns (about 87 yd²)
 const DECK_WIDTH = 15; // yd on average
 const SPAN_MIN = 12; // yd from end to end
+const WET_SHARE = 0.25; // of a bridge's deck over a swim surface (wall walks and balconies are over ground)
+const ENDS_APART = 0.6; // of the span: how far apart a bridge's or gate's two ends lie
 const COVER = 12; // yd from the ground to the span over it
 const GATE_MIN = 6; // columns
 const GATE_WIDTH = 14; // yd on average
@@ -99,7 +104,7 @@ function gridChokepoints(nav, c, place) {
 					while (below >= first[k] && flags[below] & FLAG.BLOCKED && !(flags[below] & (FLAG.SWIM | FLAG.TERRAIN)) && z[e] - z[below] <= DECK_THICK) below--;
 					if (below >= first[k] && (flags[below] & FLAG.SWIM || z[e] - z[below] >= BRIDGE_DROP)) {
 						const p = cellCentre(col, row, k & 255, k >> 8);
-						deck.set(key(col, row, k), { e, z: z[e], wx: p.wx, wy: p.wy, col, row, k });
+						deck.set(key(col, row, k), { e, z: z[e], wx: p.wx, wy: p.wy, col, row, k, wet: !!(flags[below] & FLAG.SWIM) });
 						haveDeck = true;
 					}
 				}
@@ -160,7 +165,7 @@ function gridChokepoints(nav, c, place) {
 			const B = far(A);
 			const span = Math.hypot(A.wx - B.wx, A.wy - B.wy) + CELL;
 			if ((comp.length * CELL * CELL) / span > width) continue;
-			if (kind === 'bridge' && span < SPAN_MIN) continue;
+			if (kind === 'bridge' && (span < SPAN_MIN || comp.filter((q) => q.wet).length < WET_SHARE * comp.length)) continue;
 			// Contact groups (columns within 2 cells are one group).
 			const groups = [];
 			for (const p of contacts) {
@@ -173,6 +178,10 @@ function gridChokepoints(nav, c, place) {
 				}
 			}
 			if (groups.length !== 2) continue;
+			// The ends lie at opposite ends: their centres at least ENDS_APART of the span apart.
+			const centre = (gr) => [gr.reduce((s, p) => s + p.wx, 0) / gr.length, gr.reduce((s, p) => s + p.wy, 0) / gr.length];
+			const [c1, c2] = groups.map(centre);
+			if (kind === 'bridge' && Math.hypot(c1[0] - c2[0], c1[1] - c2[1]) < ENDS_APART * span) continue;
 			const mx = comp.reduce((s, q) => s + q.wx, 0) / comp.length;
 			const my = comp.reduce((s, q) => s + q.wy, 0) / comp.length;
 			const mid = comp.reduce((b, q) => (Math.hypot(q.wx - mx, q.wy - my) < Math.hypot(b.wx - mx, b.wy - my) ? q : b), comp[0]);
@@ -254,7 +263,7 @@ function chokepoints({ nav, c, aids, lifts = [], geo, areas }) {
 			list[pass] = { ...list[pass], kind: g.kind, wx: g.wx, wy: g.wy, z: g.z, ...place(g.wx, g.wy) };
 			continue;
 		}
-		list.push(g);
+		if (g.kind === 'bridge') list.push(g);
 	}
 	for (const x of list) {
 		if (x.z === null) delete x.z;

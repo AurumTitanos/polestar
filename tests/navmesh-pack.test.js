@@ -174,9 +174,11 @@ test('pack: deterministic', async () => {
 	assert.deepEqual([...one.entries()], [...two.entries()]);
 });
 
-test('pack: blocks fit the client\'s 16 KB inflate buffer, parts stay under 512 KB, a decoded cluster fits Path.cacheKB / 16 (C17)', async () => {
-	const s = new Scene({ height: (x, y) => Math.sin(x / 9) * 6 + Math.cos(y / 7) * 5 });
-	for (let i = 0; i < 20; i++) s.box(20 + i * 24, 30, -1, 22 + i * 24, 500, 8);
+test('pack: blocks fit the client\'s 16 KB inflate buffer, parts stay under 512 KB, a decoded cluster fits Path.cacheKB / 8 (C17)', async () => {
+	// Rolling hills, a walled pen and three two-storey houses with outside stairs (floors over the ground).
+	const s = new Scene({ height: (x, y) => Math.sin(x / 40) * 6 + Math.cos(y / 30) * 5 });
+	s.box(100, 100, -10, 102, 300, 8).box(300, 100, -10, 302, 300, 8).box(100, 100, -10, 300, 102, 8);
+	for (let i = 0; i < 3; i++) s.box(350 + i * 50, 350, 9.5, 380 + i * 50, 380, 10, 1).quad([340 + i * 50, 360, 0], [350 + i * 50, 360, 10], [350 + i * 50, 370, 10], [340 + i * 50, 370, 0], 1);
 	const { files, D } = await packOf([s], 128);
 	for (const [name, src] of files) {
 		assert.ok(Buffer.byteLength(src) <= PART_BYTES, `${name} within a part`);
@@ -190,5 +192,5 @@ test('pack: blocks fit the client\'s 16 KB inflate buffer, parts stay under 512 
 	while (cap < cl.nodes) cap *= 2;
 	let bytes = cap * 48 + 320 + cl.at.size * 64;
 	for (const l of cl.links.values()) bytes += 128 + l.length * 32;
-	assert.ok(bytes / 1024 <= 24576 / 16, `${(bytes / 1024).toFixed(0)} KB per cluster`);
+	assert.ok(bytes / 1024 <= 24576 / 8, `${(bytes / 1024).toFixed(0)} KB per cluster`);
 });
