@@ -89,7 +89,7 @@ be prefixed `Polestar`.
 ### Lifecycle
 
 ```lua
-Polestar.OnInit(fn)    -- ADDON_LOADED("Polestar"). Settings defaults are merged.
+Polestar.OnInit(fn)    -- ADDON_LOADED("Polestar"). Saved settings are loaded; Get falls back to defaults.
 Polestar.OnLogin(fn)   -- PLAYER_LOGIN, in registration order. Player info valid.
 ```
 
@@ -189,7 +189,8 @@ Polestar.RegisterCommand(name, fn(argString), help)
 ```
 
 `/polestar` and `/pole`. No argument fires `TOGGLE_FRAME`. `help` lists
-registered commands. Core registers: `guides`, `options`, `show`, `hide`,
+registered commands with their `help` lines (already translated:
+`L["..."]`). Core registers (Core/Commands.lua): `guides`, `options`, `show`, `hide`,
 `next`, `prev` (look at the next/previous step; nothing changes), `skip`
 (skip the step shown, for good), `reset` (clear ticks, latches, skips and
 the saved view for the current guide), `guide <id>`, `status`, `tabs`,
@@ -223,13 +224,44 @@ the game's error handler: wrapping it would shift the stack the game and
 
 ### Localisation
 
-`Polestar.L[key]` (enUS only for now; missing keys return the key).
+`Polestar.L[key]`: a key is the English text, and a missing key returns
+itself, so a client without a translation reads English. A locale file
+(`Locales/<locale>.lua`, loaded right after `Core/Init.lua`) fills `L` for its
+client, so every file after it may read `L` at load; Init.lua, which loads
+before it, reads `L` only when it prints (the commands register in
+Core/Commands.lua).
 
-### Compat — every client API call goes through here
+A word with more than one meaning gets a key per meaning:
+`Polestar.LC(context, text)` is the translation of `"<context>: <text>"`,
+and `text` while there is none. The gear slots on the tooltip line are
+`LC("slot", …)` (`"slot: Back"`, `"slot: Chest"`), a dungeon boss that is
+a chest is `LC("boss", "Chest")` and the item qualities are
+`LC("quality", …)` (`"quality: Rare"` is not a rare mob), so they translate
+apart from the welcome's `L["Back"]` button and the rares.
 
-UI, Nav and Engine never call quest/map/unit client APIs directly; they call
-`Polestar.Compat`. That keeps Forever specifics in one file and lets other
-modules' tests replace Compat with a fake.
+Every player-facing string is written as a literal `L["..."]` or `LC(...)`
+where it appears, so a translator finds every key by searching for them: a
+table of labels holds `L["Home"]`, not `"Home"` translated later through
+`L[VIEW_LABEL[v]]`. `L[variable]` is left only for text that comes from data
+(a guide's category, a faction, race and class names, profession and spec
+names, the release stage).
+
+### Compat — the client's game data goes through here
+
+UI, Nav and Engine read the client's quests, map, units and items through
+`Polestar.Compat`, with these exceptions that call the client themselves:
+Nav's Blizzard user waypoint (`C_Map`, `C_SuperTrack`; `Nav/Bridges.lua`),
+the minimap's radius, shape, rotation and indoors state (`Nav/Pins.lua`),
+the run speed, taxi nodes and hearthstone cooldown (`GetUnitSpeed`,
+`C_TaxiMap`, item cooldown; `Nav/Travel.lua`), the zone art's map art
+layers and exploration (`UI/ZoneArt.lua`), the class name in the options
+(`UnitClass`, `UI/Options.lua`), quest level colours
+(`GetQuestDifficultyColor`, `UI/Dungeons.lua`) and item names, icons,
+quality colours and links (`C_Item`; `UI/Dungeons.lua`, `UI/GearPick.lua`,
+`UI/Lookup.lua`). Frame and system calls (`GetTime`, `C_Timer`,
+`InCombatLockdown`, the cursor, CVars, addon loading, the build and locale)
+are not routed either. Routing the rest keeps Forever specifics in few
+places and lets other modules' tests replace Compat with a fake.
 
 Coordinates: map percent `x, y` in **0–100**. World coordinates follow
 `C_Map.GetWorldPosFromMapPos`: `wx` is the north–south axis (larger is north),
@@ -258,7 +290,7 @@ Compat.GetQuestObjectives(questID)     -> { { text, type, finished, numFulfilled
 Compat.GetQuestTitle(questID)          -> string | nil (client cache; may be nil)
 Compat.GetOfferedQuests(source)        -> { questID, ... } | nil   (source "gossip" | "greeting" | "detail")
 Compat.IsQuestTrivial(qlvl, level)     -> bool   (grey for that level)
-Compat.GetItemCount(itemID)            -> number
+Compat.GetItemCount(itemID, includeBank) -> number   (includeBank: the bank's too)
 Compat.GetItemQuality(itemID)          -> 0..7 | nil (nil while not cached)
 Compat.ItemQualityHex(quality)         -> "ffrrggbb" | nil
 Compat.GetBindLocation()               -> string | nil
@@ -453,8 +485,9 @@ implements them:
   internal `lookup` pack, registered with `internal = true` and never listed
   or switchable, `<id>/` for every other pack).
 - Clashes: guides and map frames a refused pack's files register are dropped
-  until that addon's `ADDON_LOADED`; guides registered before their pack wait
-  in a per-pack list until it comes.
+  until that addon's `ADDON_LOADED`; guides registered before their pack are
+  refused, their ids kept in a per-pack list and listed as `guide-refused`
+  problems when it comes.
 - Format: `Guides.FORMATS` (the formats this Polestar reads, `1` and `2`);
   `Guides.Validate` checks each guide against the `REQUIRED` verb table
   (`Guides.VERBS`).
@@ -570,14 +603,21 @@ Polestar.Engine.GetProgress() -> doneSteps, totalSteps
   `maxLevel` by 2 or more, the Engine fires `GUIDE_OUTLEVELED(guideId,
   suggestedId)` once per guide per session; the UI offers the jump. Setting
   `behavior.skipGrey` (default off) auto-skips `accept` goals for quests already
-  grey for the character unless a later goal in the guide or its chain needs them.
+  grey for the character, and with them the quests' turn-ins and objectives,
+  unless the quest is a prerequisite (`pre`, `preAll`) of a quest later in the
+  guide or its chain that is not grey, directly or through other grey ones.
 - **Class-training reminder.** Class trainers ship in the core:
   `Core/ClassTrainers.lua` (generated by `node tools/polestar.js trainers build`,
   one trainer per town and class, with the Era frames of their maps) calls
-  `Polestar.RegisterClassTrainers({ { npc, npcName, map, x, y, f, faction, classes }, ... })`.
+  `Polestar.RegisterClassTrainers({ { npc, npcName, map, x, y, f, faction, classes }, ... })`,
+  then `Polestar.RegisterClassTrainerIds({ WARRIOR = { npcId, ... }, ... })`
+  with every class trainer in `trainers.json`, not only one per town.
   `Engine.NearestClassTrainer()` returns the best one for the character (same
-  ranking as candidate goals) or nil. Opening the trainer window of one of the
-  character's class stores `CharState().classTrainLevel = level` and fires
+  ranking as candidate goals) or nil; `Engine.IsClassTrainer(npc)` whether an
+  npc is any class trainer of the character's class, from the full id list
+  (QoL learns spells only there).
+  Opening the trainer window of one of the character's class stores
+  `CharState().classTrainLevel = level` and fires
   `CLASS_TRAINED(level)`; a character first seen without a stored level counts
   as trained at that level. With `behavior.trainReminder` `"2"` (default; even
   levels only), `"1"` or `"off"`, the Engine fires `TRAIN_DUE(level, trainer)`
@@ -856,9 +896,13 @@ Waypoint:
 { map = 1429, x = 47.6, y = 35.1, f = nil, label = "Kill Kobold Vermin", stepIndex = 3, goalIndex = 2, kind = "kill", r = 8 }
 ```
 
-= the first goal in the current step that has coordinates and is `active` or
-`pending`. Re-evaluation is event-driven and coalesced (≤ 10 per second);
-`goto` arrival is polled only while the current step has an active `goto`.
+= the goal of the current step the player aimed at (`AimGoal`) while it is
+open; else the current goal (the focus group's first open blocking goal, else
+its first open optional one, else its header); else the focus group's first
+open goal with coordinates (blocking, then optional, then notes). A done step
+has none. Re-evaluation is event-driven and coalesced (≤ 10 per second);
+`goto` and `explore` arrival is polled only while some tab's current step has
+one open, or while the waypoint's goal has spots.
 
 Automation (setting `behavior.autoAccept`, `behavior.autoTurnin`, default
 on; holding Shift suppresses): accept only quests that are `accept` goals, and
@@ -954,7 +998,13 @@ Polestar.Nav.GetDistance() -> yards | nil      -- to an area target's edge, 0 in
 Settings live under `nav.*`; `nav.distanceUnit` (`"yards"`, the default, or
 `"metres"`) sets how distances read, and the arrow redraws its distance as
 soon as it changes. Nav hides itself in instances, on taxis, and when
-the target is on another continent (shows the zone name instead).
+the target is on another continent (shows the zone name instead). Where the
+client gives no player position (the Deeprun Tram is a map of its own, Map
+369, with no UiMap), `Nav.Sample` returns "instruction" while the route's
+current leg is a ride, flight or hearth, so the arrow keeps that leg's glyph
+and caption ("Take the tram to Stormwind"), and "nopos" otherwise: the arrow
+says "No position here" over its label. It points again as soon as a
+position returns.
 
 An area target (a waypoint with `area`, yards: a spawn area) is reached
 anywhere within `area + r` of its centre; outside, the distance shown is to
@@ -1106,6 +1156,30 @@ of at most 600 yd; captions plain text of at most 160 characters (no `|`
 escape codes). `travel route` runs the addon planner and includes
 Polestar_Travel when it is built (`--crossings-lua none` leaves it out).
 
+**Chains from recordings.** `travel chain --to <map,x,y> [--name <place>]`
+drafts an approach chain from the recorded walks that pass within 30 yd of a
+target, for a person to check in game before it goes into the crossings
+file (`--session <id>`, repeatable, keeps only those sessions' walks). Each
+pass by the target is an approach on the way in and, with `--reverse`, on the
+way out reversed (a way out is not always a way in), followed back `--within`
+yd (300); a shorter one does not count. It leaves the straight line where it has walked 20 yd more than a straight walk
+to the target would have, and its path from there to the target, simplified
+into nodes (Douglas-Peucker, `--tolerance` 8 yd), is its chain. Walks from
+different sides meet at the real mouth, so the shortest chain is printed,
+with every approach's departure point beside it. An approach that keeps to
+the straight line is reported with a warning but does not stop the draft:
+recordings have no height, so a walk that followed the arrow onto the hill
+above a cave looks straight too; only when every approach is straight is
+there no chain. Radii are at most 15 yd at
+the mouth and 10 inside, and under half the shortest hop; captions are
+left unset, so the addon's translated "Follow the path" applies (the mouth's
+is "Go to <place>" with `--name`). A single
+walk from the side away from the mouth starts the chain where it turned off
+the straight line, around the mountain: a walk from the open side, or the
+reviewer, moves the mouth. The walks are `tools/lib/travel/paths.js`
+`recordedWalks`, the ones learned paths are built from; the chain is
+`crossings.js` `recordedChain`.
+
 ## Quests — quest database, markers, tooltips, quest levels
 
 `addon/Polestar/Quests/` loads the load-on-demand data addon
@@ -1251,8 +1325,9 @@ Polestar.QoL.Rewards.best, .reason                -- auto-pick's settled answer 
   takes it; the marks frame it.
 - **Marks** (`qol.rewardHighlight`), on each `type == "choice"` button of
   `QuestInfoFrame.rewardsFrame.RewardButtons`, anchored to its `Icon`:
-  `qol-upgrade` (success) on every upgrade, `qol-coin` (accent) on the best
-  when nothing is an upgrade, a 2px accent frame with a shade keyline around
+  `qol-upgrade` (success) on every upgrade in the icon's top-left corner,
+  `qol-coin` (accent) in its top-right corner on the most valuable of two or
+  more choices (every price known; ties all), a 2px accent frame with a shade keyline around
   the best of two or more. Drawn after `QuestInfo_Display` (detail, reward and
   quest-log pages), and redrawn on `GET_ITEM_INFO_RECEIVED`, `GEAR_UPDATED`
   and the setting; cleared on `QUEST_FINISHED`. An uncached choice is judged
@@ -1317,7 +1392,7 @@ Polestar.Lookup.QuestStep(quest, from) -> step         -- accept, objectives, tu
   the quartermaster). It is registered in pack `lookup`, category `Lookup`, id
   `lookup/<kind>/<id>`, never saved, and opened in a new tab
   (`Engine.OpenTab`); a saved tab holding one is rebuilt at `ADDON_LOADED`.
-  A planner kind (`RegisterPlanner`, letters only; Dungeons' `pickup`) is
+  A planner kind (`RegisterPlanner`, letters only; Dungeons' `pickup`, `handin` and `attune`) is
   built by its module's `build(id)` through the same `BuildGuide`/`Guide`
   path (no curated guide, not gated by `lookup.enabled`), registered and
   reopened the same way.
@@ -1335,7 +1410,7 @@ Polestar.Lookup.QuestStep(quest, from) -> step         -- accept, objectives, tu
   fires on target change and mouseover; `/polestar mount` opens Lookup at the
   target's (else the mouseover's) mount, `/polestar lookup [text]` searches.
 
-## Dungeons — dungeon quest journal and pick-up guide
+## Dungeons — dungeon quest journal, pick-up and hand-in guides
 
 The dungeon pages come from the Codex's instances (Toolchain, "Codex"): in a
 release build the Forever client's tables and `data/forever/*.json`; with
@@ -1347,14 +1422,36 @@ pack as `Dungeons1.lua` (a summary table per dungeon for the list, and the page
 as Lua source compiled only when opened): the quests QuestieDB files under the
 instance's areas (the areas on the instance's map and the outdoor areas of its
 name, as the solo filter's instance classification reads them,
-`tools/lib/sim/solo.js`) or whose objectives or starting item point into it
-(plus, with `--local-extras`, `dungeons.json`'s), each with giver and ender
-and their positions, our own objective line, chain, rewards (items with
-quality and choice from recordings and ForeverLevelingBiS, XP from
-`quests.json`, money, reputation) and, with `--local-extras`, DungeonJournal's
-audited shareability; bosses in kill order with the quests tied to them;
-entrances from the Codex, else the client's Map table (the corpse point, placed
-on its zone). No loot tables. Runtime: `addon/Polestar/Dungeons/Dungeons.lua`
+`tools/lib/sim/solo.js`), whose objectives or starting item point into it,
+that Wowhead Forever's dungeon and raid quest lists place in it (`quests.json`'s
+`wowhead.zone`, counted only when QuestieDB's Forever store has the quest,
+which keeps out `<UNUSED>`, `<NYI>` and retired quests), whose start item drops
+or lies inside one instance (that page too, even when the quest has an area),
+or that end its story (a follow-up with the same title, no objectives, taken
+where the quest ends: Hidden Enemies, The Lord of Blackrock); plus, with
+`--local-extras`, `dungeons.json`'s. An objective item that is sold, crafted,
+or dropped or held outside every instance ties no quest to a dungeon (the
+false-positive rule: Murloc Poachers, Craftsman's Writs), nor does a stray
+drop, one only Wowhead's lists record and under 5% (The Ectoplasmic
+Distiller's Greater Eternal Essence from Gri'lek and Maexxna); a quest of a
+game event (pfQuest's `event`: the Darkmoon Faire, the holidays, the war
+efforts) is on a page only where QuestieDB or Wowhead files it (Copper
+Modulator, Rinling's Faire turn-in, is on none). What no rule can catch is
+in the cited table `tools/lib/codex/journal-quests.json` (Shards of the
+Felvine). Each quest has giver and ender and their positions, our own
+objective line, chain (every prerequisite and breadcrumb of the quest's side,
+all of `pre` and `preAny`, oldest first, at most 20), rewards (items with
+quality, count and choice from recordings and ForeverLevelingBiS, else
+Wowhead's list rewards, choice versus fixed as Wowhead files them; XP from
+`quests.json`; money, else Wowhead's; reputation from Wowhead's rewards, its
+"+1" placeholders left out, never the standing a quest asks for) and, with
+`--local-extras`, DungeonJournal's audited shareability; bosses in kill order
+with the quests tied to them; entrances from the Codex, else the client's Map
+table (the corpse point, placed on its zone); and the page's `attunement`
+list (below). No loot tables. `codex attune` writes the local comparison with
+the Attune addon (`tools/lib/codex/questaudit.js`,
+`tools/lib/consume/attune.js`; `data/local/dungeon-quests-audit.md` and
+`.json`, then the attunements report). Runtime: `addon/Polestar/Dungeons/Dungeons.lua`
 (`Polestar.Dungeons`: List, Get, Entrance, Quests, Quest, Bosses, Open,
 GuideTo, GuideToPoint, ShowOnMap; `SHOW_DUNGEON`). `dungeons build` writes no
 guides.
@@ -1366,7 +1463,13 @@ list), not done, not in the log (those are `carried`), open by
 max(level, the dungeon's lowest level), picked up outside from an NPC or object
 (not from an item, not inside), and not a follow-up of another quest of the
 page; each with its open prerequisites (`Lookup.QuestChain`: all of `pre`, one
-of `preAny` this character can take, in the order they are done).
+of `preAny` this character can take, in the order they are done). The giver
+is `Dungeons.Giver(pq, from)`: the page keeps one (the Codex's first), so a
+quest several NPCs give goes to the one of the character's side nearest the
+player (`Lookup.QuestEnd`, which takes an NPC of the other side only when no
+other is known and marks it `hostile`; Tabetha's Task: the mage trainers of
+both sides), never to one of the other side; the quest card and the map's
+giver markers show the same giver.
 `Dungeons.PickupGuide(key)` orders them as the cheapest path by
 `ns.TravelCost` from where the player stands, through every stop, to the
 entrance (`Dungeons.PlanStops(stops, from, finish, travel) -> order, cost`:
@@ -1380,15 +1483,69 @@ its chain (a full quest step, `Lookup.QuestStep`, from its giver nearest the
 player; the player then stands at its turn-in), and a giver once per set of
 prerequisites its quests wait on (one step with an accept per quest; the
 giver comes up again for a quest still waiting, and visits to the same giver
-in a row are one step). The last step lists the carried quests as notes and
-goes to the entrance. Nothing to take: nil, "nothing". The route is kept per
-character (`CharState().dungeonPickup[key]`, the stop keys in order) and used
-when the guide is rebuilt without a position. It is a Lookup planner kind
+in a row are one step). The last step lists the carried quests as notes,
+goes to the entrance and says where the hand-in guide is (a note naming
+`/polestar dungeons <name>`). Nothing to take: nil, "nothing". The route is
+kept per character (`CharState().dungeonPickup[key]`, the stop keys in
+order) and used when the guide is rebuilt without a position
+(`Dungeons.OrderStops(stops, from, finish, field, key)`, shared with the
+hand-in guide). It is a Lookup planner kind
 (`Lookup.RegisterPlanner("pickup", build)`): `Dungeons.PickUp(key)` ->
 `Lookup.Guide("pickup", key)` registers it as `lookup/pickup/<key>` (pack
 "lookup") and opens it in a new tab, and a saved tab of it is rebuilt at
 ADDON_LOADED like Lookup's own; it is gated by `dungeons.enabled`, not
 `lookup.enabled`.
+
+The hand-in guide is the run's other half (`addon/Polestar/Dungeons/Handin.lua`,
+planner kind `handin`, `lookup/handin/<key>`, `Dungeons.HandIn(key)`).
+`Dungeons.HandinPlan(key)` sorts the page's quests in the log: `hand`
+(objectives done, by `Compat.IsQuestReadyForTurnIn`, or a delivery with no
+objectives; turned in outside at the page's ender, else the Codex ender
+nearest the player), `unfinished`, `inside` (turned in inside the dungeon)
+and `unplaced`; it searches no follow-ups, so the page can ask for it on
+every render. `Dungeons.HandinFollowUps(plan)` adds the quests the `hand`
+quests open (`Codex.FollowUps(id)`: the quests whose `pre` or `preAny` name
+it, one scan of the quest records per id, kept until the quest chunks
+change): every `pre` done or handed in here and one of `preAny` likewise,
+takeable now (`Lookup.QuestBlock`: faction, race, class, level), not done or
+in the log, from the NPC or object a quest it waits on is turned in to or
+one within 60 seconds of it (`ns.TravelCost`). `Dungeons.HandinGuide(key)`
+makes a stop per turn-in place (its turn-ins, then the follow-ups that same
+NPC gives) and per other follow-up giver (after the turn-ins it waits on),
+ordered by `Dungeons.OrderStops` with no fixed end (`CharState().dungeonHandin[key]`);
+the last step lists the rest as notes ("Not finished yet: …", "Turned in
+inside the dungeon: …"). Nothing routable: nil, "nothing", and
+`Dungeons.HandinText(plan)` says why in one line. `Dungeons.HandIn` puts the
+guide in the tab of the dungeon's pick-up guide when that one is finished or
+at its last step (its job ends at the entrance), else in a new tab. A
+finished pick-up guide's "Guide complete" panel (UI/GuideFrame.lua) offers
+"Hand in the quests" while the dungeon has quests in the log.
+
+Attunements and keys (`addon/Polestar/Dungeons/Attune.lua`, planner kind
+`attune`, `lookup/attune/<key>:<id>`). A page's `attunement` list (Codex,
+"Dungeons and raids": `tools/lib/codex/attunements.js`) is read by
+`Dungeons.Attunements(key, faction)` (faction "A" | "H" | nil: the entries
+of that side and the side-free ones). `Dungeons.AttunementState(a)` gives
+this character's state per step: a quest `done`, `ready`, `log`, `open`,
+`locked` (a step it waits on, `after` all, `afterAny` one, is not done),
+`level`, `rep` (the quest's standing, `Compat.GetFactionStanding`), `na`
+(faction, race or class through `Lookup.QuestBlock`) or `skip` (an
+alternative not taken: of `any` goals the one whose standing fits best, the
+highest first; a `preAny` sibling of a done one); a drop, chest or gift is
+`done` once its item is owned (`Compat.GetItemCount(id, true)`, the bank
+included) or the quest it starts is taken; a standing once reached. The
+attunement is `done` when its item is owned (a key, the Drakefire Amulet,
+Aqual Quintessence) or, item-less, when its goals are done (one of them with
+`any`); `goalDone` with no item says the key was lost. `Dungeons.AttuneGuide(key, id)`
+makes a stop per quest still to do (`Lookup.QuestStep`, with any open
+prerequisite `Lookup.QuestChain` finds that the list lacks), each after the
+stops it waits on, ordered by `Dungeons.OrderStops` from where the player
+stands with no fixed end (`CharState().dungeonAttune["<key>:<id>"]`); a drop
+or chest is a collect step at its NPC or object (inside an instance: at its
+entrance, with a note naming it), a standing a rep step, a gift a talk step,
+each after the quest before it in the list; the last step holds the note and
+the entrance. Nothing left: nil, "done". `Dungeons.Attune(key, id)` opens it
+in a new tab.
 
 ## UI — guide window, hub and options
 
@@ -1398,7 +1555,8 @@ Any module adds settings to the options window without touching UI files:
 
 ```lua
 Polestar.RegisterOptions({
-  page = "Quests", icon = "icon-accept", order = 30,      -- sidebar page (created on first use)
+  page = "Quests", icon = "icon-accept", order = 30,      -- sidebar page (created on first use), its title as shown
+  key = "quests",                                           -- optional: the page's stable key (default: made from page)
   tab = "Map", section = "Markers",                         -- tab row entry and section header
   controls = {
     { kind = "toggle",   key = "qol.mapObjectives", label = "Objective markers", help = "One line." },
@@ -1433,10 +1591,16 @@ Gear fill Questing; Lookup, Dungeons and Rares fill Discovery; QoL and Maps
 (flight timer, instances) fill Quality of Life. On the **Map** page (Guide &
 quests: Guide, Quest markers; Rares & travel: Rares and treasures, Dungeons and
 travel; Zones: Zones, Coordinates) Nav, Quests, Rares and Maps place every map
-and minimap setting. Old page keys (`guidewindow`, `navigation`, `automation`,
-`quests`, `gear`, `lookup`, `dungeons`, `rares`, …) reach the page and tab that
-now hold their settings (`ALIASES` in UI/Options.lua); a page's own key wins
-over an alias.
+and minimap setting.
+
+A page is opened by its key (`/polestar options <key>`, `UI.ShowOptions(key)`,
+`Options.Select`), not its title: the built-in pages give English keys
+(`guide`, `appearance`, `map`, `questing`, `discovery`, `qualityoflife`,
+`guidepacks`, `recorder`, `about`) so a translated title does not move them;
+a registered page without `key` takes one made from its title. Old page keys
+(`guidewindow`, `navigation`, `automation`, `quests`, `gear`, `lookup`,
+`dungeons`, `rares`, …) reach the page and tab that now hold their settings
+(`ALIASES` in UI/Options.lua); a page's own key wins over an alias.
 
 The sidebar's page list is its own scroll area (`f.NavScroll`, `W.ShellNav`)
 from 12px under the search to the footer bar's line, so the version and stage
@@ -1550,15 +1714,22 @@ Reading flow: `docs/DESIGN.md` ("Intent" and "The Guide Window").
   the painting in the header band with the title drawn on it (the hub's own
   Title, Subtitle and Band are faded/hidden while a page shows and restored
   on Home and when the section hides), a back chevron and the actions, right
-  to left from the band's corner with the primary first: while
-  `Dungeons.PickupPlan` holds quests to take, "Pick up the quests"
+  to left from the band's corner with the primary first, three at most (by
+  priority; "Show on map" gives way first). The primary is "Hand in the
+  quests" while `Dungeons.HandinPlan` holds a finished quest (`DS.HandIn` ->
+  `Dungeons.HandIn`; the tooltip counts them and names what is not finished),
+  then "Pick up the quests" while `Dungeons.PickupPlan` holds quests to take
   (`DS.PickUp` -> `Dungeons.PickUp`: the guide opens in a new tab and the hub
-  steps aside; the tooltip counts the quests and those in the log), then
-  "Guide me to the entrance" (`Dungeons.GuideTo`) and "Show on map"
-  (`Dungeons.ShowOnMap`); with none left, "Guide me to the entrance" leads
-  and "Nothing to pick up" (shown while the page has quests for this side)
+  steps aside; the tooltip counts the quests and those in the log), else
+  "Guide me to the entrance" (`Dungeons.GuideTo`). After the primary: the
+  other of the two guides ("Hand in the quests" is shown while any of the
+  page's quests is in the log; with none finished its tooltip and, clicked,
+  chat say what is open, `Dungeons.HandinText`), "Guide me to the entrance"
+  and "Show on map" (`Dungeons.ShowOnMap`); with nothing to pick up or hand
+  in, "Nothing to pick up" (shown while the page has quests for this side)
   says why in its tooltip and, clicked, in chat (`DS.NothingText`); no guide
-  is built. Tabs Quests n, Bosses n, Map. Quests: a block per quest planned from the
+  is built. Tabs Quests n, Attunement (Keys when each is a key; only on pages
+  with one for the filter's side), Bosses n, Map. Quests: a block per quest planned from the
   data (the objective measured on one shared string) so only the blocks in
   view are drawn (`DS.PaintQuests` on scroll): the title in the client's
   difficulty colour (`GetQuestDifficultyColor`, else `QuestDifficultyColors`
@@ -1573,11 +1744,22 @@ Reading flow: `docs/DESIGN.md` ("Intent" and "The Guide Window").
   SetHyperlink`, where Gear adds its upgrade line; modified clicks through
   `HandleModifiedItemClick`), XP, money and reputation chips. Bosses: kill
   order, name, level, each tied quest ("Kill it for", "Drops X for", "Drops X,
-  which starts", "Part of"), a line opening the quest. Map: the entrance and
+  which starts", "Part of"), a line opening the quest. Attunement
+  (`Dungeons.Attunements`, `Dungeons.AttunementState`): per entry a head
+  (state glyph, the name in quest or item colour, a chip: Done, "Not in your
+  bags" for a key whose chain is done, "n of m done"; the facts: kind, who
+  needs it, level, side; our note; the item tile with "You have it" or "Not
+  in your bags or bank"; "Guide me through it" while something is left, which
+  opens `Dungeons.Attune` in a new tab as the pick-up guide does) and a row per
+  step of the filter's side (state glyph, the quest in its difficulty colour
+  or what drops it, its state, giver and zone or chance and instance; a click
+  sets the arrow there); the other side's entries carry no state. Map: the entrance and
   the quest givers on its zone painting. Blocks, rows, tiles, chips and cards
   are pooled; quest states refresh on QUEST_ACCEPTED, QUEST_REMOVED,
-  QUEST_TURNED_IN and PLAYER_LEVEL_UP. `UI.DungeonsSection` exposes
-  `Open`, `Home`, `SetBand`, `SetTab`, `SetFaction`, `ShowQuest`, `Shown`
+  QUEST_TURNED_IN and PLAYER_LEVEL_UP, the Attunement tab also on
+  BAG_UPDATE_DELAYED and UPDATE_FACTION. `UI.DungeonsSection` exposes
+  `Open`, `Home`, `SetBand`, `SetTab`, `SetFaction`, `ShowQuest`, `Attune`, `Shown`
+  (`shown.attune`: per entry its id, done, chip, guide, owned and step states)
   for tests and the preview.
 - **Zone art** (`UI/ZoneArt.lua`): `UI.ZoneArt.Create(parent, width, height
   [, fadeColor])` and `UI.ZoneArt.Paint(art, uiMapID, focusX, focusY, index) ->
@@ -1825,10 +2007,14 @@ registers through `ZoneArt.RegisterOverlays` the way `MapFrames.lua` and
 
 ### Codex (`codex build`)
 
-`node tools/polestar.js codex build [--addons <dir>] [--offline] [--out <dir>] [--local-extras]`
+`node tools/polestar.js codex build [--addons <dir>] [--build <version>] [--offline] [--out <dir>] [--local-extras]`
 merges `data/forever/*.json` (pfQuest, QuestieDB facts, recordings,
 corrections, Wowhead and web XP facts), the Forever client's tables
-(wago.tools, cached under `data/sources/wago/<build>/`), the installed
+(wago.tools, cached under `data/sources/wago/<build>/`: the newest 1.60+
+`wow_classic_beta` build wago.tools lists, as `data build` picks its
+`--forever-build` (`pickBuild` in `tools/lib/data/wago.js`); `--build`
+names one; offline or with wago.tools unreachable, the newest cached build
+holding every table the Codex reads; `meta.json` records it), the installed
 ForeverLevelingBiS (MIT) and Polestar's own guides into
 `data/forever/codex/*.json`, then emits the load-on-demand pack
 `addon/Polestar_Codex/` (`tools/lib/codex/pack.js`) with its
@@ -1874,9 +2060,16 @@ built.
   each matched to `npcs.json` (a recorded encounter's NPCs, else the same name
   among NPCs placed in the instance, else the same name preferring elites
   without open-world spawns at the instance's level, else one spawnless NPC
-  whose name starts with it or is within two letters of it; "A and B"
-  encounters name both). A boss's loot is its `items.json` drops at 1% or
-  more, best chance first. The entrance (`chooseEntrance`): a recorded one
+  whose name starts with it or is within two letters of it, of several the
+  one placed inside (Kirtonos the Herald, not its spell visual); "A and B"
+  encounters name both; an encounter naming no NPC takes the chest placed
+  inside whose name ends with its name, The Seven: Chest of The Seven). A
+  boss's loot (at most 30 items) is its own table first: its `items.json`
+  drops at 1% or more or at an unknown rate, and its Wowhead drops outside
+  the world-drop pool at any rate (Thermaplugg's schematics, Dextren Ward's
+  plans); then Wowhead's `commondrop` rows (world books, world blues) at 1%
+  or more, so those no longer crowd out a boss's own loot (Onyxia's Sacks
+  of Gems); each part best chance first. The entrance (`chooseEntrance`): a recorded one
   (Recorder `enter`, `data/forever/instances.json`), else the curated table
   `tools/lib/codex/entrances.json` (per instance key: the point on the zone
   map where one walks in, `{ key, instance, map, x, y, source, note }`, each
@@ -1892,26 +2085,107 @@ built.
   and the trigger nearest a Corpse point is as often an inn or city trigger,
   so they are not used. Every
   NPC placed in an instance (`npcs.json` `instances`, from QuestieDB and
-  recordings) belongs to it: its drops carry the instance. An instance's
+  recordings, or Wowhead's `location` naming an `AreaTable` area of the
+  instance's map) belongs to it: its drops carry the instance. An instance's
   boss or mob the data ranks rare is not a rare unless RareScanner lists it.
   `--local-extras` takes the instances from AtlasLoot and `dungeons.json`
   instead.
 - Wowhead Forever per entity (`tools/lib/codex/wowhead.js`, release build
-  only, lowest precedence): `codex wowhead` fetches the NPC and object pages
-  and item tooltips of what `data/local/codex-parity.json` lists as missing
-  or different, and of our instances' bosses, one request at a time (1.5 s
-  apart, a growing pause on 403/429), and caches each entity's facts under
-  `data/sources/wowhead/codex/<npc|object|item>/<id>.json` for 14 days;
+  only, lowest precedence). `codex wowhead [--max-age <days>] [--dry-run]`
+  first reads Wowhead's list pages (`/forever/npcs`, `/objects`, `/items`):
+  up to 1,000 rows a request (past that the page says "15,205 NPCs found
+  (1,000 displayed)"), each with id, name, levels, classification, boss
+  flag, `location` and `envChange` (how Forever differs from Classic: new,
+  updated with its change lines, or unchanged). It reads them by id range
+  (the ID filter, 25,000 wide up to 300,000, then open; a range at the cap
+  splits by the count its note gives; a filter starting past the last id is
+  ignored by Wowhead and counts as empty; at most 150 list requests a type),
+  cached per range in `data/sources/wowhead/codex/lists/<type>.json`. On
+  2026-10-14 a first read took 151 requests (NPCs 51 for 15,205 rows,
+  objects 23 for 4,985, items 77 for 22,677: a split range costs its capped
+  parent too), a refresh one per cached range (103). `codex build` reads the
+  NPC rows for one fact only: the level of an NPC neither our data nor a
+  page gives one (286 NPCs); a row's rank, boss flag and place are no page's,
+  so rares, bosses and parity's verdicts read only pages.
+  Then the crawl fetches the NPC and object pages and item tooltips of what
+  `data/local/codex-parity.json` lists as missing or different, and of our
+  instances' bosses, one request at a time (1.5 s apart, lists included, a
+  growing pause on 403/429), caching each entity's facts under
+  `data/sources/wowhead/codex/<npc|object|item|spell>/<id>.json`. A wanted
+  page is fetched when it is not cached, the parser's `VERSION` changed,
+  its list row differs from the one it was fetched with (`listSig`; a page
+  Wowhead had not that a list now shows), or it is older than `--max-age`
+  (7 days, lists too) and an open parity gap (`openGaps`: neither "not in
+  Forever" nor settled with a reason), Forever's own (new or updated) or on
+  no list: a page of an entity Forever left as in Classic is kept. Of the
+  1,704 pages wanted on 2026-10-14, a refresh with every page stale fetches
+  210 (was all 1,704; spell pages have no list) plus the 103 list ranges.
+  `--dry-run` counts the list ranges and pages a run would fetch.
   `codex build` only reads the cache. From them: an NPC's level, rare rank and
   spawns where ours lack them (and the rares only Wowhead places), drops and
-  object contents with chance = looted count / looted kills, and the
-  reputation ("Requires <Faction> - <Standing>") and PvP rank ("(Rank N)") an
-  item's Forever tooltip asks for. An instance also lists, after its
-  encounters and by level, the NPCs placed inside that the data or Wowhead
-  ranks rare or boss, or that alone drop an item of quality 2 or better at 5% or more.
+  object contents with chance = looted count / looted kills, an NPC's or
+  object's `location` (the areas its page entry names; the parser's
+  `VERSION` per type re-fetches pages an older parser read) and Wowhead's
+  boss flag, and the reputation ("Requires <Faction> - <Standing>") and PvP
+  rank ("(Rank N)") an item's Forever tooltip asks for; objects named like a
+  missing boss (a boss chest) are fetched too. An instance also lists, after
+  its encounters and by level, the NPCs placed inside that the data or
+  Wowhead ranks rare or boss (or flags boss), or that alone drop an item of
+  quality 2 or better at 5% or more, each with a `role`: `rare` (ranked
+  rare), `event` (pfQuest and QuestieDB know no static spawn: summoned or
+  scripted, the Ring of Law's fighters, the Tier 0.5 summons), else
+  `optional`; then the chests placed inside (no gathering node) that hold
+  more than one item (one is a quest object) and alone an item of
+  quality 2 or better (at 5% or more, or an unknown rate), as bosses with an
+  `object` and no `npc` (role `optional`). A boss is `{ name, npc, items }`,
+  plus `object` and `role` when set; the pack writes its ref as the npc id,
+  or `o<object>`, then `r`/`e`/`x` for the role (an old pack's bare npc id
+  still reads), and the Dungeons Bosses tab says Chest and the role beside
+  the level.
+- Attunements and keys (`tools/lib/codex/attunements.js`, release-safe):
+  the cited table `tools/lib/codex/attunements.json` names per Codex instance
+  each attunement's goal only (the quests that end it, one of them with
+  `any`, or the key item), whether everyone entering needs it or one in the
+  group, and our one-line note, each entry with its public sources (Wowhead
+  Forever, warcraft.wiki.gg). The steps come from the Codex: every
+  prerequisite of a goal (all of `pre`, the `preAny` of the entry's side),
+  oldest first, each with `after`/`afterAny`; a quest only an item starts
+  gets that item's drops before it (Blackhand's Command from the Scarshield
+  Quartermaster); an item goal adds the item's own sources (a dropped key's
+  drops and chests, best chance first, three at most; Aqual Quintessence's
+  standing and the NPC handing it out). `links` add a prerequisite our quest
+  data lacks, with its source (Forever's City of Dalaran: Blood in the
+  Streets after Dalaran Patrols and Key to the City, Heart of Disruption
+  after it). `removed` lists what Forever took out, with its evidence (the
+  Seal of Ascension: 4743 no longer rewards it, no Forever `ItemSparse`
+  row), read only by the local comparison. Covered: Molten Core (Attunement
+  to the Core; Aqual Quintessence), Onyxia's Lair (the Drakefire Amulet,
+  each side's chain), Blackwing Lair (Blackhand's Command), Naxxramas (one
+  of the three Dread Citadel quests), Scholomance (the Skeleton Key, each
+  side), Blackrock Depths (the Shadowforge and Prison Cell keys), Stratholme
+  (Key to the City), Dire Maul (Crescent Key), Gnomeregan (Workshop Key),
+  Scarlet Monastery (The Scarlet Key), the City of Dalaran (the Horde's
+  Dalaran Sewer Key). A goal the Codex lacks drops its entry with a warning
+  (`codex build` prints it); an instance the build lacks has none. The
+  journal puts each list on its page as `attunement` and counts them
+  (`meta.counts.attunements`, the summary's `attune = { A, H }`).
+  `auditReport(journal, attune, codex)` writes the local comparison with
+  Attune (`codex attune`, `data/local/attunements-audit.md`): per Attune
+  entry the attunement of ours sharing most quests, the quests only one side
+  lists and why ours has or lacks them (in our chain, a follow-up of our
+  goal, not a prerequisite in our data, not in our Codex), then our verdicts
+  on which source is right, kept in `data/local/attunements-verdicts.md` so
+  a rerun keeps them.
 - Rares and treasures: NPCs ranked rare (4) or rare elite (2) in `npcs.json`
-  (pfQuest, QuestieDB, recordings), with their spawns and every drop the
-  Codex knows; treasures are objects with the `chest` role, with their loot.
+  (pfQuest, QuestieDB, recordings), with their spawns and loot; treasures are
+  objects with the `chest` role, with their loot. Loot (`Codex.Loot`, where
+  the Rares view picks a signature drop) is every drop or object candidate
+  naming it, its own first (items no other NPC or object drops or holds:
+  Bayne's Bite, Serrated Shadowclaw), then best chance first, at most 150 (a
+  rare's candidates run to hundreds, median 286; 150 keeps every drop the
+  internal build names that Wowhead Forever confirms, for about 215 KB of
+  pack). An item keeps its 10 likeliest droppers (6 objects, 10 vendors) plus
+  the drops of its instances' bosses.
 - Precedence for a fact found in several places follows `docs/SUITE.md`;
   sources are deduplicated by type and id, keep their `from` provenance and the
   best-known drop chance.
@@ -1923,7 +2197,10 @@ built.
   is `{ type: vendor|drop|object|quest|craft|rep|pvp|
   container|world, from, ... }`), `npcs.json`, `objects.json`, `quests.json`
   (with `pre` = every blocking prerequisite, `preAny`, rewards from recordings
-  and ForeverLevelingBiS), `instances.json`, `zones.json`, `factions.json`,
+  and ForeverLevelingBiS, and `wowhead` on each quest Wowhead Forever's zone,
+  dungeon and raid lists carry: `{ zone, type, side, choices, items, money,
+  rep }`, the zone or instance category and the list's rewards, read by the
+  journal), `instances.json`, `zones.json`, `factions.json`,
   `spells.json` (mount and pet aura spell → item, class), `frames.json` (Era
   bounds for the pack's maps), `journal.json` (the Dungeons pages).
   An item's `status` is `nosource` without a source, and `retired` for a mount
@@ -1943,12 +2220,21 @@ built.
   missing and different rows; a difference whose value comes from a
   better-evidenced input says so and counts as a match; a corpse point is
   never taken for an entrance) and records the match per kind in its
-  `meta.parity`; without the internal build it claims none. `codex parity
+  `meta.parity`; without the internal build it claims none. A confirmed
+  missing drop or loot row that the build knows but a cap left out (the
+  merge's `evidence.cut`, not shipped) says so ("cut by a cap") and is
+  counted on its own line. A chest boss matches the internal row named after
+  its object (Chest of The Seven); a confirmed missing boss that Forever's
+  sources place outside every instance (Wowhead `location` or spawns off the
+  instance maps' areas: Techbot, Maraudon's Desolace caves) or rank an
+  ordinary NPC (no Wowhead boss flag, not rare, no green or better item
+  only it drops at 5% or more) says so, counted as "no boss of it in
+  Forever's sources". `codex parity
   [--ours <dir>] [--against <dir>]` reruns the comparison. The report also
   lists what only play can fill and the Recorder event that fills it
   (Forever instances and their entrances: `enter`, `encounter`; Forever
   rares: `rare`, `slain` + `drop`; quest givers, enders, rewards: `accept`,
-  `turnin`). On 2026-10-14 (Forever client 1.60.1.70338, the same
+  `turnin`). On 2026-10-15 (Forever client 1.60.1.70374, the same
   `data/forever`):
 
   | Kind | Internal | Release matching | Match |
@@ -1956,36 +2242,36 @@ built.
   | instances | 44 | 37 | 84.1% |
   | instance levels | 29 | 29 | 100.0% |
   | instance entrances | 14 | 13 | 92.9% |
-  | bosses | 373 | 272 | 72.9% |
-  | bosses with loot | 265 | 262 | 98.9% |
-  | boss loot items | 2066 | 1671 | 80.9% |
-  | drop chances | 20707 | 17770 | 85.8% |
-  | rares | 413 | 387 | 93.7% |
-  | rare positions | 363 | 357 | 98.3% |
-  | rare levels | 387 | 387 | 100.0% |
-  | rare loot | 14016 | 13816 | 98.6% |
+  | bosses | 373 | 333 | 89.3% |
+  | bosses with loot | 326 | 324 | 99.4% |
+  | boss loot items | 2306 | 1977 | 85.7% |
+  | drop chances | 20707 | 17533 | 84.7% |
+  | rares | 413 | 411 | 99.5% |
+  | rare positions | 387 | 384 | 99.2% |
+  | rare levels | 406 | 406 | 100.0% |
+  | rare loot | 51604 | 50787 | 98.4% |
   | treasures | 65 | 60 | 92.3% |
   | treasure positions | 31 | 31 | 100.0% |
-  | treasure loot | 1548 | 1508 | 97.4% |
-  | items with a source | 15967 | 15901 | 99.6% |
-  | items: drop | 8806 | 8666 | 98.4% |
-  | items: quest | 2092 | 2091 | 100.0% |
+  | treasure loot | 4502 | 4498 | 99.9% |
+  | items with a source | 16205 | 16187 | 99.9% |
+  | items: drop | 8806 | 8743 | 99.3% |
+  | items: quest | 2429 | 2429 | 100.0% |
   | items: vendor | 2248 | 2248 | 100.0% |
   | items: object | 3288 | 3287 | 100.0% |
-  | items: world | 4152 | 4145 | 99.8% |
+  | items: world | 4152 | 4150 | 100.0% |
   | items: craft | 1797 | 1797 | 100.0% |
   | items: container | 2095 | 2095 | 100.0% |
   | tabards | 40 | 40 | 100.0% |
-  | mounts | 135 | 134 | 99.3% |
-  | items: rep | 689 | 484 | 70.2% |
-  | pets | 89 | 87 | 97.8% |
-  | items: pvp | 763 | 451 | 59.1% |
-  | journal quests | 929 | 880 | 94.7% |
-  | quest givers | 641 | 628 | 98.0% |
-  | quest enders | 680 | 671 | 98.7% |
-  | quest rewards | 552 | 547 | 99.1% |
-  | quest XP | 731 | 722 | 98.8% |
-  | quest chains | 489 | 469 | 95.9% |
+  | mounts | 136 | 136 | 100.0% |
+  | items: rep | 980 | 975 | 99.5% |
+  | pets | 90 | 90 | 100.0% |
+  | items: pvp | 763 | 763 | 100.0% |
+  | journal quests | 833 | 823 | 98.8% |
+  | quest givers | 582 | 568 | 97.6% |
+  | quest enders | 618 | 608 | 98.4% |
+  | quest XP | 698 | 689 | 98.7% |
+  | quest chains | 481 | 474 | 98.5% |
+  | quest rewards | 582 | 577 | 99.1% |
 
   The gaps: seven Forever instances AtlasLoot lists ahead of release are not
   in the client (no `Map` row); the Hall of Thanes' entrance stays
@@ -1995,8 +2281,42 @@ built.
   Law's fighters, rare spawns, chests) are not `DungeonEncounter` rows;
   reputation standings that vendors gate in gossip, and battleground rewards
   AtlasLoot files as PvP, are in no client table (`ItemSparse` carries no
-  `MinFactionID` or `RequiredPVPRank` for them); 26 Forever rares no
-  database ranks yet.
+  `MinFactionID` or `RequiredPVPRank` for them, and Wowhead Forever's Sells
+  standing is that same `MinReputation`). A vendor's, giver's or quest's gate
+  comes from the cited table `tools/lib/codex/repgates.json`
+  (`loadRepGateTable`, provenance `curated`: rows `{ item, name, faction,
+  standing, npcs: [vendors or givers] | quest (+ choice), source, note? }`,
+  one per item and faction, each citing warcraft.wiki.gg, else Wowhead
+  Classic's reputation guides or QuestieDB; the Alterac Valley and Warsong
+  Gulch supply officers, Argent Dawn quartermasters, Timbermaw Hold, Duke
+  Hydraxis, Rin'wosho the Trader's barter quests, which the row also makes
+  the item's quest source since QuestieDB lists no rewards for them), from a
+  curated guide that collects the item and reaches the standing before its
+  `buy` (`curatedRepGates`, provenance `guides`: the Winterspring
+  Frostsaber, the Stormpike Battle Charger, the Frostwolf Howler), and a
+  quest's from QuestieDB (`minRep` or a reputation objective, the higher: a
+  `rep` source naming no vendor, and the quest's `repFaction`/`repStanding`,
+  which blocks its reward row in Lookup; a table row's standing replaces it,
+  with a warning when they differ). Precedence: client, then the table, then
+  a guide. A rep source at an item's vendor or giver sets its
+  `repFaction`/`repStanding`; Lookup gates each vendor or giver row by the
+  rep source standing at that npc, else (a purchase) by the item's own,
+  unless that is the other side's faction and a gate of the npc's side exists
+  (`Lookup.PurchaseRep`: Alterac Valley wares both sides' supply officers
+  sell). A table row whose item, vendor or quest the Codex lacks is a build
+  warning. What stays missing: the Insignia of the Dawn and of the Crusade
+  (quest rewards and turn-ins, no standing), the Bloodsail Shirt, Sash and
+  Pants (in the Buccaneer's Uniform, whose quest, Dressing the Part, carries
+  the Neutral gate) and the world-drop Warbear patterns 15742 and 15754
+  (Timbermaw Hold sells 20253 and 20254, gated in `ItemSparse`). An NPC that
+  casts a spell creating an item (client `SpellEffect` 24; who casts it,
+  Wowhead Forever's spell page, `codex wowhead` fetching those of items ours
+  has no source for) hands it out: a `gift { npc, spell }` source (Duke
+  Hydraxis's Aqual and Eternal Quintessence). 26 Forever rares no
+  database ranks yet. The 251 confirmed drop chances the release lacks are
+  all cut by an item's 10-dropper cap (the internal build keeps AtlasLoot's
+  instance trash past it; every dropper of every item would be 1.6 million
+  sources against 74 thousand).
 
 ### Reference data (`data/forever/`, built by `data build`, gitignored)
 
@@ -2081,14 +2401,18 @@ Optional extras: quests `skill` (profession requirement), `event` (holiday),
 `f`, `x`, `y`; npcs `levelMax`, `rank`, `roles` (flightmaster, innkeeper,
 vendor, trainer, ...), `subName`; objects `roles` (herb, mine, chest, ...); items
 `containers` (items that contain it), `questItem: true` (QuestieDB item class 12:
-drops only while on the quest). A drop chance is `null` when QuestieDB lists the
+drops only while on the quest), `duration` (seconds the item lasts once the
+player has it: the Forever client's ItemSparse DurationInInventory, when that
+table is cached; the timed-item lint reads it). A drop chance is `null` when QuestieDB lists the
 dropper but no source has a rate. From QuestieDB, each only when it has a
 value: quests `preAll` (all must be done; preQuestGroup), `preAny` (any one
 suffices; preQuestSingle), `breadcrumbFor` (the quest this optional breadcrumb
 leads to), `breadcrumbs` (breadcrumbs leading here), `parent` (must be active;
 parentQuest), `children` (childQuests), `requiredItems` (needed, not
 objectives), `sourceItem` (handed over at accept), `maxLevel`, `skillLevel`,
-`repeatable`, `reputation { faction, value }` (an objective), `area` (AreaTable id
+`repeatable`, `reputation { faction, value }` (an objective), `minRep { faction,
+value }` (requiredMinRep: the reputation value, 3000 Friendly, a character needs
+to take it), `area` (AreaTable id
 of the quest's zone or dungeon, QuestieDB zoneOrSort > 0); kill objectives
 `credit` (every npc id that gives the kill credit). `pre` keeps pfQuest's
 meaning (any one suffices, optional breadcrumbs included) for every quest
@@ -2127,9 +2451,9 @@ exclusive group: pfQuest `close` united with QuestieDB `exclusiveTo`.
    all rights reserved, Questie issue #4447). The data stays in `data/`, and
    only the importer is in this repository.
 3. **Wowhead Forever's change notes** (`tools/lib/data/wowhead.js`,
-   `--no-wowhead` skips them): the quest list of every zone and city page and
-   of the nine class pages (class quests are filed there, not under a zone) on
-   wowhead.com/forever (cached a day in `data/sources/wowhead/zones.json`;
+   `--no-wowhead` skips them, as does a build without QuestieDB): the quest
+   list of every zone and city page and of the nine class pages (class
+   quests are filed there, not under a zone) on wowhead.com/forever (cached a day in `data/sources/wowhead/zones.json`;
    `--offline` reads the cache). A quest Wowhead marks updated with "Experience
    X instead of Y", "Level X instead of Y" or "Requires level X instead of Y"
    gets X where its value is still the old Y (for XP, also where it has none),
@@ -2147,7 +2471,8 @@ exclusive group: pfQuest `close` united with QuestieDB `exclusiveTo`.
    npc/object fields (`set`: the Forever elite and rare ranks QuestieDB's
    Forever store lacks, since it gives every Forever npc rank 0, and renamed
    Era records) and npc/object spawn maps (`addSpawns`). They are applied
-   after the merge, and the record's `source` gains `polestar-correction`. One
+   after the merge, only in a build that reads QuestieDB, and the record's
+   `source` gains `polestar-correction`. One
    cleanup is general rather than per quest: `pre`, `preAll` and `preAny`
    never contain the quest itself or an id from its `excl`. QuestieDB
    preQuestSingle sometimes lists the whole exclusive group.
@@ -2156,7 +2481,7 @@ exclusive group: pfQuest `close` united with QuestieDB `exclusiveTo`.
    the rules of their own paragraph there.
 
 `source` on every quest, npc, object and item lists its contributors in
-that order: `pfquest`, `questie-forever`, `wowhead:*`, `polestar-correction`, `recorder`, plus the XP source tag.
+that order: `pfquest`, `questie-forever`, `wowhead:*` (change notes), `polestar-correction`, the web XP tag, `recorder`, then the recorded XP tag (`recorder:xp-*`).
 Blizzard map tables come from wago.tools: Classic Era (`wow_classic_era`) for
 the Era frames pfQuest's coordinates use, and the Forever client
 (`wow_classic_beta` builds 1.60+, `--forever-build`, `--no-forever`) for

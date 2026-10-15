@@ -187,7 +187,9 @@ function emitMapFrames(frames, packId) {
 // Core/ClassTrainers.lua: the class trainers the training reminder picks
 // from (candidates: { npc, npcName, map, x, y, f, faction, classes }), with
 // the Era bounds of every map they stand on.
-function emitClassTrainers(trainers, frames) {
+// trainers: the reminder's candidates (one per town and class); byClass:
+// { classFile: [npcId, ...] }, every class trainer, for Engine.IsClassTrainer.
+function emitClassTrainers(trainers, frames, byClass) {
 	const ids = Object.keys(frames)
 		.map(Number)
 		.sort((a, b) => a - b);
@@ -201,6 +203,8 @@ function emitClassTrainers(trainers, frames) {
 	for (const id of ids) out.push(`\t\t[${id}] = ${inline(frames[id], FRAME_KEYS, 4)},`);
 	out.push('\t},', '})', '', 'ns.RegisterClassTrainers({');
 	for (const t of trainers) out.push(`\t${inline(t, CANDIDATE_KEYS)},`);
+	out.push('})', '', 'ns.RegisterClassTrainerIds({');
+	for (const cls of Object.keys(byClass || {}).sort()) out.push(`\t${cls} = { ${byClass[cls].join(', ')} },`);
 	out.push('})');
 	return `${out.join('\n')}\n`;
 }

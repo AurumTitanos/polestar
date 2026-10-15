@@ -5,14 +5,25 @@
 //
 // Quest lists: /forever/quests/<continent>/<zone> carries a Listview of the
 // zone's quests: id, name, level, reqlevel, xp, category (the zone's AreaTable
-// id) and envChange { status: new | updated | unchanged, lines }. Class quests
-// are filed under the class instead (/forever/quests/classes/<class>, a
-// negative category per class). Wowhead answers an unknown path with a generic
-// list, so only rows whose category is the page's own count.
+// id), type (Wowhead's quest type: 81 Dungeon, 62 Raid, 1 Elite, 41 PvP),
+// side (1 Alliance, 2 Horde, 3 both), itemchoices and itemrewards ([[item,
+// count]]: one of the choices, every one of the rewards), money (copper),
+// reprewards ([[faction, value]]) and envChange { status: new | updated |
+// unchanged, lines }. Class quests are filed under the class instead
+// (/forever/quests/classes/<class>, a negative category per class), dungeon
+// and raid quests under their instance (/forever/quests/dungeons and
+// /forever/quests/raids list every one, each row's category the instance's
+// area: 1581 The Deadmines). Wowhead answers an unknown path with a generic
+// list, so only rows whose category is the page's own count (any category on
+// the dungeon and raid pages).
 //
-// Cache: <sources>/wowhead/zones.json ({ fetchedAt, zones: { "<area>": rows } }),
-// refetched once it is a day old (Wowhead adds quests as players find them);
-// --offline builds read it and fetch nothing.
+// Cache: <sources>/wowhead/zones.json ({ version, fetchedAt, pages: ["<page>",
+// ...], zones: { "<area>": rows } }), refetched once it is a day old (Wowhead
+// adds quests as players find them), when it lacks a page the build now reads
+// or when an older parser wrote it (`version`); --offline builds read it and
+// fetch nothing. A row: { id, name, level, reqlevel, xp, type, side, choices,
+// items, money, rep, status, lines } (choices / items [[item, count]], rep
+// [[faction, value]]).
 //
 // What the build does with it:
 // - applyChangeNotes: a note "Experience X instead of Y", "Level X instead of
@@ -23,6 +34,10 @@
 //   alone.
 // - fillWowheadXp: XP for quests still without any after QuestieDB and the web
 //   XP sources, from the zone list's xp.
+// - applyWowheadFacts: each listed quest's `wowhead` record { zone, type,
+//   side, choices, items, money, rep } (zone: the row's category), which
+//   `codex build` reads for the Dungeons journal (Wowhead's instance
+//   category, rewards a recording or ForeverLevelingBiS lack).
 // Wowhead's Forever database also lists datamined quests that are not live
 // (<NYI> placeholders, Season of Discovery leftovers), so a quest's presence
 // there says nothing about whether it is in the game.
@@ -33,6 +48,8 @@ const path = require('node:path');
 const BASE = 'https://www.wowhead.com/forever';
 const CONCURRENCY = 4;
 const ZONE_TTL_MS = 24 * 60 * 60 * 1000;
+// Bumped when a row gains fields: an older cache is read again.
+const CACHE_VERSION = 2;
 const CONTINENTS = { 1414: 'kalimdor', 1415: 'eastern-kingdoms' };
 // Wowhead's quest categories for the class pages.
 const CLASS_PAGES = [
@@ -65,8 +82,11 @@ function plain(s) {
 	return String(s).replace(/<[^>]*>/g, '').replace(/&amp;/g, '&').replace(/&#0?39;|&#x27;/g, "'").trim();
 }
 
+const pairs = (v) => (Array.isArray(v) ? v.filter((p) => Array.isArray(p) && Number.isInteger(p[0]) && p[0] > 0).map((p) => [p[0], Number(p[1]) || 1]) : []);
+
 // Zone page HTML -> rows of the quest Listview whose category is `area`
-// ([] for a page without one).
+// (any category when `area` is null: the dungeon and raid pages), each with
+// its category as `zone` ([] for a page without one).
 function parseZoneQuests(html, area) {
 	const i = html.indexOf("new Listview({template: 'quest'");
 	if (i < 0) return [];
@@ -74,13 +94,20 @@ function parseZoneQuests(html, area) {
 	const open = d < 0 ? -1 : html.indexOf('[', d);
 	if (open < 0) return [];
 	return arrayAt(html, open)
-		.filter((q) => q.category === area && Number.isInteger(q.id))
+		.filter((q) => (area === null ? Number.isInteger(q.category) : q.category === area) && Number.isInteger(q.id))
 		.map((q) => ({
 			id: q.id,
 			name: q.name,
+			zone: q.category,
 			level: q.level || null,
 			reqlevel: q.reqlevel || null,
 			xp: q.xp || null,
+			type: q.type || 0,
+			side: q.side || 0,
+			choices: pairs(q.itemchoices),
+			items: pairs(q.itemrewards),
+			money: q.money || 0,
+			rep: pairs(q.reprewards),
 			status: (q.envChange && q.envChange.status) || 'unchanged',
 			lines: ((q.envChange && q.envChange.lines) || []).map(plain),
 		}))
@@ -109,19 +136,24 @@ function parseChangeNotes(lines) {
 }
 
 // Quest lists worth asking for: the class pages, then zone and city maps
-// (UiMap type 3) with an area. A zone's continent comes from its parent; a
-// zone without one is tried under both continents and bare.
+// (UiMap type 3) with an area, then every dungeon's and raid's quests (two
+// pages, `area` null: rows of any category). A zone's continent comes from
+// its parent; a zone without one is tried under both continents and bare.
+const INSTANCE_PAGES = [
+	{ area: null, page: 'dungeons', name: 'Dungeons', paths: ['dungeons'] },
+	{ area: null, page: 'raids', name: 'Raids', paths: ['raids'] },
+];
 function zonePages(zones) {
-	const out = CLASS_PAGES.map(([name, area]) => ({ area, name, paths: [`classes/${name.toLowerCase()}`] }));
+	const out = CLASS_PAGES.map(([name, area]) => ({ area, page: String(area), name, paths: [`classes/${name.toLowerCase()}`] }));
 	const seen = new Set();
 	for (const z of Object.values(zones)) {
 		if (z.type !== 3 || !z.areaId || !z.name || seen.has(z.areaId)) continue;
 		seen.add(z.areaId);
 		const s = slug(z.name);
 		const cont = CONTINENTS[z.parent];
-		out.push({ area: z.areaId, name: z.name, paths: cont ? [`${cont}/${s}`] : [`kalimdor/${s}`, `eastern-kingdoms/${s}`, s] });
+		out.push({ area: z.areaId, page: String(z.areaId), name: z.name, paths: cont ? [`${cont}/${s}`] : [`kalimdor/${s}`, `eastern-kingdoms/${s}`, s] });
 	}
-	return out.sort((a, b) => a.area - b.area);
+	return [...out.sort((a, b) => a.area - b.area), ...INSTANCE_PAGES];
 }
 
 async function get(fetchImpl, url) {
@@ -144,25 +176,32 @@ async function loadZoneQuests({ sourcesDir, zones, offline = false, fetchImpl = 
 	const file = path.join(sourcesDir, 'wowhead', 'zones.json');
 	let cache = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : null;
 	const warnings = [];
-	if ((!cache || now - Date.parse(cache.fetchedAt) >= ZONE_TTL_MS) && !offline) {
-		const pages = zonePages(zones);
+	const pages = zonePages(zones);
+	// A cache read before a page was added to the list (the class pages, a new
+	// zone, the dungeon and raid pages) or by an older parser is stale too,
+	// whatever its age: it records the pages it read (older caches: the pages
+	// that had rows).
+	const read = new Set((cache && (cache.pages || Object.keys(cache.zones || {}))) || []);
+	const missing = pages.some((z) => !read.has(z.page)) || !cache || cache.version !== CACHE_VERSION;
+	if ((!cache || missing || now - Date.parse(cache.fetchedAt) >= ZONE_TTL_MS) && !offline) {
 		log(`reading ${pages.length} Wowhead Forever zone quest lists`);
-		const fresh = { fetchedAt: new Date(now).toISOString(), zones: {} };
+		const fresh = { version: CACHE_VERSION, fetchedAt: new Date(now).toISOString(), pages: pages.map((z) => z.page), zones: {} };
 		let errors = 0;
 		await pool(pages, async (z) => {
 			try {
 				for (const p of z.paths) {
 					const rows = parseZoneQuests((await get(fetchImpl, `${BASE}/quests/${p}`)) || '', z.area);
-					if (rows.length) {
-						fresh.zones[z.area] = rows;
-						break;
-					}
+					if (!rows.length) continue;
+					// A dungeon or raid page's rows go under their own instance's area.
+					for (const r of rows) (fresh.zones[r.zone] = fresh.zones[r.zone] || []).push(r);
+					break;
 				}
 			} catch (err) {
 				errors++;
 				if (errors <= 3) warnings.push(`Wowhead ${z.name}: ${err.message}`);
 			}
 		});
+		for (const list of Object.values(fresh.zones)) list.sort((a, b) => a.id - b.id);
 		if (errors) {
 			warnings.push(`${errors} Wowhead zone lists failed; ${cache ? 'kept the cached lists' : 'building without them'}`);
 		} else {
@@ -173,7 +212,7 @@ async function loadZoneQuests({ sourcesDir, zones, offline = false, fetchImpl = 
 		}
 	}
 	const rows = new Map();
-	if (cache) for (const list of Object.values(cache.zones)) for (const r of list) rows.set(r.id, r);
+	if (cache) for (const [zone, list] of Object.entries(cache.zones)) for (const r of list) rows.set(r.id, r.zone === undefined ? { ...r, zone: Number(zone) } : r);
 	else warnings.push(offline ? '--offline: no cached Wowhead zone lists' : 'no Wowhead zone lists');
 	return { rows, file, fetchedAt: cache ? cache.fetchedAt : null, warnings };
 }
@@ -221,4 +260,33 @@ function fillWowheadXp(quests, rows) {
 	return n;
 }
 
-module.exports = { BASE, slug, parseZoneQuests, parseChangeNotes, zonePages, loadZoneQuests, applyChangeNotes, fillWowheadXp };
+// Wowhead's instance category, type, side and rewards on each listed quest
+// (`wowhead`, read by `codex build`). -> count of quests given one
+//
+// Where Forever changed a quest's rewards, Wowhead's row can name an item as
+// both a choice and a reward: Deviate Hides (1486) lists Deviate Hide Pack and
+// Slick Deviate Leggings in both, its notes saying "Rewards: adds Deviate Hide
+// Pack, Slick Deviate Leggings" and "no longer Choice of ..." (both given
+// now); Serpentbloom (962) lists Apothecary Gloves in both, its note "adds
+// Choice of Heat Resistant Mitts, Choice of Safety Boots" (the gloves became
+// one of three choices). So an item in both is a reward when a note says
+// "no longer Choice of", else a choice. A reputation of 1 (Magram Alliance's
+// Gelkis Clan Centaur, a Silithus quest's Stormwind) is no amount Wowhead
+// knows: left out.
+function applyWowheadFacts(quests, rows) {
+	let n = 0;
+	for (const r of rows.values()) {
+		const q = quests[r.id];
+		if (!q || r.type === undefined) continue;
+		const choiceIds = new Set(r.choices.map((p) => p[0]));
+		const noLongerChoice = r.lines.some((l) => /^Rewards: no longer Choice of /.test(l));
+		const both = r.items.filter((p) => choiceIds.has(p[0])).map((p) => p[0]);
+		const choices = noLongerChoice ? r.choices.filter((p) => !both.includes(p[0])) : r.choices;
+		const items = noLongerChoice ? r.items : r.items.filter((p) => !choiceIds.has(p[0]));
+		q.wowhead = { zone: r.zone ?? null, type: r.type, side: r.side, choices, items, money: r.money, rep: r.rep.filter((p) => Math.abs(p[1]) > 1) };
+		n++;
+	}
+	return n;
+}
+
+module.exports = { BASE, slug, parseZoneQuests, parseChangeNotes, zonePages, loadZoneQuests, applyChangeNotes, fillWowheadXp, applyWowheadFacts };

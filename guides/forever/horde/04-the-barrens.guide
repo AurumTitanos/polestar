@@ -63,8 +63,12 @@ next forever/horde/05-stonetalon-mountains
 # Foothills (493, from Silverpine) and Rilli Greasygob (3923).
 #
 # Class quests (training trip at 20): Warrior Speak with Ruga / Trial at the
-# Field of Giants / Speak with Thun'grim (1823-1825); Brutal Armor (1838
-# onwards) is in the Warrior class guide Brutal Armor. Shaman Call of Water
+# Field of Giants / Speak with Thun'grim (1823-1825); the Twitching Antennae
+# vanish 15 minutes after they drop (ItemSparse 7119, 900 s), so Warriors
+# gather them at the Field of Giants after Gann's last turn-in and hearth to
+# Ruga at once, not on the first pass before the hour-long southern loop.
+# Brutal Armor (1838 onwards) is in the Warrior class guide Brutal Armor.
+# Shaman Call of Water
 # (1528, 1530, 1535; 1536 waits at the Spring Well beside Tarren Mill); Warlock
 # succubus chain (1507-1513, The Binding on the last Orgrimmar trip). The
 # incubus (Love Hurts 65601, Wish You Were Here 65610, The Binding 65604,
@@ -417,7 +421,6 @@ step Jorn Skyseer
 step Field of Giants
   tip South of Camp Taurajo the Silithid Mounds dot the Field of Giants; the eggs lie in them, and Silithid Swarmers come out to defend them. Silithid Harvesters are rare: if you see one, kill it for its head.
   collect 5058 quest 868.1
-  collect 7119 quest 1824.1 only Warrior -- Twitching Antennae from the silithid
   collect 5138 optional               -- Harvester's Head
   accept 897 optional
 
@@ -472,6 +475,11 @@ step The flying machine
 
 step Gann Stonespire
   turnin 849
+
+step Twitching Antennae
+  only Warrior
+  tip The antennae vanish fifteen minutes after they drop, so gather them now, on the way back north: kill the Silithid Swarmers and Creepers at the Field of Giants' mounds until you have five, then hearth to Camp Taurajo straight away.
+  collect 7119 quest 1824.1           -- Twitching Antennae from the silithid
 
 # ---------------------------------------------------------------- Back north
 

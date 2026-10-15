@@ -1924,11 +1924,13 @@ W.OptionsRegistry = registry
 
 local CONTROL_KINDS = { toggle = true, slider = true, dropdown = true, color = true, button = true }
 
--- spec = { page, icon, order, tab, section, controls = { { kind, key, label, help, ... } } }
+-- spec = { page, key, icon, order, tab, section, controls = { { kind, key, label, help, ... } } }
+-- page is the title as shown, key (optional) the page's stable key.
 -- -> true | false, err
 function ns.RegisterOptions(spec)
 	if type(spec) ~= "table" then return false, "RegisterOptions: spec must be a table" end
 	if type(spec.page) ~= "string" or spec.page == "" then return false, "RegisterOptions: page must be a string" end
+	if spec.key ~= nil and (type(spec.key) ~= "string" or spec.key == "") then return false, "RegisterOptions: key must be a string" end
 	if type(spec.controls) ~= "table" then return false, "RegisterOptions: controls must be a list" end
 	for i, c in ipairs(spec.controls) do
 		if type(c) ~= "table" or not CONTROL_KINDS[c.kind] then

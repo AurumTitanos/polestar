@@ -14,7 +14,8 @@
 --                                     ("missing", "disabled", "combat", ...), "nodata" (pack built without Dungeons)
 --   Dungeons.IsEnabled() ; Dungeons.Meta()
 --   Dungeons.List() -> { { key, name, kind, forever, minLevel, maxLevel, players, zone, zoneName,
---       entrance = { map, x, y, f } | nil, quests = { A = n, H = n }, bosses = n } }   -- level order, no page decoded
+--       entrance = { map, x, y, f } | nil, quests = { A = n, H = n }, bosses = n,
+--       attune = { A = n, H = n } } }   -- level order, no page decoded
 --   Dungeons.Get(key) -> { key, name, kind, forever, minLevel, maxLevel, players, zone, zoneName, entrance } | nil
 --   Dungeons.Entrance(key) -> map, x, y, f | nil
 --   Dungeons.Quests(key, faction) -> { quest, ... }   -- faction "A" | "H" | nil (all); level order
@@ -23,7 +24,9 @@
 --         start, finish (= { kind, id, name, map, x, y, f, inside }), startItem = { id, name },
 --         chain = { ids }, rewards = { items = { { id, name, quality, choice } }, xp, money, rep = { { faction, name, value } } },
 --         bosses = { names } }
---   Dungeons.Bosses(key) -> { { order, name, npc, level, quests = { { id, how, item, itemName } } } }
+--   Dungeons.Bosses(key) -> { { order, name, npc, level, object, role, quests = { { id, how, item, itemName } } } }
+--       object: a chest boss's object id (npc nil); role: "rare" | "event" | "optional" for the
+--       bosses after the encounters, nil for an encounter (and on pages built before roles)
 --       how: "kill" (an objective), "item" (drops an objective item), "starts" (drops the item
 --       that starts it), "involved" (DungeonJournal names it for the quest)
 --   Dungeons.Open(key|nil)   -- fires SHOW_DUNGEON(key); the hub section listens
@@ -31,8 +34,19 @@
 --   Dungeons.ShowOnMap(key) -> ok   -- the world map on the entrance's zone
 --   Dungeons.Find(text) -> key | nil
 --   Dungeons.Register(group, a, b)  -- pack files only
---   Picking up a page's quests (PickupPlan, PickupGuide, PickUp, GiverTarget):
---   Dungeons/Pickup.lua.
+--   Dungeons.Attunements(key, faction) -> { attunement, ... }   -- faction "A" | "H" | nil (all)
+--       attunement = { id, name, kind = "attunement"|"key"|"item", need = "each"|"one", faction,
+--         item = { id, name, quality }, note, level, any, goal = { questIds }, steps = { step, ... } }
+--       step: { kind = "quest", id, title, level, minLevel, faction, classes, start, finish,
+--         startItem, after = { ids }, afterAny = { ids }, goal, rep = { faction, name, standing } }
+--         | { kind = "drop", item, npc = point, chance, instance } | { kind = "object", item, object = point, chance }
+--         | { kind = "rep", faction, name, standing } | { kind = "gift", item, npc = point }
+--       (tools/lib/codex/attunements.js; their state and guide: Dungeons/Attune.lua)
+--   Picking up a page's quests (PickupPlan, PickupGuide, PickUp, GiverTarget,
+--   PlanStops, OrderStops): Dungeons/Pickup.lua. Handing them in after the
+--   run (HandinPlan, HandinFollowUps, HandinGuide, HandIn, HandinText):
+--   Dungeons/Handin.lua. Attunements and keys (AttunementState, AttuneGuide,
+--   Attune): Dungeons/Attune.lua.
 -- Settings: dungeons.enabled. Command: /polestar dungeons [name].
 
 local ADDON, ns = ...
@@ -101,6 +115,7 @@ local function page(key)
 	p.quests = p.quests or {}
 	p.chain = p.chain or {}
 	p.bosses = p.bosses or {}
+	p.attunement = p.attunement or {}
 	openKey, openPage = key, p
 	return p
 end
@@ -115,6 +130,7 @@ local function summary(key, s)
 		minLevel = s.minLevel, maxLevel = s.maxLevel, players = s.players, zone = s.zone, zoneName = s.zoneName,
 		entrance = s.entrance,
 		quests = { A = s.quests and s.quests.A or 0, H = s.quests and s.quests.H or 0 }, bosses = s.bosses or 0,
+		attune = { A = s.attune and s.attune.A or 0, H = s.attune and s.attune.H or 0 },
 	}
 end
 
@@ -164,6 +180,16 @@ end
 function Dungeons.Bosses(key)
 	local p = page(key)
 	return p and p.bosses or {}
+end
+
+function Dungeons.Attunements(key, faction)
+	local p = page(key)
+	if not p then return {} end
+	local out = {}
+	for _, a in ipairs(p.attunement) do
+		if not faction or not a.faction or a.faction == faction then out[#out + 1] = a end
+	end
+	return out
 end
 
 function Dungeons.Find(text)

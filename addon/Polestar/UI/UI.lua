@@ -18,6 +18,7 @@ local format, type = string.format, type
 ns.RegisterDefaults("ui", {
 	shown = true,
 	locked = false,
+	growUp = false, -- pin the guide window by its bottom edge, so it grows upward
 	compact = false,
 	style = "standard", -- "standard" | "transparent"
 	scale = 1,
@@ -296,12 +297,12 @@ function UI.AreaLine(goal)
 end
 
 -- Creature ranks as the client names them.
-local RANK = { [1] = "elite", [2] = "rare elite", [3] = "boss", [4] = "rare" }
+local RANK = { [1] = L["elite"], [2] = L["rare elite"], [3] = L["boss"], [4] = L["rare"] }
 
 -- "Aean Swiftriver (rare elite)": a source's name with its rank.
 local function sourceName(src)
 	local rank = RANK[src.rank]
-	return rank and (src.name .. " (" .. L[rank] .. ")") or src.name
+	return rank and (src.name .. " (" .. rank .. ")") or src.name
 end
 
 -- Where a collected item comes from, when one source has it (the goal's
@@ -320,13 +321,13 @@ end
 -- advised", "Rare elite: group advised", "Boss: group advised", "Dungeon:
 -- Dire Maul", "Raid: Molten Core", "Group of 3 advised" or "Group advised",
 -- in the dungeon colour. Nil once the goal is done or skipped.
-local ELITE_LINE = { [1] = "Elite: group advised", [2] = "Rare elite: group advised", [3] = "Boss: group advised" }
+local ELITE_LINE = { [1] = L["Elite: group advised"], [2] = L["Rare elite: group advised"], [3] = L["Boss: group advised"] }
 function UI.GroupLine(goal)
 	local p = goal.party
 	if type(p) ~= "table" or goal.status == "done" or goal.status == "skipped" then return nil end
 	local text
 	if p.kind == "elite" then
-		text = L[ELITE_LINE[p.rank] or ELITE_LINE[1]]
+		text = ELITE_LINE[p.rank] or ELITE_LINE[1]
 	elseif (p.kind == "dungeon" or p.kind == "raid") and type(p.name) == "string" then
 		text = format(p.kind == "raid" and L["Raid: %s"] or L["Dungeon: %s"], p.name)
 	elseif p.kind == "group" then

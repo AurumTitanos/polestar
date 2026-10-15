@@ -310,12 +310,22 @@ step "Auntie" Bernice Stonefield
   turnin 86
   accept 84
 
+# Goldtooth (41.71,78.03) is inside the Fargodeep Mine, under the hill: "He
+# was always INSIDE the mine, in the back, on the ground level. Stay leftish"
+# (https://www.wowhead.com/forever/npc=327, comments, 2026); "Enter mine 39 82
+# and go to 41 78 to kill him" and "Don't go up the stairs for Goldtooth!"
+# (https://www.wowhead.com/classic/quest=87, comments); "Enter is on 39 83"
+# (https://www.wowhead.com/classic/quest=62, comments). The mouth, 39.5,82.4,
+# lies between the Kobold Tunnelers outside it (39.33,83.2, 39.6,82.13) and
+# the Kobold Miners inside (39.85,81.06 on). From Billy a straight line to
+# Goldtooth climbs the hill above the mine, so the step ends at the mouth.
 step Billy Maclure
   turnin 84
   accept 87
+  goto 39.5,82.4 "Fargodeep Mine's mouth"
 
 step Goldtooth
-  tip Goldtooth, a named kobold, sits in the back of the Fargodeep Mine's lower level. Defias Bandits around the vineyards drop a Westfall Deed now and then: right-click it.
+  tip Goldtooth is inside the Fargodeep Mine, not on the hill above it: go in at the mouth and keep left to the back of the mine floor; don't take the stairs up. Defias Bandits around the vineyards drop a Westfall Deed now and then: right-click it.
   collect 981 quest 87                        -- Bernice's Necklace
   collect 1972 x1 optional                    -- Westfall Deed
   accept 184 optional
@@ -391,6 +401,10 @@ step Stone Cairn Lake
 step The gnoll camps
   tip Riverpaw gnolls camp in the hills west of Stone Cairn Lake; the Stolen Enchanting Supplies lie in their camps.
   collect 247805 quest 91725                  -- Stolen Enchanting Supplies
+
+# "The mine entrance is at 61.6,54.1" (https://www.wowhead.com/classic/quest=76, comments).
+step The Jasperlode Mine's entrance
+  goto 61.6,54.1 "The Jasperlode Mine"
 
 step The Jasperlode Mine
   tip The mine is south-west of the gnoll camps. Mining Tools lie near the entrance; Kobold Geomancers hold the tunnels.

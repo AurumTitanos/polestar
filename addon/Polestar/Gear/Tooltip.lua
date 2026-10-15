@@ -26,13 +26,22 @@ local abs = math.abs
 
 local SAME = 0.05 -- percent: closer than this reads as "same"
 
--- Equipment slot -> its name on the tooltip line.
+-- Equipment slot -> its name on the tooltip line, translated under its own
+-- key ("slot: Back"): "Back" is also the welcome's button and "Chest" a
+-- dungeon boss's chest.
+local LC = ns.LC
 local SLOT_NAME = {
-	[1] = "Head", [2] = "Neck", [3] = "Shoulder", [5] = "Chest", [6] = "Waist", [7] = "Legs", [8] = "Feet",
-	[9] = "Wrist", [10] = "Hands", [11] = "Finger", [12] = "Finger", [13] = "Trinket", [14] = "Trinket",
-	[15] = "Back", [16] = "Main hand", [17] = "Off hand", [18] = "Ranged",
+	[1] = LC("slot", "Head"), [2] = LC("slot", "Neck"), [3] = LC("slot", "Shoulder"), [5] = LC("slot", "Chest"),
+	[6] = LC("slot", "Waist"), [7] = LC("slot", "Legs"), [8] = LC("slot", "Feet"), [9] = LC("slot", "Wrist"),
+	[10] = LC("slot", "Hands"), [11] = LC("slot", "Finger"), [12] = LC("slot", "Finger"), [13] = LC("slot", "Trinket"),
+	[14] = LC("slot", "Trinket"), [15] = LC("slot", "Back"), [16] = LC("slot", "Main hand"), [17] = LC("slot", "Off hand"),
+	[18] = LC("slot", "Ranged"),
 }
-Gear.SLOT_NAME = SLOT_NAME
+
+-- -> the slot's name in the client's language, or nil for a slot without one.
+function Gear.SlotName(slot)
+	return SLOT_NAME[slot]
+end
 
 local function color(name, fr, fg, fb)
 	local T = ns.Theme
@@ -49,7 +58,10 @@ local function prefix()
 	return L["Polestar"]
 end
 
-local REASON = { class = "not for your class", armor = "armor you cannot wear", weapon = "weapon you cannot use", dualwield = "needs Dual Wield" }
+local REASON = {
+	class = L["not for your class"], armor = L["armor you cannot wear"],
+	weapon = L["weapon you cannot use"], dualwield = L["needs Dual Wield"],
+}
 
 function Gear.TooltipLine(link)
 	local r = Gear.CompareToEquipped(link)
@@ -57,7 +69,7 @@ function Gear.TooltipLine(link)
 	if not r.usable then
 		if not r.reason then return nil end
 		local cr, cg, cb = color("textMuted", 0.5, 0.54, 0.63)
-		return prefix(), L[REASON[r.reason]], cr, cg, cb
+		return prefix(), REASON[r.reason], cr, cg, cb
 	end
 	if not r.delta then return nil end
 	local right, cr, cg, cb
@@ -80,7 +92,8 @@ function Gear.TooltipLine(link)
 		right = right .. " " .. L["at level"] .. " " .. r.minLevel
 		cr, cg, cb = color("warning", 0.98, 0.75, 0.3)
 	end
-	if r.slot and SLOT_NAME[r.slot] and not r.empty then right = right .. " · " .. L[SLOT_NAME[r.slot]] end
+	local slotName = r.slot and not r.empty and Gear.SlotName(r.slot)
+	if slotName then right = right .. " · " .. slotName end
 	return prefix(), right, cr, cg, cb
 end
 

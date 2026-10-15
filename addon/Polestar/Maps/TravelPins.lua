@@ -18,9 +18,9 @@ local L = ns.L
 local type, ipairs, lower, format = type, ipairs, string.lower, string.format
 
 local KIND = {
-	boat = { label = "Boat to %s", color = "npc" },
-	zeppelin = { label = "Zeppelin to %s", color = "place" },
-	tram = { label = "Deeprun Tram to %s", color = "object" },
+	boat = { label = L["Boat to %s"], color = "npc" },
+	zeppelin = { label = L["Zeppelin to %s"], color = "place" },
+	tram = { label = L["Deeprun Tram to %s"], color = "object" },
 }
 
 local function color(name, a)
@@ -73,7 +73,7 @@ end
 local function dockTooltip(t, here, there, ride, waitThere, waitHere)
 	return function(tip)
 		local kind = KIND[t.kind] or KIND.boat
-		tip:SetText(format(L[kind.label], there.name), rgb("text"))
+		tip:SetText(format(kind.label, there.name), rgb("text"))
 		tip:AddLine(format(L["From %s"], here.name), rgb("textDim"))
 		if ride then
 			tip:AddDoubleLine(L["Ride"], Maps.FormatTime(ride), rgb("textDim"))

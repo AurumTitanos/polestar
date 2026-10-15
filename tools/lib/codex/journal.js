@@ -10,7 +10,7 @@
 // Polestar.Dungeons (addon/Polestar/Dungeons/Dungeons.lua).
 //
 //   instanceMapsOf(mapRows, areaRows)  Map (+ AreaTable) CSV rows -> [ { id, name, raid, players, area,
-//                                      areas: [areaIds], zones: [areaIds], corpse: { c, x, y } | null } ]
+//                                      areas: [areaIds], inner: [areaIds on the map itself], zones: [areaIds], corpse: { c, x, y } | null } ]
 //   zonePoint(frames, c, wx, wy, prefer) world point -> { map, x, y, f } on a zone frame
 //   buildJournal(inputs, codex)        -> { meta, dungeons: { key: Page } }
 //   emitJournal(journal)               -> [ { name: 'Dungeons1.lua', text } ]
@@ -23,7 +23,9 @@
 // Page: { key, name, kind, forever, minLevel, maxLevel, players, zone, zoneName,
 //   entrance: { map, x, y, f } | null,
 //   quests: [ Quest ] (level order), chain: { id: Quest } (prerequisites not on the page),
-//   bosses: [ { order, name, npc, level, quests: [ { id, how, item?, itemName? } ] } ] }
+//   bosses: [ { order, name, npc, level, object?, role?, quests: [ { id, how, item?, itemName? } ] } ],
+//   attunement: [ Attunement ] (tools/lib/codex/attunements.js; none: absent) }
+//   (object: a chest boss's object id; role: rare | event | optional, the bosses after the encounters)
 // Quest: { id, title, level, minLevel, faction 'A'|'H'|null, classes|null, inside, shareable,
 //   objective|null, start|null, finish|null (each { kind, id, name, map, x, y, f, inside }),
 //   startItem: { id, name }|null, chain: [ids, oldest first],
@@ -33,6 +35,8 @@
 // Facts only (ids, names, levels, coordinates, amounts); the objective line is
 // our own wording built from the objective facts.
 
+const fs = require('node:fs');
+const path = require('node:path');
 const { header } = require('../generated');
 
 const SCHEMA = 2;
@@ -79,6 +83,8 @@ function instanceMapsOf(mapRows, areaRows) {
 		const y = num(r.Corpse_1);
 		const areas = new Set(areasByMap[id] || []);
 		if (num(r.AreaTableID)) areas.add(num(r.AreaTableID));
+		// The areas on the instance's own map (what Wowhead's `location` names).
+		const inner = [...areas].sort((a, b) => a - b);
 		// Areas of the same name outside the instance (Questie files some
 		// dungeon quests under the outdoor sub-zone, e.g. Gnomeregan in Dun Morogh).
 		const zones = new Set();
@@ -94,6 +100,7 @@ function instanceMapsOf(mapRows, areaRows) {
 			players: num(r.MaxPlayers) || null,
 			area: num(r.AreaTableID) || null,
 			areas: [...areas].sort((a, b) => a - b),
+			inner,
 			zones: [...zones].sort((a, b) => a - b),
 			corpse: c >= 0 && (x || y) ? { c, x, y } : null,
 		});
@@ -127,18 +134,32 @@ function zonePoint(frames, c, wx, wy, prefer = []) {
 // Quests
 // ---------------------------------------------------------------------------
 
-// The quests before `id` (oldest first), following each quest's first prerequisite.
-function chainOf(quests, id) {
+// Every quest before `id`, oldest first: its prerequisites (`pre`, `preAll`,
+// each `preAny` alternative) and the breadcrumbs that lead to it, and theirs,
+// depth first so a quest follows the ones it needs; the other side's are left
+// out (`side` 'A' | 'H' | null), at most 20. One prerequisite per quest left
+// Nathanos Blightcaller's errands for The Call to Command (6144: 6135 and
+// 6136) and the breadcrumbs (Speak with Shoni before Underground Assault) off
+// the page.
+const CHAIN_MAX = 20;
+function chainOf(quests, fq, id, side) {
 	const chain = [];
 	const seen = new Set([id]);
-	let q = quests[id];
-	while (q && chain.length < 12) {
-		const pre = (q.pre && q.pre[0]) || (q.preAll && q.preAll[0]) || (q.preAny && q.preAny[0]);
-		if (!pre || seen.has(pre)) break;
-		seen.add(pre);
-		chain.unshift(pre);
-		q = quests[pre];
-	}
+	const visit = (qid) => {
+		const c = quests[qid] || {};
+		const f = fq[qid] || {};
+		for (const pre of [...(c.pre || []), ...(f.pre || []), ...(f.preAll || []), ...(c.preAny || []), ...(f.preAny || []), ...(f.breadcrumbs || [])]) {
+			if (seen.has(pre) || chain.length >= CHAIN_MAX) continue;
+			seen.add(pre);
+			const p = quests[pre] || fq[pre];
+			if (!p) continue;
+			const pside = SIDE[p.faction] || null;
+			if (side && pside && pside !== side) continue;
+			visit(pre);
+			if (chain.length < CHAIN_MAX) chain.push(pre);
+		}
+	};
+	visit(id);
 	return chain;
 }
 
@@ -185,20 +206,24 @@ function djPlace(p) {
 	};
 }
 
+// The reputation a quest gives: Wowhead Forever's list row (quests.json
+// `wowhead.rep`). QuestieDB's `reputation` is the standing a quest asks for
+// (Friendly is 3000), not what it gives.
 function repOf(fq, factions) {
-	const r = fq && fq.reputation;
-	if (!r) return [];
-	return (Array.isArray(r) ? r : [r])
-		.filter((x) => x && x.faction)
-		.map((x) => ({ faction: x.faction, name: (factions[x.faction] && factions[x.faction].name) || null, value: x.value ?? null }));
+	const r = fq && fq.wowhead && fq.wowhead.rep;
+	if (!Array.isArray(r)) return [];
+	return r.map(([faction, value]) => ({ faction, name: (factions[faction] && factions[faction].name) || null, value: value ?? null }));
 }
 
-function rewardItem(id, choice, codex, given) {
+// count: how many of it (Wowhead's lists; omitted for one).
+function rewardItem(id, choice, codex, given, count) {
 	const it = codex.items && codex.items[id];
-	return { id, name: (given && given.name) || (it && it.name) || null, quality: (given && given.quality) ?? (it && it.quality) ?? null, choice };
+	const out = { id, name: (given && given.name) || (it && it.name) || null, quality: (given && given.quality) ?? (it && it.quality) ?? null, choice };
+	if (count > 1) out.count = count;
+	return out;
 }
 
-function buildPages(inputs, codex) {
+function buildPages(inputs, codex, warnings = []) {
 	const fv = inputs.forever || {};
 	const client = inputs.client || {};
 	const maps = client.instanceMaps || [];
@@ -220,39 +245,80 @@ function buildPages(inputs, codex) {
 	const djByName = {};
 	for (const d of Object.values(djByKey)) djByName[norm(d.name)] = d;
 
-	// Which instance an NPC or an item (by its drops) belongs to; which boss drops an item.
-	const npcInstance = {};
-	for (const [id, n] of Object.entries(npcs)) if (n.instance) npcInstance[id] = n.instance;
-	const itemInstances = {};
-	const dropNpcs = {};
-	for (const [id, it] of Object.entries(items)) {
-		for (const s of it.sources || []) {
-			if (s.type !== 'drop') continue;
-			(dropNpcs[id] = dropNpcs[id] || new Set()).add(s.npc);
-			const key = s.instance || npcInstance[s.npc];
-			if (key) (itemInstances[id] = itemInstances[id] || new Set()).add(key);
-		}
-	}
-
 	const mapOf = {};
 	const areaKeys = {};
+	const mapKeys = {}; // client map id -> instance keys
 	for (const [key, inst] of Object.entries(instances)) {
 		const m = matchMap(inst, maps);
 		mapOf[key] = m;
 		const areas = new Set(m ? m.areas : []);
 		if (inst.areaId) areas.add(inst.areaId);
 		for (const a of areas) (areaKeys[a] = areaKeys[a] || new Set()).add(key);
+		if (m) (mapKeys[m.id] = mapKeys[m.id] || new Set()).add(key);
 	}
-	const linked = (q) => {
-		const keys = new Set();
-		for (const o of q.objectives || []) {
-			if (o.type === 'kill' && npcInstance[o.id]) keys.add(npcInstance[o.id]);
-			if (o.type === 'item' && itemInstances[o.id]) for (const k of itemInstances[o.id]) keys.add(k);
+
+	// Which instance an NPC or an item (by its drops) belongs to; which boss
+	// drops an item. A quest's start item also belongs to the one instance an
+	// object holding it is placed in (the Treaty of Understanding in the Hall
+	// of Thanes' vault); objective items do not (chests inside hold world
+	// loot). An objective item that is also sold, crafted, dropped or held
+	// outside every instance links its quest to none (`outside`): the Bronze
+	// Tube of Look to the Stars (sold, and one Gnomeregan drop), Rite of
+	// Vision's Well Stone (a Mulgore object, one Maraudon drop), the Indurium
+	// Flakes of the Badlands' Stonevault, the Kor Gem the Blackfathom ruins'
+	// priestesses drop. Nor does a stray drop: one only Wowhead's lists
+	// record, under 5% (QuestieDB and pfQuest hold the quest drops), such as
+	// a boss's trade good: the Nexus Crystal in Blackwing Lair (The Dread
+	// Citadel), the Greater Eternal Essence from Gri'lek and Maexxna (The
+	// Ectoplasmic Distiller), the Copper Modulator from Sneed's Shredder.
+	const STRAY = 5;
+	const stray = (s) => Array.isArray(s.from) && s.from.length > 0 && s.from.every((f) => f === 'wowhead') && typeof s.chance === 'number' && s.chance < STRAY;
+	const npcInstance = {};
+	for (const [id, n] of Object.entries(npcs)) if (n.instance) npcInstance[id] = n.instance;
+	const itemInstances = {};
+	const itemLinks = {}; // itemInstances without stray drops: what ties an objective
+	const itemObjectInstances = {};
+	const outside = new Set();
+	const dropNpcs = {};
+	for (const [id, it] of Object.entries(items)) {
+		let out = 0;
+		for (const s of it.sources || []) {
+			if (s.type === 'drop') {
+				(dropNpcs[id] = dropNpcs[id] || new Set()).add(s.npc);
+				const key = s.instance || npcInstance[s.npc];
+				if (key) {
+					(itemInstances[id] = itemInstances[id] || new Set()).add(key);
+					if (!stray(s)) (itemLinks[id] = itemLinks[id] || new Set()).add(key);
+				} else out++;
+			} else if (s.type === 'object') {
+				const maps = (fv.objects && fv.objects[s.object] && fv.objects[s.object].instances) || [];
+				if (!maps.length) out++;
+				if (maps.length !== 1) continue;
+				for (const k of mapKeys[maps[0]] || []) (itemObjectInstances[id] = itemObjectInstances[id] || new Set()).add(k);
+			} else if (s.type === 'vendor' || s.type === 'craft') out++;
 		}
-		for (const it of (q.start && q.start.item) || []) if (itemInstances[it]) for (const k of itemInstances[it]) keys.add(k);
+		if (out) outside.add(id);
+	}
+	const startItemKeys = (q) => {
+		const keys = new Set();
+		for (const it of (q.start && q.start.item) || []) for (const k of [...(itemInstances[it] || []), ...(itemObjectInstances[it] || [])]) keys.add(k);
 		return keys;
 	};
+	const linked = (q) => {
+		const keys = startItemKeys(q);
+		for (const o of q.objectives || []) {
+			if (o.type === 'kill' && npcInstance[o.id]) keys.add(npcInstance[o.id]);
+			if (o.type === 'item' && itemLinks[o.id] && !outside.has(String(o.id))) for (const k of itemLinks[o.id]) keys.add(k);
+		}
+		return keys;
+	};
+	// In the game: QuestieDB's Forever store or a recording knows it (Wowhead's
+	// lists also carry datamined quests that are not: <UNUSED>, <NYI>, the
+	// Classic Attunement to the Core 7487 that 7848 replaced).
+	const live = (id) => ((fq[id] && fq[id].source) || []).some((s) => /^questie|^recorder/.test(s));
 
+	// How many of a reward item Wowhead's list row gives (quests.json `wowhead`).
+	const countIn = (id, list, it) => ((((fq[id] && fq[id].wowhead) || {})[list] || []).find((p) => p[0] === it) || [])[1];
 	// A quest from the Codex (and quests.json) alone.
 	const codexQuest = (id) => {
 		const q = cq[id];
@@ -263,12 +329,14 @@ function buildPages(inputs, codex) {
 		const e = src.end || {};
 		const start = placeOf('npc', (s.npc || [])[0], codex) || placeOf('object', (s.object || [])[0], codex);
 		const startItem = (s.item || [])[0] ? { id: s.item[0], name: names.item(s.item[0]) } : null;
+		const wh = f.wowhead || {};
+		const faction = SIDE[src.faction] || null;
 		return {
 			id: Number(id),
 			title: src.title || null,
 			level: src.level ?? null,
 			minLevel: src.minLevel ?? null,
-			faction: SIDE[src.faction] || null,
+			faction,
 			classes: null,
 			inside: false,
 			shareable: null,
@@ -276,11 +344,14 @@ function buildPages(inputs, codex) {
 			start: start || (startItem ? { kind: 'item', id: startItem.id, name: startItem.name, map: null, x: null, y: null, f: null, inside: false } : null),
 			finish: placeOf('npc', (e.npc || [])[0], codex) || placeOf('object', (e.object || [])[0], codex),
 			startItem,
-			chain: chainOf(cq, Number(id)),
+			chain: chainOf(cq, fq, Number(id), faction),
 			rewards: {
-				items: [...(src.rewards || []).map((i) => rewardItem(i, false, codex)), ...(src.choices || []).map((i) => rewardItem(i, true, codex))],
+				items: [
+					...(src.rewards || []).map((i) => rewardItem(i, false, codex, null, countIn(id, 'items', i))),
+					...(src.choices || []).map((i) => rewardItem(i, true, codex, null, countIn(id, 'choices', i))),
+				],
 				xp: f.xp ?? null,
-				money: (f.rewards && f.rewards.money) ?? null,
+				money: (f.rewards && f.rewards.money) ?? (wh.money || null),
 				rep: repOf(f, factions),
 			},
 			bosses: [],
@@ -305,9 +376,12 @@ function buildPages(inputs, codex) {
 			startItem: q.startItem ? { id: q.startItem.item, name: q.startItem.name || names.item(q.startItem.item) } : c ? c.startItem : null,
 			chain: (q.chain || []).filter((x) => x !== q.id),
 			rewards: {
-				items: [...(rewards.items || []).map((i) => rewardItem(i.item, false, codex, i)), ...(rewards.choices || []).map((i) => rewardItem(i.item, true, codex, i))],
+				items: [
+					...(rewards.items || []).map((i) => rewardItem(i.item, false, codex, i, countIn(q.id, 'items', i.item))),
+					...(rewards.choices || []).map((i) => rewardItem(i.item, true, codex, i, countIn(q.id, 'choices', i.item))),
+				],
 				xp: q.xp ?? (c && c.rewards.xp) ?? null,
-				money: q.money ?? null,
+				money: q.money ?? (c && c.rewards.money) ?? null,
 				rep: c ? c.rewards.rep : [],
 			},
 			bosses: base ? q.bosses || [] : [],
@@ -328,26 +402,85 @@ function buildPages(inputs, codex) {
 		djOf[key] = d;
 		for (const q of d.quests || []) if (!q.hidden) onPage[key].set(q.id, djQuest(q, true));
 	}
-	// 2. Quests filed under the instance's areas, narrowed to the wing their
-	//    objectives point to when wings share an area; 3. quests whose
-	//    objectives or start item point into at most two instances.
+	// 2. Quests filed under the instance's areas (QuestieDB's area, or the
+	//    instance Wowhead Forever lists a quest in, for a quest in the game),
+	//    narrowed to the wing their objectives point to when wings share an
+	//    area, plus the instance their start item drops or lies in (An Unholy
+	//    Alliance starts with Charlga Razorflank's scroll in Razorfen Kraul and
+	//    is filed under Razorfen Downs); 3. quests whose objectives or start
+	//    item point into at most two instances. A quest of a game event
+	//    (pfQuest's `event`: the Darkmoon Faire's turn-ins, the holidays, the
+	//    war efforts) is on a page only where it is filed (the Cenarion
+	//    Circle's Qiraji rings and cloaks under Ahn'Qiraj): an item of it that
+	//    drops inside ties it to nothing (Rinling's Copper Modulator, a Faire
+	//    ticket turn-in in Mulgore or Elwynn, was on the Deadmines and
+	//    Gnomeregan pages in 0.2.3: the modulator drops in both).
 	for (const sid of new Set([...Object.keys(cq), ...Object.keys(fq)])) {
 		const id = Number(sid);
 		const q = cq[id] || fq[id];
 		if (!q) continue;
-		const area = fq[id] && fq[id].area;
-		const byArea = area && areaKeys[area] ? [...areaKeys[area]] : [];
+		const f = fq[id] || {};
+		const byArea = new Set();
+		for (const area of [f.area, live(id) && f.wowhead ? f.wowhead.zone : null]) if (area && areaKeys[area]) for (const k of areaKeys[area]) byArea.add(k);
 		const byLink = [...linked(q)];
-		let keys = byArea;
-		if (byArea.length > 1) {
-			const narrowed = byArea.filter((k) => byLink.includes(k));
+		let keys = [...byArea];
+		if (keys.length > 1) {
+			const narrowed = keys.filter((k) => byLink.includes(k));
 			if (narrowed.length) keys = narrowed;
 		}
-		if (!keys.length) keys = byLink.length <= 2 ? byLink : [];
+		const event = !!f.event;
+		const byStart = event ? [] : [...startItemKeys(q)];
+		if (keys.length && byStart.length <= 2) for (const k of byStart) if (!keys.includes(k)) keys.push(k);
+		if (!keys.length && !event) keys = byLink.length <= 2 ? byLink : [];
 		for (const key of keys) {
 			if (onPage[key].has(id)) continue;
 			const rec = codexQuest(id);
 			if (rec) onPage[key].set(id, rec);
+		}
+	}
+	// 3b. The cited table's quests (tools/lib/codex/journal-quests.json): what
+	//     no rule places (Shards of the Felvine: Moonglade giver, an item made
+	//     from Alzzin's Felvine in Dire Maul). A row of an instance this build
+	//     lacks is skipped; one whose quest it lacks is a warning.
+	for (const r of inputs.journalQuests || loadJournalQuests()) {
+		if (!onPage[r.instance]) continue;
+		const rec = codexQuest(r.quest);
+		if (!rec) warnings.push(`journal-quests.json: quest ${r.quest} is not in the Codex`);
+		else if (!onPage[r.instance].has(r.quest)) onPage[r.instance].set(r.quest, rec);
+	}
+	// 4. The rest of a page quest's story: a follow-up of the same name with no
+	//    objectives of its own, taken where that quest is turned in (Hidden
+	//    Enemies: Thrall sends you to Neeru Fireblade, who sends you back to
+	//    him), in the game and for the same side.
+	const sameTitle = (a, b) => !!a && !!b && norm(a) === norm(b);
+	const followers = {};
+	for (const sid of Object.keys(fq)) {
+		const f = fq[sid];
+		const c = cq[sid] || {};
+		for (const pre of new Set([...(c.pre || []), ...(f.pre || []), ...(f.preAll || []), ...(c.preAny || []), ...(f.preAny || [])])) (followers[pre] = followers[pre] || []).push(Number(sid));
+	}
+	for (const key of Object.keys(onPage)) {
+		for (let round = 0; round < 3; round++) {
+			let added = 0;
+			for (const p of [...onPage[key].values()]) {
+				const pe = (cq[p.id] || fq[p.id] || {}).end || {};
+				for (const id of followers[p.id] || []) {
+					if (onPage[key].has(id) || !live(id)) continue;
+					const q = cq[id] || fq[id];
+					if (!q || !sameTitle(q.title, p.title) || (q.objectives || []).length) continue;
+					const side = SIDE[q.faction] || null;
+					if (side && p.faction && side !== p.faction) continue;
+					const qs = q.start || {};
+					const at = (qs.npc || []).some((n) => (pe.npc || []).includes(n)) || (qs.object || []).some((o) => (pe.object || []).includes(o));
+					if (!at) continue;
+					const rec = codexQuest(id);
+					if (rec) {
+						onPage[key].set(id, rec);
+						added++;
+					}
+				}
+			}
+			if (!added) break;
 		}
 	}
 
@@ -374,10 +507,14 @@ function buildPages(inputs, codex) {
 				}
 			}
 		}
-		// Bosses in kill order, with the quests tied to each.
+		// Bosses in kill order, with the quests tied to each. A chest boss
+		// (object) ties the quests whose item it holds; role marks the bosses
+		// after the encounters (rare, event, optional).
 		const bossList = d
 			? (d.bosses || []).map((b) => ({ name: b.name, npc: b.npc ?? null, level: b.level ?? null }))
-			: (inst.bosses || []).filter((b) => b.name && b.name !== 'Trash').map((b) => ({ name: b.name, npc: b.npc ?? null, level: (npcs[b.npc] && npcs[b.npc].level) || null }));
+			: (inst.bosses || [])
+					.filter((b) => b.name && b.name !== 'Trash')
+					.map((b) => ({ name: b.name, npc: b.npc ?? null, object: b.object ?? null, role: b.role ?? null, items: b.items || [], level: (npcs[b.npc] && npcs[b.npc].level) || null }));
 		const bosses = bossList.map((b, i) => {
 			const tied = [];
 			const add = (id, how, item) => {
@@ -394,11 +531,16 @@ function buildPages(inputs, codex) {
 				for (const o of src.objectives || []) {
 					if (o.type === 'kill' && b.npc && o.id === b.npc) add(q.id, 'kill');
 					if (o.type === 'item' && b.npc && dropNpcs[o.id] && dropNpcs[o.id].has(b.npc)) add(q.id, 'item', o.id);
+					if (o.type === 'item' && b.object && b.items.includes(o.id)) add(q.id, 'item', o.id);
 				}
 				if (q.startItem && b.npc && dropNpcs[q.startItem.id] && dropNpcs[q.startItem.id].has(b.npc)) add(q.id, 'starts', q.startItem.id);
+				if (q.startItem && b.object && b.items.includes(q.startItem.id)) add(q.id, 'starts', q.startItem.id);
 				if (q.bosses.includes(b.name) && !tied.some((t) => t.id === q.id)) add(q.id, 'involved');
 			}
-			return { order: i + 1, name: b.name, npc: b.npc, level: b.level, quests: tied };
+			const page = { order: i + 1, name: b.name, npc: b.npc, level: b.level, quests: tied };
+			if (b.object) page.object = b.object;
+			if (b.role) page.role = b.role;
+			return page;
 		});
 		const lv = inst.levels;
 		const zone = entrance ? entrance.map : null;
@@ -421,6 +563,18 @@ function buildPages(inputs, codex) {
 	return pages;
 }
 
+// The cited table of journal quests no rule places
+// (tools/lib/codex/journal-quests.json) -> [{ quest, instance, source, note }].
+// A malformed row throws.
+function loadJournalQuests(file = path.join(__dirname, 'journal-quests.json')) {
+	if (!fs.existsSync(file)) return [];
+	const rows = JSON.parse(fs.readFileSync(file, 'utf8')).quests || [];
+	for (const r of rows) {
+		if (!Number.isInteger(r.quest) || typeof r.instance !== 'string' || !/^https?:\/\//.test(r.source || '')) throw new Error(`journal-quests.json: bad row ${JSON.stringify(r)}`);
+	}
+	return rows;
+}
+
 function matchMap(inst, maps) {
 	const n = norm(inst.name);
 	const k = norm(inst.key);
@@ -432,14 +586,25 @@ function matchMap(inst, maps) {
 }
 
 function buildJournal(inputs = {}, codex = {}) {
-	const dungeons = buildPages(inputs, codex);
+	const pageWarnings = [];
+	const dungeons = buildPages(inputs, codex, pageWarnings);
+	const { attunementsOf } = require('./attunements');
+	const att = attunementsOf(codex, { table: inputs.attunementTable });
+	let attunements = 0;
+	for (const [key, list] of Object.entries(att.byKey)) {
+		if (!dungeons[key]) continue;
+		dungeons[key].attunement = list;
+		attunements += list.length;
+	}
 	let quests = 0;
 	let entrances = 0;
 	for (const p of Object.values(dungeons)) {
 		quests += p.quests.length;
 		if (p.entrance) entrances++;
 	}
-	return { meta: { schema: SCHEMA, counts: { dungeons: Object.keys(dungeons).length, quests, entrances } }, dungeons };
+	const meta = { schema: SCHEMA, counts: { dungeons: Object.keys(dungeons).length, quests, entrances, attunements } };
+	// warnings: the attunement table's goals and the journal-quests table's rows the Codex lacks (codex build reports them).
+	return { meta, dungeons, warnings: [...pageWarnings, ...att.warnings] };
 }
 
 // ---------------------------------------------------------------------------
@@ -481,6 +646,7 @@ function summaryOf(p) {
 		entrance: p.entrance,
 		quests: { A: count('A'), H: count('H') },
 		bosses: p.bosses.length,
+		attune: p.attunement && p.attunement.length ? { A: p.attunement.filter((a) => a.faction !== 'H').length, H: p.attunement.filter((a) => a.faction !== 'A').length } : null,
 	};
 }
 
@@ -504,11 +670,11 @@ function emitJournal(journal) {
 	lines.push('}, {');
 	for (const k of keys) {
 		const p = journal.dungeons[k];
-		const page = { entrance: p.entrance, quests: p.quests, chain: p.chain, bosses: p.bosses };
+		const page = { entrance: p.entrance, quests: p.quests, chain: p.chain, bosses: p.bosses, attunement: p.attunement };
 		lines.push(`${luaKey(k)}=${luaStr(`return ${lua(page)}`)},`);
 	}
 	lines.push('})', '');
 	return [{ name: 'Dungeons1.lua', text: lines.join('\n') }];
 }
 
-module.exports = { instanceMapsOf, zonePoint, chainOf, objectiveText, buildJournal, emitJournal, SCHEMA };
+module.exports = { instanceMapsOf, zonePoint, chainOf, objectiveText, buildJournal, emitJournal, loadJournalQuests, SCHEMA };

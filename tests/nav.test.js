@@ -505,6 +505,38 @@ test('hidden on a taxi, in an instance and without a target; zone name on anothe
 	]);
 });
 
+// The Deeprun Tram is a map of its own with no world map: the client gives
+// no player position there (nor in some loading moments). The arrow says so
+// over the target's label instead of vanishing, and points again once a
+// position returns.
+test('without a player position the arrow says so, keeps the label, and points again when one returns', () => {
+	const [out] = run(`
+		local seen = {}
+		local function snap(tag)
+			seen[#seen + 1] = { tag, A.frame:IsShown(), A.GetMode() or "hidden", A.distText:GetText(), A.labelText:GetText(),
+				A.dial:IsShown(), A.etaText:IsShown() }
+		end
+		target(100, 0, "Nightbane Shadow Weavers")
+		stub.advance(0.1); snap("start")
+		nav.player = nil
+		stub.advance(0.1); snap("no position")
+		seen[#seen + 1] = { "state", (N.Sample()), N.GetDistance() or false }
+		nav.place(0, 0, 0)
+		stub.advance(0.1); snap("back")
+		N.ClearTarget()
+		nav.player = nil
+		stub.advance(1.1)
+		seen[#seen + 1] = { "no target", A.frame:IsShown(), A.GetMode() or "hidden" }
+		emit(seen)`);
+	assert.deepEqual(out, [
+		['start', true, 'travel', '100 yd', 'Nightbane Shadow Weavers', true, false],
+		['no position', true, 'nopos', 'No position here', 'Nightbane Shadow Weavers', false, false],
+		['state', 'nopos', false],
+		['back', true, 'travel', '100 yd', 'Nightbane Shadow Weavers', true, false],
+		['no target', false, 'hidden'],
+	]);
+});
+
 test('ReleaseTarget drops only the override and guides to the engine waypoint again', () => {
 	const [out] = run(`
 		local seen = {}
@@ -811,4 +843,27 @@ test('the ETA closing speed ignores out-of-band refreshes', () => {
 	});
 	const expected = out.dist / 7;
 	for (const s of secs) assert.ok(Math.abs(s - expected) <= 4, `ETA ${s} s vs ${expected.toFixed(0)} s (${out.etas})`);
+});
+
+test('/polestar way without a position here says so, not how to type it', () => {
+	const [out] = run(`
+		local function way(msg)
+			stub.messages = {}
+			SlashCmdList.POLESTAR(msg)
+			local t = N.GetTarget()
+			return { msgs = #stub.messages > 0 and stub.messages or "none", target = t and t.label or "nil" }
+		end
+		local r = {}
+		nav.place(0, 0, 1)                 -- other continent: the game gives no map position
+		r.noPosition = way("way 40 60 Mine")
+		nav.place(0, 0, 0)
+		r.malformed = way("way 40")
+		r.valid = way("way 40 60 Mine")
+		emit(r)`);
+	assert.deepEqual(out.noPosition, {
+		msgs: ['|cff4fd1c5Polestar|r: No position here: the game gives none in instances and on some maps.'],
+		target: 'nil',
+	});
+	assert.deepEqual(out.malformed, { msgs: ['|cff4fd1c5Polestar|r: Usage: /polestar way <x> <y> [label]'], target: 'nil' });
+	assert.deepEqual(out.valid, { msgs: 'none', target: 'Mine' });
 });

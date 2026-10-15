@@ -16,7 +16,7 @@ const BUILDS_URL = 'https://wago.tools/api/builds';
 // loads (tables[t] stays undefined, with a warning).
 const PRODUCTS = {
 	era: { key: 'wow_classic_era', family: /^1\.1[0-5]\./, tables: ['UiMap', 'UiMapAssignment', 'AreaTable', 'Faction'], optional: [] },
-	forever: { key: 'wow_classic_beta', family: /^1\.6\d\./, tables: ['UiMap', 'UiMapAssignment', 'AreaTable'], optional: ['ChrRaces', 'ChrClasses', 'CharBaseInfo', 'Faction', 'Map'] },
+	forever: { key: 'wow_classic_beta', family: /^1\.6\d\./, tables: ['UiMap', 'UiMapAssignment', 'AreaTable'], optional: ['ChrRaces', 'ChrClasses', 'CharBaseInfo', 'Faction', 'Map', 'ItemSparse'] },
 };
 const PRODUCT = PRODUCTS.era.key;
 const TABLES = PRODUCTS.era.tables;
@@ -35,11 +35,12 @@ function compareVersions(a, b) {
 	return 0;
 }
 
-function newestCachedBuild(cacheRoot, product) {
+// The newest cached build of product holding every one of tables.
+function newestCachedBuild(cacheRoot, product, tables = product.tables) {
 	if (!fs.existsSync(cacheRoot)) return null;
 	const builds = fs
 		.readdirSync(cacheRoot)
-		.filter((b) => /^\d+(\.\d+)+$/.test(b) && product.family.test(b) && product.tables.every((t) => fs.existsSync(path.join(cacheRoot, b, `${t}.csv`))))
+		.filter((b) => /^\d+(\.\d+)+$/.test(b) && product.family.test(b) && tables.every((t) => fs.existsSync(path.join(cacheRoot, b, `${t}.csv`))))
 		.sort(compareVersions);
 	return builds.length ? builds[builds.length - 1] : null;
 }
@@ -58,28 +59,37 @@ async function latestBuild(fetchImpl, product) {
 	return list.sort(compareVersions)[list.length - 1];
 }
 
+// The build to read: `build` when given, else the newest wago.tools lists for
+// the product, else (offline, or wago.tools unreachable) the newest cached
+// one holding `tables` (default the product's). -> { build, warnings }
+async function pickBuild({ sourcesDir, build, offline = false, fetchImpl = globalThis.fetch, product: name = 'era', tables }) {
+	const product = PRODUCTS[name];
+	if (!product) throw new Error(`wago: unknown product "${name}"`);
+	if (build) return { build, warnings: [] };
+	const cacheRoot = path.join(sourcesDir, 'wago');
+	if (offline) {
+		const cached = newestCachedBuild(cacheRoot, product, tables);
+		if (!cached) throw new Error(`--offline: no cached wago.tools build under ${cacheRoot} (${product.key})`);
+		return { build: cached, warnings: [] };
+	}
+	try {
+		return { build: await latestBuild(fetchImpl, product), warnings: [] };
+	} catch (err) {
+		const cached = newestCachedBuild(cacheRoot, product, tables);
+		if (!cached) throw err;
+		return { build: cached, warnings: [`wago.tools: ${err.message}; using cached ${product.key} build ${cached}`] };
+	}
+}
+
 // -> { build, product, tables: { UiMap: rows, ... }, urls, warnings }
 // product: "era" (default) or "forever".
 async function loadWago({ sourcesDir, build, offline = false, fetchImpl = globalThis.fetch, log = () => {}, product: name = 'era' }) {
 	const product = PRODUCTS[name];
 	if (!product) throw new Error(`wago: unknown product "${name}"`);
 	const cacheRoot = path.join(sourcesDir, 'wago');
-	const warnings = [];
-	let chosen = build || null;
-	if (!chosen) {
-		if (offline) {
-			chosen = newestCachedBuild(cacheRoot, product);
-			if (!chosen) throw new Error(`--offline: no cached wago.tools build under ${cacheRoot} (${product.key})`);
-		} else {
-			try {
-				chosen = await latestBuild(fetchImpl, product);
-			} catch (err) {
-				chosen = newestCachedBuild(cacheRoot, product);
-				if (!chosen) throw err;
-				warnings.push(`wago.tools: ${err.message}; using cached ${product.key} build ${chosen}`);
-			}
-		}
-	}
+	const picked = await pickBuild({ sourcesDir, build, offline, fetchImpl, product: name });
+	const warnings = picked.warnings;
+	const chosen = picked.build;
 	const dir = path.join(cacheRoot, chosen);
 	const tables = {};
 	const urls = {};
@@ -110,4 +120,4 @@ async function loadWago({ sourcesDir, build, offline = false, fetchImpl = global
 	return { build: chosen, product: product.key, tables, urls, warnings };
 }
 
-module.exports = { loadWago, compareVersions, tableUrl, TABLES, PRODUCT, PRODUCTS, BUILDS_URL };
+module.exports = { loadWago, pickBuild, compareVersions, tableUrl, TABLES, PRODUCT, PRODUCTS, BUILDS_URL };

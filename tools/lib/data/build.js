@@ -19,7 +19,7 @@ const { DEFAULTS: SPAWN_DEFAULTS } = require('./spawns');
 const { readQuestie, REPO: QUESTIEDB_REPO, QUESTIE_REPO } = require('./questie');
 const { applyQuestie } = require('./questie-merge');
 const { loadWebXp, WFT, FC } = require('./webxp');
-const { loadZoneQuests, applyChangeNotes, fillWowheadXp, BASE: WOWHEAD } = require('./wowhead');
+const { loadZoneQuests, applyChangeNotes, fillWowheadXp, applyWowheadFacts, BASE: WOWHEAD } = require('./wowhead');
 const CORRECTIONS = require('./corrections.json');
 
 // tools/lib/data/corrections.json: quests `set` fields; items `removeDrops`/`removeVendors`; npcs/objects `set`
@@ -56,6 +56,20 @@ function applyCorrections(tables) {
 			}
 			tag(e);
 		}
+	}
+	return n;
+}
+
+// ItemSparse rows -> `duration` (seconds an item lasts once looted, its
+// DurationInInventory) on the items we hold. -> how many items got one.
+function itemDurations(rows, items) {
+	let n = 0;
+	for (const r of rows || []) {
+		const seconds = Number(r.DurationInInventory);
+		const it = items[Number(r.ID)];
+		if (!it || !(seconds > 0)) continue;
+		it.duration = seconds;
+		n++;
 	}
 	return n;
 }
@@ -202,7 +216,7 @@ async function buildData(options = {}) {
 	if (qz && options.wowhead) {
 		const zl = await loadZoneQuests({ sourcesDir, zones, offline, fetchImpl: options.fetchImpl, log });
 		warnings.push(...zl.warnings);
-		wh = { zl, changed: applyChangeNotes(norm.quests, zl.rows), xpFilled: 0 };
+		wh = { zl, changed: applyChangeNotes(norm.quests, zl.rows), facts: applyWowheadFacts(norm.quests, zl.rows), xpFilled: 0 };
 	}
 	if (qz) qstats.corrections = applyCorrections(norm);
 
@@ -234,6 +248,9 @@ async function buildData(options = {}) {
 		recordings,
 		{ spawnOptions, liveMaps: live },
 	);
+	// Items that vanish a while after they are looted (the Forever client's
+	// ItemSparse DurationInInventory, seconds): the timed-item lint reads them.
+	const durations = itemDurations(ft && ft.ItemSparse, norm.items);
 
 	const sources = [
 		{ name: 'pfQuest', url: REPO, revision: pf.revision, license: license.license, copyright: license.copyright, notice: license.notice },
@@ -275,16 +292,16 @@ async function buildData(options = {}) {
 			name: 'Wowhead Forever database: zone quest lists (XP, levels, Forever change notes)',
 			url: WOWHEAD,
 			revision: `${wh.zl.rows.size} listed quests${wh.zl.fetchedAt ? ` read ${wh.zl.fetchedAt}` : ''}; cache ${path.relative(root, wh.zl.file)}`,
-			license: 'Public web pages; facts (ids, XP, levels) only, used locally',
+			license: 'Public web pages; facts (ids, XP, levels, instance categories, rewards) only, used locally',
 			copyright: null,
 		});
 	}
 	if (fwago) {
 		sources.push({
-			name: `World of Warcraft: Forever client tables (UiMap, UiMapAssignment, AreaTable${races ? ', ChrRaces, ChrClasses, CharBaseInfo' : ''}${fwago.tables.Faction ? ', Faction' : ''}${fwago.tables.Map ? ', Map' : ''}${fwago.tables.QuestV2 ? ', QuestV2' : ''}) via wago.tools`,
+			name: `World of Warcraft: Forever client tables (UiMap, UiMapAssignment, AreaTable${races ? ', ChrRaces, ChrClasses, CharBaseInfo' : ''}${fwago.tables.Faction ? ', Faction' : ''}${fwago.tables.Map ? ', Map' : ''}${fwago.tables.ItemSparse ? ', ItemSparse' : ''}${fwago.tables.QuestV2 ? ', QuestV2' : ''}) via wago.tools`,
 			url: `https://wago.tools/db2?build=${fwago.build}`,
 			revision: `${fwago.product} ${fwago.build}`,
-			license: 'Blizzard Entertainment game client data; factual map geometry, names and race/class combinations only',
+			license: `Blizzard Entertainment game client data; factual map geometry, names${fwago.tables.ItemSparse ? ', item durations' : ''} and race/class combinations only`,
 			copyright: 'World of Warcraft (c) Blizzard Entertainment, Inc.',
 			tables: Object.values(fwago.urls),
 		});
@@ -329,6 +346,7 @@ async function buildData(options = {}) {
 			...(fmaps ? { foreverMapFrames: Object.keys(fmaps.frames).length } : {}),
 			factions: Object.keys(factions).length,
 			...(races ? { races: Object.keys(races).length } : {}),
+			...(fwago && fwago.tables.ItemSparse ? { timedItems: durations } : {}),
 			recorderOnlyFactions: rec.recorderOnlyFactions,
 			eraSpawnPoints: countPoints(norm.npcs, 'e') + countPoints(norm.objects, 'e'),
 			liveSpawnPoints: countPoints(norm.npcs, 'l') + countPoints(norm.objects, 'l'),
@@ -362,6 +380,7 @@ async function buildData(options = {}) {
 						questXpFromWeb: webxp ? webxp.xp.size : 0,
 						questXpFromWowhead: wh ? wh.xpFilled : 0,
 						wowheadChanged: wh ? wh.changed : null,
+						wowheadFacts: wh ? wh.facts : 0,
 						prereqsCleaned: qstats.prereqsCleaned,
 						reverseLinks: qstats.reverseLinks,
 						itemsRegainedEntries: qstats.itemsRegainedEntries,
