@@ -196,6 +196,9 @@
   `/polestar packs` open the right page on a translated client instead of
   the first one. `Polestar.RegisterOptions` takes an optional `key` for a
   page's stable key.
+- Translations: the travel route's boat, zeppelin and tram captions ("Take
+  the tram to %s") are written as `L["..."]` keys in Nav/Travel.lua like the
+  flight one, so a translator finds them.
 
 ## 0.2.3 (2026-10-14)
 

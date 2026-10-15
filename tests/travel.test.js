@@ -7,6 +7,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { runAddon } = require('./helpers/lua');
+const { fakeLocale } = require('./helpers/locale');
 
 const NAV = { name: 'Polestar', files: ['Core/Init.lua', 'Nav/Nav.xml'] };
 
@@ -34,9 +35,10 @@ local function known(...)
 end
 `;
 
-function run(script, { flightYards } = {}) {
+function run(script, { flightYards, before } = {}) {
 	return runAddon({
 		stubs: ['stub_nav.lua'],
+		before,
 		addons: [NAV],
 		login: true,
 		script: `${PRELUDE}
@@ -45,6 +47,39 @@ nav.useTravelWorld(${flightYards || 'nil'})
 ${script}`,
 	}).emitted;
 }
+
+test('every leg caption is in the client language: flight, boat and tram', () => {
+	const [out] = run(
+		`
+		nav.place(0, 600)
+		known(1, 2)
+		target(0, -780, "Kobolds")
+		local flying = route()
+		nav.place(0, 0, 1)
+		target(-800, 100, "Docks quest")
+		local boat = route()
+		N.RegisterTravelData({ build = "test", taxi = {}, flights = {}, inns = {},
+			transports = { { id = "tram-test", kind = "tram", faction = 1, ab = 100, ba = 100, waitA = 30, waitB = 30,
+				a = { "Northgate", 0, 900, 0, 9000, 50, 5 }, b = { "Southgate", 0, -900, 0, 9000, 50, 95 } } } }, true)
+		nav.place(890, 0)
+		target(-950, 0, "Nightbane Shadow Weavers")
+		emit({ flying = flying, boat = boat, tram = route() })`,
+		{
+			before: fakeLocale('deDE', {
+				'Walk to the flight master': 'Geh zum Flugmeister',
+				'Fly to %s': 'Flieg nach %s',
+				'Walk to the boat': 'Geh zum Schiff',
+				'Take the boat to %s': 'Nimm das Schiff nach %s',
+				'Take the tram to %s': 'Nimm die Tiefenbahn nach %s',
+			}),
+		},
+	);
+	assert.deepEqual(out, {
+		flying: ['walk|Geh zum Flugmeister', 'fly|Flieg nach East Hold', 'walk|Kobolds'],
+		boat: ['walk|Geh zum Schiff', 'boat|Nimm das Schiff nach Testshire Docks', 'walk|Docks quest'],
+		tram: ['tram|Nimm die Tiefenbahn nach Southgate', 'walk|Nightbane Shadow Weavers'],
+	});
+});
 
 test('takes a known flight over a long walk, and walks when no flight is known', () => {
 	const [out] = run(`
