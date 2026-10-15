@@ -9,7 +9,8 @@
 -- does not say whether stock counts items or purchases; it is read as items
 -- rounded down to whole purchases, at least one while any is left. Goods for
 -- other currencies or items are left alone, and so are optional goals and a
--- goal that would cost over MAX_SPEND (it says so). Prints what was bought
+-- goal that would cost over MAX_SPEND, or take one visit's buying over it
+-- (it says so). Prints what was bought
 -- once it lands in the bags (a refused purchase never is), and what money
 -- was short for.
 --
@@ -84,6 +85,7 @@ function Buy.Run()
 	local want = wanted()
 	if not want then return end
 	local money = Client.Money()
+	local spent = 0
 	for i = 1, GetMerchantNumItems() do
 		local id = GetMerchantItemID(i)
 		local w = id and want[id]
@@ -98,7 +100,9 @@ function Buy.Run()
 				-- The whole goal, not only what this visit's stock covers:
 				-- a merchant with fewer in stock must not split a dear goal.
 				local goalCost = ceil(need / perStack) * price
-				if goalCost > MAX_SPEND then
+				-- And the whole visit: several dear goals at one merchant
+				-- (a guide pack may list them) stop at the same cap.
+				if goalCost > MAX_SPEND or spent + cost > MAX_SPEND then
 					ns.Print(format(L["Left %d %s (%s) for you to buy."], need, name, QoL.Money(goalCost)))
 					items, shortItems = 0, 0
 				end
@@ -115,6 +119,7 @@ function Buy.Run()
 						left = left - n
 					end
 					money = money - cost
+					spent = spent + cost
 					-- One record per item while purchases are on their way: a
 					-- later one adds to it, and each landing reports only the
 					-- items not reported yet, so none is counted twice and a

@@ -849,6 +849,32 @@ test('buying: the 50g cap weighs the whole goal, not this visit\'s stock: 5 x 20
 	assert.equal(left, true);
 });
 
+test('buying: the 50g cap also weighs the whole visit: of three 20g goals at one merchant two are bought, the third left', () => {
+	const [requests, money, left] = run(`${GOODS}
+		set("buyGoals", true)
+		q.money = 3000000                 -- 300g
+		q.items[31] = { name = "Iron Lockbox", quality = 1, price = 0 }
+		q.items[32] = { name = "Silver Lockbox", quality = 1, price = 0 }
+		q.items[33] = { name = "Gold Lockbox", quality = 1, price = 0 }
+		q.goods = { { id = 31, price = 200000 }, { id = 32, price = 200000 }, { id = 33, price = 200000 } }
+		q.step({
+			{ t = "buy", item = 31, itemName = "Iron Lockbox" },
+			{ t = "buy", item = 32, itemName = "Silver Lockbox" },
+			{ t = "buy", item = 33, itemName = "Gold Lockbox" },
+		})
+		q.openMerchant()
+		stub.advance(1)
+		local n = 0
+		for _, c in ipairs(q.calls) do if c[1] == "BuyMerchantItem" then n = n + c[3] end end
+		emit(n)
+		emit(q.money)
+		emit(printed("Left 1 Gold Lockbox %(20g 0s 0c%) for you to buy"))
+	`);
+	assert.equal(requests, 2, 'two lockboxes bought');
+	assert.equal(money, 3000000 - 400000);
+	assert.equal(left, true);
+});
+
 // ---------------------------------------------------------------------------
 // Quest rewards
 // ---------------------------------------------------------------------------
