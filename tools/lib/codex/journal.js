@@ -23,7 +23,8 @@
 // Page: { key, name, kind, forever, minLevel, maxLevel, players, zone, zoneName,
 //   entrance: { map, x, y, f } | null,
 //   quests: [ Quest ] (level order), chain: { id: Quest } (prerequisites not on the page),
-//   bosses: [ { order, name, npc, level, object?, role?, quests: [ { id, how, item?, itemName? } ] } ] }
+//   bosses: [ { order, name, npc, level, object?, role?, quests: [ { id, how, item?, itemName? } ] } ],
+//   attunement: [ Attunement ] (tools/lib/codex/attunements.js; none: absent) }
 //   (object: a chest boss's object id; role: rare | event | optional, the bosses after the encounters)
 // Quest: { id, title, level, minLevel, faction 'A'|'H'|null, classes|null, inside, shareable,
 //   objective|null, start|null, finish|null (each { kind, id, name, map, x, y, f, inside }),
@@ -571,15 +572,23 @@ function matchMap(inst, maps) {
 function buildJournal(inputs = {}, codex = {}) {
 	const pageWarnings = [];
 	const dungeons = buildPages(inputs, codex, pageWarnings);
+	const { attunementsOf } = require('./attunements');
+	const att = attunementsOf(codex, { table: inputs.attunementTable });
+	let attunements = 0;
+	for (const [key, list] of Object.entries(att.byKey)) {
+		if (!dungeons[key]) continue;
+		dungeons[key].attunement = list;
+		attunements += list.length;
+	}
 	let quests = 0;
 	let entrances = 0;
 	for (const p of Object.values(dungeons)) {
 		quests += p.quests.length;
 		if (p.entrance) entrances++;
 	}
-	const meta = { schema: SCHEMA, counts: { dungeons: Object.keys(dungeons).length, quests, entrances } };
-	// warnings: the journal-quests table's rows the Codex lacks (codex build reports them).
-	return { meta, dungeons, warnings: pageWarnings };
+	const meta = { schema: SCHEMA, counts: { dungeons: Object.keys(dungeons).length, quests, entrances, attunements } };
+	// warnings: the attunement table's goals and the journal-quests table's rows the Codex lacks (codex build reports them).
+	return { meta, dungeons, warnings: [...pageWarnings, ...att.warnings] };
 }
 
 // ---------------------------------------------------------------------------
@@ -621,6 +630,7 @@ function summaryOf(p) {
 		entrance: p.entrance,
 		quests: { A: count('A'), H: count('H') },
 		bosses: p.bosses.length,
+		attune: p.attunement && p.attunement.length ? { A: p.attunement.filter((a) => a.faction !== 'H').length, H: p.attunement.filter((a) => a.faction !== 'A').length } : null,
 	};
 }
 
@@ -644,7 +654,7 @@ function emitJournal(journal) {
 	lines.push('}, {');
 	for (const k of keys) {
 		const p = journal.dungeons[k];
-		const page = { entrance: p.entrance, quests: p.quests, chain: p.chain, bosses: p.bosses };
+		const page = { entrance: p.entrance, quests: p.quests, chain: p.chain, bosses: p.bosses, attunement: p.attunement };
 		lines.push(`${luaKey(k)}=${luaStr(`return ${lua(page)}`)},`);
 	}
 	lines.push('})', '');

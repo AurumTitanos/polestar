@@ -54,7 +54,7 @@ tools/lib/codex/wowhead.js).
 data/forever/codex) with the installed Attune addon (no licence: read on
 this machine only, never in a build): each dungeon's quests per side and
 every journal quest's rewards, written to data/local/dungeon-quests-audit.md
-(and .json).
+(and .json), and the attunement chains to data/local/attunements-audit.md.
 
   --ours <dir>       parity: the release build (default data/forever/codex)
   --against <dir>    parity: the internal build (default data/local/codex-extras)
@@ -239,6 +239,10 @@ async function runAttune(rest) {
 	fs.writeFileSync(path.join(out, 'dungeon-quests-audit.md'), audit.markdown);
 	fs.writeFileSync(path.join(out, 'dungeon-quests-audit.json'), `${JSON.stringify({ rows: audit.rows, rewards: audit.rewards }, null, '\t')}\n`);
 	const files = ['data/local/dungeon-quests-audit.md', 'data/local/dungeon-quests-audit.json'];
+	// The attunement chains (tools/lib/codex/attunements.js).
+	const { auditReport } = require('../lib/codex/attunements');
+	fs.writeFileSync(path.join(out, 'attunements-audit.md'), auditReport(journal, attune, { quests }));
+	files.push('data/local/attunements-audit.md');
 	const attuneOnly = audit.rows.reduce((n, r) => n + r.attuneOnly.length, 0);
 	console.log(`Attune ${attune.meta.version}: ${audit.rows.length} dungeon groups, ${attuneOnly} quests only Attune lists; rewards ${audit.rewards.match} / ${audit.rewards.checked} match`);
 	console.log(`wrote ${files.join(', ')}`);

@@ -68,7 +68,7 @@ test('chainOf and objectiveText', () => {
 
 test('buildJournal: pages with quests from DungeonJournal, area and objectives; chains, rewards, bosses with tied quests, entrances', () => {
 	const j = buildJournal(inputs, codex);
-	assert.deepEqual(j.meta, { schema: 2, counts: { dungeons: 3, quests: 5, entrances: 2 } });
+	assert.deepEqual(j.meta, { schema: 2, counts: { dungeons: 3, quests: 5, entrances: 2, attunements: 3 } });
 	const wc = j.dungeons['wailing-caverns'];
 	assert.equal(wc.zoneName, 'The Barrens');
 	assert.equal(wc.players, 10);

@@ -258,7 +258,7 @@ Compat.GetQuestObjectives(questID)     -> { { text, type, finished, numFulfilled
 Compat.GetQuestTitle(questID)          -> string | nil (client cache; may be nil)
 Compat.GetOfferedQuests(source)        -> { questID, ... } | nil   (source "gossip" | "greeting" | "detail")
 Compat.IsQuestTrivial(qlvl, level)     -> bool   (grey for that level)
-Compat.GetItemCount(itemID)            -> number
+Compat.GetItemCount(itemID, includeBank) -> number   (includeBank: the bank's too)
 Compat.GetItemQuality(itemID)          -> 0..7 | nil (nil while not cached)
 Compat.ItemQualityHex(quality)         -> "ffrrggbb" | nil
 Compat.GetBindLocation()               -> string | nil
@@ -1324,7 +1324,7 @@ Polestar.Lookup.QuestStep(quest, from) -> step         -- accept, objectives, tu
   the quartermaster). It is registered in pack `lookup`, category `Lookup`, id
   `lookup/<kind>/<id>`, never saved, and opened in a new tab
   (`Engine.OpenTab`); a saved tab holding one is rebuilt at `ADDON_LOADED`.
-  A planner kind (`RegisterPlanner`, letters only; Dungeons' `pickup` and `handin`) is
+  A planner kind (`RegisterPlanner`, letters only; Dungeons' `pickup`, `handin` and `attune`) is
   built by its module's `build(id)` through the same `BuildGuide`/`Guide`
   path (no curated guide, not gated by `lookup.enabled`), registered and
   reopened the same way.
@@ -1374,10 +1374,11 @@ Wowhead's list rewards, choice versus fixed as Wowhead files them; XP from
 "+1" placeholders left out, never the standing a quest asks for) and, with
 `--local-extras`, DungeonJournal's audited shareability; bosses in kill order
 with the quests tied to them; entrances from the Codex, else the client's Map
-table (the corpse point, placed on its zone). No loot tables. `codex attune` writes the local comparison with
+table (the corpse point, placed on its zone); and the page's `attunement`
+list (below). No loot tables. `codex attune` writes the local comparison with
 the Attune addon (`tools/lib/codex/questaudit.js`,
 `tools/lib/consume/attune.js`; `data/local/dungeon-quests-audit.md` and
-`.json`). Runtime: `addon/Polestar/Dungeons/Dungeons.lua`
+`.json`, then the attunements report). Runtime: `addon/Polestar/Dungeons/Dungeons.lua`
 (`Polestar.Dungeons`: List, Get, Entrance, Quests, Quest, Bosses, Open,
 GuideTo, GuideToPoint, ShowOnMap; `SHOW_DUNGEON`). `dungeons build` writes no
 guides.
@@ -1440,6 +1441,32 @@ guide in the tab of the dungeon's pick-up guide when that one is finished or
 at its last step (its job ends at the entrance), else in a new tab. A
 finished pick-up guide's "Guide complete" panel (UI/GuideFrame.lua) offers
 "Hand in the quests" while the dungeon has quests in the log.
+
+Attunements and keys (`addon/Polestar/Dungeons/Attune.lua`, planner kind
+`attune`, `lookup/attune/<key>:<id>`). A page's `attunement` list (Codex,
+"Dungeons and raids": `tools/lib/codex/attunements.js`) is read by
+`Dungeons.Attunements(key, faction)` (faction "A" | "H" | nil: the entries
+of that side and the side-free ones). `Dungeons.AttunementState(a)` gives
+this character's state per step: a quest `done`, `ready`, `log`, `open`,
+`locked` (a step it waits on, `after` all, `afterAny` one, is not done),
+`level`, `rep` (the quest's standing, `Compat.GetFactionStanding`), `na`
+(faction, race or class through `Lookup.QuestBlock`) or `skip` (an
+alternative not taken: of `any` goals the one whose standing fits best, the
+highest first; a `preAny` sibling of a done one); a drop, chest or gift is
+`done` once its item is owned (`Compat.GetItemCount(id, true)`, the bank
+included) or the quest it starts is taken; a standing once reached. The
+attunement is `done` when its item is owned (a key, the Drakefire Amulet,
+Aqual Quintessence) or, item-less, when its goals are done (one of them with
+`any`); `goalDone` with no item says the key was lost. `Dungeons.AttuneGuide(key, id)`
+makes a stop per quest still to do (`Lookup.QuestStep`, with any open
+prerequisite `Lookup.QuestChain` finds that the list lacks), each after the
+stops it waits on, ordered by `Dungeons.OrderStops` from where the player
+stands with no fixed end (`CharState().dungeonAttune["<key>:<id>"]`); a drop
+or chest is a collect step at its NPC or object (inside an instance: at its
+entrance, with a note naming it), a standing a rep step, a gift a talk step,
+each after the quest before it in the list; the last step holds the note and
+the entrance. Nothing left: nil, "done". `Dungeons.Attune(key, id)` opens it
+in a new tab.
 
 ## UI — guide window, hub and options
 
@@ -1615,7 +1642,8 @@ Reading flow: `docs/DESIGN.md` ("Intent" and "The Guide Window").
   and "Show on map" (`Dungeons.ShowOnMap`); with nothing to pick up or hand
   in, "Nothing to pick up" (shown while the page has quests for this side)
   says why in its tooltip and, clicked, in chat (`DS.NothingText`); no guide
-  is built. Tabs Quests n, Bosses n, Map. Quests: a block per quest planned from the
+  is built. Tabs Quests n, Attunement (Keys when each is a key; only on pages
+  with one for the filter's side), Bosses n, Map. Quests: a block per quest planned from the
   data (the objective measured on one shared string) so only the blocks in
   view are drawn (`DS.PaintQuests` on scroll): the title in the client's
   difficulty colour (`GetQuestDifficultyColor`, else `QuestDifficultyColors`
@@ -1630,11 +1658,22 @@ Reading flow: `docs/DESIGN.md` ("Intent" and "The Guide Window").
   SetHyperlink`, where Gear adds its upgrade line; modified clicks through
   `HandleModifiedItemClick`), XP, money and reputation chips. Bosses: kill
   order, name, level, each tied quest ("Kill it for", "Drops X for", "Drops X,
-  which starts", "Part of"), a line opening the quest. Map: the entrance and
+  which starts", "Part of"), a line opening the quest. Attunement
+  (`Dungeons.Attunements`, `Dungeons.AttunementState`): per entry a head
+  (state glyph, the name in quest or item colour, a chip: Done, "Not in your
+  bags" for a key whose chain is done, "n of m done"; the facts: kind, who
+  needs it, level, side; our note; the item tile with "You have it" or "Not
+  in your bags or bank"; "Guide me through it" while something is left, which
+  opens `Dungeons.Attune` in a new tab as the pick-up guide does) and a row per
+  step of the filter's side (state glyph, the quest in its difficulty colour
+  or what drops it, its state, giver and zone or chance and instance; a click
+  sets the arrow there); the other side's entries carry no state. Map: the entrance and
   the quest givers on its zone painting. Blocks, rows, tiles, chips and cards
   are pooled; quest states refresh on QUEST_ACCEPTED, QUEST_REMOVED,
-  QUEST_TURNED_IN and PLAYER_LEVEL_UP. `UI.DungeonsSection` exposes
-  `Open`, `Home`, `SetBand`, `SetTab`, `SetFaction`, `ShowQuest`, `Shown`
+  QUEST_TURNED_IN and PLAYER_LEVEL_UP, the Attunement tab also on
+  BAG_UPDATE_DELAYED and UPDATE_FACTION. `UI.DungeonsSection` exposes
+  `Open`, `Home`, `SetBand`, `SetTab`, `SetFaction`, `ShowQuest`, `Attune`, `Shown`
+  (`shown.attune`: per entry its id, done, chip, guide, owned and step states)
   for tests and the preview.
 - **Zone art** (`UI/ZoneArt.lua`): `UI.ZoneArt.Create(parent, width, height
   [, fadeColor])` and `UI.ZoneArt.Paint(art, uiMapID, focusX, focusY, index) ->
@@ -2017,6 +2056,40 @@ built.
   or `o<object>`, then `r`/`e`/`x` for the role (an old pack's bare npc id
   still reads), and the Dungeons Bosses tab says Chest and the role beside
   the level.
+- Attunements and keys (`tools/lib/codex/attunements.js`, release-safe):
+  the cited table `tools/lib/codex/attunements.json` names per Codex instance
+  each attunement's goal only (the quests that end it, one of them with
+  `any`, or the key item), whether everyone entering needs it or one in the
+  group, and our one-line note, each entry with its public sources (Wowhead
+  Forever, warcraft.wiki.gg). The steps come from the Codex: every
+  prerequisite of a goal (all of `pre`, the `preAny` of the entry's side),
+  oldest first, each with `after`/`afterAny`; a quest only an item starts
+  gets that item's drops before it (Blackhand's Command from the Scarshield
+  Quartermaster); an item goal adds the item's own sources (a dropped key's
+  drops and chests, best chance first, three at most; Aqual Quintessence's
+  standing and the NPC handing it out). `links` add a prerequisite our quest
+  data lacks, with its source (Forever's City of Dalaran: Blood in the
+  Streets after Dalaran Patrols and Key to the City, Heart of Disruption
+  after it). `removed` lists what Forever took out, with its evidence (the
+  Seal of Ascension: 4743 no longer rewards it, no Forever `ItemSparse`
+  row), read only by the local comparison. Covered: Molten Core (Attunement
+  to the Core; Aqual Quintessence), Onyxia's Lair (the Drakefire Amulet,
+  each side's chain), Blackwing Lair (Blackhand's Command), Naxxramas (one
+  of the three Dread Citadel quests), Scholomance (the Skeleton Key, each
+  side), Blackrock Depths (the Shadowforge and Prison Cell keys), Stratholme
+  (Key to the City), Dire Maul (Crescent Key), Gnomeregan (Workshop Key),
+  Scarlet Monastery (The Scarlet Key), the City of Dalaran (the Horde's
+  Dalaran Sewer Key). A goal the Codex lacks drops its entry with a warning
+  (`codex build` prints it); an instance the build lacks has none. The
+  journal puts each list on its page as `attunement` and counts them
+  (`meta.counts.attunements`, the summary's `attune = { A, H }`).
+  `auditReport(journal, attune, codex)` writes the local comparison with
+  Attune (`codex attune`, `data/local/attunements-audit.md`): per Attune
+  entry the attunement of ours sharing most quests, the quests only one side
+  lists and why ours has or lacks them (in our chain, a follow-up of our
+  goal, not a prerequisite in our data, not in our Codex), then our verdicts
+  on which source is right, kept in `data/local/attunements-verdicts.md` so
+  a rerun keeps them.
 - Rares and treasures: NPCs ranked rare (4) or rare elite (2) in `npcs.json`
   (pfQuest, QuestieDB, recordings), with their spawns and loot; treasures are
   objects with the `chest` role, with their loot. Loot (`Codex.Loot`, where

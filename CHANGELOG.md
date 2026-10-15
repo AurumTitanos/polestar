@@ -147,6 +147,18 @@
   bloodmages' beasts, and Horde Warriors in the Barrens gather the Twitching
   Antennae (fifteen minutes) on the way back from Gann Stonespire and hearth
   to Ruga at once. Teldrassil says Iverron's Antidote lasts five minutes.
+- Dungeons: an Attunement tab (Keys where each is a key) on the pages of
+  Molten Core (Attunement to the Core, and Aqual Quintessence for the runes),
+  Onyxia's Lair (the Drakefire Amulet, each side's chain), Blackwing Lair
+  (Blackhand's Command), Naxxramas (the Dread Citadel quest your Argent Dawn
+  standing allows), Scholomance (the Skeleton Key), Blackrock Depths (the
+  Shadowforge and Prison Cell keys), Stratholme, Dire Maul, Gnomeregan,
+  Scarlet Monastery and the City of Dalaran (the Horde's Dalaran Sewer Key).
+  Each shows what it opens and who needs it, whether you hold the key, and
+  every step with your progress: done, in your log, open now, waiting on an
+  earlier step, too low or short of standing. "Guide me through it" opens a
+  guide through what is left, from where you stand. Forever took the Seal of
+  Ascension out, so Upper Blackrock Spire has no key (thanks Shockp).
 
 ### For guide authors
 
@@ -199,6 +211,13 @@
   every table the Codex reads is used. `meta.json` records the build;
   `codex parity` and `codex wowhead` read the client tables of the build the
   Codex was made from.
+- `tools/lib/codex/attunements.json`: a cited table naming each attunement's
+  goal (the quests that end it, or the key item) per instance;
+  `tools/lib/codex/attunements.js` builds the steps from the Codex's quest
+  chains and item sources into the journal pages (`attunement`), and
+  `auditReport` compares them with the Attune addon's for the local
+  `data/local/attunements-audit.md` (thanks Shockp).
+- `preview` renders the Attunement tab (`docs/preview/dungeons-attune.svg`).
 
 ## 0.2.3 (2026-10-14)
 

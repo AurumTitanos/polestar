@@ -99,6 +99,7 @@ CI, they skip; everything else runs.
 | Client map tables cached in `data/sources/wago` | `exploration build` | `exploration.test.js` |
 | `addon/Polestar_QuestDB` | `questdb build` | `questdb.test.js`, `quests.test.js` |
 | `addon/Polestar_Codex` | `codex build` | `lookup-codex.test.js` (release-safe, and Lookup, Dungeons and Rares read it in game) |
+| `data/forever/codex/*.json` | `codex build` | `dungeons-attune.test.js` (the real attunement chains) |
 | `addon/Polestar_ItemDB/Items.lua` | `itemdb build` (committed, so present on a clone) | `itemdb.test.js` |
 | `data/local/crossings.json`, `addon/Polestar_Travel` | the local crossings file, `travel build` | `travel-crossings.test.js`, `nav-crossings.test.js` |
 | Installed addons in the game's AddOns folder | the game client | `consume.test.js` |

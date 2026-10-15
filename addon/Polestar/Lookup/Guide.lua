@@ -20,7 +20,7 @@
 --       holds title and steps (the rest as above); Lookup.BuildGuide and
 --       Lookup.Guide then build `kind` with it, whatever lookup.enabled says
 --       (the module gates itself), and its saved tabs come back after /reload.
---       Dungeons' "pickup" and "handin" kinds are two (Dungeons/Pickup.lua, Handin.lua).
+--       Dungeons' "pickup", "handin" and "attune" kinds are three (Dungeons/Pickup.lua, Handin.lua, Attune.lua).
 --   Lookup.QuestChain(questId, player) -> { quest, ... }, truncated
 --       the quest after its open prerequisites, in the order they are done
 --   Lookup.QuestStep(quest, from) -> step   -- accept, objectives, turn-in
