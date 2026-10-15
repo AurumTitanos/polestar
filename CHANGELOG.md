@@ -10,6 +10,11 @@
   skipping its quests one by one until it called itself complete. The guide
   starts by itself on the level-up, and the guide menu's row reads "From
   level 20".
+- The published leveling times count only what a guide requires: about
+  130-132 h to 60 for the Horde and 132-134 h for the Alliance, not 123-124
+  and 128-129. They used to count the guides' optional extras (rare-drop
+  quest starters, the Green Hills pages, profession quests) as done; doing
+  them as they come can still save up to about 8 h (thanks joelwurtz).
 - "Skip grey quests" (Options, Guide, Automation) leaves out grey quests now:
   it kept every quest the guide also turns in, which is nearly all of them,
   so a character ahead of the route still saw them. A grey quest goes with
@@ -312,6 +317,13 @@
 
 ### For contributors
 
+- `sim compare` and `sim bench` score the guides without their `optional`
+  goals (an optional quest whole); `--with-optional` scores them as done, the
+  old way. README, docs/SIMULATION.md and the charts are republished on world
+  5eef72140b61. The world builder's quest log stays 20 with Forever's 40
+  (`MAXIMUM_NUM_QUESTS_LOG_CAN_ACCEPT`) cited: 40 never binds the guides but
+  merges one Alliance package, so it comes with the next world (thanks
+  joelwurtz).
 - The solo filter's dungeon and raid rule (`instanceQuest` in
   `tools/lib/sim/solo.js`) is shared with the compiler's group content
   (`tools/lib/dsl/group.js`), and `preview` renders the group line

@@ -405,36 +405,48 @@ flowchart LR
 
 Hours to 60, solo, under the model. The routes were searched four times,
 independently: the first search is the one the guides were written from;
-each later one used another random seed, more routes and newer data, and the
-fourth runs on the data this release ships with. The guides are scored on
-the fourth search's world, beside those of the first release.
+each later one used another random seed, more routes and newer data. Each
+search is scored on its own world. The guides are scored on the world of the
+data this release ships with (`5eef72140b61`), beside those of the first
+release.
 
-| Start | Search 1: best / consensus | Search 2 | Search 3 | Search 4 | Guides 0.2.0 (grinding) | Guides 0.1.0 (grinding) |
-|---|---:|---:|---:|---:|---:|---:|
-| Orc | 119.4 / 120.5 | 120.7 / 117.8 | 117.7 / 116.8 | 119.6 / 117.3 | 123.8 (16.1) | 123.0 (14.4) |
-| Tauren | 120.4 / 120.2 | 119.1 / 117.4 | 118.3 / 116.5 | 117.1 / 116.8 | 123.2 (15.6) | 122.5 (13.9) |
-| Undead | 120.8 / 120.6 | 119.0 / 118.1 | 119.3 / 117.0 | 118.8 / 117.4 | 124.3 (15.7) | 123.5 (14.0) |
-| Skyborne (Horde) | 120.2 / 120.1 | 117.3 / 117.3 | 116.3 / 116.3 | 116.8 / 116.8 | 123.6 (14.7) | 122.9 (13.2) |
-| Human | 119.6 / 119.1 | 120.7 / 118.8 | 119.2 / 116.8 | 119.3 / 118.9 | 128.2 (28.7) | 128.7 (28.5) |
-| Dwarf | 119.5 / 119.5 | 120.8 / 118.8 | 117.4 / 117.3 | 119.8 / 118.8 | 128.7 (28.6) | 129.3 (28.4) |
-| Night Elf | 120.0 / 119.5 | 120.9 / 118.9 | 119.0 / 117.5 | 119.1 / 119.1 | 128.7 (28.9) | 129.2 (28.8) |
-| Skyborne (Alliance) | 121.2 / 119.6 | 118.6 / 118.6 | 118.2 / 117.3 | 119.0 / 118.4 | 129.1 (27.9) | 129.0 (27.7) |
+The guides are scored on what they require. Their optional extras (quests
+started by rare drops such as the OOX beacons, the Green Hills of
+Stranglethorn pages, profession and bag quests, rares) are left out, because
+most players will not get them; the last column counts them as done, which is
+how these hours were published before 0.2.4 (issue
+[#30](https://github.com/fitzforge/polestar/issues/30)).
 
-The Horde guides of 0.2.0 score 0.7-0.8 h slower than those of 0.1.0, and
-that is the model being fair to 0.1.0, not a step back: 0.1.0 counted quests a
-player could not take (a chain that starts from a dungeon drop, quests
-removed from the game, a chain missing its first quest) and sent level-30
-characters at level-35 quests, which 0.2.0 drops or moves. The Alliance
-guides of 0.2.0 are about 0.5 h faster, from a loop through northern
-Stranglethorn and the Shimmering Flats in the 40s.
+| Start | Search 1: best / consensus | Search 2 | Search 3 | Search 4 | Guides 0.2.4 (grinding) | Guides 0.1.0 (grinding) | Guides 0.2.4 with every optional extra |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Orc | 119.4 / 120.5 | 120.7 / 117.8 | 117.7 / 116.8 | 119.6 / 117.3 | 131.1 (34.2) | 128.5 (29.7) | 122.8 |
+| Tauren | 120.4 / 120.2 | 119.1 / 117.4 | 118.3 / 116.5 | 117.1 / 116.8 | 130.1 (34.2) | 127.8 (29.1) | 121.9 |
+| Undead | 120.8 / 120.6 | 119.0 / 118.1 | 119.3 / 117.0 | 118.8 / 117.4 | 131.5 (33.8) | 128.9 (29.1) | 123.3 |
+| Skyborne (Horde) | 120.2 / 120.1 | 117.3 / 117.3 | 116.3 / 116.3 | 116.8 / 116.8 | 130.1 (32.8) | 128.3 (28.2) | 122.3 |
+| Human | 119.6 / 119.1 | 120.7 / 118.8 | 119.2 / 116.8 | 119.3 / 118.9 | 132.5 (37.0) | 132.1 (35.5) | 127.5 |
+| Dwarf | 119.5 / 119.5 | 120.8 / 118.8 | 117.4 / 117.3 | 119.8 / 118.8 | 133.1 (36.9) | 132.6 (35.5) | 128.2 |
+| Night Elf | 120.0 / 119.5 | 120.9 / 118.9 | 119.0 / 117.5 | 119.1 / 119.1 | 133.0 (37.1) | 132.6 (35.6) | 128.1 |
+| Skyborne (Alliance) | 121.2 / 119.6 | 118.6 / 118.6 | 118.2 / 117.3 | 119.0 / 118.4 | 133.5 (36.2) | 132.5 (34.5) | 129.0 |
+
+So a Horde character following the guides should expect about 130-132 h,
+an Alliance one about 132-134 h; doing the optional extras as they come can
+save up to about 8 h (Horde) and 5 h (Alliance). With every optional extra
+counted, the guides of 0.2.4 and 0.1.0 are within 0.6 h (Horde) and the
+Alliance guides of 0.2.4 are 0.8-1.6 h faster; counting only what each
+requires, 0.1.0 comes out 1.8-2.6 h faster for the Horde because the later
+guides marked more of their quests optional.
 
 <p align="center">
-  <img src="docs/assets/charts/starts.svg" width="880" alt="Chart: hours to 60 and hours of grinding per start. The best routes found and the consensus routes reach 60 in 117 to 120 hours; the guides of 0.2.0 in about 123 to 124 hours for the Horde and 128 to 129 for the Alliance, close to those of 0.1.0. The guides grind about 15 to 16 hours for the Horde and 28 to 29 for the Alliance.">
+  <img src="docs/assets/charts/starts.svg" width="880" alt="Chart: hours to 60 and hours of grinding per start, for what the guides require. The guides of 0.2.4 reach 60 in about 130 to 132 hours for the Horde and 132 to 134 for the Alliance; those of 0.1.0 in about 128 to 129 and 132 to 133. The guides of 0.2.4 grind about 33 to 34 hours for the Horde and 36 to 37 for the Alliance.">
 </p>
 
 <p align="center">
-  <img src="docs/assets/charts/levels.svg" width="880" alt="Chart: level against hours played for each faction: the guides of 0.2.0, the best route found, the consensus route and the guides of 0.1.0 as curves that stay close to level 45 and part in the last levels, with a strip showing the hours the guides of 0.2.0 are ahead of those of 0.1.0 at each level.">
+  <img src="docs/assets/charts/levels.svg" width="880" alt="Chart: level against hours played for each faction, for what the guides require: the guides of 0.2.4 and those of 0.1.0 as curves, with a strip showing the hours the guides of 0.2.4 are ahead of (or behind) those of 0.1.0 at each level.">
 </p>
+
+The charts show only the guides: the searches' best and consensus routes
+were searched on earlier worlds, and a chart draws only numbers from one
+world.
 
 **How close to the best?** Nobody can prove a route is the best one
 possible, so the claim is narrower and checked:
@@ -450,14 +462,15 @@ possible, so the claim is narrower and checked:
   random draws of the model's parameters, the best route found stays within
   1% of each draw's best in 76-100% of draws (fourth search), and no route
   wins every draw: "best found" names one of several near-equal routes.
-- **The guides trade hours for a smooth, safe run.** They take 6.4-6.9 h
-  (Horde) and 9.3-10.7 h (Alliance) longer than the fourth search's
-  consensus. Almost all of that is grinding the guides choose: side trips for
-  one or two small quests behind a flight, boat or hearth are left out, and
-  quests that need a group, a rare drop or a level the route has not reached
-  are optional or gone, so the guides grind about 15-16 h (Horde) and 28-29 h
-  (Alliance) where the searched routes grind under 1 h and about 8 h. The
-  Alliance mid-40s have few solo quests left once those trips are gone.
+- **The guides trade hours for a smooth, safe run.** For what they require
+  they take 13.3-14.1 h (Horde) and 13.6-15.1 h (Alliance) longer than the
+  fourth search's consensus (scored on its own world). Almost all of that is
+  grinding the guides choose: side trips for one or two small quests behind
+  a flight, boat or hearth are left out, and quests that need a group, a
+  rare drop or a level the route has not reached are optional or gone, so
+  the guides grind about 33-34 h (Horde) and 36-37 h (Alliance) where the
+  searched routes grind under 1 h and about 8 h. The Alliance mid-40s have
+  few solo quests left once those trips are gone.
 - **Dungeons do not beat questing solo** under the model: searched with
   dungeons allowed (Orc, Tauren, Undead), no dungeon route came out ahead.
 
