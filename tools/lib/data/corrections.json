@@ -13,6 +13,16 @@
 			},
 			"note": "The Binding (Warlock voidwalker, after 1501) is open to Orc, Undead and Troll Warlocks: Wowhead Forever https://www.wowhead.com/forever/quest=1504 lists Races [race=2], [race=5], [race=8] (checked 2026-10-14). The merged data has races 2 (Orc only)."
 		},
+		"7637": {
+			"set": {
+				"pre": [],
+				"preAny": [
+					7638,
+					7670
+				]
+			},
+			"note": "Emphasis on Sacrifice (Paladin charger) is for Human and Dwarf Paladins and starts at Lord Grayson Shadowbreaker: Wowhead Forever https://www.wowhead.com/forever/quest=7637 lists Races [race=1], [race=3] and Start npc=928 (checked 2026-10-16). Both races reach him by their own Lord Grayson Shadowbreaker quest: 7638 for Humans, 7670 for Dwarves, whose next is 7637 in the merged data. The compiled guide had only the Human's 7638 as its prerequisite, so a Dwarf read as lacking it."
+		},
 		"92434": {
 			"set": {
 				"pre": [
