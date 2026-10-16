@@ -761,7 +761,7 @@ do
 	local function worldPin(i)
 		local f = wPins[i]
 		if f then return f end
-		f = CreateFrame("Frame", nil, wView.canvas)
+		f = ns.CreateFrameUnder("Frame", nil, wView.canvas)
 		buildLook(f)
 		f.data = {}
 		f:EnableMouse(true)
@@ -783,7 +783,7 @@ do
 	local function worldArea(i)
 		local f = wAreas[i]
 		if f then return f end
-		f = CreateFrame("Frame", nil, wView.canvas)
+		f = ns.CreateFrameUnder("Frame", nil, wView.canvas)
 		f.tex = f:CreateTexture(nil, "BACKGROUND")
 		f.tex:SetTexture(MEDIA .. "area")
 		f.tex:SetAllPoints()
@@ -804,7 +804,7 @@ do
 	local function worldHull(i)
 		local f = wHulls[i]
 		if f then return f end
-		f = CreateFrame("Frame", nil, wView.canvas)
+		f = ns.CreateFrameUnder("Frame", nil, wView.canvas)
 		f.texs, f.used, f.outline = {}, 0, {}
 		f.get = function(k)
 			local t = f.texs[k]
@@ -1118,7 +1118,7 @@ do
 	-- in canvas units; WORLD_DOT on screen like a pin.
 	local function trailHost()
 		if wTrail then return wTrail end
-		local host = CreateFrame("Frame", nil, wView.canvas)
+		local host = ns.CreateFrameUnder("Frame", nil, wView.canvas)
 		host:SetPoint("TOPLEFT", wView.canvas, "TOPLEFT", 0, 0)
 		host:SetSize(1, 1)
 		wTrail = { host = host, dots = {}, n = 0 }
@@ -1275,7 +1275,7 @@ end
 local function acquireMinimap()
 	local f = table.remove(mmFree)
 	if not f then
-		f = CreateFrame("Frame", nil, Minimap)
+		f = ns.CreateFrameUnder("Frame", nil, Minimap)
 		buildLook(f)
 		f:SetScript("OnEnter", function(self) showTooltip(self, self.pin) end)
 		f:SetScript("OnLeave", function() GameTooltip:Hide() end)
@@ -1348,7 +1348,7 @@ local mmDots, mmDotCount, mmTrailAt = {}, 0, -1
 
 local function minimapDot(i)
 	if not mmTrail then
-		mmTrail = CreateFrame("Frame", nil, Minimap)
+		mmTrail = ns.CreateFrameUnder("Frame", nil, Minimap)
 		mmTrail:SetAllPoints(Minimap)
 		mmTrail:SetFrameLevel((Minimap:GetFrameLevel() or 1) + 4)
 	end
@@ -1419,7 +1419,7 @@ end
 
 local function areaFrame()
 	if mmArea then return end
-	mmArea = CreateFrame("Frame", nil, Minimap)
+	mmArea = ns.CreateFrameUnder("Frame", nil, Minimap)
 	mmArea:SetAllPoints(Minimap)
 	mmArea:SetFrameLevel((Minimap:GetFrameLevel() or 1) + 3)
 	if mmArea.CreateMaskTexture then

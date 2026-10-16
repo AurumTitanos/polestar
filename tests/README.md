@@ -43,7 +43,7 @@ client loads them.
 
 | File | What it fakes |
 |---|---|
-| `wow_stub.lua` | The generic client every module shares: frames, scripts, events, timers and a clock the test advances, fonts, animation groups, slash commands, settings panels, and the map frames' shape (`stub.newMapCanvas`: the world map's canvas and the getters Polestar reads; `stub.guardMap`: any write of addon code into a map's tables fails, and what it reads is listed). No quest, map data or unit APIs. |
+| `wow_stub.lua` | The generic client every module shares: frames, scripts, events, timers and a clock the test advances, fonts, animation groups, slash commands, settings panels, and the map frames' shape (`stub.newMapCanvas`: the world map's canvas and the getters Polestar reads; `stub.guardMap`: any write of addon code into a map's tables fails, and what it reads is listed), and the gamepad interface's hook on `CreateFrame` (a call from addon code with a parent that is, or is under, a frame addon code did not make fails and is listed in `stub.underGameFrames`). No quest, map data or unit APIs. |
 | `stub_world.lua` | The game world for Core tests: the player, quest log, bags, NPCs, the quest, gossip, trainer, merchant and taxi frames, and maps with simple bounds |
 | `stub_nav.lua` | A world for Nav: fakes of `Compat` and `Engine`, the world map (guarded), the minimap, super-tracking and an optional waypoint addon |
 | `stub_quests.lua` | Quest log enumeration, completed quests, tooltip processing, nameplates, loading `Polestar_QuestDB`, and a fake of `Pins` |

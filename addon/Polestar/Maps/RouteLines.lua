@@ -324,7 +324,7 @@ end
 local function ensureWorldPin()
 	if worldPin then return worldPin end
 	local canvas = view.canvas
-	worldPin = newOwner(CreateFrame("Frame", nil, canvas))
+	worldPin = newOwner(ns.CreateFrameUnder("Frame", nil, canvas))
 	worldPin:SetPoint("TOPLEFT", canvas, "TOPLEFT", 0, 0)
 	worldPin:EnableMouse(false)
 	worldPin:SetScript("OnUpdate", worldTick)
@@ -410,11 +410,11 @@ end
 
 local function ensureMinimap()
 	if mm or not Minimap then return mm ~= nil end
-	mm = newOwner(CreateFrame("Frame", nil, Minimap))
+	mm = newOwner(ns.CreateFrameUnder("Frame", nil, Minimap))
 	mm:SetAllPoints(Minimap)
 	mm:SetFrameLevel((Minimap:GetFrameLevel() or 1) + 3)
 	mm:EnableMouse(false)
-	driver = CreateFrame("Frame", nil, mm)
+	driver = ns.CreateFrameUnder("Frame", nil, mm)
 	driver:SetScript("OnUpdate", tick)
 	return true
 end

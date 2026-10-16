@@ -229,6 +229,31 @@ report a player copies (UI, "Reporting a problem"). Polestar never replaces
 the game's error handler: wrapping it would shift the stack the game and
 !BugGrabber show for every error.
 
+### Frames under the game's UI
+
+```lua
+Polestar.CreateFrameUnder(kind, name, parent, template) -> frame   -- CreateFrame with no parent, then SetParent(parent)
+```
+
+Forever's gamepad interface hooks `CreateFrame`
+(`Blizzard_GamepadSmartNavigation`, `SetupFrameHooks`): when the parent is,
+or is under, one of its open panels (the world map, the quest frame, the
+talents, the settings...), it rebuilds that panel's button groups inside the
+caller's code. Called from Polestar, the panel's tables are left tainted and
+the next gamepad action there is blocked ("An action was blocked because of
+taint from Polestar"; seen in game as a quest reward was taken, then on every
+panel after it). `SetParent` is not hooked. So every frame of Polestar's
+whose parent is a game frame, or is under one (the map canvases, the
+minimap, the quest reward and talent buttons, and the frames under those),
+is made through `CreateFrameUnder`; frames under Polestar's own windows,
+which hang off `UIParent`, are made with `CreateFrame`. No `CreateFramePool`
+with a game frame either: it calls `CreateFrame` with its parent.
+`tests/lua/wow_stub.lua`'s `CreateFrame` raises on a call from addon code
+whose parent is, or is under, a frame addon code did not make
+(`stub.underGameFrames`), and `tests/nav-mapcanvas.test.js`,
+`tests/qol.test.js` (the reward marks) and `tests/talents.test.js` (the
+talent marks) check that none was made.
+
 ### Localisation
 
 `Polestar.L[key]`: a key is the English text, and a missing key returns
@@ -1365,7 +1390,9 @@ because of taint from Polestar"). So every module draws on the maps through
 `Nav/MapCanvas.lua` and never writes into them: no data provider, no pin
 pool, no `AcquirePin`, no map method that writes, no hook on the map. Its
 frames are children of `map:GetCanvas()` (parenting is the client's, in C:
-the scroll frame clips them, they show and hide with the map), positioned
+the scroll frame clips them, they show and hide with the map), each made
+with no parent and then set under the canvas (`CreateFrameUnder`, Core,
+"Frames under the game's UI"), positioned
 from map percent times the canvas size, and the map is only read through
 `GetMapID`, `GetCanvas`, `GetCanvasScale`, `HasZoomLevels`,
 `GetCanvasZoomPercent`, `GetGlobalPinScale`, `GetGlobalAlpha`,
@@ -1390,8 +1417,9 @@ only while the map is shown; each frame it compares the map ID, the canvas
 size, scale and zoom, the pin scale and the alpha, and tells its listeners
 what changed ("show" with fresh values on the map's first frame open).
 `tests/nav-mapcanvas.test.js` runs every drawing with the maps' tables
-guarded (`stub.guardMap`: any write of addon code fails) and pins the list
-of what is read.
+guarded (`stub.guardMap`: any write of addon code fails), pins the list
+of what is read and checks that no frame was made with a parent on the maps
+or the minimap.
 
 ### Pins — map and minimap icons for every module
 

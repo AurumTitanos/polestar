@@ -82,7 +82,7 @@ local function label(i)
 	if f then return f end
 	local W = ns.Widgets
 	local T = ns.Theme
-	f = CreateFrame("Frame", nil, view.canvas)
+	f = ns.CreateFrameUnder("Frame", nil, view.canvas)
 	f:SetSize(120, 30)
 	f.Name = W.Text(f, "small", "textDim")
 	f.Name:SetPoint("BOTTOM", f, "CENTER", 0, 0)
@@ -233,7 +233,7 @@ local function buildBar()
 	local W = ns.Widgets
 	if bar or not W then return end
 	local host = owner.ScrollContainer or owner
-	bar = CreateFrame("Frame", "PolestarMapInfo", owner)
+	bar = ns.CreateFrameUnder("Frame", "PolestarMapInfo", owner)
 	bar:SetHeight(22)
 	bar:SetPoint("BOTTOMLEFT", host, "BOTTOMLEFT", 0, 0)
 	bar:SetPoint("BOTTOMRIGHT", host, "BOTTOMRIGHT", 0, 0)

@@ -9,6 +9,9 @@
 // closes ("An action was blocked because of taint from Polestar -
 // SetPreferredGamepadInteractTarget()"). stub.guardMap (tests/lua/
 // wow_stub.lua) makes such a write fail and lists what the addon reads.
+// Nor does the addon call CreateFrame with a parent on the maps (or the
+// minimap): the gamepad interface hooks it and rebuilds the open map's
+// buttons in the caller's code, tainted (wow_stub.lua's stub.underGameFrames).
 // Core, Theme, Nav, Maps and UI against stub_world.lua + stub_maps.lua.
 
 const { test } = require('node:test');
@@ -135,7 +138,7 @@ for label, keys in pairs(stub.mapReads) do
 	table.sort(list)
 	reads[label] = list
 end
-emit({ r = r, writes = table.concat(stub.mapWrites, "; "), reads = reads })
+emit({ r = r, writes = table.concat(stub.mapWrites, "; "), under = table.concat(stub.underGameFrames, "; "), reads = reads })
 `;
 
 function run(style) {
@@ -169,8 +172,9 @@ const READS = {
 
 for (const style of ['keyboard and mouse', 'gamepad']) {
 	test(`with the ${style} interface every drawing shows on the world and battlefield maps, and the maps are only read`, () => {
-		const { r, writes, reads } = run(style === 'gamepad' ? 'gamepad' : 'mkb');
+		const { r, writes, under, reads } = run(style === 'gamepad' ? 'gamepad' : 'mkb');
 		assert.equal(writes, '', 'nothing written into the maps');
+		assert.equal(under, '', 'every frame on the maps and the minimap is made with no parent, then set under it');
 		assert.deepEqual({ ...r.continent, way: r.continent.way > 0 }, { pins: 2, areas: 1, hulls: 1, way: true, labels: 1, tiles: 0 },
 			"the continent: its zones' levels, and the zone's pins, area, region and the way to the target");
 		assert.equal(r.bar, 'Testshire  10–20', 'the info bar: the zone under the cursor');

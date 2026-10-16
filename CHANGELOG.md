@@ -17,6 +17,12 @@
 - With the gamepad, the world map's cursor works on Polestar's pins as on
   the game's own: near one, its tooltip shows, and A does what a click does
   (aims the arrow at a goal or a camp, opens a dungeon's page, and so on).
+- With the gamepad interface on, taking a quest reward no longer brings up
+  the same warning, with the game's gamepad controls failing in every window
+  after it; nor does opening the talents or the world map. Polestar's marks
+  on the reward choices and on the talents, and its drawings on the map and
+  the minimap, are now added in a way that leaves the gamepad interface's
+  own code alone.
 
 ### For contributors
 
@@ -35,6 +41,14 @@
   addon code into them; `tests/nav-mapcanvas.test.js` draws everything with
   the maps guarded, with either interface, and pins what Polestar reads
   there.
+- A frame of Polestar's whose parent is a game frame, or is under one (the
+  map canvases, the minimap, quest reward and talent buttons), is made with
+  `Polestar.CreateFrameUnder` (`Core/Init.lua`, ARCHITECTURE "Frames under
+  the game's UI"): no parent, then `SetParent`. The gamepad interface hooks
+  `CreateFrame` and, for a parent inside one of its open panels, rebuilds
+  the panel's buttons in the caller's code, tainted. `tests/lua/wow_stub.lua`'s
+  `CreateFrame` fails such a call from addon code and lists it in
+  `stub.underGameFrames`.
 
 ## 0.2.4 (2026-10-16)
 

@@ -260,6 +260,22 @@ emit({ flag = m and m:IsShown() and m.Flag:IsShown() or false })`, { stubs: [] }
 	assert.equal(outs[3].flag, true);
 });
 
+// The gamepad interface hooks CreateFrame and, for a parent inside the open
+// talent frame, rebuilds its buttons in the caller's code: from Polestar's,
+// the talent frame's next gamepad action is blocked. wow_stub.lua's
+// CreateFrame lists those calls in stub.underGameFrames.
+test('Overlay: a mark and its ring and badge are made with no parent, then set under the talent button, so the gamepad interface never rebuilds the talent frame\'s buttons in Polestar\'s code', () => {
+	const [out] = run(`${FRAME}
+local on = 0
+for button, m in pairs(O.marks) do
+	if m:GetParent() == button and m.Ring:GetParent() == m and m.Badge:GetParent() == m then on = on + 1 end
+end
+emit({ marks = view().marks, on = on, under = table.concat(stub.underGameFrames, "; ") })`);
+	assert.ok(out.marks > 1, 'the planned talents are marked');
+	assert.ok(out.on >= out.marks, 'every mark hangs off its button, its ring and badge off the mark');
+	assert.equal(out.under, '', 'no CreateFrame names a game frame as parent');
+});
+
 test('Overlay: no level labels and nothing muted at the level cap; badges and tooltips give pick numbers', () => {
 	const outs = run(`${FRAME}
 -- Early points: level 30 is the cap, yet the game has given a 22nd point.

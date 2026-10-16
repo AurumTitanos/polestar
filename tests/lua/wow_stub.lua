@@ -728,6 +728,70 @@ function stub.guardMap(map, label)
 	return map
 end
 
+-- The gamepad interface (Blizzard_GamepadSmartNavigation) hooks CreateFrame:
+-- when the parent is, or is under, one of its open panels (the world map, the
+-- quest frame, the talents...), it rebuilds that panel's button list inside
+-- the caller's code, so a CreateFrame from addon code taints the panel and
+-- the next gamepad action there is blocked. The hook walks the parents up to
+-- UIParent. Here, stricter: CreateFrame called from addon code with a parent
+-- that is, or is under, a frame addon code did not make (UIParent ends the
+-- walk) raises and is listed in stub.underGameFrames ("Polestar/Nav/Pins.lua:764
+-- under WorldMapFrame (a frame under it)"). Frames the test stubs make for
+-- the game, even when addon code's call makes them, are the game's.
+-- SetParent is not hooked: a frame made with no parent, then set under a
+-- game frame, is how addon code puts one there.
+stub.underGameFrames = {}
+local addonMade = setmetatable({}, { __mode = "k" })
+
+local function nameOf(frame)
+	local f = frame
+	while f do
+		local n = f.name
+		if n then return f == frame and n or n .. " (a frame under it)" end
+		f = f.parent
+	end
+	return tostring(frame)
+end
+
+local function gameFrameAbove(parent)
+	local f = parent
+	while f and f ~= UIParent do
+		if not addonMade[f] then return f end
+		f = f.parent
+	end
+	return nil
+end
+
+-- The addon code that called CreateFrame, through the other stubs' wrappers
+-- of it (stub_qol.lua's, the play driver's): its debug.getinfo record, or nil.
+local function creator()
+	local level = 3
+	while true do
+		local info = debug.getinfo(level, "Sln")
+		if not info then return nil end
+		if stub.addonSources[info.source] then return info end
+		if info.name ~= "CreateFrame" then return nil end
+		level = level + 1
+	end
+end
+
+local createFrame = CreateFrame
+function CreateFrame(kind, name, parent, ...)
+	local by = creator()
+	if by and parent then
+		local game = gameFrameAbove(parent)
+		if game then
+			local msg = by.source:gsub("^@", ""):gsub("\\", "/"):gsub("^.-/addon/", "") .. ":" .. tostring(by.currentline)
+				.. " under " .. nameOf(game)
+			table.insert(stub.underGameFrames, msg)
+			error("addon code called CreateFrame with a parent under a game frame: " .. msg, 2)
+		end
+	end
+	local f = createFrame(kind, name, parent, ...)
+	if by then addonMade[f] = true end
+	return f
+end
+
 WorldMapFrame = stub.newMapCanvas("WorldMapFrame")
 function WorldMapFrame.GetMapID() return stub.worldMapID end
 

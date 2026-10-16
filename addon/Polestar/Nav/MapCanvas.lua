@@ -14,7 +14,10 @@
 -- Polestar". So Polestar adds no data provider, acquires no pin and calls
 -- no map method that writes. Its frames are children of the map's canvas
 -- (parenting is the client's, in C: the scroll frame clips them and they
--- show and hide with the map) and the map is only read, through
+-- show and hide with the map), each made with no parent, then set under the
+-- canvas (Polestar.CreateFrameUnder, Core/Init.lua): the gamepad interface
+-- hooks CreateFrame and, for a parent on the open map, rebuilds the map's
+-- buttons in the caller's code. The map is only read, through
 --   map:GetMapID(), map:GetCanvas(), map:GetCanvasScale(),
 --   map:HasZoomLevels(), map:GetCanvasZoomPercent(), map:GetGlobalPinScale(),
 --   map:GetGlobalAlpha(), map:GetPinFrameLevelsManager():GetValidFrameLevel(t)
@@ -121,7 +124,7 @@ function MapCanvas.Watch(map, fn)
 		local canvas = map:GetCanvas()
 		if not canvas then return nil end
 		view = setmetatable({ map = map, canvas = canvas, shown = false, listeners = {} }, View)
-		local f = CreateFrame("Frame", nil, canvas)
+		local f = ns.CreateFrameUnder("Frame", nil, canvas)
 		f:SetScript("OnUpdate", function(_, elapsed) update(view, elapsed or 0) end)
 		f:SetScript("OnHide", function()
 			if not view.shown then return end
