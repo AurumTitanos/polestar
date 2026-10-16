@@ -18,8 +18,8 @@ departure times.
 
 ## What came from Shortest Path Forever
 
-Version 1.15.0, commit
-[ba60bce](https://github.com/cjber/shortest-path-forever/commit/ba60bceec93ed48f7706d0f5b3023e5072ed3f8b),
+Version 1.16.0, commit
+[b1ad5bd](https://github.com/cjber/shortest-path-forever/commit/b1ad5bd4bf579c781937af0e25f5233cc94b3726),
 GPL-3.0-or-later, Copyright (C) 2026 Cillian Berragan:
 
 | Here | Upstream | Changed |

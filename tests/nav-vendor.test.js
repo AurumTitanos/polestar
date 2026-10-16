@@ -206,7 +206,7 @@ emit({
 })`;
 
 function checkRoute(got) {
-	// Shortest Path Forever 1.15.0 costs this walk 511 running yards; the straight line is 358.
+	// Shortest Path Forever 1.15.0 and 1.16.0 cost this walk 511 running yards; the straight line is 358.
 	assert.ok(got.cost > 400 && got.cost < 700, `cost ${got.cost}`);
 	assert.ok(got.length > 358 && got.length < 700, `drawn length ${got.length}`);
 	assert.ok(got.n >= 3, 'the route bends round the hill');

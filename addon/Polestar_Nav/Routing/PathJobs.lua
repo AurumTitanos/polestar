@@ -1,4 +1,4 @@
--- Polestar_Nav: Routing/PathJobs.lua from Shortest Path Forever (https://github.com/cjber/shortest-path-forever) at ba60bceec93ed48f7706d0f5b3023e5072ed3f8b, Copyright (C) 2026 Cillian Berragan, GPL-3.0-or-later. Modified for Polestar on 2026-10-15 by `node tools/polestar.js nav vendor`: the data global is PolestarPathData.
+-- Polestar_Nav: Routing/PathJobs.lua from Shortest Path Forever (https://github.com/cjber/shortest-path-forever) at b1ad5bd4bf579c781937af0e25f5233cc94b3726, Copyright (C) 2026 Cillian Berragan, GPL-3.0-or-later. Modified for Polestar on 2026-10-16 by `node tools/polestar.js nav vendor`: the data global is PolestarPathData.
 ---@class SPFNamespace
 local ns = select(2, ...)
 
@@ -74,6 +74,8 @@ pump = function()
 				geterrorhandler()(points)
 				points, cost = nil, "error"
 			end
+			-- A pause drops the queued answer; a batch's costs are already on the job, and this keeps why.
+			job.reason = type(cost) == "string" and cost or nil
 			if not job.cancelled then
 				notify(job, job.callback, points, cost)
 			end

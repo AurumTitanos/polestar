@@ -175,7 +175,7 @@
   `tests/nav-journey.test.js` (NAV_QA rows 7, 8, 9, C11, C13, C14).
 - `addon/Polestar_Nav` vendors Shortest Path Forever's router
   (`Routing/PathGrid.lua`, `Path.lua`, `PathJobs.lua`) and walking maps
-  (`Nav/`) at v1.15.0 (ba60bce), GPL-3.0-or-later with Cillian Berragan's
+  (`Nav/`) at v1.16.0 (b1ad5bd), GPL-3.0-or-later with Cillian Berragan's
   copyright (`LICENSE`, `CREDITS.md`). The only changes are mechanical: the
   data global `ShortestPathForeverPathData` becomes `PolestarPathData`, each
   file names its upstream file and commit. `API.lua` hands the engine to
