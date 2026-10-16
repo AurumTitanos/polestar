@@ -1,0 +1,25 @@
+name: Feature request
+description: Something Polestar does not do yet that would help you level.
+title: "Feature: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What it would do
+      description: What you would see or press in the game, and what happens then.
+      placeholder: Warn me before I take a quest that closes another one for good.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: When it would help
+      description: The moment in play where you missed it, and what you did instead.
+    validations:
+      required: true
+  - type: input
+    id: discord
+    attributes:
+      label: Discord thread
+      description: If it was asked on the Polestar Discord first, a link to the message.

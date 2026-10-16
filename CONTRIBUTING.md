@@ -27,6 +27,8 @@ package them. You can help without touching any code.
   deaths and detours.
 - **Code.** Bugs in the addon or the tools; see [Code changes](#code-changes).
   For a Lua error, use the "Bug report" form.
+- **Suggest a feature.** Open an issue with the "Feature request" form, so the
+  idea and the date it was asked stay in one place and anyone can pick it up.
 
 ## A good wrong-step report
 
