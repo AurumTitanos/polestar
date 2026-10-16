@@ -124,7 +124,8 @@ Messages:
 | `PACKS_CHANGED` | packId | `Guides.SetPackShown`: a pack's guides were hidden or shown |
 | `GUIDE_CHANGED` | guideId or nil | Engine |
 | `STEP_CHANGED` | stepIndex | Engine |
-| `STEP_UPDATED` | stepIndex | Engine (goal status/progress changed, same step) |
+| `STEP_UPDATED` | stepIndex | Engine (goal status/progress changed, same step); Names (names arrived) |
+| `NAMES_LOADED` | — | Names, when the names pack loads after a refusal in combat (the quest tracker reads its names again) |
 | `STEP_SKIPPED` | fromStep, toStep or nil, `{ { quest, title, reason, text }, ... }` | Engine, active tab, just before `STEP_CHANGED`: the computed step moved past a step whose open quest goals became unavailable (reasons as in "Unavailable quests") |
 | `PLAYER_SKIPPED_STEP` | guideId, stepIndex | Engine, after `Skip()` (the window, the menu, `/polestar skip`): the guide window offers the undo |
 | `WAYPOINT_CHANGED` | waypoint or nil | Engine (and Nav when an override is set/cleared) |
@@ -287,7 +288,8 @@ Names.Add(locale, kind, { [id] = name })   -- the pack's files only
   and an item's name (`Compat.GetItemName`, `C_Item.GetItemNameByID`). The
   client has none for NPCs and objects. Then the names pack of the client's
   language, `Polestar_Names_<GetLocale()>`, loaded through `Data.Pack` on the
-  first ask (in combat it waits for the next ask out of combat; a missing
+  first ask (refused in combat, it loads when combat ends, fires
+  `NAMES_LOADED` and redraws the guide window once; a missing
   folder is final for the session and harmless). Then nil. On an English
   client every answer is nil and nothing loads.
 - **Asking the server.** A quest or item the client has not cached is asked

@@ -1158,6 +1158,25 @@ ns.On("STEP_CHANGED", onGuide)
 ns.On("GUIDE_CHANGED", onGuide)
 ns.On("QUESTDB_STARTED", onGuide)
 
+-- The names pack arrived late (refused in combat, Core/Names.lua): the
+-- objectives were named in English, so read their names again, match the
+-- client's lines anew and rebuild what is keyed by name.
+ns.On("NAMES_LOADED", function()
+	for _, e in pairs(entries) do
+		for i = 1, #e.objs do
+			local o = e.objs[i]
+			o.name = entityName(o.kind, o.id)
+		end
+		e.lines = nil
+	end
+	if not running then return end
+	rebuildIndex()
+	rebuildObjectiveMarkers()
+	publish(LAYER_OBJECTIVES)
+	dirtyLog = true
+	schedule()
+end)
+
 local function onTheme()
 	for k in pairs(colors) do colors[k] = nil end
 	for k in pairs(dimmed) do dimmed[k] = nil end

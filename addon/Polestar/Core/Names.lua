@@ -39,6 +39,7 @@ local ready = not localised -- the pack is in, or will not load this session
 -- Ids asked of the server: 1 while waiting, 2 once answered. Never asked twice.
 local asked = { quest = {}, item = {} }
 local redrawing = false
+local deferred = false -- a load was refused in combat
 
 function Names.Localised() return localised end
 function Names.Ready() return ready end
@@ -52,8 +53,26 @@ function Names.Add(loc, kind, t)
 	end
 end
 
--- Data.Pack refuses in combat; the next ask out of combat tries again. Any
--- other answer (loaded, missing, disabled...) is final for the session.
+-- One redraw for a burst of arrivals: the guide window refills its rows
+-- (GuideFrame's STEP_UPDATED) with the names now cached.
+local function redraw()
+	redrawing = false
+	local E = ns.Engine
+	local step = E and E.GetStepIndex and E.GetStepIndex()
+	if step then ns.Fire("STEP_UPDATED", step) end
+end
+
+local function scheduleRedraw()
+	if redrawing then return end
+	redrawing = true
+	C_Timer.After(0.2, redraw)
+end
+
+-- Data.Pack refuses in combat: the load is tried again when combat ends
+-- (PLAYER_REGEN_ENABLED) or at the next ask, and once it lands NAMES_LOADED
+-- fires (the tracker reads its names again) and the guide window redraws:
+-- what showed meanwhile was English. Any other answer (loaded, missing,
+-- disabled...) is final for the session.
 local function load()
 	local Data = ns.Data
 	if not (Data and Data.Pack) then
@@ -61,7 +80,16 @@ local function load()
 		return
 	end
 	local ok, reason = Data.Pack(PACK)
-	if ok or reason ~= "combat" then ready = true end
+	if not ok and reason == "combat" then
+		deferred = true
+		return
+	end
+	ready = true
+	if ok and deferred then
+		deferred = false
+		ns.Fire("NAMES_LOADED")
+		scheduleRedraw()
+	end
 end
 
 local function fromPack(kind, id)
@@ -115,24 +143,15 @@ function Names.Cached(kind, id)
 	return fromPack(kind, id)
 end
 
--- One redraw for a burst of arrivals: the guide window refills its rows
--- (GuideFrame's STEP_UPDATED) with the names now cached.
-local function redraw()
-	redrawing = false
-	local E = ns.Engine
-	local step = E and E.GetStepIndex and E.GetStepIndex()
-	if step then ns.Fire("STEP_UPDATED", step) end
-end
-
 local function arrived(kind, id, success)
 	if asked[kind][id] ~= 1 then return end
 	asked[kind][id] = 2
-	if success == false or redrawing then return end
-	redrawing = true
-	C_Timer.After(0.2, redraw)
+	if success == false then return end
+	scheduleRedraw()
 end
 
 if localised then
 	ns.RegisterEvent("QUEST_DATA_LOAD_RESULT", function(_, id, success) arrived("quest", id, success) end)
 	ns.RegisterEvent("ITEM_DATA_LOAD_RESULT", function(_, id, success) arrived("item", id, success) end)
+	ns.RegisterEvent("PLAYER_REGEN_ENABLED", function() if deferred and not ready then load() end end)
 end

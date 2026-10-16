@@ -229,7 +229,7 @@ const QUEST_PACK = namesPack('frFR', {
 	item: { 772: 'Grande chandelle' },
 });
 
-function questRun(script, { locale = 'frFR' } = {}) {
+function questRun(script, { locale = 'frFR', setup = '' } = {}) {
 	const files = questDb();
 	return runAddon({
 		stubs: ['stub_world.lua', 'stub_quests.lua'],
@@ -240,7 +240,8 @@ function C_QuestLog.RequestLoadQuestByID() end
 stub.quests.dbFiles = { ${files.map((f) => JSON.stringify(f)).join(', ')} }
 local w = stub.world
 w.addMap(1429, { name = "Elwynn Forest", c = 0, left = 1500, right = -1500, top = 500, bottom = -1500 })
-w.moveTo(1429, 48, 40)`,
+w.moveTo(1429, 48, 40)
+${setup}`,
 		addons: ['Polestar'],
 		saved: { Polestar: 'PolestarDB = { schema = 1, settings = { qol = { mapObjectives = true } } }' },
 		script: `
@@ -337,4 +338,39 @@ local out = {}
 for _, r in ipairs(Polestar.Search.Query("霍格", { kinds = { npc = true } })) do out[#out + 1] = r.kind .. ":" .. tostring(r.id) end
 emit(table.concat(out, "|"))` });
 	assert.equal(cjk, 'npc:448');
+});
+
+test('a names pack refused in combat loads when combat ends, without another ask, and redraws the guide window once', () => {
+	const [out] = run({
+		guide: true,
+		before: 'stub.inCombat = true',
+		script: `
+local fired, names = 0, 0
+Polestar.On("STEP_UPDATED", function() fired = fired + 1 end)
+Polestar.On("NAMES_LOADED", function() names = names + 1 end)
+local during = N.Npc(448) or false
+stub.inCombat = false
+stub.fire("PLAYER_REGEN_ENABLED")
+stub.advance(1)
+local loads = __namesLoads
+stub.fire("PLAYER_REGEN_ENABLED")
+stub.advance(1)
+emit({ during, loads, N.Ready(), fired, names, __namesLoads })`,
+	});
+	assert.deepEqual(out, [false, 1, true, 1, 1, 1]);
+});
+
+test('the quest tracker reads the objective lines by the French names once a pack refused in combat arrives', () => {
+	const [out] = questRun(`
+local before = __namesLoads
+stub.inCombat = true
+w.accept(9500, { { text = "Vermine kobold avorton tuée : 1/5", required = 5, fulfilled = 1 }, { text = "Vermine kobold tuée : 2/8", required = 8, fulfilled = 2 } })
+stub.advance(0.3)
+stub.inCombat = false
+stub.fire("PLAYER_REGEN_ENABLED")
+stub.advance(0.6)
+w.progress(9500, 2, 3)
+stub.advance(0.3)
+emit({ before, prog(9500, 6), prog(9500, 9500) })`);
+	assert.deepEqual(out, [0, '3/8', '1/5']);
 });
