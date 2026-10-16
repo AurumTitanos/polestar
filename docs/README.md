@@ -10,14 +10,16 @@ and maintainers who release. Paths are from the repository root.
 | Doc | Reader | What it answers |
 |---|---|---|
 | [README.md](../README.md) | players, everyone | What Polestar is, how to install it, what it does, where to go next |
-| [CHANGELOG.md](../CHANGELOG.md) | players, guide authors, contributors | What changed in each release, under "For players", "For guide authors" and "For contributors" |
+| [CHANGELOG.md](../CHANGELOG.md) | players, guide authors, contributors | What changed in each release, under "For players", "For guide authors" and "For contributors"; what is merged but not released yet is in `changes/` ([changes/README.md](../changes/README.md)) |
 | [docs/GUIDE_PACKS.md](GUIDE_PACKS.md) | players, guide authors | What a guide pack is and is not, how to tell one from Polestar's own addons, installing one, turning it on or off, who supports it; for authors, the steps from `new` to publishing, what the tools require and what we ask of you. The in-game Guide packs page links here |
 | [docs/GUIDE_CHEATSHEET.md](GUIDE_CHEATSHEET.md) | guide authors | The guide format on one page: every header line, goal and condition, with what it does and a short example |
 | [docs/GUIDE_FORMAT.md](GUIDE_FORMAT.md) | guide authors | The `.guide` language in full: header, steps, goals, conditions, what the compiler fills in, validation, a cookbook |
 | [docs/PACKS.md](PACKS.md) | guide authors | The full handbook: how to write, test, publish and update a guide pack; every problem the tools or the game can report, with its fix |
 | [docs/PACK_FORMAT.md](PACK_FORMAT.md) | guide authors, tool builders | The contract between a guide pack and Polestar: `pack.json`, the addon the compiler writes, the rules Polestar enforces, versioning |
 | [LICENSE-EXCEPTION.md](../LICENSE-EXCEPTION.md) | guide authors | The permission to distribute a compiled guide pack under terms of your choice |
-| [CONTRIBUTING.md](../CONTRIBUTING.md) | players, guide authors, contributors | Ways to help; how to report a wrong step; how to fix a guide; setting up; code changes; commits and pull requests; the licence of contributions |
+| [CONTRIBUTING.md](../CONTRIBUTING.md) | players, guide authors, contributors | Ways to help; how to report a wrong step; how to fix a guide; setting up; code changes; which branch a pull request goes to; using an AI agent; commits and pull requests; the licence of contributions |
+| [AGENTS.md](../AGENTS.md) and [skills/](../skills) | contributors' coding agents | AGENTS.md points every agent to its skill: `polestar-contributing` (branches, generated files, changelog fragments, what a pull request must not do, posting on issues), `polestar-triage` (checking a report before agreeing it is a bug), `polestar-guide-fix`, `polestar-guide-pack` |
+| [SECURITY.md](../SECURITY.md) | everyone | How to report a security problem privately, and what counts as one |
 | [docs/TRANSLATING.md](TRANSLATING.md) | translators, contributors | The languages and their status, the locale file and how to fill it, formats, the glossary, the `i18n` commands, adding or reviewing a language |
 | [docs/ARCHITECTURE.md](ARCHITECTURE.md) | contributors | The contract between the addon's modules, the compiled guide data, the toolchain and the tests |
 | [addon/README.md](../addon/README.md) | contributors | Which addon is which, the modules in load order with each file and its public table, where a hub screen lives, the generated files inside `addon/` |
@@ -27,7 +29,7 @@ and maintainers who release. Paths are from the repository root.
 | [docs/SIMULATION.md](SIMULATION.md) | contributors | The route simulator: world model, character model, search, calibration, results |
 | [docs/DESIGN.md](DESIGN.md) | contributors | The design system: who the windows are for and what they must do, then colour, type, layout and component tokens |
 | [docs/NAV_QA.md](NAV_QA.md) | contributors, maintainers | The pathing checks: every problem reported against Shortest Path Forever that touches what Polestar uses from it, the check Polestar holds itself to and the test or in-game step that enforces it |
-| [docs/RELEASING.md](RELEASING.md) | maintainers | What ships, setting the version, and the release steps |
+| [docs/RELEASING.md](RELEASING.md) | maintainers | What ships, setting the version, the feature release steps, patch releases from a `hotfix/` branch, release candidates |
 | [docs/curseforge/README.md](curseforge/README.md) | maintainers | The CurseForge listing: the summary, the project settings, what to upload where, and the description to paste ([description.md](curseforge/description.md)) |
 | [THIRD_PARTY.md](../THIRD_PARTY.md) | guide authors, maintainers | Where every input comes from, its licence, and what may enter the repository or a release |
 

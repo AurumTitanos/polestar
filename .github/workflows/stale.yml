@@ -1,0 +1,44 @@
+name: Stale issues
+
+# An issue labelled needs-info waits on its reporter. With no reply for 14
+# days it gets the label stale and a reminder; 7 days after that it is closed
+# as not planned. A reply in between removes stale and the wait starts over.
+# Issues labelled confirmed, and every pull request, are left alone.
+
+on:
+  schedule:
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  # The action keeps its progress in the Actions cache between runs.
+  actions: write
+
+concurrency:
+  group: stale
+
+jobs:
+  stale:
+    name: Needs-info issues
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/stale@4391f3da665fdf50b6810c1a66712fb9ba21aa93 # v11.0.0
+        with:
+          only-issue-labels: needs-info
+          exempt-issue-labels: confirmed
+          stale-issue-label: stale
+          days-before-issue-stale: 14
+          days-before-issue-close: 7
+          days-before-pr-stale: -1
+          days-before-pr-close: -1
+          close-issue-reason: not_planned
+          stale-issue-message: >
+            This issue is waiting on the information asked for above and has
+            had no reply for a while, so it will be closed if none comes. A
+            reply keeps it open; anything you can add helps.
+          close-issue-message: >
+            Closing this issue for now, as the information it needs did not
+            come. Nothing is lost: reply here with it and a maintainer will
+            reopen the issue.

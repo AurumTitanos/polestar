@@ -89,6 +89,10 @@ without QuestieDB.
 |---|---|
 | `version` | Shows, or sets, the version in `package.json`, `guides/pack.json` and every addon TOC |
 | `pack` | Writes the release zips and `SHA256SUMS` to `dist/`; given a guide pack, that pack's zip |
+| `changelog add` / `check` / `show` / `build <version>` | The changelog fragments in `changes/`: writes one from `--text` or stdin / checks every fragment (CI) / prints them as the release will / assembles them into CHANGELOG.md under `## <version> (<date>)` and deletes them; `--root` works on another checkout |
+| `release scope` | Lists the paths since the last `vX.Y.Z` tag (or `--base`, or `--files -`) that a patch release may not carry; exit 1 when there are any. The `Base branch` check runs it on pull requests into `hotfix/` |
+| `release patch <version> --root <checkout>` | A patch release's build in a `hotfix/` checkout, with that checkout's tools: scope, the last release's data addons back, version, lint, compile, and the compiled guides that changed |
+| `release notes <version>` | Drafts the GitHub, CurseForge and Discord notes from the version's CHANGELOG.md section into `dist/` |
 
 The release steps are in [docs/RELEASING.md](../docs/RELEASING.md).
 

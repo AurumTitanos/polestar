@@ -66,8 +66,8 @@ function fakeDiscord() {
 		async activeThreads() {
 			return { threads: [...channels.values()].filter((c) => c.parent_id) };
 		},
-		async send(channel, content, users = []) {
-			sent.push({ channel, content, users });
+		async send(channel, content, users = [], roles = []) {
+			sent.push({ channel, content, users, roles });
 			const msg = { id: String(nextId++), channel_id: channel, content, attachments: [], mentions: [], author: { id: BOT, username: 'Polestar Bot', bot: true } };
 			if (messages.has(channel)) messages.get(channel).push(msg);
 			return msg;
@@ -87,12 +87,20 @@ function fakeGitHub(repo = 'fitzforge/polestar') {
 	const comments = new Map();
 	const labels = new Set();
 	const releases = [];
+	const files = new Map(); // `${ref}:${path}` -> text: the repository at a tag
+	const timelines = new Map(); // issue number -> timeline events
+	const pulls = new Map(); // pull request number -> { merge_commit_sha }
+	const tagCommits = new Map(); // tag -> Set of the commits it holds
 	return {
 		repo,
 		commentsByIssue: comments,
 		issues,
 		labels,
 		releasesList: releases,
+		files,
+		timelines,
+		pulls,
+		tagCommits,
 		async ensureLabels(names) {
 			for (const n of names) labels.add(n);
 		},
@@ -130,6 +138,25 @@ function fakeGitHub(repo = 'fitzforge/polestar') {
 		},
 		async releases() {
 			return releases;
+		},
+		async timeline(n) {
+			return structuredClone(timelines.get(n) || []);
+		},
+		async pull(n) {
+			if (!pulls.has(n)) throw httpError(404);
+			return { number: n, ...pulls.get(n) };
+		},
+		async contains(ref, sha) {
+			return (tagCommits.get(ref) || new Set()).has(sha);
+		},
+		async listDir(dir, ref) {
+			const prefix = `${ref}:${dir}/`;
+			return [...files.keys()]
+				.filter((k) => k.startsWith(prefix) && !k.slice(prefix.length).includes('/'))
+				.map((k) => ({ name: k.slice(prefix.length), path: k.slice(ref.length + 1), type: 'file' }));
+		},
+		async readFile(p, ref) {
+			return files.has(`${ref}:${p}`) ? files.get(`${ref}:${p}`) : null;
 		},
 	};
 }

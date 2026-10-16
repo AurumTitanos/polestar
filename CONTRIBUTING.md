@@ -12,7 +12,11 @@ package them. You can help without touching any code.
   paste the report on the [Polestar Discord](https://discord.gg/vMbee6F2e9);
   or open an issue with the "Wrong step" form.
 - **Fix a guide.** Guides are plain text files; a fix is often one line. See
-  [Fixing a guide](#fixing-a-guide).
+  [Fixing a guide](#fixing-a-guide). New here? Start with an issue labelled
+  [good first issue](https://github.com/fitzforge/polestar/labels/good%20first%20issue)
+  or [patch-candidate](https://github.com/fitzforge/polestar/labels/patch-candidate):
+  small issues to start on, and confirmed guide-only fixes with the evidence
+  on the issue.
 - **Record a session.** The Polestar Recorder addon (its own download beside
   Polestar on the GitHub release; it runs with or without Polestar) logs your
   play: quests, routes, rares you see, what creatures and chests drop, the
@@ -66,8 +70,8 @@ report goes through the same steps before anything changes:
    changed many quests.
 4. **Fix it only if it is real,** with a test that fails before the fix and
    passes after it (or, for a guide, lint and `playtest`).
-5. **Credit the reporter** in CHANGELOG.md, "(thanks <name>)", and tell them
-   which release carries the fix.
+5. **Credit the reporter** in the fix's changelog entry, "(thanks <name>)",
+   and tell them which release carries the fix.
 
 ## Fixing a guide
 
@@ -155,20 +159,79 @@ command.
   locale files with the change ([docs/TRANSLATING.md](docs/TRANSLATING.md),
   "For developers"); CI runs `i18n check`.
 
+## Branches
+
+| Branch | Holds |
+|---|---|
+| `main` | The latest release, what players have. It moves only when a release is made. |
+| `next` | The next feature release (the repository's default branch). |
+| `hotfix/<version>` | The next patch release, for example `hotfix/0.2.5`: cut from the latest release's tag right after it ships, deleted once the patch is out. |
+
+Open your pull request against:
+
+- **`hotfix/<version>`** for a guide fix to a bug players have in the latest
+  release: changes to `guides/`, the recompiled `addon/Polestar_Guides/`,
+  the fix's test, `tools/lib/data/corrections.json` and its changelog
+  fragment in `changes/`, nothing else. The `Base branch` check fails a
+  pull request to a `hotfix/` branch that changes anything more. It has
+  to work with the released addon: a fix that needs a change to the addon or
+  the tools that is only on `next` goes to `next`. Write "fixes #N" in the
+  description; GitHub closes issues only for pull requests merged into
+  `next`, so the maintainer closes them when the patch ships.
+- **`next`** for everything else: the addon, the tools, the data builds,
+  translations, new guides and route refreshes. Not sure? Use `next`; a fix
+  there can still go into a patch later.
+- Never `main`.
+
+After a patch ships, `main` is merged into `next`, so `next` always has
+every released fix. docs/RELEASING.md has the release side.
+
+## Using an AI agent
+
+Agents are welcome. [AGENTS.md](AGENTS.md), which most coding agents read
+on their own, sends them to the skill for their task in `skills/`:
+`polestar-contributing` for any change or pull request, `polestar-triage`
+for checking a report, `polestar-guide-fix` for fixing a guide step and
+`polestar-guide-pack` for writing a guide pack. Your own agent settings and
+notes stay yours: keep them out of commits. The rules that matter most:
+
+- A bug report is a lead, not a verdict, from a player or from their agent.
+  Check it against the guide, the data and Forever's own sources before
+  changing anything; Classic knowledge is not a source (see
+  [How a report is handled](#how-a-report-is-handled)).
+- Never claim a check ran when it did not, and never invent quest ids,
+  coordinates or names.
+- You answer for what your agent opens, pushes or posts. Read its comments
+  before they go up, and say in the pull request that an agent helped.
+
 ## Commits and pull requests
 
-- Open pull requests against `next`, the next release in progress (the
-  repository's default branch). `main` is the latest release: it moves only
-  when a release is made, by merging `next` into it.
+- Base branch: see [Branches](#branches).
 - One change per commit.
 - Plain messages that describe the change for the players or authors it
   affects (for example "Westfall: turn in at Sentinel Hill before the farms"), not
   how it was made.
 - Behaviour changes come with tests that show the behaviour.
-- A change goes into CHANGELOG.md under the coming release. A fix for a
-  reported bug (Discord, an issue, the in-game report) credits the person
-  who reported it at the end of its entry, by the name they reported under:
-  "(thanks Tom)". A contribution credits its author the same way.
+- Each change brings its changelog entry as a file of its own in
+  `changes/` (a fragment), not an edit to CHANGELOG.md: with many pull
+  requests open at once, they would all edit the same lines. The release
+  assembles them into CHANGELOG.md. Write it with
+
+  ```sh
+  node tools/polestar.js changelog add players --name westfall-sentinel-hill --text "Westfall turns in at Sentinel Hill before the farms (thanks Tom)."
+  ```
+
+  (`players`, `authors` or `contributors`: the "For players", "For guide
+  authors" and "For contributors" headings), or by hand as in
+  [changes/README.md](changes/README.md). `changelog check` (run in CI)
+  checks every fragment and `changelog show` prints them as the release will.
+  A fix for a reported bug (Discord, an issue, the in-game report) credits
+  the person who reported it at the end of its entry, by the name they
+  reported under: "(thanks Tom)". A contribution credits its author the
+  same way.
+- A pull request into `next` that should also go out in the coming patch:
+  ask for the `backport` label. When it merges, a pull request picking it
+  onto the `hotfix/` branch opens on its own (docs/RELEASING.md).
 
 ## How a pull request is reviewed
 
@@ -197,7 +260,7 @@ unexplained.
 
 Then the change is reviewed for correctness (tests, the game's limits,
 Options toggles off by default for anything that spends, equips or acts for
-the player) and merged into `next`.
+the player) and merged into its base branch.
 
 ## Licence
 

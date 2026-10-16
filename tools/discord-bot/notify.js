@@ -9,6 +9,8 @@
 // Reads the event from GITHUB_EVENT_PATH (NOTIFY_EVENT_PATH first when set:
 // a manual run's stand-in); needs DISCORD_TOKEN, GITHUB_TOKEN and
 // GITHUB_REPOSITORY, and checks threads against DISCORD_FORUM_ID when set.
+// A prerelease pings DISCORD_TESTER_ROLE_ID in DISCORD_TESTERS_CHANNEL_ID,
+// and tells no one when either is unset.
 
 const fs = require('node:fs');
 const { required } = require('./lib/config');
@@ -27,7 +29,10 @@ async function main(mode) {
 		await onIssue({ discord, github, event, forumId });
 		return 0;
 	}
-	const { failed } = await onRelease({ discord, github, event, forumId });
+	const testersChannel = (env.DISCORD_TESTERS_CHANNEL_ID || '').trim();
+	const testerRole = (env.DISCORD_TESTER_ROLE_ID || '').trim();
+	const testers = testersChannel && testerRole ? { channel: testersChannel, role: testerRole } : null;
+	const { failed } = await onRelease({ discord, github, event, forumId, testers });
 	return failed ? 1 : 0;
 }
 

@@ -14,7 +14,7 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
 const ROOT = path.join(__dirname, '..');
-const PATHS = ['addon', 'guides', 'docs', 'skills', 'tools/templates', 'README.md', 'CONTRIBUTING.md', 'CHANGELOG.md', 'THIRD_PARTY.md', 'LICENSE-EXCEPTION.md'];
+const PATHS = ['addon', 'guides', 'docs', 'skills', 'tools/templates', 'README.md', 'CONTRIBUTING.md', 'CHANGELOG.md', 'changes', 'THIRD_PARTY.md', 'LICENSE-EXCEPTION.md'];
 // Names of other guide products, kept as hashes so the repository never
 // spells them: SHA-256 of each name's lower-case form.
 const NAME_HASHES = new Set([
