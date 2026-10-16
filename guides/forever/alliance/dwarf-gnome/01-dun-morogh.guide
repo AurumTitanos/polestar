@@ -268,6 +268,7 @@ step The Great Outdoors
   complete 96608
   turnin 96608
   accept 96629
+  complete 96629                              -- Speak with Gremlock Pilsnor
   turnin 96629                                -- Gremlock Pilsnor
 
 step Steelgrill's Depot

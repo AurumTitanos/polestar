@@ -136,6 +136,11 @@
   done, with the class letter, so Sting of the Scorpid and Galgar's Cactus
   Apple Surprise come along to Sarkoth, whose slope is full of the Scorpid
   Workers and cactuses they need (thanks Tom).
+- Three quests no longer go straight from their accept to the turn-in
+  with the quest unfinished: Camping 101: Cooking in Mulgore and Dun Morogh
+  waits until you have spoken with the cook, and the Alliance Un'Goro guide
+  collects the compass, map and key for It's a Secret to Everybody, as the
+  Horde one does.
 - The arrow leads to a cave's mouth before anyone inside it: the Den (Kzan
   Thornslash, at the back of the cave behind Gornek), the Burning Blade
   Coven and Skull Rock in Durotar, the Coldridge troll cave in Dun Morogh,
