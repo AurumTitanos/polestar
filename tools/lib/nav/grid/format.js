@@ -94,6 +94,10 @@ const CLIMB_MAX = 80; // degrees: terrain walkable (as a climb) up to here
 // slope up to this gradient when the treads under the upper column's top
 // climb from the lower surface in rises of at most STEP (decided 2026-10-15:
 // the stairs of crypts and keeps were falls one way and nothing the other).
+// Steps higher than that, rises to STEP under a top rise to JUMP and at most
+// STEP + JUMP in all (decided 2026-10-15: the Ruins of Lordaeron's throne
+// room above the Undercity's lift halls, 0.7 and 1.5 yd in one column), are
+// a jump at any gradient.
 const STAIR_MAX = 45; // degrees
 // Walls (rasterise.js): model triangles this steep or steeper (whole degrees) are kept as the
 // ranges where they cross each column's half-lines, not as spans; links.js

@@ -3468,14 +3468,21 @@ fileDataID from wago.tools into `data/sources/casc` (local, never shipped):
   2.0833 yd columns (256 per tile), walkable surfaces with 1.6 yd clearance,
   walls (model faces of 80° and steeper) stored per column side; links for
   steps, slopes (terrain to 35° plain, 35-50° and 50-60° slow, 60-80° climbed
-  upward only; models to 50°), jumps to 1.6 yd, falls (free under 14.57 yd,
+  upward only; models to 50°), WMO staircases (treads under the upper
+  column's top rising at most 1 yd walk as a slope to 45°; steps whose top
+  rise is up to 1.6 yd over treads rising at most 1 yd, 2.6 yd in all, are
+  a jump: the Ruins of Lordaeron's throne room into the Undercity's lift
+  halls), jumps to 1.6 yd, falls (free under 14.57 yd,
   then the servers' damage share `0.018 h - 0.2426`; at most 30 yd onto
   ground and 60 yd into water; landing only on stable ground), swims and
   lifts (elevator objects of `data/forever` at their car's travel from the
   client's TransportAnimation); regions; a per-tile graph per movement class.
 - **Routes** (`tools/lib/nav/path.js`, API in its header; `move.js` the
-  profiles): `snap` picks the surface for a map point (indoor floors before
-  terrain, never a ledge one only falls onto), `route` minimises time for a
+  profiles): `snap` picks the surface for a map point (without a height, a
+  point over an indoor floor takes that floor or one level with it beside
+  it: an innkeeper behind a counter gets the inn's floor, not its roof or
+  the terrain under the city, never the storey below; then indoor floors
+  before terrain, never a ledge one only falls onto), `route` minimises time for a
   character (run, swim, mounts, Travel Form, Ghost Wolf, Cheetah, indoor
   rules, slope, fall and lift costs) with a direct search for near ends and
   the per-tile graph otherwise, then smooths the path; `los` tests a
