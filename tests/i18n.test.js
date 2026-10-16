@@ -187,7 +187,7 @@ test('i18n status lists every locale with its status and translators', () => {
 });
 
 test('every shipped interface file loads, has no stale key or key set twice, and keeps the English formats', () => {
-	assert.deepEqual(shipped, ['deDE', 'esMX']);
+	assert.deepEqual(shipped, ['deDE', 'esMX', 'frFR']);
 	const st = localeState(POLESTAR, shipped);
 	for (const locale of shipped) {
 		const s = st.locales[locale];
@@ -221,4 +221,14 @@ ITEM_QUALITY3_DESC, FACTION_HORDE, BACKSLOT = "Rare", "Horde", "Dos"`,
 		script: 'emit({ Polestar.StandingName(8), Polestar.QualityName(3), Polestar.FactionName("H"), Polestar.Gear.SlotName(15), Polestar.StandingName(9) or false })',
 	}).emitted;
 	assert.deepEqual(out, ['Exaltée', 'Rare', 'Horde', 'Dos', false]);
+});
+
+test('each shipped language loads before the code that reads L at load: the key binding labels are translated', () => {
+	const st = localeState(POLESTAR, shipped);
+	for (const locale of shipped) {
+		const [label] = runAddon({ before: `function GetLocale() return "${locale}" end`, addons: [{ name: 'Polestar', files: ['Core/Core.xml'] }], script: 'emit(BINDING_NAME_POLESTAR_TOGGLE)' }).emitted;
+		assert.equal(label, st.locales[locale].translated['Toggle guide window'], locale);
+	}
+	const [en] = runAddon({ addons: [{ name: 'Polestar', files: ['Core/Core.xml'] }], script: 'emit(BINDING_NAME_POLESTAR_TOGGLE)' }).emitted;
+	assert.equal(en, 'Toggle guide window');
 });

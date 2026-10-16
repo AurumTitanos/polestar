@@ -2,6 +2,7 @@
 	<Script file="Init.lua"/>
 	<Script file="..\Locales\deDE.lua"/>
 	<Script file="..\Locales\esMX.lua"/>
+	<Script file="..\Locales\frFR.lua"/>
 	<Script file="Compat.lua"/>
 	<Script file="Data.lua"/>
 	<Script file="Hooks.lua"/>
