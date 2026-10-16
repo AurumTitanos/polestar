@@ -14,6 +14,8 @@ const { tmpdir } = require('./helpers/tmp');
 const { formatProblems } = require('../tools/lib/i18n/check');
 const { extractKeys } = require('../tools/lib/i18n/keys');
 const { readLocaleFiles, updateLocaleText, newLocaleText } = require('../tools/lib/i18n/files');
+const { LOCALES } = require('../tools/lib/i18n/locales');
+const { TERMS, GLOSSARY_DIR, readGlossary, glossaryWarnings } = require('../tools/lib/i18n/glossary');
 
 const POLESTAR = path.join(ADDONS, 'Polestar');
 
@@ -137,4 +139,21 @@ test('the reader takes Polestar\'s layout, Ding!\'s ns.AddTranslations and a ret
 	]);
 	assert.deepEqual([ours.layout, ding.layout, table.layout], ['L', 'AddTranslations', 'return']);
 	for (const r of [ours, ding, table]) assert.deepEqual(r.strings, { Accept: 'Accepter' });
+});
+
+test('glossary: a translation without its locale\'s word warns, its forms count without case or accents, and every glossary names known terms', () => {
+	const g = { 'flight master': { term: 'Maître de vol', match: ['maitre de vol', 'maitres de vol'], client: null } };
+	const w = glossaryWarnings(g, {
+		'Flight masters': 'Maîtres de vol',
+		'Walk to the flight master': 'Allez voir le maître de vol',
+		'Fly from the flight master': 'Partez du griffon',
+		'/pole flight master: where': 'où',
+	});
+	assert.deepEqual(w.map((x) => x.key), ['Fly from the flight master']);
+	for (const f of fs.readdirSync(GLOSSARY_DIR).filter((n) => n.endsWith('.json'))) {
+		const locale = f.replace(/\.json$/, '');
+		assert.ok(LOCALES[locale], `${f}: not a locale Polestar ships`);
+		const read = readGlossary(locale);
+		for (const id of Object.keys(read)) assert.ok(TERMS[id], `${f}: ${id}`);
+	}
 });
