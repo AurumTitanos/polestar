@@ -48,8 +48,11 @@ aids    the arrow's aids from the grid (tools/lib/nav/aids.js): zone
         data/local/crossings.json; read only).
 vendor  copies Shortest Path Forever's walking router (Routing/PathGrid.lua,
         Routing/Path.lua, Routing/PathJobs.lua) and its walking maps (Nav/)
-        from a git checkout of https://github.com/cjber/shortest-path-forever
-        into addon/Polestar_Nav (--out), by Cillian Berragan,
+        from a clean git checkout whose origin is
+        https://github.com/cjber/shortest-path-forever (https or ssh; any
+        uncommitted or untracked change, or another origin, is refused)
+        into addon/Polestar_Nav (--out: a folder with an UPSTREAM.json, or a
+        new, empty one), by Cillian Berragan,
         GPL-3.0-or-later. The only change is mechanical: the data global
         ShortestPathForeverPathData becomes PolestarPathData (Polestar always
         reads its own copy of the maps), and each file gets a header line
@@ -57,8 +60,9 @@ vendor  copies Shortest Path Forever's walking router (Routing/PathGrid.lua,
         date of the change (GPLv3 section 5a; --date, default today). Only
         map files named Nav<name>.lua are taken from Nav.xml; any other name
         stops the copy. Writes UPSTREAM.json (repo, commit, version, vendored
-        date, sha256 of every vendored file). Map files the new commit no
-        longer has are removed. Update CREDITS.md's commit line by hand.
+        date, sha256 of every vendored file). Files the previous UPSTREAM.json
+        listed that the new commit no longer has are removed; no other file
+        in the folder is touched. Update CREDITS.md's commit line by hand.
 check   the vendored files match UPSTREAM.json and the transform.`;
 
 const usageError = (msg) => Object.assign(new Error(msg), { exit: 2 });

@@ -10,6 +10,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const { spawnSync } = require('node:child_process');
 const { runAddon, xmlFiles, ADDONS } = require('./helpers/lua');
 const { quiet } = require('./helpers/cli');
 const { tmpdir } = require('./helpers/tmp');
@@ -69,25 +70,40 @@ test('the transform renames only the data global, adds a header line, and is ide
 	assert.throws(() => transform('Nav/Nav7.lua', MAP, commit, 'today'), /date must be YYYY-MM-DD/);
 });
 
-test('nav vendor copies a checkout, drops stale files, and a changed file fails the check', () => {
+// A minimal Shortest Path Forever checkout whose Nav.xml lists `scripts`
+// (each written from `maps`, by name, else MAP).
+function fakeCheckout(scripts, maps = {}) {
 	const src = tmpdir();
 	fs.mkdirSync(path.join(src, 'Routing'));
 	fs.mkdirSync(path.join(src, 'Nav'));
 	for (const f of ['PathGrid.lua', 'Path.lua', 'PathJobs.lua']) fs.writeFileSync(path.join(src, 'Routing', f), ROUTING);
-	fs.writeFileSync(path.join(src, 'Nav', 'Nav.xml'), XML);
-	fs.writeFileSync(path.join(src, 'Nav', 'Nav7.lua'), MAP);
-	fs.writeFileSync(path.join(src, 'Nav', 'Nav7_1.lua'), PART);
+	fs.writeFileSync(path.join(src, 'Nav', 'Nav.xml'), `<Ui xmlns="http://www.blizzard.com/wow/ui/">\n${scripts.map((s) => `\t<Script file="${s}"/>\n`).join('')}</Ui>\n`);
+	for (const s of scripts) if (/^Nav\w*\.lua$/.test(s)) fs.writeFileSync(path.join(src, 'Nav', s), maps[s] || MAP);
+	return src;
+}
+
+const META = { commit: 'c'.repeat(40), version: '9.9.9' };
+
+test('nav vendor copies a checkout, removes only files the previous UPSTREAM.json listed, and a changed file fails the check', () => {
 	const out = path.join(tmpdir(), 'Polestar_Nav');
-	fs.mkdirSync(path.join(out, 'Nav'), { recursive: true });
-	fs.writeFileSync(path.join(out, 'Nav', 'Nav9.lua'), 'old\n');
-	const res = vendor(src, out, { commit: 'c'.repeat(40), version: '9.9.9' }, '2026-10-15');
-	assert.deepEqual(res.removed, ['Nav/Nav9.lua']);
+	const first = vendor(fakeCheckout(['Nav7.lua', 'Nav7_1.lua', 'Nav9.lua'], { 'Nav7_1.lua': PART }), out, META, '2026-10-15');
+	assert.deepEqual(first.removed, []);
+	// Polestar's own files in the folder, inside Nav/ and beside it.
+	fs.writeFileSync(path.join(out, 'API.lua'), '-- ours\n');
+	fs.writeFileSync(path.join(out, 'Nav', 'Nav8.lua'), '-- ours, not vendored\n');
+	const src = fakeCheckout(['Nav7.lua', 'Nav7_1.lua'], { 'Nav7_1.lua': PART });
+	const res = vendor(src, out, META, '2026-10-15');
+	assert.deepEqual(res.removed, ['Nav/Nav9.lua'], 'only the file the previous UPSTREAM.json listed and upstream dropped');
+	assert.equal(fs.existsSync(path.join(out, 'Nav', 'Nav9.lua')), false);
+	assert.equal(fs.readFileSync(path.join(out, 'API.lua'), 'utf8'), '-- ours\n', 'a file beside the vendored ones survives');
+	assert.equal(fs.readFileSync(path.join(out, 'Nav', 'Nav8.lua'), 'utf8'), '-- ours, not vendored\n', 'a non-vendored file in Nav/ survives');
+	fs.rmSync(path.join(out, 'Nav', 'Nav8.lua'));
 	const m = JSON.parse(fs.readFileSync(path.join(out, 'UPSTREAM.json'), 'utf8'));
 	assert.deepEqual({ ...m, files: Object.keys(m.files) }, { repo: REPO, commit: 'c'.repeat(40), version: '9.9.9', vendored: '2026-10-15', files: ['Routing/PathGrid.lua', 'Routing/Path.lua', 'Routing/PathJobs.lua', 'Nav/Nav.xml', 'Nav/Nav7.lua', 'Nav/Nav7_1.lua'] });
 	assert.deepEqual(checkVendored(out), []);
 	// Vendoring the same commit again writes the same bytes.
 	const before = fs.readFileSync(path.join(out, 'Nav', 'Nav7.lua'), 'utf8');
-	vendor(src, out, { commit: 'c'.repeat(40), version: '9.9.9' }, '2026-10-15');
+	vendor(src, out, META, '2026-10-15');
 	assert.equal(fs.readFileSync(path.join(out, 'Nav', 'Nav7.lua'), 'utf8'), before);
 	fs.appendFileSync(path.join(out, 'Routing', 'Path.lua'), '-- edited\n');
 	fs.writeFileSync(path.join(out, 'Nav', 'Extra.lua'), '\n');
@@ -95,16 +111,70 @@ test('nav vendor copies a checkout, drops stale files, and a changed file fails 
 	assert.throws(() => vendor(tmpdir(), out, { commit: 'c', version: null }), /no Nav\/Nav\.xml: not a Shortest Path Forever checkout/);
 });
 
-// A minimal Shortest Path Forever checkout whose Nav.xml lists `scripts`.
-function fakeCheckout(scripts) {
-	const src = tmpdir();
-	fs.mkdirSync(path.join(src, 'Routing'));
-	fs.mkdirSync(path.join(src, 'Nav'));
-	for (const f of ['PathGrid.lua', 'Path.lua', 'PathJobs.lua']) fs.writeFileSync(path.join(src, 'Routing', f), ROUTING);
-	fs.writeFileSync(path.join(src, 'Nav', 'Nav.xml'), `<Ui xmlns="http://www.blizzard.com/wow/ui/">\n${scripts.map((s) => `\t<Script file="${s}"/>\n`).join('')}</Ui>\n`);
-	fs.writeFileSync(path.join(src, 'Nav', 'Nav7.lua'), MAP);
-	return src;
+test('nav vendor refuses an --out that is not a Polestar_Nav folder (files but no UPSTREAM.json, or a broken one) and touches nothing; a new empty folder is fine', () => {
+	const src = fakeCheckout(['Nav7.lua']);
+	const other = tmpdir();
+	fs.mkdirSync(path.join(other, 'Nav'));
+	fs.writeFileSync(path.join(other, 'Nav', 'Nav9.lua'), 'someone else\'s\n');
+	fs.writeFileSync(path.join(other, 'notes.txt'), 'keep\n');
+	assert.throws(() => vendor(src, other, META, '2026-10-15'), /is not a Polestar_Nav folder \(no UPSTREAM\.json\) and is not empty/);
+	assert.deepEqual(fs.readdirSync(other).sort(), ['Nav', 'notes.txt']);
+	assert.deepEqual(fs.readdirSync(path.join(other, 'Nav')), ['Nav9.lua'], 'nothing removed or written');
+	fs.writeFileSync(path.join(other, 'UPSTREAM.json'), '{ broken');
+	assert.throws(() => vendor(src, other, META, '2026-10-15'), /UPSTREAM\.json is not valid JSON .*cannot tell which files the last vendoring wrote/);
+	fs.writeFileSync(path.join(other, 'UPSTREAM.json'), '{ "commit": "x" }');
+	assert.throws(() => vendor(src, other, META, '2026-10-15'), /UPSTREAM\.json has no files list/);
+	assert.deepEqual(fs.readdirSync(path.join(other, 'Nav')), ['Nav9.lua']);
+	const empty = tmpdir();
+	vendor(src, empty, META, '2026-10-15');
+	assert.deepEqual(checkVendored(empty), []);
+});
+
+// A git checkout of fakeCheckout's files, committed, with `origin` set.
+function gitCheckout(origin) {
+	const src = fakeCheckout(['Nav7.lua']);
+	const git = (...args) => {
+		const r = spawnSync('git', ['-C', src, '-c', 'user.name=Test', '-c', 'user.email=test@example.invalid', '-c', 'commit.gpgsign=false', ...args], { encoding: 'utf8' });
+		assert.equal(r.status, 0, r.stderr);
+		return r.stdout.trim();
+	};
+	git('init', '-q');
+	git('add', '-A');
+	git('commit', '-q', '-m', 'upstream');
+	if (origin) git('remote', 'add', 'origin', origin);
+	return { src, head: git('rev-parse', 'HEAD') };
 }
+
+test('nav vendor refuses a checkout with uncommitted or untracked changes, or whose origin is not Shortest Path Forever', async () => {
+	const vendorCli = (src) => {
+		const out = path.join(tmpdir(), 'Polestar_Nav');
+		return quiet(() => nav.run(['vendor', src, '--out', out, '--date', '2026-10-15'])).then((r) => ({ ...r, dir: out }));
+	};
+	for (const url of ['https://github.com/cjber/shortest-path-forever', 'https://github.com/cjber/shortest-path-forever.git',
+		'git@github.com:cjber/shortest-path-forever.git', 'ssh://git@github.com/cjber/shortest-path-forever']) {
+		const { src, head } = gitCheckout(url);
+		const r = await vendorCli(src);
+		assert.equal(r.result, 0, `${url}: ${r.out}`);
+		assert.equal(JSON.parse(fs.readFileSync(path.join(r.dir, 'UPSTREAM.json'), 'utf8')).commit, head);
+	}
+	for (const url of [null, 'https://github.com/someone/shortest-path-forever', 'https://gitlab.com/cjber/shortest-path-forever',
+		'https://github.com/cjber/shortest-path-forever-fork', '/tmp/shortest-path-forever']) {
+		const r = await vendorCli(gitCheckout(url).src);
+		assert.equal(r.result, 1, String(url));
+		assert.match(r.out, url ? /origin is ".*", not https:\/\/github\.com\/cjber\/shortest-path-forever: vendor only from a clone/ : /origin is not set/, String(url));
+		assert.equal(fs.existsSync(r.dir), false, `${url}: nothing written`);
+	}
+	const modified = gitCheckout('https://github.com/cjber/shortest-path-forever');
+	fs.appendFileSync(path.join(modified.src, 'Routing', 'Path.lua'), '-- local edit\n');
+	const untracked = gitCheckout('https://github.com/cjber/shortest-path-forever');
+	fs.writeFileSync(path.join(untracked.src, 'Nav', 'Nav8.lua'), MAP);
+	for (const { src } of [modified, untracked]) {
+		const r = await vendorCli(src);
+		assert.equal(r.result, 1);
+		assert.match(r.out, /has uncommitted or untracked changes \(git status --porcelain is not empty\): vendor only a clean checkout/);
+		assert.equal(fs.existsSync(r.dir), false, 'nothing written');
+	}
+});
 
 test('security L8: nav vendor takes only Nav<name>.lua map files from Nav.xml; a path out of Nav/ stops it before anything is read or written', () => {
 	const victim = path.join(tmpdir(), 'secret.lua');
