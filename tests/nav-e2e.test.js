@@ -586,8 +586,9 @@ test('every one of the 49 zones the guides walk in routes on the shipped maps (o
 	const geo = new Geo(JSON.parse(fs.readFileSync(path.join(DATA, 'map-frames.json'), 'utf8')), JSON.parse(fs.readFileSync(path.join(DATA, 'zones.json'), 'utf8')));
 	const src = fs.readFileSync(path.join(ADDONS, 'Polestar_Guides', 'Guides.lua'), 'utf8');
 	const byZone = new Map();
-	for (const m of src.matchAll(/map = (\d+), x = ([\d.]+), y = ([\d.]+)/g)) {
-		const w = geo.toWorld(+m[1], +m[2], +m[3], 'e');
+	// A goal's coordinates are in the Era frame with f = "e", else the live (Forever) frame (Compat.MapToWorld).
+	for (const m of src.matchAll(/map = (\d+), x = ([\d.]+), y = ([\d.]+)(?:, z = -?[\d.]+)?(, f = "e")?/g)) {
+		const w = geo.toWorld(+m[1], +m[2], +m[3], m[4] ? 'e' : 'l');
 		if (!w || ![0, 1].includes(w.c)) continue;
 		if (!byZone.has(+m[1])) byZone.set(+m[1], []);
 		byZone.get(+m[1]).push(w);
