@@ -22,6 +22,23 @@
   one. Each language's names are their own small addon,
   `Polestar_Names_<locale>`, in the release zip; the game loads only the one
   of its language, and an English client none.
+- On a French, German, Spanish or any other non-English client, setting your
+  home, discovering a flight path, hearthing and flying complete their steps:
+  the guide named the place in English and the game answered in your language
+  ("Darkshire" against "Sombre-Comté"), so these steps never checked off and
+  had to be skipped. Polestar now knows each inn, flight path and place by
+  the game's own ID: binding at the innkeeper the step names, or being bound
+  there already, completes the step, and the guide window names the place as
+  your game does (thanks Yendi, #83).
+
+### For guide authors
+
+- `compile` gives `sethome`, `hearth`, `fly` and `getfp` and a labelled `goto`
+  the game's area ID of the place they name (`area`), and `getfp` its flight
+  point's taxi node (`node`), so they complete on every client language; it
+  prints how many got one. The guide sources do not change, and a pack
+  without the keys keeps matching by English name (GUIDE_FORMAT.md, "Places
+  by ID"; PACK_FORMAT.md).
 
 ### For contributors
 
@@ -49,6 +66,11 @@
   licences and counts, with Ding's `CREDITS.md` beside it. `Polestar.Names`
   (`Core/Names.lua`) reads them; docs/ARCHITECTURE.md, "Names", and
   docs/TRANSLATING.md, "Game names".
+- `travel build` gives every inn in `Nav/TravelData.lua` its AreaTable area,
+  from the AreaTable `data build` caches (`tools/lib/data/areas.js`, also read
+  by `compile`); `Compat.GetAreaName` reads `C_Map.GetAreaInfo`; Nav exposes
+  `Nav.FindInn` and `Nav.BoundInn`. `tests/engine-l10n.test.js` plays the
+  steps on a fake French client.
 - `tools/discord-bot`: `/close` and `/reopen` for server administrators in
   a #bugs thread. `/close` takes a reason (Fixed, Won't fix, No action
   needed, Can't reproduce, Not resolved, Duplicate) and an optional note,
