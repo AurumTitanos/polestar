@@ -154,6 +154,25 @@
 			},
 			"note": "Third step of the Dwarf Shaman Call of Earth series (Wowhead Forever quest=94375, checked 2026-10-12)."
 		},
+		"94466": {
+			"set": {
+				"objectives": [
+					{
+						"type": "item",
+						"id": 5026,
+						"count": 1,
+						"text": "Fire Tar"
+					},
+					{
+						"type": "item",
+						"id": 6652,
+						"count": 1,
+						"text": "Reagent Pouch"
+					}
+				]
+			},
+			"note": "Call of Fire (Dun Morogh, Dwarf Shaman) lists Fire Tar first, then the Reagent Pouch: Wowhead Forever https://www.wowhead.com/forever/quest=94466, checked 2026-10-16. The merged data has the two the other way round, so `quest 94466.1` named the pouch."
+		},
 		"95508": {
 			"set": {
 				"objectives": [
@@ -196,6 +215,25 @@
 				}
 			},
 			"note": "An Ancient Grudge (The Hall of Thanes) is open to both sides and starts and ends inside with the Ghostly Attendant 265002: Wowhead Forever https://www.wowhead.com/forever/quest=96395 Quick Facts \"Type: Dungeon\", \"Side: None\" (its list row side 0), and two comments (\"Quest starts and ends inside the dungeon\", 2026-09-21; \"The NPC that gives this quest [npc=265002 Ghostly Attendant] is located within the Hall of Thanes\", 2026-10-04), checked 2026-10-15. QuestieDB 1.0.5 has no giver or ender and an Alliance race mask."
+		},
+		"96821": {
+			"set": {
+				"objectives": [
+					{
+						"type": "kill",
+						"id": 266850,
+						"count": 6,
+						"text": "Ridgeshade Creeper"
+					},
+					{
+						"type": "kill",
+						"id": 266849,
+						"count": 6,
+						"text": "Ridgeshade Lurker"
+					}
+				]
+			},
+			"note": "Legging It (Durotar) lists the Ridgeshade Creepers first, then the Ridgeshade Lurkers: Wowhead Forever https://www.wowhead.com/forever/quest=96821, checked 2026-10-16. The merged data has the two the other way round, so `quest 96821.1` named the Lurkers."
 		},
 		"96984": {
 			"set": {
