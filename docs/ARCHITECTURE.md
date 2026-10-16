@@ -252,6 +252,11 @@ qualities (`Polestar.QualityName(q)`, `ITEM_QUALITYn_DESC`), the factions
 (`Polestar.FactionName(f)`, `FACTION_ALLIANCE`, `FACTION_HORDE`), gear slots
 (`Gear.SlotName`, `HEADSLOT`…) and the Dungeon Journal (`ENCOUNTER_JOURNAL`).
 The test client (`tests/lua/wow_stub.lua`) holds their English values.
+Class and race names come from the client too, keeping their keys only as the
+fallback: `UI.ClassName` reads `LOCALIZED_CLASS_NAMES_MALE`, `UI.RaceName`
+reads `C_CreatureInfo.GetRaceInfo` by the Era races' ChrRaces IDs. Skyborne
+reads its key: the client names it only per side ("High Order Skyborne",
+"Windshaper Skyborne").
 
 Every player-facing string is written as a literal `L["..."]` or `LC(...)`
 where it appears, so `i18n keys` and a translator find every key: a table of

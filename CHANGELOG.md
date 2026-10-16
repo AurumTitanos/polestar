@@ -6,9 +6,9 @@
 
 - Polestar's interface is in French, translated by Yendi (thanks Yendi).
 - Reputation standings, item qualities, the Alliance and the Horde, the gear
-  slots on the upgrade line and the Dungeon Journal read exactly as the game
-  writes them, in every language ("Main Hand", "Shoulders" and "Dungeon
-  Journal" in English).
+  slots on the upgrade line, the Dungeon Journal and the race names on guides
+  and the welcome read exactly as the game writes them, in every language
+  ("Main Hand", "Shoulders" and "Dungeon Journal" in English).
 - Options > About says so on a client whose translation was made with AI, with
   the Discord invite.
 

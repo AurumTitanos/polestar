@@ -239,6 +239,17 @@ ITEM_QUALITY3_DESC, FACTION_HORDE, BACKSLOT = "Rare", "Horde", "Dos"`,
 	assert.deepEqual(out, ['Exaltée', 'Rare', 'Horde', 'Dos', false]);
 });
 
+test('race names come in the client\'s words by ChrRaces ID; Skyborne, named only per side by the client, reads its key', () => {
+	const [out] = runAddon({
+		before: `${fakeLocale('itIT', { Skyborne: 'Celestiale', Human: 'Umano (chiave)' })}
+local NAMES = { [1] = "Umano", [5] = "Non morto", [23] = "Gilneano", [95] = "Celestiale dell'Ordine Supremo" }
+C_CreatureInfo = { GetRaceInfo = function(id) return NAMES[id] and { raceName = NAMES[id], raceID = id } end }`,
+		addons: [{ name: 'Polestar', files: ['Core/Core.xml', 'Theme/Theme.xml', 'UI/UI.xml'] }],
+		script: 'local U = Polestar.UI\nemit({ U.RaceName("Human"), U.RaceName("Scourge"), U.RaceName("Skyborne"), U.RaceName("Orc") })',
+	}).emitted;
+	assert.deepEqual(out, ['Umano', 'Non morto', 'Celestiale', 'Orc']);
+});
+
 test('each shipped language loads before the code that reads L at load: the key binding labels are translated', () => {
 	const st = localeState(POLESTAR, shipped);
 	for (const locale of shipped) {
