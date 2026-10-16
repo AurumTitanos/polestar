@@ -71,7 +71,13 @@ local function drawn()
 	-- The way to the target: the route lines (Maps/RouteLines.lua), or the trail's dots while they draw nothing.
 	local R = Polestar.RouteLines
 	local lines = R and R.GetWorldFrame() and R.GetWorldFrame():IsVisible() and R.GetStrokes("world").n or 0
-	return { pins = #P.GetWorldFrames("pins"), areas = #P.GetWorldFrames("areas"), hulls = #P.GetWorldFrames("hulls"),
+	-- The marks and the target; the route's steps (pins with a step) come and
+	-- go with Nav/Travel.lua's choice of way and are left out.
+	local pins = 0
+	for _, f in ipairs(P.GetWorldFrames("pins")) do
+		if not (f.data and f.data.pin and f.data.pin.step) then pins = pins + 1 end
+	end
+	return { pins = pins, areas = #P.GetWorldFrames("areas"), hulls = #P.GetWorldFrames("hulls"),
 		way = #P.GetTrailFrames("world") + lines, labels = labels, tiles = tiles(WorldMapFrame) }
 end
 
