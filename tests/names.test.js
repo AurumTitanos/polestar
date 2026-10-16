@@ -188,3 +188,93 @@ test('an English client keeps the guide\'s English, its quest title before the c
 	assert.deepEqual(view.map((g) => g[0]), ['Wanted: Hogger', 'Kobold Vermin', 'Handful of Oats', 'Wanted Poster', 'Nobody Translated', 'Untranslated Thing', 'Wolves Across the Border']);
 	assert.deepEqual(view[0], ['Wanted: Hogger', 'from Marshal Dughan', 'Marshal Dughan']);
 });
+
+// ---------------------------------------------------------------------------
+// The target button, the quest database's names, objective matching
+// ---------------------------------------------------------------------------
+
+test('the target button\'s macro targets the French name; an English client\'s the English one', () => {
+	const script = 'local B = Polestar.QoL.Buttons; emit(B.TargetMacro(B.TargetNames(), 1))';
+	const before = 'stub.world.accept(7, { { text = "Kobold Vermin slain: 0/10", required = 10 }, { text = "Handful of Oats: 0/8", required = 8 } })';
+	assert.deepEqual(run({ guide: true, before, script }), ['/targetexact Vermine kobold']);
+	assert.deepEqual(run({ locale: null, guide: true, before, script }), ['/targetexact Kobold Vermin']);
+});
+
+const fs = require('node:fs');
+const path = require('node:path');
+const { buildQuestDB, writeQuestDB } = require('../tools/lib/questdb/build');
+const { tmpdir } = require('./helpers/tmp');
+
+// tests/fixtures/questdb plus quest 9500: 8 Kobold Vermin (6) and 5 Kobold
+// Vermin Runts (9500), a name holding the other.
+function questDb() {
+	const FIX = path.join(__dirname, 'fixtures', 'questdb');
+	const dir = tmpdir('polestar-names-questdb-');
+	for (const f of fs.readdirSync(FIX)) fs.copyFileSync(path.join(FIX, f), path.join(dir, f));
+	const quests = JSON.parse(fs.readFileSync(path.join(FIX, 'quests.json'), 'utf8'));
+	const npcs = JSON.parse(fs.readFileSync(path.join(FIX, 'npcs.json'), 'utf8'));
+	npcs[9500] = { ...npcs[6], id: 9500, name: 'Kobold Vermin Runt', spawns: { 1429: { f: 'e', pts: [[20, 20], [20.4, 20.3]] } } };
+	quests[9500] = { ...quests[7], id: 9500, title: 'Quest 9500', pre: [], objectives: [{ type: 'kill', id: 6, count: 8, text: 'Kobold Vermin' }, { type: 'kill', id: 9500, count: 5, text: 'Kobold Vermin Runt' }] };
+	fs.writeFileSync(path.join(dir, 'quests.json'), JSON.stringify(quests));
+	fs.writeFileSync(path.join(dir, 'npcs.json'), JSON.stringify(npcs));
+	const out = tmpdir('polestar-names-questdb-out-');
+	writeQuestDB(buildQuestDB({ dataDir: dir }), out);
+	return ['MapFrames.lua', 'Quests.lua', 'Npcs.lua', 'Objects.lua', 'Items.lua'].map((f) => path.join(out, f));
+}
+
+const QUEST_PACK = namesPack('frFR', {
+	quest: { 60: 'Les chandelles kobolds' },
+	npc: { 6: 'Vermine kobold', 40: 'Mineur kobold', 9500: 'Vermine kobold avorton' },
+	object: { 77: 'Caisse de chandelles' },
+	item: { 772: 'Grande chandelle' },
+});
+
+function questRun(script, { locale = 'frFR' } = {}) {
+	const files = questDb();
+	return runAddon({
+		stubs: ['stub_world.lua', 'stub_quests.lua'],
+		before: `${locale ? `function GetLocale() return ${JSON.stringify(locale)} end` : ''}
+${NO_INTERFACE_FILE}
+${QUEST_PACK.stubLua}
+function C_QuestLog.RequestLoadQuestByID() end
+stub.quests.dbFiles = { ${files.map((f) => JSON.stringify(f)).join(', ')} }
+local w = stub.world
+w.addMap(1429, { name = "Elwynn Forest", c = 0, left = 1500, right = -1500, top = 500, bottom = -1500 })
+w.moveTo(1429, 48, 40)`,
+		addons: ['Polestar'],
+		saved: { Polestar: 'PolestarDB = { schema = 1, settings = { qol = { mapObjectives = true } } }' },
+		script: `
+local w, sq, Q = stub.world, stub.quests, Polestar.QuestDB
+sq.installPins()
+stub.login()
+stub.advance(0.3)
+local function prog(q, npc)
+	for _, o in ipairs(Q._index.npc[npc] or {}) do
+		if o.q == q then return o.cur .. "/" .. o.max .. (o.done and " done" or "") end
+	end
+	return "none"
+end
+${script}`,
+	}).emitted;
+}
+
+test('the quest database names quests, NPCs and items in French (tooltips, the target button\'s droppers)', () => {
+	const [names] = questRun(`
+emit({ Q.GetQuestTitle(60), Q.EntityName(6), Q.GetObjectiveMobs(60, 1), Q.GetItemDroppers(772)[1].name, Q.GetItem(772).name, Q.GetNpc(6).name, Q.GetQuest(60).title, Q.EntityName(253) })`);
+	assert.deepEqual(names, ['Les chandelles kobolds', 'Vermine kobold', ['Vermine kobold', 'Mineur kobold'], 'Vermine kobold', 'Grande chandelle', 'Vermine kobold', 'Les chandelles kobolds', 'William Pestle']);
+});
+
+test('an object\'s tooltip, which names it in French, finds the objectives it serves', () => {
+	const [found] = questRun(`
+w.accept(60, { { text = "Grande chandelle : 0/8", required = 8 } })
+stub.advance(0.3)
+local fr, en = Q.ObjectivesForObjectName("Caisse de chandelles"), Q.ObjectivesForObjectName("Candle Crate")
+emit({ fr and #fr or 0, en and #en or 0 })`);
+	assert.deepEqual(found, [1, 0]);
+});
+
+test('objective lines match their objectives by the French names before their order', () => {
+	const lines = 'w.accept(9500, { { text = "Vermine kobold avorton tuée : 1/5", required = 5, fulfilled = 1 }, { text = "Vermine kobold tuée : 2/8", required = 8, fulfilled = 2 } })\nstub.advance(0.3)\nemit({ prog(9500, 6), prog(9500, 9500) })';
+	assert.deepEqual(questRun(lines)[0], ['2/8', '1/5'], 'each line read for its own objective');
+	assert.deepEqual(questRun(lines, { locale: null })[0], ['1/5', '2/8'], 'English names find nothing in French lines: by order');
+});
