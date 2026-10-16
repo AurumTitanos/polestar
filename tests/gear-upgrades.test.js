@@ -95,7 +95,7 @@ test('upgrade line: unusable items say why; class-restricted; the downgrade in r
 });
 
 test('upgrade line: why an item is unusable is in the client language', () => {
-	const es = fakeLocale('esMX', { 'armor you cannot wear': 'armadura que no puedes llevar', 'not for your class': 'no es para tu clase' });
+	const es = fakeLocale('itIT', { 'armor you cannot wear': 'armadura que no puedes llevar', 'not for your class': 'no es para tu clase' });
 	const [mage] = run('emit(line("item:9101"))', { cls: 'MAGE', className: 'Mage', classID: 8, locale: es });
 	const [cls] = run('emit(line("item:9150"))', { locale: es });
 	assert.equal(mage, 'Polestar · Frost | armadura que no puedes llevar');

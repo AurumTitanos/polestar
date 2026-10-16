@@ -263,7 +263,7 @@ test('tooltip line: the slot is named by its own key, so "Back" and "Chest" tran
 		emit(g.showTooltip(GameTooltip, "item:9041"))
 		emit(g.showTooltip(GameTooltip, "item:9061"))
 	`,
-		{ before: fakeLocale('frFR', { Back: 'Atrás', Chest: 'Cofre', 'slot: Back': 'Espalda', 'slot: Chest': 'Pecho' }) },
+		{ before: fakeLocale('itIT', { Back: 'Atrás', Chest: 'Cofre', 'slot: Back': 'Espalda', 'slot: Chest': 'Pecho' }) },
 	);
 	assert.match(back[0], /^Polestar · Arms \| .*upgrade · Espalda$/);
 	assert.match(chest[0], /^Polestar · Arms \| .*upgrade · Pecho$/);

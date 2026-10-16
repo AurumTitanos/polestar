@@ -448,7 +448,7 @@ test('the Attunement tab: the kind beside the title is in the client language', 
 Polestar.Dungeons.Open("wailing-caverns")
 DS.SetTab("attune")
 emit(DS.atts[1].Meta:GetText())`,
-		{ locale: fakeLocale('frFR', { Attunement: 'Zugangsquest', 'Everyone entering needs it': 'Jeder braucht sie', 'From level %d': 'Ab Stufe %d' }) },
+		{ locale: fakeLocale('itIT', { Attunement: 'Zugangsquest', 'Everyone entering needs it': 'Jeder braucht sie', 'From level %d': 'Ab Stufe %d' }) },
 	);
 	assert.equal(meta, 'Zugangsquest  \u00b7  Jeder braucht sie  \u00b7  Ab Stufe 17');
 });
