@@ -79,7 +79,7 @@ const METAS = {
 		['preQuestGroup', 'table', 'idarray'], ['exclusiveTo', 'table', 'idarray'], ['nextQuestInChain', 'number'],
 		['breadcrumbs', 'table', 'idarray'], ['triggerEnd', 'table', 'trigger'], ['zoneOrSort', 'number'],
 		['requiredClasses', 'number'], ['retired', 'number', null, 7], ['breadcrumbForQuestId', 'number'],
-		['parentQuest', 'number'], ['childQuests', 'table', 'idarray'],
+		['parentQuest', 'number'], ['childQuests', 'table', 'idarray'], ['requiredSkill', 'table', 'pair'],
 	],
 	Npc: [
 		['name', 'string'], ['minLevel', 'number'], ['maxLevel', 'number'], ['spawns', 'table', 'spawnlist'],
@@ -150,7 +150,7 @@ const QUESTS = {
 		startedBy: [[2]], finishedBy: [[2]],
 		objectivesText: ['Bring 3 pieces of Wolf Pelt, and kill 10 Fixture Wolves and 4 Fixture Wolf Alphas for Alice.'],
 		objectives: [[{ 1: 3, 3: 0 }, { 1: 4, 3: 0 }], [], [{ 1: 50, 3: 0 }]],
-		preQuestSingle: [100], exclusiveTo: [102, 105], breadcrumbs: [103], childQuests: [104],
+		preQuestSingle: [100], exclusiveTo: [102, 105], breadcrumbs: [103], childQuests: [104], requiredSkill: [393, 1],
 	},
 	102: { name: 'Fixture Altar', questLevel: 4, requiredLevel: 2, startedBy: [[], [500]], finishedBy: [[], [500]], preQuestSingle: [101, 102, 100] },
 	// Sparse questgivers (object slot only) and an ender known only from the object's questEnds.
@@ -354,9 +354,15 @@ describe('QuestieDB merge', () => {
 		assert.deepEqual(q[101].breadcrumbs, [103]);
 		assert.deepEqual(q[101].children, [104]);
 		assert.equal(q[101].races, 77);
-		// 102: Questie has no objectives, skill or event: pfQuest's stay.
+		assert.equal(q[101].skill, 393, "the profession from QuestieDB's requiredSkill");
+		assert.equal(q[101].skillLevel, 1);
+		// 102: Questie has no objectives or event: pfQuest's stay. It has no
+		// requiredSkill either, and that is Forever's answer: pfQuest's Classic
+		// Mining (186) is dropped, as Beer Basted Boar Ribs (384) lost pfQuest's
+		// Cooking, which Forever does not ask for (thmastin's report).
 		assert.equal(q[102].event, 12);
-		assert.equal(q[102].skill, 186);
+		assert.equal(q[102].skill, null);
+		assert.equal('skillLevel' in q[102], false);
 		assert.equal(q[102].objectives.length, 2);
 		assert.equal('preAll' in q[102], false, 'fields Questie has no value for are omitted');
 		assert.deepEqual(q[102].preAny, [100], 'a quest never requires itself or a quest exclusive with it');
