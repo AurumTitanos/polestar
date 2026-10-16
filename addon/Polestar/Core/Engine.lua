@@ -1383,11 +1383,17 @@ local WHO_VERBS = {
 }
 
 -- kind ("npc" | "object" | "here"), id and name of whom a goal is done with.
+-- An interact for a quest objective (totems, mounds, cages, braziers) is
+-- field work done where you are, like a kill or a collect, not a visit: it
+-- shows with the step's kills instead of waiting behind them. A plain
+-- interact (no quest) is still a visit to that object.
 local function whoOf(goal)
 	if WHO_VERBS[goal.t] then
 		local npc, name = npcOf(goal)
 		if npc then return "npc", npc, name end
-		if goal.object then return "object", goal.object, ns.Names.Object(goal.object) or goal.objName end
+		if goal.object and not (goal.t == "interact" and goal.quest) then
+			return "object", goal.object, ns.Names.Object(goal.object) or goal.objName
+		end
 	end
 	return "here"
 end
