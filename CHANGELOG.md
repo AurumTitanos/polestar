@@ -4,6 +4,10 @@
 
 ### For players
 
+- The quest item button offers only an item from the step's own quests: it
+  took the first usable quest item in your bags, so Bethor's Potion from
+  Silverpine sat on it through the Barrens. From the bags it now offers only
+  an item one of the step's open quests handed you when you took it.
 - The Barrens (19-24) takes Her Name Is Olgra after Lost in Battle is handed
   in, the only time Mankrik offers it, and collects Olgra's Adornments on the
   way back down to Camp Taurajo: the guide asked for it at the first
