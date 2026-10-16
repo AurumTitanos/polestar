@@ -89,6 +89,10 @@
 					545,
 					93680
 				],
+				"preAll": [
+					545,
+					93680
+				],
 				"preAny": []
 			},
 			"note": "Blood in the Streets (City of Dalaran, Horde) opens after Magus Wordeen Voidglare's other quests, Prison Break In 544 -> Dalaran Patrols 545 and Key to the City 93680: a Wowhead Forever comment on https://www.wowhead.com/forever/quest=92434 (2026-10-05: \"You need to complete all of Magus Wordeen Voidglare's other quests to start this quest\"), checked 2026-10-15. QuestieDB 1.0.5 has no prerequisite."
