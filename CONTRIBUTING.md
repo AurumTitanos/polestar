@@ -193,7 +193,9 @@ on their own, sends them to the skill for their task in `skills/`:
 `polestar-contributing` for any change or pull request, `polestar-triage`
 for checking a report, `polestar-guide-fix` for fixing a guide step and
 `polestar-guide-pack` for writing a guide pack. Your own agent settings and
-notes stay yours: keep them out of commits. The rules that matter most:
+notes stay yours: keep them out of commits. Claude Code reads AGENTS.md only
+while you have no `CLAUDE.md` or `CLAUDE.local.md` of your own; if you write
+one, start it with `@AGENTS.md`. The rules that matter most:
 
 - A bug report is a lead, not a verdict, from a player or from their agent.
   Check it against the guide, the data and Forever's own sources before
@@ -203,6 +205,22 @@ notes stay yours: keep them out of commits. The rules that matter most:
   coordinates or names.
 - You answer for what your agent opens, pushes or posts. Read its comments
   before they go up, and say in the pull request that an agent helped.
+
+### Installing the skills
+
+Install the skills to have them in your agent outside a clone too, for
+example to start on an issue. The `--sparse` paths fetch only the skills,
+not the whole repository:
+
+| Agent | Install | Update |
+|---|---|---|
+| Claude Code | `claude plugin marketplace add fitzforge/polestar --sparse .claude-plugin skills`, then `claude plugin install polestar@polestar` | `claude plugin update polestar@polestar` |
+| Codex | `codex plugin marketplace add fitzforge/polestar --sparse .agents/plugins --sparse skills`, then `codex plugin add polestar@polestar` | `codex plugin marketplace upgrade polestar` |
+| Any other (Cursor, Hermes Agent, OpenCode, Gemini CLI and more) | `npx skills add fitzforge/polestar -g` (`-a hermes-agent` for one agent) | `npx skills update` |
+
+Run `npx skills` with `-g`: without it, it writes the skills into the folder
+you are in. Start a new session after installing. An agent picks a skill when
+your request matches it; to be sure, name it: "use polestar-triage on #123".
 
 ## Commits and pull requests
 

@@ -254,7 +254,9 @@ notes, routes you played, guides you wrote. Two ways work well:
   write only from the author's own material. It also writes the
   polestar-guide-pack skill (the workflow and the guide format on one page)
   into `.agents/skills/` and `.claude/skills/`; for an older pack, copy
-  `skills/polestar-guide-pack/` from your Polestar clone into both.
+  `skills/polestar-guide-pack/` from your Polestar clone into both, or run
+  `npx skills add fitzforge/polestar --skill polestar-guide-pack` in the
+  pack folder.
 
 **The ground rule:** an assistant's quest ids, NPC ids, place names and
 coordinates are guesses until `find`, lint and playtest confirm them.
