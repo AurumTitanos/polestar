@@ -136,9 +136,10 @@ end
 `;
 
 // Runs the scenario; its emitted record goes to the test's diagnostics (the numbers behind each check).
-function run(t, script) {
+// shipped: only what the release zip carries (no local Polestar_Travel crossing data).
+function run(t, script, { shipped = false } = {}) {
 	const addons = ['Polestar', { name: 'Polestar_Guides', files: ['MapFrames.lua'] }];
-	if (fs.existsSync(path.join(ADDONS, 'Polestar_Travel', 'Polestar_Travel.toc'))) addons.push('Polestar_Travel');
+	if (!shipped && fs.existsSync(path.join(ADDONS, 'Polestar_Travel', 'Polestar_Travel.toc'))) addons.push('Polestar_Travel');
 	const [out] = runAddon({
 		stubs: ['stub_world.lua', 'stub_encoding.lua', 'stub_packs.lua'],
 		before: before(),
@@ -649,4 +650,75 @@ emit(out)`,
 	assert.equal(out.n, ZONES.length);
 	assert.deepEqual(Object.values(out.failed), [], 'every zone routes');
 	assert.ok(typeof out.zephras === 'number' && out.zephras > 100, `Zephras Isle routes on his map (${out.zephras})`);
+});
+
+// Fitz, 2026-10-16: a map marker near Astranaar; the route landed at a flight
+// point south-west of it and drew a straight dotted walk over the
+// Ashenvale/Stonetalon ridge. Until his coordinates come, the case from the
+// description, with what the release zip carries (no local crossing data): a
+// Horde character at the Crossroads who knows Sun Rock Retreat, Splintertree
+// Post and Zoram'gar Outpost, guided to Ashenvale 40,70, just north-east of
+// the ridge. Without crossing data for Kalimdor, straight x1.25 the route
+// lands at Sun Rock Retreat, south-west, and walks over the ridge; the
+// engine's walk from there runs 365 yd off that line, and from Splintertree
+// Post it is 240 yd shorter. With complete crossing data (Carbonite's, in
+// TravelData.lua) Sun Rock Retreat's walk must take the Talondeep Path and
+// the straight plan lands at Splintertree Post already; either way the
+// measured plan lands there and draws its last walk along the engine's path.
+test('Ashenvale 40,70 from the Crossroads: the route lands where the engine\'s walk is short (Splintertree Post, not Sun Rock Retreat over the ridge), and its last walk follows the engine\'s path', { skip }, (t) => {
+	const out = run(t, `
+		w.faction = "Horde"
+		Polestar.CharState().flags.taxi = { [22] = true, [23] = true, [25] = true, [29] = true, [58] = true, [61] = true, [77] = true }
+		local by = {}
+		for _, n in ipairs(N.GetTravelData().taxi) do by[n.id] = n end
+		local xr, sun, splinter = by[25], by[29], by[61]
+		place(xr.map, xr.wx, xr.wy)
+		-- Where the route lands, its last walk, and how the route lines draw that walk.
+		local function route()
+			local legs, ci = N.GetRoute()
+			local fly, walk
+			for i = ci, #legs do
+				if legs[i].kind == "fly" then fly = legs[i] end
+				if legs[i].kind == "walk" then walk = legs[i] end
+			end
+			local g = N.GetRouteGeometry().legs
+			local last = g[#g]
+			return { lands = fly and fly.to.name, yards = walk.yards, engine = walk.engine or false, kind = last.kind, n = #last.pts,
+				first = { last.pts[1][2], last.pts[1][3] }, final = { last.pts[#last.pts][2], last.pts[#last.pts][3] } }
+		end
+		N.SetTarget(1440, 40, 70, "Fitz's marker", "e")
+		aim()
+		local covered = N.travel.CrossingCounts()
+		local r = { before = route(), kalimdorCrossings = false }
+		for _, c in ipairs(covered) do if c == 1 then r.kalimdorCrossings = true end end
+		local n = 0
+		while n < 400 and route().engine ~= "path" do stub.advance(0.05); aim(); n = n + 1 end
+		r.after = route()
+		local tc, tx, ty = N.GetTargetWorld()
+		r.target = { tx, ty }
+		r.splinter = { splinter.wx, splinter.wy }
+		local cost = N.walk.Measured(tc, tx, ty, false)
+		r.measured = { sun = cost(1, sun.wx, sun.wy), splinter = cost(1, splinter.wx, splinter.wy) }
+		r.straight = { sun = dist(sun.wx, sun.wy, tx, ty), splinter = dist(splinter.wx, splinter.wy, tx, ty) }
+		-- The engine's walk from Sun Rock Retreat: how far it runs from the straight line over the ridge.
+		local pts = E.FindSync(1, { x = sun.wx, y = sun.wy }, { x = tx, y = ty })
+		local dx, dy = tx - sun.wx, ty - sun.wy
+		local off = 0
+		for _, p in ipairs(pts) do
+			local s = math.max(0, math.min(1, ((p.x - sun.wx) * dx + (p.y - sun.wy) * dy) / (dx * dx + dy * dy)))
+			off = math.max(off, dist(sun.wx + dx * s, sun.wy + dy * s, p.x, p.y))
+		end
+		r.sunPath = { length = length(pts), off = off }
+		emit(r)`, { shipped: true });
+	const gap = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+	if (!out.kalimdorCrossings) assert.equal(out.before.lands, 'Sun Rock Retreat, Stonetalon Mountains', 'straight x1.25 lands south-west of the ridge');
+	assert.equal(out.before.n, 2, 'and draws its last walk straight');
+	assert.ok(out.sunPath.off > 150, `the engine's walk from Sun Rock Retreat runs ${out.sunPath.off.toFixed(0)} yd off that straight line (${out.sunPath.length.toFixed(0)} yd against ${out.straight.sun.toFixed(0)} straight)`);
+	assert.ok(out.measured.sun > out.measured.splinter + 150, `measured: Sun Rock Retreat ${out.measured.sun.toFixed(0)} yd, Splintertree Post ${out.measured.splinter.toFixed(0)} yd (straight ${out.straight.sun.toFixed(0)} and ${out.straight.splinter.toFixed(0)})`);
+	assert.equal(out.after.lands, 'Splintertree Post, Ashenvale', 'the terrain favours Splintertree Post');
+	assert.equal(out.after.engine, 'path', 'its last walk is priced by its path');
+	assert.equal(out.after.kind, 'walk');
+	assert.ok(out.after.n > 2, `drawn along the engine's ${out.after.n} points, not straight`);
+	assert.ok(gap(out.after.first, out.splinter) < 15 && gap(out.after.final, out.target) < 15, 'from Splintertree Post to the marker');
+	assert.ok(Math.abs(out.after.yards - out.measured.splinter) < out.measured.splinter * 0.15, `${out.after.yards} yd along the path, ${out.measured.splinter.toFixed(0)} measured`);
 });

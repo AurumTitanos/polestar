@@ -59,10 +59,37 @@ end
 local function calls() return #fake.calls end
 `;
 
-function run(script, { engine = true } = {}) {
+// The planner's measures (Walk.Measure): the fake engine with Path.FindMany too.
+// settle(job, fn) answers a batch with fn(x, y) per target (a cost, or false).
+const MANY = `
+Polestar_NavEngine.FindMany = function(map, from, targets, callback, waterWalking, reverse)
+	local job = { many = true, map = map, from = from, targets = targets, callback = callback, waterWalking = waterWalking, reverse = reverse }
+	fake.calls[#fake.calls + 1] = job
+	return job
+end
+-- The searches of one kind: many = true for batches, false for Path.Find.
+function fake.of(many)
+	local out = {}
+	for _, job in ipairs(fake.calls) do if (job.many == true) == many then out[#out + 1] = job end end
+	return out
+end
+function fake.settle(job, fn)
+	local costs = {}
+	for i, p in ipairs(job.targets) do costs[i] = fn(p.x, p.y) end
+	job.callback(costs, nil, job)
+end
+-- Answer one Path.Find with the path x1, y1, x2, y2, ...
+function fake.answer(job, ...)
+	local xy, points = { ... }, {}
+	for i = 1, #xy - 1, 2 do points[#points + 1] = { map = job.map, x = xy[i], y = xy[i + 1] } end
+	job.callback(points, 100, job)
+end
+`;
+
+function run(script, { engine = true, many = false } = {}) {
 	return runAddon({
 		stubs: ['stub_nav.lua'],
-		before: engine ? ENGINE : 'fake = { calls = {} }',
+		before: engine ? ENGINE + (many ? MANY : '') : 'fake = { calls = {} }',
 		addons: [NAV],
 		login: true,
 		script: `${PRELUDE}\n${script}`,
@@ -631,4 +658,270 @@ test('Z2: a path searched with the height that ends more than 30 yards above or 
 	assert.deepEqual(out.used.slice(2), [100, -300], 'the answer without z is the arrow\'s path');
 	assert.equal(out.within, 3, 'another goal with a height: searched with it');
 	assert.deepEqual(out.close, [3, 'travel'], '25 yards off is within 30: kept');
+});
+
+// Walks into the target priced by the walking engine (Walk.Measure, Travel.Remeasured).
+// Three flight masters on Testshire, all known, both factions: Home Roost
+// (900, 900) where the player stands, Ridge Roost (0, 300) and Road Roost
+// (0, -700), each 1700 yards' flight from home. The target (0, 0) is 300 yd
+// straight from Ridge Roost and 700 from Road Roost, so straight x1.25 the
+// route lands at Ridge Roost; the engine finds Ridge Roost's walk crossing a
+// ridge (2000 yd) and Road Roost's short (750 yd).
+const TERRAIN = `
+local T = N.travel
+N.RegisterTravelData({ build = "test",
+	taxi = {
+		{ 1, 0, 900, 900, 9000, 5, 5, 3, "Home Roost, Testshire" },
+		{ 2, 0, 0, 300, 9000, 35, 50, 3, "Ridge Roost, Testshire" },
+		{ 3, 0, 0, -700, 9000, 85, 50, 3, "Road Roost, Testshire" },
+	},
+	flights = { 1, 2, 1700, 2, 1, 1700, 1, 3, 1700, 3, 1, 1700 },
+}, true)
+Polestar.CharState().flags.taxi = { [1] = true, [2] = true, [3] = true }
+local function at(x, y, ax, ay) return math.abs(x - ax) < 0.01 and math.abs(y - ay) < 0.01 end
+-- The engine's walks into (0, 0): the ridge from Ridge Roost.
+local function terrain(x, y)
+	if at(x, y, 0, 300) then return 2000 end
+	if at(x, y, 0, -700) then return 750 end
+	return math.floor(math.sqrt(x * x + y * y) * 1.1)
+end
+-- The route: where it lands, and its last walk's yards, seconds and pricing.
+local function route()
+	local legs, ci = N.GetRoute()
+	if not legs then return {} end
+	local fly, walk
+	for i = ci, #legs do
+		if legs[i].kind == "fly" then fly = legs[i] end
+		if legs[i].kind == "walk" then walk = legs[i] end
+	end
+	return { lands = fly and fly.to.name, yards = walk and walk.yards, seconds = walk and walk.seconds, engine = walk and walk.engine or false }
+end
+local changes = 0
+Polestar.On("ROUTE_CHANGED", function() changes = changes + 1 end)
+`;
+
+test('terrain: one reversed FindMany from the target prices the walks into it; the route then lands where the walk is short, once', () => {
+	const [out] = run(`${TERRAIN}
+		local r = {}
+		nav.place(900, 900)
+		target(0, 0)
+		N.Sample()
+		r.before = route()
+		local many = fake.of(true)
+		local job = many[1]
+		local pts = {}
+		for _, p in ipairs(job.targets) do pts[#pts + 1] = { floor(p.x + 0.5), floor(p.y + 0.5) } end
+		r.batch = { n = #many, map = job.map, from = { floor(job.from.x + 0.5), floor(job.from.y + 0.5) }, reverse = job.reverse == true, water = job.waterWalking == true, targets = pts }
+		local before = changes
+		fake.settle(job, terrain)
+		r.changes = changes - before
+		r.after = route()
+		-- Planned again (a zone change, a landing): the same measure, no new batch, the same way.
+		T.Replan()
+		r.again = route()
+		r.batches = #fake.of(true)
+		emit(r)`, { many: true });
+	assert.deepEqual(out.before, { lands: 'Ridge Roost, Testshire', yards: 375, seconds: 54, engine: false }, 'straight x1.25 before the measure');
+	assert.equal(out.batch.n, 1, 'one batch for the target');
+	assert.equal(out.batch.map, 0);
+	assert.deepEqual(out.batch.from, [0, 0], 'from the target');
+	assert.equal(out.batch.reverse, true, 'reversed: each cost is the walk from that place to the target');
+	assert.equal(out.batch.water, false);
+	assert.deepEqual(out.batch.targets.slice().sort(), [[0, -700], [0, 300], [900, 900], [900, 900]].sort(), 'the player and the three flight masters');
+	assert.equal(out.changes, 1, 'one replan once the measure lands');
+	assert.deepEqual(out.after, { lands: 'Road Roost, Testshire', yards: 750, seconds: 107, engine: 'cost' }, 'Road Roost: its measured walk, at 7 yd/s');
+	assert.deepEqual(out.again, out.after, 'later plans keep the measure: no flip-flop');
+	assert.equal(out.batches, 1, 'and ask for no second batch');
+});
+
+test('terrain: a measure that keeps the way keeps the route and its progress (no replan)', () => {
+	const [out] = run(`${TERRAIN}
+		nav.place(900, 900)
+		target(0, 0)
+		N.Sample()
+		local legs = N.GetRoute()
+		local before = changes
+		fake.settle(fake.of(true)[1], function(x, y) return math.floor(math.sqrt(x * x + y * y) * 1.1) end)
+		local after = N.GetRoute()
+		emit({ same = legs == after, changes = changes - before, lands = route().lands })`, { many: true });
+	assert.deepEqual(out, { same: true, changes: 0, lands: 'Ridge Roost, Testshire' });
+});
+
+test('terrain fallbacks: a place the engine finds no walk from, or none found at all, keeps the straight estimate', () => {
+	const [out] = run(`${TERRAIN}
+		local r = {}
+		nav.place(900, 900)
+		target(0, 0)
+		N.Sample()
+		-- Ridge Roost unreachable (a tower the engine cannot snap from): not left out, straight x1.25.
+		fake.settle(fake.of(true)[1], function(x, y) if at(x, y, 0, 300) then return false end return terrain(x, y) end)
+		r.one = route()
+		-- Another target: nothing found from anywhere (the target snapped off the ground).
+		target(0, 50)
+		N.Sample()
+		fake.settle(fake.of(true)[2], function() return false end)
+		r.none = route()
+		T.Replan()
+		r.batches = #fake.of(true)
+		emit(r)`, { many: true });
+	assert.deepEqual(out.one, { lands: 'Ridge Roost, Testshire', yards: 375, seconds: 54, engine: false });
+	assert.equal(out.none.lands, 'Ridge Roost, Testshire');
+	assert.equal(out.none.engine, false);
+	assert.equal(out.batches, 2, 'a target whose measure found nothing is not asked again');
+});
+
+test('terrain: nothing is measured in combat (owed until it ends) or while Shortest Path Forever guides', () => {
+	const [out] = run(`${TERRAIN}
+		local r = {}
+		stub.inCombat = true
+		nav.place(900, 900)
+		target(0, 0)
+		N.Sample()
+		N.Refresh()
+		r.fight = #fake.calls
+		stub.inCombat = false
+		N.Refresh()
+		r.after = #fake.of(true)
+		N.HandedOff = function() return true end
+		target(0, 50)
+		N.Sample()
+		N.Refresh()
+		r.handedOff = #fake.calls
+		emit(r)`, { many: true });
+	assert.equal(out.fight, 0, 'no search at all in combat');
+	assert.equal(out.after, 1, 'the owed measure once combat ends');
+	assert.equal(out.handedOff, 1, 'nothing more while handed off');
+});
+
+test('terrain: a new target cancels the stale measure; a measured target is kept and not asked again', () => {
+	const [out] = run(`${TERRAIN}
+		local r = {}
+		nav.place(900, 900)
+		target(0, 0)
+		local first = fake.of(true)[1]
+		target(0, -100)
+		r.cancelled = first.cancelled == true
+		local second = fake.of(true)[2]
+		-- The stale batch's late answer is dropped.
+		fake.settle(first, terrain)
+		r.stale = route().engine
+		fake.settle(second, function(x, y) return math.floor(math.sqrt(x * x + (y + 100) ^ 2) * 1.1) end)
+		target(0, 0)
+		r.back = #fake.of(true)
+		fake.settle(fake.of(true)[3], terrain)
+		r.first = route().lands
+		target(0, -100)
+		r.kept = #fake.of(true)
+		r.second = route().engine
+		emit(r)`, { many: true });
+	assert.equal(out.cancelled, true);
+	assert.equal(out.stale, false, 'the old target\'s measure never prices the new one');
+	assert.equal(out.back, 3, 'the first target, never measured, is asked again');
+	assert.equal(out.first, 'Road Roost, Testshire');
+	assert.equal(out.kept, 3, 'the second target\'s measure is kept');
+	assert.equal(out.second, 'cost');
+});
+
+// A crossing world (as complete crossing data lays it out): West Vale and
+// East Vale meet at a gate (600, 20) / (600, -20). The player stands 100 yd
+// from Home Roost (900, 900) in West Vale; the target (600, -300) lies in
+// East Vale. The route: walk to Home Roost, fly to Gate Roost (400, 300),
+// walk to the gate, through it (hand-made), on to the target (hand-made:
+// from a crossing end).
+const CROSSING = `
+local T = N.travel
+N.RegisterTravelData({ build = "test",
+	taxi = {
+		{ 1, 0, 900, 900, 9000, 5, 5, 3, "Home Roost, Testshire" },
+		{ 2, 0, 400, 300, 9000, 35, 30, 3, "Gate Roost, Testshire" },
+	},
+	flights = { 1, 2, 600, 2, 1, 600 },
+}, true)
+N.RegisterCrossings({ complete = true,
+	zones = {
+		[9002] = { name = "West Vale", c = 0, top = 1000, bottom = -1000, left = 1000, right = 0 },
+		[9003] = { name = "East Vale", c = 0, top = 1000, bottom = -1000, left = 0, right = -1000 },
+	},
+	crossings = { { id = "gate", a = { map = 9002, c = 0, wx = 600, wy = 20, r = 15 }, b = { map = 9003, c = 0, wx = 600, wy = -20, r = 15 },
+		ab = "Through the gate to East Vale" } } })
+Polestar.CharState().flags.taxi = { [1] = true, [2] = true }
+local function legsNow()
+	local legs, ci = N.GetRoute()
+	local out = {}
+	for i = ci, #legs do
+		local l = legs[i]
+		out[#out + 1] = { l.kind, l.handmade == true, l.yards, l.engine or false }
+	end
+	return out
+end
+local function lines()
+	local out = {}
+	for _, leg in ipairs(N.GetRouteGeometry().legs) do out[#out + 1] = { leg.kind, #leg.pts } end
+	return out
+end
+`;
+
+test('crossings: the walk from a crossing end is priced by the measure but stays hand-made; later non-hand-made walks are searched after the arrow\'s own, drawn and priced by their path', () => {
+	const [out] = run(`${CROSSING}
+		local r = {}
+		nav.place(900, 800)
+		target(600, -300)
+		N.Sample()
+		r.plan = legsNow()
+		r.order = {}
+		for _, job in ipairs(fake.calls) do r.order[#r.order + 1] = job.many and "many" or "find" end
+		local batch = fake.of(true)[1]
+		r.places = #batch.targets
+		local own = fake.of(false)[1]
+		fake.settle(batch, function(x, y) return math.floor(math.sqrt((x - 600) ^ 2 + (y + 300) ^ 2) * 1.1) end)
+		r.waitOwn = #fake.of(false)
+		fake.answer(own, 900, 800, 900, 900)
+		local finds = fake.of(false)
+		r.leg = { #finds, floor(finds[2].from.x), floor(finds[2].from.y), floor(finds[2].to.x), floor(finds[2].to.y) }
+		r.straight = lines()
+		fake.answer(finds[2], 400, 300, 500, 300, 600, 20)
+		r.priced = legsNow()
+		r.drawn = lines()
+		r.finds = #fake.of(false)
+		T.Replan()
+		r.replanned = legsNow()
+		r.cached = #fake.of(false)
+		emit(r)`, { many: true });
+	assert.deepEqual(out.plan.map((l) => [l[0], l[1]]), [['walk', false], ['fly', false], ['walk', false], ['walk', true], ['walk', true]], 'to Home Roost, fly, to the gate, through it, on to the target');
+	assert.deepEqual(out.order, ['many', 'find'], 'the measure, then the arrow\'s own walk to Home Roost');
+	assert.equal(out.places, 5, 'the player, both flight masters and both crossing ends');
+	assert.equal(out.waitOwn, 1, 'later walks wait for the arrow\'s own search');
+	assert.deepEqual(out.leg, [2, 400, 300, 600, 20], 'then Gate Roost to the gate is searched');
+	assert.deepEqual(out.straight.slice(2), [['walk', 2], ['walk', 2], ['walk', 2]], 'straight until its path is in');
+	const path = 100 + Math.hypot(100, 280);
+	assert.deepEqual(out.priced[2], ['walk', false, Math.round(path), 'path'], 'priced by its path');
+	assert.deepEqual(out.drawn[2], ['walk', 3], 'drawn along it');
+	assert.deepEqual(out.drawn.slice(3), [['walk', 2], ['walk', 2]], 'the hand-made walks stay straight');
+	assert.equal(out.finds, 2, 'the hand-made walks are never searched');
+	assert.deepEqual(out.replanned[4], ['walk', true, Math.floor(280 * 1.1), 'cost'], 'the last walk, from the crossing end, is priced by the measure');
+	assert.deepEqual(out.replanned[2], ['walk', false, Math.round(path), 'path'], 'a fresh plan takes the kept path');
+	assert.equal(out.cached, 2, 'and searches nothing again');
+});
+
+test('later walks: a search whose walk leaves the route is cancelled; none starts in combat', () => {
+	const [out] = run(`${CROSSING}
+		local r = {}
+		nav.place(900, 800)
+		target(600, -300)
+		N.Sample()
+		fake.settle(fake.of(true)[1], function(x, y) return math.floor(math.sqrt((x - 600) ^ 2 + (y + 300) ^ 2) * 1.1) end)
+		stub.inCombat = true
+		fake.answer(fake.of(false)[1], 900, 800, 900, 900)
+		N.Refresh()
+		r.fight = #fake.of(false)
+		stub.inCombat = false
+		N.Refresh()
+		r.after = #fake.of(false)
+		local leg = fake.of(false)[2]
+		target(0, 900)
+		r.cancelled = leg.cancelled == true
+		emit(r)`, { many: true });
+	assert.equal(out.fight, 1, 'no later walk is searched in combat');
+	assert.equal(out.after, 2, 'it is once combat ends');
+	assert.equal(out.cancelled, true, 'a new target drops it');
 });
