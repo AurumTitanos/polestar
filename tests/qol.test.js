@@ -304,24 +304,30 @@ test('step key: the route\'s own goals come before optional ones, and an NPC nam
 	assert.deepEqual(out[4], ['nil', 'nil'], 'a tab is a control character too: no macro');
 });
 
-// Every CLICK binding names a button Buttons.lua creates and has its label in
-// Commands.lua.
-test('key bindings: each CLICK binding has a button and a label', () => {
+// Every CLICK binding in Bindings.xml shows its label in the key bindings
+// window, and the step key's button is there from login (the travel button is
+// made with the route's first cast leg: tests/nav-prompts.test.js).
+test('key bindings: each CLICK binding has its label, and the step key its button from login', () => {
 	const fs = require('node:fs');
 	const path = require('node:path');
-	const dir = path.join(__dirname, '..', 'addon', 'Polestar');
-	const xml = fs.readFileSync(path.join(dir, 'Bindings.xml'), 'utf8');
-	const commands = fs.readFileSync(path.join(dir, 'Core', 'Commands.lua'), 'utf8');
-	const buttons = fs.readFileSync(path.join(dir, 'QoL', 'Buttons.lua'), 'utf8');
+	const xml = fs.readFileSync(path.join(__dirname, '..', 'addon', 'Polestar', 'Bindings.xml'), 'utf8');
 	const names = [...xml.matchAll(/name="CLICK (\w+):LeftButton"/g)].map((m) => m[1]);
 	assert.ok(names.includes('PolestarStepButton'));
-	for (const n of names) {
-		assert.ok(commands.includes('_G["BINDING_NAME_CLICK ' + n + ':LeftButton"] = L['), n + ' has a label');
-	}
-	assert.ok(commands.includes('L["Step action: NPC, quest item, mob or Hearthstone"]'), 'the step key\'s label names its actions in the order it tries them');
-	for (const n of names) {
-		assert.ok(buttons.includes('"' + n + '"'), n + ' is created');
-	}
+	const [r] = runAddon({
+		stubs: ['stub_world.lua'],
+		addons: ['Polestar'],
+		login: true,
+		script: `
+			local labels = {}
+			for _, n in ipairs({ ${names.map((n) => `'${n}'`).join(', ')} }) do
+				local l = _G["BINDING_NAME_CLICK " .. n .. ":LeftButton"]
+				labels[n] = type(l) == "string" and l ~= "" and not l:find("^CLICK ")
+			end
+			emit({ labels = labels, step = PolestarStepButton ~= nil })
+		`,
+	}).emitted;
+	for (const n of names) assert.equal(r.labels[n], true, n + ' has a label');
+	assert.equal(r.step, true, 'the step key\'s button exists from login');
 });
 
 test('target button: a name with a line break or other control character never reaches the macro, from the guide or from QuestDB (a pack could hide "/run ..." in it)', () => {
