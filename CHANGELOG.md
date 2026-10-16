@@ -421,6 +421,13 @@
   Kingdoms and Kalimdor are Polestar's own, in his format. They come in the
   new `Polestar_Nav` folder of the zip (install it with the others). Options,
   Arrow & routes, "Walk real paths" turns it off.
+- The route picks where to land by the real walk: the walks from the flight
+  masters, docks, portals, inn and teleports near your target are measured on
+  the ground, so a landing whose walk goes round a ridge loses to one whose
+  walk does not (a marker near Astranaar no longer lands you at Sun Rock
+  Retreat to walk over the mountains, thanks Fitz). Every walk on the route
+  follows the paths on the map lines and in the journey, with its own time,
+  not only the one you are on.
 - Works with Shortest Path Forever: with it installed, Polestar hands it the
   route. Each goal goes to it as a stop with the game's own mark (a quest's
   "!" or "?", a trainer, a flight master, a dungeon, a boat), a kill or
@@ -833,8 +840,8 @@
   world map itself (NAV_QA C3).
 - `pack` and `install` ship `Polestar_Nav` with Polestar and Polestar_Guides,
   and Polestar checks its version at login like the data packs'.
-- `Nav/Walk.lua` follows `Polestar_NavEngine`'s paths: only the walk the
-  arrow is on is searched (`Path.Find`, cancelled on a new goal, asked again
+- `Nav/Walk.lua` follows `Polestar_NavEngine`'s paths: the walk the arrow is
+  on is searched first (`Path.Find`, cancelled on a new goal, asked again
   25 yd off the path, never in combat), hand-made walks (crossings, chains,
   a goal after a guide `goto`) stay straight, and every failure falls back
   to the straight arrow; it splits that walk at the lifts `Nav/Transit.lua`
@@ -848,6 +855,24 @@
   `stops`, `item`/`spell`, `Travel.SkipLeg()` and `Travel.Progress()`; option
   `nav.navRouting`. Tested by `tests/nav-spf.test.js` (fake engine; NAV_QA
   C1, C2, K1-K8) and `tests/travel-transit.test.js` (2, 3, 11, C9, C11, C15).
+- The planner's walks into the target are priced by the walking engine:
+  `Travel.lua` hands each plan's places (the player, flight masters, docks,
+  portal ends, the inn, teleport landings, crossing ends and chain mouths;
+  `p.places`) to `Walk.Measure`, which runs one reversed `Path.FindMany` from
+  the target to the nearest 16 within 3000 yd (after Shortest Path Forever's
+  goal batch, `Journey/JourneySearch.lua`, v1.16.0); later plans price those
+  walks by it (`p.walkCost` from `Walk.Measured`, legs `engine = "cost"`). A
+  place with no walk found, or a target with none at all, keeps straight
+  x1.25; the player's measure holds within 50 yd. Measures are fixed per
+  target (the last 4 kept), so `Travel.Remeasured` replans once when one lands
+  and keeps the route unless the way changes. Every later walk leg that is
+  not hand-made is searched once after the arrow's own search and the
+  measure (`Path.Find`, one at a time, the last 32 kept by their ends):
+  `Walk.LegPath`, drawn by `GetRouteGeometry`, priced by
+  `Travel.PricePaths` (`engine = "path"`). Nothing is measured or searched in
+  combat or while handed off. Tested by `tests/nav-spf.test.js` (fake
+  engine: terrain, crossings, later walks) and `tests/nav-e2e.test.js`
+  (Ashenvale 40,70 on the real engine; NAV_QA H4).
 - `Maps/RouteStrokes.lua` (route-line geometry) and `Maps/RouteLines.lua`
   (the world map pin and minimap painters) port Shortest Path Forever's
   `UI/Strokes.lua`, `UI/FlightLines.lua` and `UI/Route.lua`; they draw
