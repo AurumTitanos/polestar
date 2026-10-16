@@ -36,7 +36,7 @@
 	"mount": { "term": "Monture", "client": "MOUNTS" },
 	"zone": { "term": "Zone", "client": "ZONE" },
 	"minimap": { "term": "Minicarte", "client": "MINIMAP_LABEL" },
-	"world map": { "term": "Carte du monde", "match": ["carte"], "client": "WORLD_MAP" },
+	"world map": { "term": "Carte", "match": ["carte"], "client": "WORLD_MAP" },
 	"level": { "term": "Niveau", "match": ["niveau", "progress"] },
 	"boat": { "term": "Bateau" }
 }

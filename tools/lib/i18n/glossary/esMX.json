@@ -24,7 +24,7 @@
 	"route": { "term": "Ruta" },
 	"dungeon": { "term": "Calabozo", "client": "DUNGEONS" },
 	"raid": { "term": "Banda", "client": "RAID" },
-	"rare": { "term": "Raro", "match": ["raro", "rara"], "client": "MAP_LEGEND_RARE" },
+	"rare": { "term": "Rara", "match": ["raro", "rara"], "client": "MAP_LEGEND_RARE" },
 	"treasure": { "term": "Tesoro" },
 	"elite": { "term": "Élite", "client": "ELITE" },
 	"group": { "term": "Grupo", "client": "GROUP" },
@@ -36,7 +36,7 @@
 	"mount": { "term": "Montura", "client": "MOUNTS" },
 	"zone": { "term": "Zona", "client": "ZONE" },
 	"minimap": { "term": "Minimapa", "client": "MINIMAP_LABEL" },
-	"world map": { "term": "Mapa del mundo", "match": ["mapa"], "client": "WORLD_MAP" },
+	"world map": { "term": "Mapa", "match": ["mapa"], "client": "WORLD_MAP" },
 	"level": { "term": "Nivel", "match": ["nivel", "subir"] },
 	"boat": { "term": "Barco" }
 }
