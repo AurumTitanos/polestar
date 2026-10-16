@@ -3612,9 +3612,25 @@ fileDataID from wago.tools into `data/sources/casc` (local, never shipped):
   `Polestar_Nav` routes on it. Each SPF cell (128 per tile by default, 4.17
   yd) holds the connected pieces of our surfaces in its columns (base plus
   floors; a wall inside a cell keeps its sides apart); a step between cells
-  is open only where one of our links (not a climb) crosses it, so walls,
-  cliffs and one-way climbs close it; falls and lifts stay out (lifts are
-  his transports). `chokepoints.js` adds `Chokepoints.lua`
+  is open only where one of our links crosses it, so walls and cliffs close
+  it; falls and lifts stay out (lifts are his transports), and so do
+  climbs (60-80°, one way up). Faces are held back: steep links (50-60°)
+  and terrain links inside a run of triangles over 50° (Forever's client
+  slides off them) rising more than a jump. His steps are two-way and cost
+  their flat length, so a face packed as steps was a straight line up it
+  (Fitz's report: the Raptor Horns slope in the Barrens, 61.66,35.46 to
+  61.00,33.70, where the columns and cells averaged 51-56° triangles to
+  under 50°). A face link is opened again only when it is the only way
+  between two parts of the map (union-find over every other join, then the
+  face links gentlest first), so nothing reachable before is lost and a
+  face with a way round is walked round; closing them all cut off 84 guide
+  goals. An intra-cluster edge is pruned only for a two-hop path whose
+  hops are both shorter (gen_nav.py's 2% rule let two entrances a few yards
+  apart at the end of a long walk prune each other's edge, cutting a region
+  in two; it cut 14 guide goals off with faces held back, Thunder Bluff's
+  among them). A route down a face goes round as well; slopes under 50° still
+  cost only their flat length in his search (a height-aware step cost is his
+  engine's to add). `chokepoints.js` adds `Chokepoints.lua`
   (`PolestarNavChokepoints[map]`: lift landings, bridges, gates at passages,
   tunnels, cave and building mouths, passes, each named by its AreaTable
   area) for the journey's named walk steps.

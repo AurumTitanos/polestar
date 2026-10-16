@@ -40,7 +40,9 @@
   Shortest Path Forever's map format, with Cillian Berragan's permission): out
   of an inn by its door rather than through the wall, down into the Undercity
   by its lifts, never swimming across open sea (water the game tires you in),
-  and along the coast where that is the way. The maps take about 26 MB once
+  and along the coast where that is the way, and never straight up a slope
+  too steep to climb (the Raptor Horns hillside in the Barrens; thanks
+  Fitz). The maps take about 26 MB once
   loaded (Walk real paths on) and up to about 54 MB more while a walk is
   being searched; the zip grows by about 11 MB.
 - A class guide opened before your level says so: the guide window shows
@@ -646,7 +648,11 @@
   navigation grid in his walking-map format (`tools/lib/nav/pack.js`, a port
   of his `gen_nav.py` and `pack_nav.py`: 128 cells a tile, a step between
   cells open only where one of our links crosses it, floors for stacked
-  surfaces, his HPA* graph), with `Nav/Chokepoints.lua`
+  surfaces, his HPA* graph; climbs are no step, and a face, steep links and
+  runs of terrain triangles over 50° that Forever's client slides off, only
+  where it is the only way between two places, since his steps are two-way
+  at flat cost; an intra-cluster edge is pruned only via two shorter hops,
+  so pruning never cuts a region), with `Nav/Chokepoints.lua`
   (`tools/lib/nav/chokepoints.js`) and `PACK.json` (grid build, cells, date,
   sizes, sha256; `nav check` and `nav pack --check` hold the folder to it);
   `nav vendor` now takes only his router and the maps we do not pack
