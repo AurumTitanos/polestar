@@ -428,6 +428,15 @@
 - `trainers build` reads the same guides as `compile`: Recorder drafts under
   `guides/drafts/` and build output under `dist/` no longer add class
   trainers to `trainers.json` (thanks meellm).
+- `preview` writes the same `docs/preview/nav-areas.svg` on every run, so
+  "Previews are up to date" no longer fails pull requests that don't touch
+  it. The world map's pin pools released their pins in `pairs()` order over
+  a table keyed by frame, an order of table addresses that changed from run
+  to run (under lua5.1 and LuaJIT alike): a redraw could give a hull to a
+  frame that had made more pieces for another, and the extra pieces
+  renumbered the minimap's mask in the render. The pools release their
+  frames newest first now, so a redraw hands every frame back the pin it
+  showed (thanks CDVolvik).
 
 ## 0.2.3 (2026-10-14)
 

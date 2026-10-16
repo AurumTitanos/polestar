@@ -403,6 +403,52 @@ test('a hull is a region cut from pieces that tile it exactly, with a rim kept t
 	assert.deepEqual(out.cleared, [0, 0, false]);
 });
 
+// Issue #55: the world map pool released its pins in pairs() order over a
+// frame-keyed table, so which frame drew which pin after a redraw (and how
+// many pieces each hull frame had made) hung on table addresses, and changed
+// from run to run.
+test('world map redraws hand every pin frame back the pin it showed, and no hull frame grows pieces it does not need', () => {
+	const [out] = run(`
+		WorldMapFrame.Child:SetSize(1000, 1000)
+		local pins = {}
+		for k = 3, 14 do                                                -- hulls of 3 to 14 corners, each with a pin and a disc
+			local cx, cy, hull = (k - 8) * 120, (k % 4) * 150 - 200, {}
+			for i = 1, k do
+				local a = 2 * math.pi * (i - 1) / k
+				hull[2 * i - 1], hull[2 * i] = cx + 60 * math.cos(a), cy + 60 * math.sin(a)
+			end
+			pins[#pins + 1] = { c = 0, wx = cx, wy = cy, hull = hull, area = 40, priority = k % 3 }
+		end
+		Pins.SetLayer("spawns", pins)
+		local templates = { "PolestarPinsTemplate", "PolestarPinsHullTemplate", "PolestarPinsAreaTemplate" }
+		local function owners()
+			local r, n = {}, 0
+			for _, t in ipairs(templates) do
+				for pin in WorldMapFrame.pinPools[t]:EnumerateActive() do
+					r[pin], n = pin.data.pin, n + 1
+				end
+			end
+			return r, n
+		end
+		nav.showWorldMap(9000)
+		local first, shown = owners()
+		local r = { shown = shown, moved = 0, spare = 0 }
+		for _ = 1, 4 do
+			nav.showWorldMap(9000)                                      -- the same pins drawn again
+			local now = owners()
+			for frame, pin in pairs(first) do
+				if now[frame] ~= pin then r.moved = r.moved + 1 end
+			end
+		end
+		for frame in pairs(first) do
+			if frame.texs and #frame.texs > frame.used then r.spare = r.spare + 1 end
+		end
+		emit(r)`);
+	assert.equal(out.shown, 36, '12 pins, 12 hulls, 12 discs');
+	assert.equal(out.moved, 0, 'every frame draws the pin it drew before');
+	assert.equal(out.spare, 0, 'every hull frame holds exactly the pieces of its own hull');
+});
+
 test('icon pins may sit on a dark disc, carry a ring, and take their own minimap size', () => {
 	const [out] = run(`
 		nav.viewRadius = 200
