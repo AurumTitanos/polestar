@@ -244,7 +244,7 @@ end, L["Dungeon quests, bosses and entrances"])
 
 if ns.RegisterOptions then
 	local ok, err = ns.RegisterOptions({
-		page = L["Discovery"], tab = L["Dungeons"], section = L["Dungeon journal"],
+		page = L["Discovery"], tab = L["Dungeons"], section = ENCOUNTER_JOURNAL,
 		controls = {
 			{ kind = "toggle", key = "dungeons.enabled", label = L["Dungeons"],
 				help = L["A page per dungeon and raid: every quest with where to get it, its chain and rewards, the bosses and the entrance."] },

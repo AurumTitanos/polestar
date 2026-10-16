@@ -109,8 +109,8 @@ test('two-hand vs one-hand: a two-hander against main + off hand; a one-hander a
 		g.equip(17, nil); g.equip(16, "item:9110"); g.bag(0, 1, "item:9111")
 		emit(line("item:9107"))
 	`);
-	assert.match(twoHand, /^Polestar · Arms \| \+[\d.]+% upgrade · Main hand$/);
-	assert.match(oneHand, /^Polestar · Arms \| -[\d.]+% downgrade · Main hand$/);
+	assert.match(twoHand, /^Polestar · Arms \| \+[\d.]+% upgrade · Main Hand$/);
+	assert.match(oneHand, /^Polestar · Arms \| -[\d.]+% downgrade · Main Hand$/);
 });
 
 test('rings and trinkets: against the weaker equipped one; a unique ring only against its own copy; an empty slot first', () => {

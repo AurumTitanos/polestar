@@ -94,18 +94,11 @@ local SOURCE_ICON = {
 	rep = "icon-rep", pvp = "icon-achieve", container = "icon-use", world = "icon-explore",
 }
 
--- Item qualities under their own keys ("quality: Rare" is not a rare mob).
-local LC = ns.LC
-local QUALITY_NAME = {
-	[0] = LC("quality", "Poor"), LC("quality", "Common"), LC("quality", "Uncommon"), LC("quality", "Rare"),
-	LC("quality", "Epic"), LC("quality", "Legendary"), LC("quality", "Artifact"),
-}
 -- The client's colours, for a client (or preview) without the API.
 local QUALITY_RGB = {
 	[0] = { 0.62, 0.62, 0.62 }, { 1, 1, 1 }, { 0.12, 1, 0 }, { 0, 0.44, 0.87 }, { 0.64, 0.21, 0.93 }, { 1, 0.5, 0 }, { 0.9, 0.8, 0.5 },
 }
-local STANDING = { L["Hated"], L["Hostile"], L["Unfriendly"], L["Neutral"], L["Friendly"], L["Honored"], L["Revered"], L["Exalted"] }
-local FACTION = { A = L["Alliance"], H = L["Horde"], AH = L["Both factions"] }
+local FACTION = { A = ns.FactionName("A"), H = ns.FactionName("H"), AH = L["Both factions"] }
 
 local shell, root, results, details -- the hub window, this section, the results scroll, the details pane
 local query, kind = "", "all"
@@ -251,19 +244,8 @@ local function qualityColor(q)
 end
 LK.QualityColor = qualityColor
 
-local function qualityName(q)
-	if type(q) ~= "number" then return nil end
-	local s = _G["ITEM_QUALITY" .. q .. "_DESC"]
-	if type(s) == "string" and s ~= "" then return s end
-	return QUALITY_NAME[q]
-end
-
-local function standingName(n)
-	if type(n) ~= "number" then return nil end
-	local s = _G["FACTION_STANDING_LABEL" .. n]
-	if type(s) == "string" and s ~= "" then return s end
-	return STANDING[n]
-end
+-- Item qualities and standings in the client's words (Core/Init.lua).
+local qualityName, standingName = ns.QualityName, ns.StandingName
 
 -- Paint a font string in a result's colour: its quality for item kinds,
 -- else its kind's subject colour.
@@ -741,7 +723,7 @@ local function factsFor(s, entity, list)
 		local g = guideHeader(s.id) or {}
 		add(L["Category"], g and UI.Category and L[UI.Category(g)])
 		add(L["Levels"], UI.LevelRange(g.minLevel, g.maxLevel))
-		add(L["Faction"], g.faction and L[g.faction] or L["Both factions"])
+		add(L["Faction"], ns.FactionName(g.faction) or L["Both factions"])
 		if g.stepCount or g.steps then add(L["Steps"], tostring(g.stepCount or #g.steps)) end
 		return out
 	end

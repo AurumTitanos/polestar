@@ -10,7 +10,7 @@ const assert = require('node:assert/strict');
 const path = require('node:path');
 const fs = require('node:fs');
 const { spawnSync } = require('node:child_process');
-const { ADDONS, ROOT } = require('./helpers/lua');
+const { runAddon, ADDONS, ROOT } = require('./helpers/lua');
 const { tmpdir } = require('./helpers/tmp');
 const { formatProblems } = require('../tools/lib/i18n/check');
 const { extractKeys } = require('../tools/lib/i18n/keys');
@@ -28,6 +28,7 @@ test('the code\'s keys are found: literal L["..."], ns.LC pairs, the transport c
 	for (const k of ['Toggle guide window', 'boss: Chest', 'Next boat in about %s', 'Boat docked, leaves in %s', 'Collectibles', 'Night Elf', 'First Aid', 'Beta', 'Protection (tank)']) {
 		assert.ok(keys.has(k), `${JSON.stringify(k)} is not found`);
 	}
+	for (const k of ['Exalted', 'quality: Rare', 'slot: Back', 'Dungeon journal', 'Alliance']) assert.ok(!keys.has(k), `${JSON.stringify(k)} is the client's word now, not a key`);
 });
 
 test('the format check refuses what the client would show broken, and allows reordering with numbered values', () => {
@@ -208,4 +209,16 @@ test('sync keeps every translation line of the shipped files byte for byte', () 
 		assert.deepEqual(lost, [], `${locale}: translation lines sync would change`);
 		assert.equal(updateLocaleText({ text: out.text, file, keys }).text, out.text, `${locale}: a second sync changes nothing`);
 	}
+});
+
+test('game terms come in the client\'s words: a standing in the character\'s gender, a quality, a faction, a gear slot', () => {
+	const [out] = runAddon({
+		before: `function GetText(tag, sex) return sex == 3 and _G[tag .. "_FEMALE"] or _G[tag] end
+function UnitSex() return 3 end
+FACTION_STANDING_LABEL8, FACTION_STANDING_LABEL8_FEMALE = "Exalté", "Exaltée"
+ITEM_QUALITY3_DESC, FACTION_HORDE, BACKSLOT = "Rare", "Horde", "Dos"`,
+		addons: [{ name: 'Polestar', files: ['Core/Core.xml', 'Gear/Gear.xml'] }],
+		script: 'emit({ Polestar.StandingName(8), Polestar.QualityName(3), Polestar.FactionName("H"), Polestar.Gear.SlotName(15), Polestar.StandingName(9) or false })',
+	}).emitted;
+	assert.deepEqual(out, ['Exaltée', 'Rare', 'Horde', 'Dos', false]);
 });

@@ -805,7 +805,7 @@ function DS.Build(parent, shell)
 		b.Selected = W.Fill(b, "panelAlt", "BACKGROUND", 0)
 		b.Label = W.Text(b, "small", "textMuted")
 		b.Label:SetPoint("CENTER", b, "CENTER", 0, 0)
-		b.Label:SetText(L[f])
+		b.Label:SetText(f == "All" and L["All"] or ns.FactionName(f))
 		b:SetWidth(floor(b.Label:GetStringWidth() + 20 + 0.5))
 		b:SetPoint("RIGHT", hub.TabRow, "RIGHT", x, 0)
 		b:SetScript("OnClick", function(self) DS.SetFaction(self.psKey) end)
@@ -896,7 +896,7 @@ local function paintCard(c, d, f, plevel, key)
 			facts[#facts + 1] = format(a > 0 and L["%d Alliance quests"] or L["%d Horde quests"], k)
 		end
 	elseif n == 0 then
-		facts[#facts + 1] = f == "All" and L["No quests known"] or format(L["No %s quests"], L[f])
+		facts[#facts + 1] = f == "All" and L["No quests known"] or format(L["No %s quests"], ns.FactionName(f))
 	else
 		facts[#facts + 1] = n == 1 and L["1 quest"] or format(L["%d quests"], n)
 	end
@@ -1272,7 +1272,7 @@ local function paintQuest(b, q, p, top, plevel, key)
 		b.State:Hide()
 	end
 	if q.faction then
-		local w = W.SetChip(b.Faction, q.faction == "A" and L["Alliance"] or L["Horde"])
+		local w = W.SetChip(b.Faction, ns.FactionName(q.faction == "A" and "A" or "H"))
 		b.Faction:ClearAllPoints()
 		b.Faction:SetPoint("RIGHT", b, "TOPRIGHT", -right, -30)
 		right = right + w + 6
@@ -1462,7 +1462,7 @@ local function renderQuests(key, f, plevel)
 		if side then other = #D().Quests(key, side == "A" and "H" or "A") end
 		local text = L["No quests are known for this dungeon yet."]
 		if other > 0 then
-			local them = side == "A" and L["Horde"] or L["Alliance"]
+			local them = ns.FactionName(side == "A" and "H" or "A")
 			text = other == 1 and format(L["1 quest here is for the %s. Switch the filter to All to see it."], them)
 				or format(L["%d quests here are for the %s. Switch the filter to All to see them."], other, them)
 		end
@@ -1612,10 +1612,9 @@ local function colored(token, text)
 	return "|c" .. Theme.Hex(token) .. (text or L["Not known"]) .. "|r"
 end
 
--- Lookup.STANDINGS holds the standings already translated.
+-- The client's word for a standing; Neutral when the step names none.
 local function standingName(n)
-	local S = ns.Lookup and ns.Lookup.STANDINGS
-	return (S and S[n]) or L["Neutral"]
+	return ns.StandingName(n) or ns.StandingName(4)
 end
 
 -- A step -> its line and the point its click sets the arrow to.

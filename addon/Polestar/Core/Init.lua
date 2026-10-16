@@ -42,12 +42,40 @@ local pcall, type, pairs, select, tostring = pcall, type, pairs, select, tostrin
 local L = setmetatable({}, { __index = function(_, key) return key end })
 ns.L = L
 
--- A word with more than one meaning ("Back": the welcome's button and the
--- cloak slot) gets a key per meaning, so each can be translated on its own:
--- ns.LC("slot", "Back") is the translation of "slot: Back", and "Back" while
--- there is none.
+-- A word with more than one meaning ("Chest": a dungeon boss that is a loot
+-- chest, or a gear slot) gets a key per meaning, so each can be translated on
+-- its own: ns.LC("boss", "Chest") is the translation of "boss: Chest", and
+-- "Chest" while there is none.
 function ns.LC(context, text)
 	return rawget(L, context .. ": " .. text) or text
+end
+
+-- Game terms in the client's own words, so they read as the game writes them
+-- in every language (docs/ARCHITECTURE.md, "Localisation"); nil where the
+-- client has none. A reputation standing, 1 (Hated) to 8 (Exalted), in the
+-- character's gender where the language has one.
+function ns.StandingName(n)
+	if type(n) ~= "number" then return nil end
+	local tag = "FACTION_STANDING_LABEL" .. n
+	if type(_G[tag]) ~= "string" then return nil end
+	return GetText and GetText(tag, UnitSex and UnitSex("player")) or _G[tag]
+end
+
+-- An item quality, 0 (Poor) to 6 (Artifact).
+function ns.QualityName(q)
+	if type(q) ~= "number" then return nil end
+	local s = _G["ITEM_QUALITY" .. q .. "_DESC"]
+	if type(s) == "string" and s ~= "" then return s end
+	return nil
+end
+
+-- A faction: "Alliance" or "A", "Horde" or "H".
+local FACTION_TAG = { Alliance = "FACTION_ALLIANCE", A = "FACTION_ALLIANCE", Horde = "FACTION_HORDE", H = "FACTION_HORDE" }
+function ns.FactionName(f)
+	local tag = FACTION_TAG[f]
+	local s = tag and _G[tag]
+	if type(s) == "string" and s ~= "" then return s end
+	return nil
 end
 
 -- Text that prints literally in a FontString: every `|` (the client's escape

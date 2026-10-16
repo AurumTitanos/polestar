@@ -353,7 +353,7 @@ for _, list in ipairs({
 	}),
 	declare(DISCOVERY, "discovery", "search", 50, L["Lookup, the dungeon journal and rares: finding things in the world."], {
 		{ L["Lookup"], { L["How to get anything"] } },
-		{ L["Dungeons"], { L["Dungeon journal"] } },
+		{ L["Dungeons"], { ENCOUNTER_JOURNAL } },
 		{ L["Rares"], { L["When a rare shows up"], L["How rares are noticed"], L["History"] } },
 	}),
 	declare(QOL, "qualityoflife", "qol-toggles", 60, L["Small conveniences: travel, invitations, merchants and trackers."], {

@@ -254,7 +254,7 @@ test('tooltip line: upgrade and downgrade percentages, empty slot, later level; 
 	assert.ok(colors[1][0] > colors[1][1], 'downgrade is red');
 });
 
-test('tooltip line: the slot is named by its own key, so "Back" and "Chest" translate apart from the button and the boss chest', () => {
+test('tooltip line: the slot is the client\'s own word (BACKSLOT, CHESTSLOT), apart from the Back button and the boss chest', () => {
 	const [back, chest] = run(
 		`
 		Polestar.ItemDB.Register(nil, { [9041] = "16 25 20 2 4 1 sta8", [9060] = "5 20 15 2 4 3 str5 sta3 armor200", [9061] = "5 25 20 2 4 3 str10 sta4 armor260" })
@@ -263,7 +263,7 @@ test('tooltip line: the slot is named by its own key, so "Back" and "Chest" tran
 		emit(g.showTooltip(GameTooltip, "item:9041"))
 		emit(g.showTooltip(GameTooltip, "item:9061"))
 	`,
-		{ before: fakeLocale('itIT', { Back: 'Atrás', Chest: 'Cofre', 'slot: Back': 'Espalda', 'slot: Chest': 'Pecho' }) },
+		{ before: `${fakeLocale('itIT', { Back: 'Atrás', Chest: 'Cofre', 'boss: Chest': 'Arca' })}\nBACKSLOT, CHESTSLOT = "Espalda", "Pecho"` },
 	);
 	assert.match(back[0], /^Polestar · Arms \| .*upgrade · Espalda$/);
 	assert.match(chest[0], /^Polestar · Arms \| .*upgrade · Pecho$/);

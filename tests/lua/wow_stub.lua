@@ -606,6 +606,19 @@ RAID_CLASS_COLORS = {
 	DRUID = { r = 1.0, g = 0.49, b = 0.04 },
 }
 
+-- The client's own words for the game terms Polestar shows as the client
+-- writes them (docs/ARCHITECTURE.md, "Localisation"): the English client's
+-- GlobalStrings (build 1.60.1.70425).
+FACTION_STANDING_LABEL1, FACTION_STANDING_LABEL2, FACTION_STANDING_LABEL3, FACTION_STANDING_LABEL4 = "Hated", "Hostile", "Unfriendly", "Neutral"
+FACTION_STANDING_LABEL5, FACTION_STANDING_LABEL6, FACTION_STANDING_LABEL7, FACTION_STANDING_LABEL8 = "Friendly", "Honored", "Revered", "Exalted"
+ITEM_QUALITY0_DESC, ITEM_QUALITY1_DESC, ITEM_QUALITY2_DESC, ITEM_QUALITY3_DESC = "Poor", "Common", "Uncommon", "Rare"
+ITEM_QUALITY4_DESC, ITEM_QUALITY5_DESC, ITEM_QUALITY6_DESC = "Epic", "Legendary", "Artifact"
+FACTION_ALLIANCE, FACTION_HORDE = "Alliance", "Horde"
+HEADSLOT, NECKSLOT, SHOULDERSLOT, CHESTSLOT, WAISTSLOT, LEGSSLOT = "Head", "Neck", "Shoulders", "Chest", "Waist", "Legs"
+FEETSLOT, WRISTSLOT, HANDSSLOT, FINGER0SLOT, TRINKET0SLOT, BACKSLOT = "Feet", "Wrist", "Hands", "Finger", "Trinket", "Back"
+MAINHANDSLOT, SECONDARYHANDSLOT, RANGEDSLOT = "Main Hand", "Off Hand", "Ranged"
+ENCOUNTER_JOURNAL = "Dungeon Journal"
+
 Settings = {
 	categories = {},
 	RegisterCanvasLayoutCategory = function(frame, name)

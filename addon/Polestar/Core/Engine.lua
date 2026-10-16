@@ -794,11 +794,9 @@ local function checked(s, g)
 	return m ~= nil and m[Own.key(s, g)] and true or false
 end
 
-local STANDINGS = { L["Hated"], L["Hostile"], L["Unfriendly"], L["Neutral"], L["Friendly"], L["Honored"], L["Revered"], L["Exalted"] }
-
--- Localized by the client's FACTION_STANDING_LABELn when present.
+-- The client's word for a standing (ns.StandingName), else its number.
 local function standingName(n)
-	return _G["FACTION_STANDING_LABEL" .. tostring(n)] or STANDINGS[n] or tostring(n)
+	return ns.StandingName(n) or tostring(n)
 end
 
 -- "first aid" -> "First Aid", for goals that only carry a skill line ID.
