@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.2.5 (unreleased)
+
+### For players
+
+- With the gamepad interface on (Options, Gamepad, Enable Gamepad UI),
+  opening and closing the world map, or closing windows with B, no longer
+  brings up the game's warning that Polestar was blocked from an action only
+  available to the Blizzard UI, again and again, with the game's own gamepad
+  controls failing behind it. Everything Polestar shows on the world map
+  (the arrow's target, the step's goals and their regions, the route lines
+  and the trail, rares, dungeon entrances, flight masters, zone levels, the
+  coordinates bar) and the unexplored areas on the world and battlefield
+  maps are now drawn over the map without touching it, the same with the
+  gamepad and with the keyboard and mouse.
+
+### For contributors
+
+- Polestar draws on Blizzard's map frames through `Polestar.MapCanvas`
+  (`Nav/MapCanvas.lua`, ARCHITECTURE "MapCanvas"): its own frames on the
+  map's canvas, the map only read. No module adds a data provider or a pin
+  pool, acquires a pin or calls a map method that writes: a value written
+  into the map's tables taints the gamepad interface's secure code. No frame
+  there has a click script either (the gamepad's navigation reads it back as
+  it scans the map): pins take clicks from `GLOBAL_MOUSE_DOWN` and
+  `GLOBAL_MOUSE_UP`. The route lines (`Maps/RouteLines.lua`) are one such
+  frame; `Nav/Journey.lua` tells Polestar's pins under the mouse with
+  `Pins.WorldPinOf` and lets the target go on a Shift-click of its pin
+  through `Pins.OnWorldClick`. `tests/lua/wow_stub.lua` fakes the map
+  frames' shape (`stub.newMapCanvas`) and `stub.guardMap` fails any write of
+  addon code into them; `tests/nav-mapcanvas.test.js` draws everything with
+  the maps guarded, with either interface, and pins what Polestar reads
+  there.
+
 ## 0.2.4 (2026-10-16)
 
 ### For players
