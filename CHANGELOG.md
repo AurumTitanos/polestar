@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.2.4 (unreleased)
+
+### For players
+
+- A bug posted in the Discord #bugs forum is tracked on GitHub right away:
+  the post gets "Tracked as #N", and you hear back in it when the bug is
+  fixed, when we decide not to change it, and again when the fix is out in
+  a release.
+
+### For contributors
+
+- `tools/discord-bot`: the bug bot. It files each #bugs post as an issue
+  (labels from the addon's report: version, guide, locale, Lua errors, the
+  forum tags; screenshots kept on the `bug-media` branch), carries the
+  reporter's follow-ups and edits over, and with the workflows
+  `discord-issue-sync.yml` and `discord-release-notify.yml` answers the
+  thread when the issue closes, reopens or ships. Setup in
+  `tools/discord-bot/README.md`.
+
 ## 0.2.3 (2026-10-14)
 
 ### For players

@@ -1,0 +1,38 @@
+name: Discord bug threads
+
+# An issue filed from the Discord #bugs forum (label `discord`) is closed or
+# reopened: tell the player in their thread, set its status tag and lock or
+# unlock it. tools/discord-bot/README.md has the setup.
+
+on:
+  issues:
+    types: [closed, reopened]
+
+permissions:
+  issues: read
+  contents: read
+
+concurrency:
+  group: discord-issue-${{ github.event.issue.number }}
+
+jobs:
+  notify:
+    name: Tell the thread
+    if: contains(github.event.issue.labels.*.name, 'discord')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: tools/discord-bot
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Notify
+        run: node tools/discord-bot/notify.js issue
+        env:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          DISCORD_FORUM_ID: ${{ vars.DISCORD_FORUM_ID }}
+          GITHUB_TOKEN: ${{ github.token }}
