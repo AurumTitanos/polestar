@@ -46,10 +46,11 @@ next forever/horde/07-ashenvale
 # Bluff at 30 is not on the route any more. Blood of Innocents (1066) needs
 # Journey to Tarren Mill (1065), from Zamah's chain in Thunder Bluff, which
 # this route never runs. Unending Torment (97289-97292): re-checked for the
-# new consensus route, which does all four in the Undercity at about 21
-# because the data lists no prerequisite for them; but 97289 asks for the
+# new consensus route, which did all four in the Undercity at about 21
+# because QuestieDB lists no prerequisite for them; but 97289 asks for the
 # Head of the Baron, and the chain starts from the Abominable Head (97288), a
-# drop from The Baron in the Ruins of Lordaeron dungeon, so they stay out.
+# drop from The Baron in the Ruins of Lordaeron dungeon, so they stay out
+# (tools/lib/data/corrections.json now links 97288 -> 97289 -> ... -> 97292).
 # Valuable Vantages (98095, Forever, Masoj's follow-up to Scout Support):
 # the new consensus route takes it, but its three vial spots (the hills by
 # Dun Garok, the plateau over Durnholde, the Headland ridge above Hillsbrad,
