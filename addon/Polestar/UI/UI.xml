@@ -16,4 +16,5 @@
 	<Script file="Report.lua"/>
 	<Script file="Packs.lua"/>
 	<Script file="Options.lua"/>
+	<Script file="QuestieTurnIns.lua"/>
 </Ui>
