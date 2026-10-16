@@ -199,3 +199,36 @@ for (const style of ['keyboard and mouse', 'gamepad']) {
 		assert.deepEqual(reads, expected, 'what Polestar reads on the maps');
 	});
 }
+
+// The view fires every frame the map is open: a listener that errors would
+// raise an error a frame, a stream of error popups that stalls the client.
+// It is reported once and left out until the map opens again; the others
+// keep drawing.
+test('a map listener that errors is reported once, left out until the map reopens, and the others keep their ticks', () => {
+	const r = runAddon({
+		stubs: ['stub_world.lua', 'stub_maps.lua'],
+		before: BEFORE('gamepad'),
+		addons: [{ name: 'Polestar', files: FILES }],
+		login: true,
+		script: `
+local reported, broken, fine = 0, 0, 0
+geterrorhandler = function() return function() reported = reported + 1 end end
+Polestar.MapCanvas.Watch(WorldMapFrame, function(_, what)
+	if what == "tick" then broken = broken + 1; error("boom") end
+end)
+Polestar.MapCanvas.Watch(WorldMapFrame, function(_, what) if what == "tick" then fine = fine + 1 end end)
+stub.maps.showMap(9000)
+for _ = 1, 5 do stub.runMapFrame(WorldMapFrame, 0.01) end
+local open = { reported = reported, broken = broken, fine = fine }
+WorldMapFrame:Hide()
+stub.advance(0.1)
+WorldMapFrame:Show()
+for _ = 1, 3 do stub.runMapFrame(WorldMapFrame, 0.01) end
+emit({ open = open, reported = reported, broken = broken, fine = fine })
+`,
+	}).emitted[0];
+	assert.equal(r.open.reported, 1, 'one report while the map stays open');
+	assert.equal(r.open.broken, 1, 'the erroring listener is not called again while the map stays open');
+	assert.ok(r.open.fine >= 5, 'the other listener ticks every frame');
+	assert.equal(r.reported, 2, 'called again, and reported again, once the map reopens');
+});

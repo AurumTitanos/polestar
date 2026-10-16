@@ -63,9 +63,23 @@ local views = {} -- map frame -> view
 local View = {}
 View.__index = View
 
+-- A listener that errors is reported once and left out until the map is
+-- next opened: the view fires every frame, and an error a frame is a stream
+-- of error popups that can stall the client.
 local function fire(view, what, elapsed)
-	local list = view.listeners
-	for i = 1, #list do ns.SafeCall(list[i], view, what, elapsed) end
+	local list, muted = view.listeners, view.muted
+	if what == "show" then wipe(muted) end
+	for i = 1, #list do
+		local fn = list[i]
+		if not muted[fn] then
+			local ok, err = pcall(fn, view, what, elapsed)
+			if not ok then
+				muted[fn] = true
+				ns.NoteError(err)
+				geterrorhandler()(err)
+			end
+		end
+	end
 end
 
 -- What the map shows now; every call a read.
@@ -123,7 +137,7 @@ function MapCanvas.Watch(map, fn)
 		if not (type(map) == "table" and map.GetMapID and map.GetCanvas) then return nil end
 		local canvas = map:GetCanvas()
 		if not canvas then return nil end
-		view = setmetatable({ map = map, canvas = canvas, shown = false, listeners = {} }, View)
+		view = setmetatable({ map = map, canvas = canvas, shown = false, listeners = {}, muted = {} }, View)
 		local f = ns.CreateFrameUnder("Frame", nil, canvas)
 		f:SetScript("OnUpdate", function(_, elapsed) update(view, elapsed or 0) end)
 		f:SetScript("OnHide", function()
