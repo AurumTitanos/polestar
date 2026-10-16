@@ -364,6 +364,7 @@ local function toggleRow(p, label, path, desc, opts)
 	row.Label:ClearAllPoints()
 	row.Label:SetPoint("TOPLEFT", row, "TOPLEFT", 12, -14)
 	row.Label:SetPoint("RIGHT", row.Track, "LEFT", -16, 0)
+	row.Label:SetWidth(CW - 30 - 16) -- what the anchors give it, for its height when it wraps
 	row.Desc:SetPoint("TOPLEFT", row.Label, "BOTTOMLEFT", 0, -5)
 	return row
 end
@@ -597,6 +598,7 @@ PAGES[#PAGES + 1] = {
 		h.Title = onArt(para(h.Text, "hero", "text", CW, 2))
 		h.Chip = W.Chip(h.Text)
 		h.For = onArt(W.Text(h.Text, "note", "textDim"))
+		h.For:SetWordWrap(true) -- a second line where the chip leaves too little room
 
 		p.Pitch = para(p, "body", "textDim", CW)
 		p.Beta = note(p, L["Our routes are still in beta"])
@@ -645,14 +647,17 @@ PAGES[#PAGES + 1] = {
 			h.Chip:Hide()
 		end
 		h.For:SetText(g and forWhom(g) or L["Polestar has no guide to suggest for where you are."])
-		h.For:SetWidth(min(h.For:GetStringWidth() + 1, (painted and CW or SIDE_TEXT_W + 120) - chipW))
+		h.For:SetWidth(min(W.TextWidth(h.For) + 1, (painted and CW or SIDE_TEXT_W + 120) - chipW))
 		local factY = HERO_H - 20 - W.CHIP_H
 		h.Chip:ClearAllPoints()
 		h.Chip:SetPoint("TOPLEFT", h.Text, "TOPLEFT", EDGE, -factY)
 		h.For:ClearAllPoints()
 		h.For:SetPoint("LEFT", h.Text, "TOPLEFT", EDGE + chipW, -(factY + W.CHIP_H / 2))
+		-- Centred on the chip, a wrapped line reaches above it: the title
+		-- keeps its 10px over whichever is higher.
+		local lift = max(0, (h.For:GetStringHeight() - W.CHIP_H) / 2)
 		h.Title:ClearAllPoints()
-		h.Title:SetPoint("TOPLEFT", h.Text, "TOPLEFT", EDGE, -(factY - 10 - h.Title:GetStringHeight()))
+		h.Title:SetPoint("TOPLEFT", h.Text, "TOPLEFT", EDGE, -(factY - lift - 10 - h.Title:GetStringHeight()))
 
 		-- The page: the pitch, then notes under hairlines.
 		local y = 0

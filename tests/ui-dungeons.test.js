@@ -152,7 +152,8 @@ test('A page: the painting header with the name, facts and actions; tabs with co
 		pg.Back:Click()
 		emit({ head = head, tabs = (function() DS.Open("wailing-caverns") return tabs() end)(), nav = nav, map = uistub.worldMap,
 			back = (function() DS.Home() return { DS.Page() or false, PolestarPicker.Title:GetAlpha(), PolestarPicker.Band:IsShown(), pg:IsShown() } end)() })`);
-	assert.deepEqual(out.head, ['Wailing Caverns', 'Levels 17\u201324  \u00b7  The Barrens  \u00b7  10 players  \u00b7  4 bosses', true, true, true, false,
+	// The facts break between two facts where the actions leave too little room.
+	assert.deepEqual(out.head, ['Wailing Caverns', 'Levels 17\u201324  \u00b7  The Barrens  \u00b7  10 players\n4 bosses', true, true, true, false,
 		'Wailing Caverns', 0, false, true]);
 	assert.deepEqual(out.tabs, ['Quests  4', 'Attunement', 'Bosses  4', 'Map'], 'the fixture gives Wailing Caverns an attunement');
 	assert.deepEqual(out.nav, [1413, 46, 36.4, 'Wailing Caverns']);

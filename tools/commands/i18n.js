@@ -12,7 +12,7 @@ const { localeState, syncFiles, rel } = require('../lib/i18n/project');
 
 const ADDON = path.join(ROOT, 'addon', 'Polestar');
 
-const usage = `usage: node tools/polestar.js i18n <status|check|sync|keys|import|names> [options]
+const usage = `usage: node tools/polestar.js i18n <status|check|sync|keys|import|fit|names> [options]
 
 Polestar's interface translations (docs/TRANSLATING.md): one file per
 locale, addon/Polestar/Locales/<locale>.lua. Locales: ${LOCALE_CODES.join(', ')}.
@@ -42,6 +42,17 @@ locale, addon/Polestar/Locales/<locale>.lua. Locales: ${LOCALE_CODES.join(', ')}
                              the locale's file: only into keys not translated
                              yet; a broken format is refused; keys the code
                              lacks go to the commented block at the end.
+  i18n fit [<locale>[=<file>]...]
+                             lays out every preview scene and every Options
+                             page and tab in English and in each locale (or
+                             those named; <file> stands in for the shipped
+                             file, such as a pull request's), in the game
+                             font and in Inter, and lists the text the
+                             window cuts with an ellipsis, cuts after its
+                             last line or lets cross its edge. Text cut the
+                             same way in English (a long guide or item name)
+                             is left out. Fails (exit 1) when a locale has
+                             any. CJK is measured 1em wide.
   i18n names [<locale>...]   builds the names addons addon/Polestar_Names_<locale>:
                              the quest, NPC, object and item names in each
                              language, from DingDB (pinned commit and sha256s,
@@ -52,7 +63,9 @@ locale, addon/Polestar/Locales/<locale>.lua. Locales: ${LOCALE_CODES.join(', ')}
                              loses its folder.
 
 options:
-  --json            status, check, keys, names: one JSON document on stdout
+  --json            status, check, keys, names, fit: one JSON document on stdout
+  --slack <n>       fit: measure every glyph n times wider (1.15: about the
+                    client's own font)
   --markdown        status: a Markdown table
   --no-questie      names: leave DingDB out (its base data is QuestieDB's);
                     pfQuest only
@@ -301,10 +314,43 @@ function runNames(opts, positional) {
 	return 0;
 }
 
+// Every locale (or those named, each with the file standing in for its
+// shipped one) laid out in every preview scene and Options page: the
+// translated text that does not fit (tools/preview/fit.js).
+async function runFit(opts, positional) {
+	const { fitLocales, describe } = require('../preview/fit');
+	const slack = opts.slack === undefined ? 1 : Number(opts.slack);
+	if (!(slack > 0)) throw new Error(`--slack ${opts.slack}: a number above 0`);
+	const targets = (positional.length ? positional : LOCALE_CODES).map((a) => {
+		const [locale, file] = a.split('=');
+		checkLocale(locale);
+		if (file && !fs.existsSync(file)) throw new Error(`${file}: no such file`);
+		return { locale, file: file ? path.resolve(file) : null };
+	});
+	const results = await fitLocales(targets, { slack });
+	const failed = results.some((r) => r.translated.length);
+	if (opts.json) {
+		console.log(JSON.stringify(results, null, 1));
+		return failed ? 1 : 0;
+	}
+	const where = (f) => {
+		const places = [...new Set(f.places)];
+		return `      in ${places.slice(0, 2).join('; ')}${places.length > 2 ? ` and ${places.length - 2} more` : ''}`;
+	};
+	const english = results[0].found;
+	console.log(`English: ${plural(english.length, 'string')} cut in every language alike (left out below)`);
+	for (const f of english) console.log(`  ${describe(f)}`);
+	for (const r of results.slice(1)) {
+		console.log(`${r.locale}${r.file ? ` (${path.relative(process.cwd(), r.file)})` : ''}: ${r.translated.length ? `${plural(r.translated.length, 'string')} that do not fit` : 'everything fits'}`);
+		for (const f of r.translated) console.log(`  ${describe(f)}\n${where(f)}`);
+	}
+	return failed ? 1 : 0;
+}
+
 async function run(argv) {
 	const { opts, positional, error } = parseArgs(argv, {
 		flags: ['--json', '--markdown', '--no-questie', '--offline'],
-		options: ['--ding', '--pfquest', '--guides', '--questdb', '--codex', '--out'],
+		options: ['--ding', '--pfquest', '--guides', '--questdb', '--codex', '--out', '--slack'],
 	});
 	const [sub, ...rest] = positional;
 	if (error || !sub) {
@@ -317,6 +363,7 @@ async function run(argv) {
 		if (sub === 'sync') return runSync(opts, rest);
 		if (sub === 'keys') return runKeys(opts);
 		if (sub === 'import') return runImport(opts, rest);
+		if (sub === 'fit') return await runFit(opts, rest);
 		if (sub === 'names') return runNames(opts, rest);
 	} catch (e) {
 		console.error(`error: ${e.message}`);
@@ -326,4 +373,4 @@ async function run(argv) {
 	return 2;
 }
 
-module.exports = { name: 'i18n', summary: 'interface translations (status, check, sync, keys, import) and the names addons (names)', usage, run };
+module.exports = { name: 'i18n', summary: 'interface translations (status, check, sync, keys, import, fit) and the names addons (names)', usage, run };
