@@ -14,6 +14,14 @@
   Talondeep Path. The zone crossings are Carbonite's (GPL-3.0), shipped with
   Polestar; until now only a local file had them, so released builds walked
   between zones in straight lines.
+- The quest item button offers only an item from the step's own quests: it
+  took the first usable quest item in your bags, so Bethor's Potion from
+  Silverpine sat on it through the Barrens. From the bags it now offers only
+  an item one of the step's open quests handed you when you took it.
+- The instance counter ("1/5 this hour") no longer appears on screen unless
+  you turn it on: Options, Quality of Life, Trackers, Instances, "Compact
+  display". Instances are still counted, and /pole instances still lists
+  your runs and the hourly cap.
 - The Barrens (19-24) takes Her Name Is Olgra after Lost in Battle is handed
   in, the only time Mankrik offers it, and collects Olgra's Adornments on the
   way back down to Camp Taurajo: the guide asked for it at the first
