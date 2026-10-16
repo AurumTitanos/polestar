@@ -38,6 +38,10 @@ next forever/alliance/04-redridge-mountains
 #   in at the Ironforge stop (06-ashenvale).
 # - The Lakeshire flight path and hearth the export lists at the end of this
 #   visit are taken on arrival in Redridge (next guide).
+# - Auberdine, on the return from Bashal'Aran: one round of the town, from
+#   Terenthis by the road in to Thundris last; Thundris (4763), Terenthis
+#   (986) and Gwennyth (87760) give their next quests on the same visit as
+#   the turn-ins instead of a second round.
 #
 # Optional: The Family and the Fishing Pole (1141) needs Fishing.
 # Gyromast's Revenge (2078) ends with the Threshwackonator 4100, an elite: not
@@ -225,25 +229,25 @@ step Bashal'Aran
   turnin 957                                  -- Asterion
 
 step Auberdine
-  turnin 4762                                 -- Thundris Windweaver
-  turnin 6122 only NightElf,Druid             -- Alanndarian Nightsong
-  accept 6123 only NightElf,Druid
   turnin 985                                  -- Terenthis
-  turnin 4813                                 -- Sentinel Glynda Nal'Shea
+  accept 986
+  accept 965                                  -- Sentinel Elissa Starbreeze
+  accept 2139                                 -- Tharnariun Treetender
   turnin 4728                                 -- Gwennyth Bly'Leggonde
   turnin 4730
   turnin 4727
   turnin 4725
   turnin 4723
-  accept 947                                  -- Barithras Moonshade
+  accept 87760
   accept 1138                                 -- Gubber Blump
-  accept 87760                                -- Gwennyth Bly'Leggonde
   accept 4740                                 -- The WANTED poster
-  accept 965                                  -- Sentinel Elissa Starbreeze
-  accept 986                                  -- Terenthis
-  accept 2139                                 -- Tharnariun Treetender
+  accept 947                                  -- Barithras Moonshade
+  turnin 4813                                 -- Sentinel Glynda Nal'Shea
   accept 982                                  -- Gorbold Steelhand
-  accept 4763                                 -- Thundris Windweaver
+  turnin 6122 only NightElf,Druid             -- Alanndarian Nightsong
+  accept 6123 only NightElf,Druid
+  turnin 4762                                 -- Thundris Windweaver
+  accept 4763
   vendor nearest
 
 # ---------------------------------------------------------------- Third loop: the north
