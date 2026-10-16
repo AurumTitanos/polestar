@@ -185,6 +185,7 @@ step Night Web's Hollow
   kill 1505 quest 380.2
   goto 26.0,60.0 "Night Web's Hollow"
   goto 24.8,59.6 "Webbed Victims"    -- Free six Webbed Victims inside the cave for Aramis
+  complete 98389
 
 step Back to Deathknell
   turnin 3902                         -- Deathguard Saltain
@@ -253,6 +254,7 @@ step Brill
 
 step Discipline
   goto 60.6,52.0 "Brill"              -- Use the Executor's Motivator on five idle Deathguards around town
+  complete 99134
 
 step Doom Weed
   tip The Doom Weed grows in the graveyard fields just north of Brill.
@@ -378,6 +380,7 @@ step Crusader's Outpost
   kill 1535 quest 427.1
   accept 99144                        -- Bareth Dawnstone
   goto 32.0,46.3 "Crusader's Outpost" -- Escort Bareth out of the outpost
+  complete 99144
 
 step Vile Fin shore
   tip More Vile Fin murlocs walk the shore just north of the outpost.

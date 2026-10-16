@@ -246,6 +246,21 @@ test('forever/alliance/03-darkshore.guide: Wogi\'s report: with Skip grey quests
 	assert.deepEqual(greySkippedInDarkshore(17), []);
 });
 
+// --- Tirisfal (a Scourge Priest): the guide sent them to turn in Discipline
+// (99134) without one Deathguard motivated. Its step was only a `goto` to
+// Brill, done on arrival, so nothing waited for the quest. The same holds for
+// the other event and escort objectives written as a `goto`.
+
+test(`a Priest's report: an event or escort objective holds its step until the quest is complete`, { skip }, () => {
+	for (const [guide, quest] of [[TIRISFAL, 99134], [TIRISFAL, 98389], [TIRISFAL, 99144], [DUROTAR, 99123], [TELDRASSIL, 99053]]) {
+		const list = goals(guide);
+		const accept = at(list, `${guide}: accept ${quest}`, is('accept', quest));
+		const complete = at(list, `${guide}: complete ${quest}`, is('complete', quest));
+		const turnin = at(list, `${guide}: turnin ${quest}`, is('turnin', quest));
+		assert.ok(accept < complete && complete < turnin, `${guide}: ${quest} is completed between its accept and its turn-in`);
+	}
+});
+
 // --- Durotar (AndarKerran): A Pain in the Neck (96873) is for enchanters.
 
 // A guide played by the Engine for one character (`who`: race, raceName,

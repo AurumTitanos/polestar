@@ -24,6 +24,12 @@
   As Above, So Below and The One That Got Away: Hilda the Breaker and Ephram
   Barbaro offer them to Paladins only. Other classes still collect the
   Shadowvale elixir bottles (thanks Mike_).
+- Quests done by an event or an escort wait until the quest log counts them,
+  instead of moving on as soon as you reach the place: Discipline (motivate
+  five Deathguards), A Light in the Darkness and Seeking Refuge in Tirisfal
+  Glades, Lost in the Shadows in Durotar and Escaping Ban'ethil in
+  Teldrassil. The guide used to send you to turn in Discipline with no
+  Deathguard motivated.
 - The Dungeons journal lists the dungeon quests it missed and drops ones that
   were not: each quest's chain now holds every prerequisite and breadcrumb
   (Nathanos Blightcaller's errands before Ramstein, Speak with Shoni before

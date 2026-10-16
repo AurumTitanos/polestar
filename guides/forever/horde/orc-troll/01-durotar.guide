@@ -402,6 +402,7 @@ step Kolkar Crag
   interact 3192 quest 786.3 @46.2,78.9
   accept 99123 @46.3,78.7
   goto 46.3,78.7 "Kolkar Crag"        -- Free Pal'juh and see her safely out of the crag
+  complete 99123
 
 step Sen'jin Village
   turnin 786                          -- Lar Prowltusk
