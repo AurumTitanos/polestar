@@ -60,7 +60,7 @@ local function build()
 	F.Hint:SetWordWrap(true)
 
 	F:SetScript("OnShow", function(self) Anim.To(self, "alpha", 0, 1, Anim.FAST, "out") end)
-	if UISpecialFrames then tinsert(UISpecialFrames, "PolestarCopy") end
+	ns.CloseOnEscape("PolestarCopy")
 end
 
 -- The box is made for the number of lines it holds.

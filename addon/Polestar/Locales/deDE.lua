@@ -907,6 +907,7 @@ L["Close the game menu to see Polestar's settings (it cannot be closed for you i
 -- L["Talents"] = ""
 -- L["Talent plan"] = ""
 -- L["This translation was made with AI. Help improve it on Discord."] = ""
+L["Close the game menu to see Polestar's settings."] = "Schließe das Spielmenü, um Polestars Einstellungen zu sehen."
 
 -- UI/Dungeons.lua
 L["Ready to turn in"] = "Bereit zur Abgabe"

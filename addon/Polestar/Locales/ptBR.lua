@@ -1563,6 +1563,7 @@ L["Reload UI"] = "Recarregar IU"
 L["Search settings"] = "Buscar opções"
 L["Open Polestar settings"] = "Abrir opções do Polestar"
 L["Close the game menu to see Polestar's settings (it cannot be closed for you in combat)."] = "Feche o menu do jogo para ver as opções do Polestar (em combate ele não pode ser fechado por você)."
+L["Close the game menu to see Polestar's settings."] = "Feche o menu do jogo para ver as opções do Polestar."
 
 -- Rares/Rares.lua
 L["Raid warning"] = "Aviso de raide"

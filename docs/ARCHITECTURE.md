@@ -256,6 +256,62 @@ whose parent is, or is under, a frame addon code did not make
 `tests/qol.test.js` (the reward marks) and `tests/talents.test.js` (the
 talent marks) check that none was made.
 
+### Gamepad interface
+
+```lua
+Polestar.GamepadUI() -> bool   -- Forever's Gamepad interface style is on (read once, as the addon loads)
+Polestar.CloseOnEscape(name)   -- add a Polestar window to UISpecialFrames, except with the gamepad interface
+Polestar.RunCommand(msg)       -- what /polestar runs; registered as a slash command only with the keyboard and mouse
+```
+
+With Forever's Gamepad interface on (Options, Gamepad, Enable Gamepad UI;
+`C_InputInterfaceStyle`, CVar `InputDeviceInterfaceStyle`), its navigation
+(`Blizzard_GamepadSmartNavigation`, `FrameControlsManager`) opens, closes
+and focuses the game's windows, popups, menus and chat box from Blizzard's
+code, and in the same execution makes protected calls
+(`SetPreferredGamepadInteractTarget`, `RunBinding`, `DescendStop`). Addon
+code running in that flow gets them blocked, and the "AddOn blocked"
+popup's own gamepad handling blocks the next one, thousands of times, until
+the client freezes. An addon whose only code is an empty slash command
+reproduces it (Blizzard forum threads 2367777 and 2370253). Other Forever
+addons (EllesmereUI, Olympus, Questie) do the same as Polestar: with the
+gamepad interface on, they keep to their own windows.
+
+`GamepadUI()` reads the style once, as `Core/Init.lua` loads (the client
+reloads the UI when it changes). With it on, Polestar:
+
+- registers no slash command: `/polestar`, `/pole`, `/way` (Nav/Journey)
+  and `/psrec` (Polestar_Recorder, which reads the style itself). The chat
+  box calls a command's function, then closes itself in that function's
+  taint. The minimap button, on by default then (`maps.minimapButton`), and
+  the key bindings open Polestar; the Recorder page calls
+  `PolestarRecorder_Command`;
+- adds no entry to the world map and minimap tracking menus
+  (`Menu.ModifyMenu`, Nav/Nearby);
+- puts no window in `UISpecialFrames` (`CloseOnEscape`), which the
+  gamepad's menus read and close;
+- opens no world map (`Compat.OpenWorldMap`; a dungeon page has no "Show
+  on map") and adds no canvas click handler to it (Nav/Journey);
+- never closes the game's Settings panel for "Open Polestar settings"
+  (UI/Options: the chat says to close it);
+- hooks no button the gamepad's navigation moves over: no Polestar line on
+  talent tooltips (Talents/Overlay), no route on the flight map
+  (QoL/Flight; the node keeps its mark), no quest levels in the game's
+  quest windows (Quests/QuestLevels, whose surfaces lay out windows the
+  gamepad manages);
+- leaves the game's request dialogs for the player (QoL/Social) and the
+  error-message setting off (QoL/Toggles, which writes the game's
+  `BLACK_LISTED_MESSAGE_TYPES`).
+
+Frames under the game's frames are made through `CreateFrameUnder` and the
+maps are only read (MapCanvas) with either style. The quest automation, the
+vendor and the trainer stay on: they call the game's API, never its
+windows, and the game opens and closes those from its own event handlers.
+`tests/gamepad-ui.test.js` loads Polestar with each style, and lists every
+line of addon code that reaches into the game's UI (slash commands,
+`UISpecialFrames`, menus, panels, popups, the world map's tables, the error
+frame's settings): a new one fails there until it is guarded and listed.
+
 ### Localisation
 
 `Polestar.L[key]`: a key is the English text, and a missing key returns

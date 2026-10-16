@@ -843,7 +843,7 @@ local function build()
 		ns.DB().welcomeSeen = SEEN
 		pending = nil
 	end)
-	if UISpecialFrames then tinsert(UISpecialFrames, "PolestarWelcome") end
+	ns.CloseOnEscape("PolestarWelcome")
 	WEL.frame = F
 end
 

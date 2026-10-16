@@ -1362,6 +1362,7 @@ L["Keep the bottom edge in place, so longer steps extend the window up."] = "Man
 -- L["Talents"] = ""
 -- L["Talent plan"] = ""
 -- L["This translation was made with AI. Help improve it on Discord."] = ""
+L["Close the game menu to see Polestar's settings."] = "Cierra el menú del juego para ver la configuración de Polestar."
 
 -- UI/Packs.lua
 L["turned off in the AddOns list"] = "desactivado en la lista de AddOns"

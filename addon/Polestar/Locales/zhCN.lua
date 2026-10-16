@@ -1563,6 +1563,7 @@ L["Reload UI"] = "重载界面"
 L["Search settings"] = "搜索设置"
 L["Open Polestar settings"] = "打开 Polestar 设置"
 L["Close the game menu to see Polestar's settings (it cannot be closed for you in combat)."] = "关闭游戏菜单以查看 Polestar 设置（战斗中无法自动为你关闭）。"
+L["Close the game menu to see Polestar's settings."] = "关闭游戏菜单以查看 Polestar 设置。"
 
 -- Rares/Rares.lua
 L["Raid warning"] = "团队通知"

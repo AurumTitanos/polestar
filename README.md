@@ -379,6 +379,12 @@ steps and detours, the steps to fix first.
 Questing, Discovery, Quality of Life, Guide packs, Recorder and About, with a
 search that finds any setting.
 
+With the game's gamepad interface on (Options, Gamepad, Enable Gamepad UI)
+there are no slash commands: the game blocks gamepad actions after any
+addon command typed in chat, until the game freezes. Polestar's minimap
+button (on by default then) and its key bindings open the guide and the
+settings instead, and Polestar keeps out of the game's own windows.
+
 <details>
 <summary><b>Every slash command</b></summary>
 

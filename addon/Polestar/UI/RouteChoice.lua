@@ -319,7 +319,7 @@ local function build()
 	F.Later.psTip = L["The guide window keeps offering the choice; /polestar path opens it again."]
 
 	F:SetScript("OnShow", function(self) Anim.To(self, "alpha", 0, 1, Anim.BASE, "out") end)
-	if UISpecialFrames then tinsert(UISpecialFrames, "PolestarRouteChoice") end
+	ns.CloseOnEscape("PolestarRouteChoice")
 	RC.frame = F
 end
 

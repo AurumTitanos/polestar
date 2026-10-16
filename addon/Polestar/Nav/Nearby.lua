@@ -339,8 +339,10 @@ local function addMenu(_, root)
 end
 Nearby.AddMenu = addMenu
 
+-- Not with the gamepad interface (ns.GamepadUI): the game's menus join its
+-- focus as they open, and an entry of Polestar's runs in that flow.
 ns.OnLogin(function()
-	if not (Menu and Menu.ModifyMenu) then return end
+	if ns.GamepadUI() or not (Menu and Menu.ModifyMenu) then return end
 	Menu.ModifyMenu("MENU_WORLD_MAP_TRACKING", addMenu)
 	Menu.ModifyMenu("MENU_MINIMAP_TRACKING", addMenu)
 end)

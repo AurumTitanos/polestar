@@ -863,7 +863,7 @@ local function buildMenu()
 	menu.seps = {}
 	menu:SetScript("OnHide", function() catcher:Hide() end)
 	menu:Hide()
-	if UISpecialFrames then tinsert(UISpecialFrames, "PolestarMenu") end
+	ns.CloseOnEscape("PolestarMenu")
 end
 
 local function menuRow(i)
@@ -1856,7 +1856,7 @@ function W.Shell(name, opts)
 		Anim.To(self, "alpha", 0, 1, Anim.FAST, "out")
 	end)
 	f:HookScript("OnHide", function() W.HideMenu() end)
-	if UISpecialFrames and name then tinsert(UISpecialFrames, name) end
+	ns.CloseOnEscape(name)
 	return f
 end
 

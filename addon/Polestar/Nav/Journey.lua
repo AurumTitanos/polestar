@@ -278,9 +278,12 @@ end
 
 local worldHooked, minimapHooked = false, false
 
+-- Not with the gamepad interface (ns.GamepadUI): the handler is a write
+-- into the map's own table, and the gamepad clicks the map with A, never
+-- the mouse this answers.
 local function hookWorldMap()
 	local map = WorldMapFrame
-	if worldHooked or not (map and map.AddCanvasClickHandler and map.GetNormalizedCursorPosition) then return worldHooked end
+	if worldHooked or ns.GamepadUI() or not (map and map.AddCanvasClickHandler and map.GetNormalizedCursorPosition) then return worldHooked end
 	map:AddCanvasClickHandler(onCanvasClick)
 	worldHooked = true
 	return true
@@ -715,8 +718,9 @@ local function wayTaken()
 end
 
 -- Every addon has loaded by login, so whoever owns /way is there to be seen.
+-- No slash command with the gamepad interface (Core/Init.lua).
 local function claimWay()
-	if SLASH_POLESTARWAY1 or not ns.Get("nav.answerTomTom") or Nav.HandedOff() or wayTaken() then return end
+	if SLASH_POLESTARWAY1 or ns.GamepadUI() or not ns.Get("nav.answerTomTom") or Nav.HandedOff() or wayTaken() then return end
 	SLASH_POLESTARWAY1 = "/way"
 	SlashCmdList.POLESTARWAY = Journey.Way
 end

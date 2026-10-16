@@ -110,7 +110,9 @@ function O.Draw()
 	for button in f:EnumerateAllTalentButtons() do
 		local liveID = button.GetNodeID and button:GetNodeID()
 		local id, pick, off, isNext = planFor(c, liveID)
-		if not hooked[button] and button.HookScript then
+		-- No tooltip line with the gamepad interface (ns.GamepadUI): its
+		-- navigation runs a button's OnEnter from its own code as it moves.
+		if not hooked[button] and button.HookScript and not ns.GamepadUI() then
 			button:HookScript("OnEnter", onEnter)
 			hooked[button] = true
 		end

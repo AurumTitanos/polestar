@@ -393,8 +393,7 @@ end
 O.RecorderState = recorderState
 
 local function recorderCommand(arg)
-	local cmd = SlashCmdList and SlashCmdList.POLESTARREC
-	if cmd then cmd(arg) end
+	if PolestarRecorder_Command then PolestarRecorder_Command(arg) end
 end
 
 local function buildRecorder(view)
@@ -1105,10 +1104,14 @@ local function registerSettingsCategory()
 	sub:SetPoint("TOPLEFT", canvas, "TOPLEFT", 16, -80)
 	local open = W.Button(canvas, L["Open Polestar settings"], function()
 		-- Closing the game's Settings panel is protected in combat: from addon
-		-- code it would fail and blame Polestar. Leave it open then.
+		-- code it would fail and blame Polestar. Leave it open then, and with
+		-- the gamepad interface, whose focus a panel closed from addon code
+		-- leaves blocked (ns.GamepadUI): B closes it.
 		local panel = SettingsPanel
 		if panel and panel.IsShown and panel:IsShown() and HideUIPanel then
-			if InCombatLockdown and InCombatLockdown() then
+			if ns.GamepadUI() then
+				ns.Print(L["Close the game menu to see Polestar's settings."])
+			elseif InCombatLockdown and InCombatLockdown() then
 				ns.Print(L["Close the game menu to see Polestar's settings (it cannot be closed for you in combat)."])
 			else
 				HideUIPanel(panel)
