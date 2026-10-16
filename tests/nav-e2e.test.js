@@ -705,3 +705,39 @@ test('Ashenvale 40,70 from the Crossroads: the route lands where the engine\'s w
 	assert.ok(gap(out.after.first, out.splinter) < 15 && gap(out.after.final, out.target) < 15, 'from Splintertree Post to the marker');
 	assert.ok(Math.abs(out.after.yards - out.measured.splinter) < out.measured.splinter * 0.15, `${out.after.yards} yd along the path, ${out.measured.splinter.toFixed(0)} measured`);
 });
+
+// The cause itself, pinned (review of travel-terrain): a Horde character at the
+// Crossroads who knows Splintertree Post and Zoram'gar Outpost (not Sun Rock
+// Retreat), guided to Ashenvale 35,75. Both flight masters stand in Ashenvale
+// with the target, so crossing data or none, straight x1.25 lands at
+// Splintertree Post; the ridge between makes the engine's walk from there
+// dearer than straight x1.25, and the measured route no longer lands there.
+test('Ashenvale 35,75: the ridge makes the walk from Splintertree Post dearer than straight x1.25, so the measured route no longer lands there', { skip }, (t) => {
+	const out = run(t, `
+		w.faction = "Horde"
+		Polestar.CharState().flags.taxi = { [22] = true, [23] = true, [25] = true, [58] = true, [61] = true, [77] = true }
+		local by = {}
+		for _, n in ipairs(N.GetTravelData().taxi) do by[n.id] = n end
+		local xr, splinter = by[25], by[61]
+		place(xr.map, xr.wx, xr.wy)
+		local function lands()
+			local legs, ci = N.GetRoute()
+			local fly
+			for i = ci, #legs do if legs[i].kind == "fly" then fly = legs[i] end end
+			return fly and fly.to.name or false
+		end
+		N.SetTarget(1440, 35, 75, "Behind the ridge", "e")
+		aim()
+		local r = { before = lands() }
+		local tc, tx, ty = N.GetTargetWorld()
+		local n = 0
+		while n < 400 and not N.walk.Measured(tc, tx, ty, false) do stub.advance(0.05); aim(); n = n + 1 end
+		r.after = lands()
+		local cost = N.walk.Measured(tc, tx, ty, false)
+		r.measured = cost(1, splinter.wx, splinter.wy)
+		r.straight = dist(splinter.wx, splinter.wy, tx, ty)
+		emit(r)`, { shipped: true });
+	assert.equal(out.before, 'Splintertree Post, Ashenvale', 'straight x1.25 lands at Splintertree Post');
+	assert.ok(out.measured > out.straight * 1.25, `the ridge: Splintertree Post's walk measures ${out.measured.toFixed(0)} yd, ${(out.measured / out.straight).toFixed(2)} x its ${out.straight.toFixed(0)} straight yards`);
+	assert.notEqual(out.after, 'Splintertree Post, Ashenvale', `so the measured route goes another way (${out.after || 'on foot'})`);
+});
