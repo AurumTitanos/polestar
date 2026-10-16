@@ -136,12 +136,16 @@ version throughout.
    the chat shows no `ADDON_ACTION_BLOCKED` or `ADDON_ACTION_FORBIDDEN`.
 
    Then once more with the game's gamepad interface on (Options, Gamepad,
-   Enable Gamepad UI): open the options from the minimap button, move
-   through them and close them with B, browse the guide, and let a route
-   choice or a new character's welcome show by itself: it takes no button
-   until the Browse the guide button is pressed. LB and RB + the D-pad keep
-   targeting while no Polestar window holds the gamepad, and no "AddOn
-   blocked" warning shows.
+   Enable Gamepad UI), with `taintLog` at 0 (on this client it breaks every
+   addon's `hooksecurefunc` post-hooks, so a logged pass shows Polestar
+   misbehaving where nothing is wrong): `/polestar` is unknown, the minimap
+   button shows; open the options from it, move through them and close them
+   with B, browse the guide, and let a route choice or a new character's
+   welcome show by itself: it takes no button until the Browse the guide
+   button is pressed. Open and close the world map, a quest giver's window,
+   a vendor, the flight map and the talents with the gamepad. LB and RB +
+   the D-pad keep targeting while no Polestar window holds the gamepad, and
+   no "AddOn blocked" warning shows.
 
 7. Assemble the changelog from the fragments in `changes/` (CONTRIBUTING.md,
    "Commits and pull requests"), then commit it with the version bump and
