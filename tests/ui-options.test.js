@@ -66,12 +66,49 @@ test('pages: by order, a page with nothing to set left out, Recorder and About l
 			footer = footer() })`, { between: FAKE_PAGE });
 	// Questing, Discovery and Quality of Life fill from modules not loaded
 	// here; Gear registered no control: all left out of the list. Guide packs
-	// (a custom page) is always there.
-	assert.deepEqual(out.nav, ['Guide', 'Appearance', 'Map', 'Quests', 'Guide packs', 'Gamepad', 'Recorder', 'About']);
+	// (a custom page) and Integrations (which says when it has nothing) are
+	// always there.
+	assert.deepEqual(out.nav, ['Guide', 'Appearance', 'Map', 'Quests', 'Integrations', 'Guide packs', 'Gamepad', 'Recorder', 'About']);
 	assert.equal(out.title, 'Guide');
 	assert.deepEqual(out.tabs, ['Window', 'Arrow & routes', 'Automation']);
 	assert.deepEqual(out.pages.find((p) => p.name === 'Quests'), { name: 'Quests', key: 'quests', builtin: false, tabs: ['Map'] });
 	assert.deepEqual(out.footer, ['Reset page', 'Reload UI', 'Close']);
+});
+
+// Options > Integrations: a section per supported addon, there only while
+// that addon is installed or loaded; with none, one line says so.
+test('Integrations lists Questie only when it is installed or loaded, else says none is', () => {
+	const show = `
+		UI.ShowOptions("integrations")
+		local headers = {}
+		for _, h in ipairs(O.view.headers) do if h:IsShown() then headers[#headers + 1] = h.Text:GetText() end end
+		local toggle = O.Controls("integrations")["routePlan.questie"]
+		emit({ title = PolestarOptions.Title:GetText(), headers = headers, empty = O.view.empty,
+			line = rawget(O.view, "Empty") and O.view.Empty:IsShown() and O.view.Empty:GetText() or nil,
+			toggle = toggle ~= nil and toggle:IsShown() or false, on = Polestar.Get("routePlan.questie"),
+			nav = navLabels() })`;
+	const [none] = run(show);
+	assert.equal(none.title, 'Integrations');
+	assert.ok(none.nav.includes('Integrations'));
+	assert.deepEqual(Object.values(none.headers), []);
+	assert.equal(none.empty, true);
+	assert.equal(none.line, 'None of the addons Polestar works with is installed.');
+	assert.equal(none.toggle, false);
+
+	const [loaded] = run(`stub.addonsLoaded.Questie = true\n${show}`);
+	assert.deepEqual(loaded.headers, ['Questie']);
+	assert.equal(loaded.empty, false);
+	assert.equal(loaded.line, undefined);
+	assert.equal(loaded.toggle, true);
+	assert.equal(loaded.on, false, 'planned turn-ins stay off until the player turns them on');
+
+	// Installed and enabled but loading after Polestar counts too.
+	const [installed] = run(`
+		table.insert(stub.addons, { name = "Questie" })
+		function C_AddOns.DoesAddOnExist(name) return name == "Questie" end
+		${show}`);
+	assert.deepEqual(installed.headers, ['Questie']);
+	assert.equal(installed.toggle, true);
 });
 
 // Players and macros still type the old page names (/polestar options
@@ -162,7 +199,7 @@ test('page keys stay English on a translated client: /polestar options quests, g
 		'options qualityoflife': 'qualityoflife: Komfort > Travel',
 		'options about': 'about: Über > ',
 		packs: 'guidepacks: Guide-Pakete > ',
-		keys: ['guide', 'appearance', 'map', 'questing', 'discovery', 'qualityoflife', 'guidepacks', 'gamepad', 'recorder', 'about'],
+		keys: ['guide', 'appearance', 'map', 'questing', 'discovery', 'qualityoflife', 'integrations', 'guidepacks', 'gamepad', 'recorder', 'about'],
 	});
 });
 

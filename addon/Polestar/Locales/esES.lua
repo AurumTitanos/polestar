@@ -1570,6 +1570,9 @@ L["Search settings"] = "Buscar ajustes"
 L["Open Polestar settings"] = "Abrir la configuración de Polestar"
 L["Close the game menu to see Polestar's settings (it cannot be closed for you in combat)."] = "Cierra el menú del juego para ver la configuración de Polestar (en combate no se puede cerrar por ti)."
 L["Close the game menu to see Polestar's settings."] = "Cierra el menú del juego para ver la configuración de Polestar."
+-- L["Integrations"] = ""
+-- L["Settings for other addons Polestar works with, shown when they are installed."] = ""
+-- L["None of the addons Polestar works with is installed."] = ""
 
 -- Rares/Rares.lua
 L["Raid warning"] = "Aviso de la banda"
@@ -1841,3 +1844,21 @@ L["A bar under the window says what each button does, and B sits on the close bu
 L["The guide"] = "La guía"
 L["Quest buttons"] = "Botones de misión"
 L["The guide window holds the gamepad until B: the D-pad picks a line, A points the arrow there or uses the item, X shows its details, LB and RB change steps, Y minimizes the window. A window that opened by itself, such as a route choice, waits for this button before it takes the gamepad."] = "La ventana de la guía retiene el mando hasta pulsar B: la cruceta elige una línea, A apunta la flecha allí o usa el objeto, X muestra sus detalles, LB y RB cambian de paso, Y minimiza la ventana. Una ventana que se abrió sola, como una elección de ruta, espera este botón antes de tomar el mando."
+
+-- Core/RoutePlan.lua
+-- L["step %d"] = ""
+-- L["%s · %s"] = ""
+-- L["Turn in at this step · %s"] = ""
+-- L["Turn in at %s"] = ""
+-- L["Earlier turn-in · %s — check"] = ""
+-- L["Skipped turn-in · %s — check"] = ""
+-- L["Turn-in plan depends on your next route choice"] = ""
+-- L["Next guide is not loaded; turn-in plan unavailable"] = ""
+-- L["No turn-in in this route"] = ""
+-- L["Select a guide to see its turn-in plan"] = ""
+-- L["%s (optional)"] = ""
+
+-- UI/QuestieTurnIns.lua
+-- L["Polestar: %s"] = ""
+-- L["Show planned turn-ins in Questie"] = ""
+-- L["Completed quests in Questie's tracker show their Polestar turn-in step. Earlier, skipped and unplanned hand-ins are flagged."] = ""

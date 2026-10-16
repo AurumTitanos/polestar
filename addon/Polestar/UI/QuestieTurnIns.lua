@@ -1,5 +1,10 @@
--- Optional Questie tracker captions. Post-hooks only: Questie still owns its
--- pooled rows, clicks, sorting and layout. No Questie files are modified.
+-- Optional Questie tracker captions (Options > Integrations, off by default).
+-- Post-hooks only (hooksecurefunc on Questie's tracker pool and its rows,
+-- never on a Blizzard secure function). Polestar reads Questie's rows,
+-- appends its own caption to a completed quest's title, sizes a captioned
+-- row to fit and asks Questie's tracker to lay out again, out of combat.
+-- Questie still owns its pooled rows, clicks, sorting and layout; no Questie
+-- file or saved setting is modified.
 local ADDON, ns = ...
 local L = ns.L
 local Integration = {}
@@ -30,7 +35,10 @@ local function captionFor(line, completed)
 end
 
 local function measure(label, state)
-	if state.busy or combat() then return end
+	if not state or state.busy or combat() then return end
+	-- Only a row that carries a caption, or has just lost one, has its
+	-- heights touched; every other row keeps Questie's own layout.
+	if not (state.annotated or state.grown) then return end
 	if state.annotated then
 		label:SetHeight(0)
 		label:SetHeight(math.max(state.baseHeight or 1, label:GetStringHeight()))
@@ -41,6 +49,7 @@ local function measure(label, state)
 	if state.line.mode == "quest" and state.padding then
 		state.line:SetHeight(label:GetHeight() + state.padding)
 	end
+	state.grown = state.annotated
 end
 
 local function decorate(label, text)
@@ -143,9 +152,11 @@ for _, event in ipairs({ "ADDON_LOADED", "QUEST_LOG_UPDATE", "PLAYER_REGEN_ENABL
 end
 ns.OnLogin(Integration.Refresh)
 
+-- Options > Integrations > Questie, there only while Questie is installed.
 if ns.RegisterOptions then
-	ns.RegisterOptions({ page = ns.L["Questing"], tab = ns.L["Quests"], section = ns.L["Tooltips and quest log"], controls = {
+	ns.RegisterOptions({ page = L["Integrations"], section = "Questie", controls = {
 		{ kind = "toggle", key = "routePlan.questie", label = L["Show planned turn-ins in Questie"],
-			help = L["Completed quests in Questie's tracker show their Polestar turn-in step. Earlier, skipped and unplanned hand-ins are flagged. Requires Questie."] },
+			help = L["Completed quests in Questie's tracker show their Polestar turn-in step. Earlier, skipped and unplanned hand-ins are flagged."],
+			needs = function() return ns.Compat.AddOnPresent("Questie") end },
 	} })
 end

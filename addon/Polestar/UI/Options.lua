@@ -100,6 +100,7 @@ local function add(spec, builtin)
 	if spec.subtitle then p.subtitle = spec.subtitle end
 	if spec.custom then p.custom = spec.custom end
 	if spec.dot then p.dot = spec.dot end
+	if spec.empty then p.empty = spec.empty end
 	local s = sectionOf(tabOf(p, spec.tab), spec.section)
 	for _, c in ipairs(spec.controls or {}) do
 		c.page, c.tab, c.section = p, spec.tab, spec.section
@@ -124,7 +125,8 @@ end
 -- setting: follow the guide (Guide), make Polestar look their way
 -- (Appearance), choose what the maps show (Map), quest (Questing), find
 -- things (Discovery: Lookup, the dungeon journal, rares), small
--- conveniences (Quality of Life); the author's Recorder and About close the
+-- conveniences (Quality of Life), other addons Polestar works with
+-- (Integrations); the author's Recorder and About close the
 -- list. Modules still register their own controls; the pages they fill are
 -- declared here with their tabs and sections in order, and the modules
 -- register into them by name (docs/ARCHITECTURE.md, "Options registry").
@@ -367,6 +369,14 @@ for _, list in ipairs({
 end
 
 for _, spec in ipairs(BUILTIN) do add(spec, true) end
+
+-- Integrations: a section per supported addon, each registered by its
+-- module with needs = the addon is present (Compat.AddOnPresent), so only
+-- installed addons show. The page stays in the list with none (`empty`:
+-- the line it shows then).
+add({ page = L["Integrations"], key = "integrations", icon = "plug", order = 65,
+	subtitle = L["Settings for other addons Polestar works with, shown when they are installed."],
+	empty = L["None of the addons Polestar works with is installed."] }, true)
 
 ---------------------------------------------------------------------------
 -- Custom pages: Recorder status and About
@@ -762,7 +772,7 @@ local function buildView(p, t)
 					view.Empty = W.Text(view, "note", "textMuted")
 					view.Empty:SetWordWrap(true)
 				end
-				view.Empty:SetText(L["Nothing to set here yet: the module behind this page is not loaded."])
+				view.Empty:SetText(p.empty or L["Nothing to set here yet: the module behind this page is not loaded."])
 				view.Empty:SetWidth(win.BodyWidth)
 				view.Empty:ClearAllPoints()
 				view.Empty:SetPoint("TOPLEFT", view, "TOPLEFT", SH.pad, -24)
@@ -882,7 +892,7 @@ local function shownTabs(p)
 end
 
 local function pageShown(p)
-	if p.custom then return true end
+	if p.custom or p.empty then return true end
 	for _, t in ipairs(p.tabs) do
 		if tabHasControls(t) then return true end
 	end

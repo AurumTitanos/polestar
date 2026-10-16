@@ -416,8 +416,9 @@ steps and detours, the steps to fix first.
 
 `/polestar` (or `/pole`) shows or hides the guide window; settings live in
 `/polestar options`, grouped by what you came to do: Guide, Appearance, Map,
-Questing, Discovery, Quality of Life, Guide packs, Gamepad, Recorder and
-About, with a search that finds any setting.
+Questing, Discovery, Quality of Life, Integrations (settings for other addons
+Polestar works with, such as Questie, shown while they are installed), Guide
+packs, Gamepad, Recorder and About, with a search that finds any setting.
 
 With the game's gamepad interface on (Options, Gamepad, Enable Gamepad UI)
 there are no slash commands: the game blocks gamepad actions after any

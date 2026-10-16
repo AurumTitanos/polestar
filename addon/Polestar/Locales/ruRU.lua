@@ -1570,6 +1570,9 @@ L["Search settings"] = "Поиск настроек"
 L["Open Polestar settings"] = "Открыть настройки Polestar"
 L["Close the game menu to see Polestar's settings (it cannot be closed for you in combat)."] = "Закройте игровое меню, чтобы увидеть настройки Polestar (в бою его нельзя закрыть за вас)."
 L["Close the game menu to see Polestar's settings."] = "Закройте игровое меню, чтобы увидеть настройки Polestar."
+-- L["Integrations"] = ""
+-- L["Settings for other addons Polestar works with, shown when they are installed."] = ""
+-- L["None of the addons Polestar works with is installed."] = ""
 
 -- Rares/Rares.lua
 L["Raid warning"] = "Предупреждение рейда"
@@ -1841,3 +1844,21 @@ L["A bar under the window says what each button does, and B sits on the close bu
 L["The guide"] = "Гайд"
 L["Quest buttons"] = "Кнопки заданий"
 L["The guide window holds the gamepad until B: the D-pad picks a line, A points the arrow there or uses the item, X shows its details, LB and RB change steps, Y minimizes the window. A window that opened by itself, such as a route choice, waits for this button before it takes the gamepad."] = "Окно гайда держит геймпад до нажатия B: крестовина выбирает строку, A наводит туда стрелку или использует предмет, X показывает подробности, LB и RB переключают шаги, Y сворачивает окно. Окно, открывшееся само (например, выбор маршрута), ждет этой кнопки, прежде чем взять геймпад."
+
+-- Core/RoutePlan.lua
+-- L["step %d"] = ""
+-- L["%s · %s"] = ""
+-- L["Turn in at this step · %s"] = ""
+-- L["Turn in at %s"] = ""
+-- L["Earlier turn-in · %s — check"] = ""
+-- L["Skipped turn-in · %s — check"] = ""
+-- L["Turn-in plan depends on your next route choice"] = ""
+-- L["Next guide is not loaded; turn-in plan unavailable"] = ""
+-- L["No turn-in in this route"] = ""
+-- L["Select a guide to see its turn-in plan"] = ""
+-- L["%s (optional)"] = ""
+
+-- UI/QuestieTurnIns.lua
+-- L["Polestar: %s"] = ""
+-- L["Show planned turn-ins in Questie"] = ""
+-- L["Completed quests in Questie's tracker show their Polestar turn-in step. Earlier, skipped and unplanned hand-ins are flagged."] = ""

@@ -1570,6 +1570,9 @@ L["Search settings"] = "搜尋設定"
 L["Open Polestar settings"] = "開啟 Polestar 設定"
 L["Close the game menu to see Polestar's settings (it cannot be closed for you in combat)."] = "關閉遊戲選單即可查看 Polestar 的設定（戰鬥中無法替你關閉）。"
 L["Close the game menu to see Polestar's settings."] = "關閉遊戲選單即可查看 Polestar 的設定。"
+-- L["Integrations"] = ""
+-- L["Settings for other addons Polestar works with, shown when they are installed."] = ""
+-- L["None of the addons Polestar works with is installed."] = ""
 
 -- Rares/Rares.lua
 L["Raid warning"] = "團隊警告"
@@ -1841,3 +1844,21 @@ L["A bar under the window says what each button does, and B sits on the close bu
 L["The guide"] = "指南"
 L["Quest buttons"] = "任務按鈕"
 L["The guide window holds the gamepad until B: the D-pad picks a line, A points the arrow there or uses the item, X shows its details, LB and RB change steps, Y minimizes the window. A window that opened by itself, such as a route choice, waits for this button before it takes the gamepad."] = "指南視窗會佔用控制器直到按下 B：方向鍵選擇一行，A 將箭頭指向該處或使用物品，X 顯示詳情，LB 與 RB 切換步驟，Y 最小化視窗。自行開啟的視窗（例如路線選擇）會等到按下此按鈕才取得控制器。"
+
+-- Core/RoutePlan.lua
+-- L["step %d"] = ""
+-- L["%s · %s"] = ""
+-- L["Turn in at this step · %s"] = ""
+-- L["Turn in at %s"] = ""
+-- L["Earlier turn-in · %s — check"] = ""
+-- L["Skipped turn-in · %s — check"] = ""
+-- L["Turn-in plan depends on your next route choice"] = ""
+-- L["Next guide is not loaded; turn-in plan unavailable"] = ""
+-- L["No turn-in in this route"] = ""
+-- L["Select a guide to see its turn-in plan"] = ""
+-- L["%s (optional)"] = ""
+
+-- UI/QuestieTurnIns.lua
+-- L["Polestar: %s"] = ""
+-- L["Show planned turn-ins in Questie"] = ""
+-- L["Completed quests in Questie's tracker show their Polestar turn-in step. Earlier, skipped and unplanned hand-ins are flagged."] = ""

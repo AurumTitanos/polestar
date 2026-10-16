@@ -528,6 +528,7 @@ Compat.GetNpcID(unit)                  -> number | nil   (from UnitGUID)
 Compat.InCombat()                      -> bool
 Compat.IsInInstance()                  -> bool
 Compat.IsShiftKeyDown()                -> bool
+Compat.AddOnPresent(name)              -> bool   (installed and enabled: loaded, or loadable after Polestar)
 Compat.Supports(feature)               -> bool   ("skill" | "spell" | "faction" | "explore" | "achievement")
 Compat.GetSkillRank(skillLineOrName)   -> rank, maxRank | nil  (profession/secondary skill)
 Compat.IsSpellKnown(spellID)           -> bool

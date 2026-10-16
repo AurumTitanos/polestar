@@ -962,6 +962,14 @@ end`,
 		],
 	},
 	{
+		file: 'options-integrations.svg',
+		title: 'Options: Integrations: Questie\'s section while Questie is loaded; with no supported addon, one line says so',
+		panels: [
+			{ roots: OPTIONS, script: 'stub.addonsLoaded.Questie = true; Polestar.UI.ShowOptions("integrations")' },
+			{ roots: OPTIONS, script: 'Polestar.UI.ShowOptions("integrations")' },
+		],
+	},
+	{
 		file: 'options-packs.svg',
 		title: 'Options: Guide packs: ours and a community pack on, one with problems and its report, one turned off, one too new; where suggestions come from',
 		panels: [

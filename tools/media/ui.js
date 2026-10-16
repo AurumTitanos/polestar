@@ -244,6 +244,14 @@ const GLYPHS = {
 		polyline([[3.6, 12.2], [12, 16.8], [20.4, 12.2]], 2.1),
 		polyline([[3.6, 16.2], [12, 20.8], [20.4, 16.2]], 2.1),
 	),
+	// Integrations (other addons Polestar works with): a plug, two prongs
+	// over its body, the cable out of the bottom.
+	plug: union(
+		line(9, 2.8, 9, 7.6, 2.2), line(15, 2.8, 15, 7.6, 2.2),
+		box(12, 11.2, 6.6, 3.8, 1.4),
+		poly([[8.4, 14.4], [15.6, 14.4], [13.6, 18], [10.4, 18]]),
+		line(12, 17.4, 12, 21.4, 2.25),
+	),
 	// Gamepad (UI/Gamepad.lua): the options page's controller, and the
 	// PlayStation face buttons drawn as their shapes (Xbox's are letters, set
 	// as text). The D-pad uses the chevrons.

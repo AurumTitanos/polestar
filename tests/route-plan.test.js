@@ -185,6 +185,18 @@ test('Questie final width pass reflows both the caption and parent row while pre
   assert.match(out.text,/Polestar: Turn in at step 3/);
 });
 
+test('a Questie row without a caption keeps the heights Questie gives it', () => {
+  const [out] = run(questie+`
+    stub.world.progress(3,1,0); stub.fire("QUEST_LOG_UPDATE"); stub.advance(0.3)
+    local cleared=row.label:GetText()
+    -- Questie lays the row out itself (a title that wraps), then its final width pass.
+    row.label:SetHeight(30); row:SetHeight(34); row.label:SetWidth(80)
+    emit({cleared=cleared,label=row.label:GetHeight(),row=row:GetHeight()})
+  `,true);
+  assert.equal(out.cleared,'Ready quest');
+  assert.equal(out.label,30); assert.equal(out.row,34);
+});
+
 test('unchanged quest-log updates do not rebuild Questie while changed captions still do', () => {
   const [out] = run(questie+`
     local initial=updates

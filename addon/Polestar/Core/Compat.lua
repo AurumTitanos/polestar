@@ -163,6 +163,17 @@ function Compat.GetCurrentTaxiNode()
 	return nil
 end
 
+-- Another addon installed and enabled: loaded, or loadable when it loads
+-- after Polestar. C_AddOns.IsAddOnLoaded / DoesAddOnExist / GetAddOnInfo
+-- (AddOnsDocumentation.lua).
+function Compat.AddOnPresent(name)
+	local A = C_AddOns
+	if not A then return false end
+	if A.IsAddOnLoaded and A.IsAddOnLoaded(name) then return true end
+	if not (A.DoesAddOnExist and A.GetAddOnInfo) or not A.DoesAddOnExist(name) then return false end
+	return select(4, A.GetAddOnInfo(name)) and true or false
+end
+
 ---------------------------------------------------------------------------
 -- Quests
 ---------------------------------------------------------------------------

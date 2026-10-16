@@ -1571,6 +1571,9 @@ L["Open Polestar settings"] = "Ouvrir les réglages de Polestar"
 L["Close the game menu to see Polestar's settings (it cannot be closed for you in combat)."] = "Fermez le menu du jeu pour voir les réglages de Polestar (il ne peut pas être fermé pour vous en combat)."
 L["This translation was made with AI. Help improve it on Discord."] = "Cette traduction a été faite par une IA. Aidez à l'améliorer sur Discord."
 L["Close the game menu to see Polestar's settings."] = "Fermez le menu du jeu pour voir les réglages de Polestar."
+-- L["Integrations"] = ""
+-- L["Settings for other addons Polestar works with, shown when they are installed."] = ""
+-- L["None of the addons Polestar works with is installed."] = ""
 
 -- Rares/Rares.lua
 L["Raid warning"] = "Avertissement de raid"
@@ -1842,6 +1845,24 @@ L["A bar under the window says what each button does, and B sits on the close bu
 L["The guide"] = "Le guide"
 L["Quest buttons"] = "Boutons de quête"
 L["The guide window holds the gamepad until B: the D-pad picks a line, A points the arrow there or uses the item, X shows its details, LB and RB change steps, Y minimizes the window. A window that opened by itself, such as a route choice, waits for this button before it takes the gamepad."] = "La fenêtre du guide garde la manette jusqu'à B : la croix choisit une ligne, A y pointe la flèche ou utilise l'objet, X affiche ses détails, LB et RB changent d'étape, Y réduit la fenêtre. Une fenêtre ouverte d'elle-même, comme un choix d'itinéraire, attend ce bouton avant de prendre la manette."
+
+-- Core/RoutePlan.lua
+-- L["step %d"] = ""
+-- L["%s · %s"] = ""
+-- L["Turn in at this step · %s"] = ""
+-- L["Turn in at %s"] = ""
+-- L["Earlier turn-in · %s — check"] = ""
+-- L["Skipped turn-in · %s — check"] = ""
+-- L["Turn-in plan depends on your next route choice"] = ""
+-- L["Next guide is not loaded; turn-in plan unavailable"] = ""
+-- L["No turn-in in this route"] = ""
+-- L["Select a guide to see its turn-in plan"] = ""
+-- L["%s (optional)"] = ""
+
+-- UI/QuestieTurnIns.lua
+-- L["Polestar: %s"] = ""
+-- L["Show planned turn-ins in Questie"] = ""
+-- L["Completed quests in Questie's tracker show their Polestar turn-in step. Earlier, skipped and unplanned hand-ins are flagged."] = ""
 
 -- No longer in the code (its English changed or it went away): reuse or delete.
 -- L["Alliance"] = "Alliance"
