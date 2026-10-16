@@ -263,10 +263,10 @@ test('tooltip line: the slot is named by its own key, so "Back" and "Chest" tran
 		emit(g.showTooltip(GameTooltip, "item:9041"))
 		emit(g.showTooltip(GameTooltip, "item:9061"))
 	`,
-		{ before: fakeLocale('esMX', { Back: 'Atrás', Chest: 'Cofre', 'slot: Back': 'Espalda', 'slot: Chest': 'Pecho' }) },
+		{ before: fakeLocale('frFR', { Back: 'Atrás', Chest: 'Cofre', 'slot: Back': 'Espalda', 'slot: Chest': 'Pecho' }) },
 	);
-	assert.match(back[0], /^Polestar · Arms \| .+ · Espalda$/);
-	assert.match(chest[0], /^Polestar · Arms \| .+ · Pecho$/);
+	assert.match(back[0], /^Polestar · Arms \| .*upgrade · Espalda$/);
+	assert.match(chest[0], /^Polestar · Arms \| .*upgrade · Pecho$/);
 });
 
 test('quest reward tooltips: hovering a choice (SetQuestItem, SetQuestLogItem) shows the % upgrade line, also before its link is cached', () => {

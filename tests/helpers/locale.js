@@ -3,10 +3,12 @@
 // makes GetLocale() return `locale` and fills Polestar.L with `strings`
 // right after Core/Init.lua runs, where a locale file (Locales/<locale>.lua)
 // loads in the client. Code that looks a string up too early, or two
-// meanings sharing one key, then shows in the test.
+// meanings sharing one key, then shows in the test. Use a locale Polestar
+// does not ship (frFR): a shipped one's file (deDE, esMX) loads after these
+// strings and replaces them.
 //
 //   const { fakeLocale } = require('./helpers/locale');
-//   runAddon({ before: fakeLocale('deDE', { 'Open settings': 'Einstellungen öffnen' }), ... });
+//   runAddon({ before: fakeLocale('frFR', { 'Open settings': 'Ouvrir les options' }), ... });
 
 function luaString(s) {
 	return '"' + String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n') + '"';

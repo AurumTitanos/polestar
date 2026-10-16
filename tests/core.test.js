@@ -139,7 +139,7 @@ test('slash command: bare toggles the frame, names dispatch with the rest of the
 test('/polestar help prints each line in the client language, Core\'s own commands too', () => {
 	const [out] = runAddon({
 		stubs: ['stub_world.lua'],
-		before: fakeLocale('deDE', {
+		before: fakeLocale('frFR', {
 			Commands: 'Befehle',
 			'Show the guide window': 'Guide-Fenster anzeigen',
 			'Open settings': 'Einstellungen öffnen',
