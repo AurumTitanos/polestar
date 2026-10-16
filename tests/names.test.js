@@ -159,3 +159,32 @@ test('the names pack is optional: never reported missing, named when it is from 
 		script: 'local missing, stale = Polestar.Data.CheckInstall(); emit({ table.concat(missing, ","), table.concat(stale, ",") })',
 	})[0], ['', 'Polestar_Names_frFR (0.0.1)']);
 });
+
+// ---------------------------------------------------------------------------
+// The guide window (Engine.GetStepView)
+// ---------------------------------------------------------------------------
+
+const VIEW = `
+local v = Polestar.Engine.GetStepView(1)
+local out = {}
+for i, g in ipairs(v.goals) do out[i] = { g.subject, g.detail or false, g.npcName or false } end
+emit(out)`;
+
+test('a French client: the guide window names quests, NPCs, objects and items in French, the client\'s quest title first; English where no French name exists', () => {
+	const [view] = run({ guide: true, before: 'stub.world.titles[33] = "Les loups à la frontière (client)"', script: VIEW });
+	assert.deepEqual(view, [
+		['Avis de recherche : Lardeur', 'from Maréchal Dughan', 'Maréchal Dughan'],
+		['Vermine kobold', 'for Nettoyer le camp des kobolds', false],
+		["Poignée d'avoine", 'for Nettoyer le camp des kobolds', false],
+		['Avis de recherche', false, false],
+		['Nobody Translated', false, 'Nobody Translated'],
+		['Untranslated Thing', false, false],
+		['Les loups à la frontière (client)', 'at Maréchal McBride', 'Maréchal McBride'],
+	]);
+});
+
+test('an English client keeps the guide\'s English, its quest title before the client\'s', () => {
+	const [view] = run({ locale: null, guide: true, before: 'stub.world.titles[176] = "Wanted: Hogger (client)"', script: VIEW });
+	assert.deepEqual(view.map((g) => g[0]), ['Wanted: Hogger', 'Kobold Vermin', 'Handful of Oats', 'Wanted Poster', 'Nobody Translated', 'Untranslated Thing', 'Wolves Across the Border']);
+	assert.deepEqual(view[0], ['Wanted: Hogger', 'from Marshal Dughan', 'Marshal Dughan']);
+});
