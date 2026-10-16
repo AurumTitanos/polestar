@@ -342,6 +342,8 @@ local SECTIONS = { guide = L["The guide"], windows = L["Windows"], buttons = L["
 local HELP = {
 	POLESTAR_FOCUS = L["The guide window holds the gamepad until B: the D-pad picks a line, A points the arrow there or uses the item, X shows its details, LB and RB change steps, Y minimizes the window."],
 	POLESTAR_OPTIONS = L["With a gamepad, RB + D-pad up opens them from the start, unless that chord was taken."],
+	["CLICK PolestarStepButton:LeftButton"] = L["Step action: NPC, quest item, mob or Hearthstone"],
+	["CLICK PolestarTravelButton:LeftButton"] = L["Use the route's Hearthstone or teleport"],
 }
 for _, a in ipairs(G.ACTIONS) do
 	ns.RegisterOptions({
