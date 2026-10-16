@@ -1037,6 +1037,10 @@ local function hearthReady()
 	return true
 end
 
+-- The inn the bind location stands for: the one learned when the character
+-- bound there (flags.inn, from the innkeeper), else the inn whose area
+-- (`area`, C_Map.GetAreaInfo) the client names so, in its language, else
+-- the inn of that English name. Returns the inn (or nil) and the location.
 local function bindInn()
 	local C = ns.Compat
 	local loc = C and C.GetBindLocation and C.GetBindLocation()
@@ -1044,7 +1048,28 @@ local function bindInn()
 	local key = lower(loc)
 	local learned = ns.CharState().flags.inn
 	local npc = type(learned) == "table" and learned[key]
-	return (npc and innByNpc[npc]) or innByName[key], loc
+	local inn = npc and innByNpc[npc]
+	if not inn and C.GetAreaName then
+		for _, candidate in ipairs(inns) do
+			local name = C.GetAreaName(candidate.area)
+			if name and lower(name) == key then
+				inn = candidate
+				break
+			end
+		end
+	end
+	return inn or innByName[key], loc
+end
+
+-- The inn an innkeeper (NPC ID) or a bind location name ("Darkshire")
+-- stands for, or nil: what the Engine's located `sethome` means.
+function Nav.FindInn(npc, name)
+	return (npc and innByNpc[npc]) or (type(name) == "string" and innByName[lower(name)]) or nil
+end
+
+-- The inn this character is bound at (bindInn), or nil.
+function Nav.BoundInn()
+	return (bindInn())
 end
 
 -- Bound at an innkeeper: remember which inn that bind location means.
