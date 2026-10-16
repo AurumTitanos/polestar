@@ -9,6 +9,8 @@
   slots on the upgrade line and the Dungeon Journal read exactly as the game
   writes them, in every language ("Main Hand", "Shoulders" and "Dungeon
   Journal" in English).
+- Options > About says so on a client whose translation was made with AI, with
+  the Discord invite.
 
 ### For contributors
 
@@ -24,8 +26,6 @@
 - The boat, zeppelin, tram and lift captions ("Next boat in 1:20") can be
   translated: they were looked up through a variable, so no translator saw
   them.
-- Options > About says so on a client whose translation was made with AI, with
-  the Discord invite.
 - Tests fake an Italian client (`fakeLocale('itIT', ...)`): Forever has none,
   so no shipped language file replaces the fake strings.
 - `tools/discord-bot`: `/close` and `/reopen` for server administrators in
