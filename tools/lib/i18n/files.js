@@ -147,8 +147,10 @@ function headerFiles(line) {
 // A file's text -> { head: [line], groups: [{ header, files, lines: [{ text, kind, key, value }] }], tail: [line] }:
 // head up to `local L = ns.L`, then a group at each comment line that is not a
 // commented-out L line, and the retired block from its marker to the end.
+// Windows line endings are read as plain ones (sync writes the file back with
+// "\n").
 function parseLocaleText(text, file) {
-	const lines = text.split('\n');
+	const lines = text.replace(/\r\n/g, '\n').split('\n');
 	if (lines[lines.length - 1] === '') lines.pop();
 	const start = lines.indexOf(BODY_START);
 	if (start < 0) throw new Error(`${file}: no "${BODY_START}" line, so not in the interface files' layout (docs/TRANSLATING.md)`);

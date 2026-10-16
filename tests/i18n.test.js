@@ -126,6 +126,7 @@ test('sync adds missing keys under their file\'s group, retires lost translation
 	assert.deepEqual(out.retired, ['Gone']);
 	assert.deepEqual(out.dropped, ['Gone too']);
 	assert.equal(updateLocaleText({ text: out.text, file: 'deDE.lua', keys }).text, out.text, 'a second sync changes nothing');
+	assert.equal(updateLocaleText({ text: GERMAN.replace(/\n/g, '\r\n'), file: 'deDE.lua', keys }).text, out.text, 'a file saved with Windows line endings syncs the same, written back with "\\n"');
 });
 
 test('a new file has every key commented out under its file; filled keys are translated and unknown ones retired', () => {
