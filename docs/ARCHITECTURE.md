@@ -2232,6 +2232,12 @@ flight timer and the instance tracker are set under Quality of Life.
   (`maps.coords`, `Maps/WorldMap.lua`). `maps.minimapCoords` adds a readout at
   the bottom of the minimap (`Maps/Coords.lua`, 5 Hz, repainted only when the
   tenth changes). Both use `Maps.FormatCoords`.
+- Minimap button (`maps.minimapButton`, off by default; `Maps/MinimapButton.lua`):
+  click fires `TOGGLE_FRAME`, right-click `SHOW_OPTIONS`, a drag moves it
+  around the minimap's edge and saves `maps.minimapButtonAngle` (degrees, 0 =
+  east). A square minimap (`GetMinimapShape`) puts it on the square's edge,
+  and a resized one (`OnSizeChanged`) moves it to the new edge.
+  No frame exists until the setting is first turned on.
 - Zone level ranges (`maps.zoneLevels`): labels on continent maps, and the
   hovered zone's range in the info bar. The ranges come from `maps build`
   (`tools/lib/maps/zonelevels.js`). Forever-only zones (maps with Forever

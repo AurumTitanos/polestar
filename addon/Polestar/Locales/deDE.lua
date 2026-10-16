@@ -1277,6 +1277,8 @@ L["Instances per day"] = "Instanzen pro Tag"
 L["Classic Era allows 30 new instances per 24 hours per account; 0 ignores the daily cap. Forever may differ."] = "Classic Era erlaubt 30 neue Instanzen pro 24 Stunden und Account; 0 ignoriert die Tagesgrenze. Forever kann abweichen."
 L["Clear instance history"] = "Instanzverlauf löschen"
 L["Forgets recorded entries and runs (the server's own limit is not affected)."] = "Vergisst aufgezeichnete Eintritte und Durchläufe (die eigene Grenze des Servers bleibt unberührt)."
+-- L["Minimap button"] = ""
+-- L["A Polestar button on the edge of the minimap. Click to show or hide the guide, right-click for settings, drag to move it."] = ""
 
 -- Quests/Options.lua
 L["Any level"] = "Jede Stufe"
@@ -1727,6 +1729,11 @@ L["Take"] = "Nimm"
 -- L["Picks from %s (%s), checked against the game's talent tree; notes in Polestar's words."] = ""
 -- L["Keep this plan"] = ""
 -- L["Follow this plan whatever spec gear advice uses."] = ""
+
+-- Maps/MinimapButton.lua
+-- L["Click: show or hide the guide"] = ""
+-- L["Right-click: settings"] = ""
+-- L["Drag: move it around the minimap"] = ""
 
 -- No longer in the code (its English changed or it went away): reuse or delete.
 -- L["The arrow's target and the areas it spawns in."] = "Das Ziel des Pfeils und die Gebiete, in denen es spawnt."

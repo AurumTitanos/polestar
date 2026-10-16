@@ -490,6 +490,8 @@ L["Instances per day"] = "Instancias por día"
 L["Classic Era allows 30 new instances per 24 hours per account; 0 ignores the daily cap. Forever may differ."] = "Classic Era permite 30 instancias nuevas cada 24 horas y cuenta. Pon 0 para ignorar el límite diario. Forever puede usar otro límite."
 L["Clear instance history"] = "Borrar historial de instancias"
 L["Forgets recorded entries and runs (the server's own limit is not affected)."] = "Borra las entradas y runs registradas. Esto no cambia el límite del servidor."
+-- L["Minimap button"] = ""
+-- L["A Polestar button on the edge of the minimap. Click to show or hide the guide, right-click for settings, drag to move it."] = ""
 
 -- Maps/WorldMap.lua
 L["Player"] = "Jugador"
@@ -1762,3 +1764,8 @@ L["Demonology"] = "Demonología"
 L["Destruction"] = "Destrucción"
 L["Balance"] = "Equilibrio"
 L["Feral"] = "Combate feral"
+
+-- Maps/MinimapButton.lua
+-- L["Click: show or hide the guide"] = ""
+-- L["Right-click: settings"] = ""
+-- L["Drag: move it around the minimap"] = ""

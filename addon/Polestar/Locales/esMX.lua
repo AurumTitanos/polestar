@@ -396,6 +396,8 @@ L["Instances per day"] = "Estancias por día"
 L["Classic Era allows 30 new instances per 24 hours per account; 0 ignores the daily cap. Forever may differ."] = "Classic Era permite 30 estancias nuevas cada 24 horas por cuenta; 0 ignora el límite diario. Forever puede variar."
 L["Clear instance history"] = "Borrar historial de estancias"
 L["Forgets recorded entries and runs (the server's own limit is not affected)."] = "Olvida las entradas y recorridos registrados (el límite del servidor no cambia)."
+-- L["Minimap button"] = ""
+-- L["A Polestar button on the edge of the minimap. Click to show or hide the guide, right-click for settings, drag to move it."] = ""
 
 -- Maps/TravelPins.lua
 L["Flight master, known"] = "Maestro de vuelo, conocido"
@@ -1761,6 +1763,11 @@ L["Leveling, professions, reputations, mounts and pets."] = "Subir de nivel, pro
 -- L["Picks from %s (%s), checked against the game's talent tree; notes in Polestar's words."] = ""
 -- L["Keep this plan"] = ""
 -- L["Follow this plan whatever spec gear advice uses."] = ""
+
+-- Maps/MinimapButton.lua
+-- L["Click: show or hide the guide"] = ""
+-- L["Right-click: settings"] = ""
+-- L["Drag: move it around the minimap"] = ""
 
 -- No longer in the code (its English changed or it went away): reuse or delete.
 -- L["The arrow's target, the stops of its travel route, the step's other goals and the areas their mobs and objects spawn in."] = "El objetivo de la flecha, las paradas de su ruta de viaje, los demás objetivos del paso y las zonas donde aparecen sus monstruos y objetos."

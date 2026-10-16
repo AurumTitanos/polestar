@@ -490,6 +490,8 @@ L["Instances per day"] = "하루 인스턴스"
 L["Classic Era allows 30 new instances per 24 hours per account; 0 ignores the daily cap. Forever may differ."] = "클래식 시대는 계정당 24시간에 새 인스턴스 30개를 허용합니다. 0이면 일일 제한을 무시합니다. Forever는 다를 수 있습니다."
 L["Clear instance history"] = "인스턴스 기록 삭제"
 L["Forgets recorded entries and runs (the server's own limit is not affected)."] = "기록된 입장과 회차를 지웁니다 (서버 자체 제한에는 영향 없음)."
+-- L["Minimap button"] = ""
+-- L["A Polestar button on the edge of the minimap. Click to show or hide the guide, right-click for settings, drag to move it."] = ""
 
 -- Maps/WorldMap.lua
 L["Player"] = "플레이어"
@@ -1762,3 +1764,8 @@ L["Demonology"] = "악마"
 L["Destruction"] = "파괴"
 L["Balance"] = "조화"
 L["Feral"] = "야성"
+
+-- Maps/MinimapButton.lua
+-- L["Click: show or hide the guide"] = ""
+-- L["Right-click: settings"] = ""
+-- L["Drag: move it around the minimap"] = ""
