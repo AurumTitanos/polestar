@@ -1692,7 +1692,7 @@ L["Open your talent plan"] = "특성 계획 열기"
 -- Talents/Overlay.lua
 L["Polestar: not in your %s plan"] = "Polestar: %s 계획에 없음"
 L["Polestar: done for your %s plan"] = "Polestar: %s 계획 완료"
-L["Polestar: pick #%d, rank %d/%d (%s plan)"] = "Polestar: #%d번째 선택, %d/%d 단계 (%s 계획)"
+L["Polestar: pick #%d, rank %d/%d (%s plan)"] = "Polestar: #%d 선택, 등급 %d/%d (%s 계획)"
 L["next"] = "다음"
 
 -- Talents/Options.lua
@@ -1740,8 +1740,8 @@ L["Follow this plan whatever spec gear advice uses."] = "장비 조언의 전문
 -- Gear/Weights.lua
 L["Arms"] = "무기"
 L["Fury"] = "분노"
-L["Protection (tank)"] = "방어 (탱커)"
-L["Holy (healer)"] = "신성 (치유)"
+L["Protection (tank)"] = "방어/보호 (방어 전담)"
+L["Holy (healer)"] = "신성 (치유 전담)"
 L["Retribution"] = "징벌"
 L["Beast Mastery"] = "야수"
 L["Marksmanship"] = "사격"
@@ -1752,7 +1752,7 @@ L["Discipline"] = "수양"
 L["Shadow"] = "암흑"
 L["Elemental"] = "정기"
 L["Enhancement"] = "고양"
-L["Restoration (healer)"] = "복원 (치유)"
+L["Restoration (healer)"] = "복원/회복 (치유 전담)"
 L["Arcane"] = "비전"
 L["Fire"] = "화염"
 L["Frost"] = "냉기"
