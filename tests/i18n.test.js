@@ -9,12 +9,14 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const path = require('node:path');
 const fs = require('node:fs');
-const { ADDONS } = require('./helpers/lua');
+const { spawnSync } = require('node:child_process');
+const { ADDONS, ROOT } = require('./helpers/lua');
 const { tmpdir } = require('./helpers/tmp');
 const { formatProblems } = require('../tools/lib/i18n/check');
 const { extractKeys } = require('../tools/lib/i18n/keys');
 const { readLocaleFiles, updateLocaleText, newLocaleText } = require('../tools/lib/i18n/files');
-const { LOCALES } = require('../tools/lib/i18n/locales');
+const { LOCALES, LOCALE_CODES } = require('../tools/lib/i18n/locales');
+const { localeState } = require('../tools/lib/i18n/project');
 const { TERMS, GLOSSARY_DIR, readGlossary, glossaryWarnings } = require('../tools/lib/i18n/glossary');
 
 const POLESTAR = path.join(ADDONS, 'Polestar');
@@ -156,4 +158,28 @@ test('glossary: a translation without its locale\'s word warns, its forms count 
 		const read = readGlossary(locale);
 		for (const id of Object.keys(read)) assert.ok(TERMS[id], `${f}: ${id}`);
 	}
+});
+
+test('the checker reports stale keys, broken formats, a key set twice and a file Lua cannot load', () => {
+	const dir = miniAddon();
+	const head = (l) => `local _, ns = ...\nif not (GetLocale and GetLocale() == "${l}") then return end\nlocal L = ns.L\n`;
+	fs.writeFileSync(path.join(dir, 'Locales', 'frFR.lua'), `${head('frFR')}L["Hello %s"] = "Bonjour %d"\nL["Gone"] = "Parti"\nL["Bye"] = "Salut"\nL["Bye"] = "Au revoir"\n`);
+	fs.writeFileSync(path.join(dir, 'Locales', 'deDE.lua'), `${head('deDE')}L["Bye"] = "Tschüss"\nL["Hello %s" = "Hallo %s"\n`);
+	const st = localeState(dir, ['frFR', 'deDE', 'koKR'], { glossaryDir: dir });
+	const fr = st.locales.frFR;
+	assert.deepEqual(fr.stale, { Gone: 'Parti' });
+	assert.deepEqual(fr.problems.map((p) => p.key).sort(), ['Bye', 'Hello %s']);
+	assert.deepEqual(fr.missing.sort(), ['Close the window', 'New in Main', 'slot: Back'], 'a broken translation is translated, and refused');
+	assert.match(st.locales.deDE.error, /expected|'\]'/);
+	assert.equal(st.locales.koKR.exists, false);
+});
+
+test('i18n status lists every locale with its status and translators', () => {
+	const r = spawnSync(process.execPath, [path.join(ROOT, 'tools', 'polestar.js'), 'i18n', 'status', '--json'], { encoding: 'utf8', cwd: ROOT });
+	assert.equal(r.status, 0, r.stderr);
+	const out = JSON.parse(r.stdout);
+	assert.deepEqual(out.locales.map((l) => [l.locale, l.status]), LOCALE_CODES.map((l) => [l, LOCALES[l].status]));
+	const de = out.locales.find((l) => l.locale === 'deDE');
+	assert.deepEqual(de.translators, ['thecodingcortex']);
+	assert.ok(de.file && de.translated > 1000 && de.translated <= out.keys);
 });
