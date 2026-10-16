@@ -591,7 +591,9 @@ Polestar.Engine.GetProgress() -> doneSteps, totalSteps
   The Engine filters by the character's faction (and races/classes when given),
   then picks the cheapest by `Polestar.Nav.EstimateTravel(from, to)` seconds when
   Nav provides it, else world distance on the same continent with a large penalty
-  across continents. It re-picks on step start, zone change and landing, never per
+  across continents. A candidate in a zone whose level range (`Maps.GetZoneLevels`)
+  starts more than 10 levels above the character comes after every other
+  choice, other continents included. It re-picks on step start, zone change and landing, never per
   frame. The goal view then carries the chosen `npc`, `npcName`, `map`, `x`, `y`,
   `f`, plus `alternatives = n`; `Polestar.Engine.CycleCandidate(stepIndex, goalIndex)`
   moves to the next-best one. Profession `train` goals are done when the

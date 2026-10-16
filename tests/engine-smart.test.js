@@ -397,3 +397,37 @@ for (const eraWithoutFrames of [false, true]) {
 		assert.ok(['Shaina Fuller', 'Michelle Belle'].includes(westfall), westfall);
 	});
 }
+
+test('a vendor in a zone far above the character comes after every other choice; still there to cycle to, and first again once in range', () => {
+	// South Darkshore, level 18: Chagrak Hammerstrike in Mount Hyjal (56-60) is
+	// nearer by straight line than Naram Longclaw in Auberdine.
+	const pick = (level) => runAddon({
+		stubs: ['stub_world.lua'],
+		before: `
+			local w = stub.world
+			w.addMap(1439, { name = "Darkshore", c = 1, left = 1000, right = -1000, top = 3000, bottom = 0 })
+			w.addMap(2482, { name = "Mount Hyjal", c = 1, left = 200, right = -1800, top = 1000, bottom = -1000 })
+			w.race, w.raceName, w.faction, w.class = "NightElf", "Night Elf", "Alliance", "PRIEST"
+			w.level = ${level}
+			w.moveTo(1439, 41.77, 83.55)`,
+		addons: [{ name: 'Polestar', files: ['Core/Core.xml', 'Maps/Maps.lua', 'Maps/WorldMap.lua'] }],
+		script: `${TEST_PACK}
+${TEST_SOURCE}
+			Polestar.Maps.RegisterZoneLevels({ [1439] = { 10, 20, 50, 50 }, [2482] = { 56, 60, 50, 50 } })
+			Polestar.RegisterGuide({ id = "test/darkshore", pack = "test", title = "Darkshore", faction = "Alliance", minLevel = 10, maxLevel = 20, steps = {
+				{ goals = { { t = "vendor", candidates = {
+					{ npc = 4183, npcName = "Naram Longclaw", map = 1439, x = 37.57, y = 40.35, faction = "A" },
+					{ npc = 265883, npcName = "Chagrak Hammerstrike", map = 2482, x = 13.4, y = 52.4, faction = "AH" },
+				} } } },
+				{ goals = { { t = "level", level = 60 } } },
+			} })
+			stub.login()
+			local E = Polestar.Engine
+			E.SetGuide("test/darkshore")
+			local first = E.GetStepView(1).goals[1].npcName
+			E.CycleCandidate(1, 1)
+			emit({ first = first, cycled = E.GetStepView(1).goals[1].npcName })`,
+	}).emitted[0];
+	assert.deepEqual(pick(18), { first: 'Naram Longclaw', cycled: 'Chagrak Hammerstrike' });
+	assert.deepEqual(pick(50), { first: 'Chagrak Hammerstrike', cycled: 'Naram Longclaw' });
+});
