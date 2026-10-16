@@ -2,6 +2,7 @@
 -- Keys are the English strings exactly as the code writes them; a key
 -- missing here, or commented out, shows in English. Grouped by the file that
 -- first uses each key. docs/TRANSLATING.md explains the rest.
+-- From Yendi's (@moust4ki) French translation for Ding!, GPL-3.0, used with his permission (THIRD_PARTY.md).
 
 local _, ns = ...
 if not (GetLocale and GetLocale() == "frFR") then return end
