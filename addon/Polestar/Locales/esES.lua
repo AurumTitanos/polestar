@@ -279,7 +279,7 @@ L["With TomTom installed, the arrow goes wherever TomTom's arrow points, routed 
 -- Nav/Nearby.lua
 L["Profession trainer"] = "Instructor de profesión"
 L["Class trainer"] = "Instructor de clase"
-L["Repair"] = "Reparar"
+L["Repair"] = "Reparación"
 L["Reagents"] = "Componentes"
 L["Vendor"] = "Mercader"
 L["Innkeeper"] = "Tabernero"
@@ -1223,7 +1223,7 @@ L["The Dungeons section is turned off. Turn it on under Options > Discovery > Du
 L["Dungeons are off"] = "Mazmorras desactivadas"
 L["Dungeons need the Codex"] = "Mazmorras requiere el Codex"
 L["Nothing is left to do for it."] = "No queda nada por hacer."
-L["The map can't open in combat: press Show on map again when it ends."] = "El mapa no se puede abrir en combate: pulsa Mostrar en el mapa otra vez cuando termine."
+L["The map can't open in combat: press Show on map again when it ends."] = "El mapa no se puede abrir en combate: pulsa Ver en el mapa otra vez cuando termine."
 L["Search dungeons"] = "Buscar mazmorras"
 
 -- UI/RouteChoice.lua
