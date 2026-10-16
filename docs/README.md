@@ -18,6 +18,7 @@ and maintainers who release. Paths are from the repository root.
 | [docs/PACK_FORMAT.md](PACK_FORMAT.md) | guide authors, tool builders | The contract between a guide pack and Polestar: `pack.json`, the addon the compiler writes, the rules Polestar enforces, versioning |
 | [LICENSE-EXCEPTION.md](../LICENSE-EXCEPTION.md) | guide authors | The permission to distribute a compiled guide pack under terms of your choice |
 | [CONTRIBUTING.md](../CONTRIBUTING.md) | players, guide authors, contributors | Ways to help; how to report a wrong step; how to fix a guide; setting up; code changes; commits and pull requests; the licence of contributions |
+| [docs/TRANSLATING.md](TRANSLATING.md) | translators, contributors | The languages and their status, the locale file and how to fill it, formats, the glossary, the `i18n` commands, adding or reviewing a language |
 | [docs/ARCHITECTURE.md](ARCHITECTURE.md) | contributors | The contract between the addon's modules, the compiled guide data, the toolchain and the tests |
 | [addon/README.md](../addon/README.md) | contributors | Which addon is which, the modules in load order with each file and its public table, where a hub screen lives, the generated files inside `addon/` |
 | [tools/README.md](../tools/README.md) | contributors, maintainers | The commands by group, the `tools/lib` folders, every generated file with its command and inputs, how to tell it is stale, the rebuild order after a data change |

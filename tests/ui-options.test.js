@@ -126,7 +126,7 @@ test('old page keys open the page and tab that hold their settings now', () => {
 test('page keys stay English on a translated client: /polestar options quests, gear, lookup and /polestar packs', () => {
 	const [out] = runAddon({
 		stubs: ['stub_ui.lua'],
-		before: fakeLocale('frFR', {
+		before: fakeLocale('itIT', {
 			Guide: 'Leitfaden',
 			Appearance: 'Darstellung',
 			Questing: 'Questen',

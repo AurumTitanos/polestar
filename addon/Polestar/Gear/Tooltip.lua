@@ -26,21 +26,21 @@ local abs = math.abs
 
 local SAME = 0.05 -- percent: closer than this reads as "same"
 
--- Equipment slot -> its name on the tooltip line, translated under its own
--- key ("slot: Back"): "Back" is also the welcome's button and "Chest" a
--- dungeon boss's chest.
-local LC = ns.LC
-local SLOT_NAME = {
-	[1] = LC("slot", "Head"), [2] = LC("slot", "Neck"), [3] = LC("slot", "Shoulder"), [5] = LC("slot", "Chest"),
-	[6] = LC("slot", "Waist"), [7] = LC("slot", "Legs"), [8] = LC("slot", "Feet"), [9] = LC("slot", "Wrist"),
-	[10] = LC("slot", "Hands"), [11] = LC("slot", "Finger"), [12] = LC("slot", "Finger"), [13] = LC("slot", "Trinket"),
-	[14] = LC("slot", "Trinket"), [15] = LC("slot", "Back"), [16] = LC("slot", "Main hand"), [17] = LC("slot", "Off hand"),
-	[18] = LC("slot", "Ranged"),
+-- Equipment slot -> the client's global naming it (HEADSLOT, ...): the
+-- tooltip line names the slot in the game's own word, in every language.
+local SLOT_GLOBAL = {
+	[1] = "HEADSLOT", [2] = "NECKSLOT", [3] = "SHOULDERSLOT", [5] = "CHESTSLOT", [6] = "WAISTSLOT", [7] = "LEGSSLOT",
+	[8] = "FEETSLOT", [9] = "WRISTSLOT", [10] = "HANDSSLOT", [11] = "FINGER0SLOT", [12] = "FINGER0SLOT",
+	[13] = "TRINKET0SLOT", [14] = "TRINKET0SLOT", [15] = "BACKSLOT", [16] = "MAINHANDSLOT", [17] = "SECONDARYHANDSLOT",
+	[18] = "RANGEDSLOT",
 }
 
 -- -> the slot's name in the client's language, or nil for a slot without one.
 function Gear.SlotName(slot)
-	return SLOT_NAME[slot]
+	local tag = SLOT_GLOBAL[slot]
+	local s = tag and _G[tag]
+	if type(s) == "string" and s ~= "" then return s end
+	return nil
 end
 
 local function color(name, fr, fg, fb)

@@ -95,7 +95,7 @@ test('upgrade line: unusable items say why; class-restricted; the downgrade in r
 });
 
 test('upgrade line: why an item is unusable is in the client language', () => {
-	const es = fakeLocale('esMX', { 'armor you cannot wear': 'armadura que no puedes llevar', 'not for your class': 'no es para tu clase' });
+	const es = fakeLocale('itIT', { 'armor you cannot wear': 'armadura que no puedes llevar', 'not for your class': 'no es para tu clase' });
 	const [mage] = run('emit(line("item:9101"))', { cls: 'MAGE', className: 'Mage', classID: 8, locale: es });
 	const [cls] = run('emit(line("item:9150"))', { locale: es });
 	assert.equal(mage, 'Polestar · Frost | armadura que no puedes llevar');
@@ -103,14 +103,18 @@ test('upgrade line: why an item is unusable is in the client language', () => {
 });
 
 test('two-hand vs one-hand: a two-hander against main + off hand; a one-hander against a worn two-hander pairs with the best bag off-hand', () => {
-	const [twoHand, oneHand] = run(`
+	const [twoHand, oneHand, mainHand] = run(`
 		g.equip(16, "item:9106"); g.equip(17, "item:9111")
 		emit(line("item:9110"))
 		g.equip(17, nil); g.equip(16, "item:9110"); g.bag(0, 1, "item:9111")
 		emit(line("item:9107"))
+		emit(MAINHANDSLOT)
 	`);
-	assert.match(twoHand, /^Polestar · Arms \| \+[\d.]+% upgrade · Main hand$/);
-	assert.match(oneHand, /^Polestar · Arms \| -[\d.]+% downgrade · Main hand$/);
+	// The slot is the client's word for it (MAINHANDSLOT).
+	assert.match(twoHand, /^Polestar · Arms \| \+[\d.]+% upgrade · /);
+	assert.ok(twoHand.endsWith(` · ${mainHand}`), twoHand);
+	assert.match(oneHand, /^Polestar · Arms \| -[\d.]+% downgrade · /);
+	assert.ok(oneHand.endsWith(` · ${mainHand}`), oneHand);
 });
 
 test('rings and trinkets: against the weaker equipped one; a unique ring only against its own copy; an empty slot first', () => {

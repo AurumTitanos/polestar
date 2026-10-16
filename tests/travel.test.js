@@ -65,7 +65,7 @@ test('every leg caption is in the client language: flight, boat and tram', () =>
 		target(-950, 0, "Nightbane Shadow Weavers")
 		emit({ flying = flying, boat = boat, tram = route() })`,
 		{
-			before: fakeLocale('deDE', {
+			before: fakeLocale('itIT', {
 				'Walk to the flight master': 'Geh zum Flugmeister',
 				'Fly to %s': 'Flieg nach %s',
 				'Walk to the boat': 'Geh zum Schiff',

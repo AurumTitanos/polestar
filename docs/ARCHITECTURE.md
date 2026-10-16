@@ -233,25 +233,37 @@ the game's error handler: wrapping it would shift the stack the game and
 
 `Polestar.L[key]`: a key is the English text, and a missing key returns
 itself, so a client without a translation reads English. A locale file
-(`Locales/<locale>.lua`, loaded right after `Core/Init.lua`) fills `L` for its
-client, so every file after it may read `L` at load; Init.lua, which loads
-before it, reads `L` only when it prints (the commands register in
-Core/Commands.lua).
+(`Locales/<locale>.lua`, one per language of `tools/lib/i18n/locales.js`,
+loaded by `Core/Core.xml` right after `Core/Init.lua` and returning at once on
+another client) fills `L` for its client, so every file after it may read `L`
+at load; Init.lua, which loads before it, reads `L` only when it prints (the
+commands register in Core/Commands.lua). docs/TRANSLATING.md describes the
+files and `node tools/polestar.js i18n`.
 
 A word with more than one meaning gets a key per meaning:
-`Polestar.LC(context, text)` is the translation of `"<context>: <text>"`,
-and `text` while there is none. The gear slots on the tooltip line are
-`LC("slot", …)` (`"slot: Back"`, `"slot: Chest"`), a dungeon boss that is
-a chest is `LC("boss", "Chest")` and the item qualities are
-`LC("quality", …)` (`"quality: Rare"` is not a rare mob), so they translate
-apart from the welcome's `L["Back"]` button and the rares.
+`Polestar.LC(context, text)` is the translation of `"<context>: <text>"`, and
+`text` while there is none: a dungeon boss that is a chest is
+`LC("boss", "Chest")`.
+
+A game term the client names itself is shown in the client's words and has no
+key: reputation standings (`Polestar.StandingName(n)`,
+`FACTION_STANDING_LABELn` in the character's gender through `GetText`), item
+qualities (`Polestar.QualityName(q)`, `ITEM_QUALITYn_DESC`), the factions
+(`Polestar.FactionName(f)`, `FACTION_ALLIANCE`, `FACTION_HORDE`), gear slots
+(`Gear.SlotName`, `HEADSLOT`…) and the Dungeon Journal (`ENCOUNTER_JOURNAL`).
+The test client (`tests/lua/wow_stub.lua`) holds their English values.
 
 Every player-facing string is written as a literal `L["..."]` or `LC(...)`
-where it appears, so a translator finds every key by searching for them: a
-table of labels holds `L["Home"]`, not `"Home"` translated later through
+where it appears, so `i18n keys` and a translator find every key: a table of
+labels holds `L["Home"]`, not `"Home"` translated later through
 `L[VIEW_LABEL[v]]`. `L[variable]` is left only for text that comes from data
-(a guide's category, a faction, race and class names, profession and spec
-names, the release stage).
+(a guide's category, race and class names, profession and spec names, the
+release stage), each listed in `DATA_KEYS` (`tools/lib/i18n/keys.js`).
+
+`Polestar.AI_LOCALES` names the languages whose translation is AI-made
+(`status: "ai"` in locales.js; `tests/i18n.test.js` keeps the two equal). On
+such a client with its file loaded, `Polestar.AITranslation()` is true and
+Options > About says so, with the Discord invite.
 
 ### Compat — the client's game data goes through here
 

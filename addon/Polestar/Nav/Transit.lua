@@ -316,24 +316,25 @@ local function countdown(seconds)
 end
 Transit.Countdown = countdown
 
+-- The captions, each a literal L["..."] so `i18n keys` finds it.
 local HERE = {
-	boat = "Boat docked, leaves in %s",
-	zeppelin = "Zeppelin docked, leaves in %s",
-	tram = "Tram boarding, leaves in %s",
-	lift = "Lift here, leaves in %s",
+	boat = L["Boat docked, leaves in %s"],
+	zeppelin = L["Zeppelin docked, leaves in %s"],
+	tram = L["Tram boarding, leaves in %s"],
+	lift = L["Lift here, leaves in %s"],
 }
 local NEXT = {
-	boat = "Next boat in %s",
-	zeppelin = "Next zeppelin in %s",
-	tram = "Next tram in %s",
-	lift = "Next lift in %s",
+	boat = L["Next boat in %s"],
+	zeppelin = L["Next zeppelin in %s"],
+	tram = L["Next tram in %s"],
+	lift = L["Next lift in %s"],
 }
 
 local ABOUT = {
-	boat = "Next boat in about %s",
-	zeppelin = "Next zeppelin in about %s",
-	tram = "Next tram in about %s",
-	lift = "Next lift in about %s",
+	boat = L["Next boat in about %s"],
+	zeppelin = L["Next zeppelin in about %s"],
+	tram = L["Next tram in about %s"],
+	lift = L["Next lift in about %s"],
 }
 
 -- Timed: when it docks, or while docked when it leaves. Untimed: the
@@ -346,12 +347,12 @@ function Transit.Caption(kind, id, now, side)
 	now = now or Transit.Now()
 	local arriveIn, departIn = Transit.NextArrival(kind, id, now, side)
 	if arriveIn then
-		if arriveIn <= 0 then return format(L[HERE[k]], countdown(departIn)) end
-		return format(L[NEXT[k]], countdown(arriveIn))
+		if arriveIn <= 0 then return format(HERE[k], countdown(departIn)) end
+		return format(NEXT[k], countdown(arriveIn))
 	end
 	local wait = Transit.NextDeparture(kind, id, now, side)
 	if not wait then return nil end
-	return format(L[ABOUT[k]], countdown(wait))
+	return format(ABOUT[k], countdown(wait))
 end
 
 -- Every lift: { id, name, c, wx, wy, top, bottom } (z of its landings), for
