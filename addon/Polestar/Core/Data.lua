@@ -91,9 +91,11 @@ function Data.Info(name)
 end
 
 -- Folders the release zip puts beside Polestar. The first two must be there;
--- the walking routes (Polestar_Nav), quest and item packs are optional (the
--- arrow falls back to straight lines; a source install may not build the
--- packs), but when present they must be the same version.
+-- the walking routes (Polestar_Nav), quest and item packs and the names pack
+-- of the client's language (Names.PackName(), none in English) are optional
+-- (the arrow falls back to straight lines, names to English; a source
+-- install may not build the packs), but when present they must be the same
+-- version.
 local COMPANIONS = { "Polestar_Guides", "Polestar_Codex", "Polestar_Nav", "Polestar_QuestDB", "Polestar_ItemDB" }
 local REQUIRED = { Polestar_Guides = true, Polestar_Codex = true }
 
@@ -118,17 +120,21 @@ local function versionOf(name)
 	return type(v) == "string" and v ~= "" and v or nil
 end
 
+local function check(name, mine, missing, stale)
+	if not installed(name) then
+		if REQUIRED[name] then missing[#missing + 1] = name end
+	else
+		local v = versionOf(name)
+		if v and mine and v ~= mine then stale[#stale + 1] = name .. " (" .. v .. ")" end
+	end
+end
+
 function Data.CheckInstall()
 	local missing, stale = {}, {}
 	local mine = ns.version
-	for _, name in ipairs(COMPANIONS) do
-		if not installed(name) then
-			if REQUIRED[name] then missing[#missing + 1] = name end
-		else
-			local v = versionOf(name)
-			if v and mine and v ~= mine then stale[#stale + 1] = name .. " (" .. v .. ")" end
-		end
-	end
+	for _, name in ipairs(COMPANIONS) do check(name, mine, missing, stale) end
+	local names = ns.Names and ns.Names.PackName()
+	if names then check(names, mine, missing, stale) end
 	return missing, stale
 end
 

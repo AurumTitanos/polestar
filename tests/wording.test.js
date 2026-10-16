@@ -66,11 +66,15 @@ function scan() {
 
 const where = (file, text, index) => `${path.relative(ROOT, file)}:${text.slice(0, index).split('\n').length}`;
 
+// The names addons hold the game's own names in each language, not Polestar's
+// words: a Portuguese NPC may share a first name with a product.
+const GAME_NAMES = /[/\\]addon[/\\]Polestar_Names_[A-Za-z]{4}[/\\]Names\.lua$/;
+
 test('no other guide product is named', () => {
 	const files = scan();
 	assert.ok(files.length > 20, `expected the addon, docs and template files, got ${files.length}`);
 	const hits = [];
-	for (const { file, text } of files) {
+	for (const { file, text } of files.filter((f) => !GAME_NAMES.test(f.file))) {
 		for (const { token, index } of namedTokens(text, NAME_HASHES)) hits.push(`${where(file, text, index)}: ${token}`);
 	}
 	assert.deepEqual(hits, []);

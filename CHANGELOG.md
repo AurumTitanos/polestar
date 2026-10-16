@@ -11,6 +11,17 @@
   ("Main Hand", "Shoulders" and "Dungeon Journal" in English).
 - Options > About says so on a client whose translation was made with AI, with
   the Discord invite.
+- On a client in another language, the guide window names quests, NPCs,
+  objects and items in that language, and the game's own quest title comes
+  before the guide's English one: the client's names where it has them, else
+  Polestar's names for that language (from DingDB, by Yendi, thanks Yendi,
+  and pfQuest). A name neither has stays English. The target button targets
+  the translated name, quest objectives and object tooltips are matched by
+  it, the quest database's names and tooltips use it, and Lookup finds a
+  quest, NPC, item or zone by its translated name as well as by its English
+  one. Each language's names are their own small addon,
+  `Polestar_Names_<locale>`, in the release zip; the game loads only the one
+  of its language, and an English client none.
 
 ### For contributors
 
@@ -28,6 +39,16 @@
   them.
 - Tests fake an Italian client (`fakeLocale('itIT', ...)`): Forever has none,
   so no shipped language file replaces the fake strings.
+- `node tools/polestar.js i18n names` builds the names addons
+  `addon/Polestar_Names_<locale>` (committed) from DingDB, cloned into
+  `data/sources/ding` and pinned to Ding v1.8.1's commit and each file's
+  sha256 (a file that differs stops the build), then pfQuest's locale files
+  for the names DingDB lacks, keeping only the quests, NPCs, objects and items
+  the guides, the quest database and the Codex name. `--no-questie` leaves
+  DingDB out. Each folder's `LICENSE-DATA.txt` records the sources, versions,
+  licences and counts, with Ding's `CREDITS.md` beside it. `Polestar.Names`
+  (`Core/Names.lua`) reads them; docs/ARCHITECTURE.md, "Names", and
+  docs/TRANSLATING.md, "Game names".
 - `tools/discord-bot`: `/close` and `/reopen` for server administrators in
   a #bugs thread. `/close` takes a reason (Fixed, Won't fix, No action
   needed, Can't reproduce, Not resolved, Duplicate) and an optional note,

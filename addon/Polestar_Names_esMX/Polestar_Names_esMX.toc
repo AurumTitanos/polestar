@@ -1,0 +1,11 @@
+## Interface: 16001
+## Title: Polestar Names (esMX)
+## Notes: Quest, NPC, object and item names in Spanish (Latin America) for Polestar's guides. Loaded on demand on a Spanish (Latin America) client.
+## Author: Polestar
+## X-License: GPL-3.0-only
+## Version: 0.2.4
+## Category: Quests
+## LoadOnDemand: 1
+## Dependencies: Polestar
+
+Names.lua

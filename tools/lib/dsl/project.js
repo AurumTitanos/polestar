@@ -16,6 +16,8 @@ const { heightCounts } = require('./heights');
 const { HEIGHTS_SOURCE } = require('../travel/cmangos');
 
 const { ROOT, DATA } = require('../paths');
+const { LOCALE_CODES } = require('../i18n/locales');
+const { ADDON_PREFIX: NAMES_PREFIX } = require('../i18n/names');
 // Our own pack: guides/pack.json and the guides beside it.
 const OFFICIAL_DIR = path.join(ROOT, 'guides');
 
@@ -246,9 +248,14 @@ function writePackDir(outDir, files) {
 // Shortest Path Forever's walking router, `nav vendor`), plus the generated
 // data addons when they have been built (each skipped while its folder or TOC
 // is missing; `pack` refuses a release without the Codex, which Lookup,
-// Dungeons and Rares read: tools/lib/codex/pack.js releaseRefusal).
+// Dungeons and Rares read: tools/lib/codex/pack.js releaseRefusal), the names
+// addons of each language last (`i18n names`, committed; the client loads only
+// its own).
 const RELEASE_ADDONS = ['Polestar', 'Polestar_Guides', 'Polestar_Nav'];
-const RELEASE_DATA_ADDONS = ['Polestar_QuestDB', 'Polestar_ItemDB', 'Polestar_Codex'];
+const RELEASE_DATA_ADDONS = [
+	'Polestar_QuestDB', 'Polestar_ItemDB', 'Polestar_Codex',
+	...LOCALE_CODES.map((l) => `${NAMES_PREFIX}${l}`),
+];
 
 // -> { names, skipped }: the release addons present under addonsDir, in load order.
 function releaseAddons(addonsDir) {

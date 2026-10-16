@@ -123,6 +123,31 @@ text looked up through a variable (`L[category]`) must be listed in
 translated client fake a language Polestar does not ship:
 `fakeLocale('itIT', { ... })` (`tests/helpers/locale.js`).
 
+## Game names
+
+Quest, NPC, object and item names are not translated by hand: they are the
+game's own. A client in another language reads them from the client where it
+has them (quest titles, item names) and from Polestar's names addon of its
+language, `Polestar_Names_<locale>` (DingDB's names, by Yendi, then pfQuest's
+for the ones DingDB lacks), loaded only on that client. A name neither has
+stays English. docs/ARCHITECTURE.md, "Names", has the details.
+
+- `node tools/polestar.js i18n names [<locale>...]` rebuilds the addons from
+  DingDB (cloned into `data/sources/ding` at the commit pinned in
+  `tools/lib/i18n/names.js`, every file checked against its sha256) and
+  pfQuest's `db/<locale>` (the clone `data build` uses), keeping only the ids
+  the compiled guides, the quest database (`questdb build`, or `--questdb
+  <dir>`) and the Codex's data (`codex build`, or `--codex <dir>`) name.
+  `--no-questie` leaves DingDB out. Commit the folders it writes.
+- A wrong name is fixed at its source: in DingDB (tell Yendi, then move the
+  pin to his new commit and rebuild) or, for one only pfQuest has, in pfQuest.
+- To move the pin, read what changed in Ding's `Ding/DB/`, then set the
+  commit, version and sha256s of `DING` in `tools/lib/i18n/names.js`; a file
+  that differs from its pin stops the build.
+- A new language needs a DingDB file for it, a `DING` pin and the folder's
+  entry in the release list (`tools/lib/dsl/project.js` takes every locale of
+  `locales.js`).
+
 ## Adding a language
 
 Add it to `LOCALES` in `tools/lib/i18n/locales.js` with its status and
