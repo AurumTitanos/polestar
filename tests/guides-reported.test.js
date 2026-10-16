@@ -354,6 +354,23 @@ test(`${DUN_MOROGH}: thmastin's report: Beer Basted Boar Ribs is offered without
 	assert.ok(status.every((s) => !s.endsWith(' na')), `a Dwarf without Cooking sees 384: ${status.join(', ')}`);
 });
 
+// --- The Barrens (Hotline, a Scourge Mage): Walton offered neither Unwelcome
+// Guests nor Trouble in the Valley, and Vrang no Hermit Tanner. They are one
+// chain: Vrang's Bruised Pride and Lion Hides and Vrang's Game, then The
+// Hermit Tanner up to Walton, then Trouble in the Valley, then Unwelcome Guests.
+
+const BARRENS = 'forever/horde/04-the-barrens.guide';
+
+test('Hotline\'s report: Walton and Vrang\'s quests come in the order the game offers them', { skip }, () => {
+	const list = goals(BARRENS);
+	const order = [
+		['accept', 95494], ['accept', 95507], ['turnin', 95494], ['turnin', 95507],
+		['accept', 95495], ['turnin', 95495], ['accept', 95621], ['turnin', 95621],
+		['accept', 95508], ['complete', 95508], ['turnin', 95508],
+	].map(([t, q]) => at(list, `${t} ${q}`, is(t, q)));
+	assert.deepEqual(order, [...order].sort((a, b) => a - b), 'each goal comes after the one before it in the chain');
+});
+
 // Every leveling guide with a profession quest still plays to the end for a
 // character who already has the profession (tests/guides.test.js plays them
 // all without one).

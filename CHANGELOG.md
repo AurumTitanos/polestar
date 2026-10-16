@@ -60,6 +60,11 @@
   and an item a boss drops only rarely by Wowhead's count no longer ties a
   quest to it: The Ectoplasmic Distiller left Naxxramas and Zul'Gurub, The
   Dread Citadel left Blackwing Lair (thanks kp)
+- The Barrens guide takes Walton and Vrang's quests in the order the game
+  offers them: Vrang's two first, The Hermit Tanner up to Walton, then
+  Trouble in the Valley and Unwelcome Guests, which now waits until Terry
+  Longdrink is dead. Walton offered neither at the first visit (thanks
+  Hotline).
 - A dungeon quest several NPCs give goes to the nearest one of your side:
   Tabetha's Task for Zul'Farrak sent Alliance mages to Anastasia Hartwell in
   the Undercity; now the pick-up guide, the quest's card and Lookup send
