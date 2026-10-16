@@ -64,12 +64,12 @@ do
 	end
 end`;
 
-function run({ locale = 'frFR', before = '', guide = false, script }) {
+function run({ locale = 'frFR', pack = PACK, before = '', guide = false, script }) {
 	return runAddon({
 		stubs: ['stub_world.lua'],
 		before: `${locale ? `function GetLocale() return ${JSON.stringify(locale)} end` : ''}
 ${NO_INTERFACE_FILE}
-${PACK.stubLua}
+${pack.stubLua}
 ${CLIENT}
 ${before}`,
 		addons: ['Polestar'],
@@ -317,4 +317,24 @@ test('an English client\'s Lookup is unchanged and loads no names pack', () => {
 	assert.deepEqual(elwynn, ['zone:1429:Elwynn Forest']);
 	assert.deepEqual(counts, { npc: 1, quest: 1 });
 	assert.equal(loads, 0);
+});
+
+test('a Russian client\'s Lookup finds a capitalised name from a lower-case query (Ё as Е); a Chinese name matches as typed; Œ folds to oe', () => {
+	const ru = namesPack('ruRU', { npc: { 448: 'Хоггер' }, item: { 750: 'Жёсткое волчье мясо' } });
+	const [hogger, meat, fold] = run({ locale: 'ruRU', pack: ru, before: CODEX.stubLua, script: `
+local function q(text)
+	local out = {}
+	for _, r in ipairs(Polestar.Search.Query(text, { kinds = { npc = true, item = true } })) do out[#out + 1] = r.kind .. ":" .. tostring(r.id) .. ":" .. r.title end
+	return table.concat(out, "|")
+end
+emit(q("хоггер")); emit(q("жесткое")); emit(Polestar.Search.Fold("Œuvre cœur"))` });
+	assert.equal(hogger, 'npc:448:Хоггер');
+	assert.equal(meat, 'item:750:Жёсткое волчье мясо');
+	assert.equal(fold, ' oeuvre coeur');
+	const zh = namesPack('zhCN', { npc: { 448: '霍格' } });
+	const [cjk] = run({ locale: 'zhCN', pack: zh, before: CODEX.stubLua, script: `
+local out = {}
+for _, r in ipairs(Polestar.Search.Query("霍格", { kinds = { npc = true } })) do out[#out + 1] = r.kind .. ":" .. tostring(r.id) end
+emit(table.concat(out, "|"))` });
+	assert.equal(cjk, 'npc:448');
 });

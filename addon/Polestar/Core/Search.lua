@@ -79,7 +79,7 @@ local DEFAULT_PER_KIND = 20
 -- Folding
 ---------------------------------------------------------------------------
 
--- Two-byte UTF-8 Latin-1 letters (lead byte 0xC3) -> ASCII.
+-- Two-byte UTF-8 letters -> folded: Latin-1 (lead byte 0xC3) to ASCII, Œ œ, Cyrillic case.
 local FOLD = {}
 do
 	local runs = {
@@ -95,6 +95,13 @@ do
 	for _, r in ipairs(runs) do
 		for b = r[1], r[2] do FOLD["\195" .. string.char(b)] = r[3] end
 	end
+	-- Œ œ (lead byte 0xC5) -> "oe".
+	FOLD["\197\146"], FOLD["\197\147"] = "oe", "oe"
+	-- Cyrillic capitals to lower case (string.lower leaves them), Ё and ё as е:
+	-- a Russian name matches whatever case the player types.
+	for b = 0x90, 0x9F do FOLD["\208" .. string.char(b)] = "\208" .. string.char(b + 0x20) end
+	for b = 0xA0, 0xAF do FOLD["\208" .. string.char(b)] = "\209" .. string.char(b - 0x20) end
+	FOLD["\208\129"], FOLD["\209\145"] = "\208\181", "\208\181"
 end
 
 -- " folded name" (leading space, single spaces), so a word prefix is a plain
@@ -102,7 +109,7 @@ end
 local function fold(s)
 	s = lower(s)
 	if find(s, "[\128-\255]") then
-		s = gsub(s, "\195[\128-\191]", FOLD)
+		s = gsub(s, "[\195\197\208\209][\128-\191]", FOLD)
 		s = gsub(s, "\226\128\153", "") -- right single quotation mark
 	end
 	s = gsub(s, "'", "")
