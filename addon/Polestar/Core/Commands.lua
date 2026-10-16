@@ -18,6 +18,7 @@ BINDING_NAME_POLESTAR_PREV = L["Previous step"]
 _G["BINDING_NAME_CLICK PolestarQuestItemButton:LeftButton"] = L["Use quest item"]
 _G["BINDING_NAME_CLICK PolestarTargetButton:LeftButton"] = L["Target quest mob"]
 _G["BINDING_NAME_CLICK PolestarHearthButton:LeftButton"] = L["Use Hearthstone"]
+_G["BINDING_NAME_CLICK PolestarStepButton:LeftButton"] = L["Step action: quest item, mob or NPC"]
 
 -- Entry points for Bindings.xml.
 ns.Bindings = {

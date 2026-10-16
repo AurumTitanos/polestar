@@ -261,6 +261,13 @@
   Boars on the road to Kharanos count toward Ragnar's ribs: the valley is
   never walked back to, about two minutes sooner to level 10 (thanks
   thmastin).
+- One key for the step (Options, Keybindings, AddOns, Polestar, "Step
+  action: quest item, mob or NPC") does the step's next action, in guide
+  order: targets the NPC to accept from, turn in to or talk to, uses a use
+  goal's quest item or the Hearthstone, targets the step's mobs (each press
+  the next name), else uses the quest's item. It needs no button on screen
+  and, like the buttons, keeps its action in combat until combat ends
+  (thanks Turesh).
 - Class trainers can teach you every new spell you can afford as you open
   them: Options, Quality of Life, Vendors, Learn new spells (off by default;
   Shift skips). Riding, weapon, pet and profession trainers are left alone

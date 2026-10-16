@@ -13,6 +13,10 @@
 --   Target: /targetexact for the current step's kill targets and the mobs
 --     that drop its collect items (Polestar.QuestDB when loaded); every click
 --     moves the next name to the front.
+--   Step key: no button on screen, only a binding: the first open goal it can
+--     act on, in guide order (a use goal's item, a hearth goal's Hearthstone,
+--     a kill or collect's mobs, an NPC goal's NPC by name), else the quest
+--     item. Independent of the three buttons' settings.
 --
 -- The buttons hang off one holder: hearth above the item, target below. A
 -- left-drag on any of them moves the set (out of combat); the position is
@@ -466,10 +470,66 @@ local function targetTooltip(b, tip)
 end
 
 ---------------------------------------------------------------------------
+-- Step key
+---------------------------------------------------------------------------
+
+-- Goals done with an NPC, whom the step key targets by name.
+local NPC_VERBS = { accept = true, turnin = true, talk = true, train = true, vendor = true, buy = true, sethome = true, getfp = true, learn = true }
+
+-- What the step key does now. view, raw: QoL.CurrentStep()'s, when the
+-- caller has them. -> "item", itemID | "target", names (reused list) |
+-- "npc", name | nil
+function Buttons.StepAction(view, raw)
+	if not view then view, raw = QoL.CurrentStep() end
+	if not view then return nil end
+	local goals = view.goals or {}
+	for g = 1, #goals do
+		local gv = goals[g]
+		local rg = raw and raw[g] or gv
+		if QoL.Open(gv) then
+			local t = gv.t
+			if t == "use" then
+				local item = gv.item or rg.item
+				if item and Client.ItemCount(item) > 0 then return "item", item end
+			elseif t == "hearth" then
+				if Client.ItemCount(Client.HEARTHSTONE) > 0 then return "item", Client.HEARTHSTONE end
+			elseif t == "kill" or t == "collect" then
+				-- This goal's own mobs decide; the key then cycles all the step's.
+				if #Buttons.TargetNames({ goals = { gv } }, { rg }) > 0 then return "target", Buttons.TargetNames(view, raw) end
+			elseif NPC_VERBS[t] then
+				local name = gv.npcName or rg.npcName
+				if type(name) == "string" and name ~= "" then return "npc", name end
+			end
+		end
+	end
+	local item = Buttons.ChooseQuestItem(view, raw)
+	if item then return "item", item end
+	return nil
+end
+
+local step = { kind = nil, value = nil, list = {}, sig = nil, cycle = 1 }
+
+local function applyStep(b)
+	QoL.Secure("step", function()
+		local text, item
+		if step.kind == "target" then
+			text = Buttons.TargetMacro(step.list, step.cycle)
+		elseif step.kind == "npc" then
+			text = "/targetexact " .. step.value
+		elseif step.kind == "item" then
+			item = "item:" .. step.value
+		end
+		b:SetAttribute("type", item and "item" or text and "macro" or nil)
+		b:SetAttribute("item", item)
+		b:SetAttribute("macrotext", text)
+	end)
+end
+
+---------------------------------------------------------------------------
 -- Wiring
 ---------------------------------------------------------------------------
 
-local itemButton, hearthButton, targetButton
+local itemButton, hearthButton, targetButton, stepButton
 
 local function refresh()
 	if not itemButton then return end
@@ -487,6 +547,21 @@ local function refresh()
 		target.list = copy
 		target.cycle = 1
 		applyTarget(targetButton)
+	end
+
+	local kind, value = nil, nil
+	if view then kind, value = Buttons.StepAction(view, raw) end
+	local stepSig = kind == "target" and ("target\n" .. concat(value, "\n")) or (tostring(kind) .. "\n" .. tostring(value))
+	if stepSig ~= step.sig then
+		step.sig, step.kind, step.cycle = stepSig, kind, 1
+		local copy = {}
+		if kind == "target" then
+			for i = 1, #value do copy[i] = value[i] end
+		else
+			step.value = value
+		end
+		step.list = copy
+		applyStep(stepButton)
 	end
 end
 local refreshSoon = QoL.Coalesce(refresh)
@@ -521,7 +596,19 @@ local function create()
 			applyTarget(targetButton)
 		end
 	end)
-	Buttons.item, Buttons.hearth, Buttons.target = itemButton, hearthButton, targetButton
+	-- The step key: a binding only, never shown.
+	stepButton = CreateFrame("Button", "PolestarStepButton", UIParent, "SecureActionButtonTemplate")
+	stepButton:RegisterForClicks("AnyUp", "AnyDown")
+	QoL.Secure("init:PolestarStepButton", function() stepButton:Hide() end)
+	stepButton:HookScript("PostClick", function(self, _, down)
+		if down then return end
+		local n = #step.list
+		if step.kind == "target" and n > 1 then
+			step.cycle = step.cycle % n + 1
+			applyStep(self)
+		end
+	end)
+	Buttons.item, Buttons.hearth, Buttons.target, Buttons.step = itemButton, hearthButton, targetButton, stepButton
 	set = { hearthButton, itemButton, targetButton }
 	place()
 end
