@@ -10,8 +10,7 @@
   on the zone's map when a subzone or cave map lacks it. Only when the game
   gives no position does it fall back to the nearest known spawn, and the
   alert now says so ("known spawn 120 yd"); a spawn whose distance cannot be
-  measured is no longer picked (thanks Miguel Antunes).
-
+  measured is no longer picked (thanks petllama and Miguel Antunes).
 - A class guide opened before your level says so: the guide window shows
   "Available from level 20" with who starts it (or the quest to finish
   first), instead of sending you to a trainer who has nothing for you, then
@@ -33,7 +32,8 @@
   follow-up or one quest of a choice, chat names what you would lose
   ("Taking Sven's Revenge closes Deliveries to Sven for good.") and quest
   automation leaves that accept to you. Quests your race or class never gets
-  and other versions of the same quest are left out (thanks Roxton).
+  and other versions of the same quest are left out, and so are guides for
+  the other faction (thanks CDVolvik and Roxton).
 - The Undead Tirisfal Glades guide sends only Paladins to Bandarion Keep for
   As Above, So Below and The One That Got Away: Hilda the Breaker and Ephram
   Barbaro offer them to Paladins only. Other classes still collect the
@@ -43,7 +43,7 @@
   five Deathguards), A Light in the Darkness and Seeking Refuge in Tirisfal
   Glades, Lost in the Shadows in Durotar and Escaping Ban'ethil in
   Teldrassil. The guide used to send you to turn in Discipline with no
-  Deathguard motivated.
+  Deathguard motivated (thanks CDVolvik).
 - The Dungeons journal lists the dungeon quests it missed and drops ones that
   were not: each quest's chain now holds every prerequisite and breadcrumb
   (Nathanos Blightcaller's errands before Ramstein, Speak with Shoni before
@@ -66,7 +66,7 @@
   and, for a quest with several objectives, the open ones under it in the
   game's words ("Plainstrider Meat: 3/7"), as kill and collect goals do. The
   Hunt Begins in Mulgore read only "Complete The Hunt Begins" with no x of y
-  (thanks c0nsy).
+  (thanks CDVolvik and c0nsy).
 - A dungeon's pick-up guide no longer sends you to the Darkmoon Faire: the
   Deadmines guide started with Copper Modulator, Rinling's Faire ticket
   turn-in, because the modulator drops there. Darkmoon Faire, holiday and
@@ -78,7 +78,7 @@
   offers them: Vrang's two first, The Hermit Tanner up to Walton, then
   Trouble in the Valley and Unwelcome Guests, which now waits until Terry
   Longdrink is dead. Walton offered neither at the first visit (thanks
-  Hotline).
+  CDVolvik and Hotline).
 - A dungeon quest several NPCs give goes to the nearest one of your side:
   Tabetha's Task for Zul'Farrak sent Alliance mages to Anastasia Hartwell in
   the Undercity; now the pick-up guide, the quest's card and Lookup send
@@ -94,7 +94,8 @@
   you took, who in the party lacks it, even without Polestar. Quest IDs and
   counts only, through hidden party messages when a count changes, so it
   works across guides and client languages; nothing goes to chat. Two
-  switches in Questing > Quests > Party, both off until you turn them on.
+  switches in Questing > Quests > Party, both off until you turn them on
+  (thanks CDVolvik).
 - Quests Forever renamed carry their Forever names in the guides: Chastise
   (once A Lack of Fear), Dark Sacrifice (once Devouring Plague), Look to the
   Stars, Onu is Meditating and the others Wowhead Forever lists as renamed.
@@ -170,7 +171,7 @@
   with the quest unfinished: Camping 101: Cooking in Mulgore and Dun Morogh
   waits until you have spoken with the cook, and the Alliance Un'Goro guide
   collects the compass, map and key for It's a Secret to Everybody, as the
-  Horde one does.
+  Horde one does (thanks CDVolvik).
 - The arrow leads to a cave's mouth before anyone inside it: the Den (Kzan
   Thornslash, at the back of the cave behind Gornek), the Burning Blade
   Coven and Skull Rock in Durotar, the Coldridge troll cave in Dun Morogh,
@@ -216,7 +217,8 @@
   not once per object of that name: the Sapphire of Aku'Mai in Blackfathom
   Deeps listed its quest three times (thanks Mightie).
 - Dun Morogh: Grik'nir the Cold's step says he is inside the troll cave, not
-  on the hill above it; follow the tunnel from the mouth (thanks Turesh).
+  on the hill above it; follow the tunnel from the mouth (thanks CDVolvik
+  and Turesh).
 - Elwynn Forest: Goldtooth is inside the Fargodeep Mine, at the back of the
   mine floor; the arrow now leads to the mine's mouth first instead of onto
   the hill above it (thanks Verium).
@@ -232,7 +234,8 @@
 - The arrow takes the mouse on the arrow itself, not on the distance and
   label under it, so a large arrow no longer catches drags meant for the
   world, and the hover wash sits behind the arrow only. When there is no
-  arrow to show (another continent, no position), the text takes the mouse.
+  arrow to show (another continent, no position), the text takes the mouse
+  (thanks CDVolvik).
 - Teldrassil, Dun Morogh and Mulgore: the starting glens no longer send you
   off for one delivery quest and back. Dolanaar Delivery and Supplies to
   Tannok are taken on the way out of Shadowglen and Coldridge Valley, by the
@@ -282,12 +285,12 @@
   never walked back to, about two minutes sooner to level 10 (thanks
   thmastin).
 - One key for the step (Options, Keybindings, AddOns, Polestar, "Step
-  action: quest item, mob or NPC") does the step's next action, in guide
-  order: targets the NPC to accept from, turn in to or talk to, uses a use
-  goal's quest item or the Hearthstone, targets the step's mobs (each press
-  the next name), else uses the quest's item. It needs no button on screen
-  and, like the buttons, keeps its action in combat until combat ends
-  (thanks Turesh).
+  action: NPC, quest item, mob or Hearthstone") does the step's next action,
+  in guide order, the route's own goals before optional ones: targets the
+  NPC to accept from, turn in to or talk to, uses a use goal's quest item or
+  the Hearthstone, targets the step's mobs (each press the next name), else
+  uses the quest's item. It needs no button on screen and, like the buttons,
+  keeps its action in combat until combat ends (thanks CDVolvik and Turesh).
 - Class trainers can teach you every new spell you can afford as you open
   them: Options, Quality of Life, Vendors, Learn new spells (off by default;
   Shift skips). Riding, weapon, pet and profession trainers are left alone
@@ -306,7 +309,7 @@
   Turning it on or off leaves the window where it stands (thanks thmastin).
 - Expand step tips (Options, Guide, Window, What it shows): each step starts
   with the author's tip in full instead of one line. A click still folds it
-  for that step.
+  for that step (thanks CDVolvik).
 - `/polestar way 40 60` where the game gives no map position (an instance,
   another continent) says "No position here" instead of how to type the
   command (thanks meellm).
@@ -345,7 +348,33 @@
   on a camp's mark on the world map, moves the arrow there (thanks Pynte).
 - Tirisfal Glades: Hides for the Forsaken counts the Vile Fin Murloc Skins
   (3) on the shore step and the Darkhound Hides (6) with the darkhounds; the
-  two had swapped objectives, so the murloc step showed the hide count.
+  two had swapped objectives, so the murloc step showed the hide count
+  (thanks CDVolvik).
+- Zephras Isle, Hunters: Taming the Beast tames the Ornery Galestrider with
+  Quel'ana's second rod and the Vuldren Alpha with her third, as the quests
+  ask; the guide had the two beasts the other way round.
+- Quest objectives each read their own line of the quest log: Kobold Vermin
+  no longer counts the Kobold Vermin Runt line, two objectives of the same
+  name keep their own counts, and a line that gets its name late (" slain:
+  0/8") is matched again. After a turn-in the quest counts as done until the
+  log catches up (up to 10 seconds), so its follow-up opens at once instead
+  of the quest flashing as available again (thanks meellm).
+- `/polestar guide <id>` takes the id in any case: `/polestar guide
+  Forever/Horde/02-The-Barrens` opens the Barrens guide (thanks meellm).
+- Talent plans for Paladins (Questing, Talents; `/pole talents`): Holy,
+  Protection and Retribution leveling plans as an ordered list of picks with
+  short notes, and marks on the talent frame: a ring on the next pick when a
+  point is waiting, pick numbers, a flag on points spent off the plan, and a
+  line in each talent's tooltip. Unspent points come from the game, so
+  Talented (Adventure) and other early points count. It never spends a point
+  for you (thanks jnickles85-bit).
+- Polestar in Spanish (Latin America): on an esMX client the whole interface
+  is in Spanish, in the client's own terms (calabozo, banda, piedra de hogar,
+  mercader, instructor) (thanks CDVolvik).
+- Polestar in German: on a deDE client the interface is in German, in the
+  client's own words (Verbreitet, Selten, Rar for the item qualities,
+  Alchemie, NSC, Dungeonkompendium); the report texts and "Complete" stay in
+  English for now (thanks thecodingcortex).
 
 ### For guide authors
 
@@ -393,12 +422,25 @@
   whatever pfQuest's Classic data says, so Beer Basted Boar Ribs, Liquid
   Stone and five Stranglethorn Fishing Extravaganza quests need no
   profession (thanks thmastin).
+- `record draft` writes a drafted flight as `fly "Sentinel Hill"`, the town
+  the game reports on landing, not the flight point's full name ("Sentinel
+  Hill, Westfall"), so the goal ticks off by itself and lint accepts it; the
+  step's text and `getfp` keep the full name (thanks meellm).
 - `quest Q.O` on a `collect`, `kill` or `interact` warns when objective O is
   another item, npc or object, and names the index that is this one's (or
-  write `quest Q` and the index comes from the target).
+  write `quest Q` and the index comes from the target). Legging It and Call
+  of Fire list their objectives in Wowhead Forever's order in the reference
+  data now, so their steps raise no false alarm (thanks CDVolvik).
 
 ### For contributors
 
+- A Feature request issue form beside Bug report and Wrong step, tagged
+  `enhancement`, with a field for the Discord thread an idea came from
+  (thanks CDVolvik).
+- `talents build` writes `addon/Polestar/Talents/Builds.lua` from the plans
+  in `talents/forever/`, and `talents check` replays every pick (rows,
+  prerequisites, ranks) against the Forever trait tables from wago.tools
+  (thanks jnickles85-bit).
 - `sim compare` and `sim bench` score the guides without their `optional`
   goals (an optional quest whole); `--with-optional` scores them as done, the
   old way. README, docs/SIMULATION.md and the charts are republished on world
