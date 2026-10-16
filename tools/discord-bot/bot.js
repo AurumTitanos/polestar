@@ -1,0 +1,61 @@
+#!/usr/bin/env node
+'use strict';
+// The Polestar bug bot: watches the Discord #bugs forum and files each new
+// post as a GitHub issue (tools/discord-bot/README.md). Runs until stopped;
+// settings come from the environment (.env.example).
+//
+//   node tools/discord-bot/bot.js
+
+const { botConfig } = require('./lib/config');
+const { createDiscord } = require('./lib/discord');
+const { createGateway } = require('./lib/gateway');
+const { createGitHub, createMedia } = require('./lib/github');
+const { createSync } = require('./lib/sync');
+
+const stamp = () => new Date().toISOString();
+const log = {
+	info: (...a) => console.log(stamp(), ...a),
+	warn: (...a) => console.warn(stamp(), 'warn:', ...a),
+	error: (...a) => console.error(stamp(), 'error:', ...a),
+};
+
+async function main() {
+	const config = botConfig();
+	const discord = createDiscord({ token: config.discordToken });
+	const github = createGitHub({ token: config.githubToken, repo: config.repo });
+	const mediaGitHub = config.mediaRepo === config.repo && config.mediaToken === config.githubToken
+		? github
+		: createGitHub({ token: config.mediaToken, repo: config.mediaRepo });
+	const media = createMedia({ github: mediaGitHub, branch: config.mediaBranch });
+	const sync = createSync({ discord, github, media, config, log });
+
+	const forum = await discord.getChannel(config.forumId);
+	if (forum.type !== 15) throw new Error(`DISCORD_FORUM_ID ${config.forumId} is not a forum channel (#${forum.name})`);
+	log.info(`watching #${forum.name}, filing to ${config.repo}, screenshots to ${config.mediaRepo}@${config.mediaBranch}`);
+	await sync.loadIndex();
+
+	const gateway = createGateway({
+		token: config.discordToken,
+		url: await discord.gatewayUrl(),
+		onDispatch: sync.dispatch,
+		onFatal(err) {
+			log.error(err.message);
+			process.exit(1);
+		},
+		log,
+	});
+	gateway.start();
+
+	for (const signal of ['SIGINT', 'SIGTERM']) {
+		process.on(signal, () => {
+			log.info(`${signal}: stopping`);
+			gateway.stop();
+			setTimeout(() => process.exit(0), 500);
+		});
+	}
+}
+
+main().catch((err) => {
+	log.error(err.message);
+	process.exit(1);
+});
