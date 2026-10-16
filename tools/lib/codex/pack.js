@@ -124,7 +124,8 @@ function oneLine(s) {
 }
 
 // Core/Search.lua's fold (lines "Folding"), byte for byte: lower case (ASCII),
-// Latin-1 letters (UTF-8 lead byte 0xC3) to ASCII, ’ and ' dropped, other
+// Latin-1 letters (UTF-8 lead byte 0xC3) to ASCII, Œ œ to oe, Cyrillic
+// capitals to lower case and Ё ё to е, ’ and ' dropped, other
 // punctuation and control characters to spaces, runs of spaces collapsed,
 // trimmed. Search.Fold returns it with a leading space; this does not.
 const FOLD = {};
@@ -140,13 +141,17 @@ for (const [lo, hi, to] of [
 ]) {
 	for (let b = lo; b <= hi; b++) FOLD[String.fromCharCode(0xc3, b)] = to;
 }
+FOLD['\xc5\x92'] = FOLD['\xc5\x93'] = 'oe';
+for (let b = 0x90; b <= 0x9f; b++) FOLD[String.fromCharCode(0xd0, b)] = String.fromCharCode(0xd0, b + 0x20);
+for (let b = 0xa0; b <= 0xaf; b++) FOLD[String.fromCharCode(0xd0, b)] = String.fromCharCode(0xd1, b - 0x20);
+FOLD['\xd0\x81'] = FOLD['\xd1\x91'] = '\xd0\xb5';
 
 function foldName(name) {
 	// One JS char per byte, as Lua sees the string.
 	let s = Buffer.from(String(name == null ? '' : name), 'utf8').toString('latin1');
 	s = s.replace(/[A-Z]/g, (c) => c.toLowerCase());
 	if (/[\x80-\xff]/.test(s)) {
-		s = s.replace(/\xc3[\x80-\xbf]/g, (m) => FOLD[m] ?? m);
+		s = s.replace(/[\xc3\xc5\xd0\xd1][\x80-\xbf]/g, (m) => FOLD[m] ?? m);
 		s = s.split('\xe2\x80\x99').join('');
 	}
 	s = s.replace(/'/g, '');

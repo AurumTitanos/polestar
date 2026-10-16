@@ -1,0 +1,11 @@
+## Interface: 16001
+## Title: Polestar Names (frFR)
+## Notes: Quest, NPC, object and item names in French for Polestar's guides. Loaded on demand on a French client.
+## Author: Polestar
+## X-License: GPL-3.0-only
+## Version: 0.2.4
+## Category: Quests
+## LoadOnDemand: 1
+## Dependencies: Polestar
+
+Names.lua

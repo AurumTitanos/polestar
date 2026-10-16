@@ -27,6 +27,7 @@ one into the other. The addons:
 | `Polestar_Guides` (`addon/Polestar_Guides/`) | Polestar's own guide pack (pack id `guides`) | `compile`, from `guides/` | yes (generated) | yes |
 | community guide packs | Addons by other authors (`X-Polestar-Pack` in their TOC; `docs/PACKS.md`, `docs/PACK_FORMAT.md`) | the same compiler, from their own repositories | in their own repositories | by their authors |
 | `Polestar_ItemDB` (`addon/Polestar_ItemDB/`) | Item stats and Forever reward choices for the gear advice; loaded on demand | `itemdb build` (`Items.lua`), then `gear build` (`Forever.lua`) | yes (generated) | yes |
+| `Polestar_Names_<locale>` (`addon/Polestar_Names_deDE/` … `zhTW/`) | Quest, NPC, object and item names in one client language, for `Polestar.Names`; loaded on demand, only the client's own, never in English | `i18n names`, from DingDB (pinned) and pfQuest | yes (generated) | yes |
 | `Polestar_QuestDB` (`addon/Polestar_QuestDB/`) | The quest database behind quest markers and tooltips; loaded on demand | `questdb build` | no (local, gitignored) | yes, when built |
 | `Polestar_Codex` (`addon/Polestar_Codex/`) | Lookup's Codex, and the Dungeons and Rares data; loaded on demand | `codex build`, from release-safe inputs (`--local-extras` builds a local-only one) | no (generated, gitignored) | yes, always: `pack` fails without it |
 | `Polestar_Nav` (`addon/Polestar_Nav/`) | Shortest Path Forever's walking router and his map of Zephras Isle (Cillian Berragan, GPL-3.0-or-later) with Polestar's walking maps of Eastern Kingdoms and Kalimdor in his format and the walk's chokepoints, for the arrow's walking routes; loaded on demand at login, never while the target is handed to an installed Shortest Path Forever (Nav, "In-game walking routes (Polestar_Nav)", "Hand-off to Shortest Path Forever") | `nav vendor <checkout>` (his files, `UPSTREAM.json`), `nav pack` (ours, `PACK.json`, from the navigation grid) | yes | yes, always |
@@ -123,7 +124,8 @@ Messages:
 | `PACKS_CHANGED` | packId | `Guides.SetPackShown`: a pack's guides were hidden or shown |
 | `GUIDE_CHANGED` | guideId or nil | Engine |
 | `STEP_CHANGED` | stepIndex | Engine |
-| `STEP_UPDATED` | stepIndex | Engine (goal status/progress changed, same step) |
+| `STEP_UPDATED` | stepIndex | Engine (goal status/progress changed, same step); Names (names arrived) |
+| `NAMES_LOADED` | — | Names, when the names pack loads after a refusal in combat (the quest tracker reads its names again) |
 | `STEP_SKIPPED` | fromStep, toStep or nil, `{ { quest, title, reason, text }, ... }` | Engine, active tab, just before `STEP_CHANGED`: the computed step moved past a step whose open quest goals became unavailable (reasons as in "Unavailable quests") |
 | `PLAYER_SKIPPED_STEP` | guideId, stepIndex | Engine, after `Skip()` (the window, the menu, `/polestar skip`): the guide window offers the undo |
 | `WAYPOINT_CHANGED` | waypoint or nil | Engine (and Nav when an override is set/cleared) |
@@ -270,6 +272,59 @@ release stage), each listed in `DATA_KEYS` (`tools/lib/i18n/keys.js`).
 such a client with its file loaded, `Polestar.AITranslation()` is true and
 Options > About says so, with the Discord invite.
 
+### Names
+
+`Polestar.Names` (`Core/Names.lua`) names quests, NPCs, objects and items in
+the client's language. The guides and data packs keep their English; where a
+name is shown or matched, the caller asks Names first and keeps its English
+when the answer is nil:
+
+```
+Names.Quest(id) / Names.Npc(id) / Names.Object(id) / Names.Item(id) -> name | nil
+Names.Cached(kind, id) -> name | nil   -- never asks the server; items from the pack only
+Names.Localised() -> bool              -- false on enUS and enGB
+Names.Ready() -> bool                  -- the pack is in, or will not load this session
+Names.PackName() -> "Polestar_Names_<locale>" | nil
+Names.Add(locale, kind, { [id] = name })   -- the pack's files only
+```
+
+- **Order.** The client's own name first, where the client has an API by id:
+  a quest's title (`Compat.GetQuestTitle`, `C_QuestLog.GetTitleForQuestID`)
+  and an item's name (`Compat.GetItemName`, `C_Item.GetItemNameByID`). The
+  client has none for NPCs and objects. Then the names pack of the client's
+  language, `Polestar_Names_<GetLocale()>`, loaded through `Data.Pack` on the
+  first ask (refused in combat, it loads when combat ends, fires
+  `NAMES_LOADED` and redraws the guide window once; a missing
+  folder is final for the session and harmless). Then nil. On an English
+  client every answer is nil and nothing loads.
+- **Asking the server.** A quest or item the client has not cached is asked
+  for once a session (`Compat.RequestQuest`, `Compat.RequestItem`); the
+  pack's name, or the English, shows meanwhile. When asked names arrive
+  (`QUEST_DATA_LOAD_RESULT`, `ITEM_DATA_LOAD_RESULT`), one `STEP_UPDATED`
+  per burst refills the guide window's rows.
+- **Consumers.** The guide window's labels (`Engine` `describe`, the quest
+  title order: on a non-English client the client's title before the guide's
+  English one), the target button's `/targetexact` (`QoL/Buttons.lua`), the
+  quest database's names (`QuestDB.GetQuestTitle`, `EntityName`, `GetNpc`,
+  `GetItem`, `GetItemDroppers`, `GetObjectiveMobs`: tooltips and the target
+  button's droppers), objective matching (`Quests/Tracker.lua`: a client line
+  is matched on the translated name before falling back to order, and object
+  tooltips find their objectives by the translated name), and `Search`: on a
+  non-English client each Codex kind's index gets, once, a line per id whose
+  translated name (or, for zones, the client's map name) differs, a match
+  counts an id once and is listed under its translated name. The collect
+  goals' compiled sources (`from`, `fromAlso`) carry no id and stay English.
+- **The packs.** One load-on-demand addon per language
+  (`addon/Polestar_Names_<locale>/`: `Names.lua` calling `Names.Add` per
+  1,000 names, the TOC, `LICENSE-DATA.txt`, Ding's `CREDITS.md`), committed
+  and shipped. `node tools/polestar.js i18n names` builds them from DingDB
+  (cloned into `data/sources/ding`, pinned to a commit and its files'
+  sha256s: `DING` in `tools/lib/i18n/names.js`) and, for the names it lacks,
+  pfQuest's `db/<locale>` (no esMX), keeping only the ids the compiled guides,
+  the quest database and the Codex's data name. `--no-questie` leaves DingDB
+  out. `Data.CheckInstall` checks the client's pack like the other optional
+  data packs: never missing, named when its version differs.
+
 ### Compat — the client's game data goes through here
 
 UI, Nav and Engine read the client's quests, map, units and items through
@@ -350,6 +405,7 @@ Compat.MapToWorld(uiMapID, x, y, frame) -> continentID, wx, wy | nil
 Compat.WorldToMap(continentID, wx, wy, uiMapID) -> x, y | nil
 Compat.GetMapName(uiMapID)      -> string | nil
 Compat.MapName(uiMapID)         -> string | nil   (the client's name, else the Codex zone's)
+Compat.GetAreaName(areaID)      -> string | nil   (C_Map.GetAreaInfo: the area's name in the client's language)
 Compat.GetContinentMap(uiMapID) -> continent uiMapID | nil
 Compat.GetPlayerFacing()        -> radians | nil   (0 = north, counter-clockwise positive)
 Compat.GetZoneText()            -> zone, subzone
@@ -540,14 +596,14 @@ as on a bag item (`W.ItemClick`: Shift links, Ctrl tries it on, Alt guides;
 | `complete` | `quest`, `title` | — | ready for turn-in or completed |
 | `kill` | `target` | `npc`, `count`, `quest`, `oi` | objective `oi` finished, or quest ready/completed (not while the log lists no objectives yet, right after the accept); without `quest`: manual |
 | `collect` | `item`, `itemName` | `count`, `quest`, `oi` | objective finished / quest ready (as `kill`) / completed; without `quest`: item count ≥ `count` |
-| `goto` | `map`, `x`, `y` | `text`, `r` (default 8 yd) | within radius, **or** any later goal in the step is done |
+| `goto` | `map`, `x`, `y` | `text`, `r` (default 8 yd), `area` (its name in the client's language shows instead of `text`) | within radius, **or** any later goal in the step is done |
 | `talk` | `npc`, `npcName` | — | gossip/quest frame opened with that NPC during this step; else manual |
 | `interact` | `object`, `objName` | `quest`, `oi` | objective state if `quest`; else manual |
 | `use` | `item`, `itemName` | `quest`, `oi` | objective state if `quest`; else manual |
-| `sethome` | `location` | `npc`, `npcName` | `GetBindLocation()` equals `location` (case-insensitive) |
-| `hearth` | `location` | — | zone or subzone equals `location`, else manual |
-| `getfp` | `location` | `npc`, `npcName` | taxi map opened at that flight master (persisted in `flags.fp`), else manual |
-| `fly` | `location` | — | zone or subzone equals `location`, else manual |
+| `sethome` | `location` | `npc`, `npcName`, `area` | bound at the goal's inn (`npc`'s, else the inn `location` names, in Nav/Travel.lua's data), by any of: the inn Travel finds for `GetBindLocation()` (`Nav.BoundInn`: the innkeeper learned at bind time in `flags.inn`, else the inn whose `area` the client names so, else its names); `GetBindLocation()` equal to the client's name of that inn's or the goal's `area` (`Compat.GetAreaName`); last, equal to `location` (case-insensitive). Binding at that innkeeper during the step latches it |
+| `hearth` | `location` | `area` | zone or subzone equals the client's name of `area` (without one, `location`), else manual |
+| `getfp` | `location` | `npc`, `npcName`, `node`, `area` | with `node`: that taxi node among the known ones (`flags.taxi`, recorded by Nav/Travel.lua from the flight map); without: taxi map opened at a flight master of that name (persisted in `flags.fp`); else manual |
+| `fly` | `location` | `area` | as `hearth` |
 | `train` | — | `npc`, `npcName`, `text` | trainer window opened during this step, else manual |
 | `buy` | `item`, `itemName` | `count`, `npc`, `npcName` | item count ≥ `count` (default 1) |
 | `vendor` | — | `npc`, `npcName`, `text` | merchant window opened during this step, else manual |
@@ -743,7 +799,29 @@ Polestar.Engine.GetProgress() -> doneSteps, totalSteps
 - **Unavailable quests.** An `accept` whose `closedBy` names a quest that is
   in the log or done is unavailable before any visit (reason `"closed"`,
   "No longer offered: you took <quest>"): a breadcrumb whose follow-up is
-  taken, or one version of an exclusive chain when another was taken. Beyond
+  taken, or one version of an exclusive chain when another was taken. An
+  `accept` that lacks a prerequisite the route no longer brings is
+  unavailable before any visit too (reason `"pre"`, "Requires <quest>
+  first"): one of `preAll`, or of `pre` when none of those is done, that is
+  not done and that this guide does not still turn in (issue #70: Jorn
+  Skyseer at the Crossroads needs The Angry Scytheclaws, the end of Sergra's
+  chain in the previous Barrens guide). "Still turns in" is a `turnin` of
+  that quest anywhere in the guide, before the accept or after it, that is
+  not optional, applies to the character, is not in a skipped step, not
+  skipped or ticked itself, and not unavailable in turn (followed down the
+  chain of prerequisites, at most 8 deep): that prerequisite is the route's
+  own business, so a chain the guide does later (or one lint warns about,
+  taken before its prerequisite is handed in) keeps its accept, and its
+  giver's window decides as below. So does a prerequisite whose goals in the
+  guide are all for other characters (`only`): another race's or class's
+  version of the chain, whose own the data does not list (the paladin
+  charger's Emphasis on Sacrifice names the Human's Lord Grayson
+  Shadowbreaker, not the Dwarf's). Prerequisites the data lacks (issue #51)
+  mark nothing in advance; the giver's window covers them. The mark is live:
+  it does not hold the step, the focus or the arrow, and it goes the moment
+  the prerequisite is done (the guide then goes back to it, as below), not
+  on an unrelated turn-in. A giver's window that offers the quest (this
+  session) beats the data: no mark in advance after that. Beyond
   that, when a gossip/greeting/detail window opens on an `accept` goal's NPC
   (any tab's current step) and the quest is neither offered, in the log, nor
   completed, the Engine marks that accept unavailable for the session, with a
@@ -755,7 +833,9 @@ Polestar.Engine.GetProgress() -> doneSteps, totalSteps
   accept and the goals of that quest in the
   guide (objectives, complete, turnin) count as skipped, so the guide moves on
   instead of stalling. The session marks clear on level-up and on any quest
-  turn-in. The view carries `unavailable = reason` and `unavailableText`.
+  turn-in (either can open a quest whose prerequisite the data lacks), and
+  the guide goes back to a step they had let it pass until its giver says no
+  again. The view carries `unavailable = reason` and `unavailableText`.
   When such marks move the guide past a step during play, the Engine fires
   `STEP_SKIPPED`; the guide window's banner then reads "Skipped <quest>  ·
   <reason>" (one line per quest) until the step changes again, it is
@@ -2930,7 +3010,7 @@ What `compile` writes into a pack's folder: Core, "Guide data (compiled Lua)".
 | `lint`, `compile` | checks with our guides as context; writes `<pack>/dist/<folder>/`; `--format text\|json\|github` |
 | `doctor` | Node, Lua, reference data, AddOns folder, `pack.json` |
 | `find` | quests, NPCs, objects, items, inns, flight points and our guides as guide lines (`--json`); `--kind inn\|flight` without a text lists every inn or flight point (from `travel.json`) |
-| `playtest` | every guide to the end per class (`tools/lib/playtest.js`, also behind `tests/guides.test.js`) |
+| `playtest` | every guide to the end per class (`tools/lib/playtest.js`, also behind `tests/guides.test.js`); a guide starts with the prerequisites of its accepts that the guides chaining into it turn in already done, and those they leave for it only to hand in in the log, as for a player arriving on the route |
 | `play`, `dev` | the playground with the pack built into a temp folder; `dev` watches and builds into AddOns |
 | `install`, `pack` | builds and installs the pack; writes `<pack>/dist/<folder>-<version>.zip` |
 | `record draft`, `sim compare` | drafts into `<pack>/drafts/` under `<id>/draft/`; scores the pack's chain beside ours |

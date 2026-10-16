@@ -23,6 +23,7 @@ const { buildTransports } = require('./transports');
 const { buildTimetables } = require('./timetable');
 const { loadClassicDb } = require('./cmangos');
 const { buildInns } = require('./inns');
+const { loadAreas } = require('../data/areas');
 const { buildPaths, liveFramesOf } = require('./paths');
 const { readCrossingsFile, recordedCrossings, crossingsLua, emitTravelAddon, crossingCounts, TRAVEL_ADDON } = require('./crossings');
 const { readRecordings } = require('../data/recordings');
@@ -98,9 +99,9 @@ function emitLua(t) {
 		lines.push(`\t\t${luaVal({ id: p.id, name: p.name, a: end(p.a), b: end(p.b), seconds: p.seconds })},`);
 	}
 	lines.push('\t},');
-	lines.push('\t-- bind location names (as GetBindLocation reports them), innkeeper NPC, position');
+	lines.push(`\t-- bind location names (as GetBindLocation reports them), AreaTable area (WoW Forever client build ${t.areaBuild || 'none'}), innkeeper NPC, position`);
 	lines.push('\tinns = {');
-	for (const i of t.inns) lines.push(`\t\t${luaVal({ names: i.names, npc: i.npc, c: i.c, wx: i.wx, wy: i.wy, map: i.map, x: i.x, y: i.y, f: i.f })},`);
+	for (const i of t.inns) lines.push(`\t\t${luaVal({ names: i.names, ...(i.area ? { area: i.area } : {}), npc: i.npc, c: i.c, wx: i.wx, wy: i.wy, map: i.map, x: i.x, y: i.y, f: i.f })},`);
 	lines.push('\t},');
 	lines.push('})');
 	lines.push(...transitLua(t.transit));
@@ -214,7 +215,8 @@ async function buildTravel({
 	log = () => {},
 } = {}) {
 	const mapFrames = readJson(path.join(dataDir, 'map-frames.json'));
-	const frames = new Frames(mapFrames.era, readJson(path.join(dataDir, 'zones.json')));
+	const zones = readJson(path.join(dataDir, 'zones.json'));
+	const frames = new Frames(mapFrames.era, zones);
 	const npcs = readJson(path.join(dataDir, 'npcs.json'));
 	const objects = readJson(path.join(dataDir, 'objects.json'));
 	const recordings = readRecordings(recordingsDir);
@@ -266,18 +268,22 @@ async function buildTravel({
 		frames,
 		liveFrames,
 	});
-	const inns = buildInns({ frames, npcs, liveFrames });
+	// The inns' areas: the AreaTable `data build` cached (tools/lib/data/areas.js).
+	const areas = loadAreas(sourcesDir);
+	const inns = buildInns({ frames, npcs, liveFrames, areas, zones });
+	const areaWarnings = areas ? [] : [`no cached WoW Forever AreaTable under ${path.join(sourcesDir, 'wago')}: the inns get no area (\`data build\` downloads it)`];
 	const paths = buildPaths({ recordings, frames });
 	const recorded = recordedCrossings(paths.zoneSteps, frames);
 	const local = readCrossingsFile(crossingsFile, frames);
 	const shipped = readCrossingsFile(shippedFile, frames);
 	const shippedSource = shipped ? JSON.parse(fs.readFileSync(shippedFile, 'utf8')).source || path.basename(shippedFile) : null;
-	const warnings = [...src.warnings, ...(forever ? forever.warnings : []), ...(transitTables ? transitTables.warnings : []), ...transitWarnings, ...taxi.warnings, ...tr.warnings, ...transit.warnings, ...inns.warnings, ...paths.warnings];
+	const warnings = [...src.warnings, ...(forever ? forever.warnings : []), ...(transitTables ? transitTables.warnings : []), ...transitWarnings, ...taxi.warnings, ...tr.warnings, ...transit.warnings, ...areaWarnings, ...inns.warnings, ...paths.warnings];
 
 	const sources = [{ name: 'Blizzard Classic Era client tables (wago.tools)', build: src.build, tables: Object.keys(src.urls), urls: src.urls }];
 	if (forever) sources.push({ name: 'WoW Forever client tables (wago.tools)', build: forever.build, tables: Object.keys(forever.urls), urls: forever.urls, use: 'ship loops Forever added' });
 	if (transitTables) sources.push({ name: 'WoW Forever client tables (wago.tools)', build: transitTables.build, tables: Object.keys(transitTables.urls), urls: transitTables.urls, use: 'lift and tram tracks, class teleports' });
 	if (db) sources.push({ name: 'CMaNGOS classic-db (GPL-3.0)', rev: db.rev, url: db.url, use: 'lift and tram spawns, portal and teleport destinations; sniffed transport periods' });
+	if (areas) sources.push({ name: 'WoW Forever client tables (wago.tools)', build: areas.build, tables: ['AreaTable'], use: 'the area of each inn' });
 	sources.push({ name: 'Shortest Path Forever by Cillian Berragan (GPL-3.0-or-later, used with permission)', use: 'the timetable model, observer and data choices, ported' });
 	sources.push(
 		{ name: 'data/forever npcs.json / objects.json (pfQuest, MIT)', use: 'flight masters, dock NPCs/objects, innkeepers' },
@@ -291,6 +297,7 @@ async function buildTravel({
 		foreverBuild: forever ? forever.build : null,
 		transitBuild: transitTables ? transitTables.build : null,
 		cmangosRev: db ? db.rev : null,
+		areaBuild: areas ? areas.build : null,
 		sources,
 		counts: {
 			taxiNodes: taxi.nodes.length,

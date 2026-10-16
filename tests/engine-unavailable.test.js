@@ -90,7 +90,7 @@ test('accepts their giver does not offer are skipped with a reason; the same que
 	assert.deepEqual(out.step3, ['skipped:pre:Requires Disrupt the Attacks first', 'pending:nil:nil']);
 });
 
-test('another NPC\'s window never marks an accept, and an offered quest is not marked', () => {
+test('another NPC\'s window never marks an accept, and the giver offering a quest clears even a missing prerequisite', () => {
 	const [out] = run({
 		script: `
 			local w = stub.world
@@ -100,7 +100,9 @@ test('another NPC\'s window never marks an accept, and an offered quest is not m
 			emit({ other = other, offered = brief(1), at = E.GetStepIndex() })
 		`,
 	});
-	assert.deepEqual(out.other, ['active:nil:nil', 'active:nil:nil', 'active:nil:nil', 'active:nil:nil']);
+	// 872's prerequisite (871) is missing and the guide never turns it in:
+	// known before any visit. Thork's window offering it has the last word.
+	assert.deepEqual(out.other, ['skipped:pre:Requires Disrupt the Attacks first', 'active:nil:nil', 'active:nil:nil', 'active:nil:nil']);
 	assert.deepEqual(out.offered, ['active:nil:nil', 'active:nil:nil', 'active:nil:nil', 'active:nil:nil']);
 	assert.equal(out.at, 1);
 });
@@ -167,7 +169,8 @@ test('the marks clear on level-up and on any turn-in, and the guide goes back to
 		`,
 	});
 	assert.equal(out.before, 2);
-	assert.deepEqual(out.levelUp, [1, ['active:nil:nil', 'active:nil:nil', 'active:nil:nil', 'done:nil:nil']]);
+	// The window's marks go; 872 keeps its missing prerequisite until 871 is done.
+	assert.deepEqual(out.levelUp, [1, ['skipped:pre:Requires Disrupt the Attacks first', 'active:nil:nil', 'active:nil:nil', 'done:nil:nil']]);
 	assert.equal(out.again, 2);
 	assert.deepEqual(out.turnIn, [1, 'active:nil:nil']);
 });
@@ -192,6 +195,119 @@ test('prerequisites: every `preAll` must be done, one `pre` suffices; the text n
 		`,
 	});
 	assert.deepEqual(out, ['skipped:pre:Requires The Other Errand first', 'skipped:offer:Not offered by Thork']);
+});
+
+// Issue #70 (The Barrens 19-24, step 9): Sergra Darkthorn's Jorn Skyseer
+// (3261) needs The Angry Scytheclaws (905), the end of her chain in the
+// earlier Barrens guide. Jorn's Ishamuhale (882) follows Jorn Skyseer.
+const CROSSROADS = `
+Polestar.RegisterGuide({ id = "test/xr", pack = "test", title = "The Barrens", faction = "Horde", minLevel = 19, maxLevel = 24, steps = {
+	{ title = "The Crossroads", goals = {
+		{ t = "accept", quest = 899, title = "Consumed by Hatred", npc = 3432, npcName = "Mankrik", map = 1413, x = 51.95, y = 31.58 },
+		{ t = "accept", quest = 3261, title = "Jorn Skyseer", npc = 3338, npcName = "Sergra Darkthorn", pre = { 905 }, preTitles = { [905] = "The Angry Scytheclaws" }, map = 1413, x = 52.23, y = 31.01 },
+		{ t = "accept", quest = 3281, title = "Stolen Silver", npc = 3464, npcName = "Gazrog", map = 1413, x = 51.93, y = 30.32 },
+	} },
+	{ title = "Camp Taurajo", goals = {
+		{ t = "turnin", quest = 3261, title = "Jorn Skyseer", npc = 3387, npcName = "Jorn Skyseer", map = 1413, x = 44.86, y = 59.14 },
+		{ t = "accept", quest = 882, title = "Ishamuhale", npc = 3387, npcName = "Jorn Skyseer", pre = { 3261 }, map = 1413, x = 44.86, y = 59.14 },
+	} },
+	{ goals = { { t = "level", level = 30 } } },
+} })`;
+
+const AT_SERGRA = `
+	local w = stub.world
+	local function look()
+		local wp = E.GetWaypoint()
+		return { E.GetStepIndex(), E.GetStepView(E.GetStepIndex()).focus or false, wp and wp.goalIndex or false }
+	end
+	-- Placed at the Crossroads (the quest log is read): from here on, live play.
+	stub.fire("QUEST_LOG_UPDATE"); flush()
+	w.accept(899, {}); flush()
+	local r = { mankrikDone = look(), step1 = brief(1), step2 = brief(2) }
+	w.accept(3281, {}); flush()
+	r.gazrogDone = look()
+`;
+
+test('#70: an accept whose prerequisite is missing does not hold the focus or the arrow, with or without a visit; done, it does', () => {
+	const [missing] = run({
+		guides: CROSSROADS,
+		script: `${AT_SERGRA}
+			-- A turn-in that opens nothing here does not bring it back.
+			w.turnIn(500); flush()
+			r.unrelated = look()
+			-- The Angry Scytheclaws handed in: Sergra's quest is live again.
+			w.onQuest(905, {}); w.turnIn(905); flush()
+			r.preDone = { look(), brief(1)[2] }
+			emit(r)`,
+	});
+	// Mankrik, Sergra, Gazrog: the focus and the arrow go from Mankrik to Gazrog.
+	assert.deepEqual(missing.mankrikDone, [1, 3, 3]);
+	assert.deepEqual(missing.step1, ['done:nil:nil', 'skipped:pre:Requires The Angry Scytheclaws first', 'active:nil:nil']);
+	// Jorn Skyseer's turn-in goes with it, and so does the quest after it.
+	assert.deepEqual(missing.step2, ['skipped:pre:Requires The Angry Scytheclaws first', 'skipped:pre:Requires Jorn Skyseer first']);
+	assert.deepEqual(missing.gazrogDone, [3, 1, false]);
+	assert.deepEqual(missing.unrelated, [3, 1, false]);
+	assert.deepEqual(missing.preDone, [[1, 2, 2], 'active:nil:nil']);
+
+	const [done] = run({ before: 'stub.world.complete({ 905 })', guides: CROSSROADS, script: `${AT_SERGRA} emit(r)` });
+	assert.deepEqual(done.mankrikDone, [1, 2, 2]);
+	assert.deepEqual(done.step1, ['done:nil:nil', 'active:nil:nil', 'active:nil:nil']);
+	assert.deepEqual(done.step2, ['pending:nil:nil', 'pending:nil:nil']);
+	assert.deepEqual(done.gazrogDone, [1, 2, 2]);
+});
+
+test('a missing prerequisite the guide still turns in, before the accept or after it, leaves the accept to its giver; skipping that turn-in does not', () => {
+	// Thork's 872 needs 871 (pre). Taken before 871 is handed in (against
+	// lint's order: a data error or a guide's), then 5041 after it, by the
+	// rule.
+	const guide = `
+	Polestar.RegisterGuide({ id = "test/xr", pack = "test", title = "Crossroads", faction = "Horde", minLevel = 10, maxLevel = 20, steps = {
+		{ title = "Thork", goals = {
+			{ t = "accept", quest = 871, title = "Disrupt the Attacks", npc = 3429, npcName = "Thork", map = 1413, x = 51, y = 30 },
+			{ t = "accept", quest = 872, title = "Supplies for the Crossroads", npc = 3429, npcName = "Thork", pre = { 871 }, map = 1413, x = 51, y = 30 },
+		} },
+		{ title = "Back", goals = {
+			{ t = "turnin", quest = 871, title = "Disrupt the Attacks", npc = 3429, npcName = "Thork", map = 1413, x = 51, y = 30 },
+			{ t = "accept", quest = 5041, title = "Supplies for the Crossroads", npc = 3429, npcName = "Thork", pre = { 871 }, map = 1413, x = 51, y = 30 },
+		} },
+		{ goals = { { t = "level", level = 30 } } },
+	} })`;
+	const [out] = run({
+		guides: guide,
+		script: `
+			local w = stub.world
+			-- Placed at Thork (the quest log is read), then 871 is taken.
+			stub.fire("QUEST_LOG_UPDATE"); flush()
+			w.accept(871, {}); flush()
+			local r = { step1 = brief(1), step2 = brief(2), wp = E.GetWaypoint().goalIndex }
+			-- The player skips the step that hands 871 in.
+			E.Next(); E.Skip(); flush()
+			r.skipped = { E.GetLiveStep(), brief(1) }
+			emit(r)`,
+	});
+	assert.deepEqual(out.step1, ['done:nil:nil', 'active:nil:nil']);
+	assert.deepEqual(out.step2, ['pending:nil:nil', 'pending:nil:nil']);
+	assert.equal(out.wp, 2);
+	// Nothing left to do at Thork: the guide goes past the skipped step.
+	assert.deepEqual(out.skipped, [3, ['done:nil:nil', 'skipped:pre:Requires Disrupt the Attacks first']]);
+});
+
+test('a prerequisite the guide has only for other characters is another version of the chain: the accept stays open for the giver to decide', () => {
+	// The paladin charger: Emphasis on Sacrifice (7637) names the Human Lord
+	// Grayson Shadowbreaker (7638) only; the Dwarf's (7670) is missing from the
+	// data. Here the character is an Orc, and 7670 stands for their own version.
+	const guide = `
+	Polestar.RegisterGuide({ id = "test/xr", pack = "test", title = "Charger", minLevel = 10, maxLevel = 60, steps = {
+		{ title = "Grayson", goals = {
+			{ t = "accept", quest = 7638, title = "Lord Grayson Shadowbreaker", npc = 1, npcName = "Duthorian Rall", only = { races = { "Human" } }, map = 1413, x = 51, y = 30 },
+			{ t = "turnin", quest = 7638, title = "Lord Grayson Shadowbreaker", npc = 2, npcName = "Lord Grayson", only = { races = { "Human" } }, map = 1413, x = 51, y = 30 },
+			{ t = "turnin", quest = 7670, title = "Lord Grayson Shadowbreaker", npc = 2, npcName = "Lord Grayson", only = { races = { "Orc" } }, map = 1413, x = 51, y = 30 },
+			{ t = "accept", quest = 7637, title = "Emphasis on Sacrifice", npc = 2, npcName = "Lord Grayson", pre = { 7638 }, map = 1413, x = 51, y = 30 },
+		} },
+		{ goals = { { t = "level", level = 60 } } },
+	} })`;
+	const [out] = run({ before: 'stub.world.onQuest(7670, {})', guides: guide, script: 'stub.fire("QUEST_LOG_UPDATE"); flush(); emit(brief(1))' });
+	assert.deepEqual(out, ['na:nil:nil', 'na:nil:nil', 'active:nil:nil', 'active:nil:nil']);
 });
 
 test('an accept closed for good (its breadcrumb target or an exclusive quest taken or done) is skipped before any visit, with the quest\'s later goals', () => {

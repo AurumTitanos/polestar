@@ -102,9 +102,21 @@ local function entityRecord(ref)
 end
 Q.EntityRecord = entityRecord
 
+-- A name in the client's language where Polestar.Names has it, else the
+-- database's English. kind: "Quest", "Npc", "Object" or "Item".
+local function named(kind, id, english)
+	local N = ns.Names
+	return (N and N[kind](id)) or english
+end
+
+local function refName(ref, english)
+	if ref > 0 then return named("Npc", ref, english) end
+	return named("Object", -ref, english)
+end
+
 function Q.EntityName(ref)
 	local rec = entityRecord(ref)
-	return rec and rec[1] or nil
+	return rec and refName(ref, rec[1]) or nil
 end
 
 -- fn(a, b, map, frame, x, y, r, clusterIndex) for every spawn cluster of a
@@ -181,7 +193,7 @@ function Q.GetQuest(id)
 	local sn, so = refList(r[QUEST_START])
 	local fn, fo = refList(r[QUEST_FINISH])
 	local q = {
-		id = id, title = r[QUEST_TITLE], level = r[QUEST_LEVEL], minLevel = r[QUEST_MIN],
+		id = id, title = named("Quest", id, r[QUEST_TITLE]), level = r[QUEST_LEVEL], minLevel = r[QUEST_MIN],
 		races = r[QUEST_RACES], classes = r[QUEST_CLASSES], faction = FACTIONS[r[QUEST_FACTION] or 0],
 		start = { npc = sn, object = so, item = idList(r[QUEST_START_ITEM]) },
 		finish = { npc = fn, object = fo },
@@ -209,7 +221,7 @@ end
 
 function Q.GetQuestTitle(id)
 	local r = data.quests[id]
-	return r and r[QUEST_TITLE] or nil
+	return r and named("Quest", id, r[QUEST_TITLE]) or nil
 end
 
 local function spawnRow(list, _, map, f, x, y, r)
@@ -221,7 +233,7 @@ local function entityView(ref, id)
 	if not rec then return nil end
 	local spawns = {}
 	Q.EachSpawn(ref, spawnRow, spawns)
-	return { id = id, name = rec[1], spawns = spawns }
+	return { id = id, name = refName(ref, rec[1]), spawns = spawns }
 end
 
 -- { id, name, spawns = { { map, x, y, r (yd), f ("e"|nil) }, ... } }
@@ -238,7 +250,7 @@ function Q.GetItemDroppers(itemID)
 	for k = 1, n do
 		local npc, chance = rec[1 + 2 * k], rec[2 + 2 * k]
 		local nrec = data.npcs[npc]
-		out[k] = { id = npc, name = nrec and nrec[1] or nil, chance = chance }
+		out[k] = { id = npc, name = nrec and named("Npc", npc, nrec[1]) or nil, chance = chance }
 	end
 	return out
 end
@@ -247,18 +259,18 @@ end
 function Q.GetItem(itemID)
 	local rec = itemID and data.items[itemID]
 	if not rec then return nil end
-	local item = { id = itemID, name = rec[1], droppers = Q.GetItemDroppers(itemID) or {}, objects = {}, vendors = {} }
+	local item = { id = itemID, name = named("Item", itemID, rec[1]), droppers = Q.GetItemDroppers(itemID) or {}, objects = {}, vendors = {} }
 	local i = 3 + 2 * (rec[2] or 0)
 	local no = rec[i] or 0
 	for k = 1, no do
 		local obj, chance = rec[i + 2 * k - 1], rec[i + 2 * k]
 		local orec = data.objects[obj]
-		item.objects[k] = { id = obj, name = orec and orec[1] or nil, chance = chance }
+		item.objects[k] = { id = obj, name = orec and named("Object", obj, orec[1]) or nil, chance = chance }
 	end
 	for j = i + 2 * no + 1, #rec do
 		local v = rec[j]
 		local vrec = data.npcs[v]
-		item.vendors[#item.vendors + 1] = { id = v, name = vrec and vrec[1] or nil }
+		item.vendors[#item.vendors + 1] = { id = v, name = vrec and named("Npc", v, vrec[1]) or nil }
 	end
 	return item
 end
@@ -274,7 +286,7 @@ function Q.GetObjectiveMobs(questID, oi)
 	local kind, id = obj[i], obj[i + 1]
 	if kind == 1 then
 		local nrec = data.npcs[id]
-		return nrec and { nrec[1] } or nil
+		return nrec and { named("Npc", id, nrec[1]) } or nil
 	elseif kind == 2 then
 		local d = Q.GetItemDroppers(id)
 		if not d then return nil end

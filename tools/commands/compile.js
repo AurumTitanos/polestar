@@ -6,6 +6,7 @@ const path = require('node:path');
 const { printDiagnostics, plural } = require('../lib/cli');
 const { writePackDir } = require('../lib/dsl/project');
 const { heightCounts } = require('../lib/dsl/heights');
+const { placeCounts } = require('../lib/dsl/places');
 const { ROOT, DATA } = require('../lib/paths');
 const { packCommand, buildPack } = require('../lib/pack/build');
 
@@ -64,6 +65,10 @@ async function run(argv) {
 		console.log(
 			`compiled ${plural(guides.length, 'guide')} (${plural(steps, 'step')}) from ${plural(sources.length, 'file')} into ${outDir}; ${plural(diag.warnings.length, 'warning')}`,
 		);
+		// Place IDs (tools/lib/dsl/places.js): how many place goals got an area, getfp goals a taxi node.
+		const p = placeCounts(guides);
+		console.log(data && data.areas ? `areas: ${p.withArea} of ${plural(p.places, 'place goal')} got an area (AreaTable ${data.areas.build})` : 'areas: none (no cached Forever AreaTable in the sources beside the reference data; `data build` downloads it)');
+		console.log(data && data.flightNodes().length ? `nodes: ${p.withNode} of ${plural(p.getfp, 'getfp goal')} got a taxi node (travel.json)` : 'nodes: none (no travel.json in the reference data; `travel build` writes it)');
 		// Goal heights (tools/lib/dsl/heights.js): how many NPC and object goals got z.
 		const h = heightCounts(guides);
 		console.log(data && data.spawnz ? `heights: ${h.withZ} of ${plural(h.eligible, 'NPC or object goal')} got z (spawnz.json)` : 'heights: none (no spawnz.json in the reference data; `data build` writes it)');

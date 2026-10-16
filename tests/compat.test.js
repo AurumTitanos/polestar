@@ -127,6 +127,20 @@ test('player info, zone text, bind location, taxi and items come from the client
 	});
 });
 
+test('GetAreaName gives an area\'s name in the client\'s language from C_Map.GetAreaInfo; nil for no ID, an unknown area or no API', () => {
+	const [out] = run(`
+		local names = { [42] = "Sombre-Comté" }
+		C_Map.GetAreaInfo = function(id) return names[id] end
+		local r = { C.GetAreaName(42), C.GetAreaName(43) == nil, C.GetAreaName(nil) == nil, C.GetAreaName("42") == nil }
+		C_Map.GetAreaInfo = function() error("no such area") end
+		r[5] = C.GetAreaName(42) == nil
+		C_Map.GetAreaInfo = nil
+		r[6] = C.GetAreaName(42) == nil
+		emit(r)
+	`);
+	assert.deepEqual(out, ['Sombre-Comté', true, true, true, true, true]);
+});
+
 test('skill ranks by line or name, from C_SkillInfo or the profession list; unlearned is nil', () => {
 	const [out] = run(`
 		w.learnSkill(171, "Alchemy", 42, 75)

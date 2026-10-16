@@ -14,6 +14,7 @@ const { planRoute } = require('../tools/lib/travel/route');
 const { runAddon, ROOT } = require('./helpers/lua');
 const { parseCsv } = require('../tools/lib/data/csv');
 const { tmpdir } = require('./helpers/tmp');
+const { loadAreas } = require('../tools/lib/data/areas');
 
 const FIX = path.join(__dirname, 'fixtures', 'travel');
 const opts = (extra = {}) => ({
@@ -76,6 +77,26 @@ test('flight masters, flights, transports and inns come from the client tables a
 
 	assert.deepEqual(travel.inns.map((i) => [i.location, i.npc, i.map]), [['Goldshire', 295, 1429], ['Sentinel Hill', 8931, 1436]]);
 	assert.ok(warnings.some((w) => /Booty Bay: Innkeeper Skindle \(6807\) does not spawn on map 1434/.test(w)), 'an innkeeper on the wrong map is dropped');
+});
+
+test('each inn gets the AreaTable area of its bind location in its own zone, never a Forever copy of the town', async () => {
+	const { travel, lua, warnings } = await buildTravel(opts());
+	assert.deepEqual(travel.inns.map((i) => [i.location, i.area]), [['Goldshire', 87], ['Sentinel Hill', 108]]);
+	assert.equal(travel.areaBuild, '1.60.0.1');
+	assert.match(lua, /-- bind location names \(as GetBindLocation reports them\), AreaTable area \(WoW Forever client build 1\.60\.0\.1\), innkeeper NPC, position/);
+	assert.match(lua, /\{area=87,c=0,f="e",map=1429,names=\{"Goldshire"\},npc=295,/);
+	assert.ok(!warnings.some((w) => /AreaTable/.test(w)), warnings.join('\n'));
+	// Without the cached AreaTable: no inn gets an area, and the build says why.
+	const sources = tmp();
+	try {
+		fs.cpSync(path.join(FIX, 'sources', 'wago', '1.15.0.1'), path.join(sources, 'wago', '1.15.0.1'), { recursive: true });
+		const none = await buildTravel(opts({ sourcesDir: sources }));
+		assert.ok(none.travel.inns.every((i) => i.area === undefined));
+		assert.match(none.lua, /\{c=0,f="e",map=1429,names=\{"Goldshire"\},npc=295,/);
+		assert.ok(none.warnings.some((w) => /^no cached WoW Forever AreaTable under .*: the inns get no area/.test(w)), none.warnings.join('\n'));
+	} finally {
+		fs.rmSync(sources, { recursive: true, force: true });
+	}
 });
 
 test('learned walking paths follow recorded breadcrumbs, mark zone borders and break at flights', async () => {
@@ -215,6 +236,33 @@ test('the committed TravelData.lua is loaded by the addon with the real network'
 			emit(out)`,
 	}).emitted;
 	assert.deepEqual(names, ['Stoutlager Inn', 'Thelsamar']);
+});
+
+// The committed inns, as the addon reads them.
+function committedInns() {
+	return runAddon({
+		stubs: ['stub_nav.lua'],
+		addons: [{ name: 'Polestar', files: ['Core/Init.lua', 'Nav/Nav.xml'] }],
+		script: `
+			local out = {}
+			for _, inn in ipairs(Polestar.Nav.GetTravelData().inns) do out[#out + 1] = { npc = inn.npc, area = inn.area or false, names = inn.names } end
+			emit(out)`,
+	}).emitted[0];
+}
+
+test('every inn of the committed TravelData.lua has its AreaTable area', () => {
+	const inns = committedInns();
+	assert.ok(inns.length >= 40, `${inns.length} inns`);
+	assert.deepEqual(inns.filter((i) => typeof i.area !== 'number').map((i) => i.names[0]), []);
+	assert.equal(inns.find((i) => i.npc === 6790).area, 42, 'Darkshire (#83)');
+});
+
+const AREAS = loadAreas(path.join(ROOT, 'data', 'sources'));
+test('every committed inn\'s area is named, in English, like one of its bind locations', { skip: !AREAS && 'no cached Forever AreaTable under data/sources/wago (node tools/polestar.js data build)' }, () => {
+	const wrong = committedInns()
+		.filter((i) => !AREAS.byId.has(i.area) || !i.names.includes(AREAS.byId.get(i.area).name))
+		.map((i) => `${i.names.join('/')}: area ${i.area} is ${AREAS.byId.has(i.area) ? `"${AREAS.byId.get(i.area).name}"` : 'not in the AreaTable'}`);
+	assert.deepEqual(wrong, []);
 });
 
 test('a Forever ship calling at three docks: one transport per dock pair, following the loop', () => {

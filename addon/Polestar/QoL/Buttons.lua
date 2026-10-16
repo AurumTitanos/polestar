@@ -438,7 +438,9 @@ function Buttons.TargetNames(view, raw)
 		local rg = raw and raw[g] or gv
 		if QoL.Open(gv) then
 			if gv.t == "kill" then
-				addName(rg.target or gv.subject)
+				-- /targetexact needs the name as the client writes it.
+				local N = ns.Names
+				addName((N and N.Npc(rg.npc or gv.npc)) or rg.target or gv.subject)
 			elseif gv.t == "collect" and qdb then
 				if gv.quest and rg.oi and QDB.GetObjectiveMobs then
 					addDroppers(QDB.GetObjectiveMobs(gv.quest, rg.oi))
