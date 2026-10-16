@@ -537,13 +537,14 @@
 - Boats, zeppelins, the Deeprun Tram and lifts run to their real timetables:
   each loop's period and stops from the transport model the servers use
   (accelerating, docking, the original servers' measured periods), so a
-  route weighs the real wait and ride. Ride one and Polestar times it from
-  where you are along the way ("Timed the Booty Bay - Ratchet from your
-  ride"); from then on, for six hours, the arrow says "Next boat in 1:20" or
-  "Boat docked, leaves in 0:40", and the route takes the boat you can
-  actually catch. Untimed, it says "Next boat in about 2:55". If you opt in
-  (Options, Arrow & routes, "Share boat times", off by default), the times
-  you take go to your guild and group on your realm, and theirs come to you.
+  route weighs the real wait and ride. Ride a boat, a zeppelin or the tram
+  and Polestar times it from where you are along the way ("Timed the Booty
+  Bay - Ratchet from your ride"); from then on, for six hours, the arrow says
+  "Next boat in 1:20" or "Boat docked, leaves in 0:40", and the route takes
+  the boat you can actually catch. Untimed, it says "Next boat in about
+  2:55". If you opt in (Options, Arrow & routes, "Share boat times", off by
+  default), the times you take go to your guild and group on your realm, and
+  theirs come to you.
   After Shortest Path Forever by Cillian Berragan, whose timetables these
   are.
 - Routes can start with a class teleport you know: a mage's Teleport to a
