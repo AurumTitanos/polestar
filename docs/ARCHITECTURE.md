@@ -274,8 +274,8 @@ code running in that flow gets them blocked, and the "AddOn blocked"
 popup's own gamepad handling blocks the next one, thousands of times, until
 the client freezes. An addon whose only code is an empty slash command
 reproduces it (Blizzard forum threads 2367777 and 2370253). Other Forever
-addons (EllesmereUI, Olympus, Questie, RestedXP) do the same as Polestar:
-with the gamepad interface on, they keep to their own windows.
+addons (EllesmereUI, Olympus, Questie) do the same as Polestar: with the
+gamepad interface on, they keep to their own windows.
 
 `GamepadUI()` reads the style once, as `Core/Init.lua` loads (the client
 reloads the UI when it changes). With it on, Polestar:
