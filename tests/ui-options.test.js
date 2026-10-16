@@ -331,7 +331,7 @@ test('Recorder page: not installed, then live counts and a stop control', () => 
 		stub.addonsLoaded.Polestar_Recorder = true
 		PolestarRecorderDB = { enabled = true, current = "b", sessions = { a = { events = {} }, b = { char = { name = "Testchar" }, events = { {}, {}, {} } } } }
 		local sent = {}
-		SlashCmdList.POLESTARREC = function(arg) sent[#sent + 1] = arg; if arg == "off" then PolestarRecorderDB.enabled = false end end
+		PolestarRecorder_Command = function(arg) sent[#sent + 1] = arg; if arg == "off" then PolestarRecorderDB.enabled = false end end
 		UI.ShowOptions("recorder")
 		local values = {}
 		for _, f in ipairs({ O.view:GetChildren() }) do if rawget(f, "Value") and f:IsShown() then values[f.Label:GetText()] = f.Value:GetText() end end
@@ -539,6 +539,25 @@ test('in combat the Settings canvas button leaves the protected game panel alone
 	assert.deepEqual(out.inCombat, { hidden: 0, opened: true, hint: true });
 	assert.equal(out.hidden, 1);
 	assert.equal(out.opened, true);
+});
+
+// With the gamepad interface, a panel closed from addon code leaves the
+// gamepad's focus blocked (Core/Init.lua, GamepadUI): B closes it.
+test('with the gamepad interface the Settings canvas button leaves the game panel alone', () => {
+	const [out] = run(`
+		local hidden = 0
+		SettingsPanel = CreateFrame("Frame", "SettingsPanel", UIParent)
+		HideUIPanel = function(f) hidden = hidden + 1; f:Hide() end
+		local cat
+		for _, c in ipairs(Settings.categories) do if c.name == "Polestar" then cat = c end end
+		local open
+		for _, child in ipairs(cat.frame.children) do if type(child.Label) == "table" and child.Label:GetText() == "Open Polestar settings" then open = child end end
+		open:Click()
+		emit({ hidden = hidden, opened = PolestarOptions:IsShown(), hint = stub.messages[#stub.messages] })`,
+		{ before: 'Enum.InputDeviceInterfaceType = { Mkb = 0, Gamepad = 1 }; C_InputInterfaceStyle = { GetCurrentStyle = function() return 1 end }' });
+	assert.equal(out.hidden, 0);
+	assert.equal(out.opened, true);
+	assert.match(out.hint, /Close the game menu to see Polestar's settings\.$/);
 });
 
 test('hiding a window mid-drag on its scroll bar ends the drag', () => {

@@ -380,9 +380,20 @@ commands.clear = function(rest)
 	ns.Print(("this deletes every recorded session. Type |cffffd100/psrec clear confirm|r within %d seconds to proceed."):format(CLEAR_WINDOW))
 end
 
-SLASH_POLESTARREC1 = "/psrec"
-SLASH_POLESTARREC2 = "/polestarrec"
-SlashCmdList.POLESTARREC = function(msg)
+-- Polestar's Recorder page calls PolestarRecorder_Command. /psrec is not
+-- registered with Forever's gamepad interface on: the chat box calls a
+-- command and then closes itself in the command's taint, which blocks the
+-- gamepad's actions until a reload (Polestar's Core/Init.lua, ns.GamepadUI).
+local function gamepadUI()
+	local E = Enum and Enum.InputDeviceInterfaceType
+	if not (E and E.Gamepad) then return false end
+	local S = C_InputInterfaceStyle
+	if S and S.GetCurrentStyle and S.GetCurrentStyle() == E.Gamepad then return true end
+	local get = (C_CVar and C_CVar.GetCVar) or GetCVar
+	return get and tonumber(get("InputDeviceInterfaceStyle")) == E.Gamepad or false
+end
+
+function PolestarRecorder_Command(msg)
 	local name, rest = (msg or ""):match("^%s*(%S*)%s*(.-)%s*$")
 	name = (name or ""):lower()
 	if name == "" then name = "status" end
@@ -393,4 +404,9 @@ SlashCmdList.POLESTARREC = function(msg)
 		return
 	end
 	fn(rest or "")
+end
+if not gamepadUI() then
+	SLASH_POLESTARREC1 = "/psrec"
+	SLASH_POLESTARREC2 = "/polestarrec"
+	SlashCmdList.POLESTARREC = PolestarRecorder_Command
 end

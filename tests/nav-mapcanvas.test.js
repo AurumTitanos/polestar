@@ -194,8 +194,12 @@ for (const style of ['keyboard and mouse', 'gamepad']) {
 		assert.equal(r.battlefield, 3, 'the battlefield map shows the unexplored tiles too');
 		assert.deepEqual({ ...r.reopened, way: 0 }, { pins: 4, areas: 1, hulls: 1, way: 0, labels: 0, tiles: 3 }, 'drawn again as the map reopens');
 		const expected = { ...READS };
-		// The gamepad's map cursor: the pins' place on screen from the canvas's.
-		if (style === 'gamepad') expected['WorldMapFrame.canvas'] = ['GetEffectiveScale', 'GetHeight', 'GetLeft', 'GetTop', 'GetWidth'];
+		// The gamepad's map cursor: the pins' place on screen from the canvas's;
+		// no canvas click handler (the gamepad clicks with A, Core/Init.lua's GamepadUI).
+		if (style === 'gamepad') {
+			expected['WorldMapFrame.canvas'] = ['GetEffectiveScale', 'GetHeight', 'GetLeft', 'GetTop', 'GetWidth'];
+			expected.WorldMapFrame = READS.WorldMapFrame.filter((k) => k !== 'AddCanvasClickHandler');
+		}
 		assert.deepEqual(reads, expected, 'what Polestar reads on the maps');
 	});
 }

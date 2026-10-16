@@ -21,7 +21,9 @@ ns.RegisterDefaults("maps", {
 	zoneLevels = true,      -- level ranges on the continent and zone maps
 	coords = true,          -- player and cursor coordinates on the world map
 	minimapCoords = false,  -- a small player coordinate readout on the minimap
-	minimapButton = false,  -- a Polestar button on the minimap's edge
+	-- A Polestar button on the minimap's edge. On by default with the gamepad
+	-- interface, which has no slash commands (Core/Init.lua, ns.GamepadUI).
+	minimapButton = ns.GamepadUI(),
 	minimapButtonAngle = 225, -- where on the edge, degrees (0 = east, counter-clockwise)
 	reveal = "tint",        -- unexplored areas: "off" | "on" (revealed) | "tint" (revealed, tinted)
 	dungeonPins = false,    -- dungeon entrances on the world map (from the Codex pack)

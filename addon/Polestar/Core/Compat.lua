@@ -445,9 +445,13 @@ end
 -- leaves the map frame tainted, so every later open in combat is blocked and
 -- the quest pins are lost until a reload (Shortest Path Forever 1.8.0, #92;
 -- docs/NAV_QA.md C3); it is only the
--- fallback on a client without C_Map.OpenWorldMap. Never in combat.
+-- fallback on a client without C_Map.OpenWorldMap. Never in combat, and
+-- never with the gamepad interface (ns.GamepadUI): the map opened from
+-- addon code joins the gamepad's focus in Polestar's name, and its close
+-- is blocked. The button that would open it is not shown then.
 --   Compat.CanOpenWorldMap() -> bool ; Compat.OpenWorldMap(uiMapID) -> opened
 local function worldMapOpener()
+	if ns.GamepadUI() then return nil end
 	if C_Map and C_Map.OpenWorldMap then return C_Map.OpenWorldMap end
 	return OpenWorldMap
 end

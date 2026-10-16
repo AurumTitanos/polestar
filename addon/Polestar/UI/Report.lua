@@ -432,7 +432,7 @@ local function build()
 	F.Invite = W.Button(F, L["Get the invite"], function() UI.ShowDiscord() end)
 
 	F:SetScript("OnShow", function(self) Anim.To(self, "alpha", 0, 1, Anim.FAST, "out") end)
-	if UISpecialFrames then tinsert(UISpecialFrames, "PolestarReport") end
+	ns.CloseOnEscape("PolestarReport")
 end
 
 -- Opens the window on the step on screen. The details are taken now; what

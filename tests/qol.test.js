@@ -1973,12 +1973,18 @@ test('summons: accepted out of combat when able to teleport; the dialog closes; 
 		s.combat.player = true; local combat = summon(); s.combat.player = false
 		s.canTeleport = false; local cannot = summon(); s.canTeleport = true
 		stub.keys.shift = true; local shift = summon(); stub.keys.shift = false
-		s.gamepad = true; local pad = summon(); local padClosed = #calls("StaticPopup_Hide"); s.gamepad = false
-		emit({ combat = combat, cannot = cannot, shift = shift, pad = pad, padClosed = padClosed })
+		emit({ combat = combat, cannot = cannot, shift = shift })
 	`);
 	assert.equal(out[0], 0, 'off by default');
 	assert.deepEqual(out[1], { n: 1, closed: 1, msg: true });
-	assert.deepEqual(out[2], { combat: 0, cannot: 0, shift: 0, pad: 1, padClosed: 0 }, 'Gamepad style: dialogs left alone');
+	assert.deepEqual(out[2], { combat: 0, cannot: 0, shift: 0 });
+	// The gamepad interface is read as the addon loads (Core/Init.lua).
+	const [pad] = run(`
+		q.calls = {}; set("acceptSummon", true)
+		q.showPopup("CONFIRM_SUMMON"); stub.fire("CONFIRM_SUMMON", 0, false); stub.runTimers()
+		emit({ n = #calls("ConfirmSummon"), closed = #calls("StaticPopup_Hide") })
+	`, { before: 'stub.qol.social.gamepad = true' });
+	assert.deepEqual(pad, { n: 1, closed: 0 }, 'Gamepad style: accepted, and the dialog left alone');
 });
 
 test('resurrections: accepted after the corpse delay while still offered; never from a caster in combat or in Hardcore', () => {

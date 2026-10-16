@@ -1564,6 +1564,7 @@ L["Search settings"] = "Chercher un réglage"
 L["Open Polestar settings"] = "Ouvrir les réglages de Polestar"
 L["Close the game menu to see Polestar's settings (it cannot be closed for you in combat)."] = "Fermez le menu du jeu pour voir les réglages de Polestar (il ne peut pas être fermé pour vous en combat)."
 L["This translation was made with AI. Help improve it on Discord."] = "Cette traduction a été faite par une IA. Aidez à l'améliorer sur Discord."
+L["Close the game menu to see Polestar's settings."] = "Fermez le menu du jeu pour voir les réglages de Polestar."
 
 -- Rares/Rares.lua
 L["Raid warning"] = "Avertissement de raid"
