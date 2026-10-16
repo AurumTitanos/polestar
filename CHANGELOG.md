@@ -69,6 +69,9 @@
   skipping its quests one by one until it called itself complete. The guide
   starts by itself on the level-up, and the guide menu's row reads "From
   level 20".
+- A minimap button (Options, Map, Guide & quests; off by default): click
+  shows or hides the guide, right-click opens the settings, and you can drag
+  it around the minimap's edge (thanks Tedddogg).
 - The published leveling times count only what a guide requires: about
   130-132 h to 60 for the Horde and 132-134 h for the Alliance, not 123-124
   and 128-129. They used to count the guides' optional extras (rare-drop

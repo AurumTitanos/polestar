@@ -437,7 +437,7 @@ test('every Maps setting is registered with a label and help: map features on th
 	assert.equal(out.missing, '');
 	assert.deepEqual(Object.keys(out.pages).sort(), ['Map', 'Quality of Life']);
 	assert.deepEqual(out.pages.Map.sort(), [
-		'maps.coords', 'maps.dockPins', 'maps.dungeonPins', 'maps.innPins', 'maps.minimapCoords', 'maps.reveal',
+		'maps.coords', 'maps.dockPins', 'maps.dungeonPins', 'maps.innPins', 'maps.minimapButton', 'maps.minimapCoords', 'maps.reveal',
 		'maps.taxiPins', 'maps.travelMinimap', 'maps.zoneLevels',
 	]);
 	assert.deepEqual(out.pages['Quality of Life'].sort(), [
