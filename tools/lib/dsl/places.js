@@ -11,6 +11,21 @@
 //            or its part before the first comma does
 // Inns and flight points come from travel.json, zone names from zones.json.
 // A kind of place the data has nothing for is not checked.
+//
+// Places by ID (docs/GUIDE_FORMAT.md, "Places by ID"): the game names places
+// in the player's language, so a goal naming a place also gets its ID, and
+// the addon compares like with like:
+//   area  sethome, hearth, fly, getfp: the area their location names; goto:
+//         the one its label names. From the client's AreaTable
+//         (tools/lib/data/areas.js), in the goal's zone when it has a map.
+//         The addon compares the zone and subzone text (and the bind
+//         location) with C_Map.GetAreaInfo(area) and shows that name.
+//   node  getfp: the taxi node (travel.json) of the flight master it names,
+//         else the one node of that name or town serving every faction the
+//         goal applies to. The addon checks the nodes the flight map lists.
+// A name with no single match gets neither; the goal keeps its name match.
+
+const { areaNamed } = require('../data/areas');
 
 const DATA = new WeakMap();
 
@@ -95,4 +110,66 @@ function checkLocation(data, verb, location) {
 	};
 }
 
-module.exports = { checkLocation };
+// The verbs whose `location` names a place; `goto` names one with its label.
+const LOCATION_VERBS = new Set(['sethome', 'hearth', 'fly', 'getfp']);
+// travel.json faction mask bits.
+const SIDE_MASK = { Alliance: 1, Horde: 2 };
+
+// The name a goal's area is found by, or null.
+function placeName(goal) {
+	if (LOCATION_VERBS.has(goal.t)) return typeof goal.location === 'string' ? goal.location : null;
+	if (goal.t === 'goto') return typeof goal.text === 'string' ? goal.text : null;
+	return null;
+}
+
+// A goal's area ID, or undefined: the one area its place name stands for, in
+// the zone of its map when it has one.
+function goalArea(data, goal) {
+	const name = placeName(goal);
+	if (!name || !data.areas) return undefined;
+	const zone = goal.map !== undefined ? data.zone(goal.map) : null;
+	const area = areaNamed(data.areas, name, zone && zone.areaId);
+	return area ? area.id : undefined;
+}
+
+// A getfp's taxi node ID, or undefined: the node of its flight master
+// (`npc`), else the one node whose name or town is its location and that
+// serves every faction in `sides` (the factions the goal applies to).
+function goalNode(data, goal, sides) {
+	if (goal.t !== 'getfp' || typeof goal.location !== 'string') return undefined;
+	const nodes = data.flightNodes();
+	if (goal.npc !== undefined) {
+		const own = nodes.filter((n) => n.npc === goal.npc);
+		if (own.length === 1) return own[0].id;
+	}
+	const want = goal.location.trim().toLowerCase();
+	const mask = (sides || []).reduce((m, s) => m | (SIDE_MASK[s] || 0), 0);
+	const named = nodes.filter((n) => {
+		const full = String(n.name).toLowerCase();
+		return (full === want || town(full) === want) && (n.faction & mask) === mask;
+	});
+	return named.length === 1 ? named[0].id : undefined;
+}
+
+// -> { places, withArea, getfp, withNode }: goals naming a place and how many
+// got an area; getfp goals and how many got a taxi node.
+function placeCounts(guides) {
+	const out = { places: 0, withArea: 0, getfp: 0, withNode: 0 };
+	for (const g of guides) {
+		for (const step of g.steps || []) {
+			for (const goal of step.goals || []) {
+				if (placeName(goal) !== null) {
+					out.places++;
+					if (goal.area !== undefined) out.withArea++;
+				}
+				if (goal.t === 'getfp') {
+					out.getfp++;
+					if (goal.node !== undefined) out.withNode++;
+				}
+			}
+		}
+	}
+	return out;
+}
+
+module.exports = { checkLocation, goalArea, goalNode, placeCounts };

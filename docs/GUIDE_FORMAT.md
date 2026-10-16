@@ -130,10 +130,10 @@ A step must contain at least one goal.
 | `talk` | `<npcId>` | |
 | `interact` | `<objectId>` | Click a game object. |
 | `use` | `<itemId> ["Item name"]` | |
-| `sethome` | `"Location"` or `nearest` | Inn location as the game names it (the bind location it reports), e.g. `"Goldshire"`. `sethome nearest` binds at the nearest own-faction inn when the step comes up. Lint warns about a location no inn has (`polestar find --kind inn`). |
-| `hearth` | `"Location"` | Done when the zone or subzone where you land has that name: an inn's location or the zone it is in. Lint warns about any other name. |
-| `getfp` | `"Location"` | Discover a flight path: the flight point's name (`"Stormwind, Elwynn"`) or its part before the comma (`"Stormwind"`). Lint warns about a name no flight point has (`polestar find --kind flight`). |
-| `fly` | `"Location"` | Take a flight: the flight point's town (`"Stormwind"`), as the flight map picks the node by it. Done when the zone or subzone where you land has that name; where the landing area is named differently (`"Stormwind City"`), the goal checks off only through a later goal of its step. Lint warns about a name that is no flight point's town, inn location or zone they are in. |
+| `sethome` | `"Location"` or `nearest` | Inn location as the game names it (the bind location it reports), e.g. `"Goldshire"`. `sethome nearest` binds at the nearest own-faction inn when the step comes up. Lint warns about a location no inn has (`polestar find --kind inn`). Completes on every client language: binding at the inn's innkeeper, or a bind location the client names as the inn's area (see "Places by ID"). |
+| `hearth` | `"Location"` | Done when the zone or subzone where you land has that name: an inn's location or the zone it is in, in the client's language when the compiler finds its area ("Places by ID"). Lint warns about any other name. |
+| `getfp` | `"Location"` | Discover a flight path: the flight point's name (`"Stormwind, Elwynn"`) or its part before the comma (`"Stormwind"`). The compiler adds its taxi node, so it completes on every client language ("Places by ID"). Lint warns about a name no flight point has (`polestar find --kind flight`). |
+| `fly` | `"Location"` | Take a flight: the flight point's town (`"Stormwind"`), as the flight map picks the node by it. Done when the zone or subzone where you land has that name (in the client's language when the compiler finds its area, "Places by ID"); where the landing area is named differently (`"Stormwind City"`), the goal checks off only through a later goal of its step. Lint warns about a name that is no flight point's town, inn location or zone they are in. |
 | `train` | `[npcId]`, `<Profession> [Rank]`, or `class` | `train First Aid` / `train Mining Expert`: the nearest own-faction trainer of that profession and rank (`Apprentice`, `Journeyman`, `Expert`, `Artisan`; ranks taught by a book or quest point at its vendor or quest giver). Without a rank: the highest rank whose minimum skill (0/50/125/225) the last earlier `skill` (or `craft … until`) target for that profession in the guide reaches, Apprentice when there is none, and always above a rank the guide already trained. `train class`: the nearest trainer of the player's class. Resolved at runtime from the player's faction and position. |
 | `buy` | `<itemId> ["Item name"]` | Use `xN` for quantity. Add `nearest` to send the player to the closest own-faction vendor selling it. |
 | `vendor` | `[npcId]` or `nearest` | Sell junk / repair; `nearest` picks the closest own-faction vendor. |
@@ -219,6 +219,8 @@ AND. `only Warrior,Paladin,Dwarf` = (Warrior or Paladin) and Dwarf.
 | spawn areas `spots` | every goal placed at an NPC or object that spawns at more than one place, and hand-placed `@x,y` goals whose target the data also knows: see "Spawn areas" below |
 | group content `group` | elite work, dungeon and raid quests and goals on an instance map: see "Group content" below |
 | height `z` | a goal at an NPC or object: the height of that NPC's or object's spawn (`spawnz.json`), so the walk ends on its floor: see "Heights" below |
+| place area `area` | `sethome`, `hearth`, `fly` and `getfp` (their location) and `goto` (its label): the AreaTable area of that name, so the goal completes and reads right on every client language: see "Places by ID" below |
+| taxi node `node` | `getfp`: its flight point's taxi node (`travel.json`): see "Places by ID" below |
 
 **Spawn areas.** Mobs, quest objects and some NPCs spawn at more than one
 place, and a player who finds nothing where the arrow led must be able to try
@@ -294,6 +296,34 @@ it to a spawn area other than the goal's own point. `compile` prints how many
 goals got one ("heights: N of M NPC or object goals got z"). In the game the
 walk is searched with the height and asked again without it when that finds
 no route or one ending more than 30 yards above or below it.
+
+**Places by ID.** The game names places in the player's language
+("Sombre-Comté" on a French client for "Darkshire") and guides name them in
+English, so the compiler gives a goal that names a place that place's ID, and
+Polestar compares IDs, or names the game gives in the same language:
+
+- `area`: on `sethome`, `hearth`, `fly` and `getfp` the area their location
+  names, on `goto` the one its label names, from the client's AreaTable (the
+  newest Forever build `data build` caches in `data/sources/wago/`): of the
+  areas with that name (any case), the one in the goal's zone when the goal
+  has a map, else the open world's (Eastern Kingdoms and Kalimdor, not
+  Forever's copies of a town elsewhere). A name two areas share there gets
+  none. In the game a `hearth` or `fly` is done when the zone or subzone text
+  is that area's name in the client's language (`C_Map.GetAreaInfo`), and the
+  guide window shows that name.
+- `node`: on `getfp`, the taxi node of its flight master (`npc`), else of the
+  one flight point (`travel.json`) of that name or town serving every faction
+  the goal applies to (Booty Bay has one per faction, so a goal for both gets
+  none). In the game the goal is done once the flight map lists that node as
+  known.
+- `sethome` completes by its inn: `travel build` gives every inn its area,
+  and binding at the innkeeper the goal names (or the innkeeper of the inn its
+  location names) completes it.
+
+A name with no single match gets nothing and the goal keeps matching by its
+English name, as before; the guide sources do not change. `compile` prints
+how many got one ("areas: N of M place goals got an area", "nodes: N of M
+getfp goals got a taxi node").
 
 ## Group content
 

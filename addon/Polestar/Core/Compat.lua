@@ -391,6 +391,16 @@ function Compat.GetMapName(uiMapID)
 	return info and info.name or nil
 end
 
+-- An AreaTable area's name in the client's language (C_Map.GetAreaInfo),
+-- as GetZoneText, GetSubZoneText and GetBindLocation name it there; nil
+-- without the API, for an unknown area or while the value is secret.
+function Compat.GetAreaName(areaID)
+	if type(areaID) ~= "number" or not (C_Map and C_Map.GetAreaInfo) then return nil end
+	local ok, name = pcall(C_Map.GetAreaInfo, areaID)
+	if not ok or isSecret(name) or type(name) ~= "string" or name == "" then return nil end
+	return name
+end
+
 -- A map's name to show: the client's, else the Codex zone's; nil when
 -- neither knows the map. Asks ns.Compat, so a stand-in Compat answers too.
 function Compat.MapName(uiMapID)

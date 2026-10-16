@@ -12,9 +12,16 @@
 // to an innkeeper). The innkeeper and its position come from
 // data/forever/npcs.json (role "innkeeper"), and each must spawn on the map
 // listed here or the inn is dropped with a warning.
+//
+// Each inn also gets its `area`: the AreaTable area (the newest cached
+// Forever build, tools/lib/data/areas.js) of its first name that names one
+// in the inn's zone. The addon compares the bind location with that area's
+// name in the client's language (C_Map.GetAreaInfo), so an inn is known on
+// every client, not only on English ones.
 
 const { round } = require('./geo');
 const { spawnPoints } = require('./entities');
+const { areaNamed } = require('../data/areas');
 
 // [bind location names (first = display), uiMapID, innkeeper NPC id]
 const INNS = [
@@ -65,7 +72,8 @@ const INNS = [
 	[['Stonetalon Peak'], 1442, 16458],
 ];
 
-function buildInns({ frames, npcs, liveFrames }) {
+// areas: loadAreas() (tools/lib/data/areas.js) or null; zones: zones.json.
+function buildInns({ frames, npcs, liveFrames, areas = null, zones = {} }) {
 	const warnings = [];
 	const inns = [];
 	for (const [names, map, npcId] of INNS) {
@@ -82,9 +90,13 @@ function buildInns({ frames, npcs, liveFrames }) {
 			continue;
 		}
 		const p = pts[0];
+		const zone = zones[String(map)];
+		const area = areas ? names.map((n) => areaNamed(areas, n, zone && zone.areaId)).find(Boolean) : null;
+		if (areas && !area) warnings.push(`inn ${location}: no AreaTable area named ${names.map((n) => `"${n}"`).join(' or ')} in ${frames.name(map)}; the addon matches it by name only`);
 		inns.push({
 			location,
 			names: [...names],
+			...(area ? { area: area.id } : {}),
 			npc: npcId,
 			npcName: npc.name,
 			c: p.c,

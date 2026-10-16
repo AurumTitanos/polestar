@@ -1,0 +1,6 @@
+ID,ZoneName,AreaName_lang,ContinentID,ParentAreaID
+12,Elwynn,"Elwynn Forest",0,0
+40,Westfall,Westfall,0,0
+87,Goldshire,Goldshire,0,12
+108,SentinelHill,"Sentinel Hill",0,40
+16524,Goldshire,Goldshire,2940,16510

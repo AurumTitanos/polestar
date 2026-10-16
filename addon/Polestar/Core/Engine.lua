@@ -306,9 +306,14 @@ local function same(a, b)
 	return a ~= nil and b ~= nil and a:lower() == b:lower()
 end
 
-local function inPlace(location)
-	local zone, sub = Compat().GetZoneText()
-	return same(zone, location) or same(sub, location)
+-- The player stands in a hearth's or flight's place: the zone or subzone
+-- text is its area's name (`area`, C_Map.GetAreaInfo: both in the client's
+-- language), else, for a goal the compiler gave no area, its location.
+local function inPlace(goal)
+	local C = Compat()
+	local place = C.GetAreaName and C.GetAreaName(goal.area) or goal.location
+	local zone, sub = C.GetZoneText()
+	return same(zone, place) or same(sub, place)
 end
 
 -- Discovered flight paths, CharState().flags.fp; recreated if lost.
@@ -318,11 +323,17 @@ local function fpTable()
 	return flags.fp
 end
 
--- Taxi node names read "Stormwind, Elwynn"; guides say "Stormwind".
-local function fpKnown(location)
-	local fp = fpTable()
-	local want = location:lower()
-	for name in pairs(fp) do
+-- A getfp's flight path is known: by its taxi node when the compiler gave
+-- one (`node`, among the nodes Nav/Travel.lua records from the flight map in
+-- CharState().flags.taxi), else by name: taxi node names read "Stormwind,
+-- Elwynn"; guides say "Stormwind".
+local function fpKnown(goal)
+	if goal.node then
+		local taxi = ns.CharState().flags.taxi
+		return type(taxi) == "table" and taxi[goal.node] == true
+	end
+	local want = goal.location:lower()
+	for name in pairs(fpTable()) do
 		local n = name:lower()
 		if n == want or n:match("^([^,]+)") == want then return true end
 	end
@@ -996,9 +1007,20 @@ goalDone = function(s, g, goal)
 	elseif t == "sethome" then
 		-- `sethome nearest` has no location: binding during the step latches it.
 		if not goal.location then return false end
-		return same(C.GetBindLocation(), goal.location)
+		-- Bound at the goal's inn (its innkeeper, else the inn its location
+		-- names, in Nav/Travel.lua's data) by any of: the inn Travel finds for
+		-- the bind location (the innkeeper learned at bind time, else the inn
+		-- whose area the client names so, else its English names); the bind
+		-- location reading as that inn's or the goal's area in the client's
+		-- language; last, as its English location.
+		local nav = ns.Nav
+		local want = nav and nav.FindInn and nav.FindInn(goal.npc, goal.location)
+		if want and nav.BoundInn and nav.BoundInn() == want then return true end
+		local loc, areaName = C.GetBindLocation(), C.GetAreaName
+		if areaName and (same(loc, areaName(want and want.area)) or same(loc, areaName(goal.area))) then return true end
+		return same(loc, goal.location)
 	elseif t == "hearth" or t == "fly" then
-		if inPlace(goal.location) then return true end
+		if inPlace(goal) then return true end
 		-- Done once any later goal of the step is, like goto: a hearth followed
 		-- by a flight is behind the player once the flight lands. Later travel
 		-- goals count by their own place or check-off only (no recursion).
@@ -1008,7 +1030,7 @@ goalDone = function(s, g, goal)
 			if goalApplies(later) then
 				local lt = later.t
 				if lt == "hearth" or lt == "fly" then
-					if inPlace(later.location) or checked(s, j) then return true end
+					if inPlace(later) or checked(s, j) then return true end
 				elseif lt == "goto" then
 					if arrived[later] or checked(s, j) then return true end
 				elseif lt ~= "note" and goalDone(s, j, later) then
@@ -1018,7 +1040,7 @@ goalDone = function(s, g, goal)
 		end
 		return false
 	elseif t == "getfp" then
-		return fpKnown(goal.location)
+		return fpKnown(goal)
 	elseif t == "level" then
 		return (player.level or 1) >= goal.level
 	elseif t == "skill" then
@@ -1412,6 +1434,8 @@ local function describe(goal)
 	local t = goal.t
 	local C = Compat()
 	local N = ns.Names
+	-- A place goal's area (`area`) as the client names it, in its language.
+	local place = C.GetAreaName and C.GetAreaName(goal.area) or nil
 	if t == "accept" then
 		local detail = fmt(L["from %s"], N.Npc(goal.npc) or goal.npcName or N.Object(goal.object) or goal.objName or N.Item(goal.item) or goal.itemName)
 		local lvl = tonumber(goal.minLevel)
@@ -1432,7 +1456,7 @@ local function describe(goal)
 		return L["Collect"], item, "item", fmt(L["from %s"], npcName)
 	elseif t == "goto" then
 		local mapName = C.GetMapName(goal.map)
-		if goal.text then return L["Go to"], goal.text, "place", mapName end
+		if place or goal.text then return L["Go to"], place or goal.text, "place", mapName end
 		local lx, ly = liveXY(goal)
 		return L["Go to"], ("%.1f, %.1f"):format(lx or goal.x, ly or goal.y), "place", mapName
 	elseif t == "talk" then
@@ -1443,14 +1467,14 @@ local function describe(goal)
 		return L["Use"], N.Item(goal.item) or goal.itemName, "item", goal.quest and fmt(L["for %s"], questTitle(goal)) or nil
 	elseif t == "sethome" then
 		local _, npcName = npcOf(goal)
-		if goal.location then return L["Set your home to"], goal.location, "place", fmt(L["at %s"], npcName) end
+		if goal.location then return L["Set your home to"], place or goal.location, "place", fmt(L["at %s"], npcName) end
 		return L["Set your home at"], npcName or L["the nearest inn"], npcName and "npc" or "text", nil
 	elseif t == "hearth" then
-		return L["Hearth to"], goal.location, "place", nil
+		return L["Hearth to"], place or goal.location, "place", nil
 	elseif t == "getfp" then
-		return L["Get the flight path at"], goal.location, "place", fmt(L["from %s"], N.Npc(goal.npc) or goal.npcName)
+		return L["Get the flight path at"], place or goal.location, "place", fmt(L["from %s"], N.Npc(goal.npc) or goal.npcName)
 	elseif t == "fly" then
-		return L["Fly to"], goal.location, "place", nil
+		return L["Fly to"], place or goal.location, "place", nil
 	elseif t == "train" then
 		local _, npcName = npcOf(goal)
 		if goal.skillLine and rankCap(goal) then
@@ -2213,7 +2237,11 @@ local function latch(kind, npc)
 					if kind == "talk" then
 						ok = goal.npc == npc
 					elseif kind == "sethome" then
-						ok = not goal.location
+						-- `sethome nearest` on any bind; a located one at its inn's
+						-- innkeeper (goal.npc, else the one of the inn its location names).
+						local nav = goal.location and npc and ns.Nav
+						local inn = nav and nav.FindInn and nav.FindInn(goal.npc, goal.location)
+						ok = not goal.location or (npc ~= nil and npc == (inn and inn.npc or goal.npc))
 					elseif kind == "train" and isProfessionTrain(goal) then
 						ok = false
 					elseif goal.candidates and npc then
@@ -3282,12 +3310,14 @@ for _, event in ipairs({ "ZONE_CHANGED", "ZONE_CHANGED_INDOORS", "ZONE_CHANGED_N
 	ns.RegisterEvent(event, onContextEvent)
 end
 
--- `sethome nearest`: binding during the step completes it, in every tab.
+-- Binding during the step completes `sethome nearest`, and a located
+-- `sethome` when the innkeeper bound at is its inn's, in every tab.
 ns.RegisterEvent("HEARTHSTONE_BOUND", function()
 	if player then
+		local npc = Compat().GetNpcID("npc")
 		for i = 1, #tabs do
 			use(tabs[i])
-			latch("sethome")
+			latch("sethome", npc)
 		end
 		useActive()
 	end

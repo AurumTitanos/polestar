@@ -405,6 +405,7 @@ Compat.MapToWorld(uiMapID, x, y, frame) -> continentID, wx, wy | nil
 Compat.WorldToMap(continentID, wx, wy, uiMapID) -> x, y | nil
 Compat.GetMapName(uiMapID)      -> string | nil
 Compat.MapName(uiMapID)         -> string | nil   (the client's name, else the Codex zone's)
+Compat.GetAreaName(areaID)      -> string | nil   (C_Map.GetAreaInfo: the area's name in the client's language)
 Compat.GetContinentMap(uiMapID) -> continent uiMapID | nil
 Compat.GetPlayerFacing()        -> radians | nil   (0 = north, counter-clockwise positive)
 Compat.GetZoneText()            -> zone, subzone
@@ -595,14 +596,14 @@ as on a bag item (`W.ItemClick`: Shift links, Ctrl tries it on, Alt guides;
 | `complete` | `quest`, `title` | — | ready for turn-in or completed |
 | `kill` | `target` | `npc`, `count`, `quest`, `oi` | objective `oi` finished, or quest ready/completed (not while the log lists no objectives yet, right after the accept); without `quest`: manual |
 | `collect` | `item`, `itemName` | `count`, `quest`, `oi` | objective finished / quest ready (as `kill`) / completed; without `quest`: item count ≥ `count` |
-| `goto` | `map`, `x`, `y` | `text`, `r` (default 8 yd) | within radius, **or** any later goal in the step is done |
+| `goto` | `map`, `x`, `y` | `text`, `r` (default 8 yd), `area` (its name in the client's language shows instead of `text`) | within radius, **or** any later goal in the step is done |
 | `talk` | `npc`, `npcName` | — | gossip/quest frame opened with that NPC during this step; else manual |
 | `interact` | `object`, `objName` | `quest`, `oi` | objective state if `quest`; else manual |
 | `use` | `item`, `itemName` | `quest`, `oi` | objective state if `quest`; else manual |
-| `sethome` | `location` | `npc`, `npcName` | `GetBindLocation()` equals `location` (case-insensitive) |
-| `hearth` | `location` | — | zone or subzone equals `location`, else manual |
-| `getfp` | `location` | `npc`, `npcName` | taxi map opened at that flight master (persisted in `flags.fp`), else manual |
-| `fly` | `location` | — | zone or subzone equals `location`, else manual |
+| `sethome` | `location` | `npc`, `npcName`, `area` | bound at the goal's inn (`npc`'s, else the inn `location` names, in Nav/Travel.lua's data), by any of: the inn Travel finds for `GetBindLocation()` (`Nav.BoundInn`: the innkeeper learned at bind time in `flags.inn`, else the inn whose `area` the client names so, else its names); `GetBindLocation()` equal to the client's name of that inn's or the goal's `area` (`Compat.GetAreaName`); last, equal to `location` (case-insensitive). Binding at that innkeeper during the step latches it |
+| `hearth` | `location` | `area` | zone or subzone equals the client's name of `area` (without one, `location`), else manual |
+| `getfp` | `location` | `npc`, `npcName`, `node`, `area` | with `node`: that taxi node among the known ones (`flags.taxi`, recorded by Nav/Travel.lua from the flight map); without: taxi map opened at a flight master of that name (persisted in `flags.fp`); else manual |
+| `fly` | `location` | `area` | as `hearth` |
 | `train` | — | `npc`, `npcName`, `text` | trainer window opened during this step, else manual |
 | `buy` | `item`, `itemName` | `count`, `npc`, `npcName` | item count ≥ `count` (default 1) |
 | `vendor` | — | `npc`, `npcName`, `text` | merchant window opened during this step, else manual |
