@@ -496,7 +496,9 @@ prerequisites `pre` (one of) and `preAll` (every one), `closedBy` (the quest
 its breadcrumb leads to and the quests exclusive with it: once any of them is
 taken or done the giver never offers it again) and `preTitles` (titles of the
 quests those name, for the reason texts). Every goal of a quest only
-characters with a profession can take (quests.json `skill`, `skillLevel`)
+characters with a profession can take (quests.json `skill`, `skillLevel`:
+QuestieDB's Forever `requiredSkill`; pfQuest's Classic skill is not used for
+a quest the Forever store lists)
 carries `profLine` (skill line), `profName` and `profRank` (1 when the data
 has no level): the Engine treats the goal as not this character's (status
 `"na"`, like another class's goal) while `Compat.GetSkillRank` reports no rank

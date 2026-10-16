@@ -259,9 +259,11 @@
   for everyone else, the way another class's quests do: a Troll Warrior
   without Enchanting no longer sees A Pain in the Neck in Durotar, and
   learning the profession (or the rank the quest needs) brings it back. The
-  Dun Morogh and Teldrassil guides take Beer Basted Boar Ribs and Recipe of
-  the Kaldorei after the cooking lesson, since Ragnar Thunderbrew and Zarrin
-  offer them to cooks only (thanks AndarKerran).
+  Teldrassil guide takes Recipe of the Kaldorei after the cooking lesson,
+  since Zarrin offers it to cooks only (thanks AndarKerran).
+- Beer Basted Boar Ribs stays on the first visit to Ragnar Thunderbrew in
+  Kharanos and in sight without Cooking: on Forever he offers it to
+  characters who have not learned Cooking (thanks thmastin).
 - A quest item's goal says where it comes from: "Kill Grellkin or Grell for
   Fel Moss" instead of "Collect Fel Moss", and "Collect Handful of Oats from
   Sack of Oats" for one you pick up, on the goal line and the arrow. Up to
@@ -321,7 +323,11 @@
   hides it from characters without that profession and rank (older
   versions ignore the fields). In a Leveling guide lint warns on such a goal
   unless it is `optional` or the guide trains the profession (and levels it
-  to the quest's rank) first.
+  to the quest's rank) first. `data build` takes `skill` from QuestieDB's
+  Forever store only: a quest it lists without a required skill has none,
+  whatever pfQuest's Classic data says, so Beer Basted Boar Ribs, Liquid
+  Stone and five Stranglethorn Fishing Extravaganza quests need no
+  profession (thanks thmastin).
 
 ### For contributors
 

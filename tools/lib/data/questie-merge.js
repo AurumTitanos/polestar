@@ -386,7 +386,11 @@ function mergeQuest(id, pf, r, ctx) {
 		objectiveText: r.objectiveText || base.objectiveText,
 		zone: base.zone,
 		xp: base.xp,
-		skill: has(r.skill) ? r.skill : base.skill,
+		// The profession a quest needs is the Forever store's alone: a quest it
+		// lists without requiredSkill is offered to everyone on Forever, whatever
+		// pfQuest's Classic data says (Ragnar Thunderbrew offers Beer Basted
+		// Boar Ribs, 384, to non-cooks; pfQuest lists Cooking).
+		skill: has(r.skill) ? r.skill : null,
 		event: base.event,
 		source: [...(base.source || []), SOURCE],
 	};

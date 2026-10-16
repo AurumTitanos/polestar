@@ -248,12 +248,13 @@ test('forever/alliance/03-darkshore.guide: Wogi\'s report: with Skip grey quests
 
 // --- Durotar (AndarKerran): A Pain in the Neck (96873) is for enchanters.
 
-// Durotar played by the Engine for a level 12 Troll Warrior: the status of
-// each 96873 goal ("accept na", ...), with `skills` (Lua) set before login and
-// `after` run once the guide is open.
-function painInTheNeck({ skills = '', after = '' } = {}) {
+// A guide played by the Engine for one character (`who`: race, raceName,
+// faction, cls, className, level): the status of each goal of `quest`
+// ("accept na", ...), with `skills` (Lua) set before login and `after` run
+// once the guide is open.
+function questGoalStatus(guide, quest, who, { skills = '', after = '' } = {}) {
 	data = data || loadData(DATA);
-	const file = path.join(OFFICIAL_DIR, DUROTAR);
+	const file = path.join(OFFICIAL_DIR, guide);
 	const { guides } = compileSources([{ file, text: fs.readFileSync(file, 'utf8') }], data);
 	const { dir, scripts } = writeTestPack(guides, data);
 	try {
@@ -261,8 +262,8 @@ function painInTheNeck({ skills = '', after = '' } = {}) {
 		const { emitted } = runAddon({
 			stubs: ['stub_world.lua'],
 			before: `local w = stub.world
-				w.race, w.raceName, w.faction, w.class, w.className = "Troll", "Troll", "Horde", "WARRIOR", "Warrior"
-				w.level = 12
+				w.race, w.raceName, w.faction, w.class, w.className = "${who.race}", "${who.raceName}", "${who.faction}", "${who.cls}", "${who.className}"
+				w.level = ${who.level}
 				${skills}`,
 			addons: [{ name: 'Polestar', files: ['Core/Core.xml'] }],
 			saved: { Polestar: 'PolestarDB = { schema = 1, settings = { behavior = { autoSelectGuide = false } } }' },
@@ -271,13 +272,13 @@ function painInTheNeck({ skills = '', after = '' } = {}) {
 				end
 				stub.login(); stub.advance(0.5)
 				local E = Polestar.Engine
-				E.SetGuide("forever/horde/orc-troll/01-durotar")
+				E.SetGuide("${guide.replace(/\.guide$/, '')}")
 				${after}
 				stub.advance(0.5)
 				local out = {}
 				for i = 1, #E.GetGuide().steps do
 					for _, g in ipairs(E.GetStepView(i).goals) do
-						if g.quest == 96873 then out[#out + 1] = g.t .. " " .. g.status end
+						if g.quest == ${quest} then out[#out + 1] = g.t .. " " .. g.status end
 					end
 				end
 				emit(out)`,
@@ -287,6 +288,9 @@ function painInTheNeck({ skills = '', after = '' } = {}) {
 		fs.rmSync(dir, { recursive: true, force: true });
 	}
 }
+
+const TROLL_WARRIOR = { race: 'Troll', raceName: 'Troll', faction: 'Horde', cls: 'WARRIOR', className: 'Warrior', level: 12 };
+const painInTheNeck = (opts) => questGoalStatus(DUROTAR, 96873, TROLL_WARRIOR, opts);
 
 test(`${DUROTAR}: AndarKerran's report: A Pain in the Neck is not offered to a Troll Warrior without Enchanting, and is to an enchanter`, { skip }, () => {
 	// Pa'zula offers it to enchanters only (QuestieDB: Enchanting 1): every goal carries the profession.
@@ -304,20 +308,35 @@ test(`${DUROTAR}: AndarKerran's report: A Pain in the Neck is not offered to a T
 	assert.deepEqual(painInTheNeck({ after: 'stub.world.learnSkill(333, "Enchanting", 1, 75)' }), offered);
 });
 
-// The Cooking quests of the starting zones (Beer Basted Boar Ribs 384, Recipe
-// of the Kaldorei 4161) are offered to cooks only: the guide teaches Cooking
-// at the giver's door first.
-test('the starting-zone Cooking quests are taken after the guide teaches Cooking', { skip }, () => {
-	for (const [guide, lesson, quest] of [
-		[DUN_MOROGH, 96629, 384],
-		[TELDRASSIL, 96634, 4161],
-	]) {
-		const list = goals(guide);
-		const take = at(list, `accept ${quest}`, is('accept', quest));
-		assert.equal(list[take].goal.profName, 'Cooking', `${quest} needs Cooking`);
-		assert.ok(at(list, `turnin ${lesson} (Camping 101: Cooking)`, is('turnin', lesson)) < take, `${guide}: ${quest} after the cooking lesson`);
-		assert.ok(at(list, 'train Cooking', (g) => g.t === 'train' && g.skillLine === 185) < take, `${guide}: ${quest} after training Cooking`);
-	}
+// Recipe of the Kaldorei (4161) is offered to cooks only (QuestieDB's Forever
+// store: Cooking 1): Teldrassil teaches Cooking at Zarrin's door first.
+test(`${TELDRASSIL}: Recipe of the Kaldorei is taken after the guide teaches Cooking`, { skip }, () => {
+	const list = goals(TELDRASSIL);
+	const take = at(list, 'accept 4161', is('accept', 4161));
+	assert.equal(list[take].goal.profName, 'Cooking', '4161 needs Cooking');
+	assert.ok(at(list, 'turnin 96634 (Camping 101: Cooking)', is('turnin', 96634)) < take, '4161 after the cooking lesson');
+	assert.ok(at(list, 'train Cooking', (g) => g.t === 'train' && g.skillLine === 185) < take, '4161 after training Cooking');
+});
+
+// --- Dun Morogh (thmastin): Beer Basted Boar Ribs (384) is for everyone.
+
+// Ragnar Thunderbrew offers it to a Dwarf Paladin without Cooking (Camping
+// 101: Cooking still in the log). QuestieDB's Forever store lists no skill for
+// it; only pfQuest's Classic data lists Cooking, which does not gate.
+test(`${DUN_MOROGH}: thmastin's report: Beer Basted Boar Ribs is offered without Cooking, on arrival in Kharanos`, { skip }, () => {
+	const list = goals(DUN_MOROGH);
+	const ribs = list.filter(({ goal }) => goal.quest === 384);
+	assert.deepEqual(ribs.map(({ goal }) => [goal.t, goal.profLine]), [
+		['accept', undefined],
+		['complete', undefined],
+		['turnin', undefined],
+	]);
+	const take = at(list, 'accept 384', is('accept', 384));
+	assert.ok(take < at(list, 'turnin 96629 (Camping 101: Cooking)', is('turnin', 96629)), '384 is taken before the cooking lesson');
+	const dwarf = { race: 'Dwarf', raceName: 'Dwarf', faction: 'Alliance', cls: 'PALADIN', className: 'Paladin', level: 6 };
+	const status = questGoalStatus(DUN_MOROGH, 384, dwarf);
+	assert.equal(status.length, 3);
+	assert.ok(status.every((s) => !s.endsWith(' na')), `a Dwarf without Cooking sees 384: ${status.join(', ')}`);
 });
 
 // Every leveling guide with a profession quest still plays to the end for a
