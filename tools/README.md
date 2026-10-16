@@ -81,7 +81,7 @@ without QuestieDB.
 
 | Command | What it does |
 |---|---|
-| `i18n` | The interface translations ([docs/TRANSLATING.md](../docs/TRANSLATING.md)): `status`, `check`, `sync`, `keys`, `import` |
+| `i18n` | The interface translations ([docs/TRANSLATING.md](../docs/TRANSLATING.md)): `status`, `check`, `sync`, `keys`, `import`; and `names`, the names addons `addon/Polestar_Names_<locale>` |
 
 ### Releasing
 
@@ -122,7 +122,7 @@ The release steps are in [docs/RELEASING.md](../docs/RELEASING.md).
 | `generated.js` | Writes or checks a command's generated files |
 | `game/` | The game's rules, once for every tool: `xp.js` (XP to level, quest and kill XP, the client's QuestXP table) and `races.js` (races, classes and their mask bits) |
 | `gear/` | `gear build`: Forever item stats, reward choices, weight bands |
-| `i18n/` | `i18n`: the locales (`locales.js`), key extraction (`keys.js`), the format check (`check.js`), reading and editing locale files (`files.js`), the glossary (`glossary.js`, `glossary/<locale>.json`) and each locale's state (`project.js`); adapted from Ding! by Yendi |
+| `i18n/` | `i18n`: the locales (`locales.js`), key extraction (`keys.js`), the format check (`check.js`), reading and editing locale files (`files.js`), the glossary (`glossary.js`, `glossary/<locale>.json`) and each locale's state (`project.js`), adapted from Ding! by Yendi; the names addons (`names.js`: DingDB's pin, the ids Polestar's data names, the merge with pfQuest's locale files and the emitted addons) |
 | `itemdb/` | `itemdb build`: item stats from the client tables |
 | `lua.js` | Runs Lua 5.1 for the tools (reading SavedVariables and other addons' data) |
 | `maps/` | `maps build` (zone levels) and `maps overlays` |
@@ -178,6 +178,7 @@ file's language written by `header()` in `lib/generated.js`:
 | `guides/forever/professions/` mining, herbalism, skinning, cooking, first-aid, fishing | `profession gathering build` | `data/forever` professions, items, npcs, objects | yes | `profession gathering check`; `tests/profession-gathering.test.js` |
 | `guides/forever/professions/` alchemy, blacksmithing, enchanting, engineering, leatherworking, tailoring | `profession draft <Profession> --out` | `data/forever` including professions | yes | rerun |
 | `addon/Polestar_Guides/` | `compile` | `guides/**/*.guide`, `guides/pack.json`, `data/forever` (including trainers, travel, professions, factions, races; never `dungeons.json`) | yes | rerun; `tests/guides-parse.test.js` fails when a guide is added, renamed or removed without `compile` |
+| `addon/Polestar_Names_<locale>/` (9) | `i18n names` | DingDB pinned in `tools/lib/i18n/names.js` (cloned into `data/sources/ding`), pfQuest's `db/<locale>` (`data/sources/pfQuest`), the ids of `addon/Polestar_Guides/Guides.lua`, `addon/Polestar_QuestDB/` and `data/forever/codex/` | yes (always in the release zip) | rerun after `compile`, `questdb build` or `codex build` add ids; `tests/i18n-names.test.js` |
 | `addon/Polestar/Media/Nav/*.tga`, `addon/Polestar/Media/UI/*.tga` | `media` | `tools/media/*.js`, `tools/lib/tga.js`, `tools/media/fonts` (no data) | yes | rerun: the output is byte-identical, and CI fails when it differs from the committed files; `tests/media-refs.test.js` checks the addon names every texture |
 | `docs/preview/*.svg` | `preview` | the addon's Lua (Core, Theme, Nav, Quests, Gear, Maps, QoL, Lookup, Dungeons, Rares, UI), its generated files included; `tests/lua` (the client stubs, `stub_ui.lua`'s sample guides), `tests/fixtures`, among them six compiled Horde guides frozen in `tests/fixtures/preview/guides.lua`; no reference data and not the shipped `addon/Polestar_Guides`, so a guide recompile never changes the renders. `POLESTAR_CLIENT_ART` (with `POLESTAR_DUNGEONS_PACK`) renders local art and data into its own folder, never here | yes | rerun: the output is byte-identical, and CI fails when it differs from the committed files or a render is missing; a full run removes the renders of scenes that are gone |
 | `docs/assets/{banner-dark,banner-light,emblem,logo,download,curseforge,avatar}.svg` | `readme brand` | the emblem geometry, the wordmark fonts, the CurseForge mark | yes | rerun |
