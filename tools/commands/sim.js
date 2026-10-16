@@ -12,20 +12,24 @@ const usage = `usage: node tools/polestar.js sim <command> [options]
   sim run     --faction F [--race R] [--class C] [--paths N] [--workers W] [--seed S] [--dungeons]
               [--jobs J] [--anneal A] [--max-paths M]
   sim robust  --faction F [--race R] [--draws K] [--top N]   robustness of the top routes
-  sim compare --faction F [--race R] [--guides DIR] [--pack DIR | DIR] [--to 10,20,30] [--with-optional]
+  sim compare --faction F [--race R] [--class C] [--guides DIR] [--pack DIR | DIR] [--to 10,20,30] [--with-optional]
               Polestar's routes vs the best found, same model
-  sim bench   --faction F [--race R]                  bracket table: zones, levels, quests per 10 levels
+  sim bench   --faction F [--race R] [--class C]      bracket table: zones, levels, quests per 10 levels
   sim export  --result <file> --out <dir>             zone-by-zone skeleton guides + visits.json for authors
   sim consensus --faction F [--dungeons] [--evals N]  one 12-60 route shared by the faction's starts (+ exports)
 
 Without --race, run/robust/compare/bench cover every start of the faction
 (Horde: Orc, Tauren, Undead, Skyborne; Alliance: Human, Dwarf, NightElf,
-Skyborne). Class defaults to none ("any": class quests excluded, class factor 1).
+Skyborne). Class defaults to none ("any": class quests excluded, class factor
+1); with --class the class's quests and kill-speed prior are used, and
+compare/bench write their own files so the class-agnostic ones stay.
 
 options:
   --data <dir>       reference data (default data/forever)
   --sim <dir>        simulator outputs (default data/sim)
   --fdj <dir>        calibrate: ForeverDungeonJournal folder (default: the installed one)
+  --class <name>     Warrior, Paladin, Hunter, Rogue, Priest, Shaman, Mage, Warlock or Druid:
+                     score for that class (run/robust/compare/bench); default none ("any")
   --band <levels>    level width of the world's quest packages (default 5; a new width rebuilds the world)
   --guides <dir>     compare: Polestar guides folder to score (default guides/), e.g. an old copy
   --pack <dir>       compare: also score this guide pack's chain (or name the pack folder
