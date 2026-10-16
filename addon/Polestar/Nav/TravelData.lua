@@ -4,7 +4,7 @@
 -- 1.60.1.70425) for the ships Forever added; docks and inns placed from data/forever (pfQuest, MIT);
 -- learned walking paths from 0 recorded session(s).
 -- Timetables, portals and teleports: WoW Forever TransportAnimation and spell tables (wago.tools build
--- 1.60.1.70374), CMaNGOS classic-db 22b5146 (spawns, areatrigger_teleport,
+-- 1.60.1.70425), CMaNGOS classic-db 22b5146 (spawns, areatrigger_teleport,
 -- spell_target_position, sniffed transport periods) and the CMaNGOS transport model, after
 -- Shortest Path Forever by Cillian Berragan (GPL-3.0-or-later, used with permission).
 -- Portions Copyright (C) 2026 Cillian Berragan (Shortest Path Forever, GPL-3.0-or-later); adapted for Polestar, 2026-10-15.
