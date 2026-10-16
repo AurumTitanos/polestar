@@ -478,15 +478,14 @@ local NPC_VERBS = { accept = true, turnin = true, talk = true, train = true, ven
 
 -- What the step key does now. view, raw: QoL.CurrentStep()'s, when the
 -- caller has them. -> "item", itemID | "target", names (reused list) |
--- "npc", name | nil
-function Buttons.StepAction(view, raw)
-	if not view then view, raw = QoL.CurrentStep() end
-	if not view then return nil end
-	local goals = view.goals or {}
+-- "npc", name | nil. The route's own goals come first, in guide order, then
+-- the optional ones, so an optional accept never takes the key.
+local function stepGoal(view, raw, goals, optional)
 	for g = 1, #goals do
 		local gv = goals[g]
 		local rg = raw and raw[g] or gv
-		if QoL.Open(gv) then
+		local isOptional = (rg.optional or gv.optional) and true or false
+		if isOptional == optional and QoL.Open(gv) then
 			local t = gv.t
 			if t == "use" then
 				local item = gv.item or rg.item
@@ -502,6 +501,15 @@ function Buttons.StepAction(view, raw)
 			end
 		end
 	end
+end
+
+function Buttons.StepAction(view, raw)
+	if not view then view, raw = QoL.CurrentStep() end
+	if not view then return nil end
+	local goals = view.goals or {}
+	local kind, value = stepGoal(view, raw, goals, false)
+	if not kind then kind, value = stepGoal(view, raw, goals, true) end
+	if kind then return kind, value end
 	local item = Buttons.ChooseQuestItem(view, raw)
 	if item then return "item", item end
 	return nil
@@ -515,7 +523,8 @@ local function applyStep(b)
 		if step.kind == "target" then
 			text = Buttons.TargetMacro(step.list, step.cycle)
 		elseif step.kind == "npc" then
-			text = "/targetexact " .. step.value
+			-- A line break would end the macro line and start another command.
+			text = "/targetexact " .. step.value:gsub("[\r\n]", "")
 		elseif step.kind == "item" then
 			item = "item:" .. step.value
 		end

@@ -277,6 +277,30 @@ test('step key: one binding does the step\'s next action, the NPC, the quest ite
 	assert.equal(out[11], false, 'a key only: no button on screen');
 });
 
+test('step key: the route\'s own goals come before optional ones, and an NPC name\'s line breaks never reach the macro', () => {
+	const out = run(`
+		local s = PolestarStepButton
+		local function now() return { s:GetAttribute("type") or "nil", s:GetAttribute("item") or s:GetAttribute("macrotext") or "nil" } end
+		-- an optional accept first: the route's kill takes the key
+		q.step({ { t = "accept", quest = 7, npc = 197, npcName = "Marshal McBride", optional = true }, { t = "kill", target = "Kobold Vermin", quest = 8, oi = 1 } })
+		emit(now())
+		-- the route's own turn-in after an optional accept: the turn-in's NPC
+		q.step({ { t = "accept", quest = 7, npc = 197, npcName = "Marshal McBride", optional = true }, { t = "turnin", quest = 9, npc = 240, npcName = "Marshal Dughan" } })
+		emit(now())
+		-- only optional goals open: the optional one still gets the key
+		q.step({ { t = "turnin", quest = 9, npc = 240, npcName = "Marshal Dughan", status = "done" }, { t = "accept", quest = 7, npc = 197, npcName = "Marshal McBride", optional = true } })
+		emit(now())
+		-- line breaks in the name: one /targetexact line, no second command
+		q.step({ { t = "talk", npc = 241, npcName = "Marshal\\r\\nDughan\\n/run print(1)" } })
+		emit(now())
+	`);
+	assert.deepEqual(out[0], ['macro', '/targetexact Kobold Vermin'], 'an optional accept does not take the key');
+	assert.deepEqual(out[1], ['macro', '/targetexact Marshal Dughan']);
+	assert.deepEqual(out[2], ['macro', '/targetexact Marshal McBride'], 'optional goals still count once the route\'s are done');
+	assert.deepEqual(out[3], ['macro', '/targetexact MarshalDughan/run print(1)']);
+	assert.ok(!out[3][1].includes('\n') && !out[3][1].includes('\r'));
+});
+
 // Every CLICK binding names a button Buttons.lua creates and has its label in
 // Commands.lua.
 test('key bindings: each CLICK binding has a button and a label', () => {
@@ -290,6 +314,9 @@ test('key bindings: each CLICK binding has a button and a label', () => {
 	assert.ok(names.includes('PolestarStepButton'));
 	for (const n of names) {
 		assert.ok(commands.includes('_G["BINDING_NAME_CLICK ' + n + ':LeftButton"] = L['), n + ' has a label');
+	}
+	assert.ok(commands.includes('L["Step action: NPC, quest item, mob or Hearthstone"]'), 'the step key\'s label names its actions in the order it tries them');
+	for (const n of names) {
 		assert.ok(buttons.includes('"' + n + '"'), n + ' is created');
 	}
 });
