@@ -1,0 +1,18 @@
+# Who is asked to review a pull request, by the files it changes. The last
+# matching line wins. Every pull request is read in full by a maintainer
+# (CONTRIBUTING.md, "How a pull request is reviewed"); the lines below name
+# the paths that review is strictest on.
+
+*                       @fitzforge
+
+# Code that runs in the game or on the maintainer's machine.
+/addon/Polestar/        @fitzforge
+/addon/Polestar_Recorder/ @fitzforge
+/tools/                 @fitzforge
+/tests/lua/             @fitzforge
+
+# Automation, repository rules and the rules agents follow.
+/.github/               @fitzforge
+/AGENTS.md              @fitzforge
+/skills/                @fitzforge
+/SECURITY.md            @fitzforge

@@ -1,11 +1,13 @@
 'use strict';
 // GitHub's REST API, the calls the bot and the Actions make: issues, their
-// comments and labels, and files on the media branch. Waits out rate limits
-// and retries server errors; anything else throws with GitHub's message.
+// comments and labels, releases, files at a tag, and files on the media
+// branch. Waits out rate limits and retries server errors; anything else
+// throws with GitHub's message.
 
 const API = process.env.GITHUB_API_URL || 'https://api.github.com';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const encodePath = (p) => p.split('/').map(encodeURIComponent).join('/');
 
 class GitHubError extends Error {
 	constructor(status, body, what) {
@@ -61,6 +63,13 @@ function createGitHub({ token, repo, api = API, fetch: fetchImpl = fetch }) {
 		return out.slice(0, max);
 	}
 
+	// A path's contents at a ref (a folder's entries, a file in base64), or
+	// null when it is not there.
+	const contentsAt = (path, ref) => request('GET', `${r}/contents/${encodePath(path)}?ref=${encodeURIComponent(ref)}`).catch((err) => {
+		if (err.status !== 404) throw err;
+		return null;
+	});
+
 	return {
 		repo,
 		request,
@@ -76,6 +85,30 @@ function createGitHub({ token, repo, api = API, fetch: fetchImpl = fetch }) {
 			if (err.status !== 404) throw err;
 		}),
 		releases: () => list(`${r}/releases`, 100),
+		// An issue's timeline: its events, closes and cross-references included.
+		timeline: (n) => list(`${r}/issues/${n}/timeline`, 1000),
+		pull: (n) => request('GET', `${r}/pulls/${n}`),
+		// Whether a ref (a tag) holds a commit: the commit is behind the ref or
+		// is it. A commit the repository does not have is in no ref.
+		contains: async (ref, sha) => {
+			try {
+				const cmp = await request('GET', `${r}/compare/${encodeURIComponent(ref)}...${encodeURIComponent(sha)}?per_page=1`);
+				return cmp.status === 'behind' || cmp.status === 'identical';
+			} catch (err) {
+				if (err.status === 404) return false;
+				throw err;
+			}
+		},
+		// A folder's entries ({ name, path, type }) at a ref, [] when it is not there.
+		listDir: async (path, ref) => {
+			const items = await contentsAt(path, ref);
+			return Array.isArray(items) ? items : [];
+		},
+		// A file's text at a ref, null when it is not there.
+		readFile: async (path, ref) => {
+			const file = await contentsAt(path, ref);
+			return file && typeof file.content === 'string' ? Buffer.from(file.content, file.encoding || 'base64').toString('utf8') : null;
+		},
 		// Issues (not pull requests) carrying a label, newest first.
 		issuesLabelled: async (label, { state = 'all', since, max = 300 } = {}) => {
 			let q = `${r}/issues?labels=${encodeURIComponent(label)}&state=${state}&sort=created&direction=desc`;
@@ -135,7 +168,6 @@ function createMedia({ github, repo = github.repo, branch, fetch: fetchImpl = fe
 		return ready;
 	}
 
-	const encodePath = (p) => p.split('/').map(encodeURIComponent).join('/');
 	const rawUrl = (p) => `https://raw.githubusercontent.com/${repo}/${branch}/${encodePath(p)}`;
 
 	async function put(path, bytes, message) {

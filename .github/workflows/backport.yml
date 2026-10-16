@@ -1,0 +1,77 @@
+name: Backport
+
+# A pull request merged into next with the label backport is a fix the next
+# patch should carry too: its commits are cherry-picked onto the open
+# hotfix/<version> branch and a pull request opens there. Labelling a pull
+# request after its merge works as well. With no hotfix branch, or more than
+# one, the pull request gets a comment and nothing is picked.
+#
+# This runs on pull_request_target so the token can push a branch when the
+# fix came from a fork. It checks out the default branch, never the pull
+# request's code; the action fetches the commits it picks.
+#
+# A pull request opened with GITHUB_TOKEN starts no workflow, so CI and the
+# Base branch check do not run on the backport by themselves: close and
+# reopen it (or push to it) to run them.
+
+on:
+  pull_request_target:
+    types: [closed, labeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: backport-${{ github.event.pull_request.number }}
+
+jobs:
+  backport:
+    name: Backport to the hotfix branch
+    if: >
+      github.event.pull_request.merged &&
+      github.event.pull_request.base.ref == github.event.repository.default_branch &&
+      contains(github.event.pull_request.labels.*.name, 'backport') &&
+      (github.event.action == 'closed' || github.event.label.name == 'backport')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Hotfix branch
+        id: target
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          branches=$(git ls-remote --heads origin 'hotfix/*' | sed 's|.*refs/heads/||')
+          count=$(printf '%s' "$branches" | grep -c . || true)
+          if [ "$count" -eq 1 ]; then
+            echo "branch=$branches" >> "$GITHUB_OUTPUT"
+            echo "Backporting #$NUMBER to \`$branches\`." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if [ "$count" -eq 0 ]; then
+            msg="No backport: there is no \`hotfix/<version>\` branch to pick this onto. Once one is cut, remove the \`backport\` label and add it again."
+          else
+            list=$(printf '%s' "$branches" | sed 's/.*/`&`/' | paste -sd ' ' -)
+            msg="No backport: there is more than one hotfix branch ($list), and only one patch is made at a time. Once the others are gone, remove the \`backport\` label and add it again."
+          fi
+          gh pr comment "$NUMBER" --body "$msg"
+          echo "$msg" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Backport
+        if: steps.target.outputs.branch != ''
+        uses: korthout/backport-action@8560fb503c275d433c56f05a2f64850093baa9f7 # v4.7.0
+        with:
+          target_branches: ${{ steps.target.outputs.branch }}
+          # The target comes from the step above, not from label names.
+          label_pattern: ''
+          # Merges of next into the pull request's branch are not part of the fix.
+          merge_commits: skip
+          pull_description: |-
+            Backport of #${pull_number} to `${target_branch}`, for the next patch release.
+
+            This pull request was opened by a workflow, which starts no checks: close and reopen it to run CI and the Base branch check.

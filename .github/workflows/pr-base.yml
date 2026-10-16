@@ -1,0 +1,99 @@
+name: PR base
+
+# A pull request goes to `next`, or to `hotfix/<version>` for a guide fix to
+# the latest release; never to `main`. A pull request into a hotfix branch may
+# change only what a patch release carries (`release scope` has the list).
+# CONTRIBUTING.md "Branches" has the rules.
+#
+# This runs on pull_request_target so it can be a required check for pull
+# requests from forks too. It never checks out or runs the pull request's
+# code: the scope check comes from the default branch, and the pull
+# request's files come from the API. Editing a pull request (a new base
+# included) runs it again.
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: pr-base-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  base:
+    name: Base branch
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BASE: ${{ github.event.pull_request.base.ref }}
+    steps:
+      - name: Not main
+        if: github.event.pull_request.base.ref == 'main'
+        run: |
+          msg="Pull requests never go to main, which moves only when a release is made. Change the base to next, or to the open hotfix/<version> branch for a guide fix to the latest release (CONTRIBUTING.md, \"Branches\")."
+          echo "::error::$msg"
+          {
+            echo '## Base branch: main'
+            echo
+            echo "$msg"
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit 1
+
+      - uses: actions/checkout@v5
+        if: startsWith(github.event.pull_request.base.ref, 'hotfix/')
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@v5
+        if: startsWith(github.event.pull_request.base.ref, 'hotfix/')
+        with:
+          node-version: 24
+
+      # A rename counts with both its paths: moving a file out of the allowed
+      # paths changes the place it came from too.
+      - name: Patch scope
+        if: startsWith(github.event.pull_request.base.ref, 'hotfix/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          gh api --paginate "repos/${GITHUB_REPOSITORY}/pulls/${NUMBER}/files" \
+            --jq '.[] | .filename, (.previous_filename // empty)' > "$RUNNER_TEMP/files.txt"
+          status=0
+          node tools/polestar.js release scope --files - < "$RUNNER_TEMP/files.txt" > "$RUNNER_TEMP/offenders.txt" || status=$?
+          if [ "$status" -eq 0 ]; then
+            {
+              echo "## Base branch: $BASE"
+              echo
+              echo "Every changed file is one a patch release may carry."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if [ "$status" -ne 1 ]; then
+            echo "::error::release scope exited with $status"
+            exit "$status"
+          fi
+          echo "::error::This pull request goes to $BASE, a patch release, which carries only guide fixes. These files belong on next (CONTRIBUTING.md, \"Branches\"):"
+          sed 's/^/  /' "$RUNNER_TEMP/offenders.txt"
+          {
+            echo "## Base branch: $BASE"
+            echo
+            echo "A patch release carries only the guides, the compiled guides, their tests, the data corrections and the changelog. These files belong on \`next\`: move them to a pull request there, or change this one's base to \`next\`. CONTRIBUTING.md, \"Branches\", has the rules."
+            echo
+            sed 's/.*/- `&`/' "$RUNNER_TEMP/offenders.txt"
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit 1
+
+      - name: Next
+        if: github.event.pull_request.base.ref != 'main' && !startsWith(github.event.pull_request.base.ref, 'hotfix/')
+        run: |
+          {
+            echo "## Base branch: $BASE"
+            echo
+            echo "Nothing to check for this base."
+          } >> "$GITHUB_STEP_SUMMARY"

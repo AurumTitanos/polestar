@@ -1,0 +1,70 @@
+name: Merge back
+
+# A release is published: when main has commits next does not (a patch
+# release, made on a hotfix branch), a pull request from main into next
+# brings them over, so next always has every released fix. An open one is
+# reused. A feature release moves main to next, so there is nothing to merge;
+# a release candidate never moves main and is skipped. docs/RELEASING.md,
+# "Patch releases", has the release side.
+#
+# A pull request opened with GITHUB_TOKEN starts no workflow, so CI does not
+# run on it by itself: close and reopen it (or push to it) to run the checks.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to name the pull request after (default the latest release)
+        required: false
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: merge-back
+
+jobs:
+  merge-back:
+    name: Merge main into next
+    if: github.event_name == 'workflow_dispatch' || !github.event.release.prerelease
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      NEXT: ${{ github.event.repository.default_branch }}
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+    steps:
+      - name: Open the pull request
+        run: |
+          if [ -z "$TAG" ]; then
+            TAG=$(gh api "repos/${GITHUB_REPOSITORY}/releases/latest" --jq .tag_name)
+          fi
+          ahead=$(gh api "repos/${GITHUB_REPOSITORY}/compare/${NEXT}...main" --jq .ahead_by)
+          if [ "$ahead" -eq 0 ]; then
+            echo "$NEXT has every commit of main; nothing to merge back." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          open=$(gh api "repos/${GITHUB_REPOSITORY}/pulls?state=open&base=${NEXT}&head=${GITHUB_REPOSITORY_OWNER}:main" --jq '.[0].html_url // empty')
+          if [ -n "$open" ]; then
+            echo "main is $ahead commit(s) ahead of $NEXT; the pull request is already open: $open" | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          cat > "$RUNNER_TEMP/body.md" <<EOF
+          $TAG is out, and main has $ahead commit(s) that $NEXT does not. Merging this brings them into $NEXT, so the next feature release ships every released fix. Merge it with a merge commit, not a squash or a rebase, so the commits stay the ones the tag points at.
+
+          The merge can stop on two files both branches changed (docs/RELEASING.md, "Patch releases", step 5). Resolve them locally, never with GitHub's conflict editor, which would merge $NEXT into main: \`git switch $NEXT && git merge main\`, fix the two files, commit and push $NEXT; that merges this pull request.
+
+          - \`CHANGELOG.md\`: keep $NEXT's \`## Unreleased\` first and the release's section under it.
+          - \`addon/Polestar_Guides/Guides.lua\`, which is generated: take $NEXT's side, run \`node tools/polestar.js compile\` on $NEXT and commit the result with the merge.
+
+          The version files take the release's version; the next feature release sets its own.
+
+          This pull request was opened by a workflow, which starts no checks: close and reopen it to run CI.
+          EOF
+          url=$(gh api "repos/${GITHUB_REPOSITORY}/pulls" \
+            -f head=main -f base="$NEXT" -f title="Merge $TAG back into $NEXT" \
+            -F body=@"$RUNNER_TEMP/body.md" --jq .html_url)
+          echo "Opened $url" | tee -a "$GITHUB_STEP_SUMMARY"

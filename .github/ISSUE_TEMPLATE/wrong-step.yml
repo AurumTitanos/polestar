@@ -47,3 +47,8 @@ body:
       placeholder: 0.2.0
     validations:
       required: true
+  - type: textarea
+    id: addons
+    attributes:
+      label: Other addons
+      description: The other addons you have turned on, quest and map addons above all (Questie, TomTom, other guides). Their arrows and quest lines can look like Polestar's.

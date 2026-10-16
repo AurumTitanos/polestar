@@ -1,10 +1,11 @@
 'use strict';
-// skills/polestar-guide-pack (the pack authors' skill, agentskills.io format)
-// keeps up with the tools: its front matter follows the format's rules, every
-// `polestar <command> --option` it names exists, its guide-format reference
-// names every header key, step line, verb, modifier and condition the parser
-// accepts (and nothing else), and its example guide lints clean and plays to
-// the end against data/forever (skipped without it).
+// The skills for coding agents in skills/ (agentskills.io format) keep up
+// with the tools: each one's front matter follows the format's rules, every
+// file it links exists, and every `polestar <command> --option` it names
+// exists. polestar-guide-pack, the pack authors' skill, also has its
+// guide-format reference name every header key, step line, verb, modifier
+// and condition the parser accepts (and nothing else), and its example guide
+// lint clean and play to the end against data/forever (skipped without it).
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
@@ -19,11 +20,14 @@ const { tmpdir } = require('./helpers/tmp');
 const { needs } = require('./helpers/data');
 const cli = require('./helpers/cli');
 
-const SKILL = path.join(__dirname, '..', 'skills', 'polestar-guide-pack');
+const SKILLS = path.join(__dirname, '..', 'skills');
+const SKILL = path.join(SKILLS, 'polestar-guide-pack');
 const read = (rel) => fs.readFileSync(path.join(SKILL, rel), 'utf8');
 const MAIN = read('SKILL.md');
 const REF = read('references/guide-format.md');
 const COMMANDS = load();
+const ALL = fs.readdirSync(SKILLS, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).sort();
+const skillText = (name) => fs.readFileSync(path.join(SKILLS, name, 'SKILL.md'), 'utf8');
 
 const spans = (text) => [...text.matchAll(/`([^`\n]+)`/g)].map((m) => m[1]);
 
@@ -66,30 +70,40 @@ function table(text, heading) {
 // The first word of each code span in a row's first cell: `zone <Name>` -> zone.
 const firstWords = (rows) => rows.flatMap((r) => spans(r[0])).map((s) => s.split(/[\s<]/)[0].toLowerCase());
 
-test('SKILL.md front matter follows the agentskills.io format', () => {
-	const m = /^---\n([\s\S]*?)\n---\n/.exec(MAIN);
-	assert.ok(m, 'SKILL.md starts with --- front matter ---');
-	const fields = {};
-	for (const line of m[1].split('\n')) {
-		const kv = /^([a-z-]+): (.+)$/.exec(line);
-		assert.ok(kv, `one "key: value" per line: ${line}`);
-		// A plain YAML scalar: no ": " or " #" inside, no quote or indicator first.
-		assert.doesNotMatch(kv[2], /: | #|^["'&*!|>%@`[{]/, `${kv[1]} reads as plain YAML`);
-		fields[kv[1]] = kv[2];
+test('every SKILL.md front matter follows the agentskills.io format', () => {
+	assert.ok(ALL.includes('polestar-guide-pack'));
+	for (const name of ALL) {
+		const main = skillText(name);
+		const m = /^---\n([\s\S]*?)\n---\n/.exec(main);
+		assert.ok(m, `${name}: SKILL.md starts with --- front matter ---`);
+		const fields = {};
+		for (const line of m[1].split('\n')) {
+			const kv = /^([a-z-]+): (.+)$/.exec(line);
+			assert.ok(kv, `${name}: one "key: value" per line: ${line}`);
+			// A plain YAML scalar: no ": " or " #" inside, no quote or indicator first.
+			assert.doesNotMatch(kv[2], /: | #|^["'&*!|>%@`[{]/, `${name}: ${kv[1]} reads as plain YAML`);
+			fields[kv[1]] = kv[2];
+		}
+		assert.deepEqual(Object.keys(fields).filter((k) => !['name', 'description', 'license', 'compatibility', 'metadata', 'allowed-tools'].includes(k)), []);
+		assert.equal(fields.name, name);
+		assert.match(fields.name, /^[a-z0-9]+(-[a-z0-9]+)*$/);
+		assert.ok(fields.name.length <= 64);
+		assert.ok(fields.description && fields.description.length <= 1024, `${name}: description of 1 to 1024 characters`);
+		assert.ok(!fields.compatibility || fields.compatibility.length <= 500);
+		assert.ok(main.split('\n').length < 500, `${name}: SKILL.md under 500 lines`);
 	}
-	assert.deepEqual(Object.keys(fields).filter((k) => !['name', 'description', 'license', 'compatibility', 'metadata', 'allowed-tools'].includes(k)), []);
-	assert.equal(fields.name, path.basename(SKILL));
-	assert.match(fields.name, /^[a-z0-9]+(-[a-z0-9]+)*$/);
-	assert.ok(fields.name.length <= 64);
-	assert.ok(fields.description.length > 0 && fields.description.length <= 1024);
-	assert.ok(!fields.compatibility || fields.compatibility.length <= 500);
-	assert.ok(MAIN.split('\n').length < 500, 'SKILL.md under 500 lines');
 });
 
-test('every file SKILL.md links and every Polestar doc it names exists', () => {
-	const links = [...MAIN.matchAll(/\]\(([^)#]+)\)/g)].map((m) => m[1]).filter((l) => !/^[a-z]+:/.test(l));
-	assert.ok(links.includes('references/guide-format.md'));
-	for (const l of links) assert.ok(fs.existsSync(path.join(SKILL, l)), l);
+test('every file a SKILL.md links and every repository file it names exists', () => {
+	const root = path.join(__dirname, '..');
+	for (const name of ALL) {
+		const main = skillText(name);
+		const links = [...main.matchAll(/\]\(([^)#]+)\)/g)].map((m) => m[1]).filter((l) => !/^[a-z]+:/.test(l));
+		for (const l of links) assert.ok(fs.existsSync(path.join(SKILLS, name, l)), `${name}: ${l}`);
+		const named = spans(main).filter((s) => /^(docs|skills|tests|tools)\/[^\s*<]+\.(md|js|json)$/.test(s) || /^[A-Z]+\.md$/.test(s));
+		for (const f of named) assert.ok(fs.existsSync(path.join(root, f)), `${name}: ${f}`);
+	}
+	assert.ok([...MAIN.matchAll(/\]\(([^)#]+)\)/g)].some((m) => m[1] === 'references/guide-format.md'));
 	const docs = spans(MAIN + REF).filter((s) => /^docs\/[A-Z_]+\.md$/.test(s));
 	assert.ok(docs.length >= 4);
 	for (const d of docs) assert.ok(fs.existsSync(path.join(__dirname, '..', d)), d);
@@ -97,31 +111,33 @@ test('every file SKILL.md links and every Polestar doc it names exists', () => {
 
 // Every `polestar <command> ...` the skill writes, from code spans and code
 // blocks (a `# comment` dropped): [{ cmd, args }].
-function invocations() {
+function invocations(texts) {
 	const lines = [];
-	for (const text of [MAIN, REF]) {
+	for (const text of texts) {
 		lines.push(...spans(text));
 		for (const b of blocks(text)) lines.push(...b.text.split('\n').map((l) => l.replace(/\s#\s.*$/, '')));
 	}
 	const out = [];
 	for (const line of lines) {
-		for (const m of line.matchAll(/(?<![<\/.\w-])polestar ([a-z]+)((?: [^\s|]+| "[^"]*")*)/g)) out.push({ cmd: m[1], args: m[2].trim(), line });
+		for (const m of line.matchAll(/(?<![<\/.\w-])polestar ([a-z][a-z0-9]*)((?: [^\s|]+| "[^"]*")*)/g)) out.push({ cmd: m[1], args: m[2].trim(), line });
 	}
 	return out;
 }
 
-test('every polestar command and option the skill names exists', () => {
-	const calls = invocations();
-	const used = new Set(calls.map((c) => c.cmd));
+test('every polestar command and option a skill names exists', () => {
+	const used = new Set(invocations([MAIN, REF]).map((c) => c.cmd));
 	for (const cmd of ['new', 'find', 'lint', 'playtest', 'play', 'dev', 'pack', 'doctor']) assert.ok(used.has(cmd), `the skill names polestar ${cmd}`);
 	const kinds = /--kind <k>\s+only ([a-z, ]+)/.exec(COMMANDS.get('find').usage)[1].split(/,\s*/);
-	for (const { cmd, args, line } of calls) {
-		if (cmd === 'help') continue;
-		assert.ok(COMMANDS.has(cmd), `unknown command in: ${line}`);
-		const usage = COMMANDS.get(cmd).usage;
-		for (const opt of args.match(/--[a-z][a-z-]*/g) || []) assert.match(usage, new RegExp(`${opt}(?![a-z-])`), `polestar ${cmd} --help has no ${opt}: ${line}`);
-		const kind = /--kind (\S+)/.exec(args);
-		if (kind && !kind[1].startsWith('<')) assert.ok(kinds.includes(kind[1]), `find --kind ${kind[1]}: ${line}`);
+	for (const name of ALL) {
+		const texts = name === 'polestar-guide-pack' ? [MAIN, REF] : [skillText(name)];
+		for (const { cmd, args, line } of invocations(texts)) {
+			if (cmd === 'help') continue;
+			assert.ok(COMMANDS.has(cmd), `${name}: unknown command in: ${line}`);
+			const usage = COMMANDS.get(cmd).usage;
+			for (const opt of args.match(/--[a-z][a-z-]*/g) || []) assert.match(usage, new RegExp(`${opt}(?![a-z-])`), `${name}: polestar ${cmd} --help has no ${opt}: ${line}`);
+			const kind = /--kind (\S+)/.exec(args);
+			if (kind && !kind[1].startsWith('<')) assert.ok(kinds.includes(kind[1]), `${name}: find --kind ${kind[1]}: ${line}`);
+		}
 	}
 });
 
