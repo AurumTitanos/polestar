@@ -843,7 +843,11 @@ local function objectiveState(goal)
 	local cur, max, finished
 	if goal.oi then
 		local objs = C.GetQuestObjectives(q)
-		local o = objs and objs[goal.oi]
+		-- No objectives at all while the quest is in the log: the client has
+		-- not filled them in yet (right after the accept), and its ready flag
+		-- says nothing until it has.
+		if not objs then return false end
+		local o = objs[goal.oi]
 		if o then cur, max, finished = o.numFulfilled, o.numRequired, o.finished end
 	end
 	if C.IsQuestReadyForTurnIn(q) then return true, cur, max end
@@ -3296,10 +3300,11 @@ end
 -- Unavailable quests. A gossip, greeting or quest-detail window from an
 -- `accept` goal's own giver (current step of any tab) that does not offer
 -- its quest marks it unavailable; one that offers it clears the mark. A
--- detail window opened from that giver's list, or started by an item, says
--- nothing about the others.
-local LIST_WINDOW = 30 -- seconds a gossip/greeting list covers the detail windows opened from it
-local listedAt = {} -- npc -> GetTime() of its last gossip/greeting list
+-- detail window opened from that giver's list, popped up by a turn-in at
+-- that giver (the follow-up quest), or started by an item, says nothing
+-- about the others.
+local LIST_WINDOW = 30 -- seconds a list or a turn-in covers the detail windows opened from it
+local listedAt = {} -- npc -> GetTime() of its last gossip/greeting list or turn-in
 
 local function unavailableReason(goal)
 	local lvl = tonumber(goal.minLevel)
@@ -3349,6 +3354,12 @@ end
 ns.RegisterEvent("GOSSIP_SHOW", function() checkOffers("gossip") end)
 ns.RegisterEvent("QUEST_GREETING", function() checkOffers("greeting") end)
 ns.RegisterEvent("QUEST_DETAIL", function(_, startItem) checkOffers("detail", startItem) end)
+for _, event in ipairs({ "QUEST_COMPLETE", "QUEST_TURNED_IN" }) do
+	ns.RegisterEvent(event, function()
+		local npc = Compat().GetNpcID("npc")
+		if npc then listedAt[npc] = GetTime() end
+	end)
+end
 
 -- Quests their giver did not offer survive a reload: saved at logout as
 -- CharState().offers[questID] = level, restored at login while the character

@@ -11,6 +11,15 @@
   gives no position does it fall back to the nearest known spawn, and the
   alert now says so ("known spawn 120 yd"); a spawn whose distance cannot be
   measured is no longer picked (thanks petllama and Miguel Antunes).
+- Looking ahead at an accept, taking the quest moves on to its objectives
+  again: in the moment after the accept, before the game fills in the quest's
+  objectives, the guide read it as ready to hand in and jumped past the kill
+  or collect step to the turn-in (Kolkar Leaders in the Barrens went straight
+  from Regthar to his turn-in, past Barak Kodobane).
+- Handing in a quest the guide does not list, then taking the follow-up the
+  game offers at once, no longer passes the same NPC's guide quests as "not
+  offered" when the reward took more than half a minute to read (Jorn
+  Skyseer at Sergra Darkthorn in the Crossroads).
 - A class guide opened before your level says so: the guide window shows
   "Available from level 20" with who starts it (or the quest to finish
   first), instead of sending you to a trainer who has nothing for you, then
