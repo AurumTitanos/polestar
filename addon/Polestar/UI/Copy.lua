@@ -61,6 +61,7 @@ local function build()
 
 	F:SetScript("OnShow", function(self) Anim.To(self, "alpha", 0, 1, Anim.FAST, "out") end)
 	ns.CloseOnEscape("PolestarCopy")
+	if ns.Gamepad and ns.Gamepad.Register then ns.Gamepad.Register(F, {}) end
 end
 
 -- The box is made for the number of lines it holds.

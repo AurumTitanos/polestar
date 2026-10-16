@@ -337,6 +337,22 @@ Polestar.Transit = { Now = function() return 1000 end, NextDeparture = function(
 uistub.target = { label = "Silithus" }
 ${TABS}
 Polestar.Fire("ROUTE_CHANGED", JR.legs)`;
+// A gamepad plugged in (labels "Letters": Xbox; "Shapes": PlayStation), LT
+// acting as Shift, and a few saved bindings for the Key bindings tab.
+const PAD = (labels = 'Letters') => `C_GamePad = { IsEnabled = function() return true end, GetAllDeviceIDs = function() return { 1 } end,
+	GetActiveDeviceID = function() return 1 end, GetDeviceMappedState = function() return { labelStyle = "${labels}" } end }
+stub.cvars.GamePadEmulateShift = "PADLTRIGGER"
+local saved = { PAD3 = "CLICK PolestarQuestItemButton:LeftButton", ["SHIFT-PADDRIGHT"] = "POLESTAR_NEXT", ["SHIFT-PADDLEFT"] = "POLESTAR_PREV", N = "POLESTAR_TOGGLE" }
+function GetBindingKey(action)
+	local keys = {}
+	for k, a in pairs(saved) do if a == action then keys[#keys + 1] = k end end
+	table.sort(keys)
+	return unpack(keys)
+end`;
+// The gamepad's ring, hint bar and B chip, moved to the window holding the gamepad.
+const PAD_UI = ['PolestarPadRing', 'PolestarPadHints', 'PolestarPadBadge'];
+const PAD_GUIDE = [...GUIDE, ...PAD_UI];
+const PAD_OPTIONS = [...OPTIONS, ...PAD_UI];
 const HOVER = 'PolestarGuideFrame.IsMouseOver = function() return true end; Polestar.UI.GuideFrame.HoverIn()';
 const RECORDER = `stub.addonsLoaded.Polestar_Recorder = true
 PolestarRecorderDB = { enabled = true, current = "s2", sessions = {
@@ -879,6 +895,41 @@ stub.RunScript(d, "OnTextChanged", true)`,
 			{ roots: OPTIONS, script: 'Polestar.UI.ShowOptions("guide")' },
 			{ roots: OPTIONS, script: 'Polestar.UI.ShowOptions("guide"); Polestar.UI.Options.Select("guide", "Arrow & routes")' },
 			{ roots: OPTIONS, script: 'Polestar.UI.ShowOptions("guide"); Polestar.UI.Options.Select("guide", "Automation")' },
+		],
+	},
+	{
+		file: 'gamepad-guide.svg',
+		title: 'Focus mode on the guide window (Browse the guide with the gamepad): the first open goal; down a line on a hub step; up into the navigator with PlayStation buttons',
+		panels: [
+			{ roots: PAD_GUIDE, before: PAD(), script: `${TABS}; Polestar.Gamepad.StartFocus()` },
+			{ roots: PAD_GUIDE, before: PAD(), script: `${TABS}; uistub.setStep(4); Polestar.Gamepad.StartFocus(); Polestar.Gamepad.Dispatch("PADDDOWN")` },
+			{ roots: PAD_GUIDE, before: PAD('Shapes'), script: `${TABS}; Polestar.Gamepad.StartFocus(); Polestar.Gamepad.Dispatch("PADDUP")` },
+		],
+	},
+	{
+		file: 'gamepad-options.svg',
+		title: 'Options with a gamepad: the Gamepad page (a dropdown focused, D-pad left / right steps it), a binding row on its Key bindings tab (chips for buttons, chords and keys), and a slider with PlayStation buttons; B sits on the close button',
+		panels: [
+			{ roots: PAD_OPTIONS, before: PAD(), script: 'Polestar.UI.ShowOptions("gamepad"); stub.advance(0.3)' },
+			{ roots: PAD_OPTIONS, before: PAD(), script: 'Polestar.UI.ShowOptions("gamepad"); stub.advance(0.3); Polestar.Gamepad.Dispatch("PADRSHOULDER"); stub.advance(0.3); Polestar.Gamepad.Dispatch("PADDDOWN")' },
+			{
+				roots: PAD_OPTIONS, before: PAD('Shapes'),
+				script: `Polestar.UI.ShowOptions("guide"); stub.advance(0.3)
+local G = Polestar.Gamepad
+for _ = 1, 30 do
+	local f = G.Focused(PolestarOptions)
+	if f and f.psStep then break end
+	G.Dispatch("PADDDOWN")
+end`,
+			},
+		],
+	},
+	{
+		file: 'gamepad-hub.svg',
+		title: 'The guide menu with a gamepad: the focus starts on the selected guide (X loads it, LB / RB step the sections); a dropdown\'s choices in the shared menu, the current one focused',
+		panels: [
+			{ roots: [...PICKER, ...PAD_UI], before: PAD(), script: pickerScene(`${TABS}; Polestar.UI.ShowPicker(); Polestar.UI.Picker.Select(uistub.elwynn); stub.advance(0.3)`) },
+			{ roots: [...PAD_OPTIONS, 'PolestarMenu'], before: PAD(), script: 'Polestar.UI.ShowOptions("gamepad"); stub.advance(0.3); Polestar.Gamepad.Dispatch("PAD1")' },
 		],
 	},
 	{

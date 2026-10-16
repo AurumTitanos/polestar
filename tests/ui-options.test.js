@@ -67,7 +67,7 @@ test('pages: by order, a page with nothing to set left out, Recorder and About l
 	// Questing, Discovery and Quality of Life fill from modules not loaded
 	// here; Gear registered no control: all left out of the list. Guide packs
 	// (a custom page) is always there.
-	assert.deepEqual(out.nav, ['Guide', 'Appearance', 'Map', 'Quests', 'Guide packs', 'Recorder', 'About']);
+	assert.deepEqual(out.nav, ['Guide', 'Appearance', 'Map', 'Quests', 'Guide packs', 'Gamepad', 'Recorder', 'About']);
 	assert.equal(out.title, 'Guide');
 	assert.deepEqual(out.tabs, ['Window', 'Arrow & routes', 'Automation']);
 	assert.deepEqual(out.pages.find((p) => p.name === 'Quests'), { name: 'Quests', key: 'quests', builtin: false, tabs: ['Map'] });
@@ -162,7 +162,7 @@ test('page keys stay English on a translated client: /polestar options quests, g
 		'options qualityoflife': 'qualityoflife: Komfort > Travel',
 		'options about': 'about: Über > ',
 		packs: 'guidepacks: Guide-Pakete > ',
-		keys: ['guide', 'appearance', 'map', 'questing', 'discovery', 'qualityoflife', 'guidepacks', 'recorder', 'about'],
+		keys: ['guide', 'appearance', 'map', 'questing', 'discovery', 'qualityoflife', 'guidepacks', 'gamepad', 'recorder', 'about'],
 	});
 });
 
@@ -282,7 +282,7 @@ test('search finds settings by label and help across pages, registered ones incl
 		box:SetText("")
 		stub.RunScript(box, "OnTextChanged", true)
 		emit({ arrow = arrow, help = help, none = none, found = found, back = PolestarOptions.Title:GetText() })`, { between: FAKE_PAGE });
-	assert.deepEqual(out.arrow.titles, ['Guide  \u00b7  Arrow & routes', 'Appearance  \u00b7  Arrow', 'Map  \u00b7  Guide & quests']);
+	assert.deepEqual(out.arrow.titles, ['Guide  \u00b7  Arrow & routes', 'Appearance  \u00b7  Arrow', 'Map  \u00b7  Guide & quests', 'Gamepad  \u00b7  Key bindings']);
 	assert.equal(out.arrow.title, 'Search');
 	assert.equal(out.arrow.sub, `${out.arrow.count} settings match`);
 	assert.equal(out.arrow.tabRow, false);

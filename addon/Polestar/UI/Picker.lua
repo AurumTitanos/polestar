@@ -1319,6 +1319,18 @@ function P.ShowSection(key)
 	if win and win:IsShown() then P.Render() end
 end
 
+-- The section `delta` away on the rail (LB / RB on a gamepad).
+function P.StepSection(delta)
+	local cur = P.Section()
+	for i, s in ipairs(sections) do
+		if s.key == cur then
+			local to = sections[i + delta]
+			if to then P.ShowSection(to.key) end
+			return
+		end
+	end
+end
+
 -- The hub's search wordings, longest first: the box shows the first that fits.
 local HUB_SEARCH = { L["Search guides, items, NPCs"], L["Search guides, items"], L["Search"] }
 
@@ -1726,6 +1738,34 @@ local function build()
 
 	buildDetails()
 	win:HookScript("OnShow", function() P.Render() end)
+	-- A gamepad moves through the hub (UI/Gamepad.lua): LB / RB step the
+	-- rail's sections, X loads the guide on a focused row.
+	if ns.Gamepad and ns.Gamepad.Register then
+		ns.Gamepad.Register(win, {
+			initial = function(rows)
+				local first
+				for i, w in ipairs(rows) do
+					if ns.Gamepad.Within(w, win.Main) and w.psKey == nil then
+						if w.psGuide and w.psGuide.id == P.Selected() then return i end
+						first = first or i
+					end
+				end
+				return first
+			end,
+			prevTab = function() P.StepSection(-1) end,
+			nextTab = function() P.StepSection(1) end,
+			tabsLabel = L["Sections"],
+			-- The close sits among the details' own buttons: B goes in the hint bar.
+			close = false,
+			x = function(w)
+				if w and w.psGuide and w.psGuide.id then
+					P.Select(w.psGuide.id)
+					P.LoadSelected()
+				end
+			end,
+			xLabel = function(w) return w.psGuide and L["Load guide"] or nil end,
+		})
+	end
 end
 
 -- opts: { newTab = true } when loading should open a new tab.

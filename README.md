@@ -359,6 +359,46 @@ invitations and duels (friends and guild excepted). Hold **Shift** to skip
 auto-accept, auto-turn-in, auto-sell, training or the flight helper once, or
 to answer a request yourself.
 
+### With a gamepad
+
+Polestar plays with a gamepad on Forever (ported from Ding! by Yendi,
+@moust4ki). Open its options from the minimap button (or `/polestar
+gamepad` without the game's gamepad interface): their **Gamepad** page names
+the buttons (Xbox letters or PlayStation shapes, read off the gamepad by
+default), and its **Key bindings** tab binds every Polestar action: next and
+previous step, browse the guide, show or hide the guide window, the guide
+menu, the options, report a problem, and the quest item, target and
+Hearthstone buttons. Nothing is bound until you bind it. Press A on a row,
+then a button, or hold one button and press another for a combination:
+Polestar watches its combinations itself, keeps the second button from the
+game only while you hold the first, and never acts on one in a fight. With
+the game's gamepad interface on, LB and RB are its targeting buttons and
+every combination with them is the game's own: the row says so before it
+binds one. Tap B to cancel, hold B to bind B itself; Y unbinds. The rows take
+keys of the keyboard too.
+
+The guide window never takes a button away from the game. To browse it with
+the gamepad, bind **Browse the guide with the gamepad**: the D-pad picks a
+line (up from the goals: Skip, the bug, the menu and the tabs), A points the
+arrow there or uses the quest item on its line (not with the game's gamepad
+interface, whose own buttons Polestar leaves alone), X shows the line's
+details, LB / RB look at the previous and next step, Y minimizes the window,
+and B gives the gamepad back to the game.
+
+Every Polestar window you open (the guide menu with Lookup and Dungeons, the
+options, the welcome, the route choice, the report and copy windows, the
+drop-down menus) answers the gamepad while it is open: the D-pad moves the
+focus (an accent ring), A selects, B closes or goes back, LB / RB change tabs
+or pages, left / right adjust a slider or a drop-down, Y puts a setting back
+to its default. A window that opens by itself (the welcome on a new
+character, the choice of where to level next) takes no button until you press
+the Browse the guide button, which its bar shows. A bar under the window lists
+the buttons no button on screen shows; B sits on the window's close button.
+The gamepad goes back to the game when the window closes or a fight starts,
+and returns after it. Turn the bar off, or the windows' navigation
+altogether, on the Gamepad page. Without a gamepad plugged in, none of it
+shows: everything works with the mouse and keyboard as before.
+
 ### Recorder
 
 `Polestar_Recorder` is an optional companion addon that records your
@@ -376,8 +416,8 @@ steps and detours, the steps to fix first.
 
 `/polestar` (or `/pole`) shows or hides the guide window; settings live in
 `/polestar options`, grouped by what you came to do: Guide, Appearance, Map,
-Questing, Discovery, Quality of Life, Guide packs, Recorder and About, with a
-search that finds any setting.
+Questing, Discovery, Quality of Life, Guide packs, Gamepad, Recorder and
+About, with a search that finds any setting.
 
 With the game's gamepad interface on (Options, Gamepad, Enable Gamepad UI)
 there are no slash commands: the game blocks gamepad actions after any
@@ -413,6 +453,7 @@ settings instead, and Polestar keeps out of the game's own windows.
 | `rares [test]` | Open Rares, or show a sample rare alert |
 | `questdb` | Quest database status |
 | `packs` | Open Options > Guide packs |
+| `gamepad` | Open Options > Gamepad: button names and key bindings |
 | `welcome` | Show the welcome again |
 | `where` | Print your map and position as guide lines (`zone map <id>`, `goto x,y live`), in a box to copy |
 | `report` | Report a problem with the step on screen (the guide window's bug button) |

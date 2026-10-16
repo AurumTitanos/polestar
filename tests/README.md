@@ -57,6 +57,7 @@ client loads them.
 | `stub_packs.lua` | Load-on-demand data addons from real files: `LoadAddOn` runs a pack's files once and fires `ADDON_LOADED` |
 | `stub_encoding.lua` | `C_EncodingUtil.DecodeBase64` and `DecompressString` (zlib inflate) in plain Lua 5.1, so `Polestar_Nav`'s walking maps decode as in the client; `stub.decompressed` counts the blocks |
 | `stub_ui.lua` | A stand-in for the Engine, the guide registry, Nav and Compat, with sample guides, for the UI tests and for `preview` (global `uistub`) |
+| `stub_gamepad.lua` | A gamepad and the key binding API: `C_GamePad`, `IsKeyDown`, saved and override bindings (refused in combat), and `stub.press(key[, down])`, which delivers a button as the client does: the frames reading the gamepad first, then the override bindings, then the game's binding |
 | `stub_recorder.lua` | The Recorder's slice of the world: player, maps, quest log, NPCs (classification, level), deaths, loot windows and their sources, instances, flight masters, talents |
 | `profile.lua` | Not a stub: per-handler timing and a stack sampler for `helpers/profile.js` |
 
