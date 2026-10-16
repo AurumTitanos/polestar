@@ -246,6 +246,158 @@ emit({ sq.pins.layers["quests.objectives"] == nil, sq.pins.layers["quests.turnin
 	assert.deepEqual(gone, [true, true]);
 });
 
+// The fixture plus quests whose objective names overlap: 9500 needs Kobold
+// Vermin (6) and Kobold Vermin Runt (9500), a name containing the other;
+// 9501 needs 6 and 9501, a second NPC also named Kobold Vermin; 9502 the
+// same two, 8 of one and 5 of the other.
+function overlapDb() {
+	const dir = tmpdir('polestar-questdb-overlap-');
+	for (const f of fs.readdirSync(FIX)) fs.copyFileSync(path.join(FIX, f), path.join(dir, f));
+	const quests = JSON.parse(fs.readFileSync(path.join(FIX, 'quests.json'), 'utf8'));
+	const npcs = JSON.parse(fs.readFileSync(path.join(FIX, 'npcs.json'), 'utf8'));
+	const npc = (id, name, pts) => ({ ...npcs[6], id, name, spawns: { 1429: { f: 'e', pts } } });
+	npcs[9500] = npc(9500, 'Kobold Vermin Runt', [[20, 20], [20.4, 20.3]]);
+	npcs[9501] = npc(9501, 'Kobold Vermin', [[30, 80], [30.4, 80.3]]);
+	const kill = (id, count, text) => ({ type: 'kill', id, count, text });
+	const q = (id, objectives) => ({ ...quests[7], id, title: `Quest ${id}`, pre: [], objectives });
+	quests[9500] = q(9500, [kill(6, 8, 'Kobold Vermin'), kill(9500, 5, 'Kobold Vermin Runt')]);
+	quests[9501] = q(9501, [kill(6, 8, 'Kobold Vermin'), kill(9501, 8, 'Kobold Vermin')]);
+	quests[9502] = q(9502, [kill(6, 8, 'Kobold Vermin'), kill(9501, 5, 'Kobold Vermin')]);
+	fs.writeFileSync(path.join(dir, 'quests.json'), JSON.stringify(quests));
+	fs.writeFileSync(path.join(dir, 'npcs.json'), JSON.stringify(npcs));
+	const out = tmpdir('polestar-questdb-');
+	writeQuestDB(buildQuestDB({ dataDir: dir }), out);
+	return ['MapFrames.lua', 'Quests.lua', 'Npcs.lua', 'Objects.lua', 'Items.lua'].map((f) => path.join(out, f));
+}
+
+// Progress of quest q's objective on NPC `npc`: "cur/max" plus "done".
+const PROGRESS = `
+local function prog(q, npc)
+	for _, o in ipairs(Q._index.npc[npc] or {}) do
+		if o.q == q then return o.cur .. "/" .. o.max .. (o.done and " done" or "") end
+	end
+	return "none"
+end`;
+
+test('one client line per objective: an exact name beats a name inside another, the longest name searches first, leftovers pair last', () => {
+	const files = overlapDb();
+	const [exact, later, substring, position] = run(`${PROGRESS}
+w.accept(9500, { { text = "Kobold Vermin Runt slain: 5/5", required = 5, fulfilled = 5 }, { text = "Kobold Vermin slain: 0/8", required = 8 } })
+stub.advance(0.3)
+emit({ prog(9500, 6), prog(9500, 9500), kinds("quests.objectives") })
+w.progress(9500, 2, 3)
+stub.advance(0.3)
+w.progress(9500, 2, 4)
+stub.advance(0.3)
+emit({ prog(9500, 6), prog(9500, 9500) })
+w.abandon(9500)
+stub.advance(0.3)
+w.accept(9500, { { text = "Slay Kobold Vermin Runts: 1/5", required = 5, fulfilled = 1 }, { text = "Slay Kobold Vermin: 2/8", required = 8, fulfilled = 2 } })
+stub.advance(0.3)
+emit({ prog(9500, 6), prog(9500, 9500) })
+w.abandon(9500)
+stub.advance(0.3)
+w.accept(9500, { { text = "Kobold Vermin Runt slain: 5/5", required = 5, fulfilled = 5 }, { text = "Vermines tuées : 2/8", required = 8, fulfilled = 2 } })
+stub.advance(0.3)
+emit({ prog(9500, 6), prog(9500, 9500) })
+`, { setup: `stub.quests.dbFiles = { ${files.map(lua).join(', ')} }` });
+	assert.deepEqual(exact[0], '0/8', '"Kobold Vermin" is not read from the Runt line');
+	assert.deepEqual(exact[1], '5/5 done');
+	assert.deepEqual(exact[2], [
+		'Kobold Vermin@47.8,35.8:icon-kill',
+		'Kobold Vermin@50.3,35.8:icon-kill',
+		'Kobold Vermin@70.3,70.2:icon-kill',
+	], 'the unfinished objective keeps its markers; the finished Runts have none');
+	assert.deepEqual(later, ['4/8', '5/5 done'], 'repeated scans keep the assignment');
+	assert.deepEqual(substring, ['2/8', '1/5'], 'the longer name claims its line before the shorter one can');
+	assert.deepEqual(position, ['2/8', '5/5 done'], 'an unmatched objective takes the line left over, never a claimed one');
+});
+
+test('objectives of one name take one line each, in order, and share the only one the client shows', () => {
+	const files = overlapDb();
+	const [two, one] = run(`${PROGRESS}
+w.accept(9501, { { text = "Kobold Vermin slain: 8/8", required = 8, fulfilled = 8 }, { text = "Kobold Vermin slain: 3/8", required = 8, fulfilled = 3 } })
+stub.advance(0.3)
+emit({ prog(9501, 6), prog(9501, 9501) })
+w.abandon(9501)
+stub.advance(0.3)
+w.accept(9501, { { text = "Kobold Vermin slain: 3/8", required = 8, fulfilled = 3 } })
+stub.advance(0.3)
+emit({ prog(9501, 6), prog(9501, 9501) })
+`, { setup: `stub.quests.dbFiles = { ${files.map(lua).join(', ')} }` });
+	assert.deepEqual(two, ['8/8 done', '3/8']);
+	assert.deepEqual(one, ['3/8', '3/8']);
+});
+
+test('lines of counts alone are matched again when their names arrive, though the line count stays', () => {
+	const files = overlapDb();
+	const [early, named, later] = run(`${PROGRESS}
+w.accept(9500, { { text = " slain: 0/5", required = 5 }, { text = ": 0/8", required = 8 } })
+stub.advance(0.3)
+emit({ prog(9500, 6), prog(9500, 9500) })
+local lines = w.log[9500].objectives
+lines[1].text, lines[2].text = "Kobold Vermin Runt slain: 0/5", "Kobold Vermin slain: 0/8"
+w.progress(9500, 1, 2)
+stub.advance(0.3)
+emit({ prog(9500, 6), prog(9500, 9500) })
+w.progress(9500, 2, 3)
+stub.advance(0.3)
+emit({ prog(9500, 6), prog(9500, 9500) })
+`, { setup: `stub.quests.dbFiles = { ${files.map(lua).join(', ')} }` });
+	assert.deepEqual(early, ['0/5', '0/8'], 'nameless lines pair by position for now');
+	assert.deepEqual(named, ['0/8', '2/5'], 'the names re-pair the lines: the Runts\' count is not read as the Vermin\'s');
+	assert.deepEqual(later, ['3/8', '2/5']);
+});
+
+test('objectives of one name take the line requiring their own count before database order', () => {
+	const files = overlapDb();
+	const [split] = run(`${PROGRESS}
+w.accept(9502, { { text = "Kobold Vermin slain: 1/5", required = 5, fulfilled = 1 }, { text = "Kobold Vermin slain: 2/8", required = 8, fulfilled = 2 } })
+stub.advance(0.3)
+emit({ prog(9502, 6), prog(9502, 9501) })
+`, { setup: `stub.quests.dbFiles = { ${files.map(lua).join(', ')} }` });
+	assert.deepEqual(split, ['2/8', '1/5']);
+});
+
+test('a turn-in the client never lists counts as done only for a short while, and not past a stop', () => {
+	const script = (restart) => `
+w.turnIn(783)
+w.completed[783] = nil              -- a repeatable: the client never lists it
+stub.advance(0.3)
+emit({ Q.GetAvailableQuests(), kinds("quests.available") })
+${restart ? 'Q.Stop(); Q.Start(); Q.Flush()' : 'stub.advance(10)'}
+emit({ Q.GetAvailableQuests(), kinds("quests.available") })`;
+	for (const setup of ['', 'C_QuestLog.GetAllCompletedQuestIDs = nil']) {
+		const [before] = run('emit({ Q.GetAvailableQuests(), kinds("quests.available") })', { setup });
+		for (const restart of [false, true]) {
+			const [bridged, after] = run(script(restart), { setup });
+			const label = `${setup || 'bulk list'}${restart ? ', restarted' : ''}`;
+			assert.ok(bridged[0].includes(7) && !bridged[0].includes(783), `${label}: done during the window`);
+			assert.deepEqual(after, before, `${label}: offered again afterwards, its follow-up closed`);
+		}
+	}
+});
+
+test('a turn-in counts as done before the client\'s completed flag catches up, and only for that quest', () => {
+	const turnIn = (lag) => `
+w.turnIn(783)
+${lag ? 'w.completed[783] = nil              -- the client has not listed it yet' : ''}
+stub.advance(0.3)
+emit({ Q.GetAvailableQuests(), Q.WhyUnavailable(783) or "ok", kinds("quests.available") })
+w.completed[783] = true
+stub.fire("QUEST_LOG_UPDATE")
+stub.advance(0.3)
+emit({ Q.GetAvailableQuests(), kinds("quests.available") })`;
+	for (const setup of ['', 'C_QuestLog.GetAllCompletedQuestIDs = nil']) {
+		const [now, later] = run(turnIn(false), { setup });
+		const [lagNow, lagLater] = run(turnIn(true), { setup });
+		assert.ok(now[0].includes(7) && !now[0].includes(783), 'the fixture: 783 unlocks 7');
+		assert.deepEqual(lagNow, now, `${setup || 'bulk list'}: 783 done and 7 open at once, nothing else moves`);
+		assert.deepEqual(lagLater, later, `${setup || 'bulk list'}: unchanged once the client catches up`);
+		assert.deepEqual(lagLater, lagNow.filter((_, i) => i !== 1));
+	}
+});
+
 test('item, object and event objectives mark their sources; shared clusters carry one pin', () => {
 	const [candles, wood, mapIndex] = run(`
 w.accept(60, { { text = "Large Candle: 0/8", type = "item", required = 8 } })

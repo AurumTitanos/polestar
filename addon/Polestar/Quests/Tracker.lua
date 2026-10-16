@@ -27,6 +27,9 @@ local client = Q._client
 local pairs, type, tostring = pairs, type, tostring
 
 local THROTTLE = 0.25
+-- How long a QUEST_TURNED_IN counts the quest done while the client has
+-- not listed it yet (a repeatable quest it never lists).
+local TURNIN_BRIDGE = 10
 
 local LAYER_OBJECTIVES = "quests.objectives"
 local LAYER_TURNIN = "quests.turnin"
@@ -106,6 +109,10 @@ local available = {} -- questID -> true
 local availableCount = 0
 local completed = {} -- scratch set for the bulk completed-quest call
 local haveCompletedSet = false
+-- questID -> GetTime() deadline: a QUEST_TURNED_IN counts the quest done
+-- for TURNIN_BRIDGE seconds, as the client's completed flag and list can lag
+-- the event; until then, the client listing it, or the quest accepted again.
+local turnedIn = {}
 local dirtyLog, dirtyAvailable, dirtyPublish = false, false, false
 local pending = false
 
@@ -154,11 +161,129 @@ local function newEntry(q)
 	return e
 end
 
--- Match database objectives to the client's by name (the client text reads
--- "Kobold Vermin slain: 3/10"), else by position. Returns two booleans: what
--- markers show changed (title, ready, an objective done or undone), and a
--- progress count changed.
-local find = string.find
+local find, sort = string.find, table.sort
+
+-- Client objective lines carry counts: "Kobold Vermin slain: 3/10",
+-- "Linen Cloth: 2/6", on some clients "3/10 Kobold Vermin slain". A line's
+-- label is its text without them, the name an objective is matched on; a
+-- line of counts alone (" slain: 0/8", ": 0/1") has no name yet.
+local function lineLabel(text)
+	local s = text:gsub("^%s*%d+%s*/%s*%d+%s+", ""):gsub("%s*:%s*%d+%s*/%s*%d+%s*$", "")
+	s = s:gsub("^%s+", ""):gsub("%s+$", "")
+	if s == "slain" then return "" end
+	return (s:gsub("%s+slain$", ""))
+end
+
+-- Same-name objectives, one group per name, longest name first (database
+-- order between equal lengths).
+local function nameGroups(objs)
+	local groups, byName = {}, {}
+	for i = 1, #objs do
+		local o = objs[i]
+		if o.name then
+			local g = byName[o.name]
+			if not g then
+				g = { name = o.name, first = i }
+				byName[o.name] = g
+				groups[#groups + 1] = g
+			end
+			g[#g + 1] = o
+		end
+	end
+	sort(groups, function(a, b)
+		local la, lb = #a.name, #b.name
+		if la ~= lb then return la > lb end
+		return a.first < b.first
+	end)
+	return groups
+end
+
+-- Gives a group's objectives without a line the free lines `fits` accepts:
+-- first a line requiring the objective's own count, then the first left,
+-- in database order.
+local function claim(g, client, n, used, fits)
+	for pass = 1, 2 do
+		for j = 1, #g do
+			local o = g[j]
+			if not o.ci then
+				for k = 1, n do
+					if not used[k] and fits(k) and (pass == 2 or client[k].numRequired == o.count) then
+						o.ci, used[k] = k, true
+						break
+					end
+				end
+			end
+		end
+	end
+end
+
+-- Gives each database objective its client line (o.ci), one objective per
+-- line, by precedence: a label equal to the name, then a name inside the
+-- text (longest name first, so "Gnoll" never takes "Gnoll Brute slain"),
+-- objectives of one name preferring the line with their count, then the
+-- line an objective of the identical name holds (the database lists one
+-- target twice, the client counts it once), then the same position, then,
+-- when as many objectives as lines are left, the rest in order. An
+-- objective left without a line reads 0 until the quest is ready. False
+-- while a line has no name yet (no text, or only counts as in " slain:
+-- 0/8"): match again on the next scan.
+local function matchLines(objs, client, n)
+	local labels, used, settled = {}, {}, true
+	for k = 1, n do
+		local text = client[k].text
+		local label = type(text) == "string" and lineLabel(text) or ""
+		if label ~= "" then
+			labels[k] = label
+		else
+			settled = false
+		end
+	end
+	for i = 1, #objs do objs[i].ci = nil end
+	local groups = nameGroups(objs)
+	for j = 1, #groups do
+		local name = groups[j].name
+		claim(groups[j], client, n, used, function(k) return labels[k] == name end)
+	end
+	for j = 1, #groups do
+		local name = groups[j].name
+		claim(groups[j], client, n, used, function(k)
+			return labels[k] ~= nil and find(client[k].text, name, 1, true) ~= nil
+		end)
+	end
+	for i = 1, #objs do
+		local o = objs[i]
+		if not o.ci and o.name then
+			for j = 1, #objs do
+				local p = objs[j]
+				if p.ci and p.name == o.name then
+					o.ci = p.ci
+					break
+				end
+			end
+		end
+	end
+	for i = 1, #objs do
+		local o = objs[i]
+		if not o.ci and i <= n and not used[i] then o.ci, used[i] = i, true end
+	end
+	local left, free = {}, {}
+	for i = 1, #objs do
+		if not objs[i].ci then left[#left + 1] = objs[i] end
+	end
+	for k = 1, n do
+		if not used[k] then free[#free + 1] = k end
+	end
+	if #left == #free then
+		for j = 1, #left do left[j].ci = free[j] end
+	end
+	return settled
+end
+
+-- Reads one quest's title, readiness and objective progress. Lines are
+-- matched again when the client's count of them changes, and on every scan
+-- until each has a name. Returns two
+-- booleans: what markers show changed (title, ready, an objective done or
+-- undone), and a progress count changed.
 local function readProgress(e)
 	local shape, progress = false, false
 	local title = ns.Compat.GetQuestTitle(e.q) or (e.rec and e.rec[F.TITLE]) or ("Quest " .. e.q)
@@ -175,23 +300,10 @@ local function readProgress(e)
 	if #objs == 0 then return shape, progress end
 	local client = ns.Compat.GetQuestObjectives(e.q)
 	local n = client and #client or 0
+	if e.lines ~= n then e.lines = matchLines(objs, client, n) and n or nil end
 	for i = 1, #objs do
 		local o = objs[i]
 		local ci = o.ci
-		if not ci or ci > n then
-			ci = nil
-			if o.name and n > 0 then
-				for k = 1, n do
-					local text = client[k].text
-					if type(text) == "string" and find(text, o.name, 1, true) then
-						ci = k
-						break
-					end
-				end
-			end
-			if not ci and i <= n then ci = i end
-			o.ci = ci
-		end
 		local cur, max, done
 		if ci then
 			local c = client[ci]
@@ -586,9 +698,25 @@ end
 -- Available quests
 ---------------------------------------------------------------------------
 
+-- True while quest q's turn-in still bridges the client's lag; drops the
+-- mark once the client lists the quest (`listed`) or the window has passed.
+local function bridged(q, listed)
+	local t = turnedIn[q]
+	if not t then return false end
+	if listed or GetTime() >= t then
+		turnedIn[q] = nil
+		return false
+	end
+	return true
+end
+
 local function isDone(q)
 	if haveCompletedSet then return completed[q] == true end
-	return ns.Compat.IsQuestCompleted(q)
+	if ns.Compat.IsQuestCompleted(q) then
+		turnedIn[q] = nil
+		return true
+	end
+	return bridged(q, false)
 end
 -- After a log scan (always first in a flush) `entries` holds every quest in
 -- the log, collapsed headers included.
@@ -684,6 +812,11 @@ local function scanAvailable()
 	completed, lastCompleted = lastCompleted, prev
 	local hadSet = haveCompletedSet
 	haveCompletedSet = client.CompletedSet(completed)
+	if haveCompletedSet then
+		for q in pairs(turnedIn) do
+			if bridged(q, completed[q]) then completed[q] = true end
+		end
+	end
 	Q.RefreshCheckOptions()
 	if fullAvailable or not (haveCompletedSet and hadSet) then
 		for i = 1, #candidates do
@@ -886,7 +1019,18 @@ end
 
 local function onLogEvent(event, arg)
 	if event == "UNIT_QUEST_LOG_CHANGED" and arg ~= "player" then return end
-	if event == "QUEST_ACCEPTED" and type(arg) == "number" then hidden[arg] = true end
+	if event == "QUEST_ACCEPTED" and type(arg) == "number" then
+		hidden[arg] = true
+		turnedIn[arg] = nil
+	elseif event == "QUEST_TURNED_IN" and type(arg) == "number" then
+		turnedIn[arg] = GetTime() + TURNIN_BRIDGE
+		-- Recheck once the window has passed, in case the client never lists it.
+		C_Timer.After(TURNIN_BRIDGE, function()
+			if not running then return end
+			dirtyAvailable = true
+			schedule()
+		end)
+	end
 	dirtyLog = true
 	if event == "QUEST_TURNED_IN" or event == "QUEST_ACCEPTED" or event == "QUEST_REMOVED" then dirtyAvailable = true end
 	schedule()
@@ -932,6 +1076,7 @@ function Q.Stop()
 	availableCount = 0
 	candidates = nil
 	for q in pairs(hidden) do hidden[q] = nil end
+	for q in pairs(turnedIn) do turnedIn[q] = nil end
 	rebuildIndex()
 	for layer in pairs(markers) do
 		clearMarkers(layer)
