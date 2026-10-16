@@ -54,6 +54,11 @@
   the Undercity; now the pick-up guide, the quest's card and Lookup send
   them to an Alliance mage trainer, and Lookup marks a quest only the other
   side's NPCs give as that side's.
+- The Ruins of Lordaeron pick-up guide no longer starts with Unending
+  Torment: Master Apothecary Faranell gives it only after you bring her the
+  Abominable Head The Baron drops inside, so it now comes after the run, in
+  the hand-in guide. The same for the Excavation Site's Titan Relics: Earthen
+  Echo and Prehistoric Prism follow the relic you bring out (thanks Arachnit)
 - Quests Forever renamed carry their Forever names in the guides: Chastise
   (once A Lack of Fear), Dark Sacrifice (once Devouring Plague), Look to the
   Stars, Onu is Meditating and the others Wowhead Forever lists as renamed.

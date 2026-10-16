@@ -345,3 +345,67 @@ emit({ step = E.GetStepIndex(), count = E.GetStepCount(), title = v.title, note 
 	assert.deepEqual(view.goals[1].at, view.brd, 'at the Blackrock Depths entrance');
 	assert.equal(view.note, 'Core Fragment: inside Blackrock Depths.');
 });
+
+// A dungeon's pick-up plan and guide (the quests taken, the accepts) and its
+// hand-in plan with the follow-ups those turn-ins open, for a character of
+// `race`/`faction`/`cls` at `level`, standing `at`, carrying `ready` (done, in the log).
+function dungeonQuests(key, { race, faction, cls, level, at, ready = [] }) {
+	return runAddon({
+		stubs: ['stub_world.lua'],
+		before: `${packLua()}
+local w = stub.world
+${mapsLua()}
+w.race, w.raceName, w.class, w.className, w.faction = ${luaValue(race)}, ${luaValue(race)}, ${luaValue(cls)}, ${luaValue(cls)}, ${luaValue(faction)}
+w.level = ${level}
+w.moveTo(${at.join(', ')})
+for _, q in ipairs(${luaValue(ready)}) do w.onQuest(q, {}) end`,
+		addons: ['Polestar'],
+		script: `
+stub.login()
+local D = Polestar.Dungeons
+D.Load()
+local ids = function(list, f) local o = {} for i, x in ipairs(list or {}) do o[i] = f(x) end return o end
+local plan = D.PickupPlan(${luaValue(key)})
+local def = D.PickupGuide(${luaValue(key)})
+local accepts = {}
+for _, s in ipairs(def and def.steps or {}) do
+	for _, g in ipairs(s.goals) do if g.t == "accept" then accepts[#accepts + 1] = g.quest end end
+end
+local hand = D.HandinPlan(${luaValue(key)})
+emit({ take = ids(plan and plan.take, function(t) return t.quest.id end), accepts = accepts,
+	hand = ids(hand and hand.hand, function(h) return h.quest.id end),
+	follow = hand and ids(D.HandinFollowUps(hand), function(f) return f.rec.id end) or {} })`,
+	}).emitted[0];
+}
+
+// Issue #50 (Arachnit): Unending Torment (97288-97292, Horde) starts from the
+// Abominable Head The Baron drops in the Ruins of Lordaeron; Master
+// Apothecary Faranell gives the rest of it in the Undercity once the head is
+// hers (Wowhead Forever's Series box and quest texts; tools/lib/data/corrections.json).
+test("Arachnit's report: the Ruins of Lordaeron pick-up guide of a level 23 Orc Warrior takes no Unending Torment before the run; after it, the Abominable Head goes to Faranell, who gives the next one", { skip }, () => {
+	const TORMENT = [97288, 97289, 97290, 97291, 97292];
+	const orc = { race: 'Orc', faction: 'Horde', cls: 'WARRIOR', level: 23, at: [1458, 66, 44] };
+	const before = dungeonQuests('ruins-of-lordaeron', orc);
+	assert.ok(before.take.length > 0, 'the Horde quests of the Ruins of Lordaeron are offered');
+	assert.deepEqual(before.take.filter((id) => TORMENT.includes(id)), [], `no Unending Torment to pick up: ${before.take}`);
+	assert.deepEqual(before.accepts.filter((id) => TORMENT.includes(id)), [], `no Unending Torment accept in the guide: ${before.accepts}`);
+	const after = dungeonQuests('ruins-of-lordaeron', { ...orc, ready: [97288] });
+	assert.deepEqual(after.hand, [97288], 'the Abominable Head is handed in after the run');
+	assert.deepEqual(after.follow, [97289], 'Faranell then gives the next Unending Torment');
+});
+
+// The same shape in the Excavation Site (Wetlands): each side's Titan Relic
+// drops inside and its quest's ender gives the next one (Earthen Echo 98823
+// after Elder Knowledge 95664, Prehistoric Prism 98824 after Lost Relic Carry 95810).
+test('the Excavation Site pick-up guide takes neither Titan Relic follow-up before the run; after it, each relic\'s ender gives it', { skip }, () => {
+	const tauren = { race: 'Tauren', faction: 'Horde', cls: 'WARRIOR', level: 26, at: [1456, 50, 50] };
+	const dwarf = { race: 'Dwarf', faction: 'Alliance', cls: 'WARRIOR', level: 26, at: [1455, 50, 50] };
+	for (const [who, item, next] of [[tauren, 95664, 98823], [dwarf, 95810, 98824]]) {
+		const before = dungeonQuests('excavation-site-wetlands', who);
+		assert.ok(before.take.length > 0, `the ${who.faction} quests of the Excavation Site are offered`);
+		assert.ok(!before.take.includes(next) && !before.accepts.includes(next), `${next} is not picked up before the run: ${before.take}`);
+		const after = dungeonQuests('excavation-site-wetlands', { ...who, ready: [item] });
+		assert.deepEqual(after.hand, [item]);
+		assert.deepEqual(after.follow, [next]);
+	}
+});
