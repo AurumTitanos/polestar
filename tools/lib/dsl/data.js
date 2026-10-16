@@ -13,6 +13,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const SOLO = require('../sim/solo');
+const { loadAreas } = require('../data/areas');
 
 const FILES = ['quests', 'npcs', 'objects', 'items', 'zones', 'map-frames', 'meta'];
 const OPTIONAL = ['professions', 'factions', 'trainers', 'races', 'travel', 'spawnz'];
@@ -63,6 +64,7 @@ function loadData(dir) {
 		}
 	}
 	raw.instances = SOLO.loadInstances(path.join(dir, '..', 'sources'));
+	raw.areas = loadAreas(path.join(dir, '..', 'sources'));
 	return new Data(raw, { dir, missing });
 }
 
@@ -96,6 +98,9 @@ class Data {
 		// Instances from the client's Map/AreaTable/UiMapAssignment (solo.js
 		// loadInstances): { areas, maps } or null. Group content (group.js).
 		this.instances = raw.instances || null;
+		// The client's AreaTable (tools/lib/data/areas.js: the newest Forever
+		// build cached beside the data folder), or null. Place IDs (places.js).
+		this.areas = raw.areas || null;
 		this.zoneByName = new Map();
 		for (const z of Object.values(this.zones)) {
 			if (!z || !z.name) continue;

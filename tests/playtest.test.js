@@ -12,7 +12,7 @@ const { tmpdir } = require('./helpers/tmp');
 const { needs } = require('./helpers/data');
 const { findLua } = require('../tools/lib/lua');
 const cmd = require('../tools/commands/playtest');
-const { playtest } = require('../tools/lib/playtest');
+const { playtest, chainDone } = require('../tools/lib/playtest');
 const { commandPack } = require('../tools/lib/pack/locate');
 
 const PACKS = path.join(__dirname, 'fixtures', 'packs');
@@ -26,6 +26,31 @@ const hasLua = (() => {
 const skip = needs('quests.json') || (!hasLua && 'no Lua 5.1');
 
 const lines = (out) => out.split('\n').filter(Boolean);
+
+test('a guide starts with the prerequisites its accepts need that the guides chaining into it turn in for the character done, and those they leave for it only to hand in in the log', () => {
+	const step = (goals, only) => ({ only, goals });
+	const a = { id: 'a', next: 'b', steps: [step([{ t: 'turnin', quest: 7003 }, { t: 'turnin', quest: 7638, only: { races: ['Human'] } }, { t: 'turnin', quest: 1 }, { t: 'accept', quest: 739 }, { t: 'accept', quest: 2 }, { t: 'accept', quest: 6127 }])] };
+	const b = { id: 'b', nextChoices: ['c', 'x'], steps: [step([{ t: 'turnin', quest: 7721 }], { classes: ['Druid'] })] };
+	const c = {
+		id: 'c',
+		steps: [step([
+			{ t: 'turnin', quest: 739 },
+			{ t: 'accept', quest: 704, pre: [739] },
+			{ t: 'accept', quest: 3, pre: [2] }, // 2 is carried but never turned in here
+			{ t: 'collect', quest: 6127, oi: 1 }, // 6127's objective is done here, so it is not carried ready
+			{ t: 'turnin', quest: 6127 },
+			{ t: 'accept', quest: 6128, pre: [6127] },
+			{ t: 'accept', quest: 7725, pre: [7003] },
+			{ t: 'accept', quest: 7726, pre: [7721] },
+			{ t: 'accept', quest: 7637, preAll: [7638] },
+			{ t: 'accept', quest: 3261, pre: [905] },
+		])],
+	};
+	const guides = [a, b, c];
+	assert.deepEqual(chainDone(guides, c, { race: 'Dwarf', faction: 'Alliance', cls: 'WARRIOR' }), { done: [7003], carried: [739] });
+	assert.deepEqual(chainDone(guides, c, { race: 'Human', faction: 'Alliance', cls: 'DRUID' }), { done: [7003, 7638, 7721], carried: [739] });
+	assert.deepEqual(chainDone(guides, a, { race: 'Human', faction: 'Alliance', cls: 'DRUID' }), { done: [], carried: [] });
+});
 
 test('a stuck step is reported with guide, step, title and class; exit 1', { skip }, async () => {
 	const { result, out } = await quiet(() => cmd.run(['--pack', path.join(PACKS, 'stuck')]));

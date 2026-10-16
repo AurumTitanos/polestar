@@ -123,12 +123,14 @@ async function onIssue({ discord, github, event, forumId, log = console }) {
 }
 
 // The issues a release ships: filed from Discord, closed as completed after
-// the release before it was published and before this one was, and not told
-// about a release yet (the released:<tag> label marks those told).
+// the full release before it was published and before this one was, and not
+// told about a release yet (the released:<tag> label marks those told). A
+// pre-release (a test build) is not a release players get, so it never
+// counts as the one before.
 async function shippedBy(github, release) {
 	const published = Date.parse(release.published_at || release.created_at);
 	const earlier = (await github.releases())
-		.filter((r) => !r.draft && r.id !== release.id && Date.parse(r.published_at) < published)
+		.filter((r) => !r.draft && !r.prerelease && r.id !== release.id && Date.parse(r.published_at) < published)
 		.sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at))[0];
 	const from = earlier ? Date.parse(earlier.published_at) : 0;
 	const closed = await github.issuesLabelled('discord', { state: 'closed', since: earlier ? earlier.published_at : undefined, max: 1000 });
@@ -141,7 +143,7 @@ async function shippedBy(github, release) {
 
 async function onRelease({ discord, github, event, forumId, log = console }) {
 	const release = event.release;
-	if (!release || release.draft) return { told: 0, failed: 0 };
+	if (!release || release.draft || release.prerelease) return { told: 0, failed: 0 };
 	const label = `released:${release.tag_name}`;
 	const issues = await shippedBy(github, release);
 	let told = 0;

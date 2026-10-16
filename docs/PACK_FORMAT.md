@@ -269,14 +269,14 @@ frame; absent: the live frame), `r` (arrival radius in yards), `spots`
 | `complete` | `quest`, `title` | — |
 | `kill` | `target` | `title`, `npc`, `count`, `quest`, `oi`, `spread` |
 | `collect` | `item`, `itemName` | `title`, `count`, `quest`, `oi`, `spread`, `from`, `fromAlso`, `fromKind`, `fromRank`, `fromFaction`, `candidates` |
-| `goto` | `map`, `x`, `y` | `text`, `r` |
+| `goto` | `map`, `x`, `y` | `text`, `r`, `area` |
 | `talk` | `npc`, `npcName` | — |
 | `interact` | `object`, `objName` | `title`, `quest`, `oi`, `spread` |
 | `use` | `item`, `itemName` | `title`, `quest`, `oi` |
-| `sethome` | `location`, or `candidates` | `npc`, `npcName` |
-| `hearth` | `location` | — |
-| `getfp` | `location` | `npc`, `npcName` |
-| `fly` | `location` | — |
+| `sethome` | `location`, or `candidates` | `npc`, `npcName`, `area` |
+| `hearth` | `location` | `area` |
+| `getfp` | `location` | `npc`, `npcName`, `node`, `area` |
+| `fly` | `location` | `area` |
 | `train` | — | `npc`, `npcName`, `class`, `skill`, `skillLine`, `rank`, `rankMax`, `candidates` |
 | `buy` | `item`, `itemName` | `count`, `npc`, `npcName`, `candidates` |
 | `vendor` | — | `npc`, `npcName`, `candidates` |
@@ -312,6 +312,8 @@ The fields:
 | `standing` | 1 Hated to 8 Exalted |
 | `criteria` | an achievement's criterion index |
 | `z` | the height (world z, yards) of the NPC or object the goal's `x`,`y` stands for, so the walking route ends on its floor (an Undercity quarter rather than the street above it). Polestar 0.2.4 and later pass it to the walking engine while the arrow leads to that point (not to a smart target's candidate, nor to a spawn place elsewhere), and ask again without it when the route found with it fails or ends more than 30 yards above or below it. The compiler fills it in (GUIDE_FORMAT.md, "Heights"); a hand-written pack may leave it out. Older Polestar ignores it, so it does not change the format |
+| `area` | the AreaTable area ID (`C_Map.GetAreaInfo`) of the place a `sethome`, `hearth`, `fly` or `getfp` location or a `goto` label names. Polestar 0.2.5 and later complete a `hearth` or `fly` when the zone or subzone text is that area's name in the client's language, accept a `sethome` bind location that reads so, and show that name in place of the English one. The compiler fills it in (GUIDE_FORMAT.md, "Places by ID"); without it the goal matches by its English name. Older Polestar ignores it, so it does not change the format |
+| `node` | on `getfp`: the taxi node ID (`C_TaxiMap` `nodeID`) of its flight point. Polestar 0.2.5 and later count the goal done once the flight map lists that node as known, instead of comparing names. Filled in like `area`; older Polestar ignores it |
 | `spots` | spawn places `{ { x, y, r, n, alt } }`: centre in the goal's map and frame, radius in yards, spawn count; `alt = true` for another place the target spawns, which the arrow takes only when the player moves on to it (the world map marks it) |
 | `spread` | `true` with `spots`: an area objective, searched spot by spot |
 | `from`, `fromAlso`, `fromKind`, `fromRank`, `fromFaction` | a `collect`'s main source: name, a second source of the same kind dropping it at 50% or more, `"npc"` or `"object"`, rank (1 elite, 2 rare elite, 3 boss, 4 rare), faction `"A"`, `"H"` or `"AH"` |
@@ -320,7 +322,7 @@ The fields:
 | `group` | format 2: the goal needs a group, shown under it in the guide window: `{ kind = "elite", rank = 1 }` (rank 1 elite, 2 rare elite, 3 boss: "Elite: group advised"), `{ kind = "dungeon", name = "Dire Maul" }` ("Dungeon: Dire Maul"), `{ kind = "raid", name = "Molten Core" }` ("Raid: Molten Core"), `{ kind = "group", size = 3 }` ("Group of 3 advised"; without `size`, "Group advised"). The compiler derives it or takes the author's `group [N]` (GUIDE_FORMAT.md, "Group content"); Polestar shows nothing for a kind it does not know |
 
 Polestar 0.1.0 reads every verb above; 0.2.4 and later read the `group`
-keys; 0.2.4 and later read `z`. ARCHITECTURE.md ("Guide data") describes when the Engine counts each
+keys; 0.2.4 and later read `z`; 0.2.5 and later read `area` and `node`. ARCHITECTURE.md ("Guide data") describes when the Engine counts each
 goal done.
 
 ### `RegisterMapFrames(frames, packId)`

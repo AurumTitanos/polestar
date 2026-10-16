@@ -433,6 +433,7 @@ Compat.MapToWorld(uiMapID, x, y, frame) -> continentID, wx, wy | nil
 Compat.WorldToMap(continentID, wx, wy, uiMapID) -> x, y | nil
 Compat.GetMapName(uiMapID)      -> string | nil
 Compat.MapName(uiMapID)         -> string | nil   (the client's name, else the Codex zone's)
+Compat.GetAreaName(areaID)      -> string | nil   (C_Map.GetAreaInfo: the area's name in the client's language)
 Compat.GetContinentMap(uiMapID) -> continent uiMapID | nil
 Compat.GetPlayerFacing()        -> radians | nil   (0 = north, counter-clockwise positive)
 Compat.GetZoneText()            -> zone, subzone
@@ -623,14 +624,14 @@ as on a bag item (`W.ItemClick`: Shift links, Ctrl tries it on, Alt guides;
 | `complete` | `quest`, `title` | — | ready for turn-in or completed |
 | `kill` | `target` | `npc`, `count`, `quest`, `oi` | objective `oi` finished, or quest ready/completed (not while the log lists no objectives yet, right after the accept); without `quest`: manual |
 | `collect` | `item`, `itemName` | `count`, `quest`, `oi` | objective finished / quest ready (as `kill`) / completed; without `quest`: item count ≥ `count` |
-| `goto` | `map`, `x`, `y` | `text`, `r` (default 8 yd) | within radius, **or** any later goal in the step is done |
+| `goto` | `map`, `x`, `y` | `text`, `r` (default 8 yd), `area` (its name in the client's language shows instead of `text`) | within radius, **or** any later goal in the step is done |
 | `talk` | `npc`, `npcName` | — | gossip/quest frame opened with that NPC during this step; else manual |
 | `interact` | `object`, `objName` | `quest`, `oi` | objective state if `quest`; else manual |
 | `use` | `item`, `itemName` | `quest`, `oi` | objective state if `quest`; else manual |
-| `sethome` | `location` | `npc`, `npcName` | `GetBindLocation()` equals `location` (case-insensitive) |
-| `hearth` | `location` | — | zone or subzone equals `location`, else manual |
-| `getfp` | `location` | `npc`, `npcName` | taxi map opened at that flight master (persisted in `flags.fp`), else manual |
-| `fly` | `location` | — | zone or subzone equals `location`, else manual |
+| `sethome` | `location` | `npc`, `npcName`, `area` | bound at the goal's inn (`npc`'s, else the inn `location` names, in Nav/Travel.lua's data), by any of: the inn Travel finds for `GetBindLocation()` (`Nav.BoundInn`: the innkeeper learned at bind time in `flags.inn`, else the inn whose `area` the client names so, else its names); `GetBindLocation()` equal to the client's name of that inn's or the goal's `area` (`Compat.GetAreaName`); last, equal to `location` (case-insensitive). Binding at that innkeeper during the step latches it |
+| `hearth` | `location` | `area` | zone or subzone equals the client's name of `area` (without one, `location`), else manual |
+| `getfp` | `location` | `npc`, `npcName`, `node`, `area` | with `node`: that taxi node among the known ones (`flags.taxi`, recorded by Nav/Travel.lua from the flight map); without: taxi map opened at a flight master of that name (persisted in `flags.fp`); else manual |
+| `fly` | `location` | `area` | as `hearth` |
 | `train` | — | `npc`, `npcName`, `text` | trainer window opened during this step, else manual |
 | `buy` | `item`, `itemName` | `count`, `npc`, `npcName` | item count ≥ `count` (default 1) |
 | `vendor` | — | `npc`, `npcName`, `text` | merchant window opened during this step, else manual |
@@ -826,7 +827,29 @@ Polestar.Engine.GetProgress() -> doneSteps, totalSteps
 - **Unavailable quests.** An `accept` whose `closedBy` names a quest that is
   in the log or done is unavailable before any visit (reason `"closed"`,
   "No longer offered: you took <quest>"): a breadcrumb whose follow-up is
-  taken, or one version of an exclusive chain when another was taken. Beyond
+  taken, or one version of an exclusive chain when another was taken. An
+  `accept` that lacks a prerequisite the route no longer brings is
+  unavailable before any visit too (reason `"pre"`, "Requires <quest>
+  first"): one of `preAll`, or of `pre` when none of those is done, that is
+  not done and that this guide does not still turn in (issue #70: Jorn
+  Skyseer at the Crossroads needs The Angry Scytheclaws, the end of Sergra's
+  chain in the previous Barrens guide). "Still turns in" is a `turnin` of
+  that quest anywhere in the guide, before the accept or after it, that is
+  not optional, applies to the character, is not in a skipped step, not
+  skipped or ticked itself, and not unavailable in turn (followed down the
+  chain of prerequisites, at most 8 deep): that prerequisite is the route's
+  own business, so a chain the guide does later (or one lint warns about,
+  taken before its prerequisite is handed in) keeps its accept, and its
+  giver's window decides as below. So does a prerequisite whose goals in the
+  guide are all for other characters (`only`): another race's or class's
+  version of the chain, whose own the data does not list (the paladin
+  charger's Emphasis on Sacrifice names the Human's Lord Grayson
+  Shadowbreaker, not the Dwarf's). Prerequisites the data lacks (issue #51)
+  mark nothing in advance; the giver's window covers them. The mark is live:
+  it does not hold the step, the focus or the arrow, and it goes the moment
+  the prerequisite is done (the guide then goes back to it, as below), not
+  on an unrelated turn-in. A giver's window that offers the quest (this
+  session) beats the data: no mark in advance after that. Beyond
   that, when a gossip/greeting/detail window opens on an `accept` goal's NPC
   (any tab's current step) and the quest is neither offered, in the log, nor
   completed, the Engine marks that accept unavailable for the session, with a
@@ -838,7 +861,9 @@ Polestar.Engine.GetProgress() -> doneSteps, totalSteps
   accept and the goals of that quest in the
   guide (objectives, complete, turnin) count as skipped, so the guide moves on
   instead of stalling. The session marks clear on level-up and on any quest
-  turn-in. The view carries `unavailable = reason` and `unavailableText`.
+  turn-in (either can open a quest whose prerequisite the data lacks), and
+  the guide goes back to a step they had let it pass until its giver says no
+  again. The view carries `unavailable = reason` and `unavailableText`.
   When such marks move the guide past a step during play, the Engine fires
   `STEP_SKIPPED`; the guide window's banner then reads "Skipped <quest>  ·
   <reason>" (one line per quest) until the step changes again, it is
@@ -3086,7 +3111,7 @@ What `compile` writes into a pack's folder: Core, "Guide data (compiled Lua)".
 | `lint`, `compile` | checks with our guides as context; writes `<pack>/dist/<folder>/`; `--format text\|json\|github` |
 | `doctor` | Node, Lua, reference data, AddOns folder, `pack.json` |
 | `find` | quests, NPCs, objects, items, inns, flight points and our guides as guide lines (`--json`); `--kind inn\|flight` without a text lists every inn or flight point (from `travel.json`) |
-| `playtest` | every guide to the end per class (`tools/lib/playtest.js`, also behind `tests/guides.test.js`) |
+| `playtest` | every guide to the end per class (`tools/lib/playtest.js`, also behind `tests/guides.test.js`); a guide starts with the prerequisites of its accepts that the guides chaining into it turn in already done, and those they leave for it only to hand in in the log, as for a player arriving on the route |
 | `play`, `dev` | the playground with the pack built into a temp folder; `dev` watches and builds into AddOns |
 | `install`, `pack` | builds and installs the pack; writes `<pack>/dist/<folder>-<version>.zip` |
 | `record draft`, `sim compare` | drafts into `<pack>/drafts/` under `<id>/draft/`; scores the pack's chain beside ours |

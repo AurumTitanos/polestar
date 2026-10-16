@@ -191,21 +191,23 @@ local function greySkipped(goal)
 	return not chainNeeds(guide, level)[q]
 end
 
--- Per guide: each goal's step index, and each quest's accept goals.
+-- Per guide: each goal's step index, and each quest's accept and turn-in
+-- goals ({ s, key = "s:g", step, goal }).
 local NONE = {}
 local layoutCache = setmetatable({}, { __mode = "k" })
 local function layoutOf(g)
 	local l = layoutCache[g]
 	if l then return l end
-	l = { stepOf = {}, accepts = {} }
+	l = { stepOf = {}, accepts = {}, turnins = {} }
 	for s, step in ipairs(g.steps) do
 		for gi, goal in ipairs(step.goals) do
 			l.stepOf[goal] = s
-			if goal.t == "accept" and goal.quest then
-				local list = l.accepts[goal.quest]
+			local by = goal.quest and (goal.t == "accept" and l.accepts or goal.t == "turnin" and l.turnins)
+			if by then
+				local list = by[goal.quest]
 				if not list then
 					list = {}
-					l.accepts[goal.quest] = list
+					by[goal.quest] = list
 				end
 				list[#list + 1] = { s = s, key = s .. ":" .. gi, step = step, goal = goal }
 			end
@@ -260,18 +262,32 @@ local function goalApplies(goal)
 	return not greySkipped(goal) and not orphaned(goal)
 end
 
+-- The player's own word: goal skips, the current goal, header arrival, the
+-- saved view, state carried over pack updates. One table (Lua 5.1 caps a
+-- chunk at 200 locals), which also holds the Engine's other private helpers.
+local Own = {}
+
 -- Quests found unavailable at their giver this session (questID ->
 -- { reason, accept }): the giver's window opened without offering them. Such a
 -- quest's goals count as skipped until it is taken or done; the marks clear on
 -- level-up and on any turn-in, since either can unlock it.
 local unavailable = {}
+-- Quests a giver's window offered this session (questID -> true): the
+-- giver's word beats a prerequisite the data names (Own.preBlocked).
+Own.offered = {}
+-- The "pre" mark of each accept whose prerequisite is known to be missing,
+-- one table per accept goal.
+Own.preMarks = setmetatable({}, { __mode = "k" })
 
 -- Per quest, a goal's unavailable mark or nil. Known in advance when an
 -- accept of the quest in this guide is closed for good (reason "closed"): one
 -- of its `closedBy` (the quest a breadcrumb leads to, or one exclusive with
 -- it) is in the log or done, so the giver never offers it again. Else the mark
--- its giver's window left this session.
-local function unavailableFor(goal)
+-- its giver's window left this session. Else, also known in advance, "pre":
+-- the accept lacks a prerequisite the route no longer brings (Own.preBlocked),
+-- a mark that goes the moment that prerequisite is done. `depth`: how far
+-- Own.coming has followed a chain of prerequisites.
+local function unavailableFor(goal, depth)
 	local q = goal.quest
 	if not q then return nil end
 	local C = Compat()
@@ -297,18 +313,38 @@ local function unavailableFor(goal)
 	if u and u.reason == "closed" then
 		-- Its closing quest was abandoned since (or it is another tab's mark).
 		unavailable[q] = nil
-		return nil
+		u = nil
 	end
-	return u
+	-- A chain followed this deep (or looping in the data) proves nothing.
+	if u or Own.offered[q] or (depth or 0) > 8 then return u end
+	for i = 1, own and 1 or #list do
+		local a = own and goal or list[i].goal
+		local pre = (a.pre or a.preAll) and Own.preBlocked(a, depth)
+		if pre then
+			local m = Own.preMarks[a]
+			if not m then
+				m = { reason = "pre", accept = a }
+				Own.preMarks[a] = m
+			end
+			m.pre = pre
+			return m
+		end
+	end
+	return nil
 end
 
 local function same(a, b)
 	return a ~= nil and b ~= nil and a:lower() == b:lower()
 end
 
-local function inPlace(location)
-	local zone, sub = Compat().GetZoneText()
-	return same(zone, location) or same(sub, location)
+-- The player stands in a hearth's or flight's place: the zone or subzone
+-- text is its area's name (`area`, C_Map.GetAreaInfo: both in the client's
+-- language), else, for a goal the compiler gave no area, its location.
+local function inPlace(goal)
+	local C = Compat()
+	local place = C.GetAreaName and C.GetAreaName(goal.area) or goal.location
+	local zone, sub = C.GetZoneText()
+	return same(zone, place) or same(sub, place)
 end
 
 -- Discovered flight paths, CharState().flags.fp; recreated if lost.
@@ -318,11 +354,17 @@ local function fpTable()
 	return flags.fp
 end
 
--- Taxi node names read "Stormwind, Elwynn"; guides say "Stormwind".
-local function fpKnown(location)
-	local fp = fpTable()
-	local want = location:lower()
-	for name in pairs(fp) do
+-- A getfp's flight path is known: by its taxi node when the compiler gave
+-- one (`node`, among the nodes Nav/Travel.lua records from the flight map in
+-- CharState().flags.taxi), else by name: taxi node names read "Stormwind,
+-- Elwynn"; guides say "Stormwind".
+local function fpKnown(goal)
+	if goal.node then
+		local taxi = ns.CharState().flags.taxi
+		return type(taxi) == "table" and taxi[goal.node] == true
+	end
+	local want = goal.location:lower()
+	for name in pairs(fpTable()) do
 		local n = name:lower()
 		if n == want or n:match("^([^,]+)") == want then return true end
 	end
@@ -354,16 +396,69 @@ local function isSkipped(s)
 	return sk and sk[s] and true or false
 end
 
--- The player's own word: goal skips, the current goal, header arrival, the
--- saved view, state carried over pack updates. One table (Lua 5.1 caps a
--- chunk at 200 locals).
-local Own = {}
-
 -- An optional goal the player skipped: CharState().skipped[guideId]["s:g"]
 -- (next to the step skips, which use the step number).
 function Own.goalSkipped(s, g)
 	local sk = ns.CharState().skipped[guide.id]
 	return sk ~= nil and sk[Own.key(s, g)] and true or false
+end
+
+-- Prerequisites during play. An accept is unavailable before any visit
+-- (unavailableFor, reason "pre") while it lacks a prerequisite the route no
+-- longer brings: one of `preAll`, or of `pre` when none of those is done,
+-- that is not done and that this guide does not still turn in (Own.coming).
+-- A missing prerequisite the guide still turns in, before the accept or
+-- (against lint's order) after it, is the route's own business or a gap in
+-- the data: the accept keeps its place and its giver's window has the last
+-- word. So is one this guide has only for other characters (Own.coming).
+-- Returns the prerequisite that blocks, or nil.
+function Own.preBlocked(a, depth)
+	if not (guide and missingPre(a)) then return nil end
+	if type(a.preAll) == "table" then
+		for _, p in ipairs(a.preAll) do
+			if not questDone(p) and not Own.coming(p, depth) then return p end
+		end
+	end
+	local any = a.pre
+	if type(any) == "table" and #any > 0 then
+		for _, p in ipairs(any) do
+			if questDone(p) or Own.coming(p, depth) then return nil end
+		end
+		return any[1]
+	end
+	return nil
+end
+
+-- Whether quest p is no missing prerequisite this guide can tell of: the
+-- guide still turns it in (a turn-in of it, not optional, that applies to
+-- the character, in a step the player has not skipped, not skipped or
+-- ticked itself, and not unavailable down the chain of prerequisites), or
+-- every goal of p in the guide is for other characters (`only`): another
+-- race's or class's version of the chain, whose own the data does not list
+-- (Emphasis on Sacrifice names the Human Lord Grayson Shadowbreaker, 7638,
+-- not the Dwarf's 7670).
+function Own.coming(p, depth)
+	local state = ns.CharState()
+	local skipped, manual = state.skipped[guide.id], state.manual[guide.id]
+	local l = layoutOf(guide)
+	local turnins, mine = l.turnins[p] or NONE, false
+	for _, t in ipairs(turnins) do
+		local tg = t.goal
+		if stepApplies(t.step) and Guides.Matches(tg.only, player) then
+			mine = true
+			if not tg.optional and goalApplies(tg)
+				and not (skipped and (skipped[t.s] or skipped[t.key])) and not (manual and manual[t.key])
+				and not unavailableFor(tg, (depth or 0) + 1) then
+				return true
+			end
+		end
+	end
+	if mine then return false end
+	local accepts = l.accepts[p] or NONE
+	for _, t in ipairs(accepts) do
+		if stepApplies(t.step) and Guides.Matches(t.goal.only, player) then return false end
+	end
+	return #turnins + #accepts > 0
 end
 
 -- "s:g", built once per step and goal: check-offs and goal skips are looked
@@ -996,9 +1091,20 @@ goalDone = function(s, g, goal)
 	elseif t == "sethome" then
 		-- `sethome nearest` has no location: binding during the step latches it.
 		if not goal.location then return false end
-		return same(C.GetBindLocation(), goal.location)
+		-- Bound at the goal's inn (its innkeeper, else the inn its location
+		-- names, in Nav/Travel.lua's data) by any of: the inn Travel finds for
+		-- the bind location (the innkeeper learned at bind time, else the inn
+		-- whose area the client names so, else its English names); the bind
+		-- location reading as that inn's or the goal's area in the client's
+		-- language; last, as its English location.
+		local nav = ns.Nav
+		local want = nav and nav.FindInn and nav.FindInn(goal.npc, goal.location)
+		if want and nav.BoundInn and nav.BoundInn() == want then return true end
+		local loc, areaName = C.GetBindLocation(), C.GetAreaName
+		if areaName and (same(loc, areaName(want and want.area)) or same(loc, areaName(goal.area))) then return true end
+		return same(loc, goal.location)
 	elseif t == "hearth" or t == "fly" then
-		if inPlace(goal.location) then return true end
+		if inPlace(goal) then return true end
 		-- Done once any later goal of the step is, like goto: a hearth followed
 		-- by a flight is behind the player once the flight lands. Later travel
 		-- goals count by their own place or check-off only (no recursion).
@@ -1008,7 +1114,7 @@ goalDone = function(s, g, goal)
 			if goalApplies(later) then
 				local lt = later.t
 				if lt == "hearth" or lt == "fly" then
-					if inPlace(later.location) or checked(s, j) then return true end
+					if inPlace(later) or checked(s, j) then return true end
 				elseif lt == "goto" then
 					if arrived[later] or checked(s, j) then return true end
 				elseif lt ~= "note" and goalDone(s, j, later) then
@@ -1018,7 +1124,7 @@ goalDone = function(s, g, goal)
 		end
 		return false
 	elseif t == "getfp" then
-		return fpKnown(goal.location)
+		return fpKnown(goal)
 	elseif t == "level" then
 		return (player.level or 1) >= goal.level
 	elseif t == "skill" then
@@ -1391,7 +1497,7 @@ local function unavailableText(u)
 	if u.reason == "closed" then return L["No longer offered: you took %s"]:format(titleOfQuest(u.by, a.preTitles)) end
 	if u.reason == "level" then return L["Requires level %d"]:format(tonumber(a.minLevel) or 0) end
 	if u.reason == "pre" then
-		local pre = missingPre(a)
+		local pre = u.pre or missingPre(a)
 		if pre then return L["Requires %s first"]:format(titleOfQuest(pre, a.preTitles)) end
 	end
 	local N = ns.Names
@@ -1412,6 +1518,8 @@ local function describe(goal)
 	local t = goal.t
 	local C = Compat()
 	local N = ns.Names
+	-- A place goal's area (`area`) as the client names it, in its language.
+	local place = C.GetAreaName and C.GetAreaName(goal.area) or nil
 	if t == "accept" then
 		local detail = fmt(L["from %s"], N.Npc(goal.npc) or goal.npcName or N.Object(goal.object) or goal.objName or N.Item(goal.item) or goal.itemName)
 		local lvl = tonumber(goal.minLevel)
@@ -1432,7 +1540,7 @@ local function describe(goal)
 		return L["Collect"], item, "item", fmt(L["from %s"], npcName)
 	elseif t == "goto" then
 		local mapName = C.GetMapName(goal.map)
-		if goal.text then return L["Go to"], goal.text, "place", mapName end
+		if place or goal.text then return L["Go to"], place or goal.text, "place", mapName end
 		local lx, ly = liveXY(goal)
 		return L["Go to"], ("%.1f, %.1f"):format(lx or goal.x, ly or goal.y), "place", mapName
 	elseif t == "talk" then
@@ -1443,14 +1551,14 @@ local function describe(goal)
 		return L["Use"], N.Item(goal.item) or goal.itemName, "item", goal.quest and fmt(L["for %s"], questTitle(goal)) or nil
 	elseif t == "sethome" then
 		local _, npcName = npcOf(goal)
-		if goal.location then return L["Set your home to"], goal.location, "place", fmt(L["at %s"], npcName) end
+		if goal.location then return L["Set your home to"], place or goal.location, "place", fmt(L["at %s"], npcName) end
 		return L["Set your home at"], npcName or L["the nearest inn"], npcName and "npc" or "text", nil
 	elseif t == "hearth" then
-		return L["Hearth to"], goal.location, "place", nil
+		return L["Hearth to"], place or goal.location, "place", nil
 	elseif t == "getfp" then
-		return L["Get the flight path at"], goal.location, "place", fmt(L["from %s"], N.Npc(goal.npc) or goal.npcName)
+		return L["Get the flight path at"], place or goal.location, "place", fmt(L["from %s"], N.Npc(goal.npc) or goal.npcName)
 	elseif t == "fly" then
-		return L["Fly to"], goal.location, "place", nil
+		return L["Fly to"], place or goal.location, "place", nil
 	elseif t == "train" then
 		local _, npcName = npcOf(goal)
 		if goal.skillLine and rankCap(goal) then
@@ -2213,7 +2321,11 @@ local function latch(kind, npc)
 					if kind == "talk" then
 						ok = goal.npc == npc
 					elseif kind == "sethome" then
-						ok = not goal.location
+						-- `sethome nearest` on any bind; a located one at its inn's
+						-- innkeeper (goal.npc, else the one of the inn its location names).
+						local nav = goal.location and npc and ns.Nav
+						local inn = nav and nav.FindInn and nav.FindInn(goal.npc, goal.location)
+						ok = not goal.location or (npc ~= nil and npc == (inn and inn.npc or goal.npc))
 					elseif kind == "train" and isProfessionTrain(goal) then
 						ok = false
 					elseif goal.candidates and npc then
@@ -3282,12 +3394,14 @@ for _, event in ipairs({ "ZONE_CHANGED", "ZONE_CHANGED_INDOORS", "ZONE_CHANGED_N
 	ns.RegisterEvent(event, onContextEvent)
 end
 
--- `sethome nearest`: binding during the step completes it, in every tab.
+-- Binding during the step completes `sethome nearest`, and a located
+-- `sethome` when the innkeeper bound at is its inn's, in every tab.
 ns.RegisterEvent("HEARTHSTONE_BOUND", function()
 	if player then
+		local npc = Compat().GetNpcID("npc")
 		for i = 1, #tabs do
 			use(tabs[i])
-			latch("sethome")
+			latch("sethome", npc)
 		end
 		useActive()
 	end
@@ -3360,7 +3474,10 @@ local function checkOffers(source, startItem)
 		local t = listedAt[npc]
 		if t and GetTime() - t < LIST_WINDOW then
 			local list = C.GetOfferedQuests("detail")
-			if list then unavailable[list[1]] = nil end
+			if list and list[1] then
+				unavailable[list[1]] = nil
+				Own.offered[list[1]] = true
+			end
 			return
 		end
 	else
@@ -3372,6 +3489,7 @@ local function checkOffers(source, startItem)
 	for i = 1, #list do
 		offered[list[i]] = true
 		unavailable[list[i]] = nil
+		Own.offered[list[i]] = true
 	end
 	for i = 1, #tabs do
 		use(tabs[i])

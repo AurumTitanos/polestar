@@ -23,6 +23,44 @@
   on the reward choices and on the talents, and its drawings on the map and
   the minimap, are now added in a way that leaves the gamepad interface's
   own code alone.
+- Gear advice no longer marks a weapon you haven't trained as an upgrade,
+  picks it as your quest reward or equips it: it went by the weapons your
+  class can learn, so a level 4 rogue was shown a green arrow on a sword and
+  a mace. The tooltip says the weapon skill isn't trained, and the advice
+  changes as soon as you learn it (thanks Pynte).
+- Teldrassil takes Conservator Ilthalaine's The Balance of Nature before
+  Melithar's quest: he stands right beside where you start, and the guide
+  sent you past him first (thanks Pynte).
+- Teldrassil shows the Gnarlpine Totems with the Nightsabers, boars and Fel
+  Moss instead of after them, and the arrow knows every totem in the woods:
+  the guide named only one of the two totem objects (thanks Pynte).
+- Teldrassil still hands you your class sigil after The Balance of Nature,
+  but has you hand it to your trainer on the next visit to Aldrassil, when
+  you train, rather than a trip up the tree at level 2 with nothing to learn
+  (thanks Pynte).
+- Thousand Needles offers the Bronze Tube from Herble Baubbletump before you
+  turn in Look to the Stars in Darkshire, for when you arrive without one;
+  the tip names Neal Allen in Menethil Harbor if Herble is sold out (thanks
+  Yendi).
+- Zephras Isle: The Great Outdoors says to /sit by Raan's campfire until you
+  get Boosted Rest, not "Click Basic Campfire" (thanks Sato).
+- Zephras Isle: The Gift of Skysight says to cast Skysight near the
+  Elemental Convergence, and the Alliance's Reading the Ley Lines to cast
+  Read Ley Line at the Ley Line, not to click them (thanks Sato).
+- Zephras Isle (Horde) takes Welcome to Shen'dar Village at your first stop
+  with Constable Aonda and follows the quest's own progress, so talking to
+  Illaya Amberwind earlier counts and the step no longer waits on her
+  (thanks Sato).
+- Zephras Isle: the Scrawny Ursera step sends you to the slopes west of
+  Thendal Village, where they spawn, not into the village: our spawn data
+  had bears inside it that Wowhead Forever's map has none of (thanks Sato).
+- A quest whose earlier part you haven't done reads "Requires <quest>
+  first" right away, and the guide no longer walks you to its giver: in the
+  19-24 Barrens it sent you to Sergra Darkthorn for Jorn Skyseer without The
+  Angry Scytheclaws, and only marked it after her window opened. It comes
+  back as soon as you finish the earlier part. Quests whose earlier part the
+  guide still brings you to are unchanged, and the giver's window stays the
+  final word (thanks Fitz).
 - Polestar's interface is in French, translated by Yendi (thanks Yendi).
 - Reputation standings, item qualities, the Alliance and the Horde, the gear
   slots on the upgrade line, the Dungeon Journal and the race names on guides
@@ -41,6 +79,31 @@
   one. Each language's names are their own small addon,
   `Polestar_Names_<locale>`, in the release zip; the game loads only the one
   of its language, and an English client none.
+- On a French, German, Spanish or any other non-English client, setting your
+  home, discovering a flight path, hearthing and flying complete their steps:
+  the guide named the place in English and the game answered in your language
+  ("Darkshire" against "Sombre-Comté"), so these steps never checked off and
+  had to be skipped. Polestar now knows each inn, flight path and place by
+  the game's own ID: binding at the innkeeper the step names, or being bound
+  there already, completes the step, and the guide window names the place as
+  your game does (thanks Yendi, #83).
+- Alliance Priests run Cenarion Aid, Of Coursers We Know and The Ichor of
+  Undeath (8254-8256) on the leveling route: High Priest Rohan gives the first
+  at the Ironforge stop before Azshara, and Ogtinc's two errands fit the
+  Azshara visit, the Ichor of Undeath from the Ruins of Eldarath the route
+  already clears. About half an hour faster to 60 for every Alliance Priest
+  start, with about 45 minutes less grinding. Blood of Morphaz stays in the
+  Class guide: its item drops inside the Sunken Temple (thanks XrayAlpha,
+  #119).
+
+### For guide authors
+
+- `compile` gives `sethome`, `hearth`, `fly` and `getfp` and a labelled `goto`
+  the game's area ID of the place they name (`area`), and `getfp` its flight
+  point's taxi node (`node`), so they complete on every client language; it
+  prints how many got one. The guide sources do not change, and a pack
+  without the keys keeps matching by English name (GUIDE_FORMAT.md, "Places
+  by ID"; PACK_FORMAT.md).
 
 ### For contributors
 
@@ -67,6 +130,10 @@
   the panel's buttons in the caller's code, tainted. `tests/lua/wow_stub.lua`'s
   `CreateFrame` fails such a call from addon code and lists it in
   `stub.underGameFrames`.
+- The Discord bot tells no #bugs thread about a pre-release: a test build
+  published on GitHub as a pre-release is not "the fix is out", and the next
+  full release still tells every fix closed since the last full one
+  (`tools/discord-bot/lib/notify.js`).
 - `node tools/polestar.js i18n` keeps the interface translations, adapted
   from Ding! by Yendi (@moust4ki): `status` lists the nine languages with
   their counts, status (reviewed or AI-made) and translators; `check` (run in
@@ -91,6 +158,11 @@
   licences and counts, with Ding's `CREDITS.md` beside it. `Polestar.Names`
   (`Core/Names.lua`) reads them; docs/ARCHITECTURE.md, "Names", and
   docs/TRANSLATING.md, "Game names".
+- `travel build` gives every inn in `Nav/TravelData.lua` its AreaTable area,
+  from the AreaTable `data build` caches (`tools/lib/data/areas.js`, also read
+  by `compile`); `Compat.GetAreaName` reads `C_Map.GetAreaInfo`; Nav exposes
+  `Nav.FindInn` and `Nav.BoundInn`. `tests/engine-l10n.test.js` plays the
+  steps on a fake French client.
 - `tools/discord-bot`: `/close` and `/reopen` for server administrators in
   a #bugs thread. `/close` takes a reason (Fixed, Won't fix, No action
   needed, Can't reproduce, Not resolved, Duplicate) and an optional note,
