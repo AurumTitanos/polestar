@@ -135,6 +135,14 @@ version throughout.
    Then `/console taintLog 0`: `Logs/taint.log` names no Polestar file and
    the chat shows no `ADDON_ACTION_BLOCKED` or `ADDON_ACTION_FORBIDDEN`.
 
+   Then once more with the game's gamepad interface on (Options, Gamepad,
+   Enable Gamepad UI): open the options from the minimap button, move
+   through them and close them with B, browse the guide, and let a route
+   choice or a new character's welcome show by itself: it takes no button
+   until the Browse the guide button is pressed. LB and RB + the D-pad keep
+   targeting while no Polestar window holds the gamepad, and no "AddOn
+   blocked" warning shows.
+
 7. Assemble the changelog from the fragments in `changes/` (CONTRIBUTING.md,
    "Commits and pull requests"), then commit it with the version bump and
    the regenerated files that are tracked (`git status` lists them;
