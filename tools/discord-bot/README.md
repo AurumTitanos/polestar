@@ -64,8 +64,8 @@ other issues or carry HTML. Say so in the #bugs guidelines, for example:
    `https://discord.com/oauth2/authorize?client_id=APP_ID&scope=bot+applications.commands&permissions=292057844736`
    (View Channels, Send Messages, Send Messages in Threads, Manage Threads,
    Read Message History; `applications.commands` for `/close` and
-   `/reopen`). A bot invited without it logs "slash commands not
-   registered": open the link again, no need to remove it first.
+   `/reopen`). Should the log ever say "slash commands not registered"
+   with a 403, open the link again; there is no need to remove the bot.
 3. On #bugs, add four tags: **Tracked**, **Fixed**, **Won't fix** and
    **Duplicate**, each with "Only allow moderators to apply this tag". A
    missing one is skipped. A post tagged with any of them by hand is never
