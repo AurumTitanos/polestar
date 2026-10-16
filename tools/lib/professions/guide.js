@@ -272,18 +272,19 @@ function draftGuide(name, data, opts = {}) {
 		return ids.sort((a, b) => a - b)[0];
 	};
 
-	line(header('guide', `profession draft ${P} --out`, 'Era-baseline data'));
+	line(header('guide', `profession draft ${P} --out`, "Forever's client tables"));
 	line(`guide forever/professions/${slug(P)}`);
 	line(`title ${P} 1-300`);
 	line('category Professions');
 	line('levels 5-60');
 	line('zone Azeroth');
 	line('');
-	line('# Era-baseline data:');
-	line('# Blizzard Classic Era client tables (recipes, skill thresholds, reagents,');
-	line('# vendor prices) via wago.tools, pfQuest (vendors, drops, nodes) and a curated');
-	line('# trainer list checked against npcs.json. Nothing public confirms Forever');
-	line('# changed profession recipes, so the Era recipe list is the baseline.');
+	line('# Data:');
+	line("# The Forever client's tables (recipes, skill thresholds, reagents, vendor");
+	line('# prices) via wago.tools, with Classic Era filling the few spells and items');
+	line('# they lack; pfQuest (vendors, drops, nodes) and a curated trainer list');
+	line('# checked against npcs.json. Forever changed many thresholds, reagents and');
+	line('# names from Classic, so Classic recipe tables do not apply.');
 	line('#');
 	line('# Trainers and vendors are smart targets: the engine sends each character to');
 	line('# the nearest one of its faction. Farming spots are picked per faction.');

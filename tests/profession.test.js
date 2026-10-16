@@ -17,6 +17,7 @@ const { planProfession, chance, expectedCrafts, SWITCH_BASE, SWITCH_CRAFTS } = r
 const { draftGuide, farmSpot, skinSpot } = require('../tools/lib/professions/guide');
 const { sourceOf, gatherCost, homeMap, zoneOf } = require('../tools/lib/professions/materials');
 const { tmpdir } = require('./helpers/tmp');
+const { DATA: REAL_DATA, needs } = require('./helpers/data');
 
 const FX = path.join(__dirname, 'fixtures', 'professions');
 const DATA = path.join(FX, 'data');
@@ -394,4 +395,24 @@ test('farm spots prefer real sources (2% or more), including clickable clams, ov
 	delete data.objects[7];
 	delete data.items[5500].drops.object[7];
 	assert.equal(farmSpot(5500, 'drop', 'Alliance', 0, data).label, 'Bluegill Murloc');
+});
+
+// With the real data: every `craft <recipe> until <skill>` in the generated
+// profession guides stops at or before the recipe's grey threshold. Issue #109:
+// guides drafted from Classic Era thresholds sent players on past where
+// Forever's recipes turn grey (Red Linen Shirt "until 82" on a recipe grey at 85
+// but green from 67; Tailoring, Leatherworking and Blacksmithing steps that
+// cannot be finished).
+test('no profession guide crafts a recipe past its grey threshold (issue #109)', { skip: needs('professions.json', 'quests.json', 'npcs.json', 'objects.json', 'items.json', 'map-frames.json') }, () => {
+	const { compileSources, OFFICIAL_DIR } = require('../tools/lib/dsl/project');
+	const { loadData } = require('../tools/lib/dsl/data');
+	const dir = path.join(OFFICIAL_DIR, 'forever', 'professions');
+	const sources = fs
+		.readdirSync(dir)
+		.filter((f) => f.endsWith('.guide'))
+		.sort()
+		.map((f) => ({ file: path.join(dir, f), text: fs.readFileSync(path.join(dir, f), 'utf8') }));
+	const { diag } = compileSources(sources, loadData(REAL_DATA));
+	const grey = diag.warnings.filter((d) => /turns grey at/.test(d.message)).map((d) => `${path.basename(d.file)}:${d.line} ${d.message}`);
+	assert.deepEqual(grey, []);
 });
