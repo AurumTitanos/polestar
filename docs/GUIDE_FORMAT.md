@@ -184,6 +184,7 @@ Modifiers, in any order after the positional arguments:
 | `reward <item> ["Name"] [quality] ...` | `turnin` only: items given outright, same entries as `choose`. |
 | `xp <N>` | `turnin` only: the XP it pays. Shown with the rewards, and used for the route-level check when the quest has no `xp` in the data. |
 | `money <amount>` | `turnin` only: copper (`money 350`) or `1g50s` / `7s` / `25c` forms. |
+| `direct` | `turnin` only: the quest is handed in straight from the giver's window, with no `accept` (Distracting Jarven 308, the repeat cloth donations). It needs no earlier accept, and its availability, prerequisites and exclusive quests are checked as an `accept`'s are. The quest never enters the log, so it carries no objectives: get what it asks for with a plain `buy` or `collect` (without `quest`). The goal checks off on the hand-in itself and stays checked after a `/reload`, so a repeatable does not come back as undone. |
 
 ## Conditions
 
@@ -381,7 +382,10 @@ Errors:
   `nearest`/`train class` with an `npc` (`train <Profession> npc <id>` keeps that
   trainer); an unknown profession in `train`
 - `turnin`/`complete`/objective goals for a quest that is never accepted earlier
-  in this guide or in a guide that chains into it via `next`
+  in this guide or in a guide that chains into it via `next`, unless the turn-in
+  is `direct`
+- `turnin … direct` for a quest the chain accepts earlier (drop `direct`), and
+  `complete` or an objective goal for a quest handed in `direct`
 - `accept` for a quest whose `races`/`classes` exclude every character the
   step or goal can apply to
 - coordinates outside 0–100

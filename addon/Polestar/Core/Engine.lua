@@ -223,9 +223,11 @@ end
 -- accept that is not left out as grey nor checked off: it was picked up on
 -- another route, or skipped, or ticked without being taken, so it cannot be
 -- done here and no longer applies. Taking the quest brings the goals back.
+-- A `turnin ... direct` has no accept by definition: it is handed in from the
+-- giver's own window, so it is never orphaned.
 local function orphaned(goal)
 	local q = goal.quest
-	if not q or goal.t == "accept" or not guide then return false end
+	if not q or goal.t == "accept" or goal.direct or not guide then return false end
 	local C = Compat()
 	if C.IsOnQuest(q) or questDone(q) then return false end
 	local l = layoutOf(guide)
@@ -2360,6 +2362,32 @@ local function latchOpenFrame()
 	return hit
 end
 
+-- A hand-in the client never flags completed (a repeatable quest, and every
+-- `turnin ... direct` is one in practice) is stored like the latches above, so
+-- it stays done after a /reload. The quest's own goal in the live step, and in
+-- the step in view when the player looks elsewhere: one hand-in checks off one
+-- goal, so a guide that repeats the same quest keeps its later steps open.
+function Own.latchTurnin(questID)
+	if not (guide and questID) then return false end
+	local hit = false
+	for pass = 1, 2 do
+		local s = pass == 1 and current or computed
+		if s and (pass == 1 or s ~= current) then
+			for g, goal in ipairs(guide.steps[s].goals) do
+				if goal.t == "turnin" and goal.direct and goal.quest == questID and goalApplies(goal) then
+					local m = manualFor(guide.id, true)
+					local key = s .. ":" .. g
+					if not m[key] then
+						m[key] = true
+						hit = true
+					end
+				end
+			end
+		end
+	end
+	return hit
+end
+
 local lastEval = -math.huge
 local pendingCompleted = {} -- background tabs' GUIDE_COMPLETED, fired once the active tab is loaded again
 local pendingChoices = {} -- ROUTE_CHOICE from-guide ids, fired at the end of the evaluation
@@ -3424,6 +3452,13 @@ end)
 
 ns.RegisterEvent("QUEST_TURNED_IN", function(_, questID)
 	if questID then turnedIn[questID] = true end
+	if questID and player then
+		for i = 1, #tabs do
+			use(tabs[i])
+			Own.latchTurnin(questID)
+		end
+		useActive()
+	end
 	wipe(unavailable)
 	requestUpdate()
 end)
@@ -3585,8 +3620,16 @@ ns.RegisterEvent("TAXIMAP_OPENED", function()
 	onNpcFrame("taxi")
 end)
 
--- True when an applicable `verb` goal ("accept"/"turnin") for questID sits
--- in the live step or the next `span` (default 2) applicable steps of any
+-- "direct": a `turnin ... direct` goal, whose quest its giver lists among the
+-- quests it offers rather than the ones in the log, so Automation picks it
+-- from there.
+local function matchesVerb(goal, verb)
+	if verb == "direct" then return goal.t == "turnin" and goal.direct == true end
+	return goal.t == verb
+end
+
+-- True when an applicable `verb` goal ("accept"/"turnin"/"direct") for questID
+-- sits in the live step or the next `span` (default 2) applicable steps of any
 -- open tab, or in the step in view and the ones after it when Prev/Next moved
 -- the view. Automation's gate: never act on quests the route does not want now.
 local function wantsFrom(from, verb, questID, span)
@@ -3596,7 +3639,7 @@ local function wantsFrom(from, verb, questID, span)
 		local step = steps[s]
 		if stepApplies(step) then
 			for _, goal in ipairs(step.goals) do
-				if goal.t == verb and goal.quest == questID and goalApplies(goal) then return true end
+				if matchesVerb(goal, verb) and goal.quest == questID and goalApplies(goal) then return true end
 			end
 			left = left - 1
 			if left == 0 then break end
