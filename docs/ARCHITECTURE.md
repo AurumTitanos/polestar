@@ -1816,9 +1816,10 @@ Polestar_Nav.toc        LoadOnDemand, Dependencies: Polestar
 **Memory.** Loaded, the packed maps are about 26 MB of Lua strings (his own
 three maps were about 12 MB). A search decodes the clusters (ADT tiles) it
 crosses: by the engine's own accounting (`PathGrid.lua` gridSize, an upper
-bound) about 3.3 MB a cluster on average, 28.5 MB for the dearest route
-measured (Razor Hill to the Valley of Strength through Orgrimmar), and Lua's
-own count of what that route allocates is 15.6 MB; the decoded graph of a
+bound) about 3.3 MB a cluster on average: 15.8 MB for Kharanos to
+Thelsamar (6 clusters), 28.5 MB for Razor Hill to the Valley of Strength
+through Orgrimmar (4), 46.4 MB and 4.9 MB of graph for a 7,700 yd walk from
+the Crossroads to Tanaris (17 clusters, none evicted); the decoded graph of a
 whole continent is 4.2 MB (Eastern Kingdoms) or 4.9 MB (Kalimdor). His
 ceilings, 24 MB of grids and 4 MB of graph, were sized for his 8 yd cells, so
 `API.lua` raises them to `Path.cacheKB` 48 MB and `Path.graphKB` 6 MB (never

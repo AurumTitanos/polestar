@@ -74,14 +74,16 @@ local floor, sqrt = math.floor, math.sqrt
 local function r1(v) return v and floor(v * 10 + 0.5) / 10 end
 -- Every search the arrow asks for, with what it was asked and what came back.
 local finds = {}
-local realFind = E.Find
-E.Find = function(map, from, to, callback, water)
-	local rec = { map = map, from = { from.x, from.y, from.z }, to = { to.x, to.y, to.z }, at = GetTime(), combat = InCombatLockdown() and true or false }
-	finds[#finds + 1] = rec
-	return realFind(map, from, to, function(points, cost, job)
-		rec.points, rec.cost, rec.done = points, cost, true
-		callback(points, cost, job)
-	end, water)
+if E then -- nil when Polestar_Nav was not loaded (routing off)
+	local realFind = E.Find
+	E.Find = function(map, from, to, callback, water)
+		local rec = { map = map, from = { from.x, from.y, from.z }, to = { to.x, to.y, to.z }, at = GetTime(), combat = InCombatLockdown() and true or false }
+		finds[#finds + 1] = rec
+		return realFind(map, from, to, function(points, cost, job)
+			rec.points, rec.cost, rec.done = points, cost, true
+			callback(points, cost, job)
+		end, water)
+	end
 end
 -- Stand at world (wx, wy) on map, through the live frame, as the client reports it.
 local function place(map, wx, wy, z)
@@ -500,4 +502,130 @@ test('K1: a walk into a cave is split at its mouth from Polestar_Nav\'s Chokepoi
 	assert.equal(cave.choke, 'The Grizzled Den');
 	assert.match(cave.label, /Grizzled Den/);
 	assert.ok(out.legs.every((l) => typeof l.label === 'string' && l.label !== '' && l.label !== 'Unknown'), 'K1: every step is named');
+});
+
+// Review conditions for shipping Polestar's maps (nav-maps): the maps load only with routing on; a missing or
+// broken map file leaves the straight arrow, never a Lua error; every zone the guides walk in routes.
+const NAV_DIR = path.join(ADDONS, 'Polestar_Nav', 'Nav');
+
+test('the walking maps load on demand only with Walk real paths on (nav.navRouting off: Polestar_Nav is never loaded)', { skip }, () => {
+	const run1 = (routing) => runAddon({
+		stubs: ['stub_world.lua', 'stub_encoding.lua', 'stub_packs.lua'],
+		before: before(),
+		addons: ['Polestar', { name: 'Polestar_Guides', files: ['MapFrames.lua'] }],
+		saved: { Polestar: `PolestarDB = { schema = 1, settings = { nav = { navRouting = ${routing} } } }` },
+		login: true,
+		script: `${PRELUDE}
+			place(1429, GOLDSHIRE[1], GOLDSHIRE[2], GOLDSHIRE[3])
+			N.SetTarget(1429, 39.5, 82.4, "Fargodeep Mine", "e")
+			for _ = 1, 40 do stub.advance(0.05); aim() end
+			emit({ loads = stub.packLoads.Polestar_Nav or 0, data = PolestarPathData ~= nil, chokepoints = PolestarNavChokepoints ~= nil, finds = #finds, state = aim().state })`,
+	}).emitted[0];
+	const off = run1(false);
+	assert.deepEqual([off.loads, off.data, off.chokepoints, off.finds], [0, false, false, 0], 'routing off: no maps in memory, no search');
+	assert.equal(off.state, 'travel', 'the arrow still points (straight)');
+	const on = run1(true);
+	assert.deepEqual([on.loads, on.data, on.chokepoints], [1, true, true], 'routing on: loaded once at login');
+	assert.ok(on.finds >= 1);
+});
+
+// The part file holding the cluster (ADT tile) of a world point on map 0, and that cluster's index.
+function clusterFile(wx, wy) {
+	const meta = fs.readFileSync(path.join(NAV_DIR, 'Nav0.lua'), 'utf8');
+	const num = (k) => Number(new RegExp(`\\t${k} = (-?\\d+),`).exec(meta)[1]);
+	const T = 1600 / 3;
+	const k = (Math.floor(wx / T) - num('cx0')) * num('ny') + (Math.floor(wy / T) - num('cy0'));
+	const file = fs.readdirSync(NAV_DIR).find((f) => /^Nav0_\d+\.lua$/.test(f) && fs.readFileSync(path.join(NAV_DIR, f), 'utf8').includes(`data.packed.grid[${k + 1}] = `));
+	return { k, file };
+}
+
+function withMaps(files, script) {
+	return runAddon({
+		stubs: ['stub_world.lua', 'stub_encoding.lua', 'stub_packs.lua'],
+		before: before().replace(/stub\.packs\.Polestar_Nav = \{[^\n]*\}/, `stub.packs.Polestar_Nav = { ${files.map((f) => JSON.stringify(f)).join(', ')} }`),
+		addons: ['Polestar', { name: 'Polestar_Guides', files: ['MapFrames.lua'] }],
+		login: true,
+		script: `${PRELUDE}\n${script}`,
+	}).emitted[0];
+}
+
+const STRAIGHT = `
+	place(1429, GOLDSHIRE[1], GOLDSHIRE[2], GOLDSHIRE[3])
+	local f = guide()
+	for _ = 1, 20 do stub.advance(0.05) end
+	local a = aim()
+	local _, tx, ty = N.GetTargetWorld()
+	emit({ state = a.state, toTarget = a.x and dist(a.x, a.y, tx, ty), measured = a.measured, available = E and E.Available(0), points = f and f.points and #f.points or 0, cost = f and f.cost })`;
+
+test('a map file missing from Nav.xml leaves the straight arrow on that map, with no Lua error', { skip }, () => {
+	const files = [...tocFiles('Polestar_Nav'), nsFile].filter((f) => !/[\\/]Nav0(_\d+)?\.lua$/.test(f));
+	const out = withMaps(files, STRAIGHT);
+	assert.equal(out.available, false, 'no data for map 0');
+	assert.equal(out.state, 'travel');
+	assert.ok(out.toTarget < 1, `the arrow points at the goal itself (${out.toTarget})`);
+	assert.notEqual(out.measured, true, 'its distance is the straight one');
+});
+
+test('a corrupted block of the map leaves the straight arrow for that walk, with no Lua error', { skip }, () => {
+	const { k, file } = clusterFile(-9444.062, 77.667);
+	assert.ok(file, 'Goldshire\'s cluster is in one part file');
+	const bad = path.join(tmpdir('polestar-nav-bad-'), file);
+	fs.writeFileSync(bad, fs.readFileSync(path.join(NAV_DIR, file), 'utf8').replace(new RegExp(`^data\\.packed\\.grid\\[${k + 1}\\] = \\{[^}]*\\}$`, 'm'), `data.packed.grid[${k + 1}] = {"bm90IHpsaWI="}`));
+	assert.notEqual(fs.readFileSync(bad, 'utf8'), fs.readFileSync(path.join(NAV_DIR, file), 'utf8'));
+	const files = [...tocFiles('Polestar_Nav'), nsFile].map((f) => (path.basename(f) === file ? bad : f));
+	const out = withMaps(files, STRAIGHT);
+	assert.equal(out.available, true, 'the map is there');
+	assert.equal(out.points, 0, `no path through the broken cluster (${out.cost})`);
+	assert.equal(out.state, 'travel');
+	assert.ok(out.toTarget < 1, `the arrow points at the goal itself (${out.toTarget})`);
+});
+
+test('every zone the guides walk in routes on the shipped maps (one walk between two of its located goals, 80-400 yd apart), and Zephras Isle on his', { skip }, () => {
+	const { Geo } = require('../tools/lib/planner/geo');
+	const geo = new Geo(JSON.parse(fs.readFileSync(path.join(DATA, 'map-frames.json'), 'utf8')), JSON.parse(fs.readFileSync(path.join(DATA, 'zones.json'), 'utf8')));
+	const src = fs.readFileSync(path.join(ADDONS, 'Polestar_Guides', 'Guides.lua'), 'utf8');
+	const byZone = new Map();
+	for (const m of src.matchAll(/map = (\d+), x = ([\d.]+), y = ([\d.]+)/g)) {
+		const w = geo.toWorld(+m[1], +m[2], +m[3], 'e');
+		if (!w || ![0, 1].includes(w.c)) continue;
+		if (!byZone.has(+m[1])) byZone.set(+m[1], []);
+		byZone.get(+m[1]).push(w);
+	}
+	// Per zone, up to 6 candidate pairs; the zone passes when one routes (a goal can stand on a ledge or a tree only its own quest reaches).
+	const zones = [];
+	for (const [map, ws] of [...byZone].sort((a, b) => a[0] - b[0])) {
+		const pairs = [];
+		for (let i = 0; i < ws.length && pairs.length < 6; i++) {
+			for (let j = i + 1; j < ws.length && pairs.length < 6; j++) {
+				const d = Math.hypot(ws[i].wx - ws[j].wx, ws[i].wy - ws[j].wy);
+				if (ws[i].c === ws[j].c && d >= 80 && d <= 400) pairs.push([ws[i], ws[j]]);
+			}
+		}
+		if (pairs.length) zones.push({ map, c: pairs[0][0].c, pairs });
+	}
+	const lua = zones.map((z) => `{ ${z.map}, ${z.c}, { ${z.pairs.map(([a, b]) => `{ ${a.wx.toFixed(2)}, ${a.wy.toFixed(2)}, ${b.wx.toFixed(2)}, ${b.wy.toFixed(2)} }`).join(', ')} } }`).join(',\n');
+	const zeph = geo.toWorld(2521, 50, 50, 'l');
+	const zeph2 = geo.toWorld(2521, 45, 60, 'l');
+	const [out] = runAddon({
+		stubs: ['stub_encoding.lua'],
+		addons: ['Polestar_Nav'],
+		script: `
+local Path = Polestar_NavEngine
+local out = { failed = {}, n = 0 }
+for _, z in ipairs({ ${lua} }) do
+	out.n = out.n + 1
+	local ok = false
+	for _, p in ipairs(z[3]) do
+		local pts = Path.FindSync(z[2], { x = p[1], y = p[2] }, { x = p[3], y = p[4] })
+		if pts then ok = true break end
+	end
+	if not ok then out.failed[#out.failed + 1] = z[1] end
+end
+local pts, cost = Path.FindSync(2991, { x = ${zeph.wx}, y = ${zeph.wy} }, { x = ${zeph2.wx}, y = ${zeph2.wy} })
+out.zephras = pts and cost or tostring(cost)
+emit(out)`,
+	}).emitted;
+	assert.ok(out.n >= 40, `${out.n} zones`);
+	assert.deepEqual(Object.values(out.failed), [], 'every zone routes');
+	assert.ok(typeof out.zephras === 'number' && out.zephras > 100, `Zephras Isle routes on his map (${out.zephras})`);
 });
