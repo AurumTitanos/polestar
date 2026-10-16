@@ -22670,8 +22670,8 @@ do
 					title = "The Dry Hills",
 					note = "Savannah Patriarchs roam the plains east of the hills, and the Sprung Traps lie among them. Serena Bloodfeather leads the Witchwing harpies in the hills to the west.",
 					goals = {
-						{ t = "collect", quest = 95494, title = "Bruised Pride and Lion Hides", item = 269715, itemName = "Savannah Lion Hide", count = 6, oi = 1, map = 1413, x = 43.1, y = 15.03, f = "e", spots = { { x = 44, y = 15.4, r = 104, n = 4 }, { x = 45.5, y = 16.6, r = 78, n = 1 }, { x = 47, y = 13.7, r = 78, n = 1 }, { x = 60, y = 32.7, r = 78, n = 2 }, { x = 61.9, y = 33.1, r = 115, n = 8 } }, spread = true },
-						{ t = "collect", quest = 95507, title = "Vrang's Game", item = 269719, itemName = "Trapped Game", count = 8, oi = 1, map = 1413, x = 42.9, y = 15, f = "e", spots = { { x = 43.4, y = 14.6, r = 130, n = 5 }, { x = 45.1, y = 16.1, r = 88, n = 2 }, { x = 46, y = 13.3, r = 104, n = 4 }, { x = 47.5, y = 12, r = 88, n = 3 }, { x = 50.2, y = 12.7, r = 88, n = 1 }, { x = 42.7, y = 21.2, r = 88, n = 1 } }, spread = true, from = "Sprung Trap", fromKind = "object" },
+						{ t = "collect", quest = 95494, title = "Bruised Pride and Lion Hides", item = 269715, itemName = "Savannah Lion Hide", count = 6, oi = 1, map = 1413, x = 44.5, y = 14.06, f = "e", spots = { { x = 44, y = 15.4, r = 104, n = 4 }, { x = 45.5, y = 16.6, r = 78, n = 1 }, { x = 47, y = 13.7, r = 78, n = 1 }, { x = 60, y = 32.7, r = 78, n = 2 }, { x = 61.9, y = 33.1, r = 115, n = 8 } }, spread = true },
+						{ t = "collect", quest = 95507, title = "Vrang's Game", item = 269719, itemName = "Trapped Game", count = 8, oi = 1, map = 1413, x = 43.9, y = 14.4, f = "e", spots = { { x = 43.4, y = 14.6, r = 130, n = 5 }, { x = 45.1, y = 16.1, r = 88, n = 2 }, { x = 46, y = 13.3, r = 104, n = 4 }, { x = 47.5, y = 12, r = 88, n = 3 }, { x = 50.2, y = 12.7, r = 88, n = 1 }, { x = 42.7, y = 21.2, r = 88, n = 1 } }, spread = true, from = "Sprung Trap", fromKind = "object" },
 						{ t = "collect", quest = 876, title = "Serena Bloodfeather", item = 5067, itemName = "Serena's Head", oi = 1, map = 1413, x = 39.16, y = 12.17, f = "e", from = "Serena Bloodfeather", fromKind = "npc" },
 					},
 				},
@@ -22680,14 +22680,14 @@ do
 					goals = {
 						{ t = "turnin", quest = 95494, title = "Bruised Pride and Lion Hides", npc = 3682, npcName = "Vrang Wildgore", map = 1413, x = 43.8, y = 12.21, f = "e", note = "Vrang Wildgore" },
 						{ t = "turnin", quest = 95507, title = "Vrang's Game", npc = 3682, npcName = "Vrang Wildgore", map = 1413, x = 43.8, y = 12.21, f = "e" },
-						{ t = "accept", quest = 95495, title = "The Hermit Tanner", npc = 3682, npcName = "Vrang Wildgore", minLevel = 14, qlvl = 18, map = 1413, x = 43.8, y = 12.21, f = "e" },
+						{ t = "accept", quest = 95495, title = "The Hermit Tanner", npc = 3682, npcName = "Vrang Wildgore", minLevel = 14, qlvl = 18, preAll = { 95494, 95507 }, preTitles = { [95494] = "Bruised Pride and Lion Hides", [95507] = "Vrang's Game" }, map = 1413, x = 43.8, y = 12.21, f = "e" },
 					},
 				},
 				{
 					title = "Walton",
 					goals = {
 						{ t = "turnin", quest = 95495, title = "The Hermit Tanner", npc = 261366, npcName = "Walton", map = 1413, x = 42.01, y = 11.44, f = "e", note = "Walton" },
-						{ t = "accept", quest = 95621, title = "Trouble in the Valley", npc = 261366, npcName = "Walton", minLevel = 14, qlvl = 18, map = 1413, x = 42.01, y = 11.44, f = "e" },
+						{ t = "accept", quest = 95621, title = "Trouble in the Valley", npc = 261366, npcName = "Walton", minLevel = 14, qlvl = 18, pre = { 95495 }, preTitles = { [95495] = "The Hermit Tanner" }, map = 1413, x = 42.01, y = 11.44, f = "e" },
 					},
 				},
 				{
@@ -22701,7 +22701,7 @@ do
 					title = "Walton",
 					goals = {
 						{ t = "turnin", quest = 95621, title = "Trouble in the Valley", npc = 261366, npcName = "Walton", map = 1413, x = 42.01, y = 11.44, f = "e", note = "Walton" },
-						{ t = "accept", quest = 95508, title = "Unwelcome Guests", npc = 261366, npcName = "Walton", minLevel = 14, qlvl = 18, map = 1413, x = 42.01, y = 11.44, f = "e" },
+						{ t = "accept", quest = 95508, title = "Unwelcome Guests", npc = 261366, npcName = "Walton", minLevel = 14, qlvl = 18, pre = { 95621 }, preTitles = { [95621] = "Trouble in the Valley" }, map = 1413, x = 42.01, y = 11.44, f = "e" },
 						{ t = "complete", quest = 95508, title = "Unwelcome Guests", note = "Assist Walton: stay by him when Terry Longdrink and the Kul Tiras marines come up the ridge" },
 						{ t = "turnin", quest = 95508, title = "Unwelcome Guests", npc = 261366, npcName = "Walton", map = 1413, x = 42.01, y = 11.44, f = "e" },
 					},

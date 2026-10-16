@@ -173,6 +173,20 @@
 			},
 			"note": "Call of Fire (Dun Morogh, Dwarf Shaman) lists Fire Tar first, then the Reagent Pouch: Wowhead Forever https://www.wowhead.com/forever/quest=94466, checked 2026-10-16. The merged data has the two the other way round, so `quest 94466.1` named the pouch."
 		},
+		"95495": {
+			"set": {
+				"pre": [
+					95494,
+					95507
+				],
+				"preAll": [
+					95494,
+					95507
+				],
+				"preAny": []
+			},
+			"note": "The Hermit Tanner (Barrens, Walton) is offered only after both of Vrang's quests, Bruised Pride and Lion Hides 95494 and Vrang's Game 95507: Wowhead Forever's Series box on https://www.wowhead.com/forever/quest=95621 lists \"1. Bruised Pride and Lion Hides, Vrang's Game; 2. The Hermit Tanner; 3. Trouble in the Valley\" (checked 2026-10-16). QuestieDB 1.0.5 has no prerequisite."
+		},
 		"95508": {
 			"set": {
 				"objectives": [
@@ -182,9 +196,26 @@
 						"count": 1,
 						"text": "Assist Walton"
 					}
+				],
+				"pre": [
+					95621
+				],
+				"preAny": [
+					95621
 				]
 			},
-			"note": "Unwelcome Guests (Barrens): Wowhead Forever https://www.wowhead.com/forever/quest=95508 lists one objective \"Assist Walton\" (1), credited by npc=261367 Terry Longdrink (level 19, hostile to the Horde, at The Barrens 41.8,11.4; https://www.wowhead.com/forever/npc=261367), checked 2026-10-13. QuestieDB 1.0.5 has no objectives."
+			"note": "Unwelcome Guests (Barrens): Wowhead Forever https://www.wowhead.com/forever/quest=95508 lists one objective \"Assist Walton\" (1), credited by npc=261367 Terry Longdrink (level 19, hostile to the Horde, at The Barrens 41.8,11.4; https://www.wowhead.com/forever/npc=261367), checked 2026-10-13. QuestieDB 1.0.5 has no objectives. Unwelcome Guests comes after Trouble in the Valley 95621: two Wowhead Forever comments on https://www.wowhead.com/forever/quest=95508 back the order, and Polestar's saved variables from the client record Walton's quest window opening without 95508 or 95621 (not offered), checked 2026-10-16. QuestieDB 1.0.5 has no prerequisite."
+		},
+		"95621": {
+			"set": {
+				"pre": [
+					95495
+				],
+				"preAny": [
+					95495
+				]
+			},
+			"note": "Trouble in the Valley (Barrens, Walton) comes after The Hermit Tanner 95495: Wowhead Forever's Series box on https://www.wowhead.com/forever/quest=95621 lists \"1. Bruised Pride and Lion Hides, Vrang's Game; 2. The Hermit Tanner; 3. Trouble in the Valley\" (checked 2026-10-16). QuestieDB 1.0.5 has no prerequisite."
 		},
 		"95646": {
 			"set": {
