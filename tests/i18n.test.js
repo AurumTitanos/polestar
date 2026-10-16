@@ -14,8 +14,8 @@ const { runAddon, ADDONS, ROOT } = require('./helpers/lua');
 const { fakeLocale } = require('./helpers/locale');
 const { tmpdir } = require('./helpers/tmp');
 const { formatProblems } = require('../tools/lib/i18n/check');
-const { extractKeys } = require('../tools/lib/i18n/keys');
-const { readLocaleFiles, updateLocaleText, newLocaleText } = require('../tools/lib/i18n/files');
+const { extractKeys, DATA_KEYS } = require('../tools/lib/i18n/keys');
+const { RETIRED, readLocaleFiles, parseLocaleText, updateLocaleText, newLocaleText } = require('../tools/lib/i18n/files');
 const { LOCALES, LOCALE_CODES } = require('../tools/lib/i18n/locales');
 const { localeState } = require('../tools/lib/i18n/project');
 const { TERMS, GLOSSARY_DIR, readGlossary, glossaryWarnings } = require('../tools/lib/i18n/glossary');
@@ -23,13 +23,27 @@ const { TERMS, GLOSSARY_DIR, readGlossary, glossaryWarnings } = require('../tool
 const POLESTAR = path.join(ADDONS, 'Polestar');
 const shipped = LOCALE_CODES.filter((l) => fs.existsSync(path.join(POLESTAR, 'Locales', `${l}.lua`)));
 
-test('the code\'s keys are found: literal L["..."], ns.LC pairs, the transport captions and the text that comes from data', () => {
-	const keys = extractKeys(POLESTAR);
-	assert.ok(keys.size > 1500, `only ${keys.size} keys found`);
-	for (const k of ['Toggle guide window', 'boss: Chest', 'Next boat in about %s', 'Boat docked, leaves in %s', 'Collectibles', 'Night Elf', 'First Aid', 'Beta', 'Protection (tank)']) {
-		assert.ok(keys.has(k), `${JSON.stringify(k)} is not found`);
-	}
-	for (const k of ['Exalted', 'quality: Rare', 'slot: Back', 'Dungeon journal', 'Alliance']) assert.ok(!keys.has(k), `${JSON.stringify(k)} is the client's word now, not a key`);
+test('the keys are every literal L[...] and LC("context", "text") in the code, grouped by first use, plus the text that comes from data; a key in a comment or inside a string is none', () => {
+	const dir = tmpdir();
+	const write = (rel, text) => {
+		fs.mkdirSync(path.dirname(path.join(dir, rel)), { recursive: true });
+		fs.writeFileSync(path.join(dir, rel), text);
+	};
+	const [dataFile, dataKeys] = Object.entries(DATA_KEYS)[0];
+	write('A.lua', `local L = ns.L
+local HERE = { boat = L["Docked %s"] }
+print(L['Single'], L[ [[Long]] ], ns.LC("boss", "Chest"), L["Shared"])
+-- L["In a comment"]
+--[[ L["In a block comment"] ]]
+print("L[\\"In a string\\"]")
+`);
+	write(dataFile, 'local L = ns.L\nprint(L["Shared"])\n');
+	write('Gear/Weights.lua', 'local SPECS = { { key = "arms", label = "A spec" } }\n');
+	const keys = extractKeys(dir);
+	for (const k of ['Docked %s', 'Single', 'Long', 'boss: Chest', 'Shared']) assert.ok(keys.has(k), `${JSON.stringify(k)} is not found`);
+	for (const k of ['In a comment', 'In a block comment', 'In a string']) assert.ok(!keys.has(k), `${JSON.stringify(k)} is not code`);
+	assert.deepEqual(keys.get('Shared').map((w) => w.file), ['A.lua', dataFile], 'its first use comes first');
+	for (const k of [...dataKeys, 'A spec']) assert.ok(keys.get(k) && keys.get(k).every((w) => w.data), `${JSON.stringify(k)}: a data key`);
 });
 
 test('the format check refuses what the client would show broken, and allows reordering with numbered values', () => {
@@ -75,30 +89,39 @@ L["Gone"] = "Weg"
 L["slot: Back"] = "Rücken"
 `;
 
+// A locale file's keys -> { kind: 'entry' | 'todo', files: those its group's
+// header names }, and the translations in its end block.
+function placed(text) {
+	const doc = parseLocaleText(text, 'test.lua');
+	const keys = {};
+	for (const g of doc.groups) for (const l of g.lines) if (l.kind === 'entry' || l.kind === 'todo') keys[l.key] = { kind: l.kind, files: g.files };
+	return { keys, retired: doc.tail[0] === RETIRED ? doc.tail.slice(1) : [] };
+}
+
+// Whether every one of `lines` is in `text`, in the same order.
+function inOrder(lines, text) {
+	const out = text.split('\n');
+	let at = 0;
+	for (const l of lines) {
+		at = out.indexOf(l, at);
+		if (at < 0) return false;
+		at++;
+	}
+	return true;
+}
+
 test('sync adds missing keys under their file\'s group, retires lost translations to the end, and leaves every other line alone', () => {
 	const dir = miniAddon();
 	const keys = extractKeys(dir);
 	const out = updateLocaleText({ text: GERMAN, file: 'deDE.lua', keys });
-	assert.equal(out.text, `-- German (deDE). Hand-written header.
-
-local _, ns = ...
-if not (GetLocale and GetLocale() == "deDE") then return end
-local L = ns.L
-
--- Main.lua
-L["Hello %s"] = "Hallo %s"
--- L["Bye"] = ""
-
--- Main.lua (the slot)
-L["slot: Back"] = "Rücken"
--- L["New in Main"] = ""
-
--- UI/Window.lua
--- L["Close the window"] = ""
-
--- No longer in the code (its English changed or it went away): reuse or delete.
--- L["Gone"] = "Weg"
-`);
+	const gone = GERMAN.split('\n').find((l) => l.startsWith('L["Gone"]'));
+	const lost = new Set([gone, '-- L["Gone too"] = ""']);
+	assert.ok(inOrder(GERMAN.split('\n').filter((l) => !lost.has(l)), out.text), 'every other line (the header, the hand-made group headers, each translation) stays as it was, in order');
+	const p = placed(out.text);
+	assert.deepEqual(p.keys['New in Main'], { kind: 'todo', files: ['Main.lua'] }, 'commented out in a group of the file that uses it');
+	assert.deepEqual(p.keys['Close the window'], { kind: 'todo', files: ['UI/Window.lua'] }, 'in a new group for a file the locale file had none for');
+	assert.ok(!('Gone' in p.keys) && !('Gone too' in p.keys), 'keys the code lost leave the groups');
+	assert.deepEqual(p.retired, [`-- ${gone}`], 'the lost translation is kept, commented out, at the end');
 	assert.deepEqual(out.added, ['New in Main', 'Close the window']);
 	assert.deepEqual(out.retired, ['Gone']);
 	assert.deepEqual(out.dropped, ['Gone too']);
@@ -107,28 +130,18 @@ L["slot: Back"] = "Rücken"
 
 test('a new file has every key commented out under its file; filled keys are translated and unknown ones retired', () => {
 	const dir = miniAddon();
-	const out = newLocaleText({ locale: 'frFR', keys: extractKeys(dir), fill: { Bye: 'Au revoir' }, retire: { Old: 'Vieux' } });
-	assert.equal(out.text, `-- French (frFR): Polestar's interface strings.
--- Keys are the English strings exactly as the code writes them; a key
--- missing here, or commented out, shows in English. Grouped by the file that
--- first uses each key. docs/TRANSLATING.md explains the rest.
-
-local _, ns = ...
-if not (GetLocale and GetLocale() == "frFR") then return end
-local L = ns.L
-
--- Main.lua
--- L["Hello %s"] = ""
-L["Bye"] = "Au revoir"
--- L["New in Main"] = ""
--- L["slot: Back"] = ""
-
--- UI/Window.lua
--- L["Close the window"] = ""
-
--- No longer in the code (its English changed or it went away): reuse or delete.
--- L["Old"] = "Vieux"
-`);
+	const keys = extractKeys(dir);
+	const out = newLocaleText({ locale: 'frFR', keys, fill: { Bye: 'Au revoir' }, retire: { Old: 'Vieux' } });
+	const p = placed(out.text);
+	assert.equal(Object.keys(p.keys).length, keys.size);
+	for (const [k, where] of keys) assert.deepEqual(p.keys[k], { kind: k === 'Bye' ? 'entry' : 'todo', files: [where[0].file] }, k);
+	assert.deepEqual(p.retired, ['-- L["Old"] = "Vieux"']);
+	const file = path.join(dir, 'Locales', 'frFR.lua');
+	fs.writeFileSync(file, out.text);
+	const [fr, de] = readLocaleFiles([{ file, locale: 'frFR' }, { file, locale: 'deDE' }]);
+	assert.deepEqual([fr.layout, fr.strings], ['L', { Bye: 'Au revoir' }], 'it loads on its client');
+	assert.deepEqual(de.strings, {}, 'and sets nothing on another');
+	assert.equal(updateLocaleText({ text: out.text, file, keys }).text, out.text, 'a sync changes nothing');
 });
 
 test('the reader takes Polestar\'s layout, Ding!\'s ns.AddTranslations and a returned table', () => {
@@ -181,14 +194,15 @@ test('i18n status lists every locale with its status and translators', () => {
 	const r = spawnSync(process.execPath, [path.join(ROOT, 'tools', 'polestar.js'), 'i18n', 'status', '--json'], { encoding: 'utf8', cwd: ROOT });
 	assert.equal(r.status, 0, r.stderr);
 	const out = JSON.parse(r.stdout);
-	assert.deepEqual(out.locales.map((l) => [l.locale, l.status]), LOCALE_CODES.map((l) => [l, LOCALES[l].status]));
-	const de = out.locales.find((l) => l.locale === 'deDE');
-	assert.deepEqual(de.translators, ['thecodingcortex']);
-	assert.ok(de.file && de.translated > 1000 && de.translated <= out.keys);
+	assert.deepEqual(out.locales.map((l) => [l.locale, l.status, l.translators]), LOCALE_CODES.map((l) => [l, LOCALES[l].status, LOCALES[l].translators]));
+	assert.deepEqual(out.locales.filter((l) => l.file).map((l) => l.locale), shipped);
+	for (const l of out.locales.filter((x) => x.file)) assert.ok(l.translated > 0 && l.translated <= out.keys, `${l.locale}: ${l.translated}/${out.keys}`);
 });
 
 test('every shipped interface file loads, has no stale key or key set twice, and keeps the English formats', () => {
-	assert.deepEqual(shipped, ['deDE', 'esMX', 'frFR']);
+	const files = fs.readdirSync(path.join(POLESTAR, 'Locales')).filter((f) => f.endsWith('.lua'));
+	assert.ok(files.length > 0);
+	for (const f of files) assert.ok(LOCALES[f.replace(/\.lua$/, '')], `Locales/${f}: not a locale of tools/lib/i18n/locales.js`);
 	const st = localeState(POLESTAR, shipped);
 	for (const locale of shipped) {
 		const s = st.locales[locale];
@@ -247,13 +261,14 @@ function aboutNote(before, between = '') {
 		addons: [{ name: 'Polestar', files: ['Core/Core.xml', 'Theme/Theme.xml', 'UI/UI.xml'] }],
 		script: `${between}\nuistub.install()\nstub.login()\nPolestar.UI.ShowOptions("about")
 		local v = Polestar.UI.Options.view
-		emit(v.AINote:IsShown() and { note = v.AINote:GetText(), link = v.AILink.Label:GetText() } or false)`,
+		emit(v.AINote:IsShown() and { note = v.AINote:GetText(), link = v.AILink.Label:GetText(), url = Polestar.DiscordURL } or false)`,
 	}).emitted[0];
 }
 
 test('Options > About says an AI-made translation is one, with the Discord invite; a reviewed one and English say nothing', () => {
-	const ai = aboutNote(fakeLocale('itIT', { 'This translation was made with AI. Help improve it on Discord.': 'Tradotto con l\'IA. Aiutaci su Discord.' }), 'Polestar.AI_LOCALES.itIT = true');
-	assert.deepEqual(ai, { note: 'Tradotto con l\'IA. Aiutaci su Discord.', link: 'discord.gg/vMbee6F2e9' });
+	const ai = aboutNote(fakeLocale('itIT', { 'A translated text': 'Un testo tradotto' }), 'Polestar.AI_LOCALES.itIT = true');
+	assert.ok(ai && typeof ai.note === 'string' && ai.note !== '', 'the note shows');
+	assert.equal(ai.link, ai.url.replace(/^\w+:\/\//, ''), 'with the Discord invite');
 	assert.equal(aboutNote(fakeLocale('itIT', {}), 'Polestar.AI_LOCALES.itIT = true'), false, 'no translation loaded: English, no note');
 	assert.equal(aboutNote('function GetLocale() return "deDE" end'), false, 'reviewed');
 	assert.equal(aboutNote(''), false, 'English');

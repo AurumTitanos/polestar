@@ -167,12 +167,13 @@ test('/polestar help prints each line in the client language, Core\'s own comman
 });
 
 test('LC: a word with two meanings has a key per meaning, English while untranslated', () => {
-	const [out] = runAddon({
-		before: fakeLocale('itIT', { Back: 'Atrás', 'slot: Back': 'Espalda' }),
+	const run = (strings) => runAddon({
+		before: fakeLocale('itIT', strings),
 		addons: [CORE],
-		script: `emit({ button = Polestar.L["Back"], slot = Polestar.LC("slot", "Back"), chest = Polestar.LC("boss", "Chest") })`,
-	}).emitted;
-	assert.deepEqual(out, { button: 'Atrás', slot: 'Espalda', chest: 'Chest' });
+		script: `emit({ button = Polestar.L["Back"], chest = Polestar.LC("boss", "Chest") })`,
+	}).emitted[0];
+	assert.deepEqual(run({ Back: 'Indietro', 'boss: Chest': 'Forziere' }), { button: 'Indietro', chest: 'Forziere' });
+	assert.deepEqual(run({ Back: 'Indietro' }), { button: 'Indietro', chest: 'Chest' });
 });
 
 test('registering an event the client does not know returns false instead of erroring', () => {

@@ -214,7 +214,7 @@ test('Bosses tab: a chest says Chest, the bosses after the encounters their role
 });
 
 test('Bosses tab: a chest boss is translated under its own key, apart from the Chest gear slot', () => {
-	const rows = bossRows(fakeLocale('itIT', { Chest: 'Brust', 'slot: Chest': 'Brust', 'boss: Chest': 'Truhe', Optional: 'Optional', 'Level %d': 'Stufe %d' }));
+	const rows = bossRows(`${fakeLocale('itIT', { 'boss: Chest': 'Truhe', Optional: 'Optional', 'Level %d': 'Stufe %d' })}\nCHESTSLOT = "Brust"`);
 	assert.deepEqual(rows[1], ['Serpent Cache', 'Truhe  \u00b7  Optional']);
 	assert.deepEqual(rows[0], ['Lady Anacondra', 'Stufe 20']);
 });
