@@ -161,7 +161,7 @@ file's language written by `header()` in `lib/generated.js`:
 | `data/forever/trainers.json` | `trainers build` | `train` goals under `guides/`, `data/recordings`, the curated list, `npcs.json` | local | none |
 | `addon/Polestar/Core/ClassTrainers.lua` | `trainers build` | the same | yes | rerun |
 | `addon/Polestar/Talents/Builds.lua` | `talents build` | `talents/forever/*.json`, Forever trait tables from wago.tools (build pinned in `tools/commands/talents.js`) | yes | `talents check`; `tests/talents-build.test.js` runs it when the tables are cached |
-| `data/forever/travel.json` | `travel build` | client tables (Era and Forever), CMaNGOS classic-db (`data/sources/cmangos/`), `data/forever` map-frames, zones, npcs, objects, `data/recordings` | local | none |
+| `data/forever/travel.json` | `travel build` | client tables (Era and Forever), the newest cached Forever AreaTable (`data/sources/wago/`, the inns' areas), CMaNGOS classic-db (`data/sources/cmangos/`), `data/forever` map-frames, zones, npcs, objects, `data/recordings` | local | none |
 | `addon/Polestar/Nav/TravelData.lua` | `travel build` | the same | yes | rerun; `tests/travel-build.test.js` loads the committed file; `tests/nav-transit.test.js` builds and loads the timetables |
 | `addon/Polestar/Maps/FlightPaths.lua` | `travel build` | client TaxiPathNode | yes | rerun; `tests/nav-route-lines.test.js` loads the committed file |
 | `addon/Polestar_Travel/` | `travel build` | the local crossings file `data/local/crossings.json` | local | `tests/travel-crossings.test.js` validates the crossings file |

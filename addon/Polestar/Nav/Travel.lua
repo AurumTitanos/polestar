@@ -159,7 +159,7 @@ function Nav.RegisterTravelData(d, replace)
 	end
 	for _, t in ipairs(d.inns or {}) do
 		local inn = point(t.names[1], t.c, t.wx, t.wy, t.map, t.x, t.y, t.f)
-		inn.npc, inn.names = t.npc, t.names
+		inn.npc, inn.names, inn.area = t.npc, t.names, t.area
 		inns[#inns + 1] = inn
 		innByNpc[inn.npc] = inn
 		for _, name in ipairs(t.names) do innByName[lower(name)] = inn end
