@@ -138,6 +138,8 @@ test('accept, objectives and turn-in advance the steps and fire messages in orde
 	);
 	assert.deepEqual(view3.goals[1].progress, { cur: 3, max: 10, kind: 'count' });
 	assert.equal(view3.goals[1].quest, 7);
+	// Which objective of the quest it is (the party line reads it).
+	assert.equal(view3.goals[1].oi, 1);
 	assert.equal(view3.goals[1].npc, 6);
 	// The camp's Go to names the step (its header): the arrow leads to the kobolds.
 	assert.deepEqual(wp, { map: 1429, x: 47.6, y: 35.1, label: 'Kill Kobold Vermin', stepIndex: 3, goalIndex: 2, kind: 'kill', r: 8 });

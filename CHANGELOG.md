@@ -81,6 +81,12 @@
   Abominable Head The Baron drops inside, so it now comes after the run, in
   the hand-in guide. The same for the Excavation Site's Titan Relics: Earthen
   Echo and Prehistoric Prism follow the relic you bring out (thanks Arachnit)
+- Party sync: in a party, the guide shows the counts of party members who run
+  Polestar under each shared quest goal (Ana 5/8, Ben done), and on a quest
+  you took, who in the party lacks it, even without Polestar. Quest IDs and
+  counts only, through hidden party messages when a count changes, so it
+  works across guides and client languages; nothing goes to chat. Two
+  switches in Questing > Quests > Party, both off until you turn them on.
 - Quests Forever renamed carry their Forever names in the guides: Chastise
   (once A Lack of Fear), Dark Sacrifice (once Devouring Plague), Look to the
   Stars, Onu is Meditating and the others Wowhead Forever lists as renamed.
