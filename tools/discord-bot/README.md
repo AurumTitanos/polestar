@@ -90,7 +90,7 @@ other issues or carry HTML. Say so in the #bugs guidelines, for example:
 
 ### 3. The server
 
-On port-prod, as the `port` user, beside Port_ and apart from it (its own
+On any Linux host with Docker, apart from whatever else runs there (its own
 Compose project and network, no ports, read-only, 256 MB):
 
 ```sh
