@@ -150,4 +150,44 @@ function loadPfQuest(dir) {
 	};
 }
 
-module.exports = { REPO, ensurePfQuest, checkLicense, loadPfQuest };
+// Names in other client languages: db/<locale>/{quests,units,objects,items}.lua
+// assign pfDB[<db>][<locale>] (a quest's title is its T). pfQuest has no
+// esMX: a locale without a folder comes back empty. -> { [locale]: { quest,
+// npc, object, item: Map id -> name } }
+const NAME_FILES = { quest: 'quests', npc: 'units', object: 'objects', item: 'items' };
+
+function loadPfQuestNames(dir, locales) {
+	const out = {};
+	for (const locale of locales) {
+		const byKind = {};
+		for (const kind of Object.keys(NAME_FILES)) byKind[kind] = new Map();
+		out[locale] = byKind;
+		const folder = path.join(dir, 'db', locale);
+		if (!fs.existsSync(folder)) continue;
+		const files = Object.values(NAME_FILES).map((f) => path.join(folder, `${f}.lua`)).filter((f) => fs.existsSync(f));
+		const kinds = Object.entries(NAME_FILES).map(([k, db]) => `${k} = ${JSON.stringify(db)}`).join(', ');
+		const raw = luaToJson({
+			files,
+			prelude: PRELUDE,
+			expr: `
+local out = {}
+for kind, db in pairs({ ${kinds} }) do
+  local list = {}
+  local t = rawget(pfDB, db) and rawget(pfDB[db], ${JSON.stringify(locale)}) or {}
+  for id, v in pairs(t) do
+    local name = type(v) == "table" and v.T or v
+    if type(id) == "number" and type(name) == "string" then list[#list + 1] = { id, name } end
+  end
+  out[kind] = list
+end
+return out`,
+		});
+		for (const kind of Object.keys(NAME_FILES)) {
+			const list = pairsOf(raw[kind]).slice().sort((a, b) => a[0] - b[0]);
+			for (const [id, name] of list) byKind[kind].set(Number(id), name);
+		}
+	}
+	return out;
+}
+
+module.exports = { REPO, ensurePfQuest, checkLicense, loadPfQuest, loadPfQuestNames };

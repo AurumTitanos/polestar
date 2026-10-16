@@ -12,7 +12,7 @@ const { localeState, syncFiles, rel } = require('../lib/i18n/project');
 
 const ADDON = path.join(ROOT, 'addon', 'Polestar');
 
-const usage = `usage: node tools/polestar.js i18n <status|check|sync|keys|import> [options]
+const usage = `usage: node tools/polestar.js i18n <status|check|sync|keys|import|names> [options]
 
 Polestar's interface translations (docs/TRANSLATING.md): one file per
 locale, addon/Polestar/Locales/<locale>.lua. Locales: ${LOCALE_CODES.join(', ')}.
@@ -42,10 +42,27 @@ locale, addon/Polestar/Locales/<locale>.lua. Locales: ${LOCALE_CODES.join(', ')}
                              the locale's file: only into keys not translated
                              yet; a broken format is refused; keys the code
                              lacks go to the commented block at the end.
+  i18n names [<locale>...]   builds the names addons addon/Polestar_Names_<locale>:
+                             the quest, NPC, object and item names in each
+                             language, from DingDB (pinned commit and sha256s,
+                             cloned into data/sources/ding), then pfQuest's
+                             db/<locale> for the ones it lacks; only the ids
+                             the compiled guides, the quest database and the
+                             Codex's data name. A language left without names
+                             loses its folder.
 
 options:
-  --json            status, check, keys: one JSON document on stdout
-  --markdown        status: a Markdown table`;
+  --json            status, check, keys, names: one JSON document on stdout
+  --markdown        status: a Markdown table
+  --no-questie      names: leave DingDB out (its base data is QuestieDB's);
+                    pfQuest only
+  --offline         names: use the cached DingDB and pfQuest clones as they are
+  --ding <dir>      names: this DingDB checkout (default data/sources/ding)
+  --pfquest <dir>   names: this pfQuest checkout (default data/sources/pfQuest)
+  --guides <file>   names: the compiled guides (default addon/Polestar_Guides/Guides.lua)
+  --questdb <dir>   names: the built quest database (default addon/Polestar_QuestDB)
+  --codex <dir>     names: the Codex's data (default data/forever/codex)
+  --out <dir>       names: where the addon folders go (default addon/)`;
 
 function locales(positional) {
 	if (!positional.length) return LOCALE_CODES.slice();
@@ -238,8 +255,57 @@ function runImport(opts, positional) {
 	return bad ? 1 : 0;
 }
 
+const KIND_WORDS = { quest: 'quest', npc: 'NPC', object: 'object', item: 'item' };
+
+function runNames(opts, positional) {
+	const names = require('../lib/i18n/names');
+	const { ensurePfQuest, loadPfQuestNames } = require('../lib/data/pfquest');
+	const wanted = locales(positional);
+	const abs = (p) => (p ? path.resolve(p) : undefined);
+	const log = opts.json ? () => {} : (m) => console.log(m);
+	const ids = names.usedIds({ guides: abs(opts.guides), questdb: abs(opts.questdb), codex: abs(opts.codex) });
+	const pfInfo = ensurePfQuest({ dir: abs(opts.pfquest) || names.DEFAULTS.pfquest, explicit: Boolean(opts.pfquest), offline: Boolean(opts.offline), log });
+	for (const w of pfInfo.warnings) console.error(`warning: ${w}`);
+	const ding = opts.noQuestie ? null : names.ensureDing({ dir: abs(opts.ding) || names.DEFAULTS.ding, explicit: Boolean(opts.ding), offline: Boolean(opts.offline), log });
+	const pf = loadPfQuestNames(pfInfo.dir, [...wanted, 'enUS']);
+	const out = names.buildNames({ locales: wanted, ids, ding: ding ? names.readDing(ding, wanted) : null, pf });
+	const outDir = abs(opts.out) || names.DEFAULTS.out;
+	const written = names.writeNamesAddons(out, outDir, { sources: { ding, pf: pfInfo } });
+	if (opts.json) {
+		const kinds = (m) => Object.fromEntries(names.NAME_KINDS.map((k) => [k, m[k]]));
+		console.log(JSON.stringify({
+			ids: { ...kinds(Object.fromEntries(names.NAME_KINDS.map((k) => [k, ids[k].size]))), sources: ids.counts },
+			ding: ding ? { version: ding.pin.version, commit: ding.pin.commit, revision: ding.revision } : null,
+			pfquest: { revision: pfInfo.revision },
+			locales: Object.fromEntries(wanted.map((l) => {
+				const w = written.find((x) => x.locale === l);
+				return [l, { names: kinds(Object.fromEntries(names.NAME_KINDS.map((k) => [k, out[l].names[k].size]))), from: out[l].from, bytes: w ? w.bytes : 0 }];
+			})),
+		}, null, 2));
+		return 0;
+	}
+	const idLine = (c) => names.NAME_KINDS.map((k) => plural(c[k], KIND_WORDS[k])).join(', ');
+	console.log(`ids Polestar's data names: ${idLine(Object.fromEntries(names.NAME_KINDS.map((k) => [k, ids[k].size])))}`);
+	for (const [src, c] of Object.entries(ids.counts)) console.log(`  ${src}: ${idLine(c)}`);
+	console.log(ding ? `DingDB ${ding.pin.version} (${ding.pin.commit.slice(0, 7)}): every pinned file matches its sha256` : 'DingDB left out (--no-questie)');
+	console.log(`pfQuest ${pfInfo.revision ? pfInfo.revision.slice(0, 7) : '(revision unknown)'}`);
+	for (const l of wanted) {
+		const b = out[l];
+		const w = written.find((x) => x.locale === l);
+		const from = names.NAME_KINDS.reduce((s, k) => ({ ding: s.ding + b.from[k].ding, pfquest: s.pfquest + b.from[k].pfquest }), { ding: 0, pfquest: 0 });
+		const sizes = Object.fromEntries(names.NAME_KINDS.map((k) => [k, b.names[k].size]));
+		console.log(w
+			? `${l}: ${idLine(sizes)} (DingDB ${from.ding}, pfQuest ${from.pfquest}); ${path.relative(process.cwd(), w.dir) || '.'}, ${(w.bytes / 1024).toFixed(0)} KB`
+			: `${l}: no names; no folder`);
+	}
+	return 0;
+}
+
 async function run(argv) {
-	const { opts, positional, error } = parseArgs(argv, { flags: ['--json', '--markdown'] });
+	const { opts, positional, error } = parseArgs(argv, {
+		flags: ['--json', '--markdown', '--no-questie', '--offline'],
+		options: ['--ding', '--pfquest', '--guides', '--questdb', '--codex', '--out'],
+	});
 	const [sub, ...rest] = positional;
 	if (error || !sub) {
 		console.error(`${error || 'i18n needs a subcommand'}\n\n${usage}`);
@@ -251,6 +317,7 @@ async function run(argv) {
 		if (sub === 'sync') return runSync(opts, rest);
 		if (sub === 'keys') return runKeys(opts);
 		if (sub === 'import') return runImport(opts, rest);
+		if (sub === 'names') return runNames(opts, rest);
 	} catch (e) {
 		console.error(`error: ${e.message}`);
 		return 1;
@@ -259,4 +326,4 @@ async function run(argv) {
 	return 2;
 }
 
-module.exports = { name: 'i18n', summary: 'interface translations: status, check, sync, keys, import', usage, run };
+module.exports = { name: 'i18n', summary: 'interface translations (status, check, sync, keys, import) and the names addons (names)', usage, run };
