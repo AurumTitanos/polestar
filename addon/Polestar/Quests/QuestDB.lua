@@ -389,6 +389,31 @@ function Q.EachAvailabilityRef(id, fn)
 	return r[QUEST_SKILL] ~= nil
 end
 
+-- Quests whose `excl` lists id: taking id closes them. The list is one-way
+-- for about one link in fifteen (282 lists 287, 287 does not list 282), so
+-- this reads every record once, the first time it is asked.
+local closedBy
+function Q.ClosedBy(id)
+	if not closedBy then
+		closedBy = {}
+		for q, r in pairs(data.quests) do
+			local excl = r[QUEST_EXCL]
+			if excl then
+				for _, x in Each(excl) do
+					local list = closedBy[x]
+					if not list then
+						list = {}
+						closedBy[x] = list
+					end
+					list[#list + 1] = q
+				end
+			end
+		end
+		for _, list in pairs(closedBy) do table.sort(list) end
+	end
+	return closedBy[id]
+end
+
 ---------------------------------------------------------------------------
 -- Client calls Compat does not offer (reported as contract gaps)
 ---------------------------------------------------------------------------
