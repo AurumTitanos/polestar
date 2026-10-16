@@ -165,9 +165,10 @@ test('a done step (viewed with Prev) lists all its goals under the step title, c
 	});
 });
 
-test('the tip is one line until clicked', () => {
+test('with Expand step tips off, the tip is one line until clicked', () => {
 	const [out] = run(`
 		Polestar.Set("ui.width", 300)
+		Polestar.Set("ui.notesOpen", false)
 		uistub.setGuide(uistub.elwynn, 3)
 		local tip = GF.parts.tip
 		local closed = { open = tip.psOpen, h = tip:GetHeight() }
@@ -182,19 +183,24 @@ test('the tip is one line until clicked', () => {
 	assert.deepEqual(out.reset, out.closed, 'a new step starts with the tip collapsed');
 });
 
-test('with Expand step tips on, each step starts with its tip open', () => {
+test('step tips start open by default; with Expand step tips off, on one line', () => {
 	const [out] = run(`
 		Polestar.Set("ui.width", 300)
 		uistub.setGuide(uistub.elwynn, 3)
 		local tip = GF.parts.tip
+		local byDefault = tip.psOpen
+		Polestar.Set("ui.notesOpen", false)
 		local closedH = tip:GetHeight()
+		local off = tip.psOpen
 		Polestar.Set("ui.notesOpen", true)
 		local now = tip.psOpen
 		tip:Click()
 		local clicked = tip.psOpen
 		uistub.setStep(4)
 		uistub.setStep(3)
-		emit({ closedH = closedH, now = now, clicked = clicked, next = tip.psOpen, h = tip:GetHeight() })`);
+		emit({ byDefault = byDefault, off = off, closedH = closedH, now = now, clicked = clicked, next = tip.psOpen, h = tip:GetHeight() })`);
+	assert.equal(out.byDefault, true, 'a new player sees the tip in full');
+	assert.equal(out.off, false, 'turning it off folds the tip on screen');
 	assert.equal(out.now, true, 'turning it on opens the tip on screen');
 	assert.equal(out.clicked, false, 'a click still folds it');
 	assert.equal(out.next, true, 'the next step starts open again');

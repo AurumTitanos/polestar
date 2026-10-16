@@ -28,7 +28,7 @@ ns.RegisterDefaults("ui", {
 	upcoming = 0, -- Up next is off by default (the reading flow names the next person instead)
 	upcomingOpen = false, -- when on, upcoming steps start listed instead of collapsed
 	showNotes = true,
-	notesOpen = false, -- when on, a step's tip starts in full instead of on one line
+	notesOpen = true, -- a step's tip starts in full; off, it starts on one line (players asked for it open)
 	combat = "show", -- "show" | "fade" | "hide"; steady by default, a fade on every pull distracts
 	reduceMotion = false,
 	font = "game", -- "game" (the client's own font, the default) | "inter" (EllesmereUI's while matchFont is on)
