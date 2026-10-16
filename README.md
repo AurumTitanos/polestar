@@ -235,10 +235,12 @@ map. Renders of every window and state, drawn without the game, are in
 - **Nearby services.** `/polestar near repair` (trainer, a profession,
   class, reagents, vendor, innkeeper, bank, auction, flight, stable) points
   the arrow at the quickest one to reach; the map's tracking menu lists them.
-- **Other addons' waypoints.** Without TomTom, addons that set TomTom
-  waypoints point Polestar's arrow and `/way` works; with TomTom, the arrow
-  can follow TomTom's. Addon authors: `Polestar.Nav.API`
-  (docs/ARCHITECTURE.md, "Nav API").
+- **Other addons' waypoints.** Without TomTom, "Let other addons set
+  waypoints" (off by default) lets addons that set TomTom waypoints point
+  Polestar's arrow and makes `/way` work; addons that expect TomTom's own
+  settings may not work with it on. With TomTom, the arrow can follow
+  TomTom's. Addon authors: `Polestar.Nav.API` (docs/ARCHITECTURE.md, "Nav
+  API").
 
 ### Pathing by Shortest Path Forever
 

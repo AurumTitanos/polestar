@@ -283,6 +283,18 @@ test('API: a route sent while a ghost is taken without error (C11)', () => {
 // TomTom stand-in
 // ---------------------------------------------------------------------------
 
+// The stand-in is off by default ("Let other addons set waypoints"): these
+// tests turn it on as a player would.
+const ANSWER = { Polestar: 'PolestarDB = { schema = 1, settings = { nav = { answerTomTom = true } } }' };
+
+test('TomTom stand-in: off by default, so no TomTom global (an addon reading TomTom.db would error) and no /way', () => {
+	const [out] = run(`
+		emit({ tomtom = TomTom == nil, answering = J.AnsweringTomTom(), way = SLASH_POLESTARWAY1 == nil,
+			default = Polestar.Get("nav.answerTomTom") })
+	`);
+	assert.deepEqual(out, { tomtom: true, answering: false, way: true, default: false });
+});
+
 test('TomTom stand-in: other addons\' waypoints point the arrow, one at a time; corpse and Polestar\'s own are ignored (row 7)', () => {
 	const [installed, added, removed, ignored, zoned, cleared, off] = run(`
 		emit(TomTom == N.tomtomShim)
@@ -302,7 +314,7 @@ test('TomTom stand-in: other addons\' waypoints point the arrow, one at a time; 
 		emit(N.GetTarget() == nil)
 		Polestar.Set("nav.answerTomTom", false)
 		emit(TomTom == nil)
-	`);
+	`, { saved: ANSWER });
 	assert.equal(installed, true);
 	assert.deepEqual(added, { x: 25, y: 75, label: 'Quest giver', owner: 'TomTom', valid: true, exists: true, from: 'Helper' });
 	assert.deepEqual(removed, { removed: true, target: true, valid: false });
@@ -319,13 +331,13 @@ test('TomTom stand-in: Polestar\'s own targets are never mirrored into it (no lo
 		for _, byKey in pairs(TomTom.waypoints) do for _ in pairs(byKey) do n = n + 1 end end
 		local _, owner = API.Active()
 		emit({ label = label(), waypoints = n, owner = owner or false })
-	`);
+	`, { saved: ANSWER });
 	assert.deepEqual(out, { label: 'Picked', waypoints: 0, owner: false });
 });
 
 test('TomTom stand-in: a TomTom switched off in the AddOns list does not count; an enabled one does (row 7)', () => {
-	const [disabled] = run('emit(TomTom == N.tomtomShim)', { before: 'stub.addons = { { name = "TomTom", reason = "DISABLED", enabled = false } }' });
-	const [enabled] = run('emit(TomTom == nil)', { before: 'stub.addons = { { name = "TomTom" } }' });
+	const [disabled] = run('emit(TomTom == N.tomtomShim)', { before: 'stub.addons = { { name = "TomTom", reason = "DISABLED", enabled = false } }', saved: ANSWER });
+	const [enabled] = run('emit(TomTom == nil)', { before: 'stub.addons = { { name = "TomTom" } }', saved: ANSWER });
 	assert.equal(disabled, true);
 	assert.equal(enabled, true);
 });
@@ -337,7 +349,7 @@ test('TomTom stand-in: other TomTom methods are harmless no-ops; fields such as 
 		end)
 		emit({ ok = ok, err = err or false, db = TomTom.db == nil, profile = TomTom.profile == nil,
 			add = type(TomTom.AddWaypoint), target = N.GetTarget() == nil })
-	`);
+	`, { saved: ANSWER });
 	assert.deepEqual(out, { ok: true, err: false, db: true, profile: true, add: 'function', target: true });
 });
 
@@ -348,7 +360,7 @@ test('TomTom stand-in: the global is taken at login, and an addon\'s own TomTom-
 		stub.loggedIn = true
 		stub.fire("PLAYER_LOGIN")
 		emit({ theirs = TomTom.AddWaypoint() == "theirs", answering = J.AnsweringTomTom() })
-	`, { login: false });
+	`, { login: false, saved: ANSWER });
 	assert.equal(beforeLogin, true, 'nothing set before every addon has loaded');
 	assert.deepEqual(own, { theirs: true, answering: false });
 });
@@ -435,7 +447,7 @@ test('/way: x y on your map, #mapID, a zone named inside its name, an ambiguous 
 		emit(said("test could be Test Ridge, Testshire."))
 		way("reset")
 		emit(N.GetTarget() == nil)
-	`);
+	`, { saved: ANSWER });
 	assert.equal(claimed, '/way');
 	assert.deepEqual(here, { map: 9000, x: 45, y: 61, label: 'Camp' });
 	assert.deepEqual(byId, { map: 9000, x: 10.5, y: 20, label: 'Testshire 11, 20' });
@@ -445,7 +457,7 @@ test('/way: x y on your map, #mapID, a zone named inside its name, an ambiguous 
 });
 
 test('/way: left alone when another addon has it', () => {
-	const [out] = run('emit(SLASH_POLESTARWAY1 == nil)', { before: 'SLASH_OTHERWAY1 = "/WAY"' });
+	const [out] = run('emit(SLASH_POLESTARWAY1 == nil)', { before: 'SLASH_OTHERWAY1 = "/WAY"', saved: ANSWER });
 	assert.equal(out, true);
 });
 

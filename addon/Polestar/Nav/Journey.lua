@@ -24,7 +24,8 @@
 --       API.Cancel(owner) -> true | false   the owner's target, while shown, lets go
 --       API.Active() -> active, owner       anything guided to; owner when an API caller set it
 --     A target set by the death helper over an owner's comes back theirs when handed back.
---   * TomTom's waypoint calls while TomTom is not installed (nav.answerTomTom):
+--   * TomTom's waypoint calls while TomTom is not installed (nav.answerTomTom,
+--     off by default: an addon reading TomTom's settings would find none):
 --     the global TomTom answers AddWaypoint, AddMFWaypoint, AddZWaypoint,
 --     AddWaypointToCurrentZone, RemoveWaypoint, ClearWaypoint and
 --     ClearAllWaypoints (and a few read-only helpers) by pointing Polestar's
@@ -58,7 +59,7 @@ Nav.journey = Journey
 
 ns.RegisterDefaults("nav", {
 	mapPlan = true,
-	answerTomTom = true,
+	answerTomTom = false, -- the stand-in has methods only: an addon reading TomTom.db would error
 	followTomTom = false,
 })
 
@@ -776,7 +777,7 @@ if ns.RegisterOptions then
 		page = L["Guide"], tab = L["Arrow & routes"], section = L["Other waypoints"],
 		controls = {
 			Nav.HandoffOption({ kind = "toggle", key = "nav.answerTomTom", label = L["Let other addons set waypoints"],
-				help = L["Without TomTom installed, waypoints other addons set through TomTom, and /way, point Polestar's arrow."] }),
+				help = L["Without TomTom installed, waypoints other addons set through TomTom, and /way, point Polestar's arrow. Addons that expect TomTom's own settings may not work with it on."] }),
 			{ kind = "toggle", key = "nav.followTomTom", label = L["Follow TomTom's arrow"],
 				help = L["With TomTom installed, the arrow goes wherever TomTom's arrow points, routed like any goal."],
 				disabled = function() return TomTom == nil or TomTom == shim end },

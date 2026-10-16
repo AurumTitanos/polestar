@@ -203,11 +203,16 @@ local function option()
 end
 `;
 
+// The TomTom stand-in ("Let other addons set waypoints") is off by default;
+// it is on here so its stepping aside is seen.
+const SAVED = 'PolestarDB = { schema = 1, settings = { nav = { answerTomTom = true } } }';
+
 function run(script, { spf = SPF, files = FILES } = {}) {
 	return runAddon({
 		stubs: ['stub_nav.lua'],
 		before: EARLY + (spf || ''),
 		addons: [{ name: 'Polestar', files }],
+		saved: { Polestar: SAVED },
 		login: true,
 		script: PRELUDE + script,
 	}).emitted;
