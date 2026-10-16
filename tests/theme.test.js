@@ -378,7 +378,7 @@ test('every texture the UI shows, and every goal verb icon, exists as a valid TG
 // string's font is repainted) and a button switching between the two looks.
 test('a primary button label has no drop shadow, a secondary one keeps it, across scheme changes and toggles', () => {
 	const [out] = run(`
-		local parent = CreateFrame("Frame", nil, UIParent)
+		local parent = UIParent
 		local primary = W.Button(parent, "Open in new tab", nil, { primary = true, icon = "plus" })
 		local secondary = W.Button(parent, "Load guide")
 		local function alpha(b) local _, _, _, a = b.Label:GetShadowColor() return a end
@@ -397,7 +397,7 @@ test('a primary button label has no drop shadow, a secondary one keeps it, acros
 
 test('W.Link: an address in the accent with no box; under the cursor the text colour, an accent underline and "Click to copy"; a click runs its action', () => {
 	const [out] = run(`
-		local parent = CreateFrame("Frame", nil, UIParent)
+		local parent = UIParent
 		local clicked = 0
 		local link = W.Link(parent, "discord.gg/example", function() clicked = clicked + 1 end, { role = "note" })
 		local function rgb(r, g, b) return { r, g, b } end

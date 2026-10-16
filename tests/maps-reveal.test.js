@@ -1,7 +1,7 @@
 'use strict';
 // Maps: the world map without fog of war
-// (Maps/Reveal.lua: overlay selection, the canvas provider, tint, the art
-// guard, cost while off), coordinate formatting and the minimap readout
+// (Maps/Reveal.lua: overlay selection, the tiles on the canvas, tint, the
+// art guard, cost while off), coordinate formatting and the minimap readout
 // (Maps/Coords.lua), and dungeon entrance pins (Maps/Dungeons.lua).
 // Core, Theme, Nav, Maps and UI (for UI.ZoneArt's overlay table) run against
 // stub_world.lua + stub_maps.lua with the map canvas stub.
@@ -47,10 +47,9 @@ function revealed()
 	table.sort(out, function(a, b) return a.file < b.file end)
 	return out
 end
-function providerCount()
-	local n = 0
-	for _ in pairs(WorldMapFrame.dataProviders) do n = n + 1 end
-	return n
+-- Frames of Polestar's on the canvas.
+function frameCount()
+	return #m.canvas.children
 end
 `;
 
@@ -104,7 +103,7 @@ test('unexplored = every overlay of the art minus the explored ones, matched on 
 });
 
 // ---------------------------------------------------------------------------
-// The canvas provider
+// The tiles on the canvas
 // ---------------------------------------------------------------------------
 
 test('the world map shows unexplored overlays tinted, split into tiles as Blizzard splits them', () => {
@@ -135,23 +134,24 @@ test('the world map shows unexplored overlays tinted, split into tiles as Blizza
 	assert.deepEqual(files(out.after), [501, 502]);
 });
 
-test('off costs nothing: no provider, no frames, until it is turned on; a map whose art differs is left alone', () => {
+test('off costs nothing: no frames, until it is turned on; a map whose art differs is left alone', () => {
 	const [out] = run(`
-		local before = providerCount()
+		local before = frameCount()
 		m.showMap(9000)
-		local offShown = #revealed()
+		local offShown = { #revealed(), frameCount() }
 		Polestar.Set("maps.reveal", "tint")
-		local on = providerCount()
+		local on = frameCount()
 		local shown = #revealed()
 		Polestar.Set("maps.reveal", "off")
 		local cleared = #revealed()
 		Polestar.Set("maps.reveal", "tint")
 		ART = 7777 -- the client shows other art than the table was built for
+		WorldMapFrame:Hide()
 		m.showMap(9000)
 		emit({ before = before, offShown = offShown, on = on, shown = shown, cleared = cleared, other = #revealed() })`,
 	{ saved: { Polestar: 'PolestarDB = { schema = 1, settings = { maps = { reveal = "off" } } }' } });
-	assert.equal(out.offShown, 0);
-	assert.equal(out.on, out.before + 1, 'the provider is added when the reveal is first turned on');
+	assert.deepEqual(out.offShown, [0, out.before]);
+	assert.equal(out.on, out.before + 1, 'its frame is made when the reveal is first turned on');
 	assert.equal(out.shown, 4);
 	assert.equal(out.cleared, 0);
 	assert.equal(out.other, 0, 'the art guard keeps a stale table off the map');
@@ -267,7 +267,7 @@ test('dungeon pins: the Codex loads only when the world map opens, one pin per k
 		local P = Polestar.Pins
 		local atLogin = { loads = CODEX_LOADS, layer = P.GetLayer("maps.dungeons") ~= nil }
 		WorldMapFrame:Hide()
-		WorldMapFrame:Show()
+		m.showMap(9000)
 		local layer = P.GetLayer("maps.dungeons")
 		local keys = {}
 		for _, p in ipairs(layer) do keys[#keys + 1] = p.key .. "@" .. p.x .. "," .. p.y .. ":" .. p.icon end
@@ -287,7 +287,7 @@ test('with dungeon pins off the world map opening never loads the Codex', () => 
 	const [out] = run(CODEX + `
 		Polestar.Set("maps.dungeonPins", false)
 		WorldMapFrame:Hide()
-		WorldMapFrame:Show()
+		m.showMap(9000)
 		emit({ loads = CODEX_LOADS })`);
 	assert.equal(out.loads, 0);
 });

@@ -1274,6 +1274,30 @@ test('rewards: a disabled Gear module marks no upgrades; a single choice gets it
 	assert.deepEqual(single, [{ badge: 'qol-upgrade', tint: 'success', coin: false, best: false, onIcon: true }]);
 });
 
+// The gamepad interface hooks CreateFrame and, for a parent inside the quest
+// frame while it is open, rebuilds the quest frame's buttons in the caller's
+// code: a mark made by CreateFrame under a reward button, from Polestar's
+// code, blocks the next gamepad action there (the A that takes the reward).
+// wow_stub.lua's CreateFrame lists those in stub.underGameFrames.
+test('rewards: a mark is made with no parent, then set on its reward button, so the gamepad interface never rebuilds the quest frame\'s buttons in Polestar\'s code', () => {
+	const [out] = run(`${MARKS}
+		q.items[11] = { name = "Cloak", price = 120 }
+		q.items[12] = { name = "Potion", price = 50 }
+		q.choices = { { id = 11 }, { id = 12, count = 5 } }
+		Polestar.Gear = { IsEnabled = function() return true end, IsUpgrade = function(link) return link:find("item:11") ~= nil, 4 end }
+		q.questComplete()
+		stub.runTimers()
+		local on = 0
+		for _, b in ipairs(QuestInfoRewardsFrame.RewardButtons) do
+			for _, c in ipairs(b.children) do
+				if c.Badge and c:IsShown() and c:GetParent() == b then on = on + 1 end
+			end
+		end
+		emit({ marks = on, under = table.concat(stub.underGameFrames, "; ") })
+	`);
+	assert.deepEqual(out, { marks: 2, under: '' }, 'both choices are marked, on their own buttons, and no CreateFrame names a game frame as parent');
+});
+
 test('rewards: auto-pick takes the best when on; Shift, quest cost and a disabled Gear module are respected', () => {
 	const out = run(`
 		q.items[11] = { name = "Cloak", price = 120 }

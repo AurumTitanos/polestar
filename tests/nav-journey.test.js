@@ -151,10 +151,10 @@ test('plan anywhere: Shift-click on the planned spot\'s own pin lets it go (pins
 		stub.canvasClick()
 		local targetPin
 		for _, p in ipairs(nav.pins()) do if p.data.layer.name == "nav.target" then targetPin = p end end
-		stub.foci = { targetPin }
-		emit({ pin = targetPin ~= nil, took = stub.pinClick(), target = N.GetTarget() == nil })
+		nav.click(targetPin, "LeftButton")
+		emit({ pin = targetPin ~= nil, target = N.GetTarget() == nil })
 	`);
-	assert.deepEqual(out, { pin: true, took: true, target: true });
+	assert.deepEqual(out, { pin: true, target: true });
 });
 
 test('plan anywhere: Alt-click plans over map icons by their name and leaves Polestar\'s clickable pins alone (row 9)', () => {
@@ -170,8 +170,8 @@ test('plan anywhere: Alt-click plans over map icons by their name and leaves Pol
 		stub.fire("GLOBAL_MOUSE_DOWN", "LeftButton")
 		t = N.GetTarget()
 		emit({ x = t.x, y = t.y, label = t.label })
-		stub.foci = { { pinTemplate = "PolestarPinsTemplate", data = { pin = { onClick = function() end } },
-			GetMap = function() return WorldMapFrame end } }
+		Polestar.Pins.SetLayer("test.click", { { map = 9000, x = 90, y = 90, onClick = function() end } })
+		for _, p in ipairs(nav.pins()) do if p.data.layer.name == "test.click" then stub.foci = { p } end end
 		stub.canvas.cursor = { 0.9, 0.9 }
 		stub.fire("GLOBAL_MOUSE_DOWN", "LeftButton")
 		emit(label())

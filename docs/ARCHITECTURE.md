@@ -231,6 +231,31 @@ report a player copies (UI, "Reporting a problem"). Polestar never replaces
 the game's error handler: wrapping it would shift the stack the game and
 !BugGrabber show for every error.
 
+### Frames under the game's UI
+
+```lua
+Polestar.CreateFrameUnder(kind, name, parent, template) -> frame   -- CreateFrame with no parent, then SetParent(parent)
+```
+
+Forever's gamepad interface hooks `CreateFrame`
+(`Blizzard_GamepadSmartNavigation`, `SetupFrameHooks`): when the parent is,
+or is under, one of its open panels (the world map, the quest frame, the
+talents, the settings...), it rebuilds that panel's button groups inside the
+caller's code. Called from Polestar, the panel's tables are left tainted and
+the next gamepad action there is blocked ("An action was blocked because of
+taint from Polestar"; seen in game as a quest reward was taken, then on every
+panel after it). `SetParent` is not hooked. So every frame of Polestar's
+whose parent is a game frame, or is under one (the map canvases, the
+minimap, the quest reward and talent buttons, and the frames under those),
+is made through `CreateFrameUnder`; frames under Polestar's own windows,
+which hang off `UIParent`, are made with `CreateFrame`. No `CreateFramePool`
+with a game frame either: it calls `CreateFrame` with its parent.
+`tests/lua/wow_stub.lua`'s `CreateFrame` raises on a call from addon code
+whose parent is, or is under, a frame addon code did not make
+(`stub.underGameFrames`), and `tests/nav-mapcanvas.test.js`,
+`tests/qol.test.js` (the reward marks) and `tests/talents.test.js` (the
+talent marks) check that none was made.
+
 ### Localisation
 
 `Polestar.L[key]`: a key is the English text, and a missing key returns
@@ -331,7 +356,9 @@ UI, Nav and Engine read the client's quests, map, units and items through
 `Polestar.Compat`, with these exceptions that call the client themselves:
 Nav's Blizzard user waypoint (`C_Map`, `C_SuperTrack`; `Nav/Bridges.lua`),
 the minimap's radius, shape, rotation and indoors state (`Nav/Pins.lua`;
-`Maps/RouteLines.lua` reads them through `Pins.MinimapView()`),
+`Maps/RouteLines.lua` reads them through `Pins.MinimapView()`), the gamepad's
+map cursor and A (`SoftCursor`, `IsKeyDown`; `Nav/Pins.lua`), the map frames
+Polestar draws on (only read; `Nav/MapCanvas.lua`),
 the run speed, taxi nodes, hearthstone cooldown and ghost state (`GetUnitSpeed`,
 `C_TaxiMap`, item cooldown, `UnitIsGhost`; `Nav/Travel.lua`), the player's
 height for the walking engine (`Compat.GetPlayerUnitPosition`, `Nav/Walk.lua`), the zone art's map art
@@ -362,7 +389,8 @@ who hears them (`C_ChatInfo.RegisterAddonMessagePrefix`,
 and the TomTom stand-in (`Nav/Journey.lua`: `IsShiftKeyDown`, `IsAltKeyDown`,
 `IsControlKeyDown`, `GetMouseFoci` or `GetMouseFocus`, the open chat box
 through `ChatFrameUtil.GetActiveWindow` or `ChatEdit_GetActiveWindow`,
-`WorldMapFrame:AddCanvasClickHandler`, `AddGlobalPinMouseActionHandler`,
+`WorldMapFrame:AddCanvasClickHandler` (kept in Blizzard_MapCanvasSecureUtil's
+registry, which calls addon handlers through `securecallfunction`),
 `GetNormalizedCursorPosition`, `ScrollContainer:IsMouseOver`, the
 `GLOBAL_MOUSE_DOWN` event, `Minimap:HookScript("OnMouseUp")`,
 `C_Map.GetMapInfo`, `C_Map.GetMapInfoAtPosition`, `C_Map.GetBestMapForUnit`,
@@ -1313,7 +1341,9 @@ Polestar.Pins.MinimapCursor() -> dNorth, dWest | nil      -- yards from the play
   included (`GLOBAL_MOUSE_DOWN`; the icon's name labels the target), except
   Polestar's own clickable pins. The label is "Zone x, y". Shift- or
   Alt-clicking within 1.5% of the map's width (8% of the minimap's radius) of
-  the shown pick, or Shift-clicking its pin, lets it go. With a chat edit box
+  the shown pick, or Shift-clicking its pin (`Pins.OnWorldClick`; Polestar's
+  pins are its own frames, `Pins.WorldPinOf` tells them under the mouse),
+  lets it go. With a chat edit box
   open Shift-click stays Blizzard's (links into chat). A spot on no zone (open
   sea, the world map, the minimap's corner) prints one line and plans nothing.
 - **Ownership**: a target replaced by another is not the owner's while it is
@@ -1443,6 +1473,59 @@ Polestar.Nav.handoff.Available() -> bool
 Tested by `tests/nav-handoff.test.js` against a fake API written to its
 `docs/api.md` (v1.16.0).
 
+### MapCanvas — drawing on Blizzard's map frames
+
+```lua
+local view = Polestar.MapCanvas.Watch(map, fn)  -- map: WorldMapFrame or BattlefieldMapFrame; one view per map frame
+-- fn(view, what, elapsed): what = "show" | "map" | "size" | "scale" | "alpha" | "hide" | "tick"
+-- view.map, view.canvas, view.shown, view.mapID, view.width, view.height, view.scale, view.zoom, view.pinScale, view.alpha
+view:Level(levelType)              -- the frame level the map gives its pins of that level type
+view:PinScale(startScale, endScale) -- a map pin's scale under SetScalingLimits(1, startScale, endScale)
+Polestar.MapCanvas.Get(map) -> view | nil
+```
+
+The world map and the battlefield map are Lua (`Blizzard_MapCanvas`,
+`Blizzard_WorldMap`), and Forever's gamepad interface reads them from secure
+code as they open and close (`MapCanvasMixin:OnHide` walks the pins its gamepad
+cursor hovered, then `FrameControlsManager` refreshes its focus and
+`Blizzard_GamepadActionBars` calls the protected
+`SetPreferredGamepadInteractTarget`). A value an addon wrote into the map's
+tables taints that code and the game blocks the call ("An action was blocked
+because of taint from Polestar"). So every module draws on the maps through
+`Nav/MapCanvas.lua` and never writes into them: no data provider, no pin
+pool, no `AcquirePin`, no map method that writes, no hook on the map. Its
+frames are children of `map:GetCanvas()` (parenting is the client's, in C:
+the scroll frame clips them, they show and hide with the map), each made
+with no parent and then set under the canvas (`CreateFrameUnder`, Core,
+"Frames under the game's UI"), positioned
+from map percent times the canvas size, and the map is only read through
+`GetMapID`, `GetCanvas`, `GetCanvasScale`, `HasZoomLevels`,
+`GetCanvasZoomPercent`, `GetGlobalPinScale`, `GetGlobalAlpha`,
+`GetPinFrameLevelsManager():GetValidFrameLevel(levelType)` (each returns a
+field or works one out, writing nothing; not `GetViewRect`, which caches) and
+the canvas's `GetWidth` / `GetHeight`; Maps' info bar also reads
+`GetNormalizedCursorPosition`, `IsCanvasMouseFocus` and `ScrollContainer`
+(to sit at its foot), and Pins the canvas's `GetLeft`, `GetTop` and
+`GetEffectiveScale` and the gamepad cursor's place (`SoftCursor:IsShown`,
+`GetCenter`, `GetEffectiveScale`). Frames on the canvas carry no field the client's code
+reads on the frames it finds there (`owningMap` on the mouse focus,
+`smartNavigation*` and the other SmartNavigation keys on the buttons it
+scans), and none is a button to the gamepad's navigation: as the gamepad
+interface focuses the map, `SmartNavigation_CanFocusFrame` takes a Button,
+an EditBox or a frame with an OnMouseDown or OnMouseUp script for one and
+reads that script back (`GetScript`), which put Polestar's function in its
+secure code (seen in game: the map's `FocusGamepad` registered its callbacks
+tainted). Polestar's world map pins take the mouse with OnEnter and OnLeave
+only; a click is a `GLOBAL_MOUSE_DOWN` and a `GLOBAL_MOUSE_UP` of one button
+(not the right one, which passes through to the map) on the pin. A view is a frame of Polestar's on the canvas whose OnUpdate runs
+only while the map is shown; each frame it compares the map ID, the canvas
+size, scale and zoom, the pin scale and the alpha, and tells its listeners
+what changed ("show" with fresh values on the map's first frame open).
+`tests/nav-mapcanvas.test.js` runs every drawing with the maps' tables
+guarded (`stub.guardMap`: any write of addon code fails), pins the list
+of what is read and checks that no frame was made with a parent on the maps
+or the minimap.
+
 ### Pins — map and minimap icons for every module
 
 ```lua
@@ -1459,15 +1542,29 @@ Polestar.Pins.SetLayerVisible(layer, visible)
 
 Pins are drawn on the world map for the map being viewed (converted through Compat
 for other maps) and projected on the minimap; `edge = true` clamps that layer's
-out-of-range pins to the minimap rim. Pooled frames, distance-filtered, minimap
+out-of-range pins to the minimap rim. On the world map they are Polestar's own
+frames on the canvas, at the frame levels the map gives its own pins (MapCanvas,
+below): pins at `PIN_FRAME_LEVEL_SUPER_TRACKED_QUEST`, counter-scaled as a map
+pin with `SetScalingLimits(1, 1, 1.25)` is, tooltip and click, the right button
+passed through to the map (`SetPassThroughButtons`, restricted in combat: set
+once per frame, for frames made in combat once it ends). The gamepad
+interface's map cursor (`SoftCursor`, no mouse) hovers them as the map hovers
+its own pins: every 0.05 s while it shows, the nearest pin with a tooltip or a
+click within 12 UI units (its place from its map percent and the canvas's
+`GetLeft`, `GetTop` and `GetEffectiveScale`) shows its tooltip, and a press of
+A (`GAMEPAD_FACE_BOTTOM`, polled with `IsKeyDown` so the press still reaches
+the map) clicks it; a redraw hands every
+frame back the pin it showed, higher priorities on top; layer changes while the
+map is open are drawn once, on its next frame (`GetWorldFrames(kind)` runs a
+pending draw first). Pooled frames, distance-filtered, minimap
 updates throttled; layers with hundreds of pins must cost nothing per frame when
 the player stands still. Each layer indexes its pins by continent and 500-yard
 grid square when it is set, so a minimap redraw visits only the pins around the
 player; layer changes made in one frame share one minimap redraw on the next
 (`GetMinimapFrames` runs a pending one first). Nav's own target pins are one layer. A pin's `area`
 draws a soft disc of that radius (`Media/Nav/area`, the pin's colour at 0.32
-alpha) under every pin on the world map (`PIN_FRAME_LEVEL_QUEST_BLOB`, own
-pool, no mouse, sized in canvas units so it scales with the terrain). On the
+alpha) under every pin on the world map (`PIN_FRAME_LEVEL_QUEST_BLOB`, frames
+of their own, no mouse, sized in canvas units so it scales with the terrain). On the
 minimap only a layer with `minimapAreas` draws its areas (Nav's target and
 `nav.areas`; quest objective areas stay on the world map): textures on one
 no-mouse frame under the trail and the pins, every area whose disc reaches
@@ -1484,7 +1581,7 @@ snapping off, so pieces that share an edge are rasterised without a seam or
 an overlap. The polygon inset by the rim is filled with quads fanned from its
 first point (the pin's colour at 0.2 alpha), the rim is one quad per side
 (0.7), 1.5 UI units wide on screen. Every piece shares the polygon's box
-around its centre. On the world map a hull is a pin of its own pool
+around its centre. On the world map a hull is a frame of its own
 (`PIN_FRAME_LEVEL_QUEST_BLOB`, no mouse, the box in canvas units; the rim is
 laid out again when zooming changes its width by a quarter), drawn when any of
 it lies on the viewed map (the view's world-to-percent transform, the trail's).
@@ -1509,8 +1606,8 @@ break where the continent changes. Dots are anchored to each run's end, so
 they stay put as the player walks and crawl toward the destination (one
 spacing per 1.5 s; still with `ui.reduceMotion`). Minimap: every 40 yd, only
 inside the visible disc or square, 5 px, at most 40. World map: every max(15,
-map width / 60) yd, clipped to the map, 6 px under the pins in their own
-no-mouse pool, at most 300. One 20 Hz driver runs only while dots show.
+map width / 60) yd, clipped to the map, 6 px (counter-scaled like the pins)
+under the pins, textures on one no-mouse frame, at most 300. One 20 Hz driver runs only while dots show.
 `nav.trailDots` (default on) with `nav.worldPins` / `nav.minimapPins` per surface.
 The trail stands in only while route lines draw nothing (`nav.routeLines` off):
 `Nav/Layers.lua` clears it while `Polestar.RouteLines.Active()`.
@@ -1541,8 +1638,9 @@ permission; `addon/Polestar_Nav/CREDITS.md`).
   minimap's 600), so the pools of lines, which the client cannot destroy,
   are too.
 - `RouteLines.lua` builds the draw paths once per `NAV_ROUTE_GEOMETRY` and
-  paints: one world map pin the canvas's size at `PIN_FRAME_LEVEL_QUEST_BLOB`
-  (its own pool, no mouse) redrawn on map, zoom, size, route, setting and
+  paints: one frame of Polestar's on the world map's canvas (MapCanvas, Nav),
+  the canvas's size, at `PIN_FRAME_LEVEL_QUEST_BLOB`, no mouse, redrawn on
+  map, zoom, size, route, setting and
   theme changes, and one frame over the minimap under Pins' frames, redrawn
   by a 10 Hz driver only when the player, facing, zoom or route changed
   (`Pins.MinimapView()` for the view). The walk being walked starts at the
@@ -2221,8 +2319,10 @@ entrances, flight masters `maps.taxiPins`, docks `maps.dockPins`, inns
 flight timer and the instance tracker are set under Quality of Life.
 
 - Unexplored areas (`maps.reveal`: `off` | `on` | `tint`, `Maps/Reveal.lua`):
-  one `MapCanvasDataProviderMixin` provider per map frame (the world map, and
-  the battlefield map once Blizzard loads it) added with `AddDataProvider`.
+  textures on one frame of Polestar's on each map frame's canvas (the world
+  map, and the battlefield map once Blizzard loads it), watched through
+  MapCanvas (Nav) once the setting is first on, faded with the map's global
+  alpha (the battlefield map's opacity).
   `ZoneArt.FullOverlays` returns the overlay table only when it was built for
   the art the client shows (art ID and tile size). `Maps.UnexploredOverlays`
   subtracts the client's explored list (`GetExploredMapTextures`, matched on
@@ -2231,7 +2331,8 @@ flight timer and the instance tracker are set under Quality of Life.
   The tiles are split by `ZoneArt.EachOverlayTile`, as
   `MapExplorationDataProvider` splits them, onto one frame at the exploration
   pin frame level. `tint` multiplies them by the Theme token `mapUnexplored`.
-  The provider repaints on `MAP_EXPLORATION_UPDATED` and on theme changes.
+  The tiles are painted again as the map opens or changes, on
+  `MAP_EXPLORATION_UPDATED` and on theme changes.
 - Coordinates: the world map's info bar shows the player and the cursor
   (`maps.coords`, `Maps/WorldMap.lua`). `maps.minimapCoords` adds a readout at
   the bottom of the minimap (`Maps/Coords.lua`, 5 Hz, repainted only when the

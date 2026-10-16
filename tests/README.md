@@ -43,13 +43,13 @@ client loads them.
 
 | File | What it fakes |
 |---|---|
-| `wow_stub.lua` | The generic client every module shares: frames, scripts, events, timers and a clock the test advances, fonts, animation groups, slash commands, settings panels. No quest, map or unit APIs. |
+| `wow_stub.lua` | The generic client every module shares: frames, scripts, events, timers and a clock the test advances, fonts, animation groups, slash commands, settings panels, and the map frames' shape (`stub.newMapCanvas`: the world map's canvas and the getters Polestar reads; `stub.guardMap`: any write of addon code into a map's tables fails, and what it reads is listed), and the gamepad interface's hook on `CreateFrame` (a call from addon code with a parent that is, or is under, a frame addon code did not make fails and is listed in `stub.underGameFrames`). No quest, map data or unit APIs. |
 | `stub_world.lua` | The game world for Core tests: the player, quest log, bags, NPCs, the quest, gossip, trainer, merchant and taxi frames, and maps with simple bounds |
-| `stub_nav.lua` | A world for Nav: fakes of `Compat` and `Engine`, a world map canvas, the minimap, super-tracking and an optional waypoint addon |
+| `stub_nav.lua` | A world for Nav: fakes of `Compat` and `Engine`, the world map (guarded), the minimap, super-tracking and an optional waypoint addon |
 | `stub_quests.lua` | Quest log enumeration, completed quests, tooltip processing, nameplates, loading `Polestar_QuestDB`, and a fake of `Pins` |
 | `stub_questlog.lua` | The client's quest title surfaces (quest log, tracker, gossip, greeting and quest details), for quest levels |
 | `stub_gear.lua` | Items, equipment, bags, talents, tooltips and quest reward choices |
-| `stub_maps.lua` | The taxi map, instances and saved lockouts, and a small travel world |
+| `stub_maps.lua` | The taxi map, instances and saved lockouts, a small travel world, and the world map over it (guarded) |
 | `stub_qol.lua` | A world for Quality of Life: fakes of the Engine, Nav and Pins, and the client APIs QoL uses (XP, merchant, rewards, gossip, taxi, death, requests from other players) |
 | `stub_lookup.lua` | A stand-in for Search, the Codex and the Lookup runtime, for the Lookup window's tests (global `lookupstub`) |
 | `stub_lookup_runtime.lua` | The client pieces the Lookup runtime touches: tooltip post-calls, mount auras, Alt-click (global `lookuprt`) |
@@ -68,7 +68,7 @@ modules meet. New client APIs go in the stub of the module that needs them;
 
 | File | What it gives |
 |---|---|
-| `helpers/lua.js` | `runAddon({ stubs, before, addons, saved, login, script })`: runs addons under Lua 5.1 and returns what the script `emit`ted. `POLESTAR_ADDON_DIR` loads the addons from another folder. |
+| `helpers/lua.js` | `runAddon({ stubs, before, addons, saved, login, script })`: runs addons under Lua 5.1 and returns what the script `emit`ted. `POLESTAR_ADDON_DIR` loads the addons from another folder. Every file it loads as an addon is listed in `stub.addonSources` (the map guard's addon code). |
 | `helpers/dsl.js` | The toolchain tests' helpers: the fixture reference data (`DATA_DIR`, `fixtureData`), `compile` of guide text, `writeTestPack` |
 | `helpers/cli.js` | `polestar(args, { cwd, env, input })` runs the command line as a child process; `quiet(fn)` runs a command in-process with its output captured; `fakeAddons` lays out addon folders for pack and install tests |
 | `helpers/data.js` | `needs(...files)`: the one skip reason for a test that reads `data/forever` when those files are not built |

@@ -89,6 +89,7 @@ never in saved variables.
 | File | Public table | What it does |
 |---|---|---|
 | `Nav.lua` | `Nav` | The point being guided to and where it is relative to the player |
+| `MapCanvas.lua` | `MapCanvas` | Drawing on Blizzard's map frames (world map, battlefield map) with Polestar's own frames, the maps only read |
 | `Pins.lua` | `Pins` | Map and minimap icons for every module, in named layers |
 | `Arrow.lua` | `Nav.arrow` | The waypoint arrow: turning, distance, label, arrival ring |
 | `Layers.lua` | (local) | Nav's own pins: the target, its area, the points where the travel route changes mode |

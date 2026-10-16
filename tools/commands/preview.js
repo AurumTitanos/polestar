@@ -469,9 +469,9 @@ function questDbLua() {
 }
 const MAP_W = 700, MAP_H = 470;
 // Runs before the addon files: the world, then the map canvas (the shape of
-// Blizzard_MapCanvas a data provider sees, as tests/lua/stub_nav.lua fakes
-// it) sized like the world map's, and the minimap's ground. Map percent to
-// canvas pixels: x * MAP_W, y * MAP_H from the top left.
+// Blizzard_MapCanvas Polestar reads, tests/lua/wow_stub.lua's world map with
+// its own canvas) sized like the world map's, and the minimap's ground. Map
+// percent to canvas pixels: x * MAP_W, y * MAP_H from the top left.
 const QUEST_PLAYER = { x: 46.4, y: 39.6 };
 // The zone a scene plays in (default: Elwynn at the abbey); `frame` its
 // world bounds, the same in the Era frame.
@@ -487,27 +487,10 @@ stub.worldMapID = ${place.map}
 local FONT = "Interface\\\\AddOns\\\\Polestar\\\\Media\\\\Fonts\\\\Inter-SemiBold.ttf"
 local NAV = "Interface\\\\AddOns\\\\Polestar\\\\Media\\\\Nav\\\\"
 
-MapCanvasDataProviderMixin = {
-	OnAdded = function(self, map) self.owningMap = map end,
-	GetMap = function(self) return self.owningMap end,
-	RemoveAllData = function() end,
-	RefreshAllData = function() end,
-	OnMapChanged = function(self) self:RefreshAllData() end,
-}
-MapCanvasPinMixin = {
-	OnLoad = function() end, OnAcquired = function() end, OnReleased = function() end,
-	SetOwningMap = function(self, map) self.owningMap = map end,
-	GetMap = function(self) return self.owningMap end,
-	SetPosition = function(self, x, y) self:GetMap():SetPinPosition(self, x, y) end,
-	SetScalingLimits = function() end, SetIgnoreGlobalPinScale = function() end,
-	UseFrameLevelType = function(self, t) self.pinFrameLevelType = t end,
-	CheckMouseButtonPassthrough = function() end,
-}
 local map = WorldMapFrame
 map:SetSize(${MAP_W}, ${MAP_H})
 map:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
 map:Show()
-map.pinPools = {}
 map.ScrollContainer:SetAllPoints(map)
 local canvas = CreateFrame("Frame", nil, map.ScrollContainer)
 canvas:SetPoint("TOPLEFT", map, "TOPLEFT", 0, 0)
@@ -529,32 +512,10 @@ local name = canvas:CreateFontString(nil, "ARTWORK")
 name:SetFont(FONT, 15, ""); name:SetTextColor(0.93, 0.89, 0.78, 0.6)
 name:SetPoint("TOPLEFT", canvas, "TOPLEFT", 14, -12); name:SetText("${place.name}")
 function map.GetCanvas() return canvas end
-function map.SetPinPosition(self, pin, x, y)
-	pin:ClearAllPoints()
-	pin:SetPoint("CENTER", canvas, "TOPLEFT", x * ${MAP_W}, -y * ${MAP_H})
-end
--- Blizzard_MapCanvas: AcquirePin applies the frame level of the pin's type
--- (Blizzard_WorldMap orders QUEST_BLOB far below SUPER_TRACKED_QUEST); pins
--- of one type share it and draw in acquire order (re-stamped for render.js).
-local acquired = 0
-function map.AcquirePin(self, template, ...)
-	local pool = self.pinPools[template]
-	local pin, new = pool:Acquire()
-	pin.pinTemplate = template
-	pin:SetOwningMap(self)
-	if new then pin:OnLoad() end
-	pin:SetFrameLevel(canvas:GetFrameLevel() + (pin.pinFrameLevelType == "PIN_FRAME_LEVEL_QUEST_BLOB" and 2 or 20))
-	acquired = acquired + 1
-	pin.seq = 1000000 + acquired
-	pin:Show()
-	pin:OnAcquired(...)
-	pin:CheckMouseButtonPassthrough("RightButton")
-	return pin
-end
-function map.RemoveAllPinsByTemplate(self, template)
-	if self.pinPools[template] then self.pinPools[template]:ReleaseAll() end
-end
-function map.UnregisterPin() end
+-- Blizzard_WorldMap orders QUEST_BLOB far below SUPER_TRACKED_QUEST, both
+-- under the player's unit pin.
+local levels = { GetValidFrameLevel = function(_, t) return canvas:GetFrameLevel() + (t == "PIN_FRAME_LEVEL_QUEST_BLOB" and 2 or 20) end }
+function map.GetPinFrameLevelsManager() return levels end
 -- The player, as the world map's own unit pin draws it: above every pin.
 local me = CreateFrame("Frame", nil, canvas)
 me:SetFrameLevel(100); me:SetSize(22, 22)

@@ -141,6 +141,20 @@ local function call(fn, ...)
 end
 ns.SafeCall = call
 
+-- A frame of Polestar's that goes under the game's own UI (the world map's
+-- canvas, the minimap, a quest reward or talent button): made with no parent,
+-- then set under it. The gamepad interface hooks CreateFrame and, when the
+-- parent is inside one of its open panels (the world map, the quest frame,
+-- the talents...), rebuilds that panel's button list inside the caller's
+-- code: called from Polestar, the panel is left tainted and the next gamepad
+-- action there is blocked. SetParent is not hooked. Every Polestar frame
+-- whose parent is a game frame, or is under one, is made through this.
+function ns.CreateFrameUnder(kind, name, parent, template)
+	local f = CreateFrame(kind, name, nil, template)
+	if parent then f:SetParent(parent) end
+	return f
+end
+
 local function compact(list)
 	local j = 0
 	for i = 1, #list do
