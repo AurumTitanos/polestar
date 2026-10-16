@@ -892,11 +892,14 @@ goal's NPC (`npc`, or the chosen candidate's for smart goals) or object
 (`object`) for accept, turnin, talk, train, vendor, sethome, getfp, learn,
 buy and interact goals; every other goal (goto, kill, collect, use, complete,
 explore, level, skill, craft, rep, achieve, note, and NPC verbs without an
-NPC) is "here". So a hub step reads person by person, and a field step (goto
-the camp, kill, collect) stays one group. A goal that does not apply to the
-character (`only`, grey-skipped, never-had) joins the group around it instead
-of starting one, so a class-only line between two goals at the same person
-never splits that person's group.
+NPC) is "here". An interact for a quest objective (`quest`: totems, mounds,
+cages, braziers) is "here" too: it is field work beside the kills, not a
+visit, so it shows with them instead of waiting behind them; a plain interact
+(no quest) is still a visit. So a hub step reads person by person, and a field
+step (goto the camp, kill, collect) stays one group. A goal that does not
+apply to the character (`only`, grey-skipped, never-had) joins the group
+around it instead of starting one, so a class-only line between two goals at
+the same person never splits that person's group.
 
 - **Done:** a group is done when none of its applicable goals still blocks
   (done, `na`, skipped or optional). **Focus** is the first group that is not
