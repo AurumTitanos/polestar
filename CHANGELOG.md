@@ -4,6 +4,10 @@
 
 ### For players
 
+- Ticking a quest's accept off without taking the quest no longer sends you
+  to farm for it: its objectives and turn-in leave the guide, as when you
+  skip the step, and come back if you take the quest after all. A stray tick
+  on Raptor Horns in Ratchet kept the Barrens guide on the horns.
 - The Barrens (19-24) takes Her Name Is Olgra after Lost in Battle is handed
   in, the only time Mankrik offers it, and collects Olgra's Adornments on the
   way back down to Camp Taurajo: the guide asked for it at the first
@@ -620,6 +624,13 @@
 
 ### For contributors
 
+- `Compat.GetPlayerUnitPosition` returns no height when the client reports
+  exactly 0, as Forever's does. Taken as real, it started walking paths on
+  the nearest surface within 10 yd of 0 (from Ratchet's flight master: 20 yd
+  down the slope towards the harbour, then back) and kept Transit from
+  timing a ride on a raised track (a zeppelin at 120 yd). With no height,
+  Walk starts from the ground under the player and Transit matches the ride
+  on the ground plane.
 - A Feature request issue form beside Bug report and Wrong step, tagged
   `enhancement`, with a field for the Discord thread an idea came from
   (thanks CDVolvik).

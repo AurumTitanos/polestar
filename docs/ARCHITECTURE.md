@@ -326,7 +326,8 @@ Compat.GetPlayerInfo()          -> { name, realm, guid, level, xp, xpMax, race, 
                                    -- race = raceFile ("Human","Scourge",...), class = classFile ("WARRIOR"), faction = "Alliance"|"Horde"|"Neutral"
 Compat.GetPlayerMapPosition()   -> uiMapID, x, y | nil      (nil in instances / unknown)
 Compat.GetPlayerWorldPosition() -> continentID, wx, wy | nil  (via MapToWorld of the above)
-Compat.GetPlayerUnitPosition()  -> wx, wy, z | nil, instanceID | nil  (UnitPosition; the one place it is read; nil while secret)
+Compat.GetPlayerUnitPosition()  -> wx, wy, z | nil, instanceID | nil  (UnitPosition; the one place it is read; nil while secret;
+                                   -- z nil also when the client reports exactly 0, as Forever's does)
 Compat.MapToWorld(uiMapID, x, y, frame) -> continentID, wx, wy | nil
                                    -- frame "e": use registered Era frame for uiMapID (see Map frames); nil: live client
 Compat.WorldToMap(continentID, wx, wy, uiMapID) -> x, y | nil

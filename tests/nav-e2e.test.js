@@ -298,6 +298,23 @@ test('second review: after the path arrives the arrow, the panel\'s leg time and
 	assert.ok(Math.abs(out.planned - out.header) <= 1, `the legs' planned times (${out.planned} s) and the header (${out.header} s)`);
 });
 
+// Forever's client answers UnitPosition with a height of exactly 0 (reported
+// from Ratchet's flight master, 2026-10-16, where the ground is at 12 yd).
+// Taken as real, the search started on the nearest surface within 10 yd of 0,
+// 20 yd down the slope towards the harbour, and the line went there and back.
+test('Z1: a height of 0 from UnitPosition is no height: the walk to Mebok Mizzyrix starts from the ground at Ratchet\'s flight master', { skip }, (t) => {
+	const out = run(t, `
+		local c, sx, sy = C.MapToWorld(1413, 63.07, 37.08, "e")
+		place(1413, sx, sy, 0)
+		local f = guide(1413, 62.37, 37.62, "Mebok Mizzyrix")
+		local p = f.points[2]
+		emit({ c = c, z = f.from[3], west = p.y - sy, length = length(f.points), straight = dist(sx, sy, f.to[1], f.to[2]) })`);
+	assert.equal(out.c, 1);
+	assert.equal(out.z, undefined, 'searched without a height');
+	assert.ok(out.west >= 0, `the path's first point is not east of the player, towards the harbour (${out.west.toFixed(1)} yd west)`);
+	assert.ok(out.length < out.straight * 1.2, `${out.length.toFixed(0)} yd along the path against ${out.straight.toFixed(0)} yd straight: no detour`);
+});
+
 test('b: where the straight line is blocked (Thelsamar to the Stonewrought Dam) the arrow follows the detour', { skip }, (t) => {
 	const out = run(t, `
 		local c, sx, sy = C.MapToWorld(1432, 35.5, 47, "e")
