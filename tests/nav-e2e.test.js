@@ -1,5 +1,6 @@
 'use strict';
-// End to end: the arrow on Shortest Path Forever's real walking engine. The
+// End to end: the arrow on Shortest Path Forever's real walking engine and
+// Polestar's packed maps (maps 0 and 1, `nav pack`). The
 // real Polestar (with TravelData, the guides' Era map frames, and the local
 // crossings when built) loads the real Polestar_Nav on demand at login, its
 // maps decoded by tests/lua/stub_encoding.lua the way the client decodes them;
@@ -30,7 +31,7 @@ function skipReason() {
 	}
 	const data = needs('map-frames.json', 'zones.json');
 	if (data) return data;
-	if (!fs.existsSync(path.join(ADDONS, 'Polestar_Nav', 'Nav', 'Nav.xml'))) return 'addon/Polestar_Nav has no walking maps (node tools/polestar.js nav vendor)';
+	if (!fs.existsSync(path.join(ADDONS, 'Polestar_Nav', 'Nav', 'Nav.xml'))) return 'addon/Polestar_Nav has no walking maps (node tools/polestar.js nav pack and nav vendor)';
 	if (!fs.existsSync(path.join(ADDONS, 'Polestar_Guides', 'MapFrames.lua'))) return 'addon/Polestar_Guides/MapFrames.lua not built (node tools/polestar.js compile)';
 	return false;
 }
@@ -73,14 +74,16 @@ local floor, sqrt = math.floor, math.sqrt
 local function r1(v) return v and floor(v * 10 + 0.5) / 10 end
 -- Every search the arrow asks for, with what it was asked and what came back.
 local finds = {}
-local realFind = E.Find
-E.Find = function(map, from, to, callback, water)
-	local rec = { map = map, from = { from.x, from.y, from.z }, to = { to.x, to.y, to.z }, at = GetTime(), combat = InCombatLockdown() and true or false }
-	finds[#finds + 1] = rec
-	return realFind(map, from, to, function(points, cost, job)
-		rec.points, rec.cost, rec.done = points, cost, true
-		callback(points, cost, job)
-	end, water)
+if E then -- nil when Polestar_Nav was not loaded (routing off)
+	local realFind = E.Find
+	E.Find = function(map, from, to, callback, water)
+		local rec = { map = map, from = { from.x, from.y, from.z }, to = { to.x, to.y, to.z }, at = GetTime(), combat = InCombatLockdown() and true or false }
+		finds[#finds + 1] = rec
+		return realFind(map, from, to, function(points, cost, job)
+			rec.points, rec.cost, rec.done = points, cost, true
+			callback(points, cost, job)
+		end, water)
+	end
 end
 -- Stand at world (wx, wy) on map, through the live frame, as the client reports it.
 local function place(map, wx, wy, z)
@@ -303,13 +306,16 @@ test('b: where the straight line is blocked (Thelsamar to the Stonewrought Dam) 
 		local a = aim()
 		local _, tx, ty = N.GetTargetWorld()
 		emit({ map = f.map, n = #f.points, length = length(f.points), straight = dist(sx, sy, tx, ty), index = indexOf(f, a.x, a.y),
-			toTarget = dist(a.x, a.y, tx, ty), endGap = dist(f.points[#f.points].x, f.points[#f.points].y, tx, ty), dist = a.dist })`);
+			toTarget = dist(a.x, a.y, tx, ty), endGap = dist(f.points[#f.points].x, f.points[#f.points].y, tx, ty), dist = a.dist,
+			second = dist(sx, sy, f.points[2].x, f.points[2].y) })`);
 	assert.equal(out.map, 0);
 	assert.ok(out.length > out.straight * 1.2, `path ${out.length.toFixed(0)} yd against ${out.straight.toFixed(0)} yd straight`);
-	assert.equal(out.index, 2, `the arrow aims at the detour's first corner (of ${out.n} points)`);
+	// The path's second point is the start cell's centre; within Walk.lua's POINT_REACH (5 yd) it counts as passed.
+	assert.equal(out.index, out.second > 5 ? 2 : 3, `the arrow aims at the detour's first corner (of ${out.n} points; the second is ${out.second.toFixed(1)} yd away)`);
 	assert.ok(out.toTarget > 100);
 	assert.ok(out.endGap < 10);
-	assert.ok(Math.abs(out.dist - out.length) < 0.5, 'the yards shown are the detour\'s');
+	// Measured along the path from where the player stands on it (within the passed first segment).
+	assert.ok(out.dist <= out.length + 0.5 && out.dist > out.length - out.second - 0.5, `the yards shown (${out.dist.toFixed(1)}) are the detour's (${out.length.toFixed(1)})`);
 });
 
 test('c: walking the path point by point advances the aim, never asks the engine again, and arrives', { skip }, (t) => {
@@ -469,4 +475,161 @@ test('Z1: a guide goal at Andron Gant (Undercity, Rogues\' Quarter) is walked to
 	assert.equal(out.withoutZ.z, undefined, 'the same point set by hand has no height');
 	assert.equal(out.withoutZ.asked, 2);
 	assert.ok(out.withoutZ.endZ > 20, `and ends on the street ${out.withoutZ.endZ - out.withZ.endZ} yd above him (${out.withoutZ.endZ})`);
+});
+
+test('K1: a walk into a cave is split at its mouth from Polestar_Nav\'s Chokepoints.lua, the step named by the cave (Kharanos into the Grizzled Den)', { skip }, (t) => {
+	const out = run(t, `
+		local c, sx, sy = C.MapToWorld(1426, 46.7, 53.0, "e")
+		place(1426, sx, sy, 401.5)
+		-- A goal inside the cave with its height (a guide's spawn point): the engine walks in, not over the hill above.
+		Polestar.Fire("WAYPOINT_CHANGED", { map = 1426, x = 41.18, y = 50.28, f = "e", z = 355, label = "Grizzled Den", kind = "turnin", r = 5 })
+		aim()
+		local n = 0
+		while not (finds[#finds] and finds[#finds].done) and n < 200 do stub.advance(0.05); aim(); n = n + 1 end
+		N.walk.Split()
+		local legs, ci = N.GetRoute()
+		local list = {}
+		for i = ci, #legs do
+			local l = legs[i]
+			list[#list + 1] = { kind = l.kind, label = l.label, step = l.step, choke = l.choke and l.choke.name, seconds = l.seconds }
+		end
+		local caves = 0
+		for _, e in ipairs(PolestarNavChokepoints and PolestarNavChokepoints[0] or {}) do if e.kind == "cave" then caves = caves + 1 end end
+		emit({ legs = list, caves = caves, points = finds[#finds] and finds[#finds].points and #finds[#finds].points })`);
+	assert.ok(out.caves > 50, `Chokepoints.lua loads with Polestar_Nav (${out.caves} caves on map 0)`);
+	const cave = out.legs.find((l) => l.step === 'cave');
+	assert.ok(cave, `a cave step: ${JSON.stringify(out.legs)}`);
+	assert.equal(cave.choke, 'The Grizzled Den');
+	assert.match(cave.label, /Grizzled Den/);
+	assert.ok(out.legs.every((l) => typeof l.label === 'string' && l.label !== '' && l.label !== 'Unknown'), 'K1: every step is named');
+});
+
+// Review conditions for shipping Polestar's maps (nav-maps): the maps load only with routing on; all of a
+// map's files missing from Nav.xml, or a corrupted grid block, leave the straight arrow, never a Lua error
+// (one missing part file: tests/nav-load.test.js); every zone the guides walk in routes.
+const NAV_DIR = path.join(ADDONS, 'Polestar_Nav', 'Nav');
+
+test('the walking maps load on demand only with Walk real paths on (nav.navRouting off: Polestar_Nav is never loaded)', { skip }, () => {
+	const run1 = (routing) => runAddon({
+		stubs: ['stub_world.lua', 'stub_encoding.lua', 'stub_packs.lua'],
+		before: before(),
+		addons: ['Polestar', { name: 'Polestar_Guides', files: ['MapFrames.lua'] }],
+		saved: { Polestar: `PolestarDB = { schema = 1, settings = { nav = { navRouting = ${routing} } } }` },
+		login: true,
+		script: `${PRELUDE}
+			place(1429, GOLDSHIRE[1], GOLDSHIRE[2], GOLDSHIRE[3])
+			N.SetTarget(1429, 39.5, 82.4, "Fargodeep Mine", "e")
+			for _ = 1, 40 do stub.advance(0.05); aim() end
+			emit({ loads = stub.packLoads.Polestar_Nav or 0, data = PolestarPathData ~= nil, chokepoints = PolestarNavChokepoints ~= nil, finds = #finds, state = aim().state })`,
+	}).emitted[0];
+	const off = run1(false);
+	assert.deepEqual([off.loads, off.data, off.chokepoints, off.finds], [0, false, false, 0], 'routing off: no maps in memory, no search');
+	assert.equal(off.state, 'travel', 'the arrow still points (straight)');
+	const on = run1(true);
+	assert.deepEqual([on.loads, on.data, on.chokepoints], [1, true, true], 'routing on: loaded once at login');
+	assert.ok(on.finds >= 1);
+});
+
+// The part file holding the cluster (ADT tile) of a world point on map 0, and that cluster's index.
+function clusterFile(wx, wy) {
+	const meta = fs.readFileSync(path.join(NAV_DIR, 'Nav0.lua'), 'utf8');
+	const num = (k) => Number(new RegExp(`\\t${k} = (-?\\d+),`).exec(meta)[1]);
+	const T = 1600 / 3;
+	const k = (Math.floor(wx / T) - num('cx0')) * num('ny') + (Math.floor(wy / T) - num('cy0'));
+	const file = fs.readdirSync(NAV_DIR).find((f) => /^Nav0_\d+\.lua$/.test(f) && fs.readFileSync(path.join(NAV_DIR, f), 'utf8').includes(`data.packed.grid[${k + 1}] = `));
+	return { k, file };
+}
+
+function withMaps(files, script) {
+	return runAddon({
+		stubs: ['stub_world.lua', 'stub_encoding.lua', 'stub_packs.lua'],
+		before: before().replace(/stub\.packs\.Polestar_Nav = \{[^\n]*\}/, `stub.packs.Polestar_Nav = { ${files.map((f) => JSON.stringify(f)).join(', ')} }`),
+		addons: ['Polestar', { name: 'Polestar_Guides', files: ['MapFrames.lua'] }],
+		login: true,
+		script: `${PRELUDE}\n${script}`,
+	}).emitted[0];
+}
+
+const STRAIGHT = `
+	place(1429, GOLDSHIRE[1], GOLDSHIRE[2], GOLDSHIRE[3])
+	local f = guide()
+	for _ = 1, 20 do stub.advance(0.05) end
+	local a = aim()
+	local _, tx, ty = N.GetTargetWorld()
+	emit({ state = a.state, toTarget = a.x and dist(a.x, a.y, tx, ty), measured = a.measured, available = E and E.Available(0), points = f and f.points and #f.points or 0, cost = f and f.cost })`;
+
+test('a map whose files are all missing from Nav.xml (every Nav0*.lua) leaves the straight arrow on that map, with no Lua error', { skip }, () => {
+	const files = [...tocFiles('Polestar_Nav'), nsFile].filter((f) => !/[\\/]Nav0(_\d+)?\.lua$/.test(f));
+	const out = withMaps(files, STRAIGHT);
+	assert.equal(out.available, false, 'no data for map 0');
+	assert.equal(out.state, 'travel');
+	assert.ok(out.toTarget < 1, `the arrow points at the goal itself (${out.toTarget})`);
+	assert.notEqual(out.measured, true, 'its distance is the straight one');
+});
+
+test('a corrupted grid block of the map leaves the straight arrow for that walk, with no Lua error', { skip }, () => {
+	const { k, file } = clusterFile(-9444.062, 77.667);
+	assert.ok(file, 'Goldshire\'s cluster is in one part file');
+	const bad = path.join(tmpdir('polestar-nav-bad-'), file);
+	fs.writeFileSync(bad, fs.readFileSync(path.join(NAV_DIR, file), 'utf8').replace(new RegExp(`^data\\.packed\\.grid\\[${k + 1}\\] = \\{[^}]*\\}$`, 'm'), `data.packed.grid[${k + 1}] = {"bm90IHpsaWI="}`));
+	assert.notEqual(fs.readFileSync(bad, 'utf8'), fs.readFileSync(path.join(NAV_DIR, file), 'utf8'));
+	const files = [...tocFiles('Polestar_Nav'), nsFile].map((f) => (path.basename(f) === file ? bad : f));
+	const out = withMaps(files, STRAIGHT);
+	assert.equal(out.available, true, 'the map is there');
+	assert.equal(out.points, 0, `no path through the broken cluster (${out.cost})`);
+	assert.equal(out.state, 'travel');
+	assert.ok(out.toTarget < 1, `the arrow points at the goal itself (${out.toTarget})`);
+});
+
+test('every one of the 49 zones the guides walk in routes on the shipped maps (one walk between two of its located goals, 80-400 yd apart), and Zephras Isle on his', { skip }, () => {
+	const { Geo } = require('../tools/lib/planner/geo');
+	const geo = new Geo(JSON.parse(fs.readFileSync(path.join(DATA, 'map-frames.json'), 'utf8')), JSON.parse(fs.readFileSync(path.join(DATA, 'zones.json'), 'utf8')));
+	const src = fs.readFileSync(path.join(ADDONS, 'Polestar_Guides', 'Guides.lua'), 'utf8');
+	const byZone = new Map();
+	for (const m of src.matchAll(/map = (\d+), x = ([\d.]+), y = ([\d.]+)/g)) {
+		const w = geo.toWorld(+m[1], +m[2], +m[3], 'e');
+		if (!w || ![0, 1].includes(w.c)) continue;
+		if (!byZone.has(+m[1])) byZone.set(+m[1], []);
+		byZone.get(+m[1]).push(w);
+	}
+	// Per zone, up to 6 candidate pairs; the zone passes when one routes (a goal can stand on a ledge or a tree only its own quest reaches).
+	const zones = [];
+	for (const [map, ws] of [...byZone].sort((a, b) => a[0] - b[0])) {
+		const pairs = [];
+		for (let i = 0; i < ws.length && pairs.length < 6; i++) {
+			for (let j = i + 1; j < ws.length && pairs.length < 6; j++) {
+				const d = Math.hypot(ws[i].wx - ws[j].wx, ws[i].wy - ws[j].wy);
+				if (ws[i].c === ws[j].c && d >= 80 && d <= 400) pairs.push([ws[i], ws[j]]);
+			}
+		}
+		if (pairs.length) zones.push({ map, c: pairs[0][0].c, pairs });
+	}
+	const lua = zones.map((z) => `{ ${z.map}, ${z.c}, { ${z.pairs.map(([a, b]) => `{ ${a.wx.toFixed(2)}, ${a.wy.toFixed(2)}, ${b.wx.toFixed(2)}, ${b.wy.toFixed(2)} }`).join(', ')} } }`).join(',\n');
+	const zeph = geo.toWorld(2521, 50, 50, 'l');
+	const zeph2 = geo.toWorld(2521, 45, 60, 'l');
+	const [out] = runAddon({
+		stubs: ['stub_encoding.lua'],
+		addons: ['Polestar_Nav'],
+		script: `
+local Path = Polestar_NavEngine
+local out = { failed = {}, n = 0 }
+for _, z in ipairs({ ${lua} }) do
+	out.n = out.n + 1
+	local ok = false
+	for _, p in ipairs(z[3]) do
+		local pts = Path.FindSync(z[2], { x = p[1], y = p[2] }, { x = p[3], y = p[4] })
+		if pts then ok = true break end
+	end
+	if not ok then out.failed[#out.failed + 1] = z[1] end
+end
+local pts, cost = Path.FindSync(2991, { x = ${zeph.wx}, y = ${zeph.wy} }, { x = ${zeph2.wx}, y = ${zeph2.wy} })
+out.zephras = pts and cost or tostring(cost)
+emit(out)`,
+	}).emitted;
+	// The 49 zones of Eastern Kingdoms and Kalimdor the guides walk in (uiMapIDs), pinned so none drops out unseen.
+	const ZONES = [1411, 1412, 1413, 1416, 1417, 1418, 1419, 1420, 1421, 1422, 1423, 1424, 1425, 1426, 1427, 1428, 1429, 1430, 1431, 1432, 1433, 1434, 1435, 1436, 1437, 1438, 1439, 1440, 1441, 1442, 1443, 1444, 1445, 1446, 1447, 1448, 1449, 1450, 1451, 1452, 1453, 1454, 1455, 1456, 1457, 1458, 2482, 2548, 2652];
+	assert.deepEqual(zones.map((z) => z.map), ZONES, 'the zones tested');
+	assert.equal(out.n, ZONES.length);
+	assert.deepEqual(Object.values(out.failed), [], 'every zone routes');
+	assert.ok(typeof out.zephras === 'number' && out.zephras > 100, `Zephras Isle routes on his map (${out.zephras})`);
 });

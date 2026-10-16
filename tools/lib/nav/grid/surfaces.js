@@ -6,7 +6,10 @@
 // quad of 2 x 2 columns): the entry whose gap holds the liquid's surface is
 // its floor; water or ocean at least SWIM_DEPTH above the floor (or with no
 // floor) turns it into a swim surface at the liquid's height; magma and slime
-// block their floor at any depth.
+// block their floor at any depth. Fatigue water (MH2O's deep quads,
+// geom/mh2o.js) is a swim surface that is BLOCKED (SWIM | BLOCKED): never
+// swum, by the route search or the packed maps (decided 2026-10-15, the
+// owner: never route across open sea).
 
 const {
 	COLUMNS, WALK_MAX, CLIMB_MAX, AGENT_HEIGHT, SWIM_DEPTH, FLAG, MAX_LAYERS,
@@ -59,7 +62,7 @@ function buildSurfaces(hf, geom) {
 			cs[m] = sl;
 			m++;
 		}
-		const apply = (type, lz) => {
+		const apply = (type, lz, deep = 0) => {
 			// The floor: the highest entry whose gap holds the liquid surface.
 			let e = -1;
 			for (let x = m - 1; x >= 0; x--) {
@@ -74,7 +77,7 @@ function buildSurfaces(hf, geom) {
 				if (lz - cz[e] >= SWIM_DEPTH) {
 					cz[e] = lz;
 					cs[e] = 0;
-					cf[e] = (cf[e] & (FLAG.INDOOR | FLAG.WMO | FLAG.M2 | FLAG.TERRAIN)) | FLAG.SWIM | (type === LIQUID.OCEAN ? FLAG.OCEAN : 0);
+					cf[e] = (cf[e] & (FLAG.INDOOR | FLAG.WMO | FLAG.M2 | FLAG.TERRAIN)) | FLAG.SWIM | (type === LIQUID.OCEAN ? FLAG.OCEAN : 0) | (deep ? FLAG.BLOCKED : 0);
 				}
 			} else if (m === 0 || lz < firstBottom) {
 				// No floor under the liquid: a swim surface below every span.
@@ -86,14 +89,14 @@ function buildSurfaces(hf, geom) {
 				}
 				cz[0] = lz;
 				cc[0] = m ? firstBottom : Infinity;
-				cf[0] = FLAG.SWIM | (type === LIQUID.OCEAN ? FLAG.OCEAN : 0);
+				cf[0] = FLAG.SWIM | (type === LIQUID.OCEAN ? FLAG.OCEAN : 0) | (deep ? FLAG.BLOCKED : 0);
 				cs[0] = 0;
 				m++;
 			}
 		};
 		if (liquid) {
 			const q = ((k >> 8) >> 1) * 128 + ((k & 255) >> 1);
-			if (liquid.type[q] !== LIQUID.NONE) apply(liquid.type[q], liquid.z[q]);
+			if (liquid.type[q] !== LIQUID.NONE) apply(liquid.type[q], liquid.z[q], liquid.deep ? liquid.deep[q] : 0);
 		}
 		if (wmoLiquid && wmoLiquid.type[k] !== LIQUID.NONE) apply(wmoLiquid.type[k], wmoLiquid.z[k]);
 		if (m > MAX_LAYERS) {

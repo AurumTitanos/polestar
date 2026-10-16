@@ -1,5 +1,5 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
-	<!-- Polestar_Nav: Nav/Nav.xml from Shortest Path Forever (https://github.com/cjber/shortest-path-forever) at b1ad5bd4bf579c781937af0e25f5233cc94b3726, Copyright (C) 2026 Cillian Berragan, GPL-3.0-or-later. Modified for Polestar on 2026-10-16 by `node tools/polestar.js nav vendor`: unchanged but for this comment. -->
+	<!-- Written by node tools/polestar.js nav pack and nav vendor: Polestar's maps (PACK.json), the vendored maps (UPSTREAM.json), the chokepoints. -->
 	<Script file="Nav0.lua"/>
 	<Script file="Nav0_1.lua"/>
 	<Script file="Nav0_2.lua"/>
@@ -11,6 +11,19 @@
 	<Script file="Nav0_8.lua"/>
 	<Script file="Nav0_9.lua"/>
 	<Script file="Nav0_10.lua"/>
+	<Script file="Nav0_11.lua"/>
+	<Script file="Nav0_12.lua"/>
+	<Script file="Nav0_13.lua"/>
+	<Script file="Nav0_14.lua"/>
+	<Script file="Nav0_15.lua"/>
+	<Script file="Nav0_16.lua"/>
+	<Script file="Nav0_17.lua"/>
+	<Script file="Nav0_18.lua"/>
+	<Script file="Nav0_19.lua"/>
+	<Script file="Nav0_20.lua"/>
+	<Script file="Nav0_21.lua"/>
+	<Script file="Nav0_22.lua"/>
+	<Script file="Nav0_23.lua"/>
 	<Script file="Nav1.lua"/>
 	<Script file="Nav1_1.lua"/>
 	<Script file="Nav1_2.lua"/>
@@ -25,6 +38,22 @@
 	<Script file="Nav1_11.lua"/>
 	<Script file="Nav1_12.lua"/>
 	<Script file="Nav1_13.lua"/>
+	<Script file="Nav1_14.lua"/>
+	<Script file="Nav1_15.lua"/>
+	<Script file="Nav1_16.lua"/>
+	<Script file="Nav1_17.lua"/>
+	<Script file="Nav1_18.lua"/>
+	<Script file="Nav1_19.lua"/>
+	<Script file="Nav1_20.lua"/>
+	<Script file="Nav1_21.lua"/>
+	<Script file="Nav1_22.lua"/>
+	<Script file="Nav1_23.lua"/>
+	<Script file="Nav1_24.lua"/>
+	<Script file="Nav1_25.lua"/>
+	<Script file="Nav1_26.lua"/>
+	<Script file="Nav1_27.lua"/>
+	<Script file="Nav1_28.lua"/>
 	<Script file="Nav2991.lua"/>
 	<Script file="Nav2991_1.lua"/>
+	<Script file="Chokepoints.lua"/>
 </Ui>

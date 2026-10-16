@@ -118,6 +118,29 @@ test('swimming: mounts do not swim, the swim leg runs at swim speed', async () =
 	assert.ok(epic.seconds < onFoot.seconds);
 });
 
+test('open sea: fatigue water (MH2O deep) is never swum; the coast, shallow sea, still is', async () => {
+	// A strait of ocean across the tile (x 150..350, sea bed 6 yd down): deep in the middle 100 yd, or not at all.
+	const sea = (deep) => {
+		const s = new Scene({ height: (x) => (x > 150 && x < 350 ? -6 : 0) });
+		s.water(150, 0, 350, ADT, 0, 2);
+		if (deep) s.water(200, 0, 300, ADT, 0, 2, true);
+		return s;
+	};
+	const open = sea(true);
+	const { nav, dir } = await navOf(open);
+	const r = nav.route(open.world(100, 250), open.world(400, 250), foot);
+	assert.equal(r.ok, false, 'no way across the open sea');
+	const near = nav.route(open.world(100, 250), open.world(175, 250), foot);
+	assert.ok(near.ok && near.byClass.swim > 0, 'a swim near the coast');
+	const { decodeTile, FLAG } = require('../tools/lib/nav/grid/format');
+	const t = decodeTile(fs.readFileSync(path.join(dir, 'tiles', '0', '32_32.nav.gz')));
+	const k = 120 * 256 + 120; // x 251, y 251: deep
+	assert.equal(t.flags[t.first[k]] & (FLAG.SWIM | FLAG.BLOCKED), FLAG.SWIM | FLAG.BLOCKED, 'fatigue water is a blocked swim surface');
+	const shallow = sea(false);
+	const across = (await navOf(shallow)).nav.route(shallow.world(100, 250), shallow.world(400, 250), foot);
+	assert.ok(across.ok && across.byClass.swim > 0, 'the same strait without fatigue is swum');
+});
+
 test('indoors: no mount speed, a remount on the way out', async () => {
 	const s = new Scene({ height: () => 0 });
 	// A long indoor floor (WMO indoor) raised half a yard, walled along both sides.
@@ -217,6 +240,29 @@ test('snap: without a height an indoor floor beats the hill above it', async () 
 	assert.ok(nav.snap({ ...s.world(20, 20), prefer: 'indoor' }) && !(nav.snap({ ...s.world(20, 20), prefer: 'indoor' }).flags & 8), 'no indoor floor in reach: ground');
 });
 
+test('snap: without a height a point over an indoor floor takes that floor, not a roof over it, the terrain under it or a storey below', async () => {
+	// A city floor (WMO indoor) at 0 over terrain at -40, with a roof at 30
+	// over a pillar from 1 to 29 (the floor under the pillar is blocked by
+	// its clearance, the pillar top by the roof), a closed room, and a pocket
+	// floor at -20 under the city floor.
+	const s = new Scene({ height: () => -40 });
+	s.floor(50, 50, 450, 450, 0);
+	s.box(200.5, 200.5, 1, 201.5, 201.5, 29, 2).floor(150, 150, 250, 250, 30);
+	s.box(350, 350, 0, 350.5, 370, 5, 2).box(369.5, 350, 0, 370, 370, 5, 2).box(350, 350, 0, 370, 350.5, 5, 2).box(350, 369.5, 0, 370, 370, 5, 2);
+	s.floor(100, 100, 106, 106, -20);
+	const { nav } = await navOf(s);
+	const near = (p, z) => Math.abs(p.z - z) < 0.05;
+	const pillar = nav.snap(s.world(201, 201));
+	assert.ok(near(pillar, 0) && pillar.flags & 8, `under the roof: the floor, not the roof (z ${pillar.z})`);
+	const roomAt = s.world(360, 360);
+	const room = nav.snap(roomAt);
+	assert.ok(near(room, 0), `in the closed room: the floor beside it, not the terrain (z ${room.z})`);
+	assert.ok(Math.hypot(room.wx - roomAt.wx, room.wy - roomAt.wy) > 9, 'outside the room\'s walls');
+	assert.ok(near(nav.snap(s.world(103, 103)), 0), 'over a pocket a storey below: the floor');
+	assert.ok(near(nav.snap(s.world(300, 120)), 0), 'the open floor');
+	assert.ok(near(nav.snap({ ...s.world(201, 201), z: 29 }), 30), 'with a height: the surface nearest in 3D');
+});
+
 test('long routes cross tiles through the abstract graph', async () => {
 	const tiles = [32, 33, 34].map((col) => new Scene({ col }));
 	// A wall across the middle tile from the north edge to y = 450.
@@ -257,7 +303,8 @@ test('abstract graph: slope links cost their yards, no lift ride, so the graph p
 });
 
 const NAV = path.join(__dirname, '..', 'data', 'local', 'nav');
-const realSkip = fs.existsSync(path.join(NAV, 'index.json')) ? false : 'no navigation build in data/local/nav (node tools/polestar.js nav build)';
+const navIndex = fs.existsSync(path.join(NAV, 'index.json')) ? JSON.parse(fs.readFileSync(path.join(NAV, 'index.json'), 'utf8')) : null;
+const realSkip = !navIndex ? 'no navigation build in data/local/nav (node tools/polestar.js nav build)' : navIndex.version !== require('../tools/lib/nav/grid/format').VERSION ? `data/local/nav is tile version ${navIndex.version}: rebuild it (node tools/polestar.js nav build)` : false;
 
 test('real: Kharanos to inside Frostmane Hold goes through the cave mouth, not over the hills', { skip: realSkip }, () => {
 	const nav = openNav({ dir: NAV });
@@ -299,4 +346,38 @@ test('real: Kharanos to Thelsamar costs no more than through the South Gate tunn
 		via += leg.seconds;
 	}
 	assert.ok(direct.seconds <= via, `direct ${direct.seconds.toFixed(1)} s, via the tunnel ${via.toFixed(1)} s`);
+});
+
+// The least distance from (wx, wy) to a route's polyline.
+function distTo(r, wx, wy) {
+	let best = Infinity;
+	for (let p = 0; p + 3 < r.pts.length; p += 3) {
+		const ax = r.pts[p], ay = r.pts[p + 1], bx = r.pts[p + 3], by = r.pts[p + 4];
+		const L2 = (bx - ax) ** 2 + (by - ay) ** 2;
+		const u = L2 ? Math.max(0, Math.min(1, ((wx - ax) * (bx - ax) + (wy - ay) * (by - ay)) / L2)) : 0;
+		best = Math.min(best, Math.hypot(ax + u * (bx - ax) - wx, ay + u * (by - ay) - wy));
+	}
+	return best;
+}
+
+test('real: the Ruins of Lordaeron to the Trade Quarter ride an Undervator down from the throne room', { skip: realSkip }, () => {
+	const nav = openNav({ dir: NAV });
+	// Tirisfal Glades (1420) 65.0,60.5 -> Undercity (1458) 66.2,37.8, Era frames.
+	const r = nav.route({ c: 0, wx: 2014.94, wy: 96.15 }, { c: 0, wx: 1635.99, wy: 238.09 }, foot);
+	assert.ok(r.ok, r.reason);
+	assert.ok([...r.cls].includes(CLS.LIFT), 'rides a lift');
+	// Through the throne room's round hall (the steps down to the lift halls), not the sewers.
+	assert.ok(distTo(r, 1640, 240) < 25, `throne room ${distTo(r, 1640, 240).toFixed(0)} yd off`);
+	assert.ok(r.yards < 1000, `yards ${r.yards.toFixed(0)} (round by the sewers about 1,700)`);
+});
+
+test('real: Razor Hill to the Valley of Strength goes through the Orgrimmar gate', { skip: realSkip }, () => {
+	const nav = openNav({ dir: NAV });
+	// Durotar (1411) 51.5,41.6 (Razor Hill inn) -> Orgrimmar (1454) 54.1,68.4 (Innkeeper Gryshka), Era frames.
+	const r = nav.route({ c: 1, wx: 341.93, wy: -4685.56 }, { c: 1, wx: 1634.05, wy: -4439.41 }, foot);
+	assert.ok(r.ok, r.reason);
+	assert.ok(Math.abs(r.to.z - 15.5) < 1.5, `the inn's floor, not its roof (z ${r.to.z.toFixed(1)})`);
+	// The gate's tunnel (1411 45.5,12 to the valley), not the rocks east of it.
+	assert.ok(distTo(r, 1424, -4372) < 15, `gate ${distTo(r, 1424, -4372).toFixed(0)} yd off`);
+	assert.equal(r.byClass.climb, 0, `climb ${r.byClass.climb} s`);
 });

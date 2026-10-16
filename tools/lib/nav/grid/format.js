@@ -94,6 +94,10 @@ const CLIMB_MAX = 80; // degrees: terrain walkable (as a climb) up to here
 // slope up to this gradient when the treads under the upper column's top
 // climb from the lower surface in rises of at most STEP (decided 2026-10-15:
 // the stairs of crypts and keeps were falls one way and nothing the other).
+// Steps higher than that, rises to STEP under a top rise to JUMP and at most
+// STEP + JUMP in all (decided 2026-10-15: the Ruins of Lordaeron's throne
+// room above the Undercity's lift halls, 0.7 and 1.5 yd in one column), are
+// a jump at any gradient.
 const STAIR_MAX = 45; // degrees
 // Walls (rasterise.js): model triangles this steep or steeper (whole degrees) are kept as the
 // ranges where they cross each column's half-lines, not as spans; links.js
@@ -131,6 +135,7 @@ const LIFT_MIN = 10; // yd of height a lift must span (shorter animations are do
 const LIFT_FIT = 2; // yd between the landings' height difference and the car's rise
 const LIFT_OPEN = 200; // surfaces a landing reaches (and is reached from) inside its tile
 
+// SWIM | BLOCKED: fatigue water (MH2O deep quads, surfaces.js), never swum.
 const FLAG = { TERRAIN: 1, WMO: 2, M2: 4, INDOOR: 8, SWIM: 16, OCEAN: 32, STEEP: 64, BLOCKED: 128 };
 // The route's segment classes (path.js). Stored link codes (3 bits) are the
 // same numbers for walk, steep, swim, jump and climb, plus LINK_SLOPE (walk
@@ -152,7 +157,7 @@ const FALL_SLIDE = 12; // cells a fall may carry in all, sliding over unstable g
 const RUN_MAX = 32; // border columns per abstract entrance at most
 const REF_PROFILES = ['foot', 'mount'];
 
-const VERSION = 2; // TILE
+const VERSION = 3; // TILE; 3: fatigue water is blocked (surfaces.js)
 const WALLS_VERSION = 1;
 const GRAPH_VERSION = 5; // 5: slope links are no lift rides (CODE_LIFT); 4: move.js costs of 2026-10-15 (fall comfort, slope x2 / x4 / x10)
 const MAGIC_TILE = 0x564e4150; // 'PNAV'

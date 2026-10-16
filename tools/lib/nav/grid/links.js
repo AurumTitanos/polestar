@@ -17,8 +17,12 @@
 //   most WALK_MAX) walk or swim (either entry swim); beyond it, up to
 //   STAIR_MAX gradient, a WMO staircase is walked as a slope (LINK_SLOPE):
 //   between two WMO entries, the treads in the upper one's column below it
-//   (treadRise) climb from the lower entry in rises of at most STEP; else up
-//   to JUMP, jump. Between two swim surfaces SWIM_STEP.
+//   (treadRise) climb from the lower entry in rises of at most STEP; steps
+//   higher than that (the Ruins of Lordaeron's throne room into the
+//   Undercity's lift halls: rises of 0.7 and 1.5 yd within one column, 2.2
+//   yd in all) are a jump when every rise is at most JUMP and the whole at
+//   most STEP + JUMP; else up to JUMP, jump. Between two swim surfaces
+//   SWIM_STEP.
 // - Walls (rasterise.js, format.js WALLS): no link crosses a wall on the
 //   half-lines between the two columns (for a diagonal, the eight half-lines
 //   of the four columns around the corner) between STEP and AGENT_HEIGHT
@@ -93,11 +97,19 @@ function treadRise(zs, first, up, zLo) {
 	return Math.max(rise, prev - zLo);
 }
 
+// The highest rise under the top tread (treadRise from the tread just below
+// `up`; 0 with no tread between).
+function lowerRise(zs, first, up, zLo) {
+	const w = up - 1;
+	return w >= first && zs[w] > zLo ? treadRise(zs, first, w, zLo) : 0;
+}
+
 // The link code (format.js) from an entry with flags fa, slope sa to one with
 // fb, sb, height change dz over horizontal h; -1 when there is none. riser:
 // the highest rise of the treads between the two (treadRise; Infinity:
-// unknown), for staircases.
-function linkClass(fa, sa, fb, sb, dz, h, riser = Infinity) {
+// unknown), lower: the highest under the top tread (lowerRise), for
+// staircases.
+function linkClass(fa, sa, fb, sb, dz, h, riser = Infinity, lower = Infinity) {
 	const adz = Math.abs(dz);
 	if (fa & fb & FLAG.SWIM) return adz <= SWIM_STEP ? CLS.SWIM : -1;
 	// Onto a terrain face too steep to stand on: climbing up it only (a
@@ -112,7 +124,12 @@ function linkClass(fa, sa, fb, sb, dz, h, riser = Infinity) {
 		return adz <= JUMP ? CLS.JUMP : -1;
 	}
 	if (adz > Math.max(STEP, h * TAN[Math.min(WALK_MAX, Math.max(sa, sb))])) {
-		if (riser <= STEP && adz <= h * TAN_STAIR && (fa & fb & FLAG.WMO) && !((fa | fb) & FLAG.SWIM)) return LINK_SLOPE;
+		if ((fa & fb & FLAG.WMO) && !((fa | fb) & FLAG.SWIM)) {
+			if (riser <= STEP && adz <= h * TAN_STAIR) return LINK_SLOPE;
+			// Steps higher than a stair's (rises to STEP, the top one to
+			// JUMP): steps and a jump onto the top.
+			if (lower <= STEP && riser <= JUMP && adz <= STEP + JUMP) return CLS.JUMP;
+		}
 		return adz <= JUMP ? CLS.JUMP : -1;
 	}
 	return (fa | fb) & FLAG.SWIM ? CLS.SWIM : CLS.WALK;
@@ -168,7 +185,8 @@ function linkTile(around) {
 			const adz = Math.abs(zv - zs);
 			if (adz >= bestAbs) continue;
 			const riser = zv > zs ? treadRise(t2.z, f2[k2], v, zs) : treadRise(z, first[kS], s, zv);
-			const cls = linkClass(flags[s], t.slope[s], t2.flags[v], t2.slope[v], zv - zs, h, riser);
+			const lower = zv > zs ? lowerRise(t2.z, f2[k2], v, zs) : lowerRise(z, first[kS], s, zv);
+			const cls = linkClass(flags[s], t.slope[s], t2.flags[v], t2.slope[v], zv - zs, h, riser, lower);
 			if (cls < 0) continue;
 			// No wall across the move between a step and a body height above the higher feet.
 			const top = Math.max(zs, zv);

@@ -13,14 +13,22 @@
 //     `radius` yards; wx, wy are its column's centre, layer its index in the
 //     column (format.js), entry its index in the tile, region its region
 //     (null when the graph is missing), flags format.js FLAG bits. With z:
-//     the surface nearest in 3D. Without: in the nearest column with one, an
-//     indoor surface first (the lowest), then terrain ground (the highest),
-//     then the lowest; prefer 'indoor' / 'ground' first looks for the nearest
-//     column holding such a surface. Surfaces that are not open both ways
+//     the surface nearest in 3D. Without: first the floor rule, for a point
+//     inside a building: the nearest column holding any surface gives its
+//     lowest indoor floor (walkable, or blocked only by a low clearance:
+//     the floor under an NPC behind a counter; not a slime canal's bed),
+//     and a surface level with it (within STEP) is taken, from the 3 x 3
+//     columns around when that column has an indoor surface of its own
+//     (never the storey above or below), else the nearest within `radius`
+//     (an inn's floor, not its roof or the terrain under the city); else in
+//     the nearest column with one, an indoor surface (the lowest), then
+//     terrain ground (the highest), then the lowest; prefer 'indoor' /
+//     'ground' first looks for the nearest column holding such a surface.
+//     The floor rule and the first pass only take surfaces open both ways
 //     (search.js isOpen: walking reaches SNAP_OPEN surfaces from it and it
 //     from them; a ledge one only falls off, a roof or a pen one only falls
-//     into are not) or lie in regions smaller than SNAP_REGION (a pocket
-//     under a floor) are taken only when no other is in reach.
+//     into are not) in regions of at least SNAP_REGION (not a pocket under
+//     a floor); the others are taken only when no other is in reach.
 //
 //   nav.route(a, b, profile = profileFor({}))
 //     a, b: snapped points or { c, wx, wy, z?, prefer? } (snapped here)
@@ -57,7 +65,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const {
-	ADT, CELL, TILE_CELLS, NO_LINK, NO_COMP, DIRS, FLAG, CLS, REF_PROFILES, decodeTile, decodeGraph, cellOf, cellCentre, tileKey,
+	ADT, CELL, TILE_CELLS, NO_LINK, NO_COMP, DIRS, FLAG, CLS, REF_PROFILES, AGENT_HEIGHT, WALK_MAX, STEP, decodeTile, decodeGraph, cellOf, cellCentre, tileKey,
 } = require('./grid/format');
 const { Space, MinHeap, inLinks, IN, isOpen } = require('./grid/search');
 const { TERM_SCALE } = require('./grid/graph');
@@ -191,6 +199,51 @@ class Nav {
 		return t.open.get(e);
 	}
 
+	// snap's floor rule (see there): cells nearest first; usable, make: snap's.
+	floorSnap(c, cells, usable, make) {
+		let c0 = null;
+		let t0 = null;
+		let k0 = -1;
+		for (const cell of cells) {
+			const t = this.tile(c, cell.col, cell.row);
+			if (!t) continue;
+			const k = cell.j * TILE_CELLS + cell.i;
+			if (t.first[k] === t.first[k + 1]) continue;
+			c0 = cell;
+			t0 = t;
+			k0 = k;
+			break;
+		}
+		if (!c0) return null;
+		let zf = null;
+		let strictIndoor = false;
+		for (let e = t0.first[k0]; e < t0.first[k0 + 1]; e++) {
+			if (!(t0.flags[e] & FLAG.INDOOR)) continue;
+			if (zf === null && (!(t0.flags[e] & FLAG.BLOCKED) || (t0.ceil[e] - t0.z[e] < AGENT_HEIGHT && t0.slope[e] <= WALK_MAX))) zf = t0.z[e];
+			if (usable(t0, k0, c0, e, true)) strictIndoor = true;
+		}
+		if (zf === null) return null;
+		const gi0 = c0.col * TILE_CELLS + c0.i;
+		const gj0 = c0.row * TILE_CELLS + c0.j;
+		for (const cell of cells) {
+			if (strictIndoor && (Math.abs(cell.col * TILE_CELLS + cell.i - gi0) > 1 || Math.abs(cell.row * TILE_CELLS + cell.j - gj0) > 1)) continue;
+			const t = this.tile(c, cell.col, cell.row);
+			if (!t) continue;
+			const k = cell.j * TILE_CELLS + cell.i;
+			let best = -1;
+			let bestDz = Infinity;
+			for (let e = t.first[k]; e < t.first[k + 1]; e++) {
+				const dz = Math.abs(t.z[e] - zf);
+				if (dz <= STEP && dz < bestDz && usable(t, k, cell, e, true)) {
+					best = e;
+					bestDz = dz;
+				}
+			}
+			if (best >= 0) return make(t, k, cell, best);
+		}
+		return null;
+	}
+
 	snap({ c, wx, wy, z = null, prefer = 'any', radius = 20 } = {}) {
 		if (!this.available || !Number.isFinite(wx) || !Number.isFinite(wy)) return null;
 		const at = cellOf(wx, wy);
@@ -247,6 +300,18 @@ class Nav {
 			if (e < 0) e = pick(t, k, cell, strict, () => true, false);
 			return e;
 		};
+		// Without z, a point over an indoor floor means that floor (an NPC
+		// behind a counter, under a roof, in a room the grid closes): the
+		// lowest indoor floor of the nearest column holding any surface,
+		// walkable or blocked only by a low clearance (not a slime canal's bed
+		// or a face). A strict surface level with it (within STEP) is taken:
+		// in the 3 x 3 columns around when that column has a strict indoor
+		// surface of its own (not across a floor to the storey below), else
+		// the nearest within `radius` (not the terrain under a city).
+		if (!Number.isFinite(z) && prefer === 'any') {
+			const r = this.floorSnap(c, cells, usable, make);
+			if (r) return r;
+		}
 		for (const strict of [true, false]) {
 			if (Number.isFinite(z)) {
 				let best = null;
