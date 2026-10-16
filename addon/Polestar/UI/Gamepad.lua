@@ -342,6 +342,8 @@ G.ACTIONS = {
 	{ action = "CLICK PolestarQuestItemButton:LeftButton", section = "buttons", label = L["Use quest item"] },
 	{ action = "CLICK PolestarTargetButton:LeftButton", section = "buttons", label = L["Target quest mob"] },
 	{ action = "CLICK PolestarHearthButton:LeftButton", section = "buttons", label = L["Use Hearthstone"] },
+	{ action = "CLICK PolestarStepButton:LeftButton", section = "buttons", label = L["Step action: NPC, quest item, mob or Hearthstone"] },
+	{ action = "CLICK PolestarTravelButton:LeftButton", section = "buttons", label = L["Use the route's Hearthstone or teleport"] },
 }
 local RUN = {}
 for _, a in ipairs(G.ACTIONS) do RUN[a.action] = a.run end
