@@ -4,6 +4,7 @@
 // decodeGraph, surface) and Path.lua's in-cluster moves (search), for the
 // packer's tests (tools/lib/nav/pack.js). GPL-3.0-or-later, Cillian
 // Berragan, used with his permission.
+// Portions Copyright (C) 2026 Cillian Berragan (Shortest Path Forever, GPL-3.0-or-later); adapted for Polestar, 2026-10-15.
 
 const zlib = require('node:zlib');
 

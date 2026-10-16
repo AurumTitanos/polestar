@@ -265,3 +265,20 @@ test('pack: shipPack writes the files, PACK.json and Nav.xml; checkPack finds a 
 	const again = await packNav({ dir, cells: 67, continents: [0], date: '2026-10-16' });
 	assert.deepEqual([...again.entries()], [...files.entries()], 'deterministic');
 });
+
+test('pack: a tile the grid lists but cannot read (missing, truncated, another version) stops the pack, naming it', async () => {
+	const a = new Scene({ col: 32 });
+	const b = new Scene({ col: 33 });
+	const tile = (dir) => path.join(dir, 'tiles', '0', '33_32.nav.gz');
+	const missing = await gridOf(a, b);
+	fs.rmSync(tile(missing));
+	await assert.rejects(packNav({ dir: missing, cells: 67 }), /^Error: pack: tile 0\/33_32: ENOENT/);
+	const truncated = await gridOf(a, b);
+	fs.writeFileSync(tile(truncated), fs.readFileSync(tile(truncated)).subarray(0, 100));
+	await assert.rejects(packNav({ dir: truncated, cells: 67 }), /^Error: pack: tile 0\/33_32: /);
+	const older = await gridOf(a, b);
+	const raw = zlib.gunzipSync(fs.readFileSync(tile(older)));
+	raw.writeUInt32LE(2, 4); // the tile format's version
+	fs.writeFileSync(tile(older), zlib.gzipSync(raw));
+	await assert.rejects(packNav({ dir: older, cells: 67 }), /^Error: pack: tile 0\/33_32: nav tile version 2, expected 3$/);
+});

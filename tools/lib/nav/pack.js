@@ -320,7 +320,7 @@ function cellGrid({ tiles, loadTile, regions, C, log = () => {} }) {
 	let dropped = 0;
 	for (const meta of order) {
 		const t = meta.tile || loadTile(meta.col, meta.row);
-		if (!t || !t.links) continue;
+		if (!t.links) throw new Error(`pack: tile ${meta.col}_${meta.row} is not linked`);
 		const kx = maxRow - meta.row;
 		const ky = maxCol - meta.col;
 		const k = kx * cg.NY + ky;
@@ -500,12 +500,17 @@ async function cellGridFromDir({ dir, c, C, log }) {
 		const [col, row] = key.split('_').map(Number);
 		return { col, row };
 	});
+	// Every tile index.json lists has its file: a missing, truncated or older one stops the pack (no map with holes).
 	const loadTile = (col, row) => {
+		const key = `${c}/${tileKey(col, row)}`;
+		let t;
 		try {
-			return decodeTile(fs.readFileSync(path.join(dir, 'tiles', String(c), `${tileKey(col, row)}.nav.gz`)));
-		} catch {
-			return null;
+			t = decodeTile(fs.readFileSync(path.join(dir, 'tiles', String(c), `${tileKey(col, row)}.nav.gz`)));
+		} catch (e) {
+			throw new Error(`pack: tile ${key}: ${e.message}`);
 		}
+		if (!t.links) throw new Error(`pack: tile ${key}: not linked (rerun \`node tools/polestar.js nav build\`)`);
+		return t;
 	};
 	return { cg: cellGrid({ tiles, loadTile, regions, C, log }), index };
 }
@@ -1021,9 +1026,9 @@ const HEADER = [
 const FIELDS = ['graph', 'grid', 'height', 'floor'];
 const PART_NOTE = '-- Compressed terrain for on-demand decoding (Shortest Path Forever\'s pack_nav.py layout).';
 const CREDIT = [
-	'-- The navigation grid in Shortest Path Forever\'s walking-map format, written by a port of his',
-	'-- tools/baker/gen_nav.py and tools/pack_nav.py (tools/lib/nav/pack.js). Portions Copyright (C) 2026',
-	'-- Cillian Berragan (github.com/cjber/shortest-path-forever), GPL-3.0-or-later, used with his permission.',
+	'-- The navigation grid in Shortest Path Forever\'s walking-map format (github.com/cjber/shortest-path-forever),',
+	'-- written by tools/lib/nav/pack.js, a port of his tools/baker/gen_nav.py and tools/pack_nav.py, used with his permission.',
+	'-- Portions Copyright (C) 2026 Cillian Berragan (Shortest Path Forever, GPL-3.0-or-later); adapted for Polestar, 2026-10-15.',
 ];
 
 // One map's strings -> its metadata file and parts (pack_nav.py write_bundle);

@@ -69,7 +69,8 @@ test('the packed maps of Eastern Kingdoms and Kalimdor: PACK.json names the grid
 		assert.doesNotMatch(text, /ShortestPathForeverPathData/);
 	}
 	const meta = fs.readFileSync(path.join(NAV, 'Nav', 'Nav0.lua'), 'utf8');
-	assert.match(meta, /port of his\n-- tools\/baker\/gen_nav\.py and tools\/pack_nav\.py \(tools\/lib\/nav\/pack\.js\)\. Portions Copyright \(C\) 2026\n-- Cillian Berragan/);
+	assert.match(meta, /^-- written by tools\/lib\/nav\/pack\.js, a port of his tools\/baker\/gen_nav\.py and tools\/pack_nav\.py, used with his permission\.$/m);
+	assert.match(meta, /^-- Portions Copyright \(C\) 2026 Cillian Berragan \(Shortest Path Forever, GPL-3\.0-or-later\); adapted for Polestar, 2026-10-15\.$/m, 'his notice on one line');
 	assert.match(meta, /^\tcells = 128,$/m);
 });
 
@@ -260,7 +261,7 @@ test('security L12 / review P3-15: the LICENSE shipped in Polestar/ names Cillia
 	assert.match(para, /version 3 or \(at your option\) any later version/);
 	const named = [...para.replace(/\s+/g, ' ').replace(/\/ /g, '/').matchAll(/([\w/]+\.lua|[\w/]+\.js)\b/g)].map((m) => m[1]);
 	for (const rel of named) {
-		const file = rel.startsWith('tools/') ? path.join(ROOT, rel) : path.join(ADDONS, 'Polestar', rel);
+		const file = /^(tools|tests)\//.test(rel) ? path.join(ROOT, rel) : path.join(ADDONS, 'Polestar', rel);
 		assert.ok(fs.existsSync(file), `LICENSE names ${rel}, which does not exist`);
 	}
 	// Every file carrying the dated notice as its own comment is named (a generator
@@ -275,6 +276,7 @@ test('security L12 / review P3-15: the LICENSE shipped in Polestar/ names Cillia
 	};
 	walk(path.join(ADDONS, 'Polestar'));
 	walk(path.join(ROOT, 'tools', 'lib'));
+	walk(path.join(ROOT, 'tests', 'helpers'));
 	for (const p of marked) {
 		const rel = p.startsWith(path.join(ADDONS, 'Polestar') + path.sep) ? path.relative(path.join(ADDONS, 'Polestar'), p) : path.relative(ROOT, p);
 		assert.ok(named.includes(rel.split(path.sep).join('/')), `${rel} carries the notice but LICENSE does not name it`);

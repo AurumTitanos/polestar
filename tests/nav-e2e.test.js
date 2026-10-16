@@ -581,7 +581,7 @@ test('a corrupted grid block of the map leaves the straight arrow for that walk,
 	assert.ok(out.toTarget < 1, `the arrow points at the goal itself (${out.toTarget})`);
 });
 
-test('every zone the guides walk in routes on the shipped maps (one walk between two of its located goals, 80-400 yd apart), and Zephras Isle on his', { skip }, () => {
+test('every one of the 49 zones the guides walk in routes on the shipped maps (one walk between two of its located goals, 80-400 yd apart), and Zephras Isle on his', { skip }, () => {
 	const { Geo } = require('../tools/lib/planner/geo');
 	const geo = new Geo(JSON.parse(fs.readFileSync(path.join(DATA, 'map-frames.json'), 'utf8')), JSON.parse(fs.readFileSync(path.join(DATA, 'zones.json'), 'utf8')));
 	const src = fs.readFileSync(path.join(ADDONS, 'Polestar_Guides', 'Guides.lua'), 'utf8');
@@ -626,7 +626,10 @@ local pts, cost = Path.FindSync(2991, { x = ${zeph.wx}, y = ${zeph.wy} }, { x = 
 out.zephras = pts and cost or tostring(cost)
 emit(out)`,
 	}).emitted;
-	assert.ok(out.n >= 40, `${out.n} zones`);
+	// The 49 zones of Eastern Kingdoms and Kalimdor the guides walk in (uiMapIDs), pinned so none drops out unseen.
+	const ZONES = [1411, 1412, 1413, 1416, 1417, 1418, 1419, 1420, 1421, 1422, 1423, 1424, 1425, 1426, 1427, 1428, 1429, 1430, 1431, 1432, 1433, 1434, 1435, 1436, 1437, 1438, 1439, 1440, 1441, 1442, 1443, 1444, 1445, 1446, 1447, 1448, 1449, 1450, 1451, 1452, 1453, 1454, 1455, 1456, 1457, 1458, 2482, 2548, 2652];
+	assert.deepEqual(zones.map((z) => z.map), ZONES, 'the zones tested');
+	assert.equal(out.n, ZONES.length);
 	assert.deepEqual(Object.values(out.failed), [], 'every zone routes');
 	assert.ok(typeof out.zephras === 'number' && out.zephras > 100, `Zephras Isle routes on his map (${out.zephras})`);
 });
