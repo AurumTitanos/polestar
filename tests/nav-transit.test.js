@@ -411,7 +411,7 @@ test('`travel build` with timetable sources: Transit data in TravelData.lua, loa
 		const cm = path.join(sources, 'cmangos', DB_REV.slice(0, 12));
 		fs.mkdirSync(cm, { recursive: true });
 		fs.writeFileSync(path.join(cm, 'transit.json'), JSON.stringify({ spawns: { 20649: [{ guid: 44892, map: 0, x: 1596, y: 292, z: -41, o: 0 }] }, portals: {}, positions: {} }));
-		const opts = { dataDir: path.join(FIX, 'data'), recordingsDir: path.join(FIX, 'recordings'), sourcesDir: sources, offline: true };
+		const opts = { dataDir: path.join(FIX, 'data'), recordingsDir: path.join(FIX, 'recordings'), sourcesDir: sources, offline: true, shippedFile: null };
 		const one = await buildTravel(opts);
 		const two = await buildTravel(opts);
 		assert.equal(one.lua, two.lua);
