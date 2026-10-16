@@ -490,6 +490,8 @@ L["Instances per day"] = "Подземелий в сутки"
 L["Classic Era allows 30 new instances per 24 hours per account; 0 ignores the daily cap. Forever may differ."] = "В Classic Era разрешено 30 новых подземелий за 24 часа на учетную запись; 0 — без суточного лимита. В Forever может отличаться."
 L["Clear instance history"] = "Очистить историю подземелий"
 L["Forgets recorded entries and runs (the server's own limit is not affected)."] = "Забывает записанные входы и проходы (лимит сервера не меняется)."
+-- L["Minimap button"] = ""
+-- L["A Polestar button on the edge of the minimap. Click to show or hide the guide, right-click for settings, drag to move it."] = ""
 
 -- Maps/WorldMap.lua
 L["Player"] = "Игрок"
@@ -1762,3 +1764,8 @@ L["Demonology"] = "Демонология"
 L["Destruction"] = "Разрушение"
 L["Balance"] = "Баланс"
 L["Feral"] = "Сила зверя"
+
+-- Maps/MinimapButton.lua
+-- L["Click: show or hide the guide"] = ""
+-- L["Right-click: settings"] = ""
+-- L["Drag: move it around the minimap"] = ""
