@@ -31,7 +31,8 @@
 # Carried on: The New Springs (980) and It's a Secret to Everybody (3908) for Winterspring; A Visit to Gregan (4142)
 # for Feralas; A Little Slime Goes a Long Way (4512) for Felwood; The Smoldering Ruins of Thaurissan (3701) for the
 # Burning Steppes; Arcane Runes (3449) for Azshara.
-# Class quests: none in this visit.
+# Class quests: Priests take Cenarion Aid (8254) from High Priest Rohan in the Mystic Ward for Ogtinc in Azshara,
+# the next guide's first stop.
 # Left out (not in the route): Chasing A-Me 01's later parts (4244, 4245: an Engineering item), the northern
 # pylon's crystal buffs (4381-4386: no experience), Dadanga is Hungry! (5150, repeatable), Super Sticky and the
 # Gadgetzan silithid quests (4504, 4493, 4496); accepted by the export but never turned in on its route: The
@@ -290,6 +291,7 @@ step Mystic Ward
   turnin 3448                         -- Tymor
   accept 3449                         -- Four rune rubbings in Azshara: keep it
   accept 3450
+  accept 8254 npc 11406 only Priest   -- High Priest Rohan: for Ogtinc in Azshara, keep it
 
 step Royal Historian Archesonus
   tip Archesonus stands beside King Magni in the High Seat.
