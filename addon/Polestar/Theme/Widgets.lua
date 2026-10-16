@@ -927,6 +927,22 @@ local function buildMenu()
 	menu:SetScript("OnHide", function() catcher:Hide() end)
 	menu:Hide()
 	ns.CloseOnEscape("PolestarMenu")
+	-- A gamepad (UI/Gamepad.lua) picks a row, starting on the current choice; B closes.
+	if ns.Gamepad and ns.Gamepad.Register then
+		ns.Gamepad.Register(menu, {
+			rows = function()
+				local out = {}
+				for _, r in ipairs(menu.rows) do
+					if r:IsShown() and not (r.psItem and r.psItem.disabled) then out[#out + 1] = r end
+				end
+				return out
+			end,
+			initial = function(rows)
+				for i, r in ipairs(rows) do if r.psItem and r.psItem.checked then return i end end
+			end,
+			back = function() W.HideMenu() end,
+		})
+	end
 end
 
 local function menuRow(i)
@@ -2157,7 +2173,8 @@ local registry = {} -- { spec, ... } in registration order
 local registryListeners = {}
 W.OptionsRegistry = registry
 
-local CONTROL_KINDS = { toggle = true, slider = true, dropdown = true, color = true, button = true }
+-- binding: a key binding row (UI/GamepadGuide.lua): { kind = "binding", action = "POLESTAR_NEXT", label, help }.
+local CONTROL_KINDS = { toggle = true, slider = true, dropdown = true, color = true, button = true, binding = true }
 
 -- spec = { page, key, icon, order, tab, section, controls = { { kind, key, label, help, ... } } }
 -- page is the title as shown, key (optional) the page's stable key.
@@ -2171,8 +2188,11 @@ function ns.RegisterOptions(spec)
 		if type(c) ~= "table" or not CONTROL_KINDS[c.kind] then
 			return false, ("RegisterOptions(%s): control %d has unknown kind %s"):format(spec.page, i, tostring(c and c.kind))
 		end
-		if c.kind ~= "button" and type(c.key) ~= "string" then
+		if c.kind ~= "button" and c.kind ~= "binding" and type(c.key) ~= "string" then
 			return false, ("RegisterOptions(%s): control %d needs a settings key"):format(spec.page, i)
+		end
+		if c.kind == "binding" and type(c.action) ~= "string" then
+			return false, ("RegisterOptions(%s): binding %d needs an action"):format(spec.page, i)
 		end
 		if c.kind == "button" and type(c.onClick) ~= "function" then
 			return false, ("RegisterOptions(%s): button %d needs onClick"):format(spec.page, i)

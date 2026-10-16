@@ -644,6 +644,7 @@ local ALIASES = {
 local function available(c)
 	if c.needs and not c.needs() then return false end
 	if c.kind == "button" then return true end
+	if c.kind == "binding" then return ns.Gamepad ~= nil and ns.Gamepad.BindingRow ~= nil end
 	return ns.GetDefault and ns.GetDefault(c.key) ~= nil
 end
 
@@ -678,6 +679,10 @@ local function makeControl(parent, c)
 			end
 			W.SetDisabledWhen(w, c.disabled)
 		end
+		return w
+	elseif c.kind == "binding" then
+		w = ns.Gamepad.BindingRow(parent, c)
+		w.psControl = c
 		return w
 	end
 	if c.disabled then W.SetDisabledWhen(w, c.disabled) end
@@ -998,6 +1003,23 @@ function O.SetQuery(text)
 	renderFooter(nil)
 end
 
+-- The next (delta 1) or previous tab, running on into the next page's
+-- first tab or the previous page's last (LB / RB on a gamepad).
+function O.StepTab(delta)
+	if not win then return end
+	local list, at = {}, nil
+	for _, p in ipairs(pageList) do
+		if pageShown(p) then
+			for _, t in ipairs(shownTabs(p)) do
+				list[#list + 1] = { p.key, t.name }
+				if p == current and t == currentTab then at = #list end
+			end
+		end
+	end
+	local to = list[(at or 0) + delta]
+	if to then O.Select(to[1], to[2]) end
+end
+
 -- The settings are the hub's Options section in their own shell: the same
 -- rail, Options marked, so any section is one click back.
 local function build()
@@ -1010,6 +1032,16 @@ local function build()
 	})
 	O.frame = win
 	UI.Report.SidebarLink(win)
+	-- A gamepad moves through the page (UI/Gamepad.lua); LB / RB step the tabs.
+	if ns.Gamepad and ns.Gamepad.Register then
+		ns.Gamepad.Register(win, {
+			initial = function(rows)
+				for i, w in ipairs(rows) do if ns.Gamepad.Within(w, win.Body) then return i end end
+			end,
+			prevTab = function() O.StepTab(-1) end,
+			nextTab = function() O.StepTab(1) end,
+		})
+	end
 end
 
 local function renderRail()
