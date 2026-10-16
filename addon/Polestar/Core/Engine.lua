@@ -191,21 +191,23 @@ local function greySkipped(goal)
 	return not chainNeeds(guide, level)[q]
 end
 
--- Per guide: each goal's step index, and each quest's accept goals.
+-- Per guide: each goal's step index, and each quest's accept and turn-in
+-- goals ({ s, key = "s:g", step, goal }).
 local NONE = {}
 local layoutCache = setmetatable({}, { __mode = "k" })
 local function layoutOf(g)
 	local l = layoutCache[g]
 	if l then return l end
-	l = { stepOf = {}, accepts = {} }
+	l = { stepOf = {}, accepts = {}, turnins = {} }
 	for s, step in ipairs(g.steps) do
 		for gi, goal in ipairs(step.goals) do
 			l.stepOf[goal] = s
-			if goal.t == "accept" and goal.quest then
-				local list = l.accepts[goal.quest]
+			local by = goal.quest and (goal.t == "accept" and l.accepts or goal.t == "turnin" and l.turnins)
+			if by then
+				local list = by[goal.quest]
 				if not list then
 					list = {}
-					l.accepts[goal.quest] = list
+					by[goal.quest] = list
 				end
 				list[#list + 1] = { s = s, key = s .. ":" .. gi, step = step, goal = goal }
 			end
@@ -260,18 +262,32 @@ local function goalApplies(goal)
 	return not greySkipped(goal) and not orphaned(goal)
 end
 
+-- The player's own word: goal skips, the current goal, header arrival, the
+-- saved view, state carried over pack updates. One table (Lua 5.1 caps a
+-- chunk at 200 locals), which also holds the Engine's other private helpers.
+local Own = {}
+
 -- Quests found unavailable at their giver this session (questID ->
 -- { reason, accept }): the giver's window opened without offering them. Such a
 -- quest's goals count as skipped until it is taken or done; the marks clear on
 -- level-up and on any turn-in, since either can unlock it.
 local unavailable = {}
+-- Quests a giver's window offered this session (questID -> true): the
+-- giver's word beats a prerequisite the data names (Own.preBlocked).
+Own.offered = {}
+-- The "pre" mark of each accept whose prerequisite is known to be missing,
+-- one table per accept goal.
+Own.preMarks = setmetatable({}, { __mode = "k" })
 
 -- Per quest, a goal's unavailable mark or nil. Known in advance when an
 -- accept of the quest in this guide is closed for good (reason "closed"): one
 -- of its `closedBy` (the quest a breadcrumb leads to, or one exclusive with
 -- it) is in the log or done, so the giver never offers it again. Else the mark
--- its giver's window left this session.
-local function unavailableFor(goal)
+-- its giver's window left this session. Else, also known in advance, "pre":
+-- the accept lacks a prerequisite the route no longer brings (Own.preBlocked),
+-- a mark that goes the moment that prerequisite is done. `depth`: how far
+-- Own.coming has followed a chain of prerequisites.
+local function unavailableFor(goal, depth)
 	local q = goal.quest
 	if not q then return nil end
 	local C = Compat()
@@ -297,9 +313,24 @@ local function unavailableFor(goal)
 	if u and u.reason == "closed" then
 		-- Its closing quest was abandoned since (or it is another tab's mark).
 		unavailable[q] = nil
-		return nil
+		u = nil
 	end
-	return u
+	-- A chain followed this deep (or looping in the data) proves nothing.
+	if u or Own.offered[q] or (depth or 0) > 8 then return u end
+	for i = 1, own and 1 or #list do
+		local a = own and goal or list[i].goal
+		local pre = (a.pre or a.preAll) and Own.preBlocked(a, depth)
+		if pre then
+			local m = Own.preMarks[a]
+			if not m then
+				m = { reason = "pre", accept = a }
+				Own.preMarks[a] = m
+			end
+			m.pre = pre
+			return m
+		end
+	end
+	return nil
 end
 
 local function same(a, b)
@@ -365,16 +396,69 @@ local function isSkipped(s)
 	return sk and sk[s] and true or false
 end
 
--- The player's own word: goal skips, the current goal, header arrival, the
--- saved view, state carried over pack updates. One table (Lua 5.1 caps a
--- chunk at 200 locals).
-local Own = {}
-
 -- An optional goal the player skipped: CharState().skipped[guideId]["s:g"]
 -- (next to the step skips, which use the step number).
 function Own.goalSkipped(s, g)
 	local sk = ns.CharState().skipped[guide.id]
 	return sk ~= nil and sk[Own.key(s, g)] and true or false
+end
+
+-- Prerequisites during play. An accept is unavailable before any visit
+-- (unavailableFor, reason "pre") while it lacks a prerequisite the route no
+-- longer brings: one of `preAll`, or of `pre` when none of those is done,
+-- that is not done and that this guide does not still turn in (Own.coming).
+-- A missing prerequisite the guide still turns in, before the accept or
+-- (against lint's order) after it, is the route's own business or a gap in
+-- the data: the accept keeps its place and its giver's window has the last
+-- word. So is one this guide has only for other characters (Own.coming).
+-- Returns the prerequisite that blocks, or nil.
+function Own.preBlocked(a, depth)
+	if not (guide and missingPre(a)) then return nil end
+	if type(a.preAll) == "table" then
+		for _, p in ipairs(a.preAll) do
+			if not questDone(p) and not Own.coming(p, depth) then return p end
+		end
+	end
+	local any = a.pre
+	if type(any) == "table" and #any > 0 then
+		for _, p in ipairs(any) do
+			if questDone(p) or Own.coming(p, depth) then return nil end
+		end
+		return any[1]
+	end
+	return nil
+end
+
+-- Whether quest p is no missing prerequisite this guide can tell of: the
+-- guide still turns it in (a turn-in of it, not optional, that applies to
+-- the character, in a step the player has not skipped, not skipped or
+-- ticked itself, and not unavailable down the chain of prerequisites), or
+-- every goal of p in the guide is for other characters (`only`): another
+-- race's or class's version of the chain, whose own the data does not list
+-- (Emphasis on Sacrifice names the Human Lord Grayson Shadowbreaker, 7638,
+-- not the Dwarf's 7670).
+function Own.coming(p, depth)
+	local state = ns.CharState()
+	local skipped, manual = state.skipped[guide.id], state.manual[guide.id]
+	local l = layoutOf(guide)
+	local turnins, mine = l.turnins[p] or NONE, false
+	for _, t in ipairs(turnins) do
+		local tg = t.goal
+		if stepApplies(t.step) and Guides.Matches(tg.only, player) then
+			mine = true
+			if not tg.optional and goalApplies(tg)
+				and not (skipped and (skipped[t.s] or skipped[t.key])) and not (manual and manual[t.key])
+				and not unavailableFor(tg, (depth or 0) + 1) then
+				return true
+			end
+		end
+	end
+	if mine then return false end
+	local accepts = l.accepts[p] or NONE
+	for _, t in ipairs(accepts) do
+		if stepApplies(t.step) and Guides.Matches(t.goal.only, player) then return false end
+	end
+	return #turnins + #accepts > 0
 end
 
 -- "s:g", built once per step and goal: check-offs and goal skips are looked
@@ -1413,7 +1497,7 @@ local function unavailableText(u)
 	if u.reason == "closed" then return L["No longer offered: you took %s"]:format(titleOfQuest(u.by, a.preTitles)) end
 	if u.reason == "level" then return L["Requires level %d"]:format(tonumber(a.minLevel) or 0) end
 	if u.reason == "pre" then
-		local pre = missingPre(a)
+		local pre = u.pre or missingPre(a)
 		if pre then return L["Requires %s first"]:format(titleOfQuest(pre, a.preTitles)) end
 	end
 	local N = ns.Names
@@ -3390,7 +3474,10 @@ local function checkOffers(source, startItem)
 		local t = listedAt[npc]
 		if t and GetTime() - t < LIST_WINDOW then
 			local list = C.GetOfferedQuests("detail")
-			if list then unavailable[list[1]] = nil end
+			if list and list[1] then
+				unavailable[list[1]] = nil
+				Own.offered[list[1]] = true
+			end
 			return
 		end
 	else
@@ -3402,6 +3489,7 @@ local function checkOffers(source, startItem)
 	for i = 1, #list do
 		offered[list[i]] = true
 		unavailable[list[i]] = nil
+		Own.offered[list[i]] = true
 	end
 	for i = 1, #tabs do
 		use(tabs[i])

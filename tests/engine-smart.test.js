@@ -227,8 +227,8 @@ test('skipGrey skips grey accepts and their turn-ins unless a quest worth doing 
 			{ goals = { { t = "accept", quest = 104, title = "Current", qlvl = 19 } } },
 			{ goals = { { t = "turnin", quest = 102, title = "Grey turned in" } } },
 			{ goals = { { t = "accept", quest = 106, title = "Grey chain start", qlvl = 5 } } },
-			{ goals = { { t = "accept", quest = 107, title = "Grey chain middle", qlvl = 6, pre = { 106 } } } },
-			{ goals = { { t = "accept", quest = 108, title = "Chain end worth it", qlvl = 18, pre = { 107 } } } },
+			{ goals = { { t = "turnin", quest = 106, title = "Grey chain start" }, { t = "accept", quest = 107, title = "Grey chain middle", qlvl = 6, pre = { 106 } } } },
+			{ goals = { { t = "turnin", quest = 107, title = "Grey chain middle" }, { t = "accept", quest = 108, title = "Chain end worth it", qlvl = 18, pre = { 107 } } } },
 			{ goals = { { t = "accept", quest = 109, title = "Grey dead end start", qlvl = 5 } } },
 			{ goals = { { t = "accept", quest = 110, title = "Grey dead end", qlvl = 6, preAll = { 109 } } } },
 			{ goals = { { t = "turnin", quest = 110, title = "Grey dead end" } } },
@@ -239,9 +239,13 @@ test('skipGrey skips grey accepts and their turn-ins unless a quest worth doing 
 	`;
 	const script = `
 		E.SetGuide("test/g1")
+		-- Each step's last goal: the accept, where a step first hands in its prerequisite.
 		local function statuses()
 			local s = {}
-			for i = 1, #E.GetGuide().steps do s[i] = E.GetStepView(i).goals[1].status end
+			for i = 1, #E.GetGuide().steps do
+				local goals = E.GetStepView(i).goals
+				s[i] = goals[#goals].status
+			end
 			return s
 		end
 		local s = statuses()

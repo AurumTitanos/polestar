@@ -371,6 +371,22 @@ test('Hotline\'s report: Walton and Vrang\'s quests come in the order the game o
 	assert.deepEqual(order, [...order].sort((a, b) => a - b), 'each goal comes after the one before it in the chain');
 });
 
+// --- The Barrens (Fitz, a Scourge Warlock, #70): at the Crossroads the guide
+// sent them to Sergra Darkthorn for Jorn Skyseer (3261), which needs The
+// Angry Scytheclaws (905), the end of her chain in forever/horde/02-the-barrens.
+// Without it the accept and Jorn's turn-in read as skipped from the start, so
+// neither the focus nor the arrow goes there; with it they are open.
+test(`${BARRENS}: Fitz's report: Jorn Skyseer is passed by while The Angry Scytheclaws is missing, and open once it is done`, { skip }, () => {
+	const warlock = { race: 'Scourge', raceName: 'Undead', faction: 'Horde', cls: 'WARLOCK', className: 'Warlock', level: 21 };
+	const accept = at(goals(BARRENS), 'accept 3261 (Jorn Skyseer)', is('accept', 3261));
+	assert.deepEqual(goals(BARRENS)[accept].goal.pre, [905], 'Jorn Skyseer needs The Angry Scytheclaws');
+	const missing = questGoalStatus(BARRENS, 3261, warlock);
+	assert.deepEqual(missing, ['accept skipped', 'turnin skipped']);
+	const done = questGoalStatus(BARRENS, 3261, warlock, { skills: 'w.complete({ 905 })' });
+	assert.equal(done.length, 2);
+	assert.ok(done.every((s) => !s.endsWith(' skipped') && !s.endsWith(' na')), `with 905 done Jorn Skyseer is open: ${done.join(', ')}`);
+});
+
 // Every leveling guide with a profession quest still plays to the end for a
 // character who already has the profession (tests/guides.test.js plays them
 // all without one).
