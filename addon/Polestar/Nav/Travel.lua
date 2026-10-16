@@ -842,7 +842,8 @@ function Nav.PlanRoute(p)
 			local d = 0
 			for k = i, j - 1 do
 				local a, b = chain[k], chain[k + 1]
-				local m = how == WALK and b == 2 and tw[a]
+				-- A target inside a chain is reached by its straight links, never the measure.
+				local m = how == WALK and b == 2 and not sealed(2) and tw[a]
 				if m then
 					d = d + m
 					leg.engine = "cost"
@@ -1153,17 +1154,36 @@ local function setRests()
 	end
 end
 
+-- Later rides' timetable waits again, from when the player now reaches their
+-- docks: a walk before them priced by its path arrives earlier or later than
+-- the plan's straight estimate did. The current leg counts whole.
+local function retime()
+	local dep = departureFn()
+	if not dep then return end
+	local after = legs[ci] and legs[ci].seconds or 0
+	for k = ci + 1, #legs do
+		local leg = legs[k]
+		if leg.transport and leg.kind ~= "portal" then
+			local wait, ride = dep(leg.transport, leg.side, after)
+			if wait then leg.seconds = floor(wait + ride + 0.5) end
+		end
+		after = after + leg.seconds
+	end
+end
+
 -- Walk legs after the current one take the measure of their engine path once
 -- Nav/Walk.lua has searched it (Walk.LegPath): yards along it, seconds at run
--- speed. Hand-made walks and the pieces of a split walk keep theirs.
--- -> true when a leg changed.
+-- speed; the rides after them are timed again (retime). Hand-made walks, the
+-- pieces of a split walk and the last walk to a target after a guide `goto`
+-- (walked straight from the mouth) keep theirs. -> true when a leg changed.
 local function pricePaths()
 	local W = Nav.walk
 	if not (legs and W and W.LegPath) then return false end
 	local changed = false
+	local gotoLast = W.FollowsGoto and W.FollowsGoto(Nav.GetTarget())
 	for k = ci + 1, #legs do
 		local leg = legs[k]
-		if leg.kind == "walk" and leg.engine ~= "path" and not leg.handmade and not leg.parent then
+		if leg.kind == "walk" and leg.engine ~= "path" and not leg.handmade and not leg.parent and not (gotoLast and k == #legs) then
 			local yd = W.LegPath(leg.from, leg.to)
 			if yd then
 				leg.yards, leg.seconds, leg.engine = floor(yd + 0.5), floor(yd / RUN_SPEED + 0.5), "path"
@@ -1171,7 +1191,10 @@ local function pricePaths()
 			end
 		end
 	end
-	if changed then setRests() end
+	if changed then
+		retime()
+		setRests()
+	end
 	return changed
 end
 
@@ -1720,27 +1743,60 @@ local function samePoint(a, b)
 	return a == b or (a ~= nil and b ~= nil and a.c == b.c and a.wx == b.wx and a.wy == b.wy)
 end
 
+-- A walk sameWay steps over: one between the route's waypoints (a crossing or
+-- chain walk names its waypoint and is compared), or a lift ride.
+local function between(leg)
+	return (leg.kind == "walk" and not leg.waypoint) or leg.kind == "lift"
+end
+
 -- Whether routes a (from leg i) and b (from leg j) go the same way: the same
--- flights, rides, portals, hearth and teleports in order; the walks between
--- follow from them.
+-- flights, rides, portals, hearth, teleports, crossings and chain waypoints in
+-- order; the plain walks between follow from them.
 local function sameWay(a, i, b, j)
 	while true do
-		while a[i] and (a[i].kind == "walk" or a[i].kind == "lift") do i = i + 1 end
-		while b[j] and (b[j].kind == "walk" or b[j].kind == "lift") do j = j + 1 end
+		while a[i] and between(a[i]) do i = i + 1 end
+		while b[j] and between(b[j]) do j = j + 1 end
 		local x, y = a[i], b[j]
 		if not (x and y) then return x == y end
-		if x.kind ~= y.kind or not samePoint(x.to, y.to) then return false end
-		-- A hearth or teleport leaves from wherever the player stood.
-		if x.kind ~= "hearth" and x.kind ~= "teleport" and not samePoint(x.from, y.from) then return false end
+		if x.kind ~= y.kind or not samePoint(x.to, y.to) or x.crossing ~= y.crossing then return false end
+		-- A hearth or teleport leaves from wherever the player stood; a walk to a waypoint from wherever the walk began.
+		if x.kind ~= "hearth" and x.kind ~= "teleport" and x.kind ~= "walk" and not samePoint(x.from, y.from) then return false end
 		i, j = i + 1, j + 1
 	end
 end
 
+-- The same way, freshly priced: each later walk of the route takes the fresh
+-- plan's yards, seconds and pricing for the same ends (one priced by its own
+-- path keeps that). -> true when a leg changed.
+local function takePrices(fresh)
+	local changed = false
+	for k = ci + 1, #legs do
+		local leg = legs[k]
+		if leg.kind == "walk" and not leg.parent and leg.engine ~= "path" then
+			for _, f in ipairs(fresh) do
+				if f.kind == "walk" and samePoint(f.from, leg.from) and samePoint(f.to, leg.to) then
+					if f.yards ~= leg.yards or f.seconds ~= leg.seconds then
+						leg.yards, leg.seconds, leg.engine = f.yards, f.seconds, f.engine
+						changed = true
+					end
+					break
+				end
+			end
+		end
+	end
+	if changed then
+		retime()
+		setRests()
+	end
+	return changed
+end
+
 -- The walking engine has measured the walks to the target (Nav/Walk.lua): plan
 -- again with them, and take that plan only when it goes another way; the same
--- way keeps the route and its progress. The measures are fixed for the target,
--- so this happens once per measure. On a flight or a boat it waits for the
--- landing (a landing plans again anyway). -> true when the route changed.
+-- way keeps the route and its progress, its later walks taking the new prices.
+-- The measures are fixed for the target, so this happens once per measure. On
+-- a flight or a boat it waits for the landing (a landing plans again anyway)
+-- or the end of the ride. -> true when the route changed.
 function Travel.Remeasured()
 	if onTaxi() or riding() then
 		remeasureOwed = true
@@ -1752,10 +1808,14 @@ function Travel.Remeasured()
 		return legs ~= nil
 	end
 	local fresh, pc, px, py = plan(Nav.GetTarget())
-	if not fresh or sameWay(fresh, 1, legs, ci) then return false end
-	legs, ci, boarded, progressYards, legSince = fresh, 1, false, nil, GetTime()
-	planAt, planC, planX, planY = GetTime(), pc, px, py
-	pricePaths()
+	if not fresh then return false end
+	if sameWay(fresh, 1, legs, ci) then
+		if not takePrices(fresh) then return false end
+	else
+		legs, ci, boarded, progressYards, legSince = fresh, 1, false, nil, GetTime()
+		planAt, planC, planX, planY = GetTime(), pc, px, py
+		pricePaths()
+	end
 	Travel.version = Travel.version + 1
 	ns.Fire("ROUTE_CHANGED", legs)
 	return true

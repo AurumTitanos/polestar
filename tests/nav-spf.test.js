@@ -734,7 +734,7 @@ test('terrain: one reversed FindMany from the target prices the walks into it; t
 	assert.equal(out.batches, 1, 'and ask for no second batch');
 });
 
-test('terrain: a measure that keeps the way keeps the route and its progress (no replan)', () => {
+test('terrain: a measure that keeps the way keeps the route and its progress, its later walk taking the measured price (review 8)', () => {
 	const [out] = run(`${TERRAIN}
 		nav.place(900, 900)
 		target(0, 0)
@@ -743,8 +743,9 @@ test('terrain: a measure that keeps the way keeps the route and its progress (no
 		local before = changes
 		fake.settle(fake.of(true)[1], function(x, y) return math.floor(math.sqrt(x * x + y * y) * 1.1) end)
 		local after = N.GetRoute()
-		emit({ same = legs == after, changes = changes - before, lands = route().lands })`, { many: true });
-	assert.deepEqual(out, { same: true, changes: 0, lands: 'Ridge Roost, Testshire' });
+		local r = route()
+		emit({ same = legs == after, changes = changes - before, lands = r.lands, yards = r.yards, seconds = r.seconds, engine = r.engine })`, { many: true });
+	assert.deepEqual(out, { same: true, changes: 1, lands: 'Ridge Roost, Testshire', yards: 330, seconds: 47, engine: 'cost' }, 'the same legs, the last walk at its measure (300 x 1.1) instead of straight x1.25');
 });
 
 test('terrain fallbacks: a place the engine finds no walk from, or none found at all, keeps the straight estimate', () => {
@@ -924,4 +925,316 @@ test('later walks: a search whose walk leaves the route is cancelled; none start
 	assert.equal(out.fight, 1, 'no later walk is searched in combat');
 	assert.equal(out.after, 2, 'it is once combat ends');
 	assert.equal(out.cancelled, true, 'a new target drops it');
+});
+
+// Review of travel-terrain (2026-10-16): each fix with the test that fails without it.
+
+test('review 1: past 50 yd from where it was measured, the player\'s walk is never priced above the straight distance, and the next plan measures it again', () => {
+	const [out] = run(`${TERRAIN}
+		local r = {}
+		nav.place(0, 600)
+		target(0, 0)
+		N.Sample()
+		fake.settle(fake.of(true)[1], function(x, y) return math.floor(math.sqrt(x * x + y * y) * 1.1) end)
+		local cost = N.walk.Measured(0, 0, 0, false)
+		r.here = cost(0, 0, 600, true)
+		r.closer = cost(0, 0, 500, true)
+		-- 360 yd sideways and closer: the measure less the yards moved (299) is under the straight 500.
+		r.aside = cost(0, 300, 400, true)
+		nav.place(300, 400)
+		T.Replan()
+		local again = fake.of(true)
+		local pts = {}
+		for _, p in ipairs(again[#again].targets) do pts[#pts + 1] = { floor(p.x + 0.5), floor(p.y + 0.5) } end
+		r.batches, r.points = #again, pts
+		emit(r)`, { many: true });
+	assert.equal(out.here, 660);
+	assert.equal(out.closer, 560, 'the measure less the yards moved, while it beats straight');
+	assert.equal(out.aside, 500, 'never above the straight distance x1.0 (not straight x1.25)');
+	assert.equal(out.batches, 2, 'walked away: measured again with the next plan');
+	assert.ok(out.points.some(([x, y]) => x === 300 && y === 400), 'from where the player now stands');
+});
+
+// Two gates between West Vale and East Vale: North Gate (600, +-20) and South
+// Gate (-600, +-20). The player (0, 500) in West Vale, the target (100, -500)
+// in East Vale: straight, the north gate is nearer; the engine finds the walk
+// from the north gate's far end long (a ridge) and the south one's short.
+const GATES = `
+local T = N.travel
+N.RegisterTravelData({ build = "test" }, true)
+N.RegisterCrossings({ complete = true,
+	zones = {
+		[9002] = { name = "West Vale", c = 0, top = 1000, bottom = -1000, left = 1000, right = 0 },
+		[9003] = { name = "East Vale", c = 0, top = 1000, bottom = -1000, left = 0, right = -1000 },
+	},
+	crossings = {
+		{ id = "north", a = { map = 9002, c = 0, wx = 600, wy = 20, r = 15 }, b = { map = 9003, c = 0, wx = 600, wy = -20, r = 15 } },
+		{ id = "south", a = { map = 9002, c = 0, wx = -600, wy = 20, r = 15 }, b = { map = 9003, c = 0, wx = -600, wy = -20, r = 15 } },
+	} })
+local function crossing()
+	local legs, ci = N.GetRoute()
+	for i = ci, #legs do if legs[i].crossing then return legs[i].crossing end end
+end
+`;
+
+test('review 2: a measure that sends the route through another crossing replaces it (not "the same way")', () => {
+	const [out] = run(`${GATES}
+		local r = {}
+		nav.place(0, 500)
+		target(100, -500)
+		N.Sample()
+		r.before = crossing()
+		fake.settle(fake.of(true)[1], function(x, y)
+			if math.abs(x - 600) < 1 and math.abs(y + 20) < 1 then return 2400 end
+			return math.floor(math.sqrt((x - 100) ^ 2 + (y + 500) ^ 2) * 1.1)
+		end)
+		r.after = crossing()
+		emit(r)`, { many: true });
+	assert.equal(out.before, 'north');
+	assert.equal(out.after, 'south', 'the measured way goes through the south gate');
+});
+
+test('review 3: the last walk to a target after a guide goto is never searched, drawn or priced along an engine path', () => {
+	const [out] = run(`${TERRAIN}
+		local r = {}
+		local m, mx, my = nav.mapPoint(0, 280)   -- the mouth, a guide goto
+		local _, ix, iy = nav.mapPoint(0, 0)     -- inside
+		local guide = { steps = {
+			{ goals = { { t = "goto", map = m, x = mx, y = my } } },
+			{ goals = { { t = "collect", map = m, x = ix, y = iy } } },
+		} }
+		Polestar.Engine.GetGuide = function() return guide end
+		nav.place(900, 800)
+		nav.setWaypoint({ map = m, x = ix, y = iy, label = "Inside", stepIndex = 2, goalIndex = 1, kind = "collect", r = 5 })
+		N.Sample()
+		fake.settle(fake.of(true)[1], function(x, y) return math.floor(math.sqrt(x * x + y * y) * 1.1) end)
+		fake.answer(fake.of(false)[1], 900, 800, 900, 900)
+		local legs = N.GetRoute()
+		local g = N.GetRouteGeometry().legs
+		r.finds = #fake.of(false)
+		r.last = { legs[#legs].kind, legs[#legs].engine or false, #g[#g].pts }
+		emit(r)`, { many: true });
+	assert.equal(out.finds, 1, 'only the arrow\'s own walk is searched');
+	assert.deepEqual(out.last, ['walk', 'cost', 2], 'priced by the measure, drawn straight from the mouth');
+});
+
+// A boat from Testshire Docks (-900, 0) to Farland Pier (c1: 400, 0); on Farland,
+// Pier Roost (300, 0) flies to Far Roost (-400, 0); the target (-400, -300).
+const BOAT = `
+local T = N.travel
+N.RegisterTravelData({ build = "test",
+	taxi = {
+		{ 1, 1, 300, 0, 9001, 50, 20, 3, "Pier Roost, Farland" },
+		{ 2, 1, -400, 0, 9001, 50, 90, 3, "Far Roost, Farland" },
+	},
+	flights = { 1, 2, 800, 2, 1, 800 },
+	transports = {
+		{ id = "boat-test", kind = "boat", faction = 3, ab = 60, ba = 60, waitA = 30, waitB = 30,
+			a = { "Testshire Docks", 0, -900, 0, 9000, 50, 95 }, b = { "Farland Pier", 1, 400, 0, 9001, 50, 10 } },
+	},
+}, true)
+Polestar.CharState().flags.taxi = { [1] = true, [2] = true }
+local function kinds()
+	local legs, ci = N.GetRoute()
+	local out = {}
+	for i = ci, #legs do out[#out + 1] = legs[i].kind end
+	return table.concat(out, " ")
+end
+local function farland() N.SetTarget(9001, 80, 90, "Target") end
+`;
+
+test('review 4: after ROUTE_ADVANCED (off the boat) the arrow\'s own walk is searched before any later walk', () => {
+	const [out] = run(`${BOAT}
+		local r = {}
+		fake.avail[1] = false -- nothing searched on Farland until the boat lands
+		nav.place(-900, 0)
+		farland()
+		N.Sample()
+		r.aboard = { kinds(), #fake.calls }
+		fake.avail[1] = true
+		nav.place(400, 0, 1)
+		N.Sample()
+		local after = {}
+		for _, job in ipairs(fake.calls) do after[#after + 1] = { floor(job.to.x + 0.5), floor(job.to.y + 0.5) } end
+		r.first = after
+		fake.answer(fake.of(false)[1], 400, 0, 300, 0)
+		local leg = fake.of(false)[2]
+		r.then_ = leg and { floor(leg.from.x + 0.5), floor(leg.to.x + 0.5), floor(leg.to.y + 0.5) }
+		emit(r)`, { many: true });
+	assert.deepEqual(out.aboard, ['boat walk fly walk', 0]);
+	assert.deepEqual(out.first, [[300, 0]], 'the arrow\'s walk to Pier Roost first, alone');
+	assert.deepEqual(out.then_, [-400, -400, -300], 'then Far Roost to the target');
+});
+
+test('review 5: the target\'s height goes with the measure (once more without it when it finds nothing) and with the last walk\'s search', () => {
+	const [out] = run(`${TERRAIN}
+		local r = {}
+		local m, x, y = nav.mapPoint(0, 0)
+		nav.place(900, 800)
+		nav.setWaypoint({ map = m, x = x, y = y, z = -40, label = "Below", stepIndex = 1, goalIndex = 1, kind = "turnin", r = 5 })
+		N.Sample()
+		local first = fake.of(true)[1]
+		r.batchZ = first.from.z
+		fake.settle(first, function() return false end)
+		local second = fake.of(true)[2]
+		r.retryZ = second and (second.from.z or "none")
+		fake.settle(second, function(px, py) return math.floor(math.sqrt(px * px + py * py) * 1.1) end)
+		fake.answer(fake.of(false)[1], 900, 800, 900, 900)
+		local leg = fake.of(false)[2]
+		r.legZ = leg.to.z
+		emit(r)`, { many: true });
+	assert.equal(out.batchZ, -40, 'from the target at its height');
+	assert.equal(out.retryZ, 'none', 'a batch with it that finds nothing: once more without it');
+	assert.equal(out.legZ, -40, 'the last walk is searched to the target\'s floor');
+});
+
+test('review 6: a target inside an approach chain is walked from its mouth by the chain\'s straight link, never priced by the measure', () => {
+	const [out] = run(`
+		local T = N.travel
+		N.RegisterTravelData({ build = "test" }, true)
+		N.RegisterCrossings({ complete = true,
+			zones = { [9002] = { name = "West Vale", c = 0, top = 1000, bottom = -1000, left = 1000, right = -1000 } },
+			chains = { { id = "cave", name = "The Den", nodes = {
+				{ map = 9002, c = 0, wx = 0, wy = 200, r = 10, caption = "Into the Den" },
+				{ map = 9002, c = 0, wx = 0, wy = 0, r = 10 },
+			} } } })
+		nav.place(0, 900)
+		target(0, 10)
+		N.Sample()
+		fake.settle(fake.of(true)[1], function() return 999 end)
+		T.Replan() -- a fresh plan with the measure (the mouth's walk measured 999 yd)
+		local legs = N.GetRoute()
+		local last = legs[#legs]
+		emit({ #legs, last.handmade == true, last.yards, last.engine or false })`, { many: true });
+	assert.deepEqual(out, [2, true, Math.round(190 * 1.25), false]);
+});
+
+test('review 7: a later walk searched alive is not the ghost\'s (water walking): its path is kept per water mode', () => {
+	const [out] = run(`${CROSSING}
+		nav.place(900, 800)
+		target(600, -300)
+		N.Sample()
+		fake.settle(fake.of(true)[1], function(x, y) return math.floor(math.sqrt((x - 600) ^ 2 + (y + 300) ^ 2) * 1.1) end)
+		fake.answer(fake.of(false)[1], 900, 800, 900, 900)
+		fake.answer(fake.of(false)[2], 400, 300, 500, 300, 600, 20)
+		local from, to = { c = 0, wx = 400, wy = 300 }, { c = 0, wx = 600, wy = 20 }
+		local alive = N.walk.LegPath(from, to)
+		UnitIsGhost = function() return true end
+		emit({ alive = alive and floor(alive + 0.5), ghost = N.walk.LegPath(from, to) or false })`, { many: true });
+	assert.equal(out.alive, Math.round(100 + Math.hypot(100, 280)));
+	assert.equal(out.ghost, false);
+});
+
+test('review 10: a later walk priced by its path times the boat after it again by the timetable', () => {
+	const [out] = run(`
+		local T = N.travel
+		N.RegisterTravelData({ build = "test",
+			taxi = {
+				{ 1, 0, 900, 900, 9000, 5, 5, 3, "Home Roost, Testshire" },
+				{ 2, 0, -700, 0, 9000, 50, 85, 3, "Dock Roost, Testshire" },
+			},
+			flights = { 1, 2, 1700, 2, 1, 1700 },
+			transports = {
+				{ id = "boat-test", kind = "boat", faction = 3, ab = 60, ba = 60, waitA = 30, waitB = 30,
+					a = { "Testshire Docks", 0, -900, 0, 9000, 50, 95 }, b = { "Farland Pier", 1, 400, 0, 9001, 50, 10 } },
+			},
+		}, true)
+		Polestar.CharState().flags.taxi = { [1] = true, [2] = true }
+		-- The boat leaves at 1000 s and sails 60 s.
+		Polestar.Transit.Now = function() return 0 end
+		Polestar.Transit.NextDeparture = function(kind, id, at) if kind == "boat" then return 1000 - at, 60 end end
+		local function legsNow()
+			local legs, ci = N.GetRoute()
+			local out = {}
+			for i = ci, #legs do out[#out + 1] = { legs[i].kind, legs[i].seconds } end
+			return out
+		end
+		nav.place(900, 800)
+		N.SetTarget(9001, 50, 50, "Farland")
+		N.Sample()
+		local before = legsNow()
+		local batch = fake.of(true)[1]
+		fake.settle(batch, function() return false end) -- Farland measured: nothing found, straight as planned
+		fake.answer(fake.of(false)[1], 900, 800, 900, 900)
+		-- Dock Roost to the docks: 400 yd along the path, 250 straight x1.25.
+		fake.answer(fake.of(false)[2], -700, 0, -800, 100, -800, -100, -900, 0)
+		emit({ before = before, after = legsNow() })`, { many: true });
+	const walkBefore = out.before[2][1];
+	const walkAfter = out.after[2][1];
+	assert.equal(out.before[2][0], 'walk');
+	assert.ok(walkAfter > walkBefore, `the walk to the docks along its path (${walkAfter} s, straight ${walkBefore} s)`);
+	assert.equal(out.after[3][0], 'boat');
+	// Its leg times up to the boat's landing: the boat still leaves at 1000 s and lands at 1060.
+	const landing = (legs) => legs.slice(0, 4).reduce((sum, l) => sum + l[1], 0);
+	assert.ok(Math.abs(landing(out.before) - 1060) <= 2, `planned: lands at ${landing(out.before)} s`);
+	assert.equal(landing(out.after), 1060, 'retimed: the wait shrinks by the longer walk');
+});
+
+test('test gap: a measure that lands on a boat is weighed once ashore', () => {
+	const [out] = run(`${BOAT}
+		local r = {}
+		local function farCost(x, y)
+			if math.abs(x + 400) < 1 and math.abs(y) < 1 then return 2000 end
+			return math.floor(math.sqrt((x + 400) ^ 2 + (y + 300) ^ 2) * 1.1)
+		end
+		-- The boat: boarded at the docks, the measure lands mid-sea.
+		nav.place(-900, 0)
+		farland()
+		N.Sample()
+		local legs = N.GetRoute()
+		fake.settle(fake.of(true)[1], farCost)
+		r.atSea = { N.GetRoute() == legs, kinds() }
+		N.Refresh()
+		r.stillAtSea = kinds()
+		nav.place(400, 0, 1)
+		N.Sample()
+		N.Refresh()
+		r.ashore = kinds()
+		emit(r)`, { many: true });
+	assert.deepEqual(out.atSea, [true, 'boat walk fly walk'], 'the route stays while sailing');
+	assert.equal(out.stillAtSea, 'boat walk fly walk', 'and on a Refresh at sea');
+	assert.equal(out.ashore, 'walk', 'ashore it is weighed: the walk from the pier beats Far Roost\'s ridge');
+});
+
+test('test gap: a taxi defers the measure\'s replan to the landing', () => {
+	const [out] = run(`${TERRAIN}
+		nav.place(900, 900)
+		target(0, 0)
+		N.Sample()
+		local legs = N.GetRoute()
+		nav.taxi = true
+		N.Refresh()
+		fake.settle(fake.of(true)[1], terrain)
+		local inAir = { N.GetRoute() == legs, route().lands }
+		nav.taxi = false
+		N.Refresh()
+		emit({ inAir = inAir, landed = route().lands })`, { many: true });
+	assert.deepEqual(out.inAir, [true, 'Ridge Roost, Testshire']);
+	assert.equal(out.landed, 'Road Roost, Testshire');
+});
+
+test('test gap: handed off to Shortest Path Forever, Refresh cancels the measure and the later walk in flight', () => {
+	const [out] = run(`${CROSSING}
+		local r = {}
+		nav.place(900, 800)
+		target(600, -300)
+		N.Sample()
+		local batch = fake.of(true)[1]
+		N.HandedOff = function() return true end
+		N.Refresh()
+		r.measure = batch.cancelled == true
+		N.HandedOff = function() return false end
+		target(600, -301)
+		N.Sample()
+		fake.settle(fake.of(true)[2], function(x, y) return math.floor(math.sqrt((x - 600) ^ 2 + (y + 301) ^ 2) * 1.1) end)
+		fake.answer(fake.of(false)[#fake.of(false)], 900, 800, 900, 900)
+		local leg = fake.of(false)[#fake.of(false)]
+		r.legFrom = { floor(leg.from.x), floor(leg.from.y) }
+		N.HandedOff = function() return true end
+		N.Refresh()
+		r.leg = leg.cancelled == true
+		emit(r)`, { many: true });
+	assert.equal(out.measure, true);
+	assert.deepEqual(out.legFrom, [400, 300], 'the later walk was in flight');
+	assert.equal(out.leg, true);
 });

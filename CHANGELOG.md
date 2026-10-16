@@ -434,10 +434,12 @@
 - The route picks where to land by the real walk: the walks from the flight
   masters, docks, portals, inn and teleports near your target are measured on
   the ground, so a landing whose walk goes round a ridge loses to one whose
-  walk does not (a marker near Astranaar no longer lands you at Sun Rock
-  Retreat to walk over the mountains, thanks Fitz). Every walk on the route
-  follows the paths on the map lines and in the journey, with its own time,
-  not only the one you are on.
+  walk does not (a marker near Astranaar no longer sends you from Sun Rock
+  Retreat straight over the mountains, thanks Fitz). The walks later on the
+  route follow their paths on the map lines and in the journey too, each with
+  its own time, not only the one you are on; zone crossings, cave approaches
+  and the walk on from a guide's "go to the mouth" step stay straight, as the
+  zone data and the guide lay them out.
 - Works with Shortest Path Forever: with it installed, Polestar hands it the
   route. Each goal goes to it as a stop with the game's own mark (a quest's
   "!" or "?", a trainer, a flight master, a dungeon, a boat), a kill or
@@ -886,18 +888,27 @@
   `p.places`) to `Walk.Measure`, which runs one reversed `Path.FindMany` from
   the target to the nearest 16 within 3000 yd (after Shortest Path Forever's
   goal batch, `Journey/JourneySearch.lua`, v1.16.0); later plans price those
-  walks by it (`p.walkCost` from `Walk.Measured`, legs `engine = "cost"`). A
-  place with no walk found, or a target with none at all, keeps straight
-  x1.25; the player's measure holds within 50 yd. Measures are fixed per
-  target (the last 4 kept), so `Travel.Remeasured` replans once when one lands
-  and keeps the route unless the way changes. Every later walk leg that is
-  not hand-made is searched once after the arrow's own search and the
-  measure (`Path.Find`, one at a time, the last 32 kept by their ends):
+  walks by it (`p.walkCost` from `Walk.Measured`, legs `engine = "cost"`; a
+  target inside a chain keeps its straight link). The batch goes from the
+  target's height (once more without it when it finds nothing). A place with
+  no walk found, or a target with none at all, keeps straight x1.25; the
+  player's measure holds within 50 yd, and farther is measured again with
+  the next plan, meanwhile never priced above the straight distance.
+  Measures are fixed per target (the last 4 kept), so `Travel.Remeasured`
+  replans once when one lands (after a flight or a boat ride) and keeps the
+  route unless the way changes (its flights, rides, hearth, teleports,
+  crossings or chain waypoints), the kept route taking the new walk prices.
+  Every later walk leg that is not hand-made, not a piece of a split walk and
+  not the walk on from a guide `goto` is searched once after the arrow's own
+  search and the measure (`Path.Find`, one at a time, the last walk to the
+  target's height, the last 32 kept by their ends and water mode):
   `Walk.LegPath`, drawn by `GetRouteGeometry`, priced by
-  `Travel.PricePaths` (`engine = "path"`). Nothing is measured or searched in
-  combat or while handed off. Tested by `tests/nav-spf.test.js` (fake
-  engine: terrain, crossings, later walks) and `tests/nav-e2e.test.js`
-  (Ashenvale 40,70 on the real engine; NAV_QA H4).
+  `Travel.PricePaths` (`engine = "path"`), which times the rides after it
+  again by their timetables. Nothing is measured or searched in combat or
+  while handed off. Tested by `tests/nav-spf.test.js` (fake engine: terrain,
+  crossings, later walks, the review's ten points) and
+  `tests/nav-e2e.test.js` (Ashenvale 40,70 and 35,75 on the real engine;
+  NAV_QA H4).
 - `Maps/RouteStrokes.lua` (route-line geometry) and `Maps/RouteLines.lua`
   (the world map pin and minimap painters) port Shortest Path Forever's
   `UI/Strokes.lua`, `UI/FlightLines.lua` and `UI/Route.lua`; they draw

@@ -1569,42 +1569,59 @@ whose straight walk crosses a mountain. On a continent the engine covers
 (`Path.Available`), each plan hands Walk.lua the places a walk to the target
 can start from (`p.places`: the player, known flight masters, docks and
 portal ends, the bound inn, teleport landings, crossing ends and chain
-mouths), and `Walk.Measure` runs one `Path.FindMany` from the target to the
-nearest 16 of them within 3000 yd, reversed (`reverse = true`), so each cost
-is that place's walk to the target in running yards (after Shortest Path
-Forever's goal batch, `Journey/JourneySearch.lua`, v1.16.0). The next plans
-take `p.walkCost` (`Walk.Measured`) and price those walks by it, at run
-speed, with no detour; their legs carry `engine = "cost"`. Rules: a place
-the engine finds no walk from (`false`: Thunder Bluff's flight master, on a
-tower it cannot snap from) and every place when none has a walk (the target
-snapped off the ground) or the batch failed keep the straight estimate; a
-place farther or beyond the nearest 16 keeps it too; the player's measure
-holds within 50 yd of where it was taken, farther it is that measure less
-the yards moved when that beats straight x1.25, else straight. A walk from a
-crossing end stays hand-made (drawn straight, never searched); only its
-price is the engine's. Measures are fixed per target (the last 4 targets
-are kept), so plans never flip-flop on them; a target is measured again only
-when a plan has a place its measure lacks (a flight master learned, a new
-bind). When a measure lands, `Travel.Remeasured` plans once more and takes
-the new plan only if it goes another way (other flights, rides, portals,
-hearth or teleports); the same way keeps the route and its progress. On a
+mouths), and `Walk.Measure` runs one `Path.FindMany` from the target (at the
+target's height, `Nav.GetTargetWorld`'s fourth value, so a walk into an
+Undercity quarter is measured to its floor; a batch with it that finds
+nothing is asked once more without it) to the nearest 16 of them within
+3000 yd, reversed (`reverse = true`), so each cost is that place's walk to
+the target in running yards (after Shortest Path Forever's goal batch,
+`Journey/JourneySearch.lua`, v1.16.0). The next plans take `p.walkCost`
+(`Walk.Measured`) and price those walks by it, at run speed, with no detour;
+their legs carry `engine = "cost"` (a target inside an approach chain is
+reached by the chain's straight link and keeps its straight price). Rules: a
+place the engine finds no walk from (`false`: Thunder Bluff's flight
+master, on a tower it cannot snap from) and every place when none has a walk
+(the target snapped off the ground) or the batch failed keep the straight
+estimate; a place farther or beyond the nearest 16 keeps it too; the
+player's measure holds within 50 yd of where it was taken. Farther, the
+player's walk counts as missing from the measure, so the next plan (at most
+once per replan) measures it again; meanwhile it is that measure less the
+yards moved, never less than the straight distance (x1.0), so a walk never
+gets dearer for coming closer. A walk from a crossing end stays hand-made
+(drawn straight, never searched); only its price is the engine's. Measures
+are fixed per target (the last 4 targets are kept), so plans never
+flip-flop on them; a target is measured again only when a plan has a place
+its measure lacks (a flight master learned, a new bind, the player come
+within reach or walked away). When a measure lands, `Travel.Remeasured`
+plans once more and takes the new plan only if it goes another way (other
+flights, rides, portals, hearth, teleports, crossings or chain waypoints);
+the same way keeps the route and its progress, and its later walks take the
+fresh plan's prices (a walk already priced by its own path keeps that). On a
 flight it waits for the landing (which plans again), on a boat for the next
 Refresh after the ride. One batch runs at a time; a new target cancels the
 old one's; none starts in combat (owed until it ends; the engine's queue
 pauses a running one), with `nav.navRouting` off, or while handed off to
-Shortest Path Forever. The planner itself never waits: the first plan is
-straight, the measured one follows a few frames later.
+Shortest Path Forever (`Walk:Refresh` cancels one in flight). The planner
+itself never waits: the first plan is straight, the measured one follows a
+few frames later.
 
 **Every later walk's path.** Once the plan has settled (no measure running)
-and the arrow's own search is in, each later walk leg that is not hand-made
-and not a piece of a split walk is searched once with `Path.Find`, one at a
-time, kept by its ends (the last 32; a failure is kept too and stays
-straight). When it lands the route lines draw that leg along it and
+and the arrow's own search for the walk it is on has answered (checked on
+every `ROUTE_CHANGED` and `ROUTE_ADVANCED`: the current walk's goal must be
+the one searched, with a path or a failure; a flight, a ride or a hand-made
+walk has none to wait for), each later walk leg that is not hand-made, not
+a piece of a split walk and not the walk on from a guide `goto` (the arrow
+goes straight from the mouth) is searched once with `Path.Find`, one at a
+time, the last walk to the target's height (once more without it, as Z2),
+kept by its ends and water mode (the last 32; a failure is kept too and
+stays straight). When it lands the route lines draw that leg along it and
 `Travel.PricePaths` gives it the path's yards and run-speed seconds
-(`engine = "path"`), so the journey panel's times follow the ground; a
-fresh plan through the same walk takes the kept path at once. A search whose
-leg leaves the route is cancelled; none starts in combat, with
-`nav.navRouting` off, or while handed off.
+(`engine = "path"`), so the journey panel's times follow the ground; the
+boats, zeppelins and trams after it are timed again by their timetables from
+the new arrival (the current leg counts whole). A fresh plan through the
+same walk takes the kept path at once. A search whose leg leaves the route
+is cancelled; none starts in combat, with `nav.navRouting` off, or while
+handed off (`Walk:Refresh` cancels one in flight).
 
 **Chokepoint steps.** When the path arrives, the walk the arrow is on is
 split into legs where the path passes a chokepoint. It splits at the
