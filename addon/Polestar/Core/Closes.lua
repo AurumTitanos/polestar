@@ -9,8 +9,9 @@
 -- Sources: `closedBy` on the accepts of every shown guide (breadcrumbs and
 -- exclusive groups, from the compiler), and the quest database's `excl` when
 -- it is loaded, for quests no guide takes. Left out: quests the character has
--- done, has in the log or can never take (the accept's `only`, the database's
--- faction, race and class), quests something else already closed, and other
+-- done, has in the log or can never take (the guide's faction, race and
+-- class, the accept's `only`, the database's faction, race and class), quests
+-- something else already closed, and other
 -- versions of the offered quest (the same title).
 
 local ADDON, ns = ...
@@ -20,7 +21,9 @@ local L = ns.L
 local Closes = {}
 ns.Closes = Closes
 
--- Closing quest id -> { { goal, step }, ... }: the guide accepts it closes.
+-- Closing quest id -> { { goal, step, guide }, ... }: the guide accepts it
+-- closes, with the guide each comes from (its faction, race and class decide
+-- whether the character can ever take it).
 local index
 
 local function guideIndex()
@@ -38,7 +41,7 @@ local function guideIndex()
 							list = {}
 							index[by] = list
 						end
-						list[#list + 1] = { goal = goal, step = step }
+						list[#list + 1] = { goal = goal, step = step, guide = g }
 					end
 				end
 			end
@@ -91,7 +94,7 @@ function Closes.For(q, title)
 
 	for _, e in ipairs(list or {}) do
 		local goal = e.goal
-		if Guides.Matches(e.step.only, player) and Guides.Matches(goal.only, player)
+		if Guides.GuideMatches(e.guide, player) and Guides.Matches(e.step.only, player) and Guides.Matches(goal.only, player)
 			and not anyTaken(C, goal.closedBy, q) then
 			add(goal.quest, goal.title)
 		end

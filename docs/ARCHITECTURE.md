@@ -686,8 +686,10 @@ Polestar.Engine.GetProgress() -> doneSteps, totalSteps
   `PACKS_CHANGED`), and, with the quest database loaded, the quests whose
   `excl` lists `q` (`QuestDB.ClosedBy`; `excl` is one-way for about one link
   in fifteen, so it is read from the closed quest's side). Left out: quests
-  done or in the log, the accept's `only` or the database's faction, race and
-  class not matching, a quest one of its own `closedBy`/`excl` already closed,
+  done or in the log, an accept whose guide is not for this character
+  (`Guides.GuideMatches`: faction, race, class), the accept's `only` or the
+  database's faction, race and class not matching, a quest one of its own
+  `closedBy`/`excl` already closed,
   and other versions of `q` (the same title). On `QUEST_DETAIL` (not a quest
   the game accepted itself) the setting prints "Taking <quest> closes <quests>
   for good." and Automation leaves that accept to the player.

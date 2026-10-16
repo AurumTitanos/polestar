@@ -81,6 +81,38 @@ test('a Night Elf loses the Night Elf quest too', () => {
 	assert.deepEqual(out.said, ["Taking Sven's Revenge closes Deliveries to Sven, Elune's Grace for good."]);
 });
 
+// Securing the Supply Lines (8280) closes Taking Back Silithus for good: the
+// Alliance's 8275 and the Horde's 8276, each taken in its own side's guide.
+// A Horde character is told only of the Horde one.
+test('a guide for the other faction never counts: a Horde character offered 8280 is told only of 8276', () => {
+	const [out] = runAddon({
+		stubs: ['stub_world.lua'],
+		before: 'w = stub.world; w.addMap(1429, { name = "Elwynn Forest", c = 0, left = 1500, right = -1500, top = 500, bottom = -1500 }); w.moveTo(1429, 48, 42); w.faction, w.race, w.raceName = "Horde", "Orc", "Orc"',
+		addons: [CORE],
+		script: `
+${TEST_PACK}
+${TEST_SOURCE}
+Polestar.RegisterGuide({
+	id = "test/silithus-a", pack = "test", title = "Silithus (Alliance)", faction = "Alliance", minLevel = 55, maxLevel = 60,
+	steps = { { goals = { { t = "accept", quest = 8275, title = "Taking Back Silithus", closedBy = { 8280 }, preTitles = { [8280] = "Securing the Supply Lines" } } } } },
+})
+Polestar.RegisterGuide({
+	id = "test/silithus-h", pack = "test", title = "Silithus (Horde)", faction = "Horde", minLevel = 55, maxLevel = 60,
+	steps = { { goals = { { t = "accept", quest = 8276, title = "Taking Back Silithus", closedBy = { 8280 }, preTitles = { [8280] = "Securing the Supply Lines" } } } } },
+})
+stub.login()
+Polestar.Set("behavior.warnClosing", true)
+w.questDetail(15270, 8280, { title = "Securing the Supply Lines" })
+local said = {}
+for _, m in ipairs(stub.messages) do if m:find("for good", 1, true) then said[#said + 1] = m:gsub("^.-|r: ", "") end end
+local closes = {}
+for _, e in ipairs(Polestar.Closes.For(8280) or {}) do closes[#closes + 1] = e.id end
+emit({ said = said, closes = closes })`,
+	}).emitted;
+	assert.deepEqual(out.closes, [8276]);
+	assert.deepEqual(out.said, ['Taking Securing the Supply Lines closes Taking Back Silithus for good.']);
+});
+
 test('the quest database adds the quests no guide takes, read the way its links point', () => {
 	// 282 lists 287 in its excl and 287 lists nothing back (as in the shipped
 	// data); 283 is Horde only. Layout: title, level, minLevel, races, classes,
