@@ -278,3 +278,43 @@ test('objective lines match their objectives by the French names before their or
 	assert.deepEqual(questRun(lines)[0], ['2/8', '1/5'], 'each line read for its own objective');
 	assert.deepEqual(questRun(lines, { locale: null })[0], ['1/5', '2/8'], 'English names find nothing in French lines: by order');
 });
+
+// ---------------------------------------------------------------------------
+// Lookup (Core/Search.lua) on the sample Codex
+// ---------------------------------------------------------------------------
+
+const { writeCodexPack, sampleCodex } = require('./helpers/codex');
+const CODEX = writeCodexPack(sampleCodex());
+
+const SEARCH = `
+local function q(text)
+	local out = {}
+	for _, r in ipairs(Polestar.Search.Query(text)) do out[#out + 1] = r.kind .. ":" .. tostring(r.id) .. ":" .. r.title end
+	return table.concat(out, "|")
+end
+emit(q("lardeur")); emit(q("hogger")); emit(q("foret d'elwynn")); emit(q("elwynn")); emit(q("viande de loup"))
+local _, counts = Polestar.Search.Query("hogger")
+emit(counts)
+emit(__namesLoads)`;
+
+const list = (s) => (s === '' ? [] : s.split('|'));
+
+test('Lookup finds a quest, NPC, item or zone by its French name and by its English one, listed once under its French name', () => {
+	const [lardeur, hogger, foret, elwynn, viande, counts, loads] = run({ before: CODEX.stubLua, script: SEARCH }).map((v) => (typeof v === 'string' ? list(v) : v));
+	assert.deepEqual(lardeur, ['npc:448:Lardeur', 'quest:176:Avis de recherche : Lardeur']);
+	assert.deepEqual(hogger, ['npc:448:Lardeur', 'quest:176:Avis de recherche : Lardeur'], 'the English names still find them');
+	assert.deepEqual(foret, ["zone:1429:Forêt d'Elwynn"], 'accents and apostrophes fold away');
+	assert.deepEqual(elwynn, ["zone:1429:Forêt d'Elwynn"], 'once, though both names match');
+	assert.deepEqual(viande, ['item:750:Viande de loup coriace']);
+	assert.deepEqual(counts, { npc: 1, quest: 1 });
+	assert.equal(loads, 1);
+});
+
+test('an English client\'s Lookup is unchanged and loads no names pack', () => {
+	const [lardeur, hogger, , elwynn, , counts, loads] = run({ locale: null, before: CODEX.stubLua, script: SEARCH }).map((v) => (typeof v === 'string' ? list(v) : v));
+	assert.deepEqual(lardeur, []);
+	assert.deepEqual(hogger, ['npc:448:Hogger', 'quest:176:Wanted: "Hogger"']);
+	assert.deepEqual(elwynn, ['zone:1429:Elwynn Forest']);
+	assert.deepEqual(counts, { npc: 1, quest: 1 });
+	assert.equal(loads, 0);
+});
