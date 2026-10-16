@@ -32,4 +32,32 @@ function Path.Available(map)
 	return map ~= nil and Path.HasData(map)
 end
 
+-- A map is used whole or not at all: one whose packed tables do not hold the
+-- entries its `counts` promise (a part file missing from the folder, or one
+-- that failed to load) is dropped, and so is every map when the client lacks
+-- C_EncodingUtil's DecodeBase64 or DecompressString (the engine would raise
+-- a Lua error decoding the first cluster). Path.HasData is then false for
+-- that map and Polestar's arrow points straight. A part's bytes are not
+-- checked here: the shipped files are pinned by sha256.
+local enc = C_EncodingUtil
+local decodes = type(enc) == "table" and type(enc.DecodeBase64) == "function" and type(enc.DecompressString) == "function"
+for map, D in pairs(type(PolestarPathData) == "table" and PolestarPathData or {}) do
+	local whole = decodes and type(D) == "table"
+	if whole and type(D.packed) == "table" and type(D.counts) == "table" then
+		for field, want in pairs(D.counts) do
+			local n = 0
+			for _ in pairs(D.packed[field] or {}) do
+				n = n + 1
+			end
+			if n ~= want then
+				whole = false
+				break
+			end
+		end
+	end
+	if not whole then
+		PolestarPathData[map] = nil
+	end
+end
+
 Polestar_NavEngine = Path
