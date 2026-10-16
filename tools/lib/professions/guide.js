@@ -239,6 +239,7 @@ function draftGuide(name, data, opts = {}) {
 	if (!prof) throw new Error(`unknown profession "${name}"`);
 	if (!CRAFTING.has(prof.id)) throw new Error(`${prof.name} is not a crafting profession (Alchemy, Blacksmithing, Enchanting, Engineering, Leatherworking, Tailoring)`);
 	const plan = planProfession(prof, data, opts);
+	const goal = opts.to || 300;
 	const npcs = data.npcs || {};
 	const zones = data.zones || {};
 	const frames = (data.mapFrames && data.mapFrames.era) || {};
@@ -294,6 +295,7 @@ function draftGuide(name, data, opts = {}) {
 	line('#');
 	line('# Route:');
 	for (const s of plan.segments) line(`#   ${String(s.from).padStart(3)}-${String(s.to).padEnd(3)} ${s.recipe.name} (about ${s.count})`);
+	if (plan.reach < goal) line(`#   ${String(plan.reach).padStart(3)}-${goal} not routed: no trainer or vendor recipe gives points there`);
 
 	const learned = new Set(prof.recipes.filter((r) => r.source === 'trainer' && r.learnedAt <= 1 && r.cost === 0).map((r) => r.spell));
 	const toolsDone = new Set();
@@ -486,6 +488,18 @@ function draftGuide(name, data, opts = {}) {
 			if (CAPS.includes(seg.to)) line(`  skill ${pq} ${seg.to}`);
 		}
 	});
+	// Past the plan's reach every recipe that still gives a point is one the
+	// planner leaves out: name the ones the player could use at that skill.
+	if (plan.reach < goal) {
+		const why = new Map(plan.excluded.map((e) => [e.spell, e.why.replace(/^recipe is a item$/, 'recipe from an item')]));
+		const open = prof.recipes.filter((r) => why.has(r.spell) && r.grey > plan.reach && r.learnedAt <= plan.reach && !r.races && !r.classes);
+		const names = [...new Map(open.map((r) => [r.name, `${r.name} (${why.get(r.spell)})`])).values()].slice(0, 5);
+		line('');
+		line(`step ${P} ${plan.reach}-${goal}`);
+		world();
+		line(`  tip On Forever no recipe a trainer teaches or both factions' vendors sell gives ${P} points past ${plan.reach}, so Polestar has no route for the last points.${names.length ? ` Recipes that still do: ${names.join(', ')}.` : ''}`);
+		line(`  skill ${pq} ${goal}`);
+	}
 	return { text: `${out.join('\n')}\n`, plan };
 }
 

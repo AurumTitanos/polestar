@@ -206,6 +206,19 @@ test('planner: segments stop at rank caps and skip unusable recipes', () => {
 	assert.deepEqual(plan.excluded.map((e) => e.spell), [2, 3, 4, 5, 6]);
 });
 
+test('planner and draft: past the last usable recipe the plan stops and the guide names what is left', () => {
+	// Forever Tailoring at 295: every recipe that still gives a point needs a
+	// station (Spinning Wheel, Loom) or is a drop.
+	const { prof, data } = smallProfession([rec(1, 1, 40, 60, 10), rec(2, 1, 55, 90, 10, { focus: 'Spinning Wheel' }), rec(3, 1, 55, 90, 10, { source: 'drop', recipeItem: 77 })]);
+	const plan = planProfession(prof, data, { to: 75 });
+	assert.equal(plan.reach, 60);
+	assert.deepEqual(plan.segments.map((s) => [s.spell, s.from, s.to]), [[1, 1, 60]]);
+	const { text } = draftGuide('Tailoring', data, { to: 75 });
+	assert.match(text, /^# {4}60-75 not routed: /m);
+	assert.match(text, /\nstep Tailoring 60-75\n {2}tip On Forever no recipe .* past 60, .* Recipes that still do: R2 \(needs a Spinning Wheel\), R3 \(recipe is a drop\)\.\n {2}skill Tailoring 75\n$/);
+	assert.throws(() => planProfession(smallProfession([rec(1, 20, 40, 60, 10)]).prof, data, { to: 75 }), /no recipe chain starts at 1/);
+});
+
 test('planner: a material the profession makes is crafted, and its recipe gates the user', () => {
 	const bolt = { spell: 50, name: 'Bolt', item: 40, itemCount: 1, reagents: [{ item: 10, count: 2 }], source: 'trainer', learnedAt: 1, yellow: 25, grey: 50, green: 37 };
 	const cloak = { spell: 51, name: 'Cloak', item: 41, itemCount: 1, reagents: [{ item: 40, count: 1 }], source: 'trainer', learnedAt: 1, yellow: 70, grey: 90, green: 80 };

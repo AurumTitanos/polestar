@@ -3431,16 +3431,27 @@ only it knows needs its title (and level) written in the guide.
 
 The hub's Dungeons section and the pick-up guide built from it: "Dungeons" above.
 
-`professions.json` is built by `profession build` from Blizzard's Era DB2
-(SkillLine, SkillLineAbility, SpellName, SpellEffect, SpellReagents, ItemSparse,
-Item, ItemEffect, ...). Each profession also carries `mainTrainer { Alliance,
+`professions.json` is built by `profession build` from the Forever client's
+DB2 (`wow_classic_beta` 1.60+ via wago.tools: SkillLine, SkillLineAbility,
+SpellName, SpellEffect, SpellReagents, ItemSparse, Item, ItemEffect,
+ItemXItemEffect, ...; `tools/lib/professions/tables.js`). Forever changed
+recipe thresholds, reagents and names from Classic (issue #109), so Classic
+Era only fills gaps: a table wago.tools has no Forever export of (SpellTotems,
+SpellCastingRequirements, SpellFocusObject) comes whole from the newest Era
+build, and the spells and items the Forever tables lack come from Era's rows.
+Each profession also carries `mainTrainer { Alliance,
 Horde }` and `materials { itemId: { name, buy, buyCount, sell, quality,
 vendors { A, H }, limitedVendors { A, H }, madeBy, gather { herb, mine, fishing },
 drops, dropCount } }`; ranks carry `minSkill`, `spell`, `trainers { A, H }` and,
 for secondary skills, `book`/`quest`; recipes may carry `enchant`,
 `learnedAtEstimated`, `requires` (specialisation), `reputation { faction,
 standing }`, `tools`, `focus`, `races`, `classes`, `skillUps`. Season of
-Discovery recipes (spell id ≥ 400000) are excluded.
+Discovery recipes (spell id ≥ 400000 that the Era client's SkillLineAbility
+lists too; Forever's own recipes, past 1,000,000, it does not) and the ones Forever
+retired (`AcquireMethod` 3, such as Alchemy's healing potions, which Forever
+teaches in First Aid) are excluded. A crafting profession whose last points no
+trainer or vendor recipe reaches (Forever Tailoring past 295: Spinning Wheel,
+Loom) is drafted as far as they go, with a last step naming what is left.
 
 `races`/`classes` are Blizzard bitmasks (Human 1, Orc 2, Dwarf 4, NightElf 8,
 Undead 16, Tauren 32, Gnome 64, Troll 128; Warrior 1, Paladin 2, Hunter 4,
