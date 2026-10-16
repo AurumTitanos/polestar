@@ -54,7 +54,7 @@ local function build()
 	if button then return button end
 	local W = ns.Widgets
 	if not (W and W.Tex and Minimap) then return nil end
-	button = CreateFrame("Button", "PolestarMinimapButton", Minimap)
+	button = ns.CreateFrameUnder("Button", "PolestarMinimapButton", Minimap)
 	button:SetSize(SIZE, SIZE)
 	button:SetFrameStrata("MEDIUM")
 	button:SetFrameLevel((Minimap:GetFrameLevel() or 1) + 8)
