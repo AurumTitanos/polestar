@@ -17,6 +17,7 @@ sequenceDiagram
   B->>G: comment on the issue
   G->>D: closed: "fixed" / "not changing" / "duplicate", tag, lock (Action)
   G->>D: release published: "the fix is out in 0.2.x" (Action)
+  G->>D: prerelease published: testers pinged in their channel (Action)
 ```
 
 | What happens | Who does it | What the player sees |
@@ -28,7 +29,8 @@ sequenceDiagram
 | Issue closed as **not planned** | the same | ping: "We've decided not to change this one" (or, from `/close`, "No change is needed here", "We couldn't reproduce this one", "We're closing this one without a fix for now"), quoting your last comment on the issue as the reason; tag **Won't fix**, locked |
 | Issue closed as **duplicate** | the same | ping: "already reported, tracked in #M" (from a `Duplicate of #M` comment); tag **Duplicate**, locked |
 | Issue reopened | the same | "We've reopened this", tag **Tracked**, unlocked |
-| A release published | `discord-release-notify.yml` | ping: "The fix is out in **Polestar 0.2.x**", for every issue closed as completed since the full release before; the issue gets `released:v0.2.x` so it is never told twice. A pre-release (a test build) tells no one and is never "the release before" |
+| A release published | `discord-release-notify.yml` | ping: "The fix is out in **Polestar 0.2.x**", for every issue closed as completed that the release ships; the issue gets `released:v0.2.x` so it is never told twice. An issue closed by a commit (`Fixes #N`, a merged pull request) ships in the first full release whose tag holds that commit, so a fix merged into `next` waits for the feature release, however many patches go out first. One closed by hand (a patch's fix) ships in the first full release published after it closed. Prereleases do not count as the release before |
+| A prerelease published (`v0.3.0-rc.1`: GitHub's prerelease flag, or a tag with a `-` part) | the same | nothing in the threads, and no `released:` label. The testers channel gets one message pinging the tester role: the tag, the release's link, the player entries from the tag's `changes/` (as many as fit), and a request to report in #bugs. A re-run finds that message (a bot message with the tag in bold, among the channel's last 50) and pings no one again |
 
 ## What an issue holds
 
@@ -72,6 +74,12 @@ other issues or carry HTML. Say so in the #bugs guidelines, for example:
    filed.
 4. Copy #bugs' channel id (User Settings, Advanced, Developer Mode; then
    right-click #bugs, Copy Channel ID): that is `DISCORD_FORUM_ID`.
+5. For release candidates: a testers channel where the bot has View
+   Channel, Send Messages and Read Message History, and a tester role it
+   can ping (the role's "Allow anyone to @mention this role", or Mention
+   All Roles for the bot in that channel). Copy the channel's id, that is
+   `DISCORD_TESTERS_CHANNEL_ID`, and the role's (Server Settings, Roles,
+   right-click the role, Copy Role ID), that is `DISCORD_TESTER_ROLE_ID`.
 
 ### 2. GitHub
 
@@ -86,9 +94,16 @@ other issues or carry HTML. Say so in the #bugs guidelines, for example:
    bot a second token with Contents on that one alone, and set `MEDIA_REPO`
    and `MEDIA_TOKEN`; the first token then needs Issues only.
 2. In the repository's Settings, Secrets and variables, Actions: the secret
-   `DISCORD_TOKEN` (the same bot token) and the variable `DISCORD_FORUM_ID`.
-   The workflows run from the repository's default branch (`next`), so they
-   work once this folder and `.github/workflows/discord-*.yml` are there.
+   `DISCORD_TOKEN` (the same bot token) and the variable `DISCORD_FORUM_ID`;
+   for release candidates, the variables `DISCORD_TESTERS_CHANNEL_ID` and
+   `DISCORD_TESTER_ROLE_ID`. Without both, a prerelease's run logs that no
+   one is told and succeeds.
+   The issue workflow runs from the repository's default branch (`next`),
+   so it works once this folder and `.github/workflows/discord-*.yml` are
+   there. A release runs the tagged commit's copy of the release workflow,
+   which checks out the bot from `next`: a patch tag cut from an older
+   release still gets the current bot. To announce a release again, run
+   Discord release notes from the Actions tab on `next` with its tag.
 
 ### 3. The server
 
@@ -156,7 +171,7 @@ GitHub. To run the bot or `notify.js` against something else,
 | `lib/report.js` | The addon's report (`addon/Polestar/UI/Report.lua`) read back into fields |
 | `lib/issue.js` | Issue title, body, labels and comments; the marker; making player text inert |
 | `lib/sync.js` | Posts, follow-ups and edits to issues; the index and the backfill |
-| `lib/notify.js` | Close, reopen and release messages, tags and locks |
+| `lib/notify.js` | Close, reopen and release messages, tags and locks; the testers' ping for a prerelease |
 | `lib/gateway.js`, `lib/discord.js`, `lib/github.js` | The Discord gateway and the two REST APIs; the media branch |
 
 A change to the report's layout in `Report.lua` needs `lib/report.js` and
