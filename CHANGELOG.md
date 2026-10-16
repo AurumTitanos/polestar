@@ -15,6 +15,11 @@
   and 128-129. They used to count the guides' optional extras (rare-drop
   quest starters, the Green Hills pages, profession quests) as done; doing
   them as they come can still save up to about 8 h (thanks joelwurtz).
+- A guide's "Train at" goal for your class ticks itself off when there is
+  nothing new to learn: you visited your class trainer at this level, or at
+  the even level below an odd one (class trainers teach on even levels only).
+  A level 5 Paladin who trained at 4 walks on to Goldshire instead of
+  looking for a trainer (thanks SavageHands).
 - "Skip grey quests" (Options, Guide, Automation) leaves out grey quests now:
   it kept every quest the guide also turns in, which is nearly all of them,
   so a character ahead of the route still saw them. A grey quest goes with
