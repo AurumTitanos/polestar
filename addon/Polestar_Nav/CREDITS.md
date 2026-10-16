@@ -9,7 +9,10 @@ in a couple of milliseconds a frame, so the game never stutters: round
 mountains, through the right gate, down into the mine and not over the
 cliff. It is excellent work, and he said yes when we asked to use it:
 "Definitely feel free to use my pathing logic, really appreciate you asking
-me as well! Feel free to contribute" (2026-10-15). Thank you, Cillian.
+me as well! Feel free to contribute" (2026-10-15). His permission, given
+directly to Fitz, is recorded in
+[shortest-path-forever#143](https://github.com/cjber/shortest-path-forever/issues/143).
+Thank you, Cillian.
 
 If you like walking routes, try his addon too:
 [Shortest Path Forever on CurseForge](https://www.curseforge.com/wow/addons/shortest-path-forever)

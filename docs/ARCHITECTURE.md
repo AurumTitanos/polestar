@@ -481,7 +481,7 @@ place it spawns); with `spread = true` (an area objective, or a few places far
 apart) up to 12 spread over the whole area, as a walk from `x`/`y`. The other
 places follow with `alt = true`; a hand-placed point is the first spot, the
 data's places its alternatives (GUIDE_FORMAT, "Spawn areas"). `x`/`y` stay the
-default point. `z` (optional, 0.2.5) is the height of the NPC or object the
+default point. `z` (optional, 0.2.4) is the height of the NPC or object the
 goal's `x`/`y` stands for (the compiler's, from `spawnz.json`: GUIDE_FORMAT,
 "Heights"); the Engine puts it on the waypoint while the waypoint is that
 point (`posOf`: not a smart target's candidate, not a spot elsewhere), and the
@@ -1187,7 +1187,7 @@ Polestar.Pins.MinimapCursor() -> dNorth, dWest | nil      -- yards from the play
 - **Ownership**: a target replaced by another is not the owner's while it is
   away; the same spot and label set again (the death helper hands a picked
   point back once you are alive, `QoL/Death.lua`) is theirs again.
-- **TomTom stand-in** (`nav.answerTomTom`, on): while TomTom is neither loaded
+- **TomTom stand-in** (`nav.answerTomTom`, off): while TomTom is neither loaded
   nor enabled in the AddOns list, the global `TomTom` answers `AddWaypoint`,
   `AddMFWaypoint`, `AddZWaypoint` (0-100), `AddWaypointToCurrentZone`,
   `RemoveWaypoint`, `ClearWaypoint`, `ClearAllWaypoints`, `SetCrazyArrow`,
@@ -1200,11 +1200,11 @@ Polestar.Pins.MinimapCursor() -> dNorth, dWest | nil      -- yards from the play
   and read as nil. The global is taken at login, once every addon has loaded,
   so an addon bringing its own TomTom-compatible global keeps it; it is given
   back (cleared) when the setting goes off or TomTom loads. `Nav/Bridges.lua`
-  never mirrors into it. Default on: the stand-in exists only where nothing
-  else owns `TomTom`, so another waypoint addon that does is never shadowed,
-  and one that does not (its own arrow, no `TomTom` global) never sees it;
-  turning it off would only silence guide and quest addons that set waypoints
-  through TomTom for a player who has no TomTom.
+  never mirrors into it. Default off: the stand-in has methods only, so an
+  addon that finds the global and reads TomTom's settings (`TomTom.db`, its
+  profile) would error; the option ("Let other addons set waypoints",
+  Options, Arrow & routes, Other waypoints) says so. With it off nothing sets
+  `TomTom` and `/way` is not claimed.
 - **Following TomTom** (`nav.followTomTom`, off; real TomTom only): hooks on
   TomTom's table: `SetCrazyArrow(uid)` points Polestar's arrow at that
   waypoint (not `corpse`, not `from = "Polestar"`), `RemoveWaypoint` and
@@ -1852,8 +1852,13 @@ transform (idempotent): `ShortestPathForeverPathData` becomes
 `PolestarPathData`, and a first line names the upstream file and commit, his
 copyright and licence, and the date of the change (GPLv3 section 5a;
 `--date`, default today). Only `Nav<name>.lua` map names are taken from
-`Nav.xml`, so a checkout cannot point it outside `Nav/`. It removes map files
-upstream dropped and writes `UPSTREAM.json`
+`Nav.xml`, so a checkout cannot point it outside `Nav/`. It refuses a
+checkout with uncommitted or untracked changes (`git status --porcelain`) or
+whose `origin` is not `github.com/cjber/shortest-path-forever` (https or ssh),
+and an output folder that has no `UPSTREAM.json` unless it is new and empty
+(or whose `UPSTREAM.json` is broken). It removes only files the previous
+`UPSTREAM.json` listed that upstream dropped, never any other file in the
+folder, and writes `UPSTREAM.json`
 (`{ repo, commit, version, vendored: date, files: { path: sha256 } }`); `nav
 check` reports a missing or broken `UPSTREAM.json` as such. Then update `CREDITS.md`'s version line by hand. `nav
 check` and `tests/nav-vendor.test.js` hold the folder to `UPSTREAM.json`; the
