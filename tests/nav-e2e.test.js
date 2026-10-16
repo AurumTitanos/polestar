@@ -726,17 +726,23 @@ test('Ashenvale 40,70 from the Crossroads: the route lands where the engine\'s w
 
 // The cause itself, pinned (review of travel-terrain): a Horde character at the
 // Crossroads who knows Splintertree Post and Zoram'gar Outpost (not Sun Rock
-// Retreat), guided to Ashenvale 35,75. Both flight masters stand in Ashenvale
-// with the target, so crossing data or none, straight x1.25 lands at
-// Splintertree Post; the ridge between makes the engine's walk from there
-// dearer than straight x1.25, and the measured route no longer lands there.
-test('Ashenvale 35,75: the ridge makes the walk from Splintertree Post dearer than straight x1.25, so the measured route no longer lands there', { skip }, (t) => {
+// Retreat), guided to targets west of Astranaar. At one of them the walk from
+// the landing straight x1.25 picks measures dearer than straight x1.25 (a
+// ridge in the way: its path goes round, over 100 yd off the line) and the
+// measured route lands elsewhere; where the walk measures within x1.25 the
+// landing stays. Which target shows it depends on the shipped maps: on 0.2.4's
+// Ashenvale 35,75 (Splintertree Post 1.38 x straight); on the re-packed maps,
+// which close steep faces, Ashenvale 30,70 (Zoram'gar Outpost 1.62 x, its path
+// round the ridge 590 yd off the straight line), while 35,75 now sits in a
+// pocket every landing reaches about 3 x straight and Splintertree Post is
+// still the least of them, so it stays.
+test('Ashenvale west of Astranaar: where a ridge makes the straight choice\'s measured walk dearer than straight x1.25, the measured route lands elsewhere', { skip }, (t) => {
 	const out = run(t, `
 		w.faction = "Horde"
 		Polestar.CharState().flags.taxi = { [22] = true, [23] = true, [25] = true, [58] = true, [61] = true, [77] = true }
-		local by = {}
-		for _, n in ipairs(N.GetTravelData().taxi) do by[n.id] = n end
-		local xr, splinter = by[25], by[61]
+		local by, byName = {}, {}
+		for _, n in ipairs(N.GetTravelData().taxi) do by[n.id] = n; byName[n.name] = n end
+		local xr = by[25]
 		place(xr.map, xr.wx, xr.wy)
 		local function lands()
 			local legs, ci = N.GetRoute()
@@ -744,18 +750,39 @@ test('Ashenvale 35,75: the ridge makes the walk from Splintertree Post dearer th
 			for i = ci, #legs do if legs[i].kind == "fly" then fly = legs[i] end end
 			return fly and fly.to.name or false
 		end
-		N.SetTarget(1440, 35, 75, "Behind the ridge", "e")
-		aim()
-		local r = { before = lands() }
-		local tc, tx, ty = N.GetTargetWorld()
-		local n = 0
-		while n < 400 and not N.walk.Measured(tc, tx, ty, false) do stub.advance(0.05); aim(); n = n + 1 end
-		r.after = lands()
-		local cost = N.walk.Measured(tc, tx, ty, false)
-		r.measured = cost(1, splinter.wx, splinter.wy)
-		r.straight = dist(splinter.wx, splinter.wy, tx, ty)
+		local r = {}
+		for _, g in ipairs({ { 30, 70 }, { 35, 75 } }) do
+			N.SetTarget(1440, g[1], g[2], "Behind the ridge", "e")
+			aim()
+			local before = lands()
+			local tc, tx, ty = N.GetTargetWorld()
+			local n = 0
+			while n < 400 and not N.walk.Measured(tc, tx, ty, false) do stub.advance(0.05); aim(); n = n + 1 end
+			local node = before and byName[before]
+			local cost = N.walk.Measured(tc, tx, ty, false)
+			local m = node and cost and cost(1, node.wx, node.wy)
+			local off = 0
+			if node and m then
+				-- How far the engine's walk from that landing runs from the straight line.
+				local pts = E.FindSync(1, { x = node.wx, y = node.wy }, { x = tx, y = ty }) or {}
+				local dx, dy = tx - node.wx, ty - node.wy
+				for _, p in ipairs(pts) do
+					local s = math.max(0, math.min(1, ((p.x - node.wx) * dx + (p.y - node.wy) * dy) / (dx * dx + dy * dy)))
+					off = math.max(off, dist(node.wx + dx * s, node.wy + dy * s, p.x, p.y))
+				end
+			end
+			r[#r + 1] = { at = g, before = before, after = lands(), measured = m or false, straight = node and dist(node.wx, node.wy, tx, ty) or false, off = off }
+		end
 		emit(r)`, { shipped: true });
-	assert.equal(out.before, 'Splintertree Post, Ashenvale', 'straight x1.25 lands at Splintertree Post');
-	assert.ok(out.measured > out.straight * 1.25, `the ridge: Splintertree Post's walk measures ${out.measured.toFixed(0)} yd, ${(out.measured / out.straight).toFixed(2)} x its ${out.straight.toFixed(0)} straight yards`);
-	assert.notEqual(out.after, 'Splintertree Post, Ashenvale', `so the measured route goes another way (${out.after || 'on foot'})`);
+	let ridges = 0;
+	for (const c of Object.values(out)) {
+		if (!c.before || !c.measured) continue;
+		const ratio = c.measured / c.straight;
+		if (ratio > 1.25 && c.after !== c.before) {
+			ridges++;
+			assert.ok(c.off > 100, `${c.at}: the walk from ${c.before} goes round (${c.off.toFixed(0)} yd off the straight line, ${ratio.toFixed(2)} x)`);
+		}
+		if (ratio <= 1.25) assert.equal(c.after, c.before, `${c.at}: no ridge (${ratio.toFixed(2)} x), the same landing`);
+	}
+	assert.ok(ridges >= 1, 'a ridge makes one straight choice\'s walk dearer than straight x1.25, and the measured route lands elsewhere');
 });
