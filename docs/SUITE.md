@@ -127,4 +127,6 @@ choice, the welcome for new characters (`UI/Welcome.lua`), the copy window
 lines), the report window (`UI/Report.lua`, `PolestarReport`: the guide
 window's bug writes a report on the step on screen to paste on the Polestar
 Discord) and the rare alert. Options carries a Guide packs page
-(`UI/Packs.lua`).
+(`UI/Packs.lua`) and a Gamepad page (`UI/GamepadGuide.lua`); every window
+answers a gamepad while it is open (`UI/Gamepad.lua`, ported from Ding! by
+Yendi).

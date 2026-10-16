@@ -138,6 +138,8 @@ Messages:
 | `SHOW_COPY` | title, text | `/polestar where` → UI/Copy.lua |
 | `SHOW_REPORT` | — | `/polestar report` → UI/Report.lua |
 | `SHOW_DISCORD` | — | `/polestar discord` → UI/Report.lua |
+| `TOGGLE_PICKER` / `TOGGLE_OPTIONS` | — | key bindings and gamepad chords (`POLESTAR_MENU`, `POLESTAR_OPTIONS`) → UI: open, or close when open |
+| `TOGGLE_FOCUS` | — | `POLESTAR_FOCUS` → UI/GamepadGuide.lua (focus mode) |
 
 Modules fire their own (`TABS_CHANGED`, `ROUTE_*`, `TRAIN_DUE`,
 `CLASS_TRAINED`, `GUIDE_OUTLEVELED`, `QUESTDB_*`, `CODEX_LOADED`,
@@ -164,7 +166,7 @@ the nearest 5, `opts.compact` writes yards from 1000 as "1.2k yd"
 (`Rares.YardsText`); metres turn to kilometres from 1000 m. The bug report
 keeps yards for whoever reads it.
 
-`PolestarDB = { schema = 1, settings = { [section] = { ... } }, packs = { [packId] = { off = true } }, welcomeSeen = 1 }`
+`PolestarDB = { schema = 1, settings = { [section] = { ... } }, packs = { [packId] = { off = true } }, welcomeSeen = 1, gamepad = { chords = { [action] = "PADRSHOULDER+PADDUP" }, chordDone = true } }`
 `PolestarCharDB = { schema = 1, guide = id|nil, tabs = { guideId, ... }, activeTab = n, absentAt = { [guideId] = place }, manual = { [guideId] = { ["s:g"] = true|"tick" } }, skipped = { [guideId] = { [stepIndex] = true, ["s:g"] = true } }, pins = { [guideId] = { step, done } }, offers = { [questID] = level }, shapes = { [guideId] = shape }, stepKeys = { [guideId] = { hash, ... } }, flags = { fp = { [name] = true }, ... }, welcomeSeen = 0|1 }`
 
 `packs[<id>].off` hides a pack's guides account-wide (the Guide packs page's
@@ -205,7 +207,7 @@ registered commands with their `help` lines (already translated:
 (skip the step shown, for good), `reset` (clear ticks, latches, skips and
 the saved view for the current guide), `guide <id>`, `status`, `tabs`,
 `tab <n>`, `close`, `path` (the route choice), `welcome` (`SHOW_WELCOME`),
-`packs` (Options at Guide packs), `where`, `report` (`SHOW_REPORT`),
+`packs` (Options at Guide packs), `gamepad` (Options at Gamepad), `where`, `report` (`SHOW_REPORT`),
 `discord` (`SHOW_DISCORD`), `debug`; Nav adds `arrow`, `way` and `route`;
 modules add theirs (`xp`, `gear`, `instances`, `dungeons`, `lookup`, `mount`,
 `rares`, `questdb`).
@@ -453,8 +455,11 @@ registry, which calls addon handlers through `securecallfunction`),
 `C_Map.GetMapInfo`, `C_Map.GetMapInfoAtPosition`, `C_Map.GetBestMapForUnit`,
 `C_Map.GetMapChildrenInfo`, `hooksecurefunc` on TomTom's own table, the
 `TomTom` global and `SlashCmdList`), the cursor on the minimap
-(`GetCursorPosition`; `Pins.MinimapCursor()`, `Nav/Pins.lua`) and the nearby
-services' tracking menus (`Menu.ModifyMenu`, `Nav/Nearby.lua`). Frame and system calls (`GetTime`, `GetServerTime`, `C_Timer`,
+(`GetCursorPosition`; `Pins.MinimapCursor()`, `Nav/Pins.lua`), the nearby
+services' tracking menus (`Menu.ModifyMenu`, `Nav/Nearby.lua`) and the
+gamepad and key binding API (`C_GamePad`, `C_InputInterfaceStyle`,
+`C_KeyBindings`, `SetBinding`, `GetBindingKey`, `SetOverrideBindingClick`,
+`IsKeyDown`; `UI/Gamepad.lua`). Frame and system calls (`GetTime`, `GetServerTime`, `C_Timer`,
 `InCombatLockdown`, the cursor, CVars, addon loading, the build and locale)
 are not routed either. `Polestar_Nav` is a separate addon whose vendored
 engine stays as upstream wrote it, so it calls the client directly:
@@ -2688,6 +2693,7 @@ Polestar.RegisterOptions({
       -- shown: the colour in effect while the key holds none; source: where it comes from;
       -- linked: paths a cancelled pick restores too. Right-click resets (sliders too).
     { kind = "button",   label = "Reset lockouts", help = "One line.", onClick = function() end },
+    { kind = "binding",  action = "POLESTAR_NEXT", label = "Next step", help = "One line." }, -- a key binding row (UI/GamepadGuide.lua)
   },
 })
 ```
@@ -2702,7 +2708,8 @@ Window, Arrow & routes, Automation), **Appearance** (20: Colour & type,
 Windows, Arrow), **Map** (30), **Questing** (40: Quests, Rewards & gear,
 Talents, Buttons), **Discovery** (50: Lookup, Dungeons, Rares), **Quality of Life** (60:
 Travel, Social, Vendors, Trackers), **Guide packs** (70, a custom page:
-`UI/Packs.lua`), Recorder, About. The options window
+`UI/Packs.lua`), **Gamepad** (75, registered by `UI/GamepadGuide.lua`:
+Navigation, Key bindings), Recorder, About. The options window
 declares every tab and section of the module-filled pages, in order, and the
 modules register their controls into them by name (`page = L["Questing"]`,
 `tab = L["Rewards & gear"]`, `section = L["Gear advice"]`): Quests, QoL,
@@ -3024,6 +3031,109 @@ returns its height); never in compact mode. Off with `nav.journeySteps`
 (Options, Arrow & routes, Routes, "Show the journey"); without Nav neither
 setting exists. Non-secure frames only. Tests: `tests/ui-journey.test.js`;
 render: `docs/preview/journey.svg`.
+
+### Gamepad (`UI/Gamepad.lua`, `UI/GamepadGuide.lua`)
+
+Ported from Ding! by Yendi (@moust4ki), GPL-3.0, and rebuilt on the Theme.
+No Polestar window takes a button from the game while it is merely shown:
+a window holds the gamepad only while it is the newest one open, out of
+combat, with a gamepad active and `gamepad.navigate` on (focus mode needs
+only a gamepad), through temporary override bindings
+(`SetOverrideBindingClick` on the hidden buttons `PolestarPad<KEY>`) and a
+frame that reads the buttons first (`PolestarPadInput`,
+`OnGamePadButtonDown`), so neither the game's gamepad interface nor another
+addon's overrides (Easy Controller, ConsolePort) go before it; any other
+button goes on to the game. Both are cleared when the window closes and at
+`PLAYER_REGEN_DISABLED` (before the lockdown: nothing is set in a fight);
+at `PLAYER_REGEN_ENABLED` the newest open window takes the gamepad again.
+A button already down when a window takes the gamepad stays the game's until
+released (`G.heldKeys`); a press that opened the window stays Polestar's.
+
+```lua
+Polestar.Gamepad.Register(frame, spec)  -- navigation while `frame` is shown (the contract every window uses)
+-- spec = { rows = fn -> { widget, ... } (default G.Collect(frame): every shown, enabled, clickable
+--          widget, the outermost one), initial = fn(rows) -> index, back = fn (B, Start; default Hide),
+--          prevTab / nextTab = fn (LB / RB), reset = fn(w) -> handled (Y; default: a setting row's
+--          right-click), x = fn(w) (X), activate = fn(w) -> handled (A; default w:Click()),
+--          key = fn(key, w, isRepeat) -> handled, onFocus = fn(w),
+--          close = button | false (where B's chip sits; default frame.Close),
+--          actionLabel / xLabel / resetLabel = fn(w) -> text, backLabel, tabsLabel = text }
+Polestar.Gamepad.IsActive() -> bool        -- C_InputInterfaceStyle's gamepad style, or C_GamePad / GamePadEnable with a device plugged in
+Polestar.Gamepad.Style() -> "xbox" | "playstation"  -- gamepad.glyphs, "auto" reads C_GamePad's labelStyle ("Shapes")
+Polestar.Gamepad.ButtonName(button), KeyName(key) -> text   -- "A" / "Cross", "LT + A", "LB + D-pad up", "Ctrl + N"
+Polestar.Gamepad.Glyph(parent[, name]) -> frame             -- frame:SetKeys(key or { button, ... }) -> width
+Polestar.Gamepad.BindingKeys(action), ShownKeys(action[, pad]), KeyText(action), Bind(action, key), Unbind(action[, pad])
+Polestar.Gamepad.WhoUses(action, key) -> { kind = "binding"|"addon"|"gamepad", name, action } | nil
+Polestar.Gamepad.Capture(opts)                              -- a key, a button or a chord for a binding row
+Polestar.Gamepad.StartFocus(), StopFocus(), ToggleFocus(), IsFocusing()   -- the guide window's focus mode
+Polestar.Gamepad.HasWindow() -> bool                        -- a Polestar window holds the gamepad (for other gamepad addons)
+```
+
+- **Navigation.** Where widgets have places (a client; the test and preview
+  stubs place none) the D-pad goes to the nearest widget that way (its
+  distance plus twice how far it sits off the line), scrolling a list on at
+  its edge; without, it walks `rows` in order. Left / right step a slider
+  (`row.Slider`'s wheel handler) or a dropdown's choices instead. The D-pad
+  repeats while held (0.4 s, then every 0.12 s). Until the player presses a
+  button the focus follows `spec.initial` (a window fills its page after it
+  shows); LB / RB start the new page on it again. Registered: the options
+  (LB / RB: `Options.StepTab`, every page's tabs in order), the hub (LB / RB:
+  `Picker.StepSection`, the rail's sections; X loads the focused guide), the
+  shared menu (`PolestarMenu`, B closes it and the window under it has the
+  gamepad back where it was), the welcome (LB / RB its pages), the route
+  choice, the report and copy windows.
+- **The look** (docs/DESIGN.md, "Gamepad"): one focus ring (`PolestarPadRing`,
+  the focused widget's child: the hover wash under a 2px accent ring at 90%),
+  one hint bar under the window holding the gamepad (`PolestarPadHints`, the
+  panel skin, clamped to the screen, wrapping to the window's width, 300 at
+  least) and one B chip left of its close button (`PolestarPadBadge`; the
+  bar then leaves B out: each action shown once). The bar lists the D-pad,
+  what A, X and Y do on the focused widget, LB / RB and B. `gamepad.hints`
+  turns the bar and the chip off. Without a gamepad none of it exists.
+- **Chips** (`G.Glyph`): a 20px circle per face button (Xbox's letter in
+  Caption, PlayStation's shape: `pad-cross`, `pad-circle`, `pad-square`,
+  `pad-triangle` in `Media/UI`) and D-pad direction (the chevrons), a capsule
+  for the rest ("LB", "Ctrl"), "+" between the buttons of a combination; the
+  chip wash, the name in text.
+- **Focus mode** (`POLESTAR_FOCUS`, `TOGGLE_FOCUS`): `G.Open` of the guide
+  window with its own spec: rows are its widgets (tabs, navigator, banner,
+  person, goal lines, tip, up next), the first open goal first; A on a goal
+  line aims the arrow (`rowClick`), or on the quest item's line (the item
+  button `QoL.Buttons.item` shows the goal's `item`, or a `use` goal) is
+  redirected to the secure binding `CLICK PolestarQuestItemButton`
+  (`G.Redirect`); X runs the line's `OnEnter` (its tooltip) and again its
+  `OnLeave`; LB / RB `Engine.Prev/Next`; Y sets `ui.compact` and ends the
+  mode; B ends it; hiding the window or `GAMEPAD_COMBAT` ends it.
+- **Bindings and chords.** Bindings.xml: `POLESTAR_TOGGLE`, `_NEXT`,
+  `_PREV`, `_FOCUS`, `_MENU` (`TOGGLE_PICKER`), `_OPTIONS`
+  (`TOGGLE_OPTIONS`), `_REPORT`, and the quest buttons' `CLICK` bindings;
+  `Polestar.Bindings` runs them. A chord (`"PADLSHOULDER+PADDUP"`) is
+  Polestar's own, in `PolestarDB.gamepad.chords[action]` (account-wide,
+  outside the settings, so "Reset all settings" keeps it), never bound: an
+  OnUpdate reads both buttons (`IsKeyDown`) while chords exist and a gamepad
+  is active, and while the first is held, out of combat, `PolestarPadChords`
+  reads the gamepad first and keeps the second button from the game; any
+  other button goes on. A chord does nothing while a Polestar window holds
+  the gamepad, a binding row waits, the chat has the keyboard or a game
+  window the gamepad's focus. The quest buttons' secure clicks take no chord:
+  a combination is the game's, with a button it makes a modifier
+  (`GamePadEmulateShift` / `Ctrl` / `Alt`). The first time a gamepad is
+  active `POLESTAR_OPTIONS` gets `RB + D-pad up`, else `LB + D-pad up`, unless
+  the action has a gamepad button already or neither is free
+  (`PolestarDB.gamepad.chordDone`). Polestar never changes the game's
+  gamepad settings.
+- **Binding rows**: the registry's `binding` control (`G.BindingRow`). A (a
+  click) captures (`G.Capture`): a gamepad button on its release, two
+  buttons as a chord, a keyboard key with its modifiers; B tapped cancels, B
+  held a second binds B, Escape cancels, so do a fight and 20 s idle. A key
+  someone else has (`G.WhoUses`: another binding or chord, another addon's
+  override, Easy Controller's own chord read from its saved settings, the
+  game's gamepad interface) is named in danger and bound by a second A within
+  5 s. Y (right-click) unbinds what the row shows: the gamepad's keys while a
+  gamepad is active, else the keyboard's.
+- Messages: `GAMEPAD_BINDINGS_CHANGED`, `GAMEPAD_CHANGED(active)`
+  (`GAME_PAD_CONNECTED` / `DISCONNECTED` / `ACTIVE_CHANGED`),
+  `GAMEPAD_COMBAT` (the gamepad went back at `PLAYER_REGEN_DISABLED`).
 
 ## Rares — rare NPCs and treasures
 
