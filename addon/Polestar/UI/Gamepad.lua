@@ -342,8 +342,8 @@ G.ACTIONS = {
 	{ action = "CLICK PolestarQuestItemButton:LeftButton", section = "buttons", label = L["Use quest item"] },
 	{ action = "CLICK PolestarTargetButton:LeftButton", section = "buttons", label = L["Target quest mob"] },
 	{ action = "CLICK PolestarHearthButton:LeftButton", section = "buttons", label = L["Use Hearthstone"] },
-	{ action = "CLICK PolestarStepButton:LeftButton", section = "buttons", label = L["Step action: NPC, quest item, mob or Hearthstone"] },
-	{ action = "CLICK PolestarTravelButton:LeftButton", section = "buttons", label = L["Use the route's Hearthstone or teleport"] },
+	{ action = "CLICK PolestarStepButton:LeftButton", section = "buttons", label = L["Use the step button"] },
+	{ action = "CLICK PolestarTravelButton:LeftButton", section = "buttons", label = L["Use the travel button"] },
 }
 local RUN = {}
 for _, a in ipairs(G.ACTIONS) do RUN[a.action] = a.run end
@@ -434,17 +434,21 @@ local function bindingsChanged()
 end
 
 -- Unbinds what a binding row shows: its gamepad buttons, or its keys.
+-- False in a fight: bindings change only out of combat.
 function G.Unbind(action, pad)
+	if combat() then return false end
 	local context = contextOf(action)
 	for _, key in ipairs(G.ShownKeys(action, pad)) do setKey(key, nil, context) end
 	saveBindings()
 	bindingsChanged()
+	return true
 end
 
 -- Binds `key` (a key, a button, a chord) to `action` in place of the
 -- action's keys of the same kind, and saves. False when the game refuses
--- it: the action keeps what it had.
+-- it, or in a fight: the action keeps what it had.
 function G.Bind(action, key)
+	if combat() then return false end
 	local context = contextOf(action)
 	local pad, removed = G.IsPadKey(key), {}
 	for _, old in ipairs(G.BindingKeys(action)) do

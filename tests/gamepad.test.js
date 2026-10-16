@@ -117,6 +117,22 @@ test('combat: the gamepad goes back to the game before the lockdown, nothing is 
 	assert.deepEqual(after, { focusing: false, owner: true, overrides: 11, blocked: 0 });
 });
 
+test('bindings change only out of combat: in a fight a button, a chord or an unbind is refused untouched, and works after it', () => {
+	const [fight, after] = run(`
+		pad.saved.N = "POLESTAR_TOGGLE"
+		local saves = pad.saves
+		stub.inCombat = true
+		local bound = G.Bind("POLESTAR_NEXT", "PAD3")
+		local chord = G.Bind("POLESTAR_MENU", "PADLSHOULDER+PADDUP")
+		local unbound = G.Unbind("POLESTAR_TOGGLE", false)
+		emit({ bound = bound, chord = chord, unbound = unbound, next = #G.BindingKeys("POLESTAR_NEXT"), menu = #G.BindingKeys("POLESTAR_MENU"), toggle = G.BindingKeys("POLESTAR_TOGGLE")[1], blocked = #pad.blocked, saves = pad.saves - saves })
+		stub.inCombat = false
+		emit({ chord = G.Bind("POLESTAR_MENU", "PADLSHOULDER+PADDUP"), menu = G.BindingKeys("POLESTAR_MENU")[1] })
+	`);
+	assert.deepEqual(fight, { bound: false, chord: false, unbound: false, next: 0, menu: 0, toggle: 'N', blocked: 0, saves: 0 });
+	assert.deepEqual(after, { chord: true, menu: 'PADLSHOULDER+PADDUP' });
+});
+
 test('a window holds the gamepad only while it is open: the options take the buttons, B closes them and gives every button back', () => {
 	const [open, closed] = run(`
 		UI.ShowOptions("gamepad")
