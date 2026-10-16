@@ -74,6 +74,7 @@ local current = "welcome" -- the page shown (its key)
 local pending -- nil | "login" (due at login) | "asked" (opened on request, or coming back), waiting for combat or the route choice
 local stepping -- hidden to make way for the route choice, not closed
 local full = true -- this showing has every page (false: setup left out); fixed when it starts
+local unasked = false -- this showing came by itself (open's deferred): a gamepad waits to be asked
 local hookedRC
 
 local function inCombat()
@@ -851,8 +852,10 @@ local function build()
 	ns.CloseOnEscape("PolestarWelcome")
 	WEL.frame = F
 	-- A gamepad (UI/Gamepad.lua): LB / RB turn the pages, A on Next by default.
+	-- Shown by itself, it waits for the player before it takes the gamepad.
 	if ns.Gamepad and ns.Gamepad.Register then
 		ns.Gamepad.Register(F, {
+			unasked = function() return unasked end,
 			initial = function(rows)
 				for i, w in ipairs(rows) do if w == F.Next then return i end end
 			end,
@@ -1001,8 +1004,9 @@ end
 
 -- Open now on the current page, or as soon as combat and the route choice
 -- allow. A showing at login starts on the first page, with setup while the
--- account has not had its welcome.
-local function open(why)
+-- account has not had its welcome. deferred: opened by itself (at login, or
+-- after the fight or the route choice that held it back), not on request.
+local function open(why, deferred)
 	if inCombat() or inCinematic() then
 		pending = pending == "asked" and "asked" or why
 		return
@@ -1019,6 +1023,7 @@ local function open(why)
 		current = PAGES[1].key
 	end
 	if not F then build() end
+	unasked = deferred and true or false
 	render()
 	F:Show()
 	F:Raise()
@@ -1062,7 +1067,7 @@ function WEL.Page()
 end
 
 function try()
-	if pending == "asked" or (pending and not seen()) then open(pending) end
+	if pending == "asked" or (pending and not seen()) then open(pending, true) end
 end
 
 -- A route choice opened over the welcome: step aside, come back after it

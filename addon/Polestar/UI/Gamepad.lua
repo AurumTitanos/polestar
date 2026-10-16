@@ -5,10 +5,16 @@
 -- Polestar's own chords (hold one gamepad button, press another), capturing
 -- a button for a binding, and the navigation of every Polestar window: a
 -- window that registers (G.Register) holds the D-pad, A, B, X, Y, LB, RB and
--- Start while it is the newest one open, through temporary override
--- bindings set out of combat and cleared when it closes or a fight starts.
--- Nothing is taken from the game while no Polestar window holds the gamepad.
--- The guide window's focus mode (UI/GamepadGuide.lua) holds it the same way.
+-- Start while it is the newest one open, read first by a frame of Polestar's
+-- (PolestarPadInput) and, with the keyboard and mouse interface, through
+-- temporary override bindings under it, set out of combat and cleared when
+-- it closes or a fight starts. With Forever's gamepad interface on
+-- (ns.GamepadUI) no override binding is set: its own bindings stay as they
+-- are, and the frame alone reads the window's buttons. A window that showed
+-- on its own (a route choice, the welcome) waits for the player to ask
+-- before it takes the gamepad. Nothing is taken from the game while no
+-- Polestar window holds the gamepad. The guide window's focus mode
+-- (UI/GamepadGuide.lua) holds it the same way.
 --
 -- Client calls (C_GamePad, the CVars, the binding API, IsKeyDown, the
 -- OnGamePadButton scripts) are made here, each guarded: a client without one
@@ -32,7 +38,7 @@ ns.RegisterDefaults("gamepad", {
 
 -- Polestar's chords live outside the settings, account-wide, so "Reset all
 -- settings" keeps them like the game keeps its key bindings:
--- PolestarDB.gamepad = { chords = { [action] = "PADRSHOULDER+PADDUP" }, chordDone = true }.
+-- PolestarDB.gamepad = { chords = { [action] = "PADRSHOULDER+PADDUP" } }.
 local function store()
 	local db = ns.DB()
 	if type(db.gamepad) ~= "table" then db.gamepad = {} end
@@ -53,6 +59,11 @@ local REPEAT_DELAY, REPEAT_EVERY = 0.4, 0.12
 
 local function combat() return InCombatLockdown and InCombatLockdown() and true or false end
 
+-- From PLAYER_REGEN_DISABLED to PLAYER_REGEN_ENABLED (see Events): nothing
+-- takes the gamepad, not even in the moment before the lockdown starts (a
+-- window closing as the fight starts hands it to none).
+local fighting = false
+
 ---------------------------------------------------------------------------
 -- Is a gamepad in use?
 ---------------------------------------------------------------------------
@@ -67,18 +78,11 @@ local function cvar(name)
 end
 
 -- A gamepad the player can use: Forever's gamepad interface style
--- (C_InputInterfaceStyle), or turned on in the game's options and plugged
--- in. Turned on but unplugged, the gamepad help would name buttons nobody
--- can press: everything reads as mouse and keyboard then.
-local function gamepadStyle()
-	local S, E = C_InputInterfaceStyle, Enum and Enum.InputDeviceInterfaceType
-	if not (S and S.GetCurrentStyle and E and E.Gamepad) then return false end
-	local ok, style = pcall(S.GetCurrentStyle)
-	return ok and style == E.Gamepad
-end
-
+-- (ns.GamepadUI), or turned on in the game's options and plugged in. Turned
+-- on but unplugged, the gamepad help would name buttons nobody can press:
+-- everything reads as mouse and keyboard then.
 function G.IsActive()
-	if gamepadStyle() then return true end
+	if ns.GamepadUI() then return true end
 	local enabled = false
 	if C_GamePad and C_GamePad.IsEnabled then
 		local ok, value = pcall(C_GamePad.IsEnabled)
@@ -513,6 +517,14 @@ function G.EasyControllerChord()
 	return nil
 end
 
+-- With the gamepad interface on, LB and RB are its targeting modifiers:
+-- held, the D-pad and the face buttons pick group members, mark and assist;
+-- both held, the D-pad pages the action bars and opens the quest tracker or
+-- the chat (Blizzard_Gamepad's GamepadPersistentInputLegend.lua, with
+-- GamepadSwapTargetModifiers swapping the two). A chord held on either is
+-- the game's then.
+local SHOULDERS = { PADLSHOULDER = true, PADRSHOULDER = true }
+
 local function chordUsedBy(action, key)
 	for other, chord in pairs(store().chords) do
 		if chord == key and other ~= action then
@@ -521,6 +533,9 @@ local function chordUsedBy(action, key)
 	end
 	if G.EasyControllerChord() == key then return { kind = "addon", name = "Easy Controller", action = key } end
 	local hold, press = chordParts(key)
+	if ns.GamepadUI() and SHOULDERS[hold] then
+		return { kind = "gamepad", name = G.KeyName(key), action = key }
+	end
 	local mod = modifierOf(hold)
 	if mod then
 		local over, saved = actionAt(mod.prefix .. press, true), actionAt(mod.prefix .. press, false)
@@ -611,24 +626,31 @@ local function ourPress(key)
 	return (padInput and padInput.eaten[key]) or (chordInput and chordInput.eaten[key]) or false
 end
 
-local function bindKey(owner, key)
-	protectedCall(SetOverrideBindingClick, owner, true, key, "PolestarPad" .. key)
+-- With the gamepad interface on, no override binding is set on its
+-- buttons: they sit over the game's own (its targeting, its menus' focus),
+-- which Forever's binding stack expects to find as it left them. The
+-- window's frame (PolestarPadInput) reads its buttons first all the same.
+local useOverrides = not ns.GamepadUI()
+
+local function setOverride(owner, key, name)
+	if not useOverrides then return end
+	if not name then navButton(key) end
+	protectedCall(SetOverrideBindingClick, owner, true, key, name or ("PolestarPad" .. key))
+end
+
+local function clearOverrides(owner)
+	if useOverrides and owner then protectedCall(ClearOverrideBindings, owner) end
 end
 
 local function applyNav(owner, ours)
 	for _, key in ipairs(NAV_KEYS) do
-		navButton(key)
 		if buttonDown(key) and not (ours and ours[key]) and not ourPress(key) then
 			-- Pressed for the game (RB of the RB + Up that opened the
 			-- window): its release must reach the game too.
 			G.heldKeys[key] = owner
 		else
 			G.heldKeys[key] = nil
-			if G.redirected[key] then
-				protectedCall(SetOverrideBindingClick, owner, true, key, G.redirected[key])
-			else
-				bindKey(owner, key)
-			end
+			setOverride(owner, key, G.redirected[key])
 		end
 	end
 end
@@ -641,7 +663,7 @@ local function bindReleased()
 			G.heldKeys[key] = nil
 		elseif not buttonDown(key) then
 			G.heldKeys[key] = nil
-			if not G.IsCapturing() and not G.redirected[key] then bindKey(owner, key) end
+			if not G.IsCapturing() and not G.redirected[key] then setOverride(owner, key) end
 		end
 	end
 end
@@ -716,19 +738,21 @@ end
 
 -- `key` clicks the button named `name` instead of reaching the handler (a
 -- secure button: focus mode uses the quest item with A), or nil to restore.
+-- Through an override binding, so never with the gamepad interface: the key
+-- stays the window's there.
 function G.Redirect(key, name)
-	if G.redirected[key] == name then return end
+	if not useOverrides or G.redirected[key] == name then return end
 	G.redirected[key] = name
 	if not G.owner or G.heldKeys[key] then return end
-	protectedCall(SetOverrideBindingClick, G.owner, true, key, name or ("PolestarPad" .. key))
+	setOverride(G.owner, key, name)
 end
 
 -- Routes the navigation keys to handler(key, isRepeat) until G.Release(owner).
 -- ours: keys down whose press was Polestar's (the A that opened this
 -- window): their release stays Polestar's too.
 function G.Take(owner, handler, ours)
-	if combat() then return false end
-	if G.owner and G.owner ~= owner then protectedCall(ClearOverrideBindings, G.owner) end
+	if fighting or combat() then return false end
+	if G.owner and G.owner ~= owner then clearOverrides(G.owner) end
 	G.owner, G.handler = owner, handler
 	G.held, G.repeatKey = {}, nil
 	applyNav(owner, ours)
@@ -742,7 +766,7 @@ function G.Take(owner, handler, ours)
 end
 
 function G.Release(owner)
-	if owner then protectedCall(ClearOverrideBindings, owner) end
+	clearOverrides(owner)
 	for key, waiting in pairs(G.heldKeys) do
 		if waiting == owner then G.heldKeys[key] = nil end
 	end
@@ -760,46 +784,81 @@ function G.HasWindow() return G.owner ~= nil end
 
 ---------------------------------------------------------------------------
 -- Chords in play: watched like Easy Controller's own RB + Down, both
--- buttons read every frame, never bound (binding the second button while
+-- buttons read with IsKeyDown, never bound (binding the second button while
 -- the first is held broke the game's RB combinations). While a chord's first
 -- button is held, out of combat, a frame of Polestar's reads the gamepad
 -- first and keeps the chord's second button from the game; any other button
--- goes on. A chord does nothing while a Polestar window holds the gamepad,
--- while a binding row waits, while the chat has the keyboard or a game
--- window the gamepad's focus.
+-- goes on. A chord does nothing in a fight, while a Polestar window holds
+-- the gamepad, while a binding row waits, while the chat has the keyboard
+-- or a game window the gamepad's focus, nor with another shoulder or
+-- trigger held (LB + RB + Up is not RB + Up). The buttons are looked at
+-- CHORD_POLL apart until a chord's first button is down, then every frame.
 ---------------------------------------------------------------------------
 
+local CHORD_POLL = 0.05
 local chordOn = {} -- [chord] = true: both buttons down, its action run once
+local chordHeld = false -- a chord's first button was down at the last look
+
+-- The chords bound, parsed once per change: { { action, key, hold, press }, ... }.
+local chordList, chordSource, chordsDirty = {}, nil, true
+ns.On("GAMEPAD_BINDINGS_CHANGED", function()
+	chordsDirty = true
+	updateDriver()
+end)
+local function chords()
+	local list = store().chords
+	if chordsDirty or list ~= chordSource then
+		chordList, chordSource, chordsDirty = {}, list, false
+		for action, key in pairs(list) do
+			local hold, press = chordParts(key)
+			if hold then chordList[#chordList + 1] = { action = action, key = key, hold = hold, press = press } end
+		end
+	end
+	return chordList
+end
+
+local OTHER_HOLDS = { "PADLSHOULDER", "PADRSHOULDER", "PADLTRIGGER", "PADRTRIGGER" }
+local function alone(hold, press)
+	for i = 1, #OTHER_HOLDS do
+		local b = OTHER_HOLDS[i]
+		if b ~= hold and b ~= press and buttonDown(b) then return false end
+	end
+	return true
+end
 
 local function chordsFree()
-	if G.owner or G.IsCapturing() then return false end
+	if combat() or G.owner or G.IsCapturing() then return false end
 	if type(GetCurrentKeyBoardFocus) == "function" then
 		local ok, focus = pcall(GetCurrentKeyBoardFocus)
 		if ok and focus then return false end
 	end
-	local manager = rawget(_G, "GamepadMode") and GamepadMode.FrameControlsManager
-	if type(manager) == "table" and manager.GetActiveFrame then
-		local ok, active = pcall(manager.GetActiveFrame, manager)
-		if ok and active then return false end
-	end
+	-- The window the game's gamepad focus is on: its manager's field, read
+	-- (what its GetActiveFrame returns), never a call into it.
+	local mode = rawget(_G, "GamepadMode")
+	local manager = type(mode) == "table" and rawget(mode, "FrameControlsManager")
+	if type(manager) == "table" and rawget(manager, "focusedFrame") then return false end
 	return true
 end
 
 local function runChord(action, key)
 	if chordOn[key] then return end
 	chordOn[key] = true
+	-- Never in a fight: the window it opens could not take the gamepad, and
+	-- the button went on to the game as well.
+	if combat() then return end
 	local run = RUN[action] and ns.Bindings and ns.Bindings[RUN[action]]
 	if run then ns.SafeCall(run) end
 end
 
 local function onChordPress(button)
 	if chordsFree() then
-		for action, key in pairs(store().chords) do
-			local hold, press = chordParts(key)
-			if press == button and hold ~= button and buttonDown(hold) then
+		local list = chords()
+		for i = 1, #list do
+			local c = list[i]
+			if c.press == button and c.hold ~= button and buttonDown(c.hold) and alone(c.hold, button) then
 				chordInput.eaten[button] = true
 				passOn(chordInput, false)
-				runChord(action, key)
+				runChord(c.action, c.key)
 				return false
 			end
 		end
@@ -841,26 +900,25 @@ local function setChordInput(on, force)
 end
 
 local function watchChords()
-	local list = store().chords
-	if not next(list) then
-		setChordInput(false)
-		return
-	end
-	local free, holding = chordsFree(), false
-	for action, key in pairs(list) do
-		local hold, press = chordParts(key)
+	local list = chords()
+	local holding, free = false, nil
+	for i = 1, #list do
+		local c = list[i]
 		local both = false
-		if hold and buttonDown(hold) then
+		if buttonDown(c.hold) then
 			holding = true
-			both = buttonDown(press)
+			both = buttonDown(c.press)
 		end
 		if not both then
-			chordOn[key] = nil
-		elseif free then
-			runChord(action, key)
+			chordOn[c.key] = nil
+		else
+			if free == nil then free = chordsFree() end
+			if free and alone(c.hold, c.press) then runChord(c.action, c.key) end
 		end
 	end
-	setChordInput(free and holding)
+	if holding and free == nil then free = chordsFree() end
+	chordHeld = holding
+	setChordInput(holding and free or false)
 end
 
 ---------------------------------------------------------------------------
@@ -868,14 +926,18 @@ end
 -- kept valid. It runs only while one of them needs it.
 ---------------------------------------------------------------------------
 
-local sinceCheck = 0
+local sinceCheck, sinceChords = 0, 0
 local checkFocus -- forward: the open window's focus and help, checked a few times a second
 
 driver = CreateFrame("Frame")
 driver:Hide()
 driver:SetScript("OnUpdate", function(_, elapsed)
 	bindReleased()
-	watchChords()
+	sinceChords = sinceChords + elapsed
+	if chordHeld or sinceChords >= CHORD_POLL then
+		sinceChords = 0
+		watchChords()
+	end
 	if G.owner then
 		sinceCheck = sinceCheck + elapsed
 		if sinceCheck >= 0.25 then
@@ -967,7 +1029,7 @@ function G.StopCapture(key)
 	capture = nil
 	setCaptureInput(frame, false)
 	frame:Hide()
-	if G.owner and not combat() then
+	if G.owner and not fighting and not combat() then
 		-- The buttons still down were pressed for the capture: their release stays ours.
 		applyNav(G.owner, held)
 		setPadInput(true)
@@ -1100,7 +1162,7 @@ function G.Capture(opts)
 	end
 	if frame:IsShown() then G.StopCapture(nil) end
 	capture = { held = {}, last = now(), opts = opts }
-	if G.owner then protectedCall(ClearOverrideBindings, G.owner) end
+	clearOverrides(G.owner)
 	setPadInput(false)
 	frame:Show()
 	setCaptureInput(frame, true)
@@ -1144,21 +1206,25 @@ local function clickable(f)
 end
 
 -- Every shown, enabled, clickable widget under `root` (the outermost one:
--- a row's own buttons are the row's), in the frame tree's order.
-function G.Collect(root, out)
-	out = out or {}
-	local function walk(f)
-		for _, c in ipairs({ f:GetChildren() }) do
-			if c:IsShown() and not c.psPadSkip then
-				if clickable(c) then
-					if c:IsEnabled() and (c:GetAlpha() or 1) > 0.05 then out[#out + 1] = c end
-				else
-					walk(c)
-				end
+-- a row's own buttons are the row's), in the frame tree's order. Walked
+-- over GetChildren's values, with no table per frame: it runs a few times a
+-- second while a window holds the gamepad.
+local function collectFrom(out, ...)
+	for i = 1, select("#", ...) do
+		local c = select(i, ...)
+		if c:IsShown() and not c.psPadSkip then
+			if clickable(c) then
+				if c:IsEnabled() and (c:GetAlpha() or 1) > 0.05 then out[#out + 1] = c end
+			else
+				collectFrom(out, c:GetChildren())
 			end
 		end
 	end
-	if root then walk(root) end
+end
+
+function G.Collect(root, out)
+	out = out or {}
+	if root then collectFrom(out, root:GetChildren()) end
 	return out
 end
 
@@ -1613,19 +1679,42 @@ local function navKey(key, isRepeat)
 	if G.entry == e then checkFocus() end
 end
 
--- May the newest open window hold the gamepad now?
+-- May the newest open window hold the gamepad now? Not one waiting to be
+-- asked (it showed on its own).
 local function allowed(e)
-	if combat() or not G.IsActive() then return false end
+	if fighting or combat() or e.waiting or not G.IsActive() then return false end
 	return e.manual or ns.Get("gamepad.navigate")
+end
+
+-- A waiting window's hint bar: the focus binding's button, which gives it
+-- the gamepad (G.TakeWaiting). Nothing when no button is bound to it.
+local waitingShown
+local function paintWaiting(e)
+	if not ns.Get("gamepad.hints") then return false end
+	local key = G.ShownKeys("POLESTAR_FOCUS", true)[1]
+	if not (key and G.IsPadKey(key)) then return false end
+	if ring then ring:Hide() end
+	if badge then badge:Hide() end
+	local b = theBar()
+	setHints({ { keys = key, label = L["Use the gamepad here"] } }, max(HINT_MIN, e.frame:GetWidth() or 0))
+	placeHints(e, b)
+	b:Show()
+	return true
+end
+
+-- The newest open window; nil when none is shown.
+local function newest()
+	for i = #stack, 1, -1 do
+		local e = stack[i]
+		if e.frame:IsShown() then return e end
+	end
+	return nil
 end
 
 -- The newest open window holds the gamepad; none: the game has it all.
 local function refresh()
-	local top
-	for i = #stack, 1, -1 do
-		local e = stack[i]
-		if e.frame:IsShown() then top = e break end
-	end
+	local shown = newest()
+	local top = shown
 	if top and not allowed(top) then top = nil end
 	local ours
 	if padInput and padInput:IsShown() and next(padInput.eaten) then
@@ -1644,20 +1733,49 @@ local function refresh()
 			paint(top)
 		end
 	end
+	if G.entry then
+		waitingShown = nil
+	elseif shown and shown.waiting and not fighting and not combat() and G.IsActive() and paintWaiting(shown) then
+		waitingShown = shown
+	elseif waitingShown then
+		waitingShown = nil
+		hidePaint()
+	end
 	updateDriver()
 end
 G.Refresh = refresh
 
--- `frame` opens (or comes forward): it holds the gamepad.
+-- `frame` opens (or comes forward): it holds the gamepad. manual: the
+-- player asked for it (focus mode), even with window navigation off. A
+-- window whose spec.unasked() says it showed on its own waits instead, unless
+-- a Polestar window held the gamepad as it came: a route choice or the
+-- welcome over the game would take A, B and the D-pad from the player in
+-- the middle of play.
 function G.Open(frame, spec, manual)
 	local e, i = entryOf(frame)
 	if e then tremove(stack, i) end
+	local new = e == nil
 	e = e or { frame = frame }
 	e.spec = spec or specs[frame] or e.spec or {}
 	e.manual = manual or e.manual
+	if manual then
+		e.waiting = nil
+	elseif new then
+		e.waiting = (G.entry == nil and e.spec.unasked and e.spec.unasked()) and true or nil
+	end
 	stack[#stack + 1] = e
 	refresh()
 	return e
+end
+
+-- The newest open window, waiting to be asked, takes the gamepad (the focus
+-- binding). -> true when there was one.
+function G.TakeWaiting()
+	local e = newest()
+	if not (e and e.waiting) or fighting or combat() or not G.IsActive() then return false end
+	e.waiting, e.manual = nil, true
+	refresh()
+	return true
 end
 
 function G.Close(frame)
@@ -1669,6 +1787,8 @@ function G.Close(frame)
 	refresh()
 end
 
+-- spec.unasked() -> true when the window showed on its own this time (see
+-- G.Open).
 function G.Register(frame, spec)
 	if type(frame) ~= "table" or not frame.HookScript or specs[frame] then return end
 	specs[frame] = spec or {}
@@ -1698,19 +1818,32 @@ end
 
 -- A fight: the gamepad goes back to the game before the lockdown (the
 -- override bindings and the frames cannot change in it); the windows stay
--- open for the mouse. After it, the newest open window takes it again.
+-- open for the mouse. The window lets go first, then a binding row's
+-- capture ends (its callback runs), each step on its own: an error in one
+-- cannot leave the window's frame or bindings in place for the fight. The
+-- first error is raised once all have run. After the fight, the newest
+-- open window takes the gamepad again.
 ns.RegisterEvent("PLAYER_REGEN_DISABLED", function()
-	G.StopCapture(nil)
-	if G.entry then
-		hidePaint()
-		G.Release(G.entry.frame)
-		G.entry = nil
+	fighting = true
+	local failed
+	local function step(fn, ...)
+		local ok, err = pcall(fn, ...)
+		if not ok and failed == nil then failed = err end
 	end
-	ns.Fire("GAMEPAD_COMBAT")
-	setChordInput(false, true)
-	updateDriver()
+	local e = G.entry
+	G.entry, waitingShown = nil, nil
+	if e then step(G.Release, e.frame) end
+	step(hidePaint)
+	step(G.StopCapture, nil)
+	step(setChordInput, false, true)
+	step(ns.Fire, "GAMEPAD_COMBAT")
+	step(updateDriver)
+	if failed ~= nil then error(failed, 0) end
 end)
-ns.RegisterEvent("PLAYER_REGEN_ENABLED", function() refresh() end)
+ns.RegisterEvent("PLAYER_REGEN_ENABLED", function()
+	fighting = false
+	refresh()
+end)
 
 -- A gamepad plugged in or out: windows switch between the gamepad and the mouse.
 local function gamepadChanged()
@@ -1722,8 +1855,9 @@ ns.RegisterEvent("GAME_PAD_DISCONNECTED", gamepadChanged)
 ns.RegisterEvent("GAME_PAD_ACTIVE_CHANGED", gamepadChanged)
 
 ns.On("SETTING_CHANGED", function(path)
-	if path == "gamepad.navigate" or path == "gamepad" or path == "" then refresh() end
+	if path == "gamepad.navigate" or path == "gamepad.hints" or path == "gamepad" or path == "" then refresh() end
 	if (path == "gamepad.hints" or path == "gamepad.glyphs" or path == "gamepad") and G.entry then paint(G.entry) end
 end)
+ns.On("GAMEPAD_BINDINGS_CHANGED", function() if waitingShown then refresh() end end)
 
 ns.OnLogin(updateDriver)

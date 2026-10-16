@@ -84,13 +84,15 @@ test('with the gamepad interface Polestar keeps to its own windows, and its mini
 });
 
 // What reaches into the game's UI: its command, window, popup, menu and
-// error tables and openers, and the map's own tables.
+// error tables and openers, the map's own tables, override bindings (they
+// sit over the gamepad interface's own) and its gamepad managers.
 const REACHES = new RegExp('\\b(' + [
 	'SlashCmdList', 'SLASH_[A-Z]\\w*', 'UISpecialFrames', 'Menu\\.ModifyMenu', 'MenuUtil\\.\\w+',
 	'ShowUIPanel', 'HideUIPanel', 'StaticPopup_Show', 'StaticPopup_Hide', 'StaticPopupDialogs',
 	'OpenWorldMap', 'ToggleWorldMap', 'ToggleQuestLog', 'CloseAllWindows',
 	'AddDataProvider', 'AddCanvasClickHandler', 'AddGlobalPinMouseActionHandler', 'AcquirePin', 'pinPools',
 	'SetMessageTypeEnabled', 'seterrorhandler',
+	'SetOverrideBinding\\w*', 'ClearOverrideBindings', 'GamepadMode', 'SmartNavigation',
 ].join('|') + ')\\b');
 
 // file -> [lines that reach, why it is safe with the gamepad interface]
@@ -103,6 +105,7 @@ const ALLOWED = {
 	'Polestar/QoL/Social.lua': [2, "dialogs closed for the player, never with the gamepad interface (its focus owns them)"],
 	'Polestar/QoL/Toggles.lua': [3, 'the error-message setting, which does nothing with the gamepad interface'],
 	'Polestar/UI/Options.lua': [2, "closing the game's Settings panel, never with the gamepad interface or in combat"],
+	'Polestar/UI/Gamepad.lua': [3, "a window's override bindings, only with the keyboard and mouse interface; the gamepad interface's focused window only read (a field, never a call)"],
 	'Polestar_Recorder/Commands.lua': [3, '/psrec, not with the gamepad interface'],
 };
 

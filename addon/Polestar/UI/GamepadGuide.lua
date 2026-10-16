@@ -9,12 +9,13 @@
 --   arrow there or uses the quest item on its line, X shows the line's
 --   details, LB / RB look at the previous / next step, Y minimizes the window
 --   to compact mode, B gives the gamepad back. Out of combat only; a fight
---   ends it.
+--   ends it. A window that showed on its own (a route choice, the welcome)
+--   waits for the same binding before it takes the gamepad.
 -- * The Gamepad options page: button names, window navigation, hints, and a
---   binding row per Polestar action (a key, a button, or a chord).
--- * The first time a gamepad is active, "Open Polestar options" gets the
---   chord RB + Up (LB + Up when that is taken), so a gamepad player can reach
---   Polestar at all.
+--   binding row per Polestar action (a key, a button, or a chord). No action
+--   gets a button or a chord unasked: every combination of LB or RB is the
+--   game's own with its gamepad interface on, and the minimap button opens
+--   the options there.
 
 local ADDON, ns = ...
 local G = ns.Gamepad
@@ -39,8 +40,11 @@ local function itemButton()
 end
 
 -- A goal line the quest item button serves: A uses the item there (the
--- button's secure click, through a binding: never from Polestar's code).
+-- button's secure click, through an override binding: never from
+-- Polestar's code). Not with the gamepad interface, which keeps its
+-- buttons' bindings (G.Redirect): A clicks that line as on any other.
 local function itemRow(w)
+	if ns.GamepadUI() then return false end
 	local goal = w and w.psGoal
 	local b = itemButton()
 	if not (goal and b and b:IsShown() and b.itemID) then return false end
@@ -139,8 +143,14 @@ function G.StopFocus()
 	G.Close(F)
 end
 
+-- The focus binding: a window that showed on its own and waits takes the
+-- gamepad first; else focus mode starts or ends.
 function G.ToggleFocus()
-	if focusing then G.StopFocus() else G.StartFocus() end
+	if focusing then
+		G.StopFocus()
+	elseif not G.TakeWaiting() then
+		G.StartFocus()
+	end
 end
 
 ns.On("TOGGLE_FOCUS", G.ToggleFocus)
@@ -149,36 +159,6 @@ ns.On("GAMEPAD_COMBAT", function() G.StopFocus() end)
 ns.On("STEP_UPDATED", function()
 	if focusing and G.entry and G.entry.frame == F then spec.onFocus(G.Focused(F)) end
 end)
-
----------------------------------------------------------------------------
--- "Open Polestar options" on the gamepad from the start: the chord RB + Up
--- (neither the game nor Easy Controller uses it; Easy Controller has RB +
--- Down), else LB + Up. Once per account with a gamepad in use, never over a
--- gamepad button or chord the player gave the action.
----------------------------------------------------------------------------
-
-G.DEFAULT_CHORDS = { "PADRSHOULDER+PADDUP", "PADLSHOULDER+PADDUP" }
-
--- -> the chord bound, or nil.
-function G.BindDefaultOptions()
-	local s = G.Store()
-	if s.chordDone or combat() or not G.IsActive() then return nil end
-	s.chordDone = true
-	for _, key in ipairs(G.BindingKeys("POLESTAR_OPTIONS")) do
-		if G.IsPadKey(key) then return nil end
-	end
-	for _, key in ipairs(G.DEFAULT_CHORDS) do
-		if not G.WhoUses("POLESTAR_OPTIONS", key) and G.Bind("POLESTAR_OPTIONS", key) then
-			ns.Print(string.format(L["With your gamepad, %s opens Polestar's options; its Gamepad page binds the rest."], G.KeyName(key)))
-			G.UpdateDriver()
-			return key
-		end
-	end
-	return nil
-end
-
-ns.OnLogin(function() G.BindDefaultOptions() end)
-ns.On("GAMEPAD_CHANGED", function(active) if active then G.BindDefaultOptions() end end)
 
 ---------------------------------------------------------------------------
 -- Binding rows (the options registry's `binding` control): label left, the
@@ -340,8 +320,7 @@ ns.RegisterOptions({
 
 local SECTIONS = { guide = L["The guide"], windows = L["Windows"], buttons = L["Quest buttons"] }
 local HELP = {
-	POLESTAR_FOCUS = L["The guide window holds the gamepad until B: the D-pad picks a line, A points the arrow there or uses the item, X shows its details, LB and RB change steps, Y minimizes the window."],
-	POLESTAR_OPTIONS = L["With a gamepad, RB + D-pad up opens them from the start, unless that chord was taken."],
+	POLESTAR_FOCUS = L["The guide window holds the gamepad until B: the D-pad picks a line, A points the arrow there or uses the item, X shows its details, LB and RB change steps, Y minimizes the window. A window that opened by itself, such as a route choice, waits for this button before it takes the gamepad."],
 	["CLICK PolestarStepButton:LeftButton"] = L["Step action: NPC, quest item, mob or Hearthstone"],
 	["CLICK PolestarTravelButton:LeftButton"] = L["Use the route's Hearthstone or teleport"],
 }

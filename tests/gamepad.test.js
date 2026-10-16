@@ -14,12 +14,15 @@ const { runAddon } = require('./helpers/lua');
 
 const FILES = ['Core/Core.xml', 'Theme/Theme.xml', 'UI/UI.xml'];
 
-function run(script, before = '') {
+// before: Lua run before the addon loads; atLogin: after uistub.install (which
+// marks the welcome seen), before the login.
+function run(script, before = '', atLogin = '') {
 	return runAddon({
 		stubs: ['stub_ui.lua', 'stub_gamepad.lua'],
 		before,
 		addons: [{ name: 'Polestar', files: FILES }],
 		script: `uistub.install()
+${atLogin}
 stub.login()
 local G, UI, GF = Polestar.Gamepad, Polestar.UI, Polestar.UI.GuideFrame
 local pad = stub.pad
@@ -334,24 +337,120 @@ test('the quest item\'s secure click takes no chord: a second button joins only 
 	assert.deepEqual(combo, { saved: 'CLICK PolestarQuestItemButton:LeftButton', text: 'LT + A' });
 });
 
-test('chords in play: RB + Up opens the options from the first login, Up never reaches the game meanwhile, and nothing stays bound', () => {
+test('chords in play: a chord the player bound opens its window, its second button never reaches the game, and with the other shoulder held it is the game\'s', () => {
 	const [out] = run(`
-		local chord = G.Store().chords.POLESTAR_OPTIONS
+		local unasked = G.Store().chords.POLESTAR_OPTIONS or false
+		G.Bind("POLESTAR_OPTIONS", "PADRSHOULDER+PADDUP")
 		pad.saved.PADDUP = "MOVEFORWARD"
+		stub.press("PADLSHOULDER", true)
+		stub.chord("PADRSHOULDER", "PADDUP")
+		stub.press("PADLSHOULDER", false)
+		local both = { opened = PolestarOptions ~= nil and PolestarOptions:IsShown(), game = count(pad.ran, "MOVEFORWARD") }
 		stub.chord("PADRSHOULDER", "PADDUP")
 		local opened = PolestarOptions and PolestarOptions:IsShown()
-		emit({ chord = chord, opened = opened, game = count(pad.ran, "MOVEFORWARD"), shown = G.KeyText("POLESTAR_OPTIONS") })
+		emit({ unasked = unasked, both = both, opened = opened, game = count(pad.ran, "MOVEFORWARD"), shown = G.KeyText("POLESTAR_OPTIONS") })
 	`);
-	assert.deepEqual(out, { chord: 'PADRSHOULDER+PADDUP', opened: true, game: 0, shown: 'RB + D-pad up' });
+	assert.equal(out.unasked, false, 'no chord is bound before the player binds one');
+	assert.deepEqual(out.both, { opened: false, game: 1 }, 'LB + RB + Up is not RB + Up');
+	assert.deepEqual({ opened: out.opened, game: out.game, shown: out.shown }, { opened: true, game: 1, shown: 'RB + D-pad up' });
 });
 
-test('the default chord gives way: LB + Up when another action has RB + Up, nothing over a button the player chose', () => {
-	const [taken, chosen] = [
-		run(`emit({ chord = G.Store().chords.POLESTAR_OPTIONS })`, 'PolestarDB = { schema = 1, settings = {}, gamepad = { chords = { POLESTAR_NEXT = "PADRSHOULDER+PADDUP" } } }')[0],
-		run(`emit({ chord = G.Store().chords.POLESTAR_OPTIONS or false })`, 'stub.pad.saved.PAD4 = "POLESTAR_OPTIONS"')[0],
-	];
-	assert.equal(taken.chord, 'PADLSHOULDER+PADDUP');
-	assert.equal(chosen.chord, false);
+test('a chord does nothing in a fight: its window stays shut and its button reaches the game; after the fight it works', () => {
+	const [fight, after] = run(`
+		G.Bind("POLESTAR_MENU", "PADRSHOULDER+PADDUP")
+		pad.saved.PADDUP = "MOVEFORWARD"
+		stub.fire("PLAYER_REGEN_DISABLED")
+		stub.inCombat = true
+		stub.chord("PADRSHOULDER", "PADDUP")
+		emit({ picker = PolestarPicker ~= nil and PolestarPicker:IsShown(), game = count(pad.ran, "MOVEFORWARD"), blocked = #pad.blocked })
+		stub.inCombat = false
+		stub.fire("PLAYER_REGEN_ENABLED")
+		stub.chord("PADRSHOULDER", "PADDUP")
+		emit({ picker = PolestarPicker ~= nil and PolestarPicker:IsShown(), game = count(pad.ran, "MOVEFORWARD") })
+	`);
+	assert.deepEqual(fight, { picker: false, game: 1, blocked: 0 });
+	assert.deepEqual(after, { picker: true, game: 1 });
+});
+
+// The character's welcome still due: it shows by itself after the login.
+const WELCOME_DUE = 'Polestar.CharState().welcomeSeen = 0';
+
+test('a window that shows by itself waits: the welcome at login takes no button until the focus binding gives it the gamepad', () => {
+	const [shown, asked] = run(`
+		G.Bind("POLESTAR_FOCUS", "PADRSTICK")
+		stub.advance(2.5)
+		local hint = PolestarPadHints:IsVisible() and PolestarPadHints:GetParent() == PolestarWelcome
+		emit({ shown = PolestarWelcome:IsShown(), owner = G.owner ~= nil, overrides = stub.overrideCount(), a = stub.press("PAD1"), still = PolestarWelcome:IsShown(), hint = hint })
+		Polestar.Bindings.Focus()
+		emit({ owner = G.owner == PolestarWelcome, focusing = G.IsFocusing(), overrides = stub.overrideCount(), next = G.Focused(PolestarWelcome) == PolestarWelcome.Next, down = stub.press("PADDDOWN") })
+	`, '', WELCOME_DUE);
+	assert.deepEqual(shown, { shown: true, owner: false, overrides: 0, a: 'game', still: true, hint: true });
+	assert.deepEqual(asked, { owner: true, focusing: false, overrides: 11, next: true, down: 'frame' });
+});
+
+test('a window that shows by itself while a Polestar window holds the gamepad takes it over', () => {
+	const [out] = run(`
+		UI.ShowOptions("gamepad")
+		stub.advance(0.3)
+		stub.advance(2.5)
+		emit({ welcome = PolestarWelcome:IsShown(), owner = G.owner == PolestarWelcome })
+	`, '', WELCOME_DUE);
+	assert.deepEqual(out, { welcome: true, owner: true });
+});
+
+test('an error in a binding row as a fight starts still gives every button back first', () => {
+	const [out] = run(`
+		UI.ShowOptions("gamepad")
+		UI.Options.Select("gamepad", "Key bindings")
+		local row = UI.Options.Controls("gamepad", "Key bindings")["Next step"]
+		row:Click()
+		local capturing = G.IsCapturing()
+		row.Refresh = function() error("row broke") end
+		local ok, err = pcall(stub.fire, "PLAYER_REGEN_DISABLED")
+		stub.inCombat = true
+		emit({ capturing = capturing, ok = ok, err = tostring(err), owner = G.owner or false, overrides = stub.overrideCount(), input = PolestarPadInput:IsShown(), capture = PolestarPadCapture:IsShown(), a = stub.press("PAD1"), blocked = #pad.blocked })
+	`);
+	assert.equal(out.capturing, true);
+	assert.equal(out.ok, false, 'the error is reported');
+	assert.match(out.err, /row broke/);
+	assert.deepEqual(
+		{ owner: out.owner, overrides: out.overrides, input: out.input, capture: out.capture, a: out.a, blocked: out.blocked },
+		{ owner: false, overrides: 0, input: false, capture: false, a: 'game', blocked: 0 },
+	);
+});
+
+// Forever's gamepad interface (ns.GamepadUI), on as the addon loads.
+const GAMEPAD_UI = `Enum.InputDeviceInterfaceType = { Mkb = 0, Gamepad = 1 }
+C_InputInterfaceStyle = { GetCurrentStyle = function() return 1 end }`;
+
+test('with the gamepad interface no override binding is set: the window\'s frame alone reads its buttons, and A on the quest item\'s line is no secure click', () => {
+	const [options, focus] = run(`
+		UI.ShowOptions("gamepad")
+		stub.advance(0.3)
+		local first = focused(PolestarOptions)
+		local down = stub.press("PADDDOWN")
+		emit({ owner = G.owner == PolestarOptions, overrides = stub.overrideCount(), first = first, down = down, line = focused(PolestarOptions), b = stub.press("PAD2"), shown = PolestarOptions:IsShown() })
+		local item = CreateFrame("Button", "PolestarQuestItemButton", UIParent)
+		item.itemID = 750
+		local clicks = 0
+		item:SetScript("OnClick", function(_, _, down) if down then clicks = clicks + 1 end end)
+		Polestar.QoL = { Buttons = { item = item } }
+		uistub.setGuide(uistub.elwynn, 3)
+		G.StartFocus()
+		stub.press("PADDDOWN")
+		local line = focused(PolestarGuideFrame)
+		emit({ focusing = G.IsFocusing(), line = line, a = stub.press("PAD1"), clicks = clicks, overrides = stub.overrideCount(), saves = pad.saves })
+	`, GAMEPAD_UI);
+	assert.deepEqual(options, { owner: true, overrides: 0, first: 'Button names', down: 'frame', line: "Navigate Polestar's windows", b: 'frame', shown: false });
+	assert.deepEqual(focus, { focusing: true, line: 'Collect Tough Wolf Meat', a: 'frame', clicks: 0, overrides: 0, saves: 0 });
+});
+
+test('with the gamepad interface no chord is bound unasked, and a chord on LB or RB is the game\'s own', () => {
+	const [out] = run(`
+		local function who(key) local w = G.WhoUses("POLESTAR_OPTIONS", key) return w and w.kind or false end
+		emit({ chord = G.Store().chords.POLESTAR_OPTIONS or false, rb = who("PADRSHOULDER+PADDUP"), lb = who("PADLSHOULDER+PADDUP"), face = who("PADLSHOULDER+PAD1"), lt = who("PADLTRIGGER+PADDUP") })
+	`, GAMEPAD_UI);
+	assert.deepEqual(out, { chord: false, rb: 'gamepad', lb: 'gamepad', face: 'gamepad', lt: false });
 });
 
 test('button names follow the gamepad: Xbox letters, PlayStation shapes when it says so, or the player\'s choice', () => {
