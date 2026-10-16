@@ -2,6 +2,7 @@
 	<Script file="Nav.lua"/>
 	<Script file="Pins.lua"/>
 	<Script file="Arrow.lua"/>
+	<Script file="Regions.lua"/>
 	<Script file="Layers.lua"/>
 	<Script file="Bridges.lua"/>
 	<Script file="Transit.lua"/>

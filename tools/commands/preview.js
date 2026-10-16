@@ -1173,6 +1173,7 @@ Polestar.UI.Picker.SetCategory("Leveling"); Polestar.UI.Picker.Select("forever/h
 			{ rares: true, files: RARES_FILES, roots: TOAST, script: raresScene('local a = Polestar.Rares.AlertOf({ source = "vignette", kind = "treasure", id = 2843, name = "Battered Chest" }, { map = 1429, x = 79.6, y = 55.7 }, true); a.yards = 412; Polestar.Fire("RARE_SPOTTED", a)') },
 		],
 	},
+	...require('../preview/live-dashboard'),
 ];
 
 // panel.stubs / panel.files: other client stubs and manifests than the UI's
@@ -1188,7 +1189,7 @@ function dumpPanel(panel, prelude) {
 		stubs: panel.stubs || ['stub_ui.lua'],
 		before: before.join('\n'),
 		addons: [{ name: 'Polestar', files: panel.files || FILES }],
-		script: `${panel.stubs ? '' : 'uistub.install()\n'}stub.login()\n${panel.script}\nstub.advance(1)\npreview.emit()`,
+		script: `${panel.setup || (panel.stubs ? '' : 'uistub.install()')}\nstub.login()\n${panel.script}\nstub.advance(1)\npreview.emit()`,
 	});
 	const dump = emitted[emitted.length - 1];
 	if (!dump || !dump.objects) throw new Error('preview: the scene emitted no frames');

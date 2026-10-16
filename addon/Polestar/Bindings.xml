@@ -5,6 +5,12 @@
 	<Binding name="POLESTAR_NEXT" category="ADDONS">
 		Polestar.Bindings.Next()
 	</Binding>
+	<Binding name="POLESTAR_LIVE" category="ADDONS">
+		Polestar.Bindings.Live()
+	</Binding>
+	<Binding name="POLESTAR_MINIMAP" category="ADDONS">
+		Polestar.Bindings.MiniMap()
+	</Binding>
 	<Binding name="POLESTAR_PREV" category="ADDONS">
 		Polestar.Bindings.Prev()
 	</Binding>

@@ -10,6 +10,8 @@ local Engine = ns.Engine
 
 BINDING_HEADER_POLESTAR = "Polestar"
 BINDING_NAME_POLESTAR_TOGGLE = L["Toggle guide window"]
+BINDING_NAME_POLESTAR_LIVE = L["Toggle live dashboard"]
+BINDING_NAME_POLESTAR_MINIMAP = L["Toggle compact map"]
 BINDING_NAME_POLESTAR_NEXT = L["Next step"]
 BINDING_NAME_POLESTAR_PREV = L["Previous step"]
 -- Labels for the QoL secure buttons' CLICK bindings (QoL/Buttons.lua). The
@@ -24,6 +26,8 @@ _G["BINDING_NAME_CLICK PolestarTravelButton:LeftButton"] = L["Use the route's He
 -- Entry points for Bindings.xml.
 ns.Bindings = {
 	Toggle = function() ns.Fire("TOGGLE_FRAME") end,
+	Live = function() if ns.LiveDashboard then ns.LiveDashboard.Toggle() end end,
+	MiniMap = function() if ns.LiveMiniMap then ns.LiveMiniMap.Toggle() end end,
 	Next = function() Engine.Next() end,
 	Prev = function() Engine.Prev() end,
 }
@@ -37,6 +41,9 @@ end
 ns.RegisterCommand("show", function() ns.Fire("SHOW_FRAME") end, L["Show the guide window"])
 ns.RegisterCommand("hide", function() ns.Fire("HIDE_FRAME") end, L["Hide the guide window"])
 ns.RegisterCommand("guides", function() ns.Fire("SHOW_PICKER") end, L["Choose a guide"])
+ns.RegisterCommand("live", function()
+	if ns.LiveDashboard then ns.LiveDashboard.Toggle() end
+end, L["Open or close the live map and guide dashboard"])
 ns.RegisterCommand("options", function(rest) ns.Fire("SHOW_OPTIONS", rest ~= "" and rest or nil) end, L["Open settings"])
 ns.RegisterCommand("debug", function()
 	ns.debug = not ns.debug

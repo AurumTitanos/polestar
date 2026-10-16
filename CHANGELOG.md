@@ -4,6 +4,12 @@
 
 ### For players
 
+- Optional live in-game Planner and compact terrain map show your actual
+  character, current route and guide objectives. Browse future steps without
+  moving the guide; the compact window can follow and auto-zoom along the
+  current walk, and show Questie spawn icons when Questie is available.
+  Open them from the guide menu or with `/polestar live` and `/polestar minimap`
+  (thanks AurumTitanos).
 - Gear advice no longer marks a weapon you haven't trained as an upgrade,
   picks it as your quest reward or equips it: it went by the weapons your
   class can learn, so a level 4 rogue was shown a green arrow on a sword and

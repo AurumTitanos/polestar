@@ -1781,6 +1781,8 @@ local function openMenu(button)
 	local clear = transparent()
 	W.ShowMenu(button, {
 		{ text = L["Choose guide"], icon = "search", onClick = function() UI.ShowPicker() end },
+		{ text = L["Live dashboard"], icon = "layers", onClick = function() if ns.LiveDashboard then ns.LiveDashboard.Show() end end },
+		{ text = L["Compact map"], icon = "layers", onClick = function() if ns.LiveMiniMap then ns.LiveMiniMap.Show() end end },
 		{ text = L["Open in new tab"], icon = "plus", disabled = not (E and E.OpenTab), onClick = function() UI.ShowPicker({ newTab = true }) end },
 		{ text = L["Skip this step"], icon = "skip", disabled = not hasGuide, onClick = function() GF.SkipStep() end },
 		{ text = L["Report a problem"], icon = "bug", onClick = function() UI.ShowReport() end },

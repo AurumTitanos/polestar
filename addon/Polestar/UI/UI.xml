@@ -3,6 +3,14 @@
 	<Script file="ZoneArt.lua"/>
 	<Script file="ZoneArtOverlays.lua"/>
 	<Script file="GuideFrame.lua"/>
+	<Script file="LiveTerrain.lua"/>
+	<Script file="LiveRegions.lua"/>
+	<Script file="LiveObjectives.lua"/>
+	<Script file="LiveQuestie.lua"/>
+	<Script file="LiveMap.lua"/>
+	<Script file="LiveCharacter.lua"/>
+	<Script file="LiveDashboard.lua"/>
+	<Script file="LiveMiniMap.lua"/>
 	<Script file="JourneyPanel.lua"/>
 	<Script file="GearPick.lua"/>
 	<Script file="Picker.lua"/>
