@@ -91,6 +91,20 @@ stub.fire("GLOBAL_MOUSE_DOWN", "LeftButton")
 stub.fire("GLOBAL_MOUSE_UP", "LeftButton")
 stub.RunScript(mark, "OnLeave")
 r.clicked = clicked
+if C_InputInterfaceStyle.GetCurrentStyle() == Enum.InputDeviceInterfaceType.Gamepad then
+	-- The gamepad's map cursor on the mark (the canvas's top left on screen at
+	-- (0, 1000): map (30, 30) at (300, 700)), then A.
+	clicked = nil
+	SoftCursor:Show()
+	SoftCursor.x, SoftCursor.y = 300, 700
+	stub.runMapFrame(WorldMapFrame, 0.06)
+	r.padTip = GameTooltip:IsShown() and GameTooltip.lines[1]
+	stub.keysDown.PAD1 = true
+	stub.runMapFrame(WorldMapFrame, 0.01)
+	stub.keysDown.PAD1 = false
+	r.padClicked = clicked
+	SoftCursor:Hide()
+end
 m.canvasScale, WorldMapFrame.ScrollContainer.zoomPercent = 2, 1
 stub.runMapFrame(WorldMapFrame, 0)                   -- zoomed in
 r.markScale = mark:GetScale()
@@ -164,10 +178,14 @@ for (const style of ['keyboard and mouse', 'gamepad']) {
 		assert.ok(r.zone.way > 0, 'the way to the target');
 		assert.equal(r.tip, 'A mark');
 		assert.equal(r.clicked, 'LeftButton');
+		if (style === 'gamepad') assert.deepEqual([r.padTip, r.padClicked], ['A mark', 'LeftButton'], "the gamepad's map cursor and A");
 		assert.ok(Math.abs(r.markScale - 1.25 / 2) < 1e-9, 'zoomed in: counter-scaled, a quarter larger on screen');
 		assert.equal(r.later.pins, 4, 'pins drawn in combat');
 		assert.equal(r.battlefield, 3, 'the battlefield map shows the unexplored tiles too');
 		assert.deepEqual({ ...r.reopened, way: 0 }, { pins: 4, areas: 1, hulls: 1, way: 0, labels: 0, tiles: 3 }, 'drawn again as the map reopens');
-		assert.deepEqual(reads, READS, 'what Polestar reads on the maps');
+		const expected = { ...READS };
+		// The gamepad's map cursor: the pins' place on screen from the canvas's.
+		if (style === 'gamepad') expected['WorldMapFrame.canvas'] = ['GetEffectiveScale', 'GetHeight', 'GetLeft', 'GetTop', 'GetWidth'];
+		assert.deepEqual(reads, expected, 'what Polestar reads on the maps');
 	});
 }

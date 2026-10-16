@@ -668,7 +668,8 @@ end
 --   pins        PIN_FRAME_LEVEL_SUPER_TRACKED_QUEST, counter-scaled as a
 --               map pin with SetScalingLimits(1, 1, 1.25) is (the same size
 --               on screen zoomed out, a quarter larger zoomed in); tooltip
---               and click, the right button passed through to the map
+--               and click, with the mouse and with the gamepad's map cursor
+--               and A (below), the right button passed through to the map
 --               (zoom out)
 --   areas, hulls, trail dots
 --               PIN_FRAME_LEVEL_QUEST_BLOB, under every pin, no mouse; areas
@@ -999,14 +1000,85 @@ do
 		return wTrail ~= nil and wTrail.n > 0 and wView ~= nil and wView.shown
 	end
 
-	local function onWorldView(_, what)
+	-- The gamepad interface's map cursor (Blizzard_GamepadSoftCursor's
+	-- SoftCursor, moved by the stick while the map has the gamepad's focus)
+	-- is no mouse: the map hovers its own pins near it
+	-- (MapCanvasMixin:UpdateGamepadCursor, within 12 units) and clicks them
+	-- on A (WorldMapMixin:GamepadMapClick). Polestar's pins do the same on
+	-- the view's frames, reading the cursor: the nearest pin with a tooltip
+	-- or a click within CURSOR_REACH shows its tooltip, and a press of A
+	-- clicks it. A is polled with IsKeyDown, as Blizzard_GamepadActionBars'
+	-- ClassActionFlyout polls its buttons, so the press still reaches the map.
+	local CURSOR_REACH, CURSOR_INTERVAL = 12, 0.05 -- UI units; seconds between searches
+	local hovered, hoveredPin, cursorAcc, padDown = nil, nil, 0, false
+
+	local function unhover()
+		if hovered and GameTooltip:GetOwner() == hovered then GameTooltip:Hide() end
+		hovered, hoveredPin = nil, nil
+	end
+
+	-- The pin frame nearest screen point (cx, cy) that shows a tooltip or
+	-- takes a click, within reach; its place from its map percent and the
+	-- canvas's (no layout read per pin).
+	local function pinAt(cx, cy)
+		local v = wView
+		local canvas = v.canvas
+		local left, top = canvas:GetLeft(), canvas:GetTop()
+		if not (left and top) then return nil end
+		local cs = canvas:GetEffectiveScale()
+		local reach = CURSOR_REACH * UIParent:GetEffectiveScale()
+		local best, bestD = nil, reach * reach
+		for i = 1, wPins.n do
+			local f = wPins[i]
+			local d = f.data
+			if d.pin.tooltip or d.pin.onClick then
+				local dx = (left + v.width * d.x / 100) * cs - cx
+				local dy = (top - v.height * d.y / 100) * cs - cy
+				local dd = dx * dx + dy * dy
+				if dd <= bestD then best, bestD = f, dd end
+			end
+		end
+		return best
+	end
+
+	local function followGamepadCursor(elapsed)
+		local cursor = SoftCursor
+		if not (cursor and cursor:IsShown()) then
+			if hovered then unhover() end
+			padDown = false
+			return
+		end
+		cursorAcc = cursorAcc + elapsed
+		if cursorAcc >= CURSOR_INTERVAL or (hovered and not hovered:IsShown()) then
+			cursorAcc = 0
+			local x, y = cursor:GetCenter()
+			local s = cursor:GetEffectiveScale()
+			local f = x and pinAt(x * s, y * s)
+			local p = f and f.data.pin
+			if p ~= hoveredPin or f ~= hovered then
+				unhover()
+				if f then
+					hovered, hoveredPin = f, p
+					showTooltip(f, p)
+				end
+			end
+		end
+		local down = IsKeyDown and IsKeyDown(GAMEPAD_FACE_BOTTOM or "PAD1") and true or false
+		if down and not padDown and hovered then click(hoveredPin, "LeftButton") end
+		padDown = down
+	end
+
+	local function onWorldView(_, what, elapsed)
 		if what == "tick" then
 			if wDirty then drawWorld() end
+			followGamepadCursor(elapsed)
 		elseif what == "show" or what == "map" or what == "size" then
 			drawWorld()
 		elseif what == "scale" then
 			rescaleWorld()
 		elseif what == "hide" then
+			unhover()
+			padDown = false
 			updateTrailDriver()
 		end
 	end

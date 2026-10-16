@@ -19,10 +19,12 @@
 --   map:HasZoomLevels(), map:GetCanvasZoomPercent(), map:GetGlobalPinScale(),
 --   map:GetGlobalAlpha(), map:GetPinFrameLevelsManager():GetValidFrameLevel(t)
 -- (each returns a field or works one out, writing nothing) and the canvas's
--- size (GetWidth, GetHeight). Frames on the canvas carry no field the
--- client's code reads on the frames it finds there (owningMap on the mouse
--- focus, smartNavigation* and the other SmartNavigation keys on the
--- buttons it scans): such a field would be Polestar's value in that code.
+-- size and place (GetWidth, GetHeight; GetLeft, GetTop, GetEffectiveScale
+-- for the gamepad's map cursor, Nav/Pins.lua). Frames on the canvas carry
+-- no field the client's code reads on the frames it finds there (owningMap
+-- on the mouse focus, smartNavigation* and the other SmartNavigation keys
+-- on the buttons it scans): such a field would be Polestar's value in that
+-- code.
 --
 -- One view per map frame, shared by every module: a frame of Polestar's on
 -- the canvas whose OnUpdate runs only while the map is shown (the client

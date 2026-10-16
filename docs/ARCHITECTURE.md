@@ -259,7 +259,9 @@ UI, Nav and Engine read the client's quests, map, units and items through
 `Polestar.Compat`, with these exceptions that call the client themselves:
 Nav's Blizzard user waypoint (`C_Map`, `C_SuperTrack`; `Nav/Bridges.lua`),
 the minimap's radius, shape, rotation and indoors state (`Nav/Pins.lua`;
-`Maps/RouteLines.lua` reads them through `Pins.MinimapView()`),
+`Maps/RouteLines.lua` reads them through `Pins.MinimapView()`), the gamepad's
+map cursor and A (`SoftCursor`, `IsKeyDown`; `Nav/Pins.lua`), the map frames
+Polestar draws on (only read; `Nav/MapCanvas.lua`),
 the run speed, taxi nodes, hearthstone cooldown and ghost state (`GetUnitSpeed`,
 `C_TaxiMap`, item cooldown, `UnitIsGhost`; `Nav/Travel.lua`), the player's
 height for the walking engine (`Compat.GetPlayerUnitPosition`, `Nav/Walk.lua`), the zone art's map art
@@ -1371,7 +1373,9 @@ from map percent times the canvas size, and the map is only read through
 field or works one out, writing nothing; not `GetViewRect`, which caches) and
 the canvas's `GetWidth` / `GetHeight`; Maps' info bar also reads
 `GetNormalizedCursorPosition`, `IsCanvasMouseFocus` and `ScrollContainer`
-(to sit at its foot). Frames on the canvas carry no field the client's code
+(to sit at its foot), and Pins the canvas's `GetLeft`, `GetTop` and
+`GetEffectiveScale` and the gamepad cursor's place (`SoftCursor:IsShown`,
+`GetCenter`, `GetEffectiveScale`). Frames on the canvas carry no field the client's code
 reads on the frames it finds there (`owningMap` on the mouse focus,
 `smartNavigation*` and the other SmartNavigation keys on the buttons it
 scans), and none is a button to the gamepad's navigation: as the gamepad
@@ -1410,7 +1414,13 @@ frames on the canvas, at the frame levels the map gives its own pins (MapCanvas,
 below): pins at `PIN_FRAME_LEVEL_SUPER_TRACKED_QUEST`, counter-scaled as a map
 pin with `SetScalingLimits(1, 1, 1.25)` is, tooltip and click, the right button
 passed through to the map (`SetPassThroughButtons`, restricted in combat: set
-once per frame, for frames made in combat once it ends); a redraw hands every
+once per frame, for frames made in combat once it ends). The gamepad
+interface's map cursor (`SoftCursor`, no mouse) hovers them as the map hovers
+its own pins: every 0.05 s while it shows, the nearest pin with a tooltip or a
+click within 12 UI units (its place from its map percent and the canvas's
+`GetLeft`, `GetTop` and `GetEffectiveScale`) shows its tooltip, and a press of
+A (`GAMEPAD_FACE_BOTTOM`, polled with `IsKeyDown` so the press still reaches
+the map) clicks it; a redraw hands every
 frame back the pin it showed, higher priorities on top; layer changes while the
 map is open are drawn once, on its next frame (`GetWorldFrames(kind)` runs a
 pending draw first). Pooled frames, distance-filtered, minimap

@@ -241,6 +241,7 @@ local map = WorldMapFrame
 map.Child = map:GetCanvas() -- the tests' shorthand for the canvas
 map.Child:SetSize(1000, 1000)
 stub.guardMap(map)
+stub.withSoftCursor()
 
 function nav.showWorldMap(mapID)
 	stub.worldMapID = mapID

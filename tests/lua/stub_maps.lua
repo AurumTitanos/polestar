@@ -194,6 +194,7 @@ function m.withMapCanvas()
 		return m.cursor[1], m.cursor[2]
 	end
 	stub.guardMap(map)
+	stub.withSoftCursor()
 	local getInfo = C_Map.GetMapInfo
 	function C_Map.GetMapInfo(id)
 		local info = getInfo(id)

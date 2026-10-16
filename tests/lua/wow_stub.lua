@@ -730,6 +730,20 @@ end
 
 WorldMapFrame = stub.newMapCanvas("WorldMapFrame")
 function WorldMapFrame.GetMapID() return stub.worldMapID end
+
+-- The gamepad interface's map cursor (Blizzard_GamepadSoftCursor), hidden
+-- until a test shows it (while the map has the gamepad's focus), made by
+-- stub.withSoftCursor() (a frame made here would renumber the preview's
+-- objects); stub.keysDown[key] for IsKeyDown ("PAD1": the gamepad's A).
+function stub.withSoftCursor()
+	if not SoftCursor then
+		SoftCursor = CreateFrame("Frame", "SoftCursor", UIParent)
+		SoftCursor:Hide()
+	end
+	return SoftCursor
+end
+stub.keysDown = {}
+function IsKeyDown(key) return stub.keysDown[key] == true end
 UIErrorsFrame = CreateFrame("Frame", "UIErrorsFrame", UIParent)
 GameTooltip = CreateFrame("GameTooltip", "GameTooltip", UIParent)
 GameTooltip.lines = {}
@@ -738,6 +752,7 @@ function GameTooltip.ClearLines(self) self.lines = {} end
 function GameTooltip.AddLine(self, text) table.insert(self.lines, tostring(text)) end
 function GameTooltip.AddDoubleLine(self, l, r) table.insert(self.lines, tostring(l) .. " | " .. tostring(r)) end
 function GameTooltip.SetText(self, text) self.lines = { tostring(text) } end
+function GameTooltip.GetOwner(self) return self.owner end
 DEFAULT_CHAT_FRAME = CreateFrame("Frame", "ChatFrame1", UIParent)
 function DEFAULT_CHAT_FRAME.AddMessage(_, msg) table.insert(stub.messages, tostring(msg)) end
 ColorPickerFrame = CreateFrame("Frame", "ColorPickerFrame", UIParent)

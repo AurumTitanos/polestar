@@ -528,6 +528,55 @@ test('minimap pins follow a rotating minimap, priority stacks, tooltips and clic
 	assert.deepEqual(out.afterTurn, [-35, 0]);
 });
 
+// The gamepad interface's map cursor is no mouse (Blizzard_GamepadSoftCursor):
+// the map hovers its own pins near it and clicks them on A; Polestar's pins
+// must answer it too, or a gamepad player gets no tooltip and no
+// click-to-target on them.
+test('with the gamepad, the map cursor near a pin shows its tooltip and A clicks it, once a press', () => {
+	const [out] = run(`
+		local clicks = {}
+		Pins.SetLayer("quests", {
+			at(0, 0, { tooltip = "Here", onClick = function(button) clicks[#clicks + 1] = button end }),
+			at(0, -100, {}),                                 -- 5 % east: nothing to show or click
+		})
+		nav.showWorldMap(9000)
+		-- The canvas's top left on screen at (100, 900): map (50, 50) at (600, 400), map (55, 50) at (650, 400).
+		local canvas = WorldMapFrame.Child
+		canvas.x, canvas.y = 100, -100
+		local function at(x, y) SoftCursor.x, SoftCursor.y = x, y; stub.runMapFrame(WorldMapFrame, 0.06) end
+		local function press(down) stub.keysDown.PAD1 = down; stub.runMapFrame(WorldMapFrame, 0.01) end
+		local function tip() return GameTooltip:IsShown() and GameTooltip.owner and GameTooltip.owner.data.pin.tooltip or false end
+		local r = {}
+		at(605, 403)
+		r.hidden = { tip(), #clicks }                    -- the cursor shows only while the map has the gamepad's focus
+		SoftCursor:Show()
+		at(605, 403)
+		r.near = tip()
+		press(true); press(true); press(false); press(true); press(false)
+		r.clicks = clicks
+		at(650, 400)
+		r.plain = tip()                                  -- over the pin with nothing to show
+		press(true); press(false)
+		r.plainClicks = #clicks
+		at(611, 400)
+		r.far = tip()                                    -- 11 units away: still in reach
+		at(613, 400)
+		r.out = tip()
+		at(600, 400)
+		SoftCursor:Hide()
+		stub.runMapFrame(WorldMapFrame, 0.06)
+		r.cursorGone = tip()
+		emit(r)`);
+	assert.deepEqual(out.hidden, [false, 0]);
+	assert.equal(out.near, 'Here', 'the tooltip of the pin under the cursor');
+	assert.deepEqual(out.clicks, ['LeftButton', 'LeftButton'], 'one click a press, none while held');
+	assert.equal(out.plain, false);
+	assert.equal(out.plainClicks, 2);
+	assert.equal(out.far, 'Here');
+	assert.equal(out.out, false, 'past 12 units: the tooltip goes');
+	assert.equal(out.cursorGone, false, 'and with the cursor');
+});
+
 test('world map pins never call the combat-restricted SetPassThroughButtons in combat', () => {
 	const [out] = run(`
 		local r = {}
