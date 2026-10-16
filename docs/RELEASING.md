@@ -126,6 +126,15 @@ version throughout.
    10) until the maintainer has played the release on their own client and
    said it is good. If the servers are down, the release waits.
 
+   When the gamepad support changed (`UI/Gamepad.lua`, `UI/GamepadGuide.lua`,
+   `Bindings.xml`), play it with a gamepad too: `/console taintLog 1`, then
+   with "Browse the guide with the gamepad" on and again with the options
+   open, walk into a fight and out of it (the windows give the gamepad back
+   as it starts and take it again after), bind a button and a chord on the
+   Key bindings tab, use the quest item from focus mode, and `/reload`.
+   Then `/console taintLog 0`: `Logs/taint.log` names no Polestar file and
+   the chat shows no `ADDON_ACTION_BLOCKED` or `ADDON_ACTION_FORBIDDEN`.
+
 7. Assemble the changelog from the fragments in `changes/` (CONTRIBUTING.md,
    "Commits and pull requests"), then commit it with the version bump and
    the regenerated files that are tracked (`git status` lists them;
