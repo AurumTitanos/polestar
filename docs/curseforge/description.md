@@ -6,9 +6,9 @@
 
 ## What it is
 
-Polestar is one addon for the whole of WoW: Forever. It carries 158 guides: 57 leveling guides that take both factions from 1 to 60 from every race's starting zone (Zephras Isle for the Skyborne included), the twelve professions from 1 to 300, 17 reputations, 7 exploration guides, the Legacy challenges and 64 collectible guides, one per mount and per pet.
+Polestar is one addon for the whole of WoW: Forever. It carries 220 guides: 57 leveling guides that take both factions from 1 to 60 from every race's starting zone (Zephras Isle for the Skyborne included), 62 class guides for every class's quest chains, the twelve professions from 1 to 300, 17 reputations, 7 exploration guides, the Legacy challenges and 64 collectible guides, one per mount and per pet.
 
-Around the guides it adds a 3D waypoint arrow with a travel planner, quest markers on the map, an upgrade indicator on item tooltips, a dungeon quest journal, rare alerts and the quality-of-life helpers a long leveling session needs. It is free, open source under the GPL-3.0, and made in the open on GitHub.
+Around the guides it adds a 3D waypoint arrow that walks real paths and a travel planner, quest markers on the map, an upgrade indicator on item tooltips, a dungeon quest journal, rare alerts and the quality-of-life helpers a long leveling session needs. Its interface is in English, German and Latin American Spanish. It is free, open source under the GPL-3.0, and made in the open on GitHub.
 
 ---
 
@@ -31,7 +31,8 @@ Around the guides it adds a 3D waypoint arrow with a travel planner, quest marke
 **The arrow.** Distance and the goal it leads to.
 
 - **A 3D waypoint arrow** points at the current goal, with distance and ETA, and knows every place a target spawns: a click moves it on to the next one.
-- **The travel planner** uses known flight paths, boats, zeppelins and your Hearthstone when they are faster, each leg with its own caption ("Fly to Crossroads", "Hearth to Razor Hill").
+- **Real paths:** the arrow walks you round cliffs, walls and water, through town gates, into caves and down the Undercity's lifts, on Polestar's walking maps with the routing engine of Cillian Berragan's [Shortest Path Forever](https://github.com/cjber/shortest-path-forever), used with his kind permission. With Shortest Path Forever itself installed, Polestar hands it the guiding, so the two never guide at once.
+- **The travel planner** uses known flight paths, boats, zeppelins, the tram, lifts, portals, class teleports and your Hearthstone when they are faster, with boats and zeppelins on their real timetables, each leg with its own caption and time ("Fly to Crossroads", "Take The Great Lift, leaves in about 0:15").
 - **Quest markers** for givers, objectives and turn-ins on the world map and the minimap, with tooltip lines on the mobs and items a quest needs and nameplate icons on the mobs you still need.
 - **Upgrade advice** on item tooltips and on the quest reward panel: by how much an item is an upgrade for your spec at your level, and which reward to take.
 - **Class training reminders** every two levels, with the nearest trainer of your class.

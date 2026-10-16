@@ -94,15 +94,18 @@ Good to know:
 
 ## What it is
 
-Polestar is one addon for the whole of WoW: Forever. It carries 158 guides:
+Polestar is one addon for the whole of WoW: Forever. It carries 220 guides:
 57 leveling guides that take both factions from 1 to 60 from every race's
-starting zone (Zephras Isle for the Skyborne included), the twelve
-professions from 1 to 300, 17 reputations, 7 exploration guides, the Legacy
-challenges and 64 collectible guides, one per mount and per pet. Around the
-guides it adds a 3D waypoint arrow with a travel planner, quest markers on the
-map, an upgrade indicator on item tooltips, a search for where any item, mount
-or pet comes from, a dungeon quest journal, rare alerts and the quality-of-life
-helpers a long leveling session needs.
+starting zone (Zephras Isle for the Skyborne included), 62 class guides for
+every class's quest chains, the twelve professions from 1 to 300, 17
+reputations, 7 exploration guides, the Legacy challenges and 64 collectible
+guides, one per mount and per pet. Around the guides it adds a 3D waypoint
+arrow that walks real paths (on Polestar's walking maps, with Shortest Path
+Forever's routing engine by Cillian Berragan) and a travel planner, quest
+markers on the map, an upgrade indicator on item tooltips, a search for where
+any item, mount or pet comes from, a dungeon quest journal, rare alerts and
+the quality-of-life helpers a long leveling session needs. Its interface is
+in English, German and Latin American Spanish.
 
 The leveling routes are not hand-picked. A simulator models every quest
 Forever offers a faction, plays millions of complete 1-60 routes for each
