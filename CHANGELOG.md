@@ -11,6 +11,11 @@
   gives no position does it fall back to the nearest known spawn, and the
   alert now says so ("known spawn 120 yd"); a spawn whose distance cannot be
   measured is no longer picked (thanks petllama and Miguel Antunes).
+- The Target button and the Step action key never put a name with a line
+  break (or any other control character) into their macro. A guide pack,
+  which anyone can write, could have hidden a second line such as
+  `/run SendMail(...)` in a mob's or NPC's name, and it would have run on the
+  press; such a name is now passed over.
 - Looking ahead at an accept, taking the quest moves on to its objectives
   again: in the moment after the accept, before the game fills in the quest's
   objectives, the guide read it as ready to hand in and jumped past the kill

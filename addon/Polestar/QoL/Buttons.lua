@@ -390,8 +390,15 @@ end
 
 local names, nameSeen = {}, {}
 
+-- A name the button may put after "/targetexact": a string with no control
+-- characters. Names come from guide packs, which anyone can write, and a line
+-- break would start a second macro line ("/run ...") that runs on the click.
+function Buttons.MacroSafeName(n)
+	return type(n) == "string" and n ~= "" and not n:find("%c")
+end
+
 local function addName(n)
-	if type(n) ~= "string" or n == "" or nameSeen[n] or #names >= MAX_NAMES then return end
+	if not Buttons.MacroSafeName(n) or nameSeen[n] or #names >= MAX_NAMES then return end
 	nameSeen[n] = true
 	names[#names + 1] = n
 end
@@ -433,14 +440,16 @@ function Buttons.TargetNames(view, raw)
 end
 
 -- "/targetexact" lines with names[preferred] last, so it wins when present.
+-- A name that is not MacroSafeName never becomes a line.
 function Buttons.TargetMacro(list, preferred)
 	local n = #list
 	if n == 0 then return nil end
 	local lines = {}
 	for k = 1, n do
 		local idx = (preferred + k - 1) % n + 1
-		lines[#lines + 1] = "/targetexact " .. list[idx]
+		if Buttons.MacroSafeName(list[idx]) then lines[#lines + 1] = "/targetexact " .. list[idx] end
 	end
+	if #lines == 0 then return nil end
 	local text = concat(lines, "\n")
 	while #text > MACRO_LIMIT and #lines > 1 do
 		table.remove(lines, 1)
@@ -496,8 +505,9 @@ local function stepGoal(view, raw, goals, optional)
 				-- This goal's own mobs decide; the key then cycles all the step's.
 				if #Buttons.TargetNames({ goals = { gv } }, { rg }) > 0 then return "target", Buttons.TargetNames(view, raw) end
 			elseif NPC_VERBS[t] then
+				-- A name that is not MacroSafeName is passed over, like no name.
 				local name = gv.npcName or rg.npcName
-				if type(name) == "string" and name ~= "" then return "npc", name end
+				if Buttons.MacroSafeName(name) then return "npc", name end
 			end
 		end
 	end
@@ -523,8 +533,7 @@ local function applyStep(b)
 		if step.kind == "target" then
 			text = Buttons.TargetMacro(step.list, step.cycle)
 		elseif step.kind == "npc" then
-			-- A line break would end the macro line and start another command.
-			text = "/targetexact " .. step.value:gsub("[\r\n]", "")
+			text = Buttons.TargetMacro({ step.value }, 1)
 		elseif step.kind == "item" then
 			item = "item:" .. step.value
 		end

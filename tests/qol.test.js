@@ -277,7 +277,7 @@ test('step key: one binding does the step\'s next action, the NPC, the quest ite
 	assert.equal(out[11], false, 'a key only: no button on screen');
 });
 
-test('step key: the route\'s own goals come before optional ones, and an NPC name\'s line breaks never reach the macro', () => {
+test('step key: the route\'s own goals come before optional ones, and an NPC name with a control character is passed over, never put in the macro', () => {
 	const out = run(`
 		local s = PolestarStepButton
 		local function now() return { s:GetAttribute("type") or "nil", s:GetAttribute("item") or s:GetAttribute("macrotext") or "nil" } end
@@ -290,15 +290,18 @@ test('step key: the route\'s own goals come before optional ones, and an NPC nam
 		-- only optional goals open: the optional one still gets the key
 		q.step({ { t = "turnin", quest = 9, npc = 240, npcName = "Marshal Dughan", status = "done" }, { t = "accept", quest = 7, npc = 197, npcName = "Marshal McBride", optional = true } })
 		emit(now())
-		-- line breaks in the name: one /targetexact line, no second command
-		q.step({ { t = "talk", npc = 241, npcName = "Marshal\\r\\nDughan\\n/run print(1)" } })
+		-- a line break or other control character in the name: that goal is
+		-- passed over and the key does the next one
+		q.step({ { t = "talk", npc = 241, npcName = "Marshal\\r\\nDughan\\n/run print(1)" }, { t = "kill", target = "Kobold Vermin" } })
+		emit(now())
+		q.step({ { t = "talk", npc = 241, npcName = "Marshal\\tDughan" } })
 		emit(now())
 	`);
 	assert.deepEqual(out[0], ['macro', '/targetexact Kobold Vermin'], 'an optional accept does not take the key');
 	assert.deepEqual(out[1], ['macro', '/targetexact Marshal Dughan']);
 	assert.deepEqual(out[2], ['macro', '/targetexact Marshal McBride'], 'optional goals still count once the route\'s are done');
-	assert.deepEqual(out[3], ['macro', '/targetexact MarshalDughan/run print(1)']);
-	assert.ok(!out[3][1].includes('\n') && !out[3][1].includes('\r'));
+	assert.deepEqual(out[3], ['macro', '/targetexact Kobold Vermin'], 'the unsafe NPC goal is passed over');
+	assert.deepEqual(out[4], ['nil', 'nil'], 'a tab is a control character too: no macro');
 });
 
 // Every CLICK binding names a button Buttons.lua creates and has its label in
@@ -319,6 +322,29 @@ test('key bindings: each CLICK binding has a button and a label', () => {
 	for (const n of names) {
 		assert.ok(buttons.includes('"' + n + '"'), n + ' is created');
 	}
+});
+
+test('target button: a name with a line break or other control character never reaches the macro, from the guide or from QuestDB (a pack could hide "/run ..." in it)', () => {
+	const out = run(`
+		local t = PolestarTargetButton
+		q.step({
+			{ t = "kill", target = "Kobold Vermin\\n/run SendMail(\\"Thief\\", \\"x\\", \\"\\")", quest = 7, oi = 1 },
+			{ t = "kill", target = "Kobold Worker\\r/script SetSendMailMoney(1)", quest = 7, oi = 2 },
+		})
+		emit({ t:GetAttribute("macrotext") or "nil", t:IsShown() })
+		Polestar.QuestDB = {
+			IsLoaded = function() return true end,
+			GetObjectiveMobs = function() return { "Kobold Laborer", "Tunnel Rat\\n/run X()" } end,
+		}
+		Polestar.Fire("QUESTDB_LOADED")
+		q.step({ { t = "collect", item = 950, itemName = "Candle", quest = 7, oi = 3 } })
+		stub.runTimers()
+		emit(t:GetAttribute("macrotext"))
+		emit(Polestar.QoL.Buttons.TargetMacro({ "Kobold Laborer", "Bad\\n/run X()" }, 2))
+	`);
+	assert.deepEqual(out[0], ['nil', false], 'only unsafe names: no macro, no button');
+	assert.equal(out[1], '/targetexact Kobold Laborer');
+	assert.equal(out[2], '/targetexact Kobold Laborer', 'TargetMacro itself drops an unsafe name');
 });
 
 test('hearth: button while a hearth goal is open; GetHearth reports bind and cooldown', () => {
