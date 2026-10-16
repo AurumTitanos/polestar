@@ -3616,7 +3616,8 @@ fileDataID from wago.tools into `data/sources/casc` (local, never shipped):
   it; falls and lifts stay out (lifts are his transports), and so do
   climbs (60-80°, one way up). Faces are held back: steep links (50-60°)
   and terrain links inside a run of triangles over 50° (Forever's client
-  slides off them) rising more than a jump. His steps are two-way and cost
+  slides off them) rising more than a jump, or on ground steeper than 50°
+  measured 8 yd across. His steps are two-way and cost
   their flat length, so a face packed as steps was a straight line up it
   (Fitz's report: the Raptor Horns slope in the Barrens, 61.66,35.46 to
   61.00,33.70, where the columns and cells averaged 51-56° triangles to

@@ -64,7 +64,10 @@
 // - face links are held back: steep links (STEEP, 50-60°), and terrain links
 //   touching a FLAG.STEEP column inside a run of them (along the link's
 //   direction) that rises more than JUMP: a hop up one steep triangle is
-//   kept, a slope of them is not;
+//   kept, a slope of them is not; and terrain links touching ground whose
+//   height, over FALL_SPAN columns either way (8.3 yd across), rises more
+//   than 50° (a hillside whose triangles alternate 49° and 54° is such a
+//   slope, though no run of steep ones is);
 // - and every face link that is the only way between two parts of the map
 //   is opened again (Faces: union-find over all other joins, then the face
 //   links gentlest first, each opened only when it joins two parts). Every
