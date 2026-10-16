@@ -17106,7 +17106,7 @@ do
 						{ t = "accept", quest = 7638, title = "Lord Grayson Shadowbreaker", npc = 6171, npcName = "Duthorian Rall", minLevel = 60, qlvl = 60, closedBy = { 7670 }, preTitles = { [7670] = "Lord Grayson Shadowbreaker" }, map = 1453, x = 50.48, y = 47.49, z = 106.6, only = { races = { "Human" } }, note = "Duthorian Rall, Cathedral of Light" },
 						{ t = "turnin", quest = 7638, title = "Lord Grayson Shadowbreaker", npc = 928, npcName = "Lord Grayson Shadowbreaker", map = 1453, x = 48.43, y = 50.22, z = 106.6, only = { races = { "Human" } } },
 						{ t = "turnin", quest = 7670, title = "Lord Grayson Shadowbreaker", npc = 928, npcName = "Lord Grayson Shadowbreaker", map = 1453, x = 48.43, y = 50.22, z = 106.6, only = { races = { "Dwarf" } } },
-						{ t = "accept", quest = 7637, title = "Emphasis on Sacrifice", npc = 928, npcName = "Lord Grayson Shadowbreaker", minLevel = 60, qlvl = 60, pre = { 7638 }, preTitles = { [7638] = "Lord Grayson Shadowbreaker" }, map = 1453, x = 48.43, y = 50.22, z = 106.6 },
+						{ t = "accept", quest = 7637, title = "Emphasis on Sacrifice", npc = 928, npcName = "Lord Grayson Shadowbreaker", minLevel = 60, qlvl = 60, pre = { 7638, 7670 }, preTitles = { [7638] = "Lord Grayson Shadowbreaker", [7670] = "Lord Grayson Shadowbreaker" }, map = 1453, x = 48.43, y = 50.22, z = 106.6 },
 					},
 				},
 				{
