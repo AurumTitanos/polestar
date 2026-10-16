@@ -4,6 +4,12 @@
 
 ### For players
 
+- Walks between zones go through the real tunnels, passes, bridges and
+  gates: from the Barrens to Astranaar the route flew to Sun Rock Retreat
+  and walked straight over the ridge into Ashenvale; it now walks through the
+  Talondeep Path. The zone crossings are Carbonite's (GPL-3.0), shipped with
+  Polestar; until now only a local file had them, so released builds walked
+  between zones in straight lines.
 - The Barrens (19-24) takes Her Name Is Olgra after Lost in Battle is handed
   in, the only time Mankrik offers it, and collects Olgra's Adornments on the
   way back down to Camp Taurajo: the guide asked for it at the first
@@ -620,6 +626,14 @@
 
 ### For contributors
 
+- `node tools/polestar.js travel import --carbonite <ZoneConnections.lua>
+  --source <text>` writes the shipped zone crossings,
+  `tools/lib/travel/crossings.json`, from Carbonite's Classic Era zone
+  connections (54 walks between zones, 30 yd arrival radius); `travel build`
+  puts them into TravelData.lua as both continents' full crossing data
+  (`--shipped none` leaves them out). Zones only Forever has are `wild`, and a
+  zone's rectangle is Forever's where it redrew the map. The local crossings
+  file still builds Polestar_Travel, which adds to them.
 - A Feature request issue form beside Bug report and Wrong step, tagged
   `enhancement`, with a field for the Discord thread an idea came from
   (thanks CDVolvik).

@@ -1610,9 +1610,11 @@ walk stays inside one zone; between zones it goes only through
   node's `back` caption).
 
 A point's zone is its uiMap when the crossing data knows that zone; a zone
-the data lists as `wild` (no crossing data, e.g. maps Forever added) walks as
-before; any other map (a continent map, an instance) is placed in the
-smallest known zone frame holding the point. Walk legs end at every crossing
+the data lists as `wild` (no crossing data, e.g. the zones only Forever has)
+walks as before; any other map (a continent map, an instance) is placed in
+the smallest known zone frame holding the point (Forever's frame where
+Forever redrew the map, Stormwind City with its harbour, else Era's). Walk
+legs end at every crossing
 or chain waypoint and carry its caption and radius; the arrow shows the
 current leg's caption and points at its waypoint ("Enter Orgrimmar" at the
 gate, then the target's own label).
@@ -1627,15 +1629,25 @@ every plan, `ROUTE_ADVANCED` (legs, ci) when the current leg moves on.
 
 **Data.** `node tools/polestar.js travel build` writes TravelData.lua
 (committed: flight masters and flight times, boats, zeppelins, the tram and
-inns from the client tables, learned paths, and crossings learned from zone
-changes in recordings, `tools/lib/travel/crossings.js` `recordedCrossings`,
-registered with `complete = false`: they refine a continent that has full
-crossing data and change nothing elsewhere). Full crossing data comes from an
-optional local crossings file, `data/local/crossings.json` (gitignored),
-which the build validates and writes into the local data addon
+inns from the client tables, learned paths, the shipped zone crossings, and
+crossings learned from zone changes in recordings,
+`tools/lib/travel/crossings.js` `recordedCrossings`, registered with
+`complete = false`: they refine a continent that has full crossing data and
+change nothing elsewhere). The shipped crossings are the full crossing data
+of both continents (`complete = true`): `tools/lib/travel/crossings.json`,
+committed, written by `node tools/polestar.js travel import --carbonite
+<ZoneConnections.lua> --source <text>` from Carbonite's Classic Era zone
+connections (GPL-3.0; `tools/lib/travel/carbonite.js`): its walks between
+two zones of one continent, both ways unless Carbonite marks one way, every
+end with a 30 yd arrival radius (Carbonite gives none); its boats, zeppelins,
+tram and portals are TravelData's own transports and are left out. `travel
+build --shipped none` builds without them (the test fixtures). An optional
+local crossings file, `data/local/crossings.json` (gitignored), adds to them:
+the build validates it and writes it into the local data addon
 `addon/Polestar_Travel` (gitignored; `## Dependencies: Polestar`, registers
-with `RegisterCrossings` at load; installed when built, never packaged).
-Without the file nothing is written and TravelData.lua never holds it.
+with `RegisterCrossings` at load, which merges; installed when built, never
+packaged). Without the file nothing is written and TravelData.lua never holds
+it.
 
 The crossings file (schema 1, Era map percent):
 
