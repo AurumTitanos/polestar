@@ -19474,25 +19474,26 @@ do
 			zoneName = "Burning Steppes",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "Kibler at Flame Crest",
 					note = "Kibler stands at Flame Crest in northern Burning Steppes, near the Blackrock Mountain path.",
 					goals = {
-						{ t = "accept", quest = 4862, title = "En-Ay-Es-Tee-Why", npc = 10260, npcName = "Kibler", minLevel = 55, qlvl = 59, map = 1428, x = 65.89, y = 21.92, z = 165.1, f = "e" },
+						{ t = "accept", quest = 4862, title = "En-Ay-Es-Tee-Why", npc = 10260, npcName = "Kibler", minLevel = 55, qlvl = 59, map = 1428, x = 65.89, y = 21.92, z = 165.1, f = "e", group = { kind = "dungeon", name = "Blackrock Spire" } },
 					},
 				},
 				{
 					title = "Lower Blackrock Spire",
 					note = "Lower Blackrock Spire is a group of five, level 55-60. Collect 15 Spire Spider Eggs from the nests near Mother Smolderweb.",
 					goals = {
-						{ t = "collect", quest = 4862, title = "En-Ay-Es-Tee-Why", item = 12530, itemName = "Spire Spider Egg", count = 15, oi = 1, map = 1428, x = 33.2, y = 24.9, f = "e", note = "Lower Blackrock Spire" },
+						{ t = "collect", quest = 4862, title = "En-Ay-Es-Tee-Why", item = 12530, itemName = "Spire Spider Egg", count = 15, oi = 1, map = 1428, x = 33.2, y = 24.9, f = "e", note = "Lower Blackrock Spire", group = { kind = "dungeon", name = "Blackrock Spire" } },
 					},
 				},
 				{
 					title = "Back to Kibler",
 					goals = {
-						{ t = "turnin", quest = 4862, title = "En-Ay-Es-Tee-Why", npc = 10260, npcName = "Kibler", map = 1428, x = 65.89, y = 21.92, z = 165.1, f = "e" },
+						{ t = "turnin", quest = 4862, title = "En-Ay-Es-Tee-Why", npc = 10260, npcName = "Kibler", map = 1428, x = 65.89, y = 21.92, z = 165.1, f = "e", group = { kind = "dungeon", name = "Blackrock Spire" } },
 						{ t = "collect", item = 12529, itemName = "Smolderweb Carrier", map = 1428, x = 65.9, y = 21.9, f = "e", note = "Smolderweb Carrier" },
 					},
 				},
@@ -19677,25 +19678,26 @@ do
 			zoneName = "Burning Steppes",
 			author = "Polestar",
 			version = 1,
+			group = true,
 			steps = {
 				{
 					title = "Kibler at Flame Crest",
 					note = "Kibler stands at Flame Crest in northern Burning Steppes, near the Blackrock Mountain path.",
 					goals = {
-						{ t = "accept", quest = 4729, title = "Kibler's Exotic Pets", npc = 10260, npcName = "Kibler", minLevel = 55, qlvl = 59, map = 1428, x = 65.89, y = 21.92, z = 165.1, f = "e" },
+						{ t = "accept", quest = 4729, title = "Kibler's Exotic Pets", npc = 10260, npcName = "Kibler", minLevel = 55, qlvl = 59, map = 1428, x = 65.89, y = 21.92, z = 165.1, f = "e", group = { kind = "dungeon", name = "Blackrock Spire" } },
 					},
 				},
 				{
 					title = "Upper Blackrock Spire",
 					note = "Upper Blackrock Spire is a raid group of up to ten, level 58-60. Use Kibler's cage on a Bloodaxe Worg Pup (Halycon's den) to get the Caged Worg Pup.",
 					goals = {
-						{ t = "collect", quest = 4729, title = "Kibler's Exotic Pets", item = 12263, itemName = "Caged Worg Pup", count = 1, oi = 1, map = 1428, x = 33.2, y = 24.9, f = "e", note = "Upper Blackrock Spire" },
+						{ t = "collect", quest = 4729, title = "Kibler's Exotic Pets", item = 12263, itemName = "Caged Worg Pup", count = 1, oi = 1, map = 1428, x = 33.2, y = 24.9, f = "e", note = "Upper Blackrock Spire", group = { kind = "dungeon", name = "Blackrock Spire" } },
 					},
 				},
 				{
 					title = "Back to Kibler",
 					goals = {
-						{ t = "turnin", quest = 4729, title = "Kibler's Exotic Pets", npc = 10260, npcName = "Kibler", map = 1428, x = 65.89, y = 21.92, z = 165.1, f = "e" },
+						{ t = "turnin", quest = 4729, title = "Kibler's Exotic Pets", npc = 10260, npcName = "Kibler", map = 1428, x = 65.89, y = 21.92, z = 165.1, f = "e", group = { kind = "dungeon", name = "Blackrock Spire" } },
 						{ t = "collect", item = 12264, itemName = "Worg Carrier", map = 1428, x = 65.9, y = 21.9, f = "e", note = "Worg Carrier" },
 					},
 				},
@@ -22679,14 +22681,14 @@ do
 					goals = {
 						{ t = "turnin", quest = 95494, title = "Bruised Pride and Lion Hides", npc = 3682, npcName = "Vrang Wildgore", map = 1413, x = 43.8, y = 12.21, z = 91.8, f = "e", note = "Vrang Wildgore" },
 						{ t = "turnin", quest = 95507, title = "Vrang's Game", npc = 3682, npcName = "Vrang Wildgore", map = 1413, x = 43.8, y = 12.21, z = 91.8, f = "e" },
-						{ t = "accept", quest = 95495, title = "The Hermit Tanner", npc = 3682, npcName = "Vrang Wildgore", minLevel = 14, qlvl = 18, map = 1413, x = 43.8, y = 12.21, z = 91.8, f = "e" },
+						{ t = "accept", quest = 95495, title = "The Hermit Tanner", npc = 3682, npcName = "Vrang Wildgore", minLevel = 14, qlvl = 18, preAll = { 95494, 95507 }, preTitles = { [95494] = "Bruised Pride and Lion Hides", [95507] = "Vrang's Game" }, map = 1413, x = 43.8, y = 12.21, z = 91.8, f = "e" },
 					},
 				},
 				{
 					title = "Walton",
 					goals = {
 						{ t = "turnin", quest = 95495, title = "The Hermit Tanner", npc = 261366, npcName = "Walton", map = 1413, x = 42.01, y = 11.44, f = "e", note = "Walton" },
-						{ t = "accept", quest = 95621, title = "Trouble in the Valley", npc = 261366, npcName = "Walton", minLevel = 14, qlvl = 18, map = 1413, x = 42.01, y = 11.44, f = "e" },
+						{ t = "accept", quest = 95621, title = "Trouble in the Valley", npc = 261366, npcName = "Walton", minLevel = 14, qlvl = 18, pre = { 95495 }, preTitles = { [95495] = "The Hermit Tanner" }, map = 1413, x = 42.01, y = 11.44, f = "e" },
 					},
 				},
 				{
@@ -22700,7 +22702,7 @@ do
 					title = "Walton",
 					goals = {
 						{ t = "turnin", quest = 95621, title = "Trouble in the Valley", npc = 261366, npcName = "Walton", map = 1413, x = 42.01, y = 11.44, f = "e", note = "Walton" },
-						{ t = "accept", quest = 95508, title = "Unwelcome Guests", npc = 261366, npcName = "Walton", minLevel = 14, qlvl = 18, map = 1413, x = 42.01, y = 11.44, f = "e" },
+						{ t = "accept", quest = 95508, title = "Unwelcome Guests", npc = 261366, npcName = "Walton", minLevel = 14, qlvl = 18, pre = { 95621 }, preTitles = { [95621] = "Trouble in the Valley" }, map = 1413, x = 42.01, y = 11.44, f = "e" },
 						{ t = "complete", quest = 95508, title = "Unwelcome Guests", note = "Assist Walton: stay by him when Terry Longdrink and the Kul Tiras marines come up the ridge" },
 						{ t = "turnin", quest = 95508, title = "Unwelcome Guests", npc = 261366, npcName = "Walton", map = 1413, x = 42.01, y = 11.44, f = "e" },
 					},
@@ -22862,7 +22864,7 @@ do
 					goals = {
 						{ t = "turnin", quest = 899, title = "Consumed by Hatred", npc = 3432, npcName = "Mankrik", map = 1413, x = 51.95, y = 31.58, z = 95.9, f = "e", note = "Mankrik" },
 						{ t = "turnin", quest = 4921, title = "Lost in Battle", npc = 3432, npcName = "Mankrik", map = 1413, x = 51.95, y = 31.58, z = 95.9, f = "e" },
-						{ t = "accept", quest = 95774, title = "Her Name Is Olgra", npc = 3432, npcName = "Mankrik", minLevel = 14, qlvl = 20, map = 1413, x = 51.95, y = 31.58, z = 95.9, f = "e", note = "Mankrik offers Her Name Is Olgra once Lost in Battle is handed in" },
+						{ t = "accept", quest = 95774, title = "Her Name Is Olgra", npc = 3432, npcName = "Mankrik", minLevel = 14, qlvl = 20, pre = { 4921 }, preTitles = { [4921] = "Lost in Battle" }, map = 1413, x = 51.95, y = 31.58, z = 95.9, f = "e", note = "Mankrik offers Her Name Is Olgra once Lost in Battle is handed in" },
 						{ t = "turnin", quest = 3281, title = "Stolen Silver", npc = 3464, npcName = "Gazrog", map = 1413, x = 51.93, y = 30.32, z = 96.4, f = "e", note = "Gazrog" },
 					},
 				},
