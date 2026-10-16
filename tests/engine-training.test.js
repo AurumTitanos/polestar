@@ -129,3 +129,42 @@ test('every class trainer counts, not only the reminder\'s one per town: capital
 	});
 	assert.deepEqual(out, { pet: false, weapon: false, riding: false, merchant: false });
 });
+
+// Grezz trains warriors in step 1; step 2 holds the route; step 3 trains again.
+const AGAIN = `
+local grezz = { { npc = 3353, npcName = "Grezz Ragefist", map = 1454, x = 79.8, y = 31.4, f = "e", faction = "H", classes = { "WARRIOR" } } }
+Polestar.RegisterGuide({ id = "test/again", pack = "test", title = "Trains again", faction = "Horde", minLevel = 10, maxLevel = 20, steps = {
+	{ goals = { { t = "train", class = true, candidates = grezz } } },
+	{ goals = { { t = "accept", quest = 870, title = "The Forgotten Pools", map = 1413, x = 52, y = 31 } } },
+	{ goals = { { t = "train", class = true, candidates = grezz } } },
+	{ goals = { { t = "level", level = 20 } } },
+} })
+Polestar.Engine.SetGuide("test/again")
+`;
+
+test('train class asks nothing when there is nothing new: trained at this level, or at the even level below an odd one', () => {
+	const at = (level, visit, extra = '') => run({
+		saved: { Polestar: `PolestarCharDB = { schema = 1, classTrainLevel = ${visit ?? level}${visit ? `, classTrainVisit = ${visit}` : ''} }` },
+		pre: `stub.world.level = ${level}`,
+		script: `${AGAIN} stub.advance(0.5) ${extra} emit({ step = Polestar.Engine.GetStepIndex() })`,
+	})[0].step;
+	assert.equal(at(12, 12), 2, 'trained at 12, still 12');
+	assert.equal(at(13, 12), 2, 'trained at 12, now 13: classes learn on even levels');
+	assert.equal(at(14, 12), 1, 'trained at 12, now 14: new spells');
+	assert.equal(at(13, 11), 1, 'trained at 11, now 13: 12 brought spells');
+	// Only a visit counts: a level stored on first sight (no visit) does not.
+	assert.equal(at(12, null), 1, 'no visit recorded');
+	// Done and passed stays done: the next level does not send the player back.
+	assert.equal(at(13, 12, 'stub.world.setLevel(14) stub.advance(0.5)'), 2, 'passed at 13, then 14');
+});
+
+test('opening a class trainer records the visit\'s level; a first sight does not', () => {
+	const [out] = run({
+		script: `
+			stub.advance(0.5)
+			local before = PolestarCharDB.classTrainVisit
+			stub.world.trainer(3353); stub.advance(0.5)
+			emit({ before = before or false, visit = PolestarCharDB.classTrainVisit })`,
+	});
+	assert.deepEqual(out, { before: false, visit: 12 });
+});

@@ -171,15 +171,16 @@ seen: in `PolestarDB`, the account has had its welcome (later characters skip
 its Set up page); in `PolestarCharDB`, this character has (0 while due).
 `behavior.suggestFrom` (default `"guides"`) is the pack suggestions come from.
 Modules keep their own keys beside these (`rares`, `instances` account-wide;
-`ui`, `routes`, `classTrainLevel`, `qol`, `flightTimes`, `flightNow`,
-`instanceRuns` per character), each described in its section or file header.
+`ui`, `routes`, `classTrainLevel`, `classTrainVisit`, `qol`, `flightTimes`,
+`flightNow`, `instanceRuns` per character), each described in its section or file header.
 
 `manual` holds the player's ticks (`"tick"`, any goal but a note) **and**
 latched results (`true`): NPC interactions (talk/train/vendor) are latched
 during their step, and conditions that can stop holding later (goto,
-sethome, hearth, fly, getfp, buy, bag-count collect) are latched once the
-route moves past their step, so leaving a zone or rebinding the hearthstone
-never drags the guide backwards. Quest goals are never latched: abandoning a
+sethome, hearth, fly, getfp, buy, bag-count collect, `train class` with
+nothing to learn) are latched once the route moves past their step, so
+leaving a zone, rebinding the hearthstone or levelling up never drags the
+guide backwards. Quest goals are never latched: abandoning a
 quest reopens its step (unless the player ticked it). `skipped` holds the
 steps the player skipped (step number) and the optional goals they skipped
 (`"s:g"`). `pins` is the step the player was looking at when it is not the
@@ -650,7 +651,10 @@ Polestar.Engine.GetProgress() -> doneSteps, totalSteps
   moves to the next-best one. Profession `train` goals are done when the
   profession's max rank reaches that rank's cap (75/150/225/300), so a trainer
   anywhere counts. `train class` is done on opening a trainer window for any
-  candidate during the step.
+  candidate during the step, or when there is nothing new to learn: the
+  character last visited its class trainer (`classTrainVisit`) at this level,
+  or at the even level below an odd one, since class trainers teach on even
+  levels only.
 - **Spawn areas.** A goal with `spots` is positioned at one spot, distances
   measured to each area's edge (`Compat.GetPlayerWorldPosition`). Camps: the
   spot nearest the player; a different spot takes over only once it is 40 yd
@@ -706,7 +710,8 @@ Polestar.Engine.GetProgress() -> doneSteps, totalSteps
   npc is any class trainer of the character's class, from the full id list
   (QoL learns spells only there).
   Opening the trainer window of one of the character's class stores
-  `CharState().classTrainLevel = level` and fires
+  `CharState().classTrainLevel = level` (and `classTrainVisit`, which a first
+  sight never sets) and fires
   `CLASS_TRAINED(level)`; a character first seen without a stored level counts
   as trained at that level. With `behavior.trainReminder` `"2"` (default; even
   levels only), `"1"` or `"off"`, the Engine fires `TRAIN_DUE(level, trainer)`

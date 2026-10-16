@@ -775,6 +775,7 @@ local function latchable(goal)
 	local t = goal.t
 	return t == "goto" or t == "explore" or t == "sethome" or t == "hearth" or t == "fly" or t == "getfp"
 		or t == "buy" or (t == "collect" and not goal.quest) or (t == "craft" and craftMode(goal) == "count")
+		or (t == "train" and goal.class == true)
 end
 
 -- Check-offs and latched results share CharState().manual[guideId]["s:g"].
@@ -972,6 +973,8 @@ goalDone = function(s, g, goal)
 		local _, maxRank = fn(goal.skillLine or goal.skill)
 		if not maxRank and goal.skillLine and goal.skill then _, maxRank = fn(goal.skill) end
 		return (maxRank or 0) >= rankCap(goal)
+	elseif t == "train" and goal.class and Own.nothingToTrain() then
+		return true
 	elseif t == "talk" or t == "train" or t == "vendor" then
 		-- Interactions during the step are stored as check-offs (see latch).
 		return false
@@ -2393,12 +2396,24 @@ local function checkTrainDue()
 end
 
 -- A trainer window of the character's class: trained at this level.
+-- classTrainVisit is only ever a real visit (classTrainLevel is also set on
+-- first sight), so `train class` trusts it alone.
 local function noteClassTrainer(npc)
 	if not Engine.IsClassTrainer(npc) then return end
 	refreshPlayer()
 	local s = ns.CharState()
 	s.classTrainLevel = player.level or 1
+	s.classTrainVisit = s.classTrainLevel
 	ns.Fire("CLASS_TRAINED", s.classTrainLevel)
+end
+
+-- `train class` has nothing to teach: the character visited its class trainer
+-- at this level, or at the even level below an odd one (class trainers teach
+-- on even levels only). Latched once the route moves past (latchable), so the
+-- next level does not send the player back.
+function Own.nothingToTrain()
+	local visit, level = tonumber(ns.CharState().classTrainVisit), player and player.level
+	return visit ~= nil and level ~= nil and visit <= level and level - visit <= level % 2
 end
 
 -- Fresh step state for a new guide in the loaded tab.
