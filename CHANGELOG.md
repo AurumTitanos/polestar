@@ -286,6 +286,10 @@
   the step's other goals' regions are fainter, on the world map. If the first
   camp is crowded, the next one is in sight; the next-spot button, or a click
   on a camp's mark on the world map, moves the arrow there (thanks Pynte).
+- A bug posted in the Discord #bugs forum is tracked on GitHub right away:
+  the post gets "Tracked as #N", and you hear back in it when the bug is
+  fixed, when we decide not to change it, and again when the fix is out in
+  a release.
 
 ### For guide authors
 
@@ -448,6 +452,13 @@
   renumbered the minimap's mask in the render. The pools release their
   frames newest first now, so a redraw hands every frame back the pin it
   showed (thanks CDVolvik).
+- `tools/discord-bot`: the bug bot. It files each Discord #bugs post as an
+  issue (labels from the addon's report: version, guide, locale, Lua errors,
+  the forum tags; screenshots kept on the `bug-media` branch), carries the
+  reporter's follow-ups and edits over, and with the workflows
+  `discord-issue-sync.yml` and `discord-release-notify.yml` answers the
+  thread when the issue closes, reopens or ships. Setup in
+  `tools/discord-bot/README.md`.
 
 ## 0.2.3 (2026-10-14)
 

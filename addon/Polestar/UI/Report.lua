@@ -231,7 +231,9 @@ function R.Details()
 end
 
 -- The report to paste: what went wrong, in the player's words, then the
--- details as a code block (Discord keeps their lines and spacing).
+-- details as a code block (Discord keeps their lines and spacing). The bug
+-- bot reads this layout back (tools/discord-bot/lib/report.js): the first
+-- line's shape, the guide line's "(id)", the order of the lines.
 function R.Text(description, details)
 	local desc = tostring(description or ""):match("^%s*(.-)%s*$")
 	if desc == "" then desc = L["(not described)"] end
