@@ -676,8 +676,12 @@ local TRAIL_DATA = {}
 local wC, wLeft, wTop, wKx, wKy, wSpacing
 local viewMap -- forward
 
+-- ReleaseAll goes through the pool's frames newest first, never pairs() over
+-- the frame-keyed `active` (an order of table addresses, different from run
+-- to run): Acquire pops the oldest first again, so a redraw hands every frame
+-- back the pin it showed, as the minimap's frames are released.
 local function newPool(map, mixin, mouse)
-	local pool = { active = {}, inactive = {}, count = 0 }
+	local pool = { active = {}, inactive = {}, frames = {}, count = 0 }
 
 	local function reset(pin)
 		local owner = pin.GetMap and pin:GetMap()
@@ -696,6 +700,7 @@ local function newPool(map, mixin, mouse)
 			pin = CreateFrame("Frame", nil, map:GetCanvas())
 			Mixin(pin, mixin)
 			pin:EnableMouse(mouse)
+			self.frames[#self.frames + 1] = pin
 		end
 		self.active[pin] = true
 		self.count = self.count + 1
@@ -712,7 +717,8 @@ local function newPool(map, mixin, mouse)
 	end
 
 	function pool:ReleaseAll()
-		for pin in pairs(self.active) do self:Release(pin) end
+		local frames = self.frames
+		for i = #frames, 1, -1 do self:Release(frames[i]) end
 	end
 
 	function pool:EnumerateActive()
