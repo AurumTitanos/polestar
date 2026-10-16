@@ -1,7 +1,8 @@
 -- The client's gamepad and key binding API for UI/Gamepad.lua, loaded after
 -- wow_stub.lua (and stub_ui.lua). stub.pad holds the state:
 --   enabled, devices (C_GamePad), labelStyle ("Letters" | "Shapes"),
---   down = { [button] = true } (IsKeyDown), saved = { [key] = action }
+--   down = { [button] = true } (wow_stub.lua's stub.keysDown, which IsKeyDown
+--   reads), saved = { [key] = action }
 --   (SetBinding / GetBindingKey), overrides = { [owner] = { [key] = buttonName } },
 --   blocked = { "SetOverrideBindingClick", ... } (protected calls refused in
 --   combat), ran = { action, ... } (saved bindings the game ran).
@@ -13,7 +14,7 @@
 
 local pad = {
 	enabled = true, devices = { 1 }, labelStyle = "Letters",
-	down = {}, saved = {}, overrides = {}, blocked = {}, ran = {}, saves = 0,
+	down = stub.keysDown, saved = {}, overrides = {}, blocked = {}, ran = {}, saves = 0,
 }
 stub.pad = pad
 
@@ -26,7 +27,6 @@ function C_GamePad.GetDeviceMappedState(id)
 	return { labelStyle = pad.labelStyle }
 end
 
-function IsKeyDown(key) return pad.down[key] == true end
 function GetCurrentKeyBoardFocus() return stub.focus end
 function GetBindingText(key) return key end
 
