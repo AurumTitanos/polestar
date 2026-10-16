@@ -150,18 +150,26 @@ test('--no-questie: pfQuest only, no DingDB credit; a language left without name
 	assert.deepEqual(written.map((w) => w.locale), ['deDE', 'frFR']);
 	assert.ok(!fs.existsSync(path.join(addons, 'Polestar_Names_esMX')), 'the stale folder is gone');
 	assert.ok(!fs.existsSync(path.join(addons, 'Polestar_Names_frFR', 'CREDITS.md')));
-	const lic = fs.readFileSync(path.join(addons, 'Polestar_Names_frFR', 'LICENSE-DATA.txt'), 'utf8');
-	assert.doesNotMatch(lic, /DingGuideWoWForever/);
-	assert.match(lic, /--no-questie/);
+	// Nothing DingDB alone holds reaches a written file: not its names, not its pin.
+	const dingOnly = ['Maréchal Dughan', 'Les loups à la frontière', 'Viande de loup coriace', 'Alguacil Dughan', ...Object.values(fixturePin().files)];
+	for (const dir of fs.readdirSync(addons)) {
+		for (const f of fs.readdirSync(path.join(addons, dir))) {
+			const text = fs.readFileSync(path.join(addons, dir, f), 'utf8');
+			for (const d of dingOnly) assert.ok(!text.includes(d), `${dir}/${f} holds ${d}`);
+		}
+	}
 });
 
-test('node tools/polestar.js i18n names writes the folders and prints what each language has', () => {
+test('node tools/polestar.js i18n names writes the folders and reports what each language has', () => {
 	const out = tmpdir();
-	const r = polestar(['i18n', 'names', '--no-questie', '--pfquest', PF, '--guides', INPUTS.guides, '--questdb', INPUTS.questdb, '--codex', INPUTS.codex, '--out', out]);
+	const r = polestar(['i18n', 'names', '--json', '--no-questie', '--pfquest', PF, '--guides', INPUTS.guides, '--questdb', INPUTS.questdb, '--codex', INPUTS.codex, '--out', out]);
 	assert.equal(r.status, 0, r.stderr);
-	assert.match(r.stdout, /frFR: 2 quests, 2 NPCs, 1 object, 1 item/);
-	assert.match(r.stdout, /DingDB left out \(--no-questie\)/);
-	assert.ok(fs.existsSync(path.join(out, 'Polestar_Names_frFR', 'Polestar_Names_frFR.toc')));
+	const report = JSON.parse(r.stdout);
+	assert.equal(report.ding, null);
+	assert.deepEqual(report.locales.frFR.names, { quest: 2, npc: 2, object: 1, item: 1 });
+	assert.deepEqual(fs.readdirSync(out).sort(), ['Polestar_Names_deDE', 'Polestar_Names_frFR']);
+	const lua = fs.readFileSync(path.join(out, 'Polestar_Names_frFR', 'Names.lua'), 'utf8');
+	assert.ok(lua.includes('[448]="Lardeur (pfQuest)"'), 'the pfQuest name, written for the addon');
 	const bad = polestar(['i18n', 'names', 'xxXX', '--no-questie', '--pfquest', PF]);
 	assert.notEqual(bad.status, 0);
 });

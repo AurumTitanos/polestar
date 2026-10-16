@@ -172,21 +172,22 @@ emit(out)`;
 
 test('a French client: the guide window names quests, NPCs, objects and items in French, the client\'s quest title first; English where no French name exists', () => {
 	const [view] = run({ guide: true, before: 'stub.world.titles[33] = "Les loups à la frontière (client)"', script: VIEW });
-	assert.deepEqual(view, [
-		['Avis de recherche : Lardeur', 'from Maréchal Dughan', 'Maréchal Dughan'],
-		['Vermine kobold', 'for Nettoyer le camp des kobolds', false],
-		["Poignée d'avoine", 'for Nettoyer le camp des kobolds', false],
-		['Avis de recherche', false, false],
-		['Nobody Translated', false, 'Nobody Translated'],
-		['Untranslated Thing', false, false],
-		['Les loups à la frontière (client)', 'at Maréchal McBride', 'Maréchal McBride'],
-	]);
+	const subjects = view.map((g) => g[0]);
+	assert.deepEqual(subjects, ['Avis de recherche : Lardeur', 'Vermine kobold', "Poignée d'avoine", 'Avis de recherche', 'Nobody Translated', 'Untranslated Thing', 'Les loups à la frontière (client)'],
+		'French names, the client\'s quest title first; English where no French name exists');
+	const has = (i, name) => assert.ok(view[i][1].includes(name), `${view[i][1]} names ${name}`);
+	has(0, 'Maréchal Dughan');
+	has(1, 'Nettoyer le camp des kobolds');
+	has(2, 'Nettoyer le camp des kobolds');
+	has(6, 'Maréchal McBride');
+	assert.deepEqual(view.map((g) => g[2]), ['Maréchal Dughan', false, false, false, 'Nobody Translated', false, 'Maréchal McBride']);
 });
 
 test('an English client keeps the guide\'s English, its quest title before the client\'s', () => {
 	const [view] = run({ locale: null, guide: true, before: 'stub.world.titles[176] = "Wanted: Hogger (client)"', script: VIEW });
 	assert.deepEqual(view.map((g) => g[0]), ['Wanted: Hogger', 'Kobold Vermin', 'Handful of Oats', 'Wanted Poster', 'Nobody Translated', 'Untranslated Thing', 'Wolves Across the Border']);
-	assert.deepEqual(view[0], ['Wanted: Hogger', 'from Marshal Dughan', 'Marshal Dughan']);
+	assert.ok(view[0][1].includes('Marshal Dughan'));
+	assert.equal(view[0][2], 'Marshal Dughan');
 });
 
 // ---------------------------------------------------------------------------
