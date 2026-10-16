@@ -383,7 +383,8 @@ Errors:
   trainer); an unknown profession in `train`
 - `turnin`/`complete`/objective goals for a quest that is never accepted earlier
   in this guide or in a guide that chains into it via `next`, unless the turn-in
-  is `direct`
+  is `direct` (for a repeatable quest its giver also takes back, the hint
+  suggests `turnin <id> direct`)
 - `turnin … direct` for a quest the chain accepts earlier (drop `direct`), and
   `complete` or an objective goal for a quest handed in `direct`
 - `accept` for a quest whose `races`/`classes` exclude every character the
@@ -454,7 +455,8 @@ Warnings:
 - `lint` only, with a simulator world cached in `data/sim` (or `--sim <dir>`): a
   non-`optional` quest goal in a `Leveling` guide on a quest the solo filter
   excludes (dungeon, raid, pvp, rare drop, reputation, repeatable or profession;
-  `elite` is an error, above)
+  `elite` is an error, above); a `turnin … direct` is no repeatable to grind
+  and is left out of the repeatable check
 
 These quest checks count a goal only for the characters its `only` (and the
 quest's own race and class masks) leaves. Most messages carry a `hint:` line

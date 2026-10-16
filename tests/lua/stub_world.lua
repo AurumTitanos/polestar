@@ -9,6 +9,7 @@
 --   w.accept(7, { 10 })                    -- objectives: counts or { text, type, required }
 --   w.progress(7, 1, 4)                    -- objective 1 at 4/10
 --   w.turnIn(7)
+--   w.repeatable[308] = true               -- a turn-in never flags it completed
 --   w.complete({ 783, 7 })                 -- already turned in (no events): alts
 --   w.setLevel(4); w.addItem(750, 2); w.bind("Goldshire"); w.setZone("Elwynn Forest", "Goldshire")
 --   w.gossip(197, { available = { { questID = 7, title = "..." } }, active = { { questID = 783, isComplete = true } } })
@@ -52,6 +53,7 @@ local world = {
 	frame = nil,
 	calls = {},
 	choices = {}, -- questID -> reward choices offered on its reward panel
+	repeatable = {}, -- questID -> true: a turn-in never flags it completed
 	skills = {}, -- skillLine -> { name, rank, maxRank }
 	spells = {}, -- spellbook spells
 	recipes = {}, -- learned profession recipes
@@ -154,7 +156,7 @@ end
 
 function world.turnIn(q, xp, money)
 	world.log[q] = nil
-	world.completed[q] = true
+	if not world.repeatable[q] then world.completed[q] = true end
 	fire("QUEST_TURNED_IN", q, xp or 0, money or 0)
 	fire("QUEST_REMOVED", q, false)
 	logChanged()

@@ -1049,6 +1049,10 @@ goalDone = function(s, g, goal)
 	if t == "accept" then
 		return C.IsOnQuest(goal.quest) or questDone(goal.quest)
 	elseif t == "turnin" then
+		-- `direct`: only its latched QUEST_TURNED_IN (checked above) or the
+		-- completed flag. The session's turn-ins would close every later goal
+		-- of a repeatable at the first hand-in; one hand-in closes one goal.
+		if goal.direct then return C.IsQuestCompleted(goal.quest) and true or false end
 		return questDone(goal.quest) and true or false
 	elseif t == "complete" then
 		if questDone(goal.quest) or C.IsQuestReadyForTurnIn(goal.quest) then return true end
@@ -3630,9 +3634,10 @@ ns.RegisterEvent("TAXIMAP_OPENED", function()
 	onNpcFrame("taxi")
 end)
 
--- "direct": a `turnin ... direct` goal, whose quest its giver lists among the
--- quests it offers rather than the ones in the log, so Automation picks it
--- from there.
+-- "direct": a `turnin ... direct` goal not done yet, whose quest its giver
+-- lists among the quests it offers rather than the ones in the log, so
+-- Automation picks it from there. A done one is not wanted: the giver of a
+-- repeatable keeps offering it, and a second visit must not hand in again.
 local function matchesVerb(goal, verb)
 	if verb == "direct" then return goal.t == "turnin" and goal.direct == true end
 	return goal.t == verb
@@ -3648,8 +3653,11 @@ local function wantsFrom(from, verb, questID, span)
 	for s = from, #steps do
 		local step = steps[s]
 		if stepApplies(step) then
-			for _, goal in ipairs(step.goals) do
-				if matchesVerb(goal, verb) and goal.quest == questID and goalApplies(goal) then return true end
+			for g, goal in ipairs(step.goals) do
+				if matchesVerb(goal, verb) and goal.quest == questID and goalApplies(goal)
+					and not (verb == "direct" and goalDone(s, g, goal)) then
+					return true
+				end
 			end
 			left = left - 1
 			if left == 0 then break end

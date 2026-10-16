@@ -380,6 +380,27 @@ test('#108: the same turn-in without `direct` reads as another route\'s work, an
 	assert.equal(reload, 'na', 'the hand-in is gone: a repeatable would come back as undone');
 });
 
+// The cloth donations: Additional Runecloth (7796) repeats, a `turnin 7796
+// direct` in each step. The session's memory of a turn-in must not close the
+// later steps' goals: one hand-in is one goal.
+test('#108: one hand-in of a repeatable `direct` quest checks off one goal, not every later one', () => {
+	const GUIDE = `
+		Polestar.RegisterGuide({ id = "test/cloth", pack = "test", title = "Cloth", minLevel = 1, maxLevel = 60, steps = {
+			{ title = "First", goals = { { t = "turnin", quest = 7796, title = "Additional Runecloth", direct = true, npc = 14722, npcName = "Clavicus Knavingham", map = 1429, x = 49.0, y = 42.0 } } },
+			{ title = "Second", goals = { { t = "turnin", quest = 7796, title = "Additional Runecloth", direct = true, npc = 14722, npcName = "Clavicus Knavingham", map = 1429, x = 49.0, y = 42.0 } } },
+		} })`;
+	const [out] = run({
+		guides: GUIDE,
+		before: 'w.repeatable[7796] = true',
+		saved: 'PolestarCharDB = { schema = 1, guide = "test/cloth" }',
+		script: `
+			stub.world.turnIn(7796); flush()
+			emit({ E.GetStepView(1).goals[1].status, E.GetStepView(2).goals[1].status, E.GetStepIndex() })
+		`,
+	});
+	assert.deepEqual(out, ['done', 'active', 2]);
+});
+
 test('optional goals skip with one click, are saved, and come back with another', () => {
 	const GUIDE = `
 		Polestar.RegisterGuide({ id = "test/og", pack = "test", title = "Optional", minLevel = 1, maxLevel = 60, steps = {

@@ -182,7 +182,8 @@ during their step, and conditions that can stop holding later (goto,
 sethome, hearth, fly, getfp, buy, bag-count collect, `train class` with
 nothing to learn) are latched once the route moves past their step, so
 leaving a zone, rebinding the hearthstone or levelling up never drags the
-guide backwards. Quest goals are never latched: abandoning a
+guide backwards. Quest goals are never latched, but for a `direct` turn-in's
+QUEST_TURNED_IN during its step (a repeatable is never flagged completed): abandoning a
 quest reopens its step (unless the player ticked it). `skipped` holds the
 steps the player skipped (step number) and the optional goals they skipped
 (`"s:g"`). `pins` is the step the player was looking at when it is not the
@@ -676,7 +677,7 @@ as on a bag item (`W.ItemClick`: Shift links, Ctrl tries it on, Alt guides;
 | `t` | Required | Optional | Done when (Engine) |
 |---|---|---|---|
 | `accept` | `quest`, `title` | `npc`/`npcName`, `object`/`objName`, `item`/`itemName`, `minLevel`, `qlvl`, `pre`, `preAll`, `closedBy`, `preTitles` | on quest **or** completed |
-| `turnin` | `quest`, `title` | `npc`/`npcName`, `object`/`objName`, `rewards = { choices = { { item, itemName, quality } }, items = { ... }, xp, money }` (copper) | completed |
+| `turnin` | `quest`, `title` | `npc`/`npcName`, `object`/`objName`, `rewards = { choices = { { item, itemName, quality } }, items = { ... }, xp, money }` (copper), `direct` | completed; `direct` (never accepted, so never orphaned): its QUEST_TURNED_IN during the step (latched) or the completed flag, not the session's turn-ins, so one hand-in of a repeatable closes one goal |
 | `complete` | `quest`, `title` | — | ready for turn-in or completed |
 | `kill` | `target` | `npc`, `count`, `quest`, `oi` | objective `oi` finished, or quest ready/completed (not while the log lists no objectives yet, right after the accept); without `quest`: manual |
 | `collect` | `item`, `itemName` | `count`, `quest`, `oi` | objective finished / quest ready (as `kill`) / completed; without `quest`: item count ≥ `count` |
@@ -1225,7 +1226,9 @@ one open, or while the waypoint's goal has spots.
 Automation (setting `behavior.autoAccept`, `behavior.autoTurnin`, default
 on; holding Shift suppresses): accept only quests that are `accept` goals, and
 turn in only quests that are `turnin` goals, in the current or next two
-steps; never choose among multiple rewards; with `behavior.warnClosing` on,
+steps (a `direct` one is picked from the gossip or greeting list of offered
+quests, and only while its goal is not done: the giver of a repeatable keeps
+offering it); never choose among multiple rewards; with `behavior.warnClosing` on,
 never accept a quest that closes another for good (Missable quests).
 
 ## Theme — used by UI and Nav

@@ -359,7 +359,11 @@ step Frosthowl
 # ---------------------------------------------------------------- Back to Kharanos
 
 step Kharanos
+  tip Jarven Thunderbrew guards the Thunder Ale barrels in the distillery basement. Buy a Thunder Ale from Innkeeper Belm, click the guarded barrel, then hand the ale to Jarven from his quest window (there is no quest to accept); after that, the unguarded barrel takes the Barleybrew Scalder.
   turnin 412                                  -- Razzle Sprysprocket
+  buy 2686 x1 npc 1247                        -- Thunder Ale, from Innkeeper Belm in the distillery
+  turnin 403 direct                           -- The Guarded Thunder Ale Barrel in the basement
+  turnin 308 direct                           -- Jarven Thunderbrew, beside the barrel
   turnin 310                                  -- The Unguarded Thunder Ale Barrel in the distillery
   accept 311
   turnin 287                                  -- Senir Whitebeard

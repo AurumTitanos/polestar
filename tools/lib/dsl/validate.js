@@ -507,7 +507,10 @@ function validateGuides(guides, data, diag) {
 					if (direct.has(goal.quest)) {
 						diag.error(file, ln, `\`${goal.t}\` for quest ${questName(data, goal.quest, goal.title)}, which is handed in directly (\`turnin ${goal.quest} direct\`): it is never in the quest log, so nothing tracks its objectives. Get what it asks for with a plain \`buy\` or \`collect\`, without \`quest\``);
 					} else {
-						diag.error(file, ln, `\`${goal.t}\` for quest ${goal.quest} that is never accepted earlier in this guide or a guide chaining into it`);
+						// A repeatable its giver takes back: likely handed in from the window.
+						const rq = goal.t === 'turnin' ? q : null;
+						const selfHandin = rq && rq.repeatable && rq.start && rq.end && (rq.start.npc || []).some((n) => (rq.end.npc || []).includes(n));
+						diag.error(file, ln, `\`${goal.t}\` for quest ${goal.quest} that is never accepted earlier in this guide or a guide chaining into it`, selfHandin ? 'a repeatable quest its giver takes back straight from the quest window: write `turnin <id> direct`' : undefined);
 					}
 				}
 				if (goal.t === 'turnin') {
@@ -587,7 +590,9 @@ function validateGuides(guides, data, diag) {
 // quest) should be `optional`; an elite one must be (an error, unless the
 // goal was already reported as elite work). `excluded` maps a faction to the
 // world's exclusions by quest id ({ title, reason, category }, world.excluded
-// in data/sim/world-<faction>.json); a missing faction is not checked.
+// in data/sim/world-<faction>.json); a missing faction is not checked. A
+// `turnin <id> direct` is no repeatable to grind: the route hands it in once,
+// for what it opens (Distracting Jarven frees the barrel).
 const SOLO_GOALS = new Set(['accept', 'turnin', 'complete', ...OBJECTIVE_VERBS]);
 
 function soloExclusion(e) {
@@ -605,7 +610,7 @@ function validateSoloPolicy(guides, excluded, diag) {
 				for (const side of applicable([gl, step._only, goal._only]).factions) {
 					const e = excluded[side] && excluded[side].get(goal.quest);
 					const why = e && soloExclusion(e);
-					if (!why) continue;
+					if (!why || (why === 'repeatable' && goal.direct)) continue;
 					const title = e.title || goal.title;
 					if (why === 'elite') {
 						houseRule(diag, g)(g._ast.file, goal._line, `quest ${goal.quest} (${title}) is elite (solo filter: ${e.reason}); ${eliteTip(title)}`);

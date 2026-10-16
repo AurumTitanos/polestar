@@ -39,15 +39,20 @@ local function wantsAccept(q)
 	return q and q ~= 0 and ns.Engine.WantsQuest("accept", q)
 end
 
-local function wantsTurnIn(q)
-	return q and q ~= 0 and ns.Engine.WantsQuest("turnin", q)
-end
-
 -- A `turnin ... direct`: handed in straight from the giver's window with no
 -- accept, so the NPC lists it among the quests it offers, not the ones in the
 -- log. Picking it there opens the progress window, which onProgress finishes.
+-- Wanted only while its goal is not done (a repeatable's giver keeps offering it).
 local function wantsDirect(q)
 	return q and q ~= 0 and ns.Engine.WantsQuest("direct", q)
+end
+
+-- A quest in the log by its `turnin` goal; one not in the log (its progress or
+-- reward panel opened from the giver's offers) only by a `direct` goal not done.
+local function wantsTurnIn(q)
+	if not (q and q ~= 0) then return false end
+	if ns.Compat.IsOnQuest(q) then return ns.Engine.WantsQuest("turnin", q) end
+	return wantsDirect(q)
 end
 
 local function questID()
