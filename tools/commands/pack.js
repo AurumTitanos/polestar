@@ -20,8 +20,9 @@ const { releaseRefusal, ADDON: CODEX } = require('../lib/codex/pack');
 const usage = `usage: node tools/polestar.js pack [<dir>] [options]
 
 In the repository: compiles our guides, then writes dist/Polestar-<version>.zip
-(Polestar, Polestar_Guides, Polestar_Nav, Polestar_Codex, and Polestar_QuestDB /
-Polestar_ItemDB when built), dist/Polestar_Recorder-<version>.zip and
+(Polestar, Polestar_Guides, Polestar_Nav, Polestar_Codex, the names addons
+Polestar_Names_<locale>, and Polestar_QuestDB / Polestar_ItemDB when built),
+dist/Polestar_Recorder-<version>.zip and
 dist/SHA256SUMS. Polestar/ in the zip also carries LICENSE and README.txt
 (install steps), Polestar_Recorder/ the LICENSE. The Codex must be built
 first (\`codex build\`) from release-safe inputs: pack stops on a missing
@@ -77,8 +78,10 @@ function readme(version, names) {
 		'   They are all part of Polestar: Polestar_Codex holds what Lookup,',
 		'   Dungeons and Rares show; Polestar_Nav the arrow\'s walking routes',
 		'   (Shortest Path Forever\'s pathing, by Cillian Berragan, GPL-3.0 or',
-		'   later: see its LICENSE and CREDITS.md). To update, delete the old',
-		'   Polestar folders there first.',
+		'   later: see its LICENSE and CREDITS.md); the Polestar_Names_ folders',
+		'   the game\'s quest, NPC, object and item names in each language (the',
+		'   game loads only its own). To update, delete the old Polestar folders',
+		'   there first.',
 		'2. Quit the game completely and start it again. A /reload does not',
 		'   load new addon folders.',
 		'',

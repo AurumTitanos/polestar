@@ -165,3 +165,15 @@ test('node tools/polestar.js i18n names writes the folders and prints what each 
 	const bad = polestar(['i18n', 'names', 'xxXX', '--no-questie', '--pfquest', PF]);
 	assert.notEqual(bad.status, 0);
 });
+
+test('the release zip and install take every names addon that is built, after the Codex; the nine are committed', () => {
+	const { releaseAddons } = require('../tools/lib/dsl/project');
+	const { fakeAddons } = require('./helpers/cli');
+	const { ADDONS } = require('./helpers/lua');
+	const dir = fakeAddons(tmpdir(), ['Polestar', 'Polestar_Guides', 'Polestar_Nav', 'Polestar_Codex', 'Polestar_Names_frFR']);
+	const r = releaseAddons(dir);
+	assert.deepEqual(r.names, ['Polestar', 'Polestar_Guides', 'Polestar_Nav', 'Polestar_Codex', 'Polestar_Names_frFR']);
+	assert.ok(r.skipped.includes('Polestar_Names_deDE'), 'one not built is left out');
+	const shipped = releaseAddons(ADDONS).names.filter((n) => n.startsWith(names.ADDON_PREFIX));
+	assert.deepEqual(shipped, LOCALE_CODES.map((l) => `${names.ADDON_PREFIX}${l}`));
+});
