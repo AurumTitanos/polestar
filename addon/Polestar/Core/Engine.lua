@@ -508,7 +508,8 @@ local contextGen = 0
 local picks = setmetatable({}, { __mode = "k" }) -- goal -> { list = { candidate, ... }, i, gen }
 
 -- Ranking: candidates on the player's continent always come before others,
--- even when frames are missing and travel cannot be measured. Within a
+-- even when frames are missing and travel cannot be measured; candidates in a
+-- zone far above the character (ZoneLevels) come after both. Within a
 -- tier: travel cost. Only the PLANNED nearest by straight line get the travel
 -- planner's estimate (a set can hold one vendor per town in the world); the
 -- rest count their straight-line running time. An unplaceable candidate counts
@@ -555,6 +556,7 @@ local function pickFor(goal)
 	local hc, hx, hy
 	if here then hc, hx, hy = C.MapToWorld(here.map, here.x, here.y, here.f) end
 	local farm = goal.t == "collect" and not goal.quest
+	local zoneLevels = ns.Maps and ns.Maps.GetZoneLevels
 	local list, tier, cost, extra, order, gap = {}, {}, {}, {}, {}, {}
 	local reasonable = false
 	for i, c in ipairs(goal.candidates) do
@@ -577,6 +579,11 @@ local function pickFor(goal)
 				same = line ~= nil
 			end
 			tier[c] = same and 0 or 1
+			-- A zone whose mobs start more than 10 levels above the character
+			-- (Mount Hyjal's vendors seen from Darkshore at 18) comes after
+			-- every other choice, other continents included.
+			local zoneMin = not farm and zoneLevels and zoneLevels(c.map)
+			if zoneMin and zoneMin > (player.level or 1) + 10 then tier[c] = tier[c] + 2 end
 			cost[c] = line or ((here and c.map == here.map) and 0 or UNMEASURED)
 		end
 	end

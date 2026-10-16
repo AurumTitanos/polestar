@@ -11,6 +11,11 @@
   gives no position does it fall back to the nearest known spawn, and the
   alert now says so ("known spawn 120 yd"); a spawn whose distance cannot be
   measured is no longer picked (thanks petllama and Miguel Antunes).
+- Vendors, trainers and inns the guide picks for you put towns in zones far
+  above your level last: a level 18 in Darkshore was sent to sell and repair
+  at Chagrak Hammerstrike in Mount Hyjal (56-60), nearer by straight line
+  than Auberdine. Such a town still comes up when you click through the
+  alternatives (thanks Sevenleafclover).
 - A class guide opened before your level says so: the guide window shows
   "Available from level 20" with who starts it (or the quest to finish
   first), instead of sending you to a trainer who has nothing for you, then
