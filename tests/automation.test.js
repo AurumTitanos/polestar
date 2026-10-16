@@ -245,3 +245,35 @@ test('#108: a `direct` turn-in follows autoTurnin, not autoAccept: there is no a
 	const [turninOnly] = run({ guides: DIRECT, script: `Polestar.Set("behavior.autoAccept", false)\n${script}` });
 	assert.deepEqual(turninOnly, ['C_GossipInfo.SelectAvailableQuest 308 nil']);
 });
+
+// Jarven and the cloth quartermasters keep offering their repeatable quest: a
+// `direct` goal already done must not hand in another ale or more cloth.
+test('#108: a `direct` turn-in already done is never handed in again', () => {
+	const GUIDE = `
+${TEST_PACK}
+${TEST_SOURCE}
+Polestar.RegisterGuide({
+	id = "test/auto", pack = "test", title = "Direct", minLevel = 1, maxLevel = 10,
+	steps = {
+		{ goals = {
+			{ t = "turnin", quest = 308, title = "Distracting Jarven", direct = true, npc = 1373, npcName = "Jarven Thunderbrew" },
+			{ t = "level", level = 3 },
+		} },
+	},
+})
+`;
+	const [out] = run({
+		guides: GUIDE,
+		before: 'w.repeatable[308] = true',
+		script: `
+			w.gossip(1373, { available = { { questID = 308 } } }); flush()
+			w.questProgress(1373, 308, { completable = true }); flush()
+			local first = #w.calls
+			w.gossip(1373, { available = { { questID = 308 } } }); flush(); w.close()
+			w.questProgress(1373, 308, { completable = true }); flush(); w.close()
+			w.greeting(1373, { available = { { questID = 308 } } }); flush(); w.close()
+			emit({ first = first, again = #w.calls - first, status = Polestar.Engine.GetStepView(1).goals[1].status })
+		`,
+	});
+	assert.deepEqual(out, { first: 3, again: 0, status: 'done' });
+});
