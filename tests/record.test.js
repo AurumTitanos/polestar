@@ -15,6 +15,7 @@ const { draftGuide } = require('../tools/lib/recording/draft');
 // The guide compiler's parser: drafts must parse cleanly.
 const { parseGuide } = require('../tools/lib/dsl/parse');
 const { Diagnostics } = require('../tools/lib/dsl/diag');
+const { checkLocation } = require('../tools/lib/dsl/places');
 const { tmpdir } = require('./helpers/tmp');
 
 const CLI = path.join(__dirname, '..', 'tools', 'polestar.js');
@@ -330,7 +331,7 @@ step Marshal Dughan
 step Dungar Longdrink
   zone Stormwind City
   getfp "Stormwind, Elwynn" npc 352 @66.3,62.1
-  fly "Sentinel Hill, Westfall"
+  fly "Sentinel Hill"
 `;
 
 test('draft turns a session into a guide in the .guide DSL', () => {
@@ -368,6 +369,24 @@ test('the draft parses without diagnostics in the guide compiler', () => {
 	const kill = guide.steps[1].goals[0];
 	assert.deepEqual([kill.npc, kill.count, kill.quest, kill.oi, kill.x, kill.y], [6, 10, 7, 1, 47.3, 35.4]);
 	assert.deepEqual(guide.steps[4].goals[0].zone.name, 'Stormwind City');
+});
+
+test('the recording keeps the full flight point name; the draft flies to its town, which lint accepts', () => {
+	const dir = tmpdir('polestar-record-');
+	importFile(writeSv(dir, svText()), { outDir: dir });
+	const session = readJson(path.join(dir, `${HUMAN}.json`));
+	assert.equal(session.events.find((ev) => ev.e === 'taxi').to, 'Sentinel Hill, Westfall');
+	const guide = parseGuide(draftGuide(session).text, 'draft.guide', new Diagnostics());
+	const data = {
+		inns: () => [],
+		flightNodes: () => [{ name: 'Stormwind, Elwynn' }, { name: 'Sentinel Hill, Westfall' }],
+		zone: () => null,
+	};
+	const travel = guide.steps.flatMap((s) => s.goals).filter((g) => g.verb === 'fly' || g.verb === 'getfp');
+	assert.deepEqual(travel.map((g) => [g.verb, g.location]), [['getfp', 'Stormwind, Elwynn'], ['fly', 'Sentinel Hill']]);
+	for (const g of travel) assert.equal(checkLocation(data, g.verb, g.location), null, `${g.verb} "${g.location}"`);
+	// The full name is what the old draft wrote: lint flags it, the game never reports it on landing.
+	assert.notEqual(checkLocation(data, 'fly', 'Sentinel Hill, Westfall'), null);
 });
 
 test('record CLI: import then draft, refusing to overwrite an edited draft', () => {

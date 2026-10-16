@@ -56,6 +56,12 @@ function plain(s) {
 	return String(s).replace(/[\r\n]+/g, ' ').replace(/#/g, '').replace(/\s--\s/g, ' - ').replace(/\s+/g, ' ').trim();
 }
 
+// A flight point's town: its name before the first comma ("Sentinel Hill,
+// Westfall" -> "Sentinel Hill"), what a `fly` goal names (docs/GUIDE_FORMAT.md).
+function town(name) {
+	return String(name).split(',')[0].trim();
+}
+
 function num(v) {
 	return Math.min(100, Math.max(0, v)).toFixed(1);
 }
@@ -214,7 +220,7 @@ function draftGuide(session, { pack = 'guides' } = {}) {
 				hub(`vendor${ev.npc !== undefined ? ` ${ev.npc}` : ''}${at(ev)}`, ev.npcName);
 				break;
 			case 'taxi':
-				if (ev.to) items.push({ cat: 'travel', t: ev.t, map: zoneMap, line: `fly ${quote(ev.to)}`, who: `Fly to ${ev.to}`, comments: [] });
+				if (ev.to) items.push({ cat: 'travel', t: ev.t, map: zoneMap, line: `fly ${quote(town(ev.to))}`, who: `Fly to ${ev.to}`, comments: [] });
 				break;
 			case 'mark':
 				if (ev.text) items.push({ cat: 'note', t: ev.t, ...pos, line: `note ${quote(ev.text)}` });
