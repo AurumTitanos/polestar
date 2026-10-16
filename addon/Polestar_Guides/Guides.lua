@@ -5983,6 +5983,7 @@ do
 						{ t = "turnin", quest = 3448, title = "Passing the Burden", npc = 8507, npcName = "Tymor", map = 1455, x = 30.96, y = 4.83, z = 509, f = "e", note = "Tymor" },
 						{ t = "accept", quest = 3449, title = "Arcane Runes", npc = 8507, npcName = "Tymor", minLevel = 45, qlvl = 52, pre = { 3448 }, preTitles = { [3448] = "Passing the Burden" }, map = 1455, x = 30.96, y = 4.83, z = 509, f = "e", note = "Four rune rubbings in Azshara: keep it" },
 						{ t = "accept", quest = 3450, title = "An Easy Pickup", npc = 8507, npcName = "Tymor", minLevel = 45, qlvl = 52, pre = { 3448 }, preTitles = { [3448] = "Passing the Burden" }, map = 1455, x = 30.96, y = 4.83, z = 509, f = "e" },
+						{ t = "accept", quest = 8254, title = "Cenarion Aid", npc = 11406, npcName = "High Priest Rohan", minLevel = 50, qlvl = 52, map = 1455, x = 24.73, y = 8.16, z = 501.1, f = "e", only = { classes = { "PRIEST" } }, note = "High Priest Rohan: for Ogtinc in Azshara, keep it" },
 					},
 				},
 				{
@@ -6082,6 +6083,31 @@ do
 					},
 				},
 				{
+					title = "Ogtinc",
+					note = "Ride north-east from the shrine: Ogtinc camps at the Bear's Head, in the hills above the road.",
+					only = { classes = { "PRIEST" } },
+					goals = {
+						{ t = "turnin", quest = 8254, title = "Cenarion Aid", npc = 8405, npcName = "Ogtinc", map = 1447, x = 42.4, y = 42.62, z = 154.5, f = "e", note = "Ogtinc" },
+						{ t = "accept", quest = 8255, title = "Of Coursers We Know", npc = 8405, npcName = "Ogtinc", minLevel = 50, qlvl = 52, pre = { 8254 }, preTitles = { [8254] = "Cenarion Aid" }, map = 1447, x = 42.4, y = 42.62, z = 154.5, f = "e" },
+					},
+				},
+				{
+					title = "Mosshoof Coursers",
+					note = "The nearest Mosshoof Coursers graze the hills north-east of the Bear's Head, toward the Legashi Encampment; a larger herd roams the open ground to the south.",
+					only = { classes = { "PRIEST" } },
+					goals = {
+						{ t = "collect", quest = 8255, title = "Of Coursers We Know", item = 20027, itemName = "Healthy Courser Gland", count = 4, oi = 1, map = 1447, x = 52.1, y = 35.39, f = "e", spots = { { x = 52.1, y = 35.4, r = 61, n = 1 }, { x = 52.4, y = 25.2, r = 61, n = 3 }, { x = 53, y = 14.7, r = 61, n = 2 }, { x = 46.2, y = 18.6, r = 61, n = 1 }, { x = 62.5, y = 16.1, r = 103, n = 5 }, { x = 70.7, y = 29.2, r = 61, n = 3 }, { x = 75.7, y = 22.6, r = 61, n = 1 }, { x = 83, y = 24.1, r = 61, n = 1 }, { x = 57.1, y = 85.8, r = 94, n = 6 }, { x = 45.4, y = 80.8, r = 102, n = 7 }, { x = 42.1, y = 72.1, r = 81, n = 3 }, { x = 36, y = 67.2, r = 78, n = 6 }, { x = 52, y = 31, r = 87, n = 6, alt = true }, { x = 49.5, y = 26.4, r = 101, n = 7, alt = true }, { x = 56.8, y = 22.3, r = 69, n = 3, alt = true }, { x = 48.5, y = 20.6, r = 61, n = 1, alt = true }, { x = 55.9, y = 17.7, r = 61, n = 4, alt = true }, { x = 58.5, y = 18.4, r = 61, n = 2, alt = true }, { x = 61.9, y = 19.5, r = 61, n = 2, alt = true }, { x = 65.2, y = 23.4, r = 65, n = 3, alt = true }, { x = 67.4, y = 26.9, r = 61, n = 2, alt = true }, { x = 73.1, y = 32.3, r = 61, n = 2, alt = true }, { x = 68.4, y = 15.2, r = 61, n = 1, alt = true }, { x = 73.1, y = 22.2, r = 61, n = 1, alt = true }, { x = 78.1, y = 26.3, r = 116, n = 4, alt = true }, { x = 39.2, y = 70.5, r = 96, n = 7, alt = true }, { x = 50.7, y = 76, r = 70, n = 3, alt = true }, { x = 46.8, y = 75.4, r = 79, n = 3, alt = true }, { x = 57.9, y = 77.7, r = 61, n = 4, alt = true }, { x = 81, y = 27.2, r = 61, n = 1, alt = true }, { x = 54.1, y = 79.7, r = 61, n = 4, alt = true }, { x = 50.7, y = 80.6, r = 93, n = 7, alt = true }, { x = 81.2, y = 18.6, r = 61, n = 1, alt = true }, { x = 59.3, y = 81.4, r = 61, n = 4, alt = true }, { x = 54, y = 83.5, r = 61, n = 4, alt = true }, { x = 48, y = 83.3, r = 90, n = 7, alt = true } }, spread = true, note = "Healthy Courser Gland", from = "Mosshoof Courser", fromKind = "npc" },
+					},
+				},
+				{
+					title = "Ogtinc",
+					only = { classes = { "PRIEST" } },
+					goals = {
+						{ t = "turnin", quest = 8255, title = "Of Coursers We Know", npc = 8405, npcName = "Ogtinc", map = 1447, x = 42.4, y = 42.62, z = 154.5, f = "e", note = "Ogtinc" },
+						{ t = "accept", quest = 8256, title = "The Ichor of Undeath", npc = 8405, npcName = "Ogtinc", minLevel = 50, qlvl = 52, pre = { 8255 }, preTitles = { [8255] = "Of Coursers We Know" }, map = 1447, x = 42.4, y = 42.62, z = 154.5, f = "e" },
+					},
+				},
+				{
 					title = "Sanath Lim-yo",
 					note = "Optional: Sanath Lim-yo wants two Undamaged Hippogryph Feathers from the hippogryphs around his camp. The data lists no experience for it.",
 					goals = {
@@ -6112,6 +6138,15 @@ do
 						{ t = "collect", quest = 3449, title = "Arcane Runes", item = 10564, itemName = "Rubbing: Rune of Jin'yael", oi = 2, map = 1447, x = 39.56, y = 50.25, f = "e", note = "Rune of Jin'yael", from = "Rune of Jin'yael", fromKind = "object" },
 						{ t = "collect", quest = 3449, title = "Arcane Runes", item = 10565, itemName = "Rubbing: Rune of Markri", oi = 3, map = 1447, x = 39.36, y = 55.48, f = "e", note = "Rune of Markri", from = "Rune of Markri", fromKind = "object" },
 						{ t = "collect", quest = 3449, title = "Arcane Runes", item = 10566, itemName = "Rubbing: Rune of Sael'hai", oi = 4, map = 1447, x = 42.38, y = 64.15, f = "e", note = "Rune of Sael'hai", from = "Rune of Sael'hai", fromKind = "object" },
+						{ t = "collect", quest = 8256, title = "The Ichor of Undeath", item = 7972, itemName = "Ichor of Undeath", count = 1, oi = 1, map = 1447, x = 38.83, y = 60.57, f = "e", spots = { { x = 38.8, y = 60.6, r = 40, n = 1 }, { x = 39.1, y = 55.3, r = 40, n = 1 }, { x = 39.4, y = 50.3, r = 40, n = 1 }, { x = 40.3, y = 46.1, r = 40, n = 1 }, { x = 36.3, y = 48, r = 40, n = 1 }, { x = 35.2, y = 51.8, r = 40, n = 1 }, { x = 17.3, y = 66.4, r = 40, n = 3 }, { x = 17, y = 68.3, r = 47, n = 6 }, { x = 17.7, y = 69.8, r = 40, n = 3 }, { x = 16.4, y = 72.2, r = 56, n = 4 }, { x = 14.2, y = 72.7, r = 40, n = 5 } }, spread = true, only = { classes = { "PRIEST" } }, note = "Ichor of Undeath: the Lingering Highborne, about 10%" },
+					},
+				},
+				{
+					title = "Ogtinc",
+					note = "Climb back to Ogtinc at the Bear's Head, above the ruins.",
+					only = { classes = { "PRIEST" } },
+					goals = {
+						{ t = "turnin", quest = 8256, title = "The Ichor of Undeath", npc = 8405, npcName = "Ogtinc", map = 1447, x = 42.4, y = 42.62, z = 154.5, f = "e", note = "Ogtinc" },
 					},
 				},
 				{

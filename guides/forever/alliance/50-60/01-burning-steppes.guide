@@ -22,6 +22,14 @@
 #   Hinterlands after Nethergarde Keep, and 3661 is handed in at Rut'theran, which opens Moontouched Wildkin (978)
 #   and the Ranshalla chain after it (979, 4901, 4902). Measured with sim compare against dropping the chain: about
 #   0.6 h faster to 60 for every start, despite the flight to Aerie Peak and the boat to Rut'theran.
+# - Added: the Priest chain Cenarion Aid, Of Coursers We Know and The Ichor of Undeath (8254, 8255, 8256) runs on the
+#   Azshara stop the route already makes. Cenarion Aid is taken from High Priest Rohan at the Ironforge stop that ends
+#   40-50/07; Ogtinc camps at the Bear's Head, on the cliffs above the Ruins of Eldarath, between Shadowsong Shrine
+#   and Kim'jael. The Ichor of Undeath (about 10% from the Lingering Highborne) is looted in the Eldarath pass the
+#   route already makes for Kim'jael and Tymor. Blood of Morphaz (8257) is left out: its item lies inside the Sunken
+#   Temple. Measured with the simulator scored for a Priest (sim compare scores no class) against leaving the chain
+#   off: about 0.5 h faster to 60 and 0.7 h less grinding for every Alliance Priest start. The simulator's world keeps
+#   one giver per quest (Brother Joshua in Stormwind for 8254), so Rohan was scored by moving it to the Mystic Ward.
 # Carried on: Felnok Steelspring (4808) for Everlook, Moontouched Wildkin (978) for Winterspring, The Smoldering
 # Ruins of Thaurissan (3701) for Ironforge at 57.
 # Left out: Ragnar Thunderbrew (4128: the export never turns it in).
@@ -67,6 +75,22 @@ step Shadowsong Shrine
   turnin 5535                         -- Loh'atu
   turnin 5536
 
+step Ogtinc
+  only Priest
+  tip Ride north-east from the shrine: Ogtinc camps at the Bear's Head, in the hills above the road.
+  turnin 8254                         -- Ogtinc
+  accept 8255
+
+step Mosshoof Coursers
+  only Priest
+  tip The nearest Mosshoof Coursers graze the hills north-east of the Bear's Head, toward the Legashi Encampment; a larger herd roams the open ground to the south.
+  collect 20027 quest 8255.1          -- Healthy Courser Gland
+
+step Ogtinc
+  only Priest
+  turnin 8255                         -- Ogtinc
+  accept 8256
+
 step Sanath Lim-yo
   tip Optional: Sanath Lim-yo wants two Undamaged Hippogryph Feathers from the hippogryphs around his camp. The data lists no experience for it.
   accept 3381 optional
@@ -90,6 +114,12 @@ step The Ruins of Eldarath
   collect 10564 quest 3449.2          -- Rune of Jin'yael
   collect 10565 quest 3449.3          -- Rune of Markri
   collect 10566 quest 3449.4          -- Rune of Sael'hai
+  collect 7972 quest 8256.1 only Priest -- Ichor of Undeath: the Lingering Highborne, about 10%
+
+step Ogtinc
+  only Priest
+  tip Climb back to Ogtinc at the Bear's Head, above the ruins.
+  turnin 8256                         -- Ogtinc
 
 step Kim'jael
   turnin 5534
