@@ -50,6 +50,16 @@ function ns.LC(context, text)
 	return rawget(L, context .. ": " .. text) or text
 end
 
+-- The interface's translations made with AI (tools/lib/i18n/locales.js,
+-- status "ai"; tests/i18n.test.js keeps the two lists equal).
+ns.AI_LOCALES = { esES = true, koKR = true, ptBR = true, ruRU = true, zhCN = true, zhTW = true }
+
+-- True when this client reads an AI-made translation: its locale is one of
+-- AI_LOCALES and its file filled L. Options' About then says so.
+function ns.AITranslation()
+	return (GetLocale and ns.AI_LOCALES[GetLocale()] == true and next(L) ~= nil) or false
+end
+
 -- Game terms in the client's own words, so they read as the game writes them
 -- in every language (docs/ARCHITECTURE.md, "Localisation"); nil where the
 -- client has none. A reputation standing, 1 (Hated) to 8 (Exalted), in the

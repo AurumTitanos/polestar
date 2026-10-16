@@ -504,7 +504,14 @@ local function buildAbout(view)
 	local stage = W.Chip(hero)
 	stage:SetPoint("LEFT", ver, "RIGHT", 8, 0)
 	view.Stage = stage
-
+	-- On a client reading an AI-made translation (ns.AITranslation), a line
+	-- under the hero says so, with the Discord invite where players help fix it.
+	local aiNote = W.Text(view, "note", "textDim")
+	aiNote:SetWordWrap(true)
+	aiNote:SetJustifyH("LEFT")
+	aiNote:SetText(L["This translation was made with AI. Help improve it on Discord."])
+	local aiLink = W.Link(view, (ns.DiscordURL:gsub("^%a+://", "")), function() UI.ShowDiscord() end)
+	view.AINote, view.AILink = aiNote, aiLink
 	local function block(title, text)
 		local h = W.SectionHeader(view)
 		W.SetSection(h, title)
@@ -566,6 +573,18 @@ local function buildAbout(view)
 		hero:SetPoint("TOPLEFT", view, "TOPLEFT", SH.pad, -y)
 		hero:SetWidth(width)
 		y = y + HERO_H
+		local ai = ns.AITranslation()
+		aiNote:SetShown(ai)
+		aiLink:SetShown(ai)
+		if ai then
+			aiNote:SetWidth(width)
+			aiNote:ClearAllPoints()
+			aiNote:SetPoint("TOPLEFT", view, "TOPLEFT", SH.pad, -y)
+			y = y + aiNote:GetStringHeight() + 4
+			aiLink:ClearAllPoints()
+			aiLink:SetPoint("TOPLEFT", view, "TOPLEFT", SH.pad, -y)
+			y = y + aiLink:GetHeight() + 12
+		end
 		whyH:ClearAllPoints()
 		whyH:SetPoint("TOPLEFT", view, "TOPLEFT", SH.pad, -y)
 		whyH:SetWidth(width)

@@ -1358,6 +1358,7 @@ L["Keep the bottom edge in place, so longer steps extend the window up."] = "Man
 -- L["Moving dots from you to the target on the world map and the minimap, along the travel route, while route lines are off."] = ""
 -- L["Talents"] = ""
 -- L["Talent plan"] = ""
+-- L["This translation was made with AI. Help improve it on Discord."] = ""
 
 -- UI/Packs.lua
 L["turned off in the AddOns list"] = "desactivado en la lista de AddOns"

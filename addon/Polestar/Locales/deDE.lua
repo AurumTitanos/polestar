@@ -905,6 +905,7 @@ L["Close the game menu to see Polestar's settings (it cannot be closed for you i
 -- L["Moving dots from you to the target on the world map and the minimap, along the travel route, while route lines are off."] = ""
 -- L["Talents"] = ""
 -- L["Talent plan"] = ""
+-- L["This translation was made with AI. Help improve it on Discord."] = ""
 
 -- UI/Dungeons.lua
 L["Ready to turn in"] = "Bereit zur Abgabe"

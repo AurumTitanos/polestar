@@ -11,6 +11,7 @@ const path = require('node:path');
 const fs = require('node:fs');
 const { spawnSync } = require('node:child_process');
 const { runAddon, ADDONS, ROOT } = require('./helpers/lua');
+const { fakeLocale } = require('./helpers/locale');
 const { tmpdir } = require('./helpers/tmp');
 const { formatProblems } = require('../tools/lib/i18n/check');
 const { extractKeys } = require('../tools/lib/i18n/keys');
@@ -231,4 +232,29 @@ test('each shipped language loads before the code that reads L at load: the key 
 	}
 	const [en] = runAddon({ addons: [{ name: 'Polestar', files: ['Core/Core.xml'] }], script: 'emit(BINDING_NAME_POLESTAR_TOGGLE)' }).emitted;
 	assert.equal(en, 'Toggle guide window');
+});
+
+test('the Lua list of AI-made locales is locales.js\'s', () => {
+	const [ai] = runAddon({ addons: [{ name: 'Polestar', files: ['Core/Init.lua'] }], script: 'emit(Polestar.AI_LOCALES)' }).emitted;
+	assert.deepEqual(Object.keys(ai).sort(), LOCALE_CODES.filter((l) => LOCALES[l].status === 'ai'));
+});
+
+// Options > About on a client: the AI line's text, or false when hidden.
+function aboutNote(before, between = '') {
+	return runAddon({
+		stubs: ['stub_ui.lua'],
+		before,
+		addons: [{ name: 'Polestar', files: ['Core/Core.xml', 'Theme/Theme.xml', 'UI/UI.xml'] }],
+		script: `${between}\nuistub.install()\nstub.login()\nPolestar.UI.ShowOptions("about")
+		local v = Polestar.UI.Options.view
+		emit(v.AINote:IsShown() and { note = v.AINote:GetText(), link = v.AILink.Label:GetText() } or false)`,
+	}).emitted[0];
+}
+
+test('Options > About says an AI-made translation is one, with the Discord invite; a reviewed one and English say nothing', () => {
+	const ai = aboutNote(fakeLocale('itIT', { 'This translation was made with AI. Help improve it on Discord.': 'Tradotto con l\'IA. Aiutaci su Discord.' }), 'Polestar.AI_LOCALES.itIT = true');
+	assert.deepEqual(ai, { note: 'Tradotto con l\'IA. Aiutaci su Discord.', link: 'discord.gg/vMbee6F2e9' });
+	assert.equal(aboutNote(fakeLocale('itIT', {}), 'Polestar.AI_LOCALES.itIT = true'), false, 'no translation loaded: English, no note');
+	assert.equal(aboutNote('function GetLocale() return "deDE" end'), false, 'reviewed');
+	assert.equal(aboutNote(''), false, 'English');
 });
