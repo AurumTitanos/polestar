@@ -1,7 +1,8 @@
 -- The rare alert (PolestarRareToast): a small card in Polestar's world, the
 -- night band carrying the rare's glyph, name and one line of facts (level and
--- kind, distance or "in sight", zone), then two actions: "Set waypoint" (Nav
--- to where it was seen, else its nearest known spawn) and "Show rare" or
+-- kind, distance, "in sight" or "known spawn 120 yd", zone), then two
+-- actions: "Set waypoint" (Nav to the vignette's live position, else where it
+-- was seen, else its nearest known spawn) and "Show rare" or
 -- "Show treasure" (the Rares section at it: its drop, places and history). It slides in
 -- from above, drains a hairline while it waits, holds while the cursor is on
 -- it, and closes itself after rares.toastSeconds. Drag to move (saved in
@@ -35,9 +36,14 @@ end
 
 local function waypoint()
 	local a = current
-	if not (a and a.map and a.x and a.y) then return end
+	if not a then return end
+	-- A vignette still on the minimap has a fresher place than the alert's.
+	local live = a.vignette and Rares.Detect and Rares.Detect.VignetteWhere and Rares.Detect.VignetteWhere(a.vignette)
+	local map, x, y, fr = a.map, a.x, a.y, a.f
+	if live then map, x, y, fr = live.map, live.x, live.y, nil end
+	if not (map and x and y) then return end
 	local N = ns.Nav
-	if N and N.SetTarget then N.SetTarget(a.map, a.x, a.y, a.name, a.f) end
+	if N and N.SetTarget then N.SetTarget(map, x, y, a.name, fr) end
 	T.Hide()
 end
 
@@ -58,6 +64,9 @@ function T.Facts(a)
 		parts[#parts + 1] = Rares.YardsText(a.yards)
 	elseif a.inSight then
 		parts[#parts + 1] = L["in sight"]
+	elseif a.spawnYards then
+		-- Not its own position: say the waypoint is a spawn, and how far.
+		parts[#parts + 1] = format(L["known spawn %s"], Rares.YardsText(a.spawnYards))
 	end
 	if a.zone then parts[#parts + 1] = a.zone end
 	return concat(parts, DOT)

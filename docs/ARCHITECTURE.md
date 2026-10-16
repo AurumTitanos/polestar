@@ -2030,8 +2030,11 @@ Polestar.Rares.Show(kind, id)                       -- SHOW_RARES: the hub secti
   most 400 entries; the cooldown reads `alerted` (epoch seconds), so it
   survives a reload. Losing it only resets cooldowns and the Seen list.
 - **Toast** (`PolestarRareToast`): name, "Level n Rare · 85 yd · Zone"
-  (vignettes: the distance; units: "in sight"), "Set waypoint" (the vignette's
-  position, else the nearest known spawn) and "Show rare" (the section),
+  (vignettes: the distance; units: "in sight"; a vignette without a position:
+  "known spawn 120 yd"), "Set waypoint" (the vignette's position, asked again
+  on the click and on parent maps when the player's map lacks it; a unit:
+  where it was seen; else the nearest known spawn on the player's continent,
+  or no waypoint) and "Show rare" (the section),
   `rares.toastSeconds` with a drain line, held under the cursor, draggable
   (`rares.toastPoint`).
 - **Pins**: layers `rares.rare` and `rares.treasure` through `Polestar.Pins`,

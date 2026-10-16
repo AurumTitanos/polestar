@@ -4,6 +4,14 @@
 
 ### For players
 
+- A rare alert's "Set waypoint" goes to the rare, not to a spawn point across
+  the zone: a rare in sight (nameplate, target or mouseover) sets it where you
+  saw it, and a minimap rare is asked for its position again on the click and
+  on the zone's map when a subzone or cave map lacks it. Only when the game
+  gives no position does it fall back to the nearest known spawn, and the
+  alert now says so ("known spawn 120 yd"); a spawn whose distance cannot be
+  measured is no longer picked (thanks Miguel Antunes).
+
 - A class guide opened before your level says so: the guide window shows
   "Available from level 20" with who starts it (or the quest to finish
   first), instead of sending you to a trainer who has nothing for you, then

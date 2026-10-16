@@ -320,9 +320,15 @@ function Rares.PlaySound()
 	end
 end
 
--- The alert for a sighting: what the toast shows. A vignette gives the
--- thing's own position (distance from the player); a unit seen by nameplate,
--- target or mouseover is in sight, and its waypoint is its nearest known spawn.
+-- The alert for a sighting: what the toast shows, and where its waypoint goes.
+--   * A vignette with a position: the thing's own position, at its distance.
+--   * A unit seen by nameplate, target or mouseover: in sight, so the waypoint
+--     is where it was seen (the player's spot then), not one of its spawns,
+--     which can be across the zone from a rare that walks.
+--   * A vignette without a position: its nearest known spawn, flagged
+--     (spawnYards) so the toast says it is a spawn; no waypoint when no spawn
+--     is on the player's continent. The toast asks the vignette again when
+--     the waypoint is set (a.vignette).
 local function alertOf(s, where, exact)
 	local kind = s.kind == "treasure" and "treasure" or "rare"
 	local info = s.id and Rares.Info(kind, s.id)
@@ -333,18 +339,22 @@ local function alertOf(s, where, exact)
 		level = unitLevel or (info and info.level), levelMax = not unitLevel and info and info.levelMax or nil,
 		elite = s.classification == "rareelite" or (info and info.elite) or false,
 		loot = info and #info.loot or nil,
+		vignette = s.vignette,
 	}
 	local me = ns.PlayerPoint()
 	if exact and where and where.map then
 		a.map, a.x, a.y = where.map, where.x, where.y
 		a.yards = me and Rares.Yards(me, where)
+	elseif s.source == "nameplate" or s.source == "target" or s.source == "mouseover" then
+		a.inSight = true
+		local seen = where or me
+		if seen and seen.map then a.map, a.x, a.y = seen.map, seen.x, seen.y end
 	else
-		a.inSight = s.source == "nameplate" or s.source == "target" or s.source == "mouseover"
-		local spawn = info and Rares.Nearest(info.spawns, me)
-		if spawn then
+		local spawn, d = nil, nil
+		if info then spawn, d = Rares.Nearest(info.spawns, me) end
+		if spawn and d then
 			a.map, a.x, a.y, a.f = spawn.map, spawn.x, spawn.y, spawn.f
-		elseif where and where.map then
-			a.map, a.x, a.y = where.map, where.x, where.y
+			a.spawnYards = d
 		end
 	end
 	a.zone = mapName((me and me.map) or a.map)
