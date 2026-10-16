@@ -641,9 +641,13 @@ emit(out)`,
 // description, with what the release zip carries (no local crossing data): a
 // Horde character at the Crossroads who knows Sun Rock Retreat, Splintertree
 // Post and Zoram'gar Outpost, guided to Ashenvale 40,70, just north-east of
-// the ridge. Straight x1.25 the route lands at Sun Rock Retreat, south-west,
-// and walks over the ridge; the engine's walk from there runs 365 yd off that
-// line, and from Splintertree Post it is 240 yd shorter.
+// the ridge. Without crossing data for Kalimdor, straight x1.25 the route
+// lands at Sun Rock Retreat, south-west, and walks over the ridge; the
+// engine's walk from there runs 365 yd off that line, and from Splintertree
+// Post it is 240 yd shorter. With complete crossing data (Carbonite's, in
+// TravelData.lua) Sun Rock Retreat's walk must take the Talondeep Path and
+// the straight plan lands at Splintertree Post already; either way the
+// measured plan lands there and draws its last walk along the engine's path.
 test('Ashenvale 40,70 from the Crossroads: the route lands where the engine\'s walk is short (Splintertree Post, not Sun Rock Retreat over the ridge), and its last walk follows the engine\'s path', { skip }, (t) => {
 	const out = run(t, `
 		w.faction = "Horde"
@@ -667,7 +671,9 @@ test('Ashenvale 40,70 from the Crossroads: the route lands where the engine\'s w
 		end
 		N.SetTarget(1440, 40, 70, "Fitz's marker", "e")
 		aim()
-		local r = { before = route() }
+		local covered = N.travel.CrossingCounts()
+		local r = { before = route(), kalimdorCrossings = false }
+		for _, c in ipairs(covered) do if c == 1 then r.kalimdorCrossings = true end end
 		local n = 0
 		while n < 400 and route().engine ~= "path" do stub.advance(0.05); aim(); n = n + 1 end
 		r.after = route()
@@ -688,7 +694,7 @@ test('Ashenvale 40,70 from the Crossroads: the route lands where the engine\'s w
 		r.sunPath = { length = length(pts), off = off }
 		emit(r)`, { shipped: true });
 	const gap = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
-	assert.equal(out.before.lands, 'Sun Rock Retreat, Stonetalon Mountains', 'straight x1.25 lands south-west of the ridge');
+	if (!out.kalimdorCrossings) assert.equal(out.before.lands, 'Sun Rock Retreat, Stonetalon Mountains', 'straight x1.25 lands south-west of the ridge');
 	assert.equal(out.before.n, 2, 'and draws its last walk straight');
 	assert.ok(out.sunPath.off > 150, `the engine's walk from Sun Rock Retreat runs ${out.sunPath.off.toFixed(0)} yd off that straight line (${out.sunPath.length.toFixed(0)} yd against ${out.straight.sun.toFixed(0)} straight)`);
 	assert.ok(out.measured.sun > out.measured.splinter + 150, `measured: Sun Rock Retreat ${out.measured.sun.toFixed(0)} yd, Splintertree Post ${out.measured.splinter.toFixed(0)} yd (straight ${out.straight.sun.toFixed(0)} and ${out.straight.splinter.toFixed(0)})`);
