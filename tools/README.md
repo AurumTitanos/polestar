@@ -98,6 +98,7 @@ The release steps are in [docs/RELEASING.md](../docs/RELEASING.md).
 | `planner/` | The route planner: server, workspace (packs, sources, edits, undo, lint), the command registry shared by HTTP, MCP and WebMCP, the MCP bridge, the walk routes on the navigation grid (`navpool.js`: worker pool, route cache, Walkable tiles) and the page in `planner/public` (WebGL2 map in `public/map`) |
 | `readme/` | The README's art, drawn by `readme`: `brand.js` (banners, emblem, logo, download and CurseForge buttons, CurseForge avatar) with the wordmark outlines of `outline.js`, `charts.js` (route charts) and `png.js` (the listing's PNG copies, through `rsvg-convert`) |
 | `templates/pack/` | What `new` copies into a new guide pack |
+| `discord-bot/` | The bug bot, a service rather than a command: files the Discord #bugs forum's posts as GitHub issues and tells the threads when they are fixed or shipped; setup in [discord-bot/README.md](discord-bot/README.md) |
 
 ### tools/lib
 

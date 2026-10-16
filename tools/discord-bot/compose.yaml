@@ -1,0 +1,26 @@
+# The bug bot as its own Compose project, apart from anything else on the
+# host: its own network, no ports (it only calls out to Discord and GitHub),
+# a read-only filesystem and a memory cap.
+#
+#   docker compose up -d --build     start, or update after a git pull
+#   docker compose logs -f           what it is doing
+
+name: polestar-bot
+
+services:
+  bot:
+    build: .
+    image: polestar-bot:latest
+    env_file: .env
+    restart: unless-stopped
+    init: true
+    read_only: true
+    mem_limit: 256m
+    cpus: 0.5
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"

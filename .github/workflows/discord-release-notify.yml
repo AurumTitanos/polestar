@@ -1,0 +1,53 @@
+name: Discord release notes
+
+# A release is published: every issue filed from the Discord #bugs forum and
+# closed as completed since the release before it gets "the fix is out in
+# <release>" in its thread and the label released:<tag>, so a re-run never
+# tells a thread twice. tools/discord-bot/README.md has the setup.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to announce again (threads already told are skipped)
+        required: true
+
+permissions:
+  issues: write
+  contents: read
+
+concurrency:
+  group: discord-release
+
+jobs:
+  notify:
+    name: Tell the threads
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: tools/discord-bot
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      # A manual run stands in the release event for the tag it is given.
+      - name: Release event
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${TAG}" --jq '{release: .}' > "$RUNNER_TEMP/release.json"
+          echo "NOTIFY_EVENT_PATH=$RUNNER_TEMP/release.json" >> "$GITHUB_ENV"
+
+      - name: Notify
+        run: node tools/discord-bot/notify.js release
+        env:
+          DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
+          DISCORD_FORUM_ID: ${{ vars.DISCORD_FORUM_ID }}
+          GITHUB_TOKEN: ${{ github.token }}
