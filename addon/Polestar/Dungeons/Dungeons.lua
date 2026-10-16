@@ -30,7 +30,7 @@
 --       how: "kill" (an objective), "item" (drops an objective item), "starts" (drops the item
 --       that starts it), "involved" (DungeonJournal names it for the quest)
 --   Dungeons.Open(key|nil)   -- fires SHOW_DUNGEON(key); the hub section listens
---   Dungeons.GuideTo(key) -> ok ; Dungeons.GuideToPoint(point, label) -> ok   (Nav)
+--   Dungeons.GuideTo(key) -> ok ; Dungeons.GuideToPoint(point, label[, stop]) -> ok   (Nav)
 --   Dungeons.ShowOnMap(key) -> ok   -- the world map on the entrance's zone
 --   Dungeons.Find(text) -> key | nil
 --   Dungeons.Register(group, a, b)  -- pack files only
@@ -217,22 +217,25 @@ function Dungeons.Open(key)
 	return true
 end
 
-function Dungeons.GuideToPoint(point, label)
+-- `stop`: Nav.SetTarget's stop kind ("dungeon" for an entrance).
+function Dungeons.GuideToPoint(point, label, stop)
 	local Nav = ns.Nav
 	if not (type(point) == "table" and point.map and point.x and point.y and Nav and Nav.SetTarget) then return false end
-	return Nav.SetTarget(point.map, point.x, point.y, label or point.name, point.f) and true or false
+	return Nav.SetTarget(point.map, point.x, point.y, label or point.name, point.f, stop) and true or false
 end
 
 function Dungeons.GuideTo(key)
 	local d = Dungeons.Get(key)
 	if not (d and d.entrance) then return false end
-	return Dungeons.GuideToPoint(d.entrance, d.name)
+	return Dungeons.GuideToPoint(d.entrance, d.name, "dungeon")
 end
 
+-- Through Compat.OpenWorldMap: the client's C_Map opener, never in combat
+-- (the global OpenWorldMap taints the map: NAV_QA C3).
 function Dungeons.ShowOnMap(key)
 	local map = Dungeons.Entrance(key)
-	if not (map and OpenWorldMap) then return false end
-	return pcall(OpenWorldMap, map) and true or false
+	if not map then return false end
+	return ns.Compat.OpenWorldMap(map)
 end
 
 ns.RegisterCommand("dungeons", function(rest)

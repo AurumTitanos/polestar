@@ -167,15 +167,17 @@ local override    -- point picked with Nav.SetTarget, kept until the step change
 local dismissed   -- engine waypoint hidden by ClearTarget until the Engine moves on
 local target      -- what we guide to: override, else engine waypoint
 local tC, tX, tY  -- target in world space (nil until resolvable)
+local tZ         -- its height: the Engine waypoint's `z` (a guide goal at an NPC or object), else nil
 local arrived = false
 local firing = false
 local ticker
 
 local function resolve()
-	tC, tX, tY = nil, nil, nil
+	tC, tX, tY, tZ = nil, nil, nil, nil
 	local C = ns.Compat
 	if target and C and C.MapToWorld then
 		tC, tX, tY = C.MapToWorld(target.map, target.x, target.y, target.f)
+		if tC and type(target.z) == "number" then tZ = target.z end
 	end
 end
 
@@ -216,7 +218,9 @@ local function apply(shouldAnnounce)
 	if shouldAnnounce then announce() end
 end
 
-function Nav.SetTarget(map, x, y, label, f)
+-- `stop`: what stands there, as Shortest Path Forever's stop kinds name it
+-- ("dungeon", "trainer", "innkeeper", "flightmaster"; Nav/Handoff.lua), optional.
+function Nav.SetTarget(map, x, y, label, f, stop)
 	map, x, y = tonumber(map), tonumber(x), tonumber(y)
 	if not (map and x and y) then return false end
 	local Engine = ns.Engine
@@ -224,6 +228,7 @@ function Nav.SetTarget(map, x, y, label, f)
 		map = map, x = x, y = y, f = f,
 		label = (label and label ~= "") and label or L["Waypoint"],
 		kind = "manual",
+		stop = type(stop) == "string" and stop or nil,
 		r = Nav.DEFAULT_RADIUS,
 		stepIndex = Engine and Engine.GetStepIndex and Engine.GetStepIndex() or nil,
 	}
@@ -255,10 +260,21 @@ function Nav.IsOverride()
 	return override ~= nil and target == override
 end
 
--- World position of the target: continentID, wx, wy (nil if unresolved).
+-- World position of the target: continentID, wx, wy, then its height when
+-- it has one (an Engine waypoint's `z`; a hand-set target has none). nil if unresolved.
 function Nav.GetTargetWorld()
 	if target and not tC then resolve() end
-	return tC, tX, tY
+	return tC, tX, tY, tZ
+end
+
+-- The hand-off to Shortest Path Forever began or ended (Nav/Handoff.lua): the
+-- route is planned again and every module hears the same target anew, so its
+-- arrow, lines and bridges show or step aside. Nothing is announced: the
+-- target itself did not change.
+function Nav.Reapply()
+	local T = Nav.travel
+	if T and T.Replan then T.Replan() end
+	notify("OnTarget", target)
 end
 
 -- A point's coordinates in the live (Forever) frame of its own map, for
@@ -278,14 +294,17 @@ end
 ---------------------------------------------------------------------------
 -- Situation sampling. Allocation-free: called from throttled OnUpdates.
 --
--- Nav.Sample() -> state, distance, relAngle, dNorth, dWest
+-- Nav.Sample() -> state, distance, relAngle, dNorth, dWest, measured
 --   state: "none" | "instance" | "taxi" | "unknown" | "far" | "travel" | "arrived"
 --          | "instruction" (a route leg to act on here: fly, ride, hearth)
 --          | "search" (reached a spot of an area objective: look around here)
 --          | "nopos" (the client gives no player position here: the Deeprun
 --            Tram, a map of its own without a world map)
 --   distance/relAngle/dNorth/dWest are toward what the arrow points at: the
---   current route leg's end while a travel route is active, else the target.
+--   current route leg's end while a travel route is active, else the target;
+--   on a walk the walking engine has a path for (Nav/Walk.lua), the angle is
+--   toward the path's next point and the distance is what is left of the path
+--   (measured = true: the distance is along a path, not a straight line).
 --   An area target (`area`, yards: a spawn area) is reached anywhere inside
 --   it plus its arrival radius `r`, and its distance is to the area's edge;
 --   with `search` set (an area objective) reaching it is "search", never "arrived".
@@ -294,7 +313,7 @@ end
 ---------------------------------------------------------------------------
 
 local function playArrival()
-	if not ns.Get("nav.arrivalSound") then return end
+	if not ns.Get("nav.arrivalSound") or (Nav.HandedOff and Nav.HandedOff()) then return end
 	local id = (SOUNDKIT and SOUNDKIT.MAP_PING) or 3175
 	if PlaySound then PlaySound(id, "SFX") end
 end
@@ -330,13 +349,14 @@ function Nav.Sample()
 
 	local T = Nav.travel
 	if T and T.Active and T.Active() then
-		local mode, ac, ax, ay = T.Aim(pc, px, py)
+		local mode, ac, ax, ay, left = T.Aim(pc, px, py)
 		if mode == "instruction" then
 			if ac == pc then return "instruction", toward(C, px, py, ax, ay) end
 			return "instruction"
 		elseif mode == "walk" then
 			if ac ~= pc then return "far" end
-			return "travel", toward(C, px, py, ax, ay)
+			local dist, angle, dn, dw = toward(C, px, py, ax, ay)
+			return "travel", left or dist, angle, dn, dw, left ~= nil
 		end
 		-- nil: the last leg, straight to the target
 	end
@@ -353,7 +373,20 @@ function Nav.Sample()
 		playArrival()
 	end
 	if arrived and target.search then return "search", dist, angle, dn, dw end
-	return arrived and "arrived" or "travel", dist, angle, dn, dw
+	if arrived then return "arrived", dist, angle, dn, dw end
+	-- Along the walking engine's path when it has one (Nav/Walk.lua); the
+	-- distance is then what is left of it (an area target: to its edge, straight).
+	local W = Nav.walk
+	if W then
+		local leg = T and T.CurrentLeg and T.CurrentLeg()
+		local wc, wx, wy, left = W.Aim(pc, px, py, tC, tX, tY, (leg and leg.handmade) or W.FollowsGoto(target))
+		if wc then
+			local _, a2, dn2, dw2 = toward(C, px, py, wx, wy)
+			if area and area > 0 then return "travel", dist, a2, dn2, dw2 end
+			return "travel", left, a2, dn2, dw2, true
+		end
+	end
+	return "travel", dist, angle, dn, dw
 end
 
 -- States in which nothing is drawn at all.
@@ -487,13 +520,36 @@ end)
 -- Commands
 ---------------------------------------------------------------------------
 
+-- While Shortest Path Forever guides (Nav/Handoff.lua), a command that would
+-- show Polestar's own arrow or route says so in one line instead. True if it did.
+function Nav.SayHandedOff()
+	if not (Nav.HandedOff and Nav.HandedOff()) then return false end
+	ns.Print(L["Shortest Path Forever is guiding. Turn off \"Guide with Shortest Path Forever when it's installed\" (Options, Arrow & routes) to use Polestar's arrow."])
+	return true
+end
+
+-- An option with no effect while Shortest Path Forever guides: greyed out
+-- then (with any `disabled` it had), its help saying why. Returns `c`.
+function Nav.HandoffOption(c)
+	local was = c.disabled
+	c.disabled = function()
+		if Nav.HandedOff and Nav.HandedOff() then return true end
+		return was ~= nil and was() or false
+	end
+	local why = L["Greyed out while Shortest Path Forever guides: it does this itself."]
+	c.help = c.help and (c.help .. " " .. why) or why
+	return c
+end
+
 ns.RegisterCommand("arrow", function(rest)
 	local arg = (rest or ""):lower()
 	if arg == "reset" then
 		ns.Set("nav.arrowPos", nil)
 	elseif arg == "show" or arg == "hide" then
+		if arg == "show" and Nav.SayHandedOff() then return end
 		ns.Set("nav.arrow", arg == "show")
 	else
+		if not ns.Get("nav.arrow") and Nav.SayHandedOff() then return end
 		ns.Set("nav.arrow", not ns.Get("nav.arrow"))
 	end
 end, L["Waypoint arrow: show, hide, reset"])

@@ -10,6 +10,8 @@
 --                  objectives under the step title. Done goals check and dim;
 --                  a done step (viewed with Prev) lists all its goals.
 --                  The author's tip, collapsed to one line.
+--   journey        the travel route's steps and times (UI/JourneyPanel.lua),
+--                  while the route has more than one leg
 --   then           "Then: <next person>" and "Person 2 of 8"
 --   up next        off by default (ui.upcoming)
 --   xp             the QoL module's XP pace, when on
@@ -84,6 +86,7 @@ local function T(parent, role, color, layer)
 	if F and transparent() then Theme.SetOutline(fs, true) end
 	return fs
 end
+GF.Text = T -- for the panels other files place in the window (UI/JourneyPanel.lua)
 
 ---------------------------------------------------------------------------
 -- Targets and tooltips
@@ -109,6 +112,7 @@ local function tooltipAnchor()
 	local sw = UIParent:GetWidth()
 	return (x and sw and x * F:GetEffectiveScale() > sw * UIParent:GetEffectiveScale() / 2) and "ANCHOR_LEFT" or "ANCHOR_RIGHT"
 end
+GF.TooltipAnchor = tooltipAnchor
 
 local function goalTooltip(row)
 	local goal = row.psGoal
@@ -883,7 +887,7 @@ function GF.TakeBanner()
 		notices.train = nil
 		local t, nav2 = n.trainer, ns.Nav
 		if t and t.map and t.x and nav2 and nav2.SetTarget then
-			nav2.SetTarget(t.map, t.x, t.y, t.npcName or L["Class trainer"], t.f)
+			nav2.SetTarget(t.map, t.x, t.y, t.npcName or L["Class trainer"], t.f, "trainer")
 		end
 	end
 	GF.Layout()
@@ -1021,6 +1025,20 @@ local function stack(frame, y, h)
 	return y + h
 end
 
+-- The journey (UI/JourneyPanel.lua) right under the focus it leads to;
+-- never in compact mode. Returns the new y.
+local function stackJourney(y, width)
+	local J = UI.JourneyPanel
+	local jf = J and J.frame
+	if not jf then return y end
+	if jf.psHas and not compact() then
+		jf:Show()
+		return stack(jf, y, J.Layout(width))
+	end
+	jf:Hide()
+	return y
+end
+
 function GF.Layout()
 	if not F then return end
 	local width = F:GetWidth()
@@ -1052,10 +1070,12 @@ function GF.Layout()
 			Anim.Anchor(card, "TOPLEFT", body, "TOPLEFT", 0, -y)
 		end
 		y = y + h
+		y = stackJourney(y, width)
 		if after:IsShown() then y = stack(after, y, layoutAfter(width)) end
 		if upnext:IsShown() then y = stack(upnext, y, layoutUpnext(width)) end
 	else
 		y = stack(empty, y, layoutEmpty(width))
+		y = stackJourney(y, width)
 	end
 	if GF.xp.psHas and not isCompact and state == "steps" then
 		GF.xp:Show()

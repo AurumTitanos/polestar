@@ -53,7 +53,7 @@ end
 
 local function waypoint(rec)
 	local N, e = ns.Nav, rec.entrance
-	if N and N.SetTarget then N.SetTarget(e.map, e.x, e.y, rec.name, e.f) end
+	if N and N.SetTarget then N.SetTarget(e.map, e.x, e.y, rec.name, e.f, "dungeon") end
 end
 
 local function tooltip(rec, page)

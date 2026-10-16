@@ -12,4 +12,5 @@
 	<Binding name="CLICK PolestarTargetButton:LeftButton" category="ADDONS"/>
 	<Binding name="CLICK PolestarHearthButton:LeftButton" category="ADDONS"/>
 	<Binding name="CLICK PolestarStepButton:LeftButton" category="ADDONS"/>
+	<Binding name="CLICK PolestarTravelButton:LeftButton" category="ADDONS"/>
 </Bindings>
