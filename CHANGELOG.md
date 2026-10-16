@@ -48,6 +48,11 @@
   standing some quests ask for, such as +3000), the money, the rewards of
   108 quests that showed none, how many of an item ("5 x"), and Deviate
   Hides gives both of its items now (thanks Shockp)
+- A "Complete" goal shows the quest's progress: its count after it (8/14)
+  and, for a quest with several objectives, the open ones under it in the
+  game's words ("Plainstrider Meat: 3/7"), as kill and collect goals do. The
+  Hunt Begins in Mulgore read only "Complete The Hunt Begins" with no x of y
+  (thanks c0nsy).
 - A dungeon's pick-up guide no longer sends you to the Darkmoon Faire: the
   Deadmines guide started with Copper Modulator, Rinling's Faire ticket
   turn-in, because the modulator drops there. Darkmoon Faire, holiday and

@@ -380,8 +380,9 @@ end
 -- the player does: why a quest is unavailable, that the goal needs a group,
 -- how to get the item a quest starts from, whom an item is got from, that an
 -- area objective's mobs are all over its area, which mobs a farm spot is,
--- where a chosen trainer/vendor is, the goal's own note, and an open
--- turn-in's rewards. The rest of the detail ("for Kobold Camp Cleanup")
+-- where a chosen trainer/vendor is, the open objectives of a quest to
+-- complete that has several, the goal's own note, and an open turn-in's
+-- rewards. The rest of the detail ("for Kobold Camp Cleanup")
 -- lives in the tooltip.
 -- `shownMap`: a zone the window already names above (the person's), not repeated.
 -- `noParty`: the group line already shows on a goal above (said once per card).
@@ -402,6 +403,9 @@ function UI.GoalSubline(goal, shownMap, noParty)
 	if chosen and goal.map and goal.map ~= shownMap then
 		local zone = UI.MapName(goal.map)
 		if zone then parts[#parts + 1] = zone end
+	end
+	if type(goal.objectives) == "table" then
+		for i = 1, #goal.objectives do parts[#parts + 1] = goal.objectives[i] end
 	end
 	-- A note that only names the source or the item says nothing new.
 	local note = goal.note

@@ -849,6 +849,29 @@ local function objectiveState(goal)
 	return finished and true or false, cur, max
 end
 
+-- A `complete` goal's quest in the log: its objectives' counts summed, each
+-- capped at what it needs ("Plainstrider Meat 3/7, Feathers 5/7": 8/14), and
+-- with `open`, when it has more than one, the open ones in the game's words
+-- ("Plainstrider Meat: 3/7"; the count alone says it for one). Nil when the
+-- quest is not in the log. (On Own: the main chunk is at 200 locals.)
+function Own.completeState(q, open)
+	local objs = Compat().GetQuestObjectives(q)
+	if not objs then return nil end
+	local cur, max, list = 0, 0, nil
+	for i = 1, #objs do
+		local o = objs[i]
+		max = max + o.numRequired
+		cur = cur + math.min(o.numFulfilled, o.numRequired)
+		if open and #objs > 1 and not o.finished and o.text ~= "" then
+			local text = o.text
+			if not text:find("%d+%s*/%s*%d+") then text = ("%s %d/%d"):format(text, o.numFulfilled, o.numRequired) end
+			list = list or {}
+			list[#list + 1] = text
+		end
+	end
+	return cur, max, list
+end
+
 local function countState(goal)
 	local need = goal.count or 1
 	local have = Compat().GetItemCount(goal.item)
@@ -911,7 +934,9 @@ goalDone = function(s, g, goal)
 	elseif t == "turnin" then
 		return questDone(goal.quest) and true or false
 	elseif t == "complete" then
-		return questDone(goal.quest) or C.IsQuestReadyForTurnIn(goal.quest)
+		if questDone(goal.quest) or C.IsQuestReadyForTurnIn(goal.quest) then return true end
+		local cur, max = Own.completeState(goal.quest)
+		return false, cur, max
 	elseif t == "kill" or t == "interact" or t == "use" then
 		if goal.quest then return objectiveState(goal) end
 		return false
@@ -1541,6 +1566,7 @@ local function goalView(s, g, goal, stepStatus, group)
 		standing = goal.standing, standingName = goal.standing and standingName(goal.standing) or nil,
 		achievement = goal.achievement, criteria = goal.criteria,
 		rewards = goal.rewards,
+		objectives = goal.t == "complete" and (status == "active" or status == "pending") and select(3, Own.completeState(goal.quest, true)) or nil,
 		-- Group content (compiled `group`: elite, dungeon, raid or an author's
 		-- group size); `group` above is the goal's field group.
 		party = type(goal.group) == "table" and type(goal.group.kind) == "string" and goal.group or nil,
