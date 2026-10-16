@@ -204,6 +204,10 @@
   Ironforge), anywhere else without a position it says "No position here"
   over the step, and it points again as soon as you step off (thanks
   Igotthis).
+- The arrow takes the mouse on the arrow itself, not on the distance and
+  label under it, so a large arrow no longer catches drags meant for the
+  world, and the hover wash sits behind the arrow only. When there is no
+  arrow to show (another continent, no position), the text takes the mouse.
 - Teldrassil, Dun Morogh and Mulgore: the starting glens no longer send you
   off for one delivery quest and back. Dolanaar Delivery and Supplies to
   Tannok are taken on the way out of Shadowglen and Coldridge Valley, by the
