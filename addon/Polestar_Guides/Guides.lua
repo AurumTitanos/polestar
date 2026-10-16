@@ -8555,8 +8555,12 @@ do
 				},
 				{
 					title = "Kharanos",
+					note = "Jarven Thunderbrew guards the Thunder Ale barrels in the distillery basement. Buy a Thunder Ale from Innkeeper Belm, click the guarded barrel, then hand the ale to Jarven from his quest window (there is no quest to accept); after that, the unguarded barrel takes the Barleybrew Scalder.",
 					goals = {
 						{ t = "turnin", quest = 412, title = "Operation Recombobulation", npc = 1269, npcName = "Razzle Sprysprocket", map = 1426, x = 45.85, y = 49.37, z = 395.4, f = "e", note = "Razzle Sprysprocket" },
+						{ t = "buy", npc = 1247, npcName = "Innkeeper Belm", item = 2686, itemName = "Thunder Ale", count = 1, map = 1426, x = 47.38, y = 52.52, z = 399.7, f = "e", note = "Thunder Ale, from Innkeeper Belm in the distillery" },
+						{ t = "turnin", quest = 403, title = "Guarded Thunderbrew Barrel", object = 269, objName = "Guarded Thunder Ale Barrel", map = 1426, x = 47.72, y = 52.7, z = 393, f = "e", note = "The Guarded Thunder Ale Barrel in the basement", direct = true },
+						{ t = "turnin", quest = 308, title = "Distracting Jarven", npc = 1373, npcName = "Jarven Thunderbrew", map = 1426, x = 47.65, y = 52.66, z = 392.4, f = "e", note = "Jarven Thunderbrew, beside the barrel", direct = true },
 						{ t = "turnin", quest = 310, title = "Bitter Rivals", object = 270, objName = "Unguarded Thunder Ale Barrel", map = 1426, x = 47.72, y = 52.7, z = 393, f = "e", note = "The Unguarded Thunder Ale Barrel in the distillery" },
 						{ t = "accept", quest = 311, title = "Return to Marleth", object = 270, objName = "Unguarded Thunder Ale Barrel", minLevel = 2, qlvl = 7, pre = { 310 }, preTitles = { [310] = "Bitter Rivals" }, map = 1426, x = 47.72, y = 52.7, z = 393, f = "e" },
 						{ t = "turnin", quest = 287, title = "Frostmane Hold", npc = 1252, npcName = "Senir Whitebeard", map = 1426, x = 46.73, y = 53.83, z = 396.8, f = "e", note = "Senir Whitebeard" },
@@ -39218,7 +39222,7 @@ do
 					note = "Additional Runecloth takes 20 Runecloth per turn-in and repeats as often as you like. Bring Runecloth in multiples of 20 and hand them all in at once, one turn-in after another. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true },
-						{ t = "talk", npc = 14727, npcName = "Vehena", map = 1454, x = 37.7, y = 87.9, z = 43.6, f = "e", optional = true, note = "Additional Runecloth" },
+						{ t = "turnin", quest = 7837, title = "Additional Runecloth", npc = 14727, npcName = "Vehena", map = 1454, x = 37.7, y = 87.9, z = 43.6, f = "e", optional = true, direct = true },
 						{ t = "rep", faction = 530, factionName = "Darkspear Trolls", standing = 6 },
 					},
 				},
@@ -39227,7 +39231,7 @@ do
 					note = "Keep handing in Additional Runecloth, 20 Runecloth at a time. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true },
-						{ t = "talk", npc = 14727, npcName = "Vehena", map = 1454, x = 37.7, y = 87.9, z = 43.6, f = "e", optional = true },
+						{ t = "turnin", quest = 7837, title = "Additional Runecloth", npc = 14727, npcName = "Vehena", map = 1454, x = 37.7, y = 87.9, z = 43.6, f = "e", optional = true, direct = true },
 						{ t = "rep", faction = 530, factionName = "Darkspear Trolls", standing = 7 },
 					},
 				},
@@ -39236,7 +39240,7 @@ do
 					note = "Keep handing in Additional Runecloth until Darkspear Trolls is Exalted. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true },
-						{ t = "talk", npc = 14727, npcName = "Vehena", map = 1454, x = 37.7, y = 87.9, z = 43.6, f = "e", optional = true },
+						{ t = "turnin", quest = 7837, title = "Additional Runecloth", npc = 14727, npcName = "Vehena", map = 1454, x = 37.7, y = 87.9, z = 43.6, f = "e", optional = true, direct = true },
 						{ t = "rep", faction = 530, factionName = "Darkspear Trolls", standing = 8 },
 					},
 				},
@@ -39333,7 +39337,7 @@ do
 					note = "Additional Runecloth takes 20 Runecloth per turn-in and repeats as often as you like. Bring Runecloth in multiples of 20 and hand them all in at once, one turn-in after another. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true },
-						{ t = "talk", npc = 14725, npcName = "Raedon Duskstriker", map = 1457, x = 64.02, y = 23, z = 1333.1, f = "e", optional = true, note = "Additional Runecloth" },
+						{ t = "turnin", quest = 7801, title = "Additional Runecloth", npc = 14725, npcName = "Raedon Duskstriker", map = 1457, x = 64.02, y = 23, z = 1333.1, f = "e", optional = true, direct = true },
 						{ t = "rep", faction = 69, factionName = "Darnassus", standing = 6 },
 					},
 				},
@@ -39342,7 +39346,7 @@ do
 					note = "Keep handing in Additional Runecloth, 20 Runecloth at a time. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true },
-						{ t = "talk", npc = 14725, npcName = "Raedon Duskstriker", map = 1457, x = 64.02, y = 23, z = 1333.1, f = "e", optional = true },
+						{ t = "turnin", quest = 7801, title = "Additional Runecloth", npc = 14725, npcName = "Raedon Duskstriker", map = 1457, x = 64.02, y = 23, z = 1333.1, f = "e", optional = true, direct = true },
 						{ t = "rep", faction = 69, factionName = "Darnassus", standing = 7 },
 					},
 				},
@@ -39351,7 +39355,7 @@ do
 					note = "Keep handing in Additional Runecloth until Darnassus is Exalted. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true },
-						{ t = "talk", npc = 14725, npcName = "Raedon Duskstriker", map = 1457, x = 64.02, y = 23, z = 1333.1, f = "e", optional = true },
+						{ t = "turnin", quest = 7801, title = "Additional Runecloth", npc = 14725, npcName = "Raedon Duskstriker", map = 1457, x = 64.02, y = 23, z = 1333.1, f = "e", optional = true, direct = true },
 						{ t = "rep", faction = 69, factionName = "Darnassus", standing = 8 },
 					},
 				},
@@ -39448,7 +39452,7 @@ do
 					note = "Additional Runecloth takes 20 Runecloth per turn-in and repeats as often as you like. Bring Runecloth in multiples of 20 and hand them all in at once, one turn-in after another. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true },
-						{ t = "talk", npc = 14724, npcName = "Bubulo Acerbus", map = 1455, x = 74.09, y = 48.22, z = 502, f = "e", optional = true, note = "Additional Runecloth" },
+						{ t = "turnin", quest = 7812, title = "Additional Runecloth", npc = 14724, npcName = "Bubulo Acerbus", map = 1455, x = 74.09, y = 48.22, z = 502, f = "e", optional = true, direct = true },
 						{ t = "rep", faction = 54, factionName = "Gnomeregan Exiles", standing = 6 },
 					},
 				},
@@ -39457,7 +39461,7 @@ do
 					note = "Keep handing in Additional Runecloth, 20 Runecloth at a time. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true },
-						{ t = "talk", npc = 14724, npcName = "Bubulo Acerbus", map = 1455, x = 74.09, y = 48.22, z = 502, f = "e", optional = true },
+						{ t = "turnin", quest = 7812, title = "Additional Runecloth", npc = 14724, npcName = "Bubulo Acerbus", map = 1455, x = 74.09, y = 48.22, z = 502, f = "e", optional = true, direct = true },
 						{ t = "rep", faction = 54, factionName = "Gnomeregan Exiles", standing = 7 },
 					},
 				},
@@ -39466,7 +39470,7 @@ do
 					note = "Keep handing in Additional Runecloth until Gnomeregan Exiles is Exalted. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true },
-						{ t = "talk", npc = 14724, npcName = "Bubulo Acerbus", map = 1455, x = 74.09, y = 48.22, z = 502, f = "e", optional = true },
+						{ t = "turnin", quest = 7812, title = "Additional Runecloth", npc = 14724, npcName = "Bubulo Acerbus", map = 1455, x = 74.09, y = 48.22, z = 502, f = "e", optional = true, direct = true },
 						{ t = "rep", faction = 54, factionName = "Gnomeregan Exiles", standing = 8 },
 					},
 				},
@@ -39665,7 +39669,7 @@ do
 					note = "Additional Runecloth takes 20 Runecloth per turn-in and repeats as often as you like. Bring Runecloth in multiples of 20 and hand them all in at once, one turn-in after another. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true },
-						{ t = "talk", npc = 14723, npcName = "Mistina Steelshield", map = 1455, x = 43.22, y = 31.57, z = 502.3, f = "e", optional = true, note = "Additional Runecloth" },
+						{ t = "turnin", quest = 7806, title = "Additional Runecloth", npc = 14723, npcName = "Mistina Steelshield", map = 1455, x = 43.22, y = 31.57, z = 502.3, f = "e", optional = true, direct = true },
 						{ t = "rep", faction = 47, factionName = "Ironforge", standing = 6 },
 					},
 				},
@@ -39674,7 +39678,7 @@ do
 					note = "Keep handing in Additional Runecloth, 20 Runecloth at a time. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true },
-						{ t = "talk", npc = 14723, npcName = "Mistina Steelshield", map = 1455, x = 43.22, y = 31.57, z = 502.3, f = "e", optional = true },
+						{ t = "turnin", quest = 7806, title = "Additional Runecloth", npc = 14723, npcName = "Mistina Steelshield", map = 1455, x = 43.22, y = 31.57, z = 502.3, f = "e", optional = true, direct = true },
 						{ t = "rep", faction = 47, factionName = "Ironforge", standing = 7 },
 					},
 				},
@@ -39683,7 +39687,7 @@ do
 					note = "Keep handing in Additional Runecloth until Ironforge is Exalted. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true },
-						{ t = "talk", npc = 14723, npcName = "Mistina Steelshield", map = 1455, x = 43.22, y = 31.57, z = 502.3, f = "e", optional = true },
+						{ t = "turnin", quest = 7806, title = "Additional Runecloth", npc = 14723, npcName = "Mistina Steelshield", map = 1455, x = 43.22, y = 31.57, z = 502.3, f = "e", optional = true, direct = true },
 						{ t = "rep", faction = 47, factionName = "Ironforge", standing = 8 },
 					},
 				},
@@ -39867,7 +39871,7 @@ do
 					note = "Additional Runecloth takes 20 Runecloth per turn-in and repeats as often as you like. Bring Runecloth in multiples of 20 and hand them all in at once, one turn-in after another. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true },
-						{ t = "talk", npc = 14726, npcName = "Rashona Straglash", map = 1454, x = 63.6, y = 51.23, z = 22.9, f = "e", optional = true, note = "Additional Runecloth" },
+						{ t = "turnin", quest = 7832, title = "Additional Runecloth", npc = 14726, npcName = "Rashona Straglash", map = 1454, x = 63.6, y = 51.23, z = 22.9, f = "e", optional = true, direct = true },
 						{ t = "rep", faction = 76, factionName = "Orgrimmar", standing = 6 },
 					},
 				},
@@ -39876,7 +39880,7 @@ do
 					note = "Keep handing in Additional Runecloth, 20 Runecloth at a time. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true },
-						{ t = "talk", npc = 14726, npcName = "Rashona Straglash", map = 1454, x = 63.6, y = 51.23, z = 22.9, f = "e", optional = true },
+						{ t = "turnin", quest = 7832, title = "Additional Runecloth", npc = 14726, npcName = "Rashona Straglash", map = 1454, x = 63.6, y = 51.23, z = 22.9, f = "e", optional = true, direct = true },
 						{ t = "rep", faction = 76, factionName = "Orgrimmar", standing = 7 },
 					},
 				},
@@ -39885,7 +39889,7 @@ do
 					note = "Keep handing in Additional Runecloth until Orgrimmar is Exalted. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true },
-						{ t = "talk", npc = 14726, npcName = "Rashona Straglash", map = 1454, x = 63.6, y = 51.23, z = 22.9, f = "e", optional = true },
+						{ t = "turnin", quest = 7832, title = "Additional Runecloth", npc = 14726, npcName = "Rashona Straglash", map = 1454, x = 63.6, y = 51.23, z = 22.9, f = "e", optional = true, direct = true },
 						{ t = "rep", faction = 76, factionName = "Orgrimmar", standing = 8 },
 					},
 				},
@@ -39982,7 +39986,7 @@ do
 					note = "Additional Runecloth takes 20 Runecloth per turn-in and repeats as often as you like. Bring Runecloth in multiples of 20 and hand them all in at once, one turn-in after another. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true },
-						{ t = "talk", npc = 14722, npcName = "Clavicus Knavingham", map = 1453, x = 53.93, y = 81.69, z = 97.4, optional = true, note = "Additional Runecloth" },
+						{ t = "turnin", quest = 7796, title = "Additional Runecloth", npc = 14722, npcName = "Clavicus Knavingham", map = 1453, x = 53.93, y = 81.69, z = 97.4, optional = true, direct = true },
 						{ t = "rep", faction = 72, factionName = "Stormwind", standing = 6 },
 					},
 				},
@@ -39991,7 +39995,7 @@ do
 					note = "Keep handing in Additional Runecloth, 20 Runecloth at a time. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true },
-						{ t = "talk", npc = 14722, npcName = "Clavicus Knavingham", map = 1453, x = 53.93, y = 81.69, z = 97.4, optional = true },
+						{ t = "turnin", quest = 7796, title = "Additional Runecloth", npc = 14722, npcName = "Clavicus Knavingham", map = 1453, x = 53.93, y = 81.69, z = 97.4, optional = true, direct = true },
 						{ t = "rep", faction = 72, factionName = "Stormwind", standing = 7 },
 					},
 				},
@@ -40000,7 +40004,7 @@ do
 					note = "Keep handing in Additional Runecloth until Stormwind is Exalted. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true },
-						{ t = "talk", npc = 14722, npcName = "Clavicus Knavingham", map = 1453, x = 53.93, y = 81.69, z = 97.4, optional = true },
+						{ t = "turnin", quest = 7796, title = "Additional Runecloth", npc = 14722, npcName = "Clavicus Knavingham", map = 1453, x = 53.93, y = 81.69, z = 97.4, optional = true, direct = true },
 						{ t = "rep", faction = 72, factionName = "Stormwind", standing = 8 },
 					},
 				},
@@ -40171,7 +40175,7 @@ do
 					note = "Additional Runecloth takes 20 Runecloth per turn-in and repeats as often as you like. Bring Runecloth in multiples of 20 and hand them all in at once, one turn-in after another. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true },
-						{ t = "talk", npc = 14728, npcName = "Rumstag Proudstrider", map = 1456, x = 43.05, y = 42.72, z = 145.9, f = "e", optional = true, note = "Additional Runecloth" },
+						{ t = "turnin", quest = 7825, title = "Additional Runecloth", npc = 14728, npcName = "Rumstag Proudstrider", map = 1456, x = 43.05, y = 42.72, z = 145.9, f = "e", optional = true, direct = true },
 						{ t = "rep", faction = 81, factionName = "Thunder Bluff", standing = 6 },
 					},
 				},
@@ -40180,7 +40184,7 @@ do
 					note = "Keep handing in Additional Runecloth, 20 Runecloth at a time. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true },
-						{ t = "talk", npc = 14728, npcName = "Rumstag Proudstrider", map = 1456, x = 43.05, y = 42.72, z = 145.9, f = "e", optional = true },
+						{ t = "turnin", quest = 7825, title = "Additional Runecloth", npc = 14728, npcName = "Rumstag Proudstrider", map = 1456, x = 43.05, y = 42.72, z = 145.9, f = "e", optional = true, direct = true },
 						{ t = "rep", faction = 81, factionName = "Thunder Bluff", standing = 7 },
 					},
 				},
@@ -40189,7 +40193,7 @@ do
 					note = "Keep handing in Additional Runecloth until Thunder Bluff is Exalted. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true },
-						{ t = "talk", npc = 14728, npcName = "Rumstag Proudstrider", map = 1456, x = 43.05, y = 42.72, z = 145.9, f = "e", optional = true },
+						{ t = "turnin", quest = 7825, title = "Additional Runecloth", npc = 14728, npcName = "Rumstag Proudstrider", map = 1456, x = 43.05, y = 42.72, z = 145.9, f = "e", optional = true, direct = true },
 						{ t = "rep", faction = 81, factionName = "Thunder Bluff", standing = 8 },
 					},
 				},
@@ -40413,7 +40417,7 @@ do
 					note = "Additional Runecloth takes 20 Runecloth per turn-in and repeats as often as you like. Bring Runecloth in multiples of 20 and hand them all in at once, one turn-in after another. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true },
-						{ t = "talk", npc = 14729, npcName = "Ralston Farnsley", map = 1458, x = 71.66, y = 29.23, z = -62.1, f = "e", optional = true, note = "Additional Runecloth" },
+						{ t = "turnin", quest = 7819, title = "Additional Runecloth", npc = 14729, npcName = "Ralston Farnsley", map = 1458, x = 71.66, y = 29.23, z = -62.1, f = "e", optional = true, direct = true },
 						{ t = "rep", faction = 68, factionName = "Undercity", standing = 6 },
 					},
 				},
@@ -40422,7 +40426,7 @@ do
 					note = "Keep handing in Additional Runecloth, 20 Runecloth at a time. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true },
-						{ t = "talk", npc = 14729, npcName = "Ralston Farnsley", map = 1458, x = 71.66, y = 29.23, z = -62.1, f = "e", optional = true },
+						{ t = "turnin", quest = 7819, title = "Additional Runecloth", npc = 14729, npcName = "Ralston Farnsley", map = 1458, x = 71.66, y = 29.23, z = -62.1, f = "e", optional = true, direct = true },
 						{ t = "rep", faction = 68, factionName = "Undercity", standing = 7 },
 					},
 				},
@@ -40431,7 +40435,7 @@ do
 					note = "Keep handing in Additional Runecloth until Undercity is Exalted. Runecloth: Dark Adepts and Shadowmages (level 58-60) in Eastern Plaguelands, or the Auction House.",
 					goals = {
 						{ t = "collect", item = 14047, itemName = "Runecloth", count = 20, map = 1423, x = 40, y = 51.3, f = "e", optional = true },
-						{ t = "talk", npc = 14729, npcName = "Ralston Farnsley", map = 1458, x = 71.66, y = 29.23, z = -62.1, f = "e", optional = true },
+						{ t = "turnin", quest = 7819, title = "Additional Runecloth", npc = 14729, npcName = "Ralston Farnsley", map = 1458, x = 71.66, y = 29.23, z = -62.1, f = "e", optional = true, direct = true },
 						{ t = "rep", faction = 68, factionName = "Undercity", standing = 8 },
 					},
 				},
