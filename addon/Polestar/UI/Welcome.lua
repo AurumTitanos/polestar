@@ -850,6 +850,28 @@ local function build()
 	end)
 	ns.CloseOnEscape("PolestarWelcome")
 	WEL.frame = F
+	-- A gamepad (UI/Gamepad.lua): LB / RB turn the pages, A on Next by default.
+	if ns.Gamepad and ns.Gamepad.Register then
+		ns.Gamepad.Register(F, {
+			initial = function(rows)
+				for i, w in ipairs(rows) do if w == F.Next then return i end end
+			end,
+			prevTab = function() go(-1) end,
+			nextTab = function()
+				local _, at, count = WEL.Page()
+				if at and count and at < count then go(1) end
+			end,
+			tabsLabel = L["Pages"],
+			-- A colour scheme's card: Y puts the default scheme back.
+			reset = function(w)
+				if w and w.psValue then
+					w:Click("RightButton")
+					return true
+				end
+			end,
+			resetLabel = function(w) return w.psValue and L["Default"] or nil end,
+		})
+	end
 end
 
 -- The step dots: the current one a 16x4 accent capsule, the others 4px dots.

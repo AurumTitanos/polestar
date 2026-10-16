@@ -320,6 +320,15 @@ local function build()
 
 	F:SetScript("OnShow", function(self) Anim.To(self, "alpha", 0, 1, Anim.BASE, "out") end)
 	ns.CloseOnEscape("PolestarRouteChoice")
+	-- A gamepad (UI/Gamepad.lua) starts on the recommended route.
+	if ns.Gamepad and ns.Gamepad.Register then
+		ns.Gamepad.Register(F, {
+			initial = function(rows)
+				for i, w in ipairs(rows) do if w.psOption and w.psOption.recommended then return i end end
+			end,
+			back = function() RC.Hide() end,
+		})
+	end
 	RC.frame = F
 end
 
