@@ -1827,9 +1827,19 @@ by editing his files). Decoded grids go when no search is queued (`Idle`);
 in game the arrow holds about 26 MB with no search running and at most about
 80 MB (the strings and both ceilings) while one runs.
 
+**A map is used whole.** `API.lua` drops a map whose packed tables hold
+fewer entries than its `counts` (a part file missing from the folder, or one
+that failed to load), and every map when the client lacks
+`C_EncodingUtil.DecodeBase64` or `DecompressString`: the engine then has no
+data for it and the arrow points straight, where it would otherwise raise a
+Lua error the first time a search reads a missing cluster's graph
+(`tests/nav-load.test.js`). A grid block that fails to decode is the
+engine's own case: that cluster counts as empty. The bytes of the shipped
+blocks are not checked at load; `nav check` pins them by sha256.
+
 **The handoff.** Polestar loads the addon with `Data.Pack("Polestar_Nav")`
 at login or later, never at its own `ADDON_LOADED` (decoding nothing, it
-still builds about 12 MB of packed strings) and never in combat; with
+still builds about 26 MB of packed strings) and never in combat; with
 `nav.navRouting` off it is not loaded. `API.lua` sets the global
 `Polestar_NavEngine` to upstream's Path table; `Nav/Walk.lua` keeps it as
 `Nav.Path`. The calls are upstream's, unchanged:

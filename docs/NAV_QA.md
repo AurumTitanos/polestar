@@ -56,7 +56,7 @@ why it does not apply.
 | C14 | Nearby services: a missing or unreadable database looked like "nothing here" | Fixed 1.8.2 (#96) | Each Codex failure has its own message: `tests/nav-journey.test.js` |
 | C15 | The other faction's boats and zeppelins still planned | Fixed 1.6.0 | Never planned: `tests/travel-transit.test.js` |
 | C16 | A speed change rebuilt the whole route graph in one frame | Fixed (#102) | Polestar's planner costs legs during each search, with the speed read for that plan, so a speed change rebuilds nothing; a plan is capped at 40 ms and 20,000 steps (`Nav/Travel.lua`, `MAX_MS`, `MAX_POPS`) |
-| C17 | The walking maps loaded at once, at startup (~11 MB, ~64 ms of work) | Fixed 1.9.0, 1.10.0 (#110) | `Polestar_Nav` loads on demand, out of combat; searches are sliced over frames within `Path.budget` (2 ms): `tests/nav-vendor.test.js`; load time and memory in game, see below |
+| C17 | The walking maps loaded at once, at startup (~11 MB, ~64 ms of work) | Fixed 1.9.0, 1.10.0 (#110) | `Polestar_Nav` loads on demand, out of combat; searches are sliced over frames within `Path.budget` (2 ms): `tests/nav-vendor.test.js`; a missing or unloadable map file drops that map whole (no data: the straight arrow, never a Lua error), and without the client's decoder every map: `tests/nav-load.test.js`, `tests/nav-e2e.test.js`; load time and memory in game, see below |
 
 Also noted while reading v1.15.0, none reported by players:
 
@@ -122,7 +122,8 @@ What tests cannot prove, checked in the client before a release:
    to Grom'gol's, Tirisfal's and Orgrimmar's zeppelins end on the tower's
    platform.
 4. **Loading (C17):** `Polestar_Nav` loads after login without a hitch;
-   note its memory with `/run UpdateAddOnMemoryUsage() print(GetAddOnMemoryUsage("Polestar_Nav"))`.
+   note its memory with `/run UpdateAddOnMemoryUsage() print(GetAddOnMemoryUsage("Polestar_Nav"))`
+   (about 26,000 KB, in Stormwind and in Teldrassil alike).
 5. **Hand-off (H3):** with Shortest Path Forever installed, follow a few
    guide steps (a pick-up, a kill area, a hand-in across a boat): only its
    arrow, line and journey show; the kill area stays held while you work it;

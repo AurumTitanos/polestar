@@ -80,7 +80,7 @@ local function inCombat()
 end
 
 -- Load Polestar_Nav once (at login or later, never in combat: loading builds
--- about 12 MB of packed map strings), and never while Shortest Path Forever
+-- about 26 MB of packed map strings), and never while Shortest Path Forever
 -- guides instead (Nav/Handoff.lua): it walks its own maps.
 local function load()
 	if Nav.Path or loadTried then return end

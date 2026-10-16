@@ -504,8 +504,9 @@ test('K1: a walk into a cave is split at its mouth from Polestar_Nav\'s Chokepoi
 	assert.ok(out.legs.every((l) => typeof l.label === 'string' && l.label !== '' && l.label !== 'Unknown'), 'K1: every step is named');
 });
 
-// Review conditions for shipping Polestar's maps (nav-maps): the maps load only with routing on; a missing or
-// broken map file leaves the straight arrow, never a Lua error; every zone the guides walk in routes.
+// Review conditions for shipping Polestar's maps (nav-maps): the maps load only with routing on; all of a
+// map's files missing from Nav.xml, or a corrupted grid block, leave the straight arrow, never a Lua error
+// (one missing part file: tests/nav-load.test.js); every zone the guides walk in routes.
 const NAV_DIR = path.join(ADDONS, 'Polestar_Nav', 'Nav');
 
 test('the walking maps load on demand only with Walk real paths on (nav.navRouting off: Polestar_Nav is never loaded)', { skip }, () => {
@@ -557,7 +558,7 @@ const STRAIGHT = `
 	local _, tx, ty = N.GetTargetWorld()
 	emit({ state = a.state, toTarget = a.x and dist(a.x, a.y, tx, ty), measured = a.measured, available = E and E.Available(0), points = f and f.points and #f.points or 0, cost = f and f.cost })`;
 
-test('a map file missing from Nav.xml leaves the straight arrow on that map, with no Lua error', { skip }, () => {
+test('a map whose files are all missing from Nav.xml (every Nav0*.lua) leaves the straight arrow on that map, with no Lua error', { skip }, () => {
 	const files = [...tocFiles('Polestar_Nav'), nsFile].filter((f) => !/[\\/]Nav0(_\d+)?\.lua$/.test(f));
 	const out = withMaps(files, STRAIGHT);
 	assert.equal(out.available, false, 'no data for map 0');
@@ -566,7 +567,7 @@ test('a map file missing from Nav.xml leaves the straight arrow on that map, wit
 	assert.notEqual(out.measured, true, 'its distance is the straight one');
 });
 
-test('a corrupted block of the map leaves the straight arrow for that walk, with no Lua error', { skip }, () => {
+test('a corrupted grid block of the map leaves the straight arrow for that walk, with no Lua error', { skip }, () => {
 	const { k, file } = clusterFile(-9444.062, 77.667);
 	assert.ok(file, 'Goldshire\'s cluster is in one part file');
 	const bad = path.join(tmpdir('polestar-nav-bad-'), file);
