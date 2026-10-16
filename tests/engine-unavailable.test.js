@@ -292,6 +292,24 @@ test('a missing prerequisite the guide still turns in, before the accept or afte
 	assert.deepEqual(out.skipped, [3, ['done:nil:nil', 'skipped:pre:Requires Disrupt the Attacks first']]);
 });
 
+test('a prerequisite the guide has only for other characters is another version of the chain: the accept stays open for the giver to decide', () => {
+	// The paladin charger: Emphasis on Sacrifice (7637) names the Human Lord
+	// Grayson Shadowbreaker (7638) only; the Dwarf's (7670) is missing from the
+	// data. Here the character is an Orc, and 7670 stands for their own version.
+	const guide = `
+	Polestar.RegisterGuide({ id = "test/xr", pack = "test", title = "Charger", minLevel = 10, maxLevel = 60, steps = {
+		{ title = "Grayson", goals = {
+			{ t = "accept", quest = 7638, title = "Lord Grayson Shadowbreaker", npc = 1, npcName = "Duthorian Rall", only = { races = { "Human" } }, map = 1413, x = 51, y = 30 },
+			{ t = "turnin", quest = 7638, title = "Lord Grayson Shadowbreaker", npc = 2, npcName = "Lord Grayson", only = { races = { "Human" } }, map = 1413, x = 51, y = 30 },
+			{ t = "turnin", quest = 7670, title = "Lord Grayson Shadowbreaker", npc = 2, npcName = "Lord Grayson", only = { races = { "Orc" } }, map = 1413, x = 51, y = 30 },
+			{ t = "accept", quest = 7637, title = "Emphasis on Sacrifice", npc = 2, npcName = "Lord Grayson", pre = { 7638 }, map = 1413, x = 51, y = 30 },
+		} },
+		{ goals = { { t = "level", level = 60 } } },
+	} })`;
+	const [out] = run({ before: 'stub.world.onQuest(7670, {})', guides: guide, script: 'stub.fire("QUEST_LOG_UPDATE"); flush(); emit(brief(1))' });
+	assert.deepEqual(out, ['na:nil:nil', 'na:nil:nil', 'active:nil:nil', 'active:nil:nil']);
+});
+
 test('an accept closed for good (its breadcrumb target or an exclusive quest taken or done) is skipped before any visit, with the quest\'s later goals', () => {
 	// 1483 leads to 1093 (a breadcrumb); 1507 is exclusive with 1472 (the
 	// Undercity version of the chain).

@@ -6,7 +6,10 @@
 // open goal the way a player would (accept, kill, loot, walk there, talk,
 // train, bind, level up...). Used by `polestar playtest` and
 // tests/guides.test.js (every one of our guides), and by the tests that play
-// one guide (buildSimPack, playGuide, SIMULATE).
+// one guide (buildSimPack, playGuide, SIMULATE). A guide starts with the
+// prerequisites of its accepts that the guides chaining into it turn in
+// already done, and those they leave for it to turn in in the log
+// (chainDone), as for a player arriving on the route.
 //
 //   const { results, diag } = playtest({ dir, manifest, official, filter, classes });
 //   // results: [{ guide, race, faction, cls, ok, stuck: { step, title, reason, handOver? } | null, problems, landed }]
@@ -343,6 +346,78 @@ function outcome(out, handOver = null, hand = null, persona = null) {
 	return { stuck, problems };
 }
 
+// Whether an `only` ({ classes, races, factions }, "!x" excludes) lets the
+// persona ({ race, faction, cls }) in: Guides.Matches.
+function onlyFits(only, { race, faction, cls }) {
+	const norm = (s) => String(s).toLowerCase().replace(/\s+/g, '').replace(/^undead$/, 'scourge');
+	const fits = (list, value) => {
+		if (!Array.isArray(list) || !list.length) return true;
+		let positives = false;
+		let hit = false;
+		for (const raw of list) {
+			const neg = String(raw).startsWith('!');
+			const e = norm(neg ? String(raw).slice(1) : raw);
+			if (neg && e === norm(value)) return false;
+			if (!neg) {
+				positives = true;
+				if (e === norm(value)) hit = true;
+			}
+		}
+		return hit || !positives;
+	};
+	return !only || (fits(only.classes, cls) && fits(only.races, race) && fits(only.factions, faction));
+}
+
+// The prerequisites (`pre`, `preAll`) of g's accepts that a player arriving
+// on the route brings, as { done, carried }: `done`, those the guides
+// chaining into g (through `next`, any route option, any number of guides
+// back) turn in for the persona; `carried`, those they accept and leave for
+// g only to hand in (no other goal of it in g): in the log, ready, on
+// arrival. The engine passes by an accept whose prerequisite is missing
+// (issue #70).
+function chainDone(guides, g, persona) {
+	const into = new Map();
+	for (const from of guides) {
+		for (const to of from.nextChoices || (from.next ? [from.next] : [])) into.set(to, [...(into.get(to) || []), from]);
+	}
+	const turned = new Set();
+	const accepted = new Set();
+	const seen = new Set([g.id]);
+	const queue = [...(into.get(g.id) || [])];
+	while (queue.length) {
+		const from = queue.pop();
+		if (seen.has(from.id)) continue;
+		seen.add(from.id);
+		for (const s of from.steps) {
+			if (!onlyFits(s.only, persona)) continue;
+			for (const x of s.goals) {
+				if (!x.quest || !onlyFits(x.only, persona)) continue;
+				if (x.t === 'turnin') turned.add(x.quest);
+				if (x.t === 'accept') accepted.add(x.quest);
+			}
+		}
+		queue.push(...(into.get(from.id) || []));
+	}
+	// Quests g only hands in: a turn-in and no other goal of the quest.
+	const handIn = new Map();
+	for (const s of g.steps) {
+		for (const x of s.goals) if (x.quest) handIn.set(x.quest, (handIn.get(x.quest) !== false) && x.t === 'turnin');
+	}
+	const done = new Set();
+	const carried = new Set();
+	for (const s of g.steps) {
+		for (const x of s.goals) {
+			if (x.t !== 'accept') continue;
+			for (const p of [...(x.pre || []), ...(x.preAll || [])]) {
+				if (turned.has(p)) done.add(p);
+				else if (accepted.has(p) && handIn.get(p)) carried.add(p);
+			}
+		}
+	}
+	const sorted = (set) => [...set].sort((a, b) => a - b);
+	return { done: sorted(done), carried: sorted(carried) };
+}
+
 // Reference data from `dir` for playtest; missing core files are an error in
 // diag (a search over no data would only look like a broken guide).
 function playData(dir, diag) {
@@ -394,6 +469,8 @@ function playtest({ dir, manifest, official = false, filter = null, classes = nu
 	const results = [];
 	if (diag.hasErrors()) return { results, diag, played: 0 };
 	const packIds = new Set(guides.map((g) => g.id));
+	// Every compiled guide, for the chains into each one (chainDone).
+	const chained = packs.flatMap((p) => p.guides);
 	const sim = simPacks(packs, data);
 	try {
 		// Races that reach each guide from a previous one, through any route option.
@@ -412,7 +489,12 @@ function playtest({ dir, manifest, official = false, filter = null, classes = nu
 			personas = [...personas, ...classPersonas(data, g, personas)];
 			for (const { race, faction } of personas) {
 				for (const cls of classesFor(data, g, race, faction, classes)) {
-					const [out, hand] = playGuide(sim, g, { race, faction, cls, handOver });
+					const pre = chainDone(chained, g, { race, faction, cls });
+					const before = [
+						pre.done.length ? `w.complete(${luaValue(pre.done)})` : '',
+						...pre.carried.map((q) => `w.onQuest(${q}, {})`),
+					].join('\n');
+					const [out, hand] = playGuide(sim, g, { race, faction, cls, handOver, before });
 					const { stuck, problems } = outcome(out, handOver, hand, { race, faction, cls });
 					const r = { guide: g.id, race, faction, cls, ok: !stuck && !problems.length, stuck, problems, landed: hand ? hand.guide || null : null };
 					results.push(r);
@@ -613,4 +695,4 @@ for _ in pairs(visited) do count = count + 1 end
 emit({ done = E.GetStepIndex() == nil or E.GetGuide() ~= G, stuck = stuck, visited = count, steps = #G.steps, missing = missing, wrongPick = wrongPick, level = w.level })
 `;
 
-module.exports = { playtest, resultLines, buildSimPack, playGuide, writePackInto, SIMULATE, HOME, CLASSES, luaValue };
+module.exports = { playtest, resultLines, buildSimPack, playGuide, writePackInto, chainDone, SIMULATE, HOME, CLASSES, luaValue };

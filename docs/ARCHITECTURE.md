@@ -812,7 +812,11 @@ Polestar.Engine.GetProgress() -> doneSteps, totalSteps
   chain of prerequisites, at most 8 deep): that prerequisite is the route's
   own business, so a chain the guide does later (or one lint warns about,
   taken before its prerequisite is handed in) keeps its accept, and its
-  giver's window decides as below. Prerequisites the data lacks (issue #51)
+  giver's window decides as below. So does a prerequisite whose goals in the
+  guide are all for other characters (`only`): another race's or class's
+  version of the chain, whose own the data does not list (the paladin
+  charger's Emphasis on Sacrifice names the Human's Lord Grayson
+  Shadowbreaker, not the Dwarf's). Prerequisites the data lacks (issue #51)
   mark nothing in advance; the giver's window covers them. The mark is live:
   it does not hold the step, the focus or the arrow, and it goes the moment
   the prerequisite is done (the guide then goes back to it, as below), not
@@ -3006,7 +3010,7 @@ What `compile` writes into a pack's folder: Core, "Guide data (compiled Lua)".
 | `lint`, `compile` | checks with our guides as context; writes `<pack>/dist/<folder>/`; `--format text\|json\|github` |
 | `doctor` | Node, Lua, reference data, AddOns folder, `pack.json` |
 | `find` | quests, NPCs, objects, items, inns, flight points and our guides as guide lines (`--json`); `--kind inn\|flight` without a text lists every inn or flight point (from `travel.json`) |
-| `playtest` | every guide to the end per class (`tools/lib/playtest.js`, also behind `tests/guides.test.js`) |
+| `playtest` | every guide to the end per class (`tools/lib/playtest.js`, also behind `tests/guides.test.js`); a guide starts with the prerequisites of its accepts that the guides chaining into it turn in already done, and those they leave for it only to hand in in the log, as for a player arriving on the route |
 | `play`, `dev` | the playground with the pack built into a temp folder; `dev` watches and builds into AddOns |
 | `install`, `pack` | builds and installs the pack; writes `<pack>/dist/<folder>-<version>.zip` |
 | `record draft`, `sim compare` | drafts into `<pack>/drafts/` under `<id>/draft/`; scores the pack's chain beside ours |

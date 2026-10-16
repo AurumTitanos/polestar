@@ -410,7 +410,8 @@ end
 -- A missing prerequisite the guide still turns in, before the accept or
 -- (against lint's order) after it, is the route's own business or a gap in
 -- the data: the accept keeps its place and its giver's window has the last
--- word. Returns the prerequisite that blocks, or nil.
+-- word. So is one this guide has only for other characters (Own.coming).
+-- Returns the prerequisite that blocks, or nil.
 function Own.preBlocked(a, depth)
 	if not (guide and missingPre(a)) then return nil end
 	if type(a.preAll) == "table" then
@@ -428,22 +429,36 @@ function Own.preBlocked(a, depth)
 	return nil
 end
 
--- Whether this guide still turns quest p in: a turn-in of it, not optional,
--- that applies to the character, in a step the player has not skipped, not
--- skipped or ticked itself, and not unavailable (down the chain of
--- prerequisites).
+-- Whether quest p is no missing prerequisite this guide can tell of: the
+-- guide still turns it in (a turn-in of it, not optional, that applies to
+-- the character, in a step the player has not skipped, not skipped or
+-- ticked itself, and not unavailable down the chain of prerequisites), or
+-- every goal of p in the guide is for other characters (`only`): another
+-- race's or class's version of the chain, whose own the data does not list
+-- (Emphasis on Sacrifice names the Human Lord Grayson Shadowbreaker, 7638,
+-- not the Dwarf's 7670).
 function Own.coming(p, depth)
 	local state = ns.CharState()
 	local skipped, manual = state.skipped[guide.id], state.manual[guide.id]
-	for _, t in ipairs(layoutOf(guide).turnins[p] or NONE) do
+	local l = layoutOf(guide)
+	local turnins, mine = l.turnins[p] or NONE, false
+	for _, t in ipairs(turnins) do
 		local tg = t.goal
-		if not tg.optional and stepApplies(t.step) and goalApplies(tg)
-			and not (skipped and (skipped[t.s] or skipped[t.key])) and not (manual and manual[t.key])
-			and not unavailableFor(tg, (depth or 0) + 1) then
-			return true
+		if stepApplies(t.step) and Guides.Matches(tg.only, player) then
+			mine = true
+			if not tg.optional and goalApplies(tg)
+				and not (skipped and (skipped[t.s] or skipped[t.key])) and not (manual and manual[t.key])
+				and not unavailableFor(tg, (depth or 0) + 1) then
+				return true
+			end
 		end
 	end
-	return false
+	if mine then return false end
+	local accepts = l.accepts[p] or NONE
+	for _, t in ipairs(accepts) do
+		if stepApplies(t.step) and Guides.Matches(t.goal.only, player) then return false end
+	end
+	return #turnins + #accepts > 0
 end
 
 -- "s:g", built once per step and goal: check-offs and goal skips are looked
