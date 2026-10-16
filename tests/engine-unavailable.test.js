@@ -130,6 +130,26 @@ test('a detail window opened from the giver\'s list says nothing about the other
 	]);
 });
 
+test('the follow-up a turn-in pops up says nothing about the giver\'s other quests, however long the reward was read (regression: Jorn Skyseer passed at Sergra Darkthorn)', () => {
+	const [out] = run({
+		before: 'w.onQuest(903, { 1 })',
+		script: `
+			local w = stub.world
+			-- Thork offers the guide's quests and takes in 903, which is not in the guide.
+			w.gossip(3429, { available = { { questID = 872 }, { questID = 880 }, { questID = 870 } }, active = { { questID = 903, isComplete = true } } })
+			w.questComplete(3429, 903); flush()
+			stub.advance(45) -- reading the reward panel
+			w.turnIn(903); flush()
+			-- The client then shows 903's follow-up straight away; the player takes it.
+			w.questDetail(3429, 904); flush()
+			w.accept(904, { 1 }); w.close(); flush()
+			emit({ step = brief(1), at = E.GetStepIndex() })
+		`,
+	});
+	assert.deepEqual(out.step, ['active:nil:nil', 'active:nil:nil', 'active:nil:nil', 'active:nil:nil']);
+	assert.equal(out.at, 1);
+});
+
 test('the marks clear on level-up and on any turn-in, and the guide goes back to them', () => {
 	const [out] = run({
 		script: `

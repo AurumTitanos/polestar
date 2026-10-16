@@ -115,6 +115,35 @@ test('› looks ahead and ‹ back without skipping anything; Skip skips the ste
 	assert.equal(out.after, '');
 });
 
+test('looking ahead at an accept: taking the quest moves on to its objective step even while the log has not filled in the objectives yet (regression: Barak Kodobane passed for the Kolkar Leaders turn-in)', () => {
+	const guides = `
+		Polestar.RegisterGuide({ id = "test/kolkar", pack = "test", title = "Kolkar", minLevel = 1, maxLevel = 30, steps = {
+			{ title = "Sergra", goals = { { t = "accept", quest = 3261, title = "Jorn Skyseer", npc = 3338 } } },
+			{ title = "Regthar", goals = { { t = "accept", quest = 850, title = "Kolkar Leaders", npc = 3389 } } },
+			{ title = "Barak", goals = { { t = "collect", item = 5022, itemName = "Barak's Head", count = 1, quest = 850, oi = 1 } } },
+			{ title = "Regthar", goals = { { t = "turnin", quest = 850, title = "Kolkar Leaders", npc = 3389 } } },
+		} })`;
+	const [out] = run({
+		guides,
+		saved: 'PolestarCharDB = { schema = 1, guide = "test/kolkar" }',
+		script: `
+			local w = stub.world
+			Polestar.Set("behavior.autoAccept", false)
+			E.Goto(2); flush()
+			local r = { looking = E.GetStepIndex() }
+			w.accept(850, {}); flush() -- in the log, its objectives not there yet
+			r.accepted = E.GetStepIndex()
+			w.log[850].objectives = { { text = "Barak's Head: 0/1", type = "item", numFulfilled = 0, numRequired = 1, finished = false } }
+			stub.fire("QUEST_LOG_UPDATE"); flush()
+			r.filled = { E.GetStepIndex(), E.GetLiveStep(), E.GetStepView(3).status }
+			emit(r)
+		`,
+	});
+	assert.equal(out.looking, 2);
+	assert.equal(out.accepted, 3, 'the head is still to get');
+	assert.deepEqual(out.filled, [3, 1, 'current']);
+});
+
 test('Skip while looking ahead skips the step shown and moves on from it, leaving the live step alone', () => {
 	const [out] = run({
 		before: AT_CAMP,

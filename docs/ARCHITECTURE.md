@@ -520,8 +520,8 @@ as on a bag item (`W.ItemClick`: Shift links, Ctrl tries it on, Alt guides;
 | `accept` | `quest`, `title` | `npc`/`npcName`, `object`/`objName`, `item`/`itemName`, `minLevel`, `qlvl`, `pre`, `preAll`, `closedBy`, `preTitles` | on quest **or** completed |
 | `turnin` | `quest`, `title` | `npc`/`npcName`, `object`/`objName`, `rewards = { choices = { { item, itemName, quality } }, items = { ... }, xp, money }` (copper) | completed |
 | `complete` | `quest`, `title` | — | ready for turn-in or completed |
-| `kill` | `target` | `npc`, `count`, `quest`, `oi` | objective `oi` finished, or quest ready/completed; without `quest`: manual |
-| `collect` | `item`, `itemName` | `count`, `quest`, `oi` | objective finished / quest ready / completed; without `quest`: item count ≥ `count` |
+| `kill` | `target` | `npc`, `count`, `quest`, `oi` | objective `oi` finished, or quest ready/completed (not while the log lists no objectives yet, right after the accept); without `quest`: manual |
+| `collect` | `item`, `itemName` | `count`, `quest`, `oi` | objective finished / quest ready (as `kill`) / completed; without `quest`: item count ≥ `count` |
 | `goto` | `map`, `x`, `y` | `text`, `r` (default 8 yd) | within radius, **or** any later goal in the step is done |
 | `talk` | `npc`, `npcName` | — | gossip/quest frame opened with that NPC during this step; else manual |
 | `interact` | `object`, `objName` | `quest`, `oi` | objective state if `quest`; else manual |
@@ -730,7 +730,11 @@ Polestar.Engine.GetProgress() -> doneSteps, totalSteps
   (any tab's current step) and the quest is neither offered, in the log, nor
   completed, the Engine marks that accept unavailable for the session, with a
   reason: `"level"` (below minLevel), `"pre"` (a `pre` quest not done, title
-  given) or `"offer"`. An unavailable accept and the goals of that quest in the
+  given) or `"offer"`. A detail window says nothing about the NPC's other
+  quests when it opens within 30 s of that NPC's gossip/greeting list, reward
+  panel or turn-in (the quest picked from the list, or the follow-up the
+  client pops after a turn-in), or when an item starts it. An unavailable
+  accept and the goals of that quest in the
   guide (objectives, complete, turnin) count as skipped, so the guide moves on
   instead of stalling. The session marks clear on level-up and on any quest
   turn-in. The view carries `unavailable = reason` and `unavailableText`.
