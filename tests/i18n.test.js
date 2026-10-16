@@ -20,6 +20,7 @@ const { localeState } = require('../tools/lib/i18n/project');
 const { TERMS, GLOSSARY_DIR, readGlossary, glossaryWarnings } = require('../tools/lib/i18n/glossary');
 
 const POLESTAR = path.join(ADDONS, 'Polestar');
+const shipped = LOCALE_CODES.filter((l) => fs.existsSync(path.join(POLESTAR, 'Locales', `${l}.lua`)));
 
 test('the code\'s keys are found: literal L["..."], ns.LC pairs, the transport captions and the text that comes from data', () => {
 	const keys = extractKeys(POLESTAR);
@@ -182,4 +183,29 @@ test('i18n status lists every locale with its status and translators', () => {
 	const de = out.locales.find((l) => l.locale === 'deDE');
 	assert.deepEqual(de.translators, ['thecodingcortex']);
 	assert.ok(de.file && de.translated > 1000 && de.translated <= out.keys);
+});
+
+test('every shipped interface file loads, has no stale key or key set twice, and keeps the English formats', () => {
+	assert.deepEqual(shipped, ['deDE', 'esMX']);
+	const st = localeState(POLESTAR, shipped);
+	for (const locale of shipped) {
+		const s = st.locales[locale];
+		assert.equal(s.error, null, `${locale}: ${s.error}`);
+		assert.deepEqual(Object.keys(s.stale), [], `${locale}: stale keys (run \`node tools/polestar.js i18n sync ${locale}\`)`);
+		assert.deepEqual(s.problems, [], `${locale}: broken translations`);
+		assert.ok(Object.keys(s.translated).length > 1000, `${locale}: ${Object.keys(s.translated).length} translations`);
+	}
+});
+
+test('sync keeps every translation line of the shipped files byte for byte', () => {
+	const keys = extractKeys(POLESTAR);
+	for (const locale of shipped) {
+		const file = path.join(POLESTAR, 'Locales', `${locale}.lua`);
+		const text = fs.readFileSync(file, 'utf8');
+		const out = updateLocaleText({ text, file, keys });
+		const after = new Set(out.text.split('\n'));
+		const lost = text.split('\n').filter((l) => l.startsWith('L[') && !after.has(l) && !after.has(`-- ${l}`));
+		assert.deepEqual(lost, [], `${locale}: translation lines sync would change`);
+		assert.equal(updateLocaleText({ text: out.text, file, keys }).text, out.text, `${locale}: a second sync changes nothing`);
+	}
 });
