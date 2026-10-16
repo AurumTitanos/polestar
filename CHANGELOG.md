@@ -40,11 +40,9 @@
   Shortest Path Forever's map format, with Cillian Berragan's permission): out
   of an inn by its door rather than through the wall, down into the Undercity
   by its lifts, never swimming across open sea (water the game tires you in),
-  and along the coast where that is the way. A walk is also told step by step
-  at the bridges, gates, tunnels, passes and cave and building mouths it
-  passes. The maps take about 26 MB once loaded (Walk real paths on) and up
-  to about 54 MB more while a walk is being searched; the zip grows by about
-  11 MB.
+  and along the coast where that is the way. The maps take about 26 MB once
+  loaded (Walk real paths on) and up to about 54 MB more while a walk is
+  being searched; the zip grows by about 11 MB.
 - A class guide opened before your level says so: the guide window shows
   "Available from level 20" with who starts it (or the quest to finish
   first), instead of sending you to a trainer who has nothing for you, then
@@ -418,10 +416,11 @@
 - The arrow walks real paths: round cliffs, water and walls, through the
   town gate and down into the mine instead of straight over the edge, thanks
   to Shortest Path Forever by Cillian Berragan
-  (https://github.com/cjber/shortest-path-forever), whose walking maps and
-  router he kindly let Polestar use. They come in the new `Polestar_Nav`
-  folder of the zip (install it with the others). Options, Arrow & routes,
-  "Walk real paths" turns it off.
+  (https://github.com/cjber/shortest-path-forever), whose router and walking
+  map of Zephras Isle he kindly let Polestar use; the walking maps of Eastern
+  Kingdoms and Kalimdor are Polestar's own, in his format. They come in the
+  new `Polestar_Nav` folder of the zip (install it with the others). Options,
+  Arrow & routes, "Walk real paths" turns it off.
 - Works with Shortest Path Forever: with it installed, Polestar hands it the
   route. Each goal goes to it as a stop with the game's own mark (a quest's
   "!" or "?", a trainer, a flight master, a dungeon, a boat), a kill or
@@ -442,8 +441,8 @@
   Lift, Bottom" then "Take The Great Lift", through a zone's gate or into a
   cave by the zone data's or the guide's own words, each with its own time,
   the arrow saying each as you reach it, and at the bridges, gates, tunnels,
-  passes and cave and building mouths the walking maps know. A cave or chain the
-  guide or the zone data
+  passes and cave and building mouths Polestar's walking maps of Eastern
+  Kingdoms and Kalimdor name. A cave or chain the guide or the zone data
   already describes keeps its own words, and a goal right after a guide's
   "go to the mouth" step is still pointed at straight from the mouth, so the
   arrow never leads onto the hill above a mine. As a ghost the route only
@@ -459,8 +458,8 @@
   strong and the legs after it fainter, and the dots stop short of each stop.
   Every stop along the way is marked: a lift with its own glyph, zone
   crossings, approach chains and the guide's go-to points with a plain disc;
-  gates, bridges, caves and passes get their own marks once the walking maps
-  carry them. Options, Arrow & routes, "Route lines" (on by default); the old
+  gates, bridges, caves and passes have their own marks. Options, Arrow &
+  routes, "Route lines" (on by default); the old
   trail dots stand in while it is off.
 - When the route says to hearth or teleport, a button under the arrow casts
   it (bindable: "Use the route's Hearthstone or teleport"); it appears,
@@ -609,19 +608,6 @@
   Layers add Walkable and Arrow aids. The planner, and the navigation grid
   that grew out of it, are Nivek_Gaming's idea (@Nivek_Gaming on X): thank
   you, Nivek.
-- `node tools/polestar.js nav build` builds a navigation grid from the
-  Forever client's own terrain, water and building, cave and doodad collision
-  (fetched from wago.tools like the planner's map art; local only, about
-  750 MB): where a character can walk, which slopes it can climb, which drops
-  it survives, where it swims and which lifts it can ride. `nav path` prints
-  the route between two map points.
-- `node tools/polestar.js nav aids` generates the arrow's zone crossings,
-  open borders and cave, building and climb approach chains from the
-  navigation grid (`data/local/nav/aids.json`, the crossings file format;
-  local only, never shipped) and, with `--report`, measures how many guide
-  legs the arrow walks straight over ground the grid cannot walk, without
-  and with them. Not used by the addon yet: with these aids the arrow still
-  walks straight inside a zone, and some cities' gates are not yet found.
 - The compiler gives every goal at an NPC or object (accept, turn in, talk,
   kill, interact, buy, train, vendor, set home, flight point, learn) the
   height of that NPC's or object's spawn as `z`, when one stands on the
@@ -641,6 +627,20 @@
   in `talents/forever/`, and `talents check` replays every pick (rows,
   prerequisites, ranks) against the Forever trait tables from wago.tools
   (thanks jnickles85-bit).
+- `node tools/polestar.js nav build` builds a navigation grid from the
+  Forever client's own terrain, water and building, cave and doodad collision
+  (fetched from wago.tools like the planner's map art; local only, about
+  750 MB): where a character can walk, which slopes it can climb, which drops
+  it survives, where it swims and which lifts it can ride. `nav path` prints
+  the route between two map points.
+- `node tools/polestar.js nav aids` generates the arrow's zone crossings,
+  open borders and cave, building and climb approach chains from the
+  navigation grid (`data/local/nav/aids.json`, the crossings file format;
+  local only, never shipped) and, with `--report`, measures how many guide
+  legs the arrow walks straight over ground the grid cannot walk, without
+  and with them. `nav pack` names the walk's caves, building mouths, passes,
+  bridges and tunnels from them (`Nav/Chokepoints.lua`), and the arrow's walks
+  inside a zone follow the engine's paths. Some cities' gates are not yet found.
 - `addon/Polestar_Nav`'s maps of Eastern Kingdoms and Kalimdor are
   Polestar's: `node tools/polestar.js nav pack` writes the
   navigation grid in his walking-map format (`tools/lib/nav/pack.js`, a port
@@ -805,16 +805,16 @@
   `Nav/Journey.lua` write the `TomTom` global. Tested by
   `tests/nav-journey.test.js` (NAV_QA rows 7, 8, 9, C11, C13, C14).
 - `addon/Polestar_Nav` vendors Shortest Path Forever's router
-  (`Routing/PathGrid.lua`, `Path.lua`, `PathJobs.lua`) and walking maps
-  (`Nav/`) at v1.16.0 (b1ad5bd), GPL-3.0-or-later with Cillian Berragan's
-  copyright (`LICENSE`, `CREDITS.md`). The only changes are mechanical: the
-  data global `ShortestPathForeverPathData` becomes `PolestarPathData`, each
-  file names its upstream file and commit. `API.lua` hands the engine to
-  Polestar as `Polestar_NavEngine` (upstream's `Find`, `FindCost`,
-  `FindMany`, `Cancel`, `Busy`, plus `Available(map)`). It always reads its
-  own `PolestarPathData`, never an installed Shortest Path Forever's tables:
-  his engine evicts decoded entries from them while ours may be searching.
-  With both installed each holds its maps.
+  (`Routing/PathGrid.lua`, `Path.lua`, `PathJobs.lua`) and his walking map of
+  Zephras Isle (`Nav/Nav2991*.lua`) at v1.16.0 (b1ad5bd), GPL-3.0-or-later
+  with Cillian Berragan's copyright (`LICENSE`, `CREDITS.md`). The only
+  changes are mechanical: the data global `ShortestPathForeverPathData`
+  becomes `PolestarPathData`, each file names its upstream file and commit.
+  `API.lua` hands the engine to Polestar as `Polestar_NavEngine` (upstream's
+  `Find`, `FindCost`, `FindMany`, `Cancel`, `Busy`, plus `Available(map)`).
+  It always reads its own `PolestarPathData`, never an installed Shortest
+  Path Forever's tables: his engine evicts decoded entries from them while
+  ours may be searching. With both installed each holds its maps.
 - `node tools/polestar.js nav vendor <checkout>` redoes the copy from a newer
   upstream commit (only `Nav<name>.lua` map files; each header carries his
   copyright and the dated notice GPLv3 section 5a asks for) and writes
