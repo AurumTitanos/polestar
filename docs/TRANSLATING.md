@@ -109,6 +109,14 @@ for your language from
   `{ ["English"] = "translation" }`, sets `L["English"] = "..."`, or calls
   `ns.AddTranslations` (Ding!'s layout). It fills only texts not translated
   yet, refuses a broken format, and puts texts the code lacks in the end block.
+- `node tools/polestar.js i18n fit [<locale>[=<file>]...]` lays out every
+  preview scene and every Options page in English and each language, and
+  lists the translated text the window would cut with an ellipsis or let
+  cross its edge (`deDE=my-deDE.lua` checks a file of your own). Write your
+  translation as long as it needs to be: the layout makes room (labels and
+  descriptions wrap, controls size to their text), and a text this still
+  lists is a layout bug to report, not yours to shorten. `--slack 1.15`
+  measures about as wide as the game's own font.
 
 ## For developers
 

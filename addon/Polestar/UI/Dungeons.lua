@@ -392,6 +392,7 @@ local function card(i)
 	c.Name:SetPoint("BOTTOMLEFT", c.Art, "BOTTOMLEFT", PAD - CARD_X - 1, 10)
 	c.Name:SetWidth(cw - (PAD - CARD_X) * 2)
 	c.Stats = W.Text(c, "small", "textDim")
+	c.Stats:SetSpacing(2) -- factLines may break it onto a second line
 	c.Stats:SetPoint("LEFT", c, "TOPLEFT", PAD - CARD_X, -(CARD_ART + 20))
 	c.Forever = W.Chip(c)
 	c.Yours = W.Chip(c)
@@ -757,6 +758,7 @@ function DS.Build(parent, shell)
 	pg.Forever = W.Chip(over)
 	pg.Forever:SetPoint("LEFT", pg.Title, "RIGHT", 12, 0)
 	pg.Sub = textShadow(W.Text(over, "note", "textDim"))
+	pg.Sub:SetSpacing(2)
 	pg.Sub:SetPoint("TOPLEFT", pg.Title, "BOTTOMLEFT", 0, -8)
 	-- The actions, right to left from the band's corner (pageHeader places
 	-- them): the primary one is "Hand in the quests" while quests here are
@@ -878,6 +880,24 @@ local function defaultBand(plevel)
 	return level > 0 and "level" or "all"
 end
 
+-- A dungeon's facts ("Levels 17–24 · The Barrens · ...", on its card and
+-- under its name), broken onto more lines between two facts where one line
+-- is too narrow.
+local function factLines(fs, facts, width)
+	local lines, line = {}, nil
+	for _, fact in ipairs(facts) do
+		local candidate = line and (line .. DOT .. fact) or fact
+		if line and W.TextWidth(fs, candidate) > width then
+			lines[#lines + 1] = line
+			line = fact
+		else
+			line = candidate
+		end
+	end
+	lines[#lines + 1] = line or ""
+	return concat(lines, "\n")
+end
+
 local function paintCard(c, d, f, plevel, key)
 	c.psKey, c.psEntry = d.key, d
 	c.Name:SetText(d.name)
@@ -900,7 +920,6 @@ local function paintCard(c, d, f, plevel, key)
 	else
 		facts[#facts + 1] = n == 1 and L["1 quest"] or format(L["%d quests"], n)
 	end
-	c.Stats:SetText(concat(facts, DOT))
 	local cw = c:GetWidth()
 	local right = PAD - CARD_X
 	-- Under For your level every card is; elsewhere the chip marks them.
@@ -920,7 +939,9 @@ local function paintCard(c, d, f, plevel, key)
 	else
 		c.Forever:Hide()
 	end
-	c.Stats:SetWidth(max(60, cw - (PAD - CARD_X) - right - 6))
+	local statsW = max(60, cw - (PAD - CARD_X) - right - 6)
+	c.Stats:SetWidth(statsW)
+	c.Stats:SetText(factLines(c.Stats, facts, statsW))
 	W.Color(c.Stats, n > 0 and "textDim" or "textMuted")
 end
 
@@ -1106,7 +1127,9 @@ local function pageHeader(d)
 		end
 	end
 	pg.Title:SetWidth(min(floor(pg.Title:GetStringWidth() + 1), MW - PAD * 2 - 140))
-	pg.Sub:SetWidth(MW - PAD - 24 - used - (PAD - 12))
+	local subW = MW - PAD - 24 - used - (PAD - 12)
+	pg.Sub:SetWidth(subW)
+	pg.Sub:SetText(factLines(pg.Sub, facts, subW))
 end
 
 -- Why a page has nothing to pick up, in one sentence.

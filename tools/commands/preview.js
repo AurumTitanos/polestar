@@ -121,12 +121,14 @@ function loadFonts() {
 	return new Proxy(fonts, { get: (t, k) => t[k] || t[FALLBACK] });
 }
 
-// Advance widths (em) for every code point the UI can plausibly show.
-function metricsLua(fonts) {
+// Advance widths (em) for every code point the UI can plausibly show, and
+// `extra` ones (tools/preview/fit.js: the translations' scripts).
+function metricsLua(fonts, extra = []) {
 	const cps = [];
 	for (let c = 32; c < 127; c++) cps.push(c);
 	for (let c = 0xa0; c < 0x180; c++) cps.push(c);
 	cps.push(0x2013, 0x2014, 0x2018, 0x2019, 0x201c, 0x201d, 0x2026, 0x2022, 0x00b7, 0x00d7, 0x2192);
+	for (const c of extra) if (!cps.includes(c)) cps.push(c);
 	const parts = FONT_FILES.map((file) => {
 		const f = fonts[file];
 		const adv = cps.map((c) => `[${c}]=${f.advanceEm(c).toFixed(5)}`).join(',');

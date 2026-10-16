@@ -1479,7 +1479,7 @@ function LK.Build(parent, hub)
 	LK.root = root
 	-- The results take what the details leave of the section's width.
 	local w = parent:GetWidth() or 0
-	if w <= 0 then w = hub:GetWidth() - (rawget(hub, "Rail") and SH.rail or 0) - SH.sidebar - 2 end
+	if w <= 0 then w = hub:GetWidth() - (hub.psRail or 0) - SH.sidebar - 2 end
 	MID_W = floor(w - DETAIL_W)
 	results = W.Scroll(root)
 	-- Rows are drawn for what is in view: scrolling draws the rest.
