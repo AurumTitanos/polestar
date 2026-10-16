@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### For players
+- Spanish (Spain): clearer quest and trainer instructions, party progress, XP and kill counters, instance lockouts and gear advice; correct the Restoration spec and untrained-weapon warning, with consistent player vocabulary (thanks Forever Hispano).
 
 - Gear advice no longer marks a weapon you haven't trained as an upgrade,
   picks it as your quest reward or equips it: it went by the weapons your

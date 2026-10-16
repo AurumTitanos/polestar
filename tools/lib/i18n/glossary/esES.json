@@ -9,8 +9,8 @@
 	"skip": { "term": "Omitir", "match": ["omit"] },
 	"quest": { "term": "Misión", "match": ["mision"], "client": "QUESTS_LABEL" },
 	"quest log": { "term": "Registro de misiones", "client": "QUEST_LOG" },
-	"quest giver": { "term": "Asignador de misiones", "match": ["asignador"], "client": "TUTORIAL_TITLE1" },
-	"NPC": { "term": "PNJ", "client": "PROF_CRAFTING_ORDER_TYPE_NPC" },
+	"quest giver": { "term": "Asignador de misiones", "match": ["asignador", "NPC"], "client": "TUTORIAL_TITLE1", "note": "NPC de misiones is the shorter player-facing wording." },
+	"NPC": { "term": "PNJ", "match": ["PNJ", "NPC"], "client": "PROF_CRAFTING_ORDER_TYPE_NPC", "note": "NPC is also commonly used by Spanish-speaking players." },
 	"hearthstone": { "term": "Piedra de hogar", "client": "TUTORIAL_TITLE31" },
 	"flight master": { "term": "Maestro de vuelo", "match": ["maestro de vuelo", "maestros de vuelo"], "client": "MINIMAP_TRACKING_FLIGHTMASTER" },
 	"flight path": { "term": "Ruta de vuelo", "client": "ERR_NEWTAXIPATH" },
@@ -37,6 +37,6 @@
 	"zone": { "term": "Zona", "client": "ZONE" },
 	"minimap": { "term": "Minimapa", "client": "MINIMAP_LABEL" },
 	"world map": { "term": "Mapa", "match": ["mapa"], "client": "WORLD_MAP" },
-	"level": { "term": "Nivel", "match": ["nivel", "subir"] },
+	"level": { "term": "Nivel", "match": ["nivel", "subir", "leve"] },
 	"boat": { "term": "Barco" }
 }
