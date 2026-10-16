@@ -98,8 +98,14 @@ function threadUrl(guild, thread, message) {
 	return `https://discord.com/channels/${guild}/${thread}` + (message ? `/${message}` : '');
 }
 
+// A post's title as an issue title. A player who pasted the report into the
+// title box gets their words alone: no bold lead-in, nothing from the code block on.
 function issueTitle(name) {
-	const t = String(name || '').replace(/\s+/g, ' ').trim() || 'Bug report from Discord';
+	const t = String(name || '')
+		.replace(/```[\s\S]*$/, '')
+		.replace(/^\s*\*\*[^*\n]{1,60}:\*\*\s*/, '')
+		.replace(/\s+/g, ' ')
+		.trim() || 'Bug report from Discord';
 	return t.length > 200 ? t.slice(0, 197) + '...' : t;
 }
 

@@ -109,6 +109,10 @@ ones and ones already carrying a status tag.
 Update: `git -C ~/polestar-bot pull && docker compose up -d --build` in
 `tools/discord-bot`.
 
+After a change to how posts are read, `docker compose run --rm bot node
+bot.js refresh` writes every filed issue again from its post (title, body,
+the labels the report gives), then exits.
+
 A restart loses nothing: the bot reads back which posts it filed (a hidden
 marker in each issue body, and its "Tracked as" reply in each thread), files
 the posts made while it was away, and Discord replays what a short drop

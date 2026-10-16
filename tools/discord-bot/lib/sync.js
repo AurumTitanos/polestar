@@ -216,6 +216,33 @@ function createSync({ discord, github, media, config, log = console, sleep = (ms
 		});
 	}
 
+	// Every filed issue written again from its post as it stands: title, body,
+	// and the labels the report and tags give (added; none taken away, triage
+	// not put back). For after a change to how posts are read.
+	async function refresh() {
+		let done = 0;
+		for (const [threadId, n] of issues) {
+			try {
+				await serial(threadId, async () => {
+					const thread = await getThread(threadId, true);
+					if (!inForum(thread)) return;
+					const message = await starter(threadId);
+					if (!message) return;
+					const post = await postFor(thread, message);
+					const labels = I.labelsFor(post.report, post.tags).filter((l) => l !== 'triage');
+					await github.ensureLabels(labels, I.labelInfo);
+					await github.updateIssue(n, { title: I.issueTitle(thread.name), body: I.issueBody(post) });
+					await github.addLabels(n, labels);
+					seen.set(threadId, signature(message));
+					done++;
+				});
+			} catch (err) {
+				log.error(`refresh: #${n} failed:`, err.message);
+			}
+		}
+		log.info(`refresh: ${done} of ${issues.size} issues rewritten`);
+	}
+
 	// Issues the bot filed before, read back from their markers.
 	async function loadIndex() {
 		for (const issue of await github.issuesLabelled('discord', { max: 1000 })) {
@@ -267,7 +294,7 @@ function createSync({ discord, github, media, config, log = console, sleep = (ms
 		}
 	}
 
-	return { dispatch, loadIndex, backfill, newPost, message, edit, issues };
+	return { dispatch, loadIndex, backfill, refresh, newPost, message, edit, issues };
 }
 
 module.exports = { createSync };

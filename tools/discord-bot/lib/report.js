@@ -106,7 +106,8 @@ function parseDetails(lines) {
 // { description, details, block } from a message's content. `block` is the
 // details code block as posted (for quoting it whole), `details` its fields.
 function parseReport(content) {
-	const text = String(content || '').replace(/\r\n/g, '\n');
+	// The game's copy box can leave NULs and other control characters after the report.
+	const text = String(content || '').replace(/\r\n/g, '\n').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '');
 	FENCE.lastIndex = 0;
 	let m;
 	while ((m = FENCE.exec(text))) {

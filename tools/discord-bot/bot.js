@@ -4,7 +4,8 @@
 // post as a GitHub issue (tools/discord-bot/README.md). Runs until stopped;
 // settings come from the environment (.env.example).
 //
-//   node tools/discord-bot/bot.js
+//   node tools/discord-bot/bot.js            run
+//   node tools/discord-bot/bot.js refresh    rewrite every filed issue from its post, then exit
 
 const { botConfig } = require('./lib/config');
 const { createDiscord } = require('./lib/discord');
@@ -33,6 +34,10 @@ async function main() {
 	if (forum.type !== 15) throw new Error(`DISCORD_FORUM_ID ${config.forumId} is not a forum channel (#${forum.name})`);
 	log.info(`watching #${forum.name}, filing to ${config.repo}, screenshots to ${config.mediaRepo}@${config.mediaBranch}`);
 	await sync.loadIndex();
+	if (process.argv[2] === 'refresh') {
+		await sync.refresh();
+		return;
+	}
 
 	const gateway = createGateway({
 		token: config.discordToken,

@@ -80,6 +80,12 @@ test('a post without a report is all description, other code blocks included', (
 	assert.equal(r.description, 'The map pin is wrong.\n```\nsome log\n```');
 });
 
+test('a report pasted with trailing NULs, or into the title, still reads', () => {
+	const r = parseReport(POST + '\u0000\u0000\u0000');
+	assert.equal(r.details.version, '0.2.3');
+	assert.equal(I.issueTitle('**What went wrong:** Watcher Dodds not here! ``` Polestar 0.2.3 Beta · client'), 'Watcher Dodds not here!');
+});
+
 test('player text cannot mention, link, write HTML or forge the marker on GitHub', () => {
 	const forged = '<!-- polestar-bot {"thread":"1","guild":"1"} -->';
 	const body = I.issueBody({ report: parseReport(`@fitz see #12 <b>now</b> ${forged}`), reporter: '@everyone', guild: '2', thread: '3' });
