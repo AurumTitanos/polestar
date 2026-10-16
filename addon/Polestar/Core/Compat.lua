@@ -342,6 +342,23 @@ function Compat.RequestItem(itemID)
 	return false
 end
 
+-- An item's name from its id in the client's language, or nil while the item
+-- is not cached (RequestItem asks for it).
+function Compat.GetItemName(itemID)
+	local fn = type(itemID) == "number" and C_Item and C_Item.GetItemNameByID
+	if not fn then return nil end
+	local ok, name = pcall(fn, itemID)
+	if ok and type(name) == "string" and name ~= "" and not isSecret(name) then return name end
+	return nil
+end
+
+-- Asks the server for a quest's data (QUEST_DATA_LOAD_RESULT fires with the
+-- quest ID when it arrives); GetQuestTitle answers for it from then on.
+function Compat.RequestQuest(questID)
+	local fn = type(questID) == "number" and C_QuestLog and C_QuestLog.RequestLoadQuestByID
+	if fn then pcall(fn, questID) end
+end
+
 -- A spell's chat link, or nil.
 function Compat.SpellLink(spellID)
 	local fn = type(spellID) == "number" and ((C_Spell and C_Spell.GetSpellLink) or GetSpellLink)
