@@ -22538,7 +22538,6 @@ do
 						{ t = "sethome", npc = 3934, npcName = "Innkeeper Boorand Plainswind", location = "The Crossroads", map = 1413, x = 51.99, y = 29.89, f = "e", note = "Innkeeper Boorand Plainswind" },
 						{ t = "accept", quest = 899, title = "Consumed by Hatred", npc = 3432, npcName = "Mankrik", minLevel = 14, qlvl = 20, map = 1413, x = 51.95, y = 31.58, f = "e", note = "Mankrik" },
 						{ t = "accept", quest = 4921, title = "Lost in Battle", npc = 3432, npcName = "Mankrik", minLevel = 14, qlvl = 20, map = 1413, x = 51.95, y = 31.58, f = "e" },
-						{ t = "accept", quest = 95774, title = "Her Name Is Olgra", npc = 3432, npcName = "Mankrik", minLevel = 14, qlvl = 20, map = 1413, x = 51.95, y = 31.58, f = "e" },
 						{ t = "accept", quest = 3261, title = "Jorn Skyseer", npc = 3338, npcName = "Sergra Darkthorn", minLevel = 10, qlvl = 18, pre = { 905 }, preTitles = { [905] = "The Angry Scytheclaws" }, map = 1413, x = 52.23, y = 31.01, f = "e", note = "Sergra Darkthorn" },
 						{ t = "accept", quest = 3281, title = "Stolen Silver", npc = 3464, npcName = "Gazrog", minLevel = 9, qlvl = 18, pre = { 869 }, preTitles = { [869] = "Raptor Thieves" }, map = 1413, x = 51.93, y = 30.32, f = "e", note = "Gazrog" },
 						{ t = "accept", quest = 876, title = "Serena Bloodfeather", npc = 3449, npcName = "Darsok Swiftdagger", minLevel = 12, qlvl = 20, pre = { 875 }, preTitles = { [875] = "Harpy Lieutenants" }, map = 1413, x = 51.62, y = 30.9, f = "e", note = "Darsok Swiftdagger" },
@@ -22795,10 +22794,9 @@ do
 				},
 				{
 					title = "Bristleback camps",
-					note = "The Bristleback quilboar camps spread over the plains north of Camp Taurajo, either side of the Gold Road. Every Bristleback drops a tusk and the Razormane Raiders among them carry Olgra's Adornments; Mankrik's wife lies at the north edge. Keep one Blood Shard. Lakota'mani, a grey kodo, sometimes wanders here: his hoof starts a quest.",
+					note = "The Bristleback quilboar camps spread over the plains north of Camp Taurajo, either side of the Gold Road. Every Bristleback drops a tusk; Mankrik's wife lies at the north edge. Keep one Blood Shard. Lakota'mani, a grey kodo, sometimes wanders here: his hoof starts a quest.",
 					goals = {
 						{ t = "collect", quest = 899, title = "Consumed by Hatred", item = 5085, itemName = "Bristleback Quilboar Tusk", count = 60, oi = 1, map = 1413, x = 45.09, y = 55.26, f = "e", spots = { { x = 45.2, y = 54.9, r = 40, n = 3 }, { x = 43.2, y = 55.2, r = 48, n = 9 }, { x = 43.2, y = 52.1, r = 54, n = 9 }, { x = 45.3, y = 51.5, r = 40, n = 4 }, { x = 47.4, y = 52.8, r = 40, n = 4 }, { x = 51.2, y = 54.2, r = 40, n = 2 }, { x = 52.4, y = 53.8, r = 63, n = 5 }, { x = 52.7, y = 52.3, r = 57, n = 6 }, { x = 53.4, y = 54.3, r = 44, n = 7 }, { x = 51, y = 57.3, r = 66, n = 12 }, { x = 43.7, y = 48.1, r = 40, n = 3 }, { x = 40.7, y = 45.3, r = 40, n = 7 }, { x = 45.2, y = 54, r = 55, n = 9, alt = true }, { x = 46.8, y = 53.7, r = 49, n = 10, alt = true }, { x = 44.4, y = 51.7, r = 47, n = 6, alt = true }, { x = 43.1, y = 48.4, r = 40, n = 6, alt = true }, { x = 43.1, y = 47.3, r = 78, n = 6, alt = true }, { x = 51.2, y = 55.1, r = 54, n = 10, alt = true }, { x = 51.7, y = 57.6, r = 40, n = 5, alt = true }, { x = 41.3, y = 46.1, r = 40, n = 4, alt = true }, { x = 41.4, y = 44.7, r = 40, n = 3, alt = true }, { x = 53.3, y = 53.3, r = 40, n = 7, alt = true } }, spread = true, from = "Bristleback Hunter", fromKind = "npc", fromAlso = "Bristleback Water Seeker" },
-						{ t = "collect", quest = 95774, title = "Her Name Is Olgra", item = 277277, itemName = "Olgra's Adornments", count = 4, oi = 1, map = 1413, x = 47.08, y = 52.71, f = "e", spots = { { x = 47.6, y = 52.6, r = 54, n = 9 }, { x = 47.6, y = 51, r = 48, n = 4 }, { x = 47.7, y = 49.2, r = 76, n = 6 }, { x = 48.8, y = 49.9, r = 63, n = 10 }, { x = 49.8, y = 50.9, r = 60, n = 12 }, { x = 51.4, y = 51.2, r = 40, n = 3 }, { x = 51.2, y = 53.1, r = 58, n = 8 }, { x = 49.4, y = 54.3, r = 52, n = 8 }, { x = 49.8, y = 56.5, r = 46, n = 3 }, { x = 52.9, y = 50.7, r = 40, n = 3 }, { x = 50.4, y = 48.5, r = 40, n = 3 }, { x = 49.5, y = 46.2, r = 42, n = 3 }, { x = 48, y = 53.8, r = 44, n = 5, alt = true }, { x = 48.4, y = 52.7, r = 40, n = 5, alt = true }, { x = 48.7, y = 51.3, r = 66, n = 13, alt = true }, { x = 49.9, y = 53.1, r = 61, n = 8, alt = true }, { x = 50, y = 55.3, r = 55, n = 5, alt = true }, { x = 49.7, y = 49.4, r = 57, n = 8, alt = true }, { x = 50.6, y = 51.9, r = 48, n = 7, alt = true }, { x = 50.6, y = 54.1, r = 51, n = 5, alt = true }, { x = 50.8, y = 50.2, r = 60, n = 7, alt = true }, { x = 50, y = 47.5, r = 51, n = 3, alt = true }, { x = 52, y = 50.2, r = 52, n = 6, alt = true } }, spread = true, from = "Razormane Raider", fromKind = "npc" },
 						{ t = "complete", quest = 4921, title = "Lost in Battle", map = 1413, x = 49.3, y = 50.3, f = "e" },
 						{ t = "kill", quest = 878, title = "Tribes at War", target = "Bristleback Water Seeker", npc = 3260, count = 6, oi = 1, map = 1413, x = 47.72, y = 52.79, f = "e", spots = { { x = 47.4, y = 52.9, r = 40, n = 3 }, { x = 46.7, y = 53.7, r = 55, n = 6 }, { x = 45.2, y = 54, r = 43, n = 4 }, { x = 45.3, y = 55, r = 40, n = 2 }, { x = 43.2, y = 55.2, r = 45, n = 5 }, { x = 51.1, y = 54.9, r = 40, n = 2 }, { x = 51.2, y = 57.6, r = 40, n = 3 }, { x = 53.6, y = 53.8, r = 40, n = 2 }, { x = 52.6, y = 52.4, r = 40, n = 2 } }, spread = true },
 						{ t = "kill", quest = 878, title = "Tribes at War", target = "Bristleback Thornweaver", npc = 3261, count = 12, oi = 2, map = 1413, x = 45.48, y = 51.62, f = "e", spots = { { x = 45.1, y = 51.5, r = 40, n = 4 }, { x = 44, y = 51.3, r = 40, n = 1 }, { x = 43.2, y = 52.1, r = 40, n = 3 }, { x = 50.5, y = 57.2, r = 40, n = 3 }, { x = 51.2, y = 56.2, r = 40, n = 2 }, { x = 51.2, y = 55, r = 52, n = 3 }, { x = 51.3, y = 54.2, r = 40, n = 1 }, { x = 52.8, y = 53.6, r = 45, n = 4 }, { x = 53.2, y = 52.8, r = 40, n = 2 }, { x = 53, y = 51.7, r = 40, n = 1 }, { x = 53.2, y = 54.5, r = 40, n = 2 }, { x = 51.7, y = 57.4, r = 40, n = 2 } }, spread = true },
@@ -22864,7 +22862,7 @@ do
 					goals = {
 						{ t = "turnin", quest = 899, title = "Consumed by Hatred", npc = 3432, npcName = "Mankrik", map = 1413, x = 51.95, y = 31.58, f = "e", note = "Mankrik" },
 						{ t = "turnin", quest = 4921, title = "Lost in Battle", npc = 3432, npcName = "Mankrik", map = 1413, x = 51.95, y = 31.58, f = "e" },
-						{ t = "turnin", quest = 95774, title = "Her Name Is Olgra", npc = 3432, npcName = "Mankrik", map = 1413, x = 51.95, y = 31.58, f = "e" },
+						{ t = "accept", quest = 95774, title = "Her Name Is Olgra", npc = 3432, npcName = "Mankrik", minLevel = 14, qlvl = 20, pre = { 4921 }, preTitles = { [4921] = "Lost in Battle" }, map = 1413, x = 51.95, y = 31.58, f = "e", note = "Mankrik offers Her Name Is Olgra once Lost in Battle is handed in" },
 						{ t = "turnin", quest = 3281, title = "Stolen Silver", npc = 3464, npcName = "Gazrog", map = 1413, x = 51.93, y = 30.32, f = "e", note = "Gazrog" },
 					},
 				},
@@ -22880,6 +22878,13 @@ do
 					note = "Hezrul leads the Kolkar on the west shore of Lushwater Oasis, south of Regthar. Hand his head to Regthar on your last Crossroads stop.",
 					goals = {
 						{ t = "collect", quest = 852, title = "Hezrul Bloodmark", item = 5025, itemName = "Hezrul's Head", oi = 1, map = 1413, x = 46, y = 41.1, f = "e", from = "Hezrul Bloodmark", fromKind = "npc" },
+					},
+				},
+				{
+					title = "Olgra's Adornments",
+					note = "On the way back down the Gold Road to Camp Taurajo: the Razormane Raiders among the Bristleback camps, either side of the road north of the camp, carry Olgra's Adornments. Hand them to Mankrik on your last Crossroads stop.",
+					goals = {
+						{ t = "collect", quest = 95774, title = "Her Name Is Olgra", item = 277277, itemName = "Olgra's Adornments", count = 4, oi = 1, map = 1413, x = 49.78, y = 45.75, f = "e", spots = { { x = 49.5, y = 46.2, r = 42, n = 3 }, { x = 49.7, y = 49.4, r = 57, n = 8 }, { x = 50.8, y = 50.2, r = 60, n = 7 }, { x = 50.6, y = 51.9, r = 48, n = 7 }, { x = 50.6, y = 54.1, r = 51, n = 5 }, { x = 49.4, y = 54.3, r = 52, n = 8 }, { x = 48, y = 53.8, r = 44, n = 5 }, { x = 48.7, y = 51.3, r = 66, n = 13 }, { x = 47.6, y = 51, r = 48, n = 4 }, { x = 47.7, y = 49.2, r = 76, n = 6 }, { x = 52.9, y = 50.7, r = 40, n = 3 }, { x = 49.8, y = 56.5, r = 46, n = 3 }, { x = 50, y = 47.5, r = 51, n = 3, alt = true }, { x = 50.4, y = 48.5, r = 40, n = 3, alt = true }, { x = 48.8, y = 49.9, r = 63, n = 10, alt = true }, { x = 49.8, y = 50.9, r = 60, n = 12, alt = true }, { x = 52, y = 50.2, r = 52, n = 6, alt = true }, { x = 51.4, y = 51.2, r = 40, n = 3, alt = true }, { x = 48.4, y = 52.7, r = 40, n = 5, alt = true }, { x = 49.9, y = 53.1, r = 61, n = 8, alt = true }, { x = 47.6, y = 52.6, r = 54, n = 9, alt = true }, { x = 51.2, y = 53.1, r = 58, n = 8, alt = true }, { x = 50, y = 55.3, r = 55, n = 5, alt = true } }, spread = true, from = "Razormane Raider", fromKind = "npc" },
 					},
 				},
 				{
@@ -23035,6 +23040,7 @@ do
 						{ t = "fly", location = "Crossroads" },
 						{ t = "turnin", quest = 906, title = "Betrayal from Within", npc = 3429, npcName = "Thork", map = 1413, x = 51.5, y = 30.87, f = "e", note = "Thork, at the top of the tower" },
 						{ t = "turnin", quest = 868, title = "Egg Hunt", npc = 3428, npcName = "Korran", map = 1413, x = 51.07, y = 29.63, f = "e", note = "Korran" },
+						{ t = "turnin", quest = 95774, title = "Her Name Is Olgra", npc = 3432, npcName = "Mankrik", map = 1413, x = 51.95, y = 31.58, f = "e", note = "Mankrik" },
 					},
 				},
 				{

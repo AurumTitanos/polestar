@@ -228,6 +228,17 @@
 			},
 			"note": "Horrors in the Highland (Excavation Site: Wetlands) is offered by Rethiel the Greenwarden only after his Wetlands chain The Greenwarden 463 -> Tramping Paws 276 -> Fire Taboo 277 -> Blisters on the Land 275: two Wowhead Forever comments on https://www.wowhead.com/forever/quest=95646 (2026-10-02, \"Prerequisites ... 1. The Greenwarden 2. Tramping Paws 3. Fire Taboo 4. Blisters on The Land\" and \"you must do the previous 3 quests from the Greenwarden before he offers this one\"), checked 2026-10-15. QuestieDB 1.0.5 has no prerequisite."
 		},
+		"95774": {
+			"set": {
+				"pre": [
+					4921
+				],
+				"preAny": [
+					4921
+				]
+			},
+			"note": "Her Name Is Olgra (Barrens, Mankrik) comes after Lost in Battle 4921: Wowhead Forever's Series box on https://www.wowhead.com/forever/quest=95774 lists \"1. Lost in Battle; 2. Her Name Is Olgra\", and its text (\"she has died in battle. Her name is Olgra\") follows finding her body (checked 2026-10-16). Issue #65: Mankrik did not offer it beside Lost in Battle. QuestieDB 1.0.5 has no prerequisite."
+		},
 		"96395": {
 			"set": {
 				"races": null,

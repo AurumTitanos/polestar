@@ -4,6 +4,11 @@
 
 ### For players
 
+- The Barrens (19-24) takes Her Name Is Olgra after Lost in Battle is handed
+  in, the only time Mankrik offers it, and collects Olgra's Adornments on the
+  way back down to Camp Taurajo: the guide asked for it at the first
+  Crossroads visit, Mankrik's window then marked it not offered, and the
+  quest dropped off the route (reported by Fitz on Discord).
 - A rare alert's "Set waypoint" goes to the rare, not to a spawn point across
   the zone: a rare in sight (nameplate, target or mouseover) sets it where you
   saw it, and a minimap rare is asked for its position again on the click and

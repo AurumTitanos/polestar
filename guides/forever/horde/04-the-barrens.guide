@@ -154,7 +154,6 @@ step The Crossroads
   sethome "The Crossroads" npc 3934   -- Innkeeper Boorand Plainswind
   accept 899                          -- Mankrik
   accept 4921
-  accept 95774
   accept 3261                         -- Sergra Darkthorn
   accept 3281                         -- Gazrog
   accept 876                          -- Darsok Swiftdagger
@@ -341,9 +340,8 @@ step Camp Taurajo
   accept 1824 only Warrior
 
 step Bristleback camps
-  tip The Bristleback quilboar camps spread over the plains north of Camp Taurajo, either side of the Gold Road. Every Bristleback drops a tusk and the Razormane Raiders among them carry Olgra's Adornments; Mankrik's wife lies at the north edge. Keep one Blood Shard. Lakota'mani, a grey kodo, sometimes wanders here: his hoof starts a quest.
+  tip The Bristleback quilboar camps spread over the plains north of Camp Taurajo, either side of the Gold Road. Every Bristleback drops a tusk; Mankrik's wife lies at the north edge. Keep one Blood Shard. Lakota'mani, a grey kodo, sometimes wanders here: his hoof starts a quest.
   collect 5085 quest 899.1
-  collect 277277 quest 95774.1
   complete 4921 @49.3,50.3
   kill 3260 quest 878.1
   kill 3261 quest 878.2
@@ -390,7 +388,7 @@ step Ishamuhale
 step The Crossroads
   turnin 899                          -- Mankrik
   turnin 4921
-  turnin 95774
+  accept 95774                        -- Mankrik offers Her Name Is Olgra once Lost in Battle is handed in
   turnin 3281                         -- Gazrog
 
 step Regthar Deathgate
@@ -400,6 +398,10 @@ step Regthar Deathgate
 step Hezrul Bloodmark
   tip Hezrul leads the Kolkar on the west shore of Lushwater Oasis, south of Regthar. Hand his head to Regthar on your last Crossroads stop.
   collect 5025 quest 852.1 @46.0,41.1
+
+step Olgra's Adornments
+  tip On the way back down the Gold Road to Camp Taurajo: the Razormane Raiders among the Bristleback camps, either side of the road north of the camp, carry Olgra's Adornments. Hand them to Mankrik on your last Crossroads stop.
+  collect 277277 quest 95774.1
 
 # ---------------------------------------------------------------- Camp Taurajo: Jorn's hunt
 
@@ -510,6 +512,7 @@ step The Crossroads
   fly "Crossroads"
   turnin 906                          -- Thork, at the top of the tower
   turnin 868                          -- Korran
+  turnin 95774                        -- Mankrik
 
 step Regthar Deathgate
   turnin 852
