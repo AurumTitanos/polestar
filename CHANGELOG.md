@@ -49,6 +49,10 @@
 
 ### For contributors
 
+- The Discord bot tells no #bugs thread about a pre-release: a test build
+  published on GitHub as a pre-release is not "the fix is out", and the next
+  full release still tells every fix closed since the last full one
+  (`tools/discord-bot/lib/notify.js`).
 - `node tools/polestar.js i18n` keeps the interface translations, adapted
   from Ding! by Yendi (@moust4ki): `status` lists the nine languages with
   their counts, status (reviewed or AI-made) and translators; `check` (run in
