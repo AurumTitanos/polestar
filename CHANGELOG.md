@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.5 (unreleased)
+## Unreleased
 
 ### For players
 
@@ -49,6 +49,11 @@
   the panel's buttons in the caller's code, tainted. `tests/lua/wow_stub.lua`'s
   `CreateFrame` fails such a call from addon code and lists it in
   `stub.underGameFrames`.
+- `tools/discord-bot`: `/close` and `/reopen` for server administrators in
+  a #bugs thread. `/close` takes a reason (Fixed, Won't fix, No action
+  needed, Can't reproduce, Not resolved, Duplicate) and an optional note,
+  closes the issue with it, and the reporter hears it in those words with
+  the note quoted (`tools/discord-bot/README.md`).
 
 ## 0.2.4 (2026-10-16)
 
