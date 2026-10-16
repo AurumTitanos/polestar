@@ -8327,7 +8327,7 @@ do
 				},
 				{
 					title = "Grik'nir the Cold",
-					note = "Grik'nir the Cold sits at the back of the troll cave, east of Grelin's camp.",
+					note = "Grik'nir the Cold is inside the troll cave east of Grelin's camp, not on the hill above it: go in at the mouth and follow the tunnel to the back.",
 					goals = {
 						{ t = "collect", quest = 218, title = "The Stolen Journal", item = 2004, itemName = "Grelin Whitebeard's Journal", oi = 1, map = 1426, x = 30.48, y = 80.15, f = "e", note = "Grelin Whitebeard's Journal", from = "Grik'nir the Cold", fromKind = "npc" },
 					},

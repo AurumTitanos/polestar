@@ -185,6 +185,8 @@
 - An object a quest item drops from names the quest once on its tooltip,
   not once per object of that name: the Sapphire of Aku'Mai in Blackfathom
   Deeps listed its quest three times (thanks Mightie).
+- Dun Morogh: Grik'nir the Cold's step says he is inside the troll cave, not
+  on the hill above it; follow the tunnel from the mouth (thanks Turesh).
 - Elwynn Forest: Goldtooth is inside the Fargodeep Mine, at the back of the
   mine floor; the arrow now leads to the mine's mouth first instead of onto
   the hill above it (thanks Verium).
