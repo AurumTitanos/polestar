@@ -175,6 +175,32 @@ test('the marks clear on level-up and on any turn-in, and the guide goes back to
 	assert.deepEqual(out.turnIn, [1, 'active:nil:nil']);
 });
 
+test('#127: a quest the giver\'s window lists as active is taken, not refused, before the log has it; accepting clears a mark', () => {
+	const [out] = run({
+		script: `
+			local w = stub.world
+			local r = {}
+			-- After Accept, the gossip comes back with 870 active a moment before the quest log has it.
+			w.gossip(3429, { available = {}, active = { { questID = 870 } } }); flush()
+			r.refresh = brief(1)[3]
+			w.close(); w.accept(870, {}); flush()
+			w.abandon(870); flush()
+			r.abandoned = brief(1)[3]
+			-- A mark set earlier goes when the quest is accepted, and is not saved while it is in the log.
+			w.gossip(3429, { available = {} }); w.close(); flush()
+			r.marked = brief(1)[3]
+			w.accept(870, {}); flush()
+			w.abandon(870); flush()
+			r.reaccepted = brief(1)[3]
+			emit(r)
+		`,
+	});
+	assert.equal(out.refresh, 'active:nil:nil');
+	assert.equal(out.abandoned, 'active:nil:nil');
+	assert.equal(out.marked, 'skipped:offer:Not offered by Thork');
+	assert.equal(out.reaccepted, 'active:nil:nil');
+});
+
 test('prerequisites: every `preAll` must be done, one `pre` suffices; the text names the missing one', () => {
 	// 890 needs 871 and 873 (preAll); 891 needs 871 or 873 (pre). Only 871 is done.
 	const guide = `

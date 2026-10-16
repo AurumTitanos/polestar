@@ -823,7 +823,9 @@ Polestar.Engine.GetProgress() -> doneSteps, totalSteps
   on an unrelated turn-in. A giver's window that offers the quest (this
   session) beats the data: no mark in advance after that. Beyond
   that, when a gossip/greeting/detail window opens on an `accept` goal's NPC
-  (any tab's current step) and the quest is neither offered, in the log, nor
+  (any tab's current step) and the quest is neither offered, listed as active
+  by that window (just accepted: the window refreshes before the quest log),
+  in the log, nor
   completed, the Engine marks that accept unavailable for the session, with a
   reason: `"level"` (below minLevel), `"pre"` (a `pre` quest not done, title
   given) or `"offer"`. A detail window says nothing about the NPC's other
@@ -832,9 +834,11 @@ Polestar.Engine.GetProgress() -> doneSteps, totalSteps
   client pops after a turn-in), or when an item starts it. An unavailable
   accept and the goals of that quest in the
   guide (objectives, complete, turnin) count as skipped, so the guide moves on
-  instead of stalling. The session marks clear on level-up and on any quest
+  instead of stalling. The session marks clear on level-up, on any quest
   turn-in (either can open a quest whose prerequisite the data lacks), and
-  the guide goes back to a step they had let it pass until its giver says no
+  for the quest itself when it is accepted or its giver's window lists it as
+  active; a quest in the log is not saved as refused at logout. The guide
+  goes back to a step the marks had let it pass until its giver says no
   again. The view carries `unavailable = reason` and `unavailableText`.
   When such marks move the guide past a step during play, the Engine fires
   `STEP_SKIPPED`; the guide window's banner then reads "Skipped <quest>  ·

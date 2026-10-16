@@ -3497,6 +3497,13 @@ local function checkOffers(source, startItem)
 		unavailable[list[i]] = nil
 		Own.offered[list[i]] = true
 	end
+	-- The window lists a quest just accepted as active a moment before the
+	-- quest log has it (#127): taken, not refused.
+	local active = source ~= "detail" and C.GetActiveQuests(source) or nil
+	for i = 1, active and #active or 0 do
+		offered[active[i]] = true
+		unavailable[active[i]] = nil
+	end
 	for i = 1, #tabs do
 		use(tabs[i])
 		if guide and current then
@@ -3515,6 +3522,9 @@ end
 ns.RegisterEvent("GOSSIP_SHOW", function() checkOffers("gossip") end)
 ns.RegisterEvent("QUEST_GREETING", function() checkOffers("greeting") end)
 ns.RegisterEvent("QUEST_DETAIL", function(_, startItem) checkOffers("detail", startItem) end)
+ns.RegisterEvent("QUEST_ACCEPTED", function(_, q)
+	if type(q) == "number" then unavailable[q] = nil end
+end)
 for _, event in ipairs({ "QUEST_COMPLETE", "QUEST_TURNED_IN" }) do
 	ns.RegisterEvent(event, function()
 		local npc = Compat().GetNpcID("npc")
@@ -3530,7 +3540,7 @@ function Own.saveOffers()
 	local s = ns.CharState()
 	local out
 	for q, u in pairs(unavailable) do
-		if u.reason == "offer" then
+		if u.reason == "offer" and not Compat().IsOnQuest(q) then
 			out = out or {}
 			out[q] = player and player.level or levelSeen
 		end
