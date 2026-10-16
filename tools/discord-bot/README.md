@@ -85,8 +85,8 @@ other issues or carry HTML. Say so in the #bugs guidelines, for example:
    and `MEDIA_TOKEN`; the first token then needs Issues only.
 2. In the repository's Settings, Secrets and variables, Actions: the secret
    `DISCORD_TOKEN` (the same bot token) and the variable `DISCORD_FORUM_ID`.
-   The workflows run from `main`, so they work once this folder and
-   `.github/workflows/discord-*.yml` are merged there.
+   The workflows run from the repository's default branch (`next`), so they
+   work once this folder and `.github/workflows/discord-*.yml` are there.
 
 ### 3. The server
 
