@@ -380,7 +380,10 @@ function Prompts.MenuItems()
 	return { { text = L["Mark this leg done"], tip = L["The arrow moves on to the next leg."], onClick = skip } }
 end
 
-ns.RegisterCommand("skipleg", skip, L["Skip the travel route's current leg (a Hearthstone, teleport, flight, ride or portal: plan the rest without it; a walk or lift: mark it done)"])
+ns.RegisterCommand("skipleg", function()
+	if Nav.SayHandedOff() then return end
+	skip()
+end, L["Skip the travel route's current leg (a Hearthstone, teleport, flight, ride or portal: plan the rest without it; a walk or lift: mark it done)"])
 
 ---------------------------------------------------------------------------
 -- Wiring
@@ -438,8 +441,8 @@ if ns.RegisterOptions then
 	local ok, err = ns.RegisterOptions({
 		page = L["Guide"], tab = L["Arrow & routes"], section = L["Along the route"],
 		controls = {
-			{ kind = "toggle", key = "nav.castPrompt", label = L["Travel button"],
-				help = L["When the route says to hearth or teleport, a button under the arrow casts it. Right-click the arrow to skip a leg."] },
+			Nav.HandoffOption({ kind = "toggle", key = "nav.castPrompt", label = L["Travel button"],
+				help = L["When the route says to hearth or teleport, a button under the arrow casts it. Right-click the arrow to skip a leg."] }),
 		},
 	})
 	if not ok and geterrorhandler then geterrorhandler()(err) end

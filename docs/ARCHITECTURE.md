@@ -29,7 +29,7 @@ one into the other. The addons:
 | `Polestar_ItemDB` (`addon/Polestar_ItemDB/`) | Item stats and Forever reward choices for the gear advice; loaded on demand | `itemdb build` (`Items.lua`), then `gear build` (`Forever.lua`) | yes (generated) | yes |
 | `Polestar_QuestDB` (`addon/Polestar_QuestDB/`) | The quest database behind quest markers and tooltips; loaded on demand | `questdb build` | no (local, gitignored) | yes, when built |
 | `Polestar_Codex` (`addon/Polestar_Codex/`) | Lookup's Codex, and the Dungeons and Rares data; loaded on demand | `codex build`, from release-safe inputs (`--local-extras` builds a local-only one) | no (generated, gitignored) | yes, always: `pack` fails without it |
-| `Polestar_Nav` (`addon/Polestar_Nav/`) | Shortest Path Forever's walking router and walking maps (Cillian Berragan, GPL-3.0-or-later), for the arrow's walking routes; loaded on demand at login (Nav, "In-game walking routes (Polestar_Nav)") | `nav vendor <checkout>`, from Shortest Path Forever's repository | yes (vendored) | yes, always |
+| `Polestar_Nav` (`addon/Polestar_Nav/`) | Shortest Path Forever's walking router and walking maps (Cillian Berragan, GPL-3.0-or-later), for the arrow's walking routes; loaded on demand at login, never while the target is handed to an installed Shortest Path Forever (Nav, "In-game walking routes (Polestar_Nav)", "Hand-off to Shortest Path Forever") | `nav vendor <checkout>`, from Shortest Path Forever's repository | yes (vendored) | yes, always |
 | `Polestar_Travel` (`addon/Polestar_Travel/`) | Zone crossings for the travel planner, from an optional local crossings file; loaded with Polestar | `travel build` | no (local, gitignored) | no, never packaged (Nav, "Travel planner and zone crossings") |
 | `Polestar_Recorder` (`addon/Polestar_Recorder/`) | The optional standalone recorder of play sessions, for authoring | hand-written | yes | yes, as its own zip |
 
@@ -283,7 +283,8 @@ slots and hop lines (`GetTaxiMapID`, `C_TaxiMap.GetAllTaxiNodes`,
 `TaxiRouteMap`; `QoL/Flight.lua`), and the transit sync's addon messages and
 who hears them (`C_ChatInfo.RegisterAddonMessagePrefix`,
 `C_ChatInfo.SendAddonMessage`, `CHAT_MSG_ADDON`, `IsInGuild`, `IsInGroup`,
-`IsInRaid`, `IsInInstance`, `GetNormalizedRealmName`, `UnitName`, `Ambiguate`; `Nav/Transit.lua`), map clicks, `/way`
+`IsInRaid`, `IsInInstance`, `GetNormalizedRealmName`, `UnitName`, `Ambiguate`; `Nav/Transit.lua`), the hand-off to Shortest Path Forever
+(`ShortestPathForever.API`, `UnitIsDeadOrGhost`; `Nav/Handoff.lua`), map clicks, `/way`
 and the TomTom stand-in (`Nav/Journey.lua`: `IsShiftKeyDown`, `IsAltKeyDown`,
 `IsControlKeyDown`, `GetMouseFoci` or `GetMouseFocus`, the open chat box
 through `ChatFrameUtil.GetActiveWindow` or `ChatEdit_GetActiveWindow`,
@@ -1091,7 +1092,8 @@ colour change repaints live without a reload.
 ## Nav
 
 ```lua
-Polestar.Nav.SetTarget(map, x, y, label, f)   -- user picked a goal; overrides the engine waypoint until the step changes
+Polestar.Nav.SetTarget(map, x, y, label, f, stop)   -- user picked a goal; overrides the engine waypoint until the step changes;
+                                                     -- stop: what stands there ("dungeon", "trainer", ...), for the hand-off below
 Polestar.Nav.ClearTarget()
 Polestar.Nav.GetTarget() -> waypoint | nil
 Polestar.Nav.GetDistance() -> yards | nil      -- to an area target's edge, 0 inside it
@@ -1227,6 +1229,87 @@ Polestar.Pins.MinimapCursor() -> dNorth, dWest | nil      -- yards from the play
   line (the player's continent first), the six nearest of those estimated by
   `Journey.Estimate`, the quickest becomes the target and one chat line names
   it, its zone and the time.
+
+### Hand-off to Shortest Path Forever
+
+`Nav/Handoff.lua` (`Nav.handoff`; loaded after the other Nav modules). With
+[Shortest Path Forever](https://github.com/cjber/shortest-path-forever)
+installed (its global `ShortestPathForever.API`, `version` 1, with `Cancel`
+and `NavigateRoute` or `Navigate`; every other function checked before it is
+called, as its `minor` grows) and `nav.spfHandoff` on (the default; Options,
+Arrow & routes, Routes: "Guide with Shortest Path Forever when it's
+installed", shown only with it installed), Polestar's target is guided by it
+and Polestar's own guidance steps aside, so the two never guide at once.
+
+```lua
+Polestar.Nav.HandedOff() -> bool   -- the one predicate: installed, on, and the last stop not refused
+Polestar.Nav.Reapply()             -- (Nav.lua) re-plan and tell every module the same target again, unannounced
+Polestar.Nav.handoff.Available() -> bool
+```
+
+- **What steps aside.** While `Nav.HandedOff()`: the arrow hides
+  (`Arrow.lua`); the travel planner plans no route (`Travel.Replan`), so there
+  are no route lines, journey steps (`UI/JourneyPanel.lua`), travel button
+  (`Nav/Prompts.lua`) or leg alerts; the trail is cleared (`Layers.lua`);
+  transport alerts are off (`Alerts.Check`); `Nav/Walk.lua` neither loads
+  `Polestar_Nav` (`Data.Pack` is never called) nor searches; Shift/Alt map
+  clicks plan nothing, the TomTom stand-in is not installed and `/way` is not
+  claimed (`Nav/Journey.lua`, at login and when the setting changes; the
+  addon then claims its own); `Nav/Bridges.lua` mirrors into neither TomTom
+  (its stand-in would start a second journey) nor Blizzard's user waypoint.
+  The guide window, the target pin, spawn regions, every other pin and the
+  Engine's own arrival checks stay. When the predicate flips,
+  `Nav.Reapply()` brings each surface back or sends it away again.
+- **The stop.** One stop through `NavigateRoute("Polestar", { stop })`
+  (`Navigate` with title and kind when only that exists): the target's live
+  map point (`Nav.LiveCoords`, as 0-1), its label as the title, and a kind:
+  the hand-set target's `stop` (Dungeons' entrances, Nearby's trainers, inns
+  and flight masters, the trainer banner), else the goal's verb (`accept`
+  pickup, `turnin` turnin, `kill`/`collect`/`use`/`interact`/`complete`
+  objective, `train` trainer, `sethome` innkeeper, `getfp`/`fly`
+  flightmaster), else the place it stands at from the travel data (a
+  transport landing within 30 yd: its boat, zeppelin, lift or tram; a portal,
+  flight master or inn within 15 yd). A `kill`, `collect`, `use` or `interact`
+  waypoint with a spawn `area` is held: `hold = true`, `radius = area + r`,
+  `shapes` = every spot of the goal as a circle (spot radius + `r`, live
+  frame), `questID` the goal's quest and `questIDs` too when other open
+  objectives of the step (`GetStepView`) have spawn spots overlapping it, so
+  the stop never arrives and directions pause inside the area.
+- **When it is sent.** On each target change and at the first
+  `PLAYER_ENTERING_WORLD`, only when the stop differs from the last one taken
+  (every field compared), so re-announced targets, ticks and settings never
+  churn. In combat, without a position or in an instance nothing is called and
+  the stop waits (`PLAYER_REGEN_ENABLED`, `PLAYER_ENTERING_WORLD`,
+  `ZONE_CHANGED_NEW_AREA`); a call refused because combat began waits the
+  same way. No target: `Cancel("Polestar")` while its journey runs. Dead or a
+  ghost (`UnitIsDeadOrGhost`): no call at all, as it guides corpse runs
+  itself; alive again the target goes as it is (the same stop is not resent).
+- **Not fighting.** `Subscribe` (else Nav's once-a-second tick) reads
+  `Ended("Polestar")` and `CurrentStop`: once the journey arrived or was
+  cleared or replaced it is left ended, nothing is resent and no `Cancel`
+  is called, until Polestar's target changes.
+- **Refused.** A stop refused out of combat (its Journeys off, or a point it
+  cannot place) and a target with no live point: Polestar guides that target
+  itself (`Nav.HandedOff()` false) and cancels its earlier journey; the next
+  target, or a zone change, offers a stop again, and the first one taken hands
+  back.
+- **Off.** Turning `nav.spfHandoff` off cancels the journey and Polestar
+  guides again (`Polestar_Nav` loads then); on again sends the stop anew.
+- **Options and commands.** `Nav.HandoffOption(control)` wraps every option
+  that has no effect while handing off: its `disabled` also answers
+  `Nav.HandedOff()` and its help ends "Greyed out while Shortest Path Forever
+  guides: it does this itself." (the arrow, its arrival time, chime, look and
+  position; travel routes, walking paths, route lines, class teleports, trail
+  dots, journey steps, the travel button, transport alerts; map clicks, other
+  addons' waypoints, the Blizzard and TomTom mirrors and TomTom's arrow).
+  Distances, boat-time sharing, map pins, following TomTom and the nearby
+  menu still act and stay. `Nav.SayHandedOff()` prints one line ("Shortest
+  Path Forever is guiding. Turn off ...") instead of `/polestar arrow show`
+  (or the bare toggle turning it on), `/polestar route` and
+  `/polestar skipleg`. Polestar's arrival chime is silent meanwhile.
+
+Tested by `tests/nav-handoff.test.js` against a fake API written to its
+`docs/api.md` (v1.16.0).
 
 ### Pins — map and minimap icons for every module
 
@@ -1756,7 +1839,9 @@ holds the same bake: his engine evicts and resets the decoded entries of its
 tables (`PathGrid.lua` trimming, eviction, `Idle`, `Reset`) while ours may be
 in the middle of a search that already counts a cluster as decoded, which
 would end in a Lua error (docs/NAV_QA.md H1). With both
-addons installed each holds its own maps in memory; `tests/nav-vendor.test.js`
+addons installed and the hand-off off, each holds its own maps in memory
+(with it on, the default, `Polestar_Nav` is not loaded: "Hand-off to Shortest
+Path Forever"); `tests/nav-vendor.test.js`
 trims a stand-in for his tables after every frame of one of our searches and
 checks the route is unchanged.
 

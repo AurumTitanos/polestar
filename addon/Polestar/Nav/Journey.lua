@@ -36,6 +36,8 @@
 --     stand-in answers then), and given back if TomTom loads or the setting
 --     goes off. Nav/Bridges.lua never mirrors to it. /way is claimed at login
 --     when no addon has it: `/way [#mapID | zone] x y [title]`, `/way reset`.
+--   * While the target is handed to Shortest Path Forever (Nav/Handoff.lua),
+--     map clicks, the TomTom stand-in and /way are its own: Polestar's stay out.
 --   * With TomTom installed, nav.followTomTom (off by default) points the
 --     arrow wherever TomTom's arrow points (see "Following TomTom's arrow").
 --
@@ -189,8 +191,9 @@ end
 -- Clicks
 ---------------------------------------------------------------------------
 
+-- Shortest Path Forever plans map clicks itself while it guides (Nav/Handoff.lua).
 local function planning()
-	return ns.Get("nav.mapPlan") and true or false
+	return ns.Get("nav.mapPlan") and not Nav.HandedOff() and true or false
 end
 
 -- Shift-click inserts links into an open chat box; that click stays Blizzard's.
@@ -495,7 +498,7 @@ end
 -- keeps it, and the stand-in stays out. Callers set waypoints in response to
 -- the player, after login, so none of them misses it.
 function Journey.RefreshTomTom()
-	if ns.IsLoggedIn() and ns.Get("nav.answerTomTom") and not tomtomInstalled() then
+	if ns.IsLoggedIn() and ns.Get("nav.answerTomTom") and not Nav.HandedOff() and not tomtomInstalled() then
 		if not shimActive then
 			shimActive = true
 			TomTom = shim
@@ -719,7 +722,7 @@ end
 
 -- Every addon has loaded by login, so whoever owns /way is there to be seen.
 local function claimWay()
-	if SLASH_POLESTARWAY1 or not ns.Get("nav.answerTomTom") or wayTaken() then return end
+	if SLASH_POLESTARWAY1 or not ns.Get("nav.answerTomTom") or Nav.HandedOff() or wayTaken() then return end
 	SLASH_POLESTARWAY1 = "/way"
 	SlashCmdList.POLESTARWAY = Journey.Way
 end
@@ -740,7 +743,7 @@ ns.On("WAYPOINT_CHANGED", function()
 end)
 
 ns.On("SETTING_CHANGED", function(path)
-	if path == "" or path == "nav" or path == "nav.answerTomTom" then
+	if path == "" or path == "nav" or path == "nav.answerTomTom" or path == "nav.spfHandoff" then
 		Journey.RefreshTomTom()
 		if ns.IsLoggedIn() then claimWay() end
 	end
@@ -764,16 +767,16 @@ if ns.RegisterOptions then
 	local ok, err = ns.RegisterOptions({
 		page = L["Guide"], tab = L["Arrow & routes"], section = L["Routes"],
 		controls = {
-			{ kind = "toggle", key = "nav.mapPlan", label = L["Shift-click a map to go there"],
-				help = L["Shift-click the world map or minimap and the arrow takes you there; Alt-click works over map icons. Click the spot again to clear it."] },
+			Nav.HandoffOption({ kind = "toggle", key = "nav.mapPlan", label = L["Shift-click a map to go there"],
+				help = L["Shift-click the world map or minimap and the arrow takes you there; Alt-click works over map icons. Click the spot again to clear it."] }),
 		},
 	})
 	if not ok and geterrorhandler then geterrorhandler()(err) end
 	ok, err = ns.RegisterOptions({
 		page = L["Guide"], tab = L["Arrow & routes"], section = L["Other waypoints"],
 		controls = {
-			{ kind = "toggle", key = "nav.answerTomTom", label = L["Let other addons set waypoints"],
-				help = L["Without TomTom installed, waypoints other addons set through TomTom, and /way, point Polestar's arrow."] },
+			Nav.HandoffOption({ kind = "toggle", key = "nav.answerTomTom", label = L["Let other addons set waypoints"],
+				help = L["Without TomTom installed, waypoints other addons set through TomTom, and /way, point Polestar's arrow."] }),
 			{ kind = "toggle", key = "nav.followTomTom", label = L["Follow TomTom's arrow"],
 				help = L["With TomTom installed, the arrow goes wherever TomTom's arrow points, routed like any goal."],
 				disabled = function() return TomTom == nil or TomTom == shim end },

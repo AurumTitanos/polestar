@@ -232,7 +232,7 @@ local function release()
 		local step = E and E.GetStepIndex and E.GetStepIndex() or nil
 		if previous and previous.stepIndex == step then
 			-- Picked before dying, on the same guide step: hand it back.
-			Nav.SetTarget(previous.map, previous.x, previous.y, previous.label, previous.f)
+			Nav.SetTarget(previous.map, previous.x, previous.y, previous.label, previous.f, previous.stop)
 		elseif Nav.ReleaseTarget then
 			Nav.ReleaseTarget()
 		else

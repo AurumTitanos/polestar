@@ -11,6 +11,22 @@
   router he kindly let Polestar use. They come in the new `Polestar_Nav`
   folder of the zip (install it with the others). Options, Arrow & routes,
   "Walk real paths" turns it off.
+- Works with Shortest Path Forever: with it installed, Polestar hands it the
+  route. Each goal goes to it as a stop with the game's own mark (a quest's
+  "!" or "?", a trainer, a flight master, a dungeon, a boat), a kill or
+  collect area as a held area that guides you there and then stays quiet
+  while you work it, and its arrow, route and journey take you there.
+  Polestar's own arrow, route lines, journey steps, travel button, transport
+  alerts, map clicks and `/way` step aside, so the two never guide at once,
+  and Polestar's walking maps are not loaded. Clearing or replacing the
+  journey sticks until the guide moves on; nothing is sent in combat (it goes
+  when the fight ends) or for a corpse run, which Shortest Path Forever
+  guides itself. With its journeys switched off, Polestar guides as before.
+  Options, Arrow & routes, "Guide with Shortest Path Forever when it's
+  installed" (on by default; shown only with it installed). While it guides,
+  Polestar's arrow, route and waypoint options are greyed out and say why,
+  and `/polestar arrow show`, `route` and `skipleg` say in one line how to
+  get Polestar's arrow back.
 - A walk is told step by step at the places it passes: "Walk to The Great
   Lift, Bottom" then "Take The Great Lift", through a zone's gate or into a
   cave by the zone data's or the guide's own words, each with its own time,
@@ -157,6 +173,17 @@
   playback clock on the simulator's priors (`timeline.js`), and the map art
   pipeline (`art/`: a wago.tools CASC file cache, BLP2 and BC1 decoding, a BC1
   encoder, the minimap pyramid and the unfogged zone art), each with tests.
+- `Nav/Handoff.lua` hands the target to Shortest Path Forever through its
+  public `ShortestPathForever.API` (owner "Polestar"; `NavigateRoute` with one
+  stop, `Cancel`, `Ended`, `CurrentStop`, `Subscribe` when its `minor` has
+  it, else polled). `Nav.HandedOff()` is the one predicate the arrow, trail,
+  travel planner (so route lines, journey steps, the travel button), alerts,
+  `Nav/Walk.lua` (no `Polestar_Nav` load, no search), map clicks, the TomTom
+  stand-in, `/way` and `Nav/Bridges.lua` check; `Nav.Reapply()` re-runs them
+  when it flips. `Nav.SetTarget` takes an optional sixth `stop` kind
+  (Dungeons, Nearby and the trainer banner pass it; `Nav.GetTravelData()`
+  lists `portals`). Tested by `tests/nav-handoff.test.js` against a fake API
+  written to its `docs/api.md`.
 - `Nav/Prompts.lua` (the travel button, `Nav.prompts`; its own combat queue,
   as `QoL.Secure`), `Nav/Alerts.lua` (`Nav.alerts`, reads `ns.Transit`) and
   `QoL/Flight.lua`'s `Flight.RouteFlight`, `SlotOf` and `DrawRoute` adapt

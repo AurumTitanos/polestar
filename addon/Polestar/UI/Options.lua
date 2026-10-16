@@ -149,6 +149,11 @@ O.ResetPositions = resetPositions
 
 local function borderOff() return not ns.Get("ui.border") end
 local function px(v) return string.format(L["%d px"], floor(v + 0.5)) end
+-- Guidance options with no effect while Shortest Path Forever guides (Nav/Handoff.lua).
+local function H(c)
+	local N = ns.Nav
+	return N and N.HandoffOption and N.HandoffOption(c) or c
+end
 
 -- A page's tabs and sections in their order, for modules to fill.
 local function declare(page, key, icon, order, subtitle, tabs)
@@ -181,28 +186,28 @@ local BUILTIN = {
 		{ kind = "button", icon = "reset", label = L["Reset position"], help = L["Put the guide window back in its corner."], onClick = function() ns.Set("ui.pos", nil) end },
 	} },
 	{ page = GUIDE, tab = L["Arrow & routes"], section = L["Arrow"], controls = {
-		{ kind = "toggle", key = "nav.arrow", label = L["Show arrow"], help = L["Points to the current goal. Its look and colours are under Appearance, Arrow."] },
-		{ kind = "toggle", key = "nav.arrowEta", label = L["Arrival time"], help = L["Estimated time under the distance."] },
+		H({ kind = "toggle", key = "nav.arrow", label = L["Show arrow"], help = L["Points to the current goal. Its look and colours are under Appearance, Arrow."] }),
+		H({ kind = "toggle", key = "nav.arrowEta", label = L["Arrival time"], help = L["Estimated time under the distance."] }),
 		{ kind = "dropdown", key = "nav.distanceUnit", label = L["Distances"], help = L["How the arrow, map tooltips, rares and the death helper show distances."],
 			choices = { { value = "yards", label = L["Yards (the game's unit)"] }, { value = "metres", label = L["Metres"] } } },
-		{ kind = "toggle", key = "nav.arrivalSound", label = L["Arrival sound"], help = L["A soft chime when you reach a waypoint."] },
-		{ kind = "button", icon = "reset", label = L["Reset arrow position"], help = L["Back to the top of the screen. Drag the arrow to move it."],
+		H({ kind = "toggle", key = "nav.arrivalSound", label = L["Arrival sound"], help = L["A soft chime when you reach a waypoint."] }),
+		H({ kind = "button", icon = "reset", label = L["Reset arrow position"], help = L["Back to the top of the screen. Drag the arrow to move it."],
 			onClick = function() if ns.Nav and ns.Nav.ResetArrowPosition then ns.Nav.ResetArrowPosition() end end,
-			needs = function() return ns.Nav and ns.Nav.ResetArrowPosition end },
+			needs = function() return ns.Nav and ns.Nav.ResetArrowPosition end }),
 	} },
 	{ page = GUIDE, tab = L["Arrow & routes"], section = L["Routes"], controls = {
-		{ kind = "toggle", key = "nav.travel", label = L["Plan travel routes"], help = L["Flights, boats and your hearthstone when they are faster. Off: the arrow points straight at the goal."] },
-		{ kind = "toggle", key = "nav.navRouting", label = L["Walk real paths"], help = L["The arrow follows paths on the ground around cliffs, water and walls, with the walking maps of Shortest Path Forever by Cillian Berragan. Off: it points straight at each stop."] },
-		{ kind = "toggle", key = "nav.routeLines", label = L["Route lines"], help = L["The way to the goal on the world map and the minimap: dots where you walk, lines where you fly, sail or ride, the legs after this one fainter. Drawn as Shortest Path Forever by Cillian Berragan draws them."] },
-		{ kind = "toggle", key = "nav.teleports", label = L["Class teleports"], help = L["Routes may start with a Teleport spell you know (a mage's city teleports, a druid's Moonglade) when it is faster. A city teleport needs a Rune of Teleportation in your bags."],
-			disabled = function() return not ns.Get("nav.travel") end },
+		H({ kind = "toggle", key = "nav.travel", label = L["Plan travel routes"], help = L["Flights, boats and your hearthstone when they are faster. Off: the arrow points straight at the goal."] }),
+		H({ kind = "toggle", key = "nav.navRouting", label = L["Walk real paths"], help = L["The arrow follows paths on the ground around cliffs, water and walls, with the walking maps of Shortest Path Forever by Cillian Berragan. Off: it points straight at each stop."] }),
+		H({ kind = "toggle", key = "nav.routeLines", label = L["Route lines"], help = L["The way to the goal on the world map and the minimap: dots where you walk, lines where you fly, sail or ride, the legs after this one fainter. Drawn as Shortest Path Forever by Cillian Berragan draws them."] }),
+		H({ kind = "toggle", key = "nav.teleports", label = L["Class teleports"], help = L["Routes may start with a Teleport spell you know (a mage's city teleports, a druid's Moonglade) when it is faster. A city teleport needs a Rune of Teleportation in your bags."],
+			disabled = function() return not ns.Get("nav.travel") end }),
 		{ kind = "toggle", key = "nav.shareTransit", label = L["Share boat times"], help = L["Riding a boat, zeppelin, tram or lift times it; your guild and group get those times and you get theirs, so the arrow can say when the next one leaves."] },
 	} },
 	{ page = GUIDE, tab = L["Arrow & routes"], section = L["Other waypoints"], controls = {
-		{ kind = "toggle", key = "nav.blizzardWaypoint", label = L["Blizzard waypoint"], help = L["Also set the game's own map pin and tracking."] },
-		{ kind = "toggle", key = "nav.tomtom", label = L["Mirror to TomTom"], help = L["Adds the target as a TomTom waypoint when TomTom is loaded."] },
-		{ kind = "toggle", key = "nav.useTomTomArrow", label = L["Use TomTom's arrow"], help = L["Hides Polestar's arrow in favour of TomTom's."],
-			disabled = function() return not ns.Get("nav.tomtom") end },
+		H({ kind = "toggle", key = "nav.blizzardWaypoint", label = L["Blizzard waypoint"], help = L["Also set the game's own map pin and tracking."] }),
+		H({ kind = "toggle", key = "nav.tomtom", label = L["Mirror to TomTom"], help = L["Adds the target as a TomTom waypoint when TomTom is loaded."] }),
+		H({ kind = "toggle", key = "nav.useTomTomArrow", label = L["Use TomTom's arrow"], help = L["Hides Polestar's arrow in favour of TomTom's."],
+			disabled = function() return not ns.Get("nav.tomtom") end }),
 	} },
 	{ page = GUIDE, tab = L["Automation"], section = L["Quests"], controls = {
 		{ kind = "toggle", key = "behavior.autoAccept", label = L["Accept guide quests"], help = L["Only quests in the next steps of your open guides. Hold Shift to skip."] },
@@ -300,9 +305,9 @@ local BUILTIN = {
 			help = L["The guide menu and this window; applies when you let go. Right-click to reset."] },
 	} },
 	{ page = LOOK, tab = L["Arrow"], section = L["Arrow"], controls = {
-		{ kind = "dropdown", key = "nav.arrowStyle", label = L["Arrow style"], choices = { { value = "3d", label = L["3D"] }, { value = "flat", label = L["Flat"] } } },
-		{ kind = "slider", key = "nav.arrowScale", label = L["Arrow scale"], min = 0.5, max = 2, step = 0.05, format = percent },
-		{ kind = "slider", key = "nav.arrowAlpha", label = L["Arrow opacity"], min = 0.2, max = 1, step = 0.05, format = percent },
+		H({ kind = "dropdown", key = "nav.arrowStyle", label = L["Arrow style"], choices = { { value = "3d", label = L["3D"] }, { value = "flat", label = L["Flat"] } } }),
+		H({ kind = "slider", key = "nav.arrowScale", label = L["Arrow scale"], min = 0.5, max = 2, step = 0.05, format = percent }),
+		H({ kind = "slider", key = "nav.arrowAlpha", label = L["Arrow opacity"], min = 0.2, max = 1, step = 0.05, format = percent }),
 	} },
 	{ page = LOOK, tab = L["Arrow"], section = L["Colours"], controls = {
 		{ kind = "color", key = "nav.arrowColor", label = L["Arrow colour"],
@@ -323,9 +328,9 @@ local BUILTIN = {
 		{ kind = "toggle", key = "nav.worldPins", label = L["Guide pins on the world map"],
 			help = L["The arrow's target, the stops of its travel route, the step's other goals, the areas their mobs and objects spawn in, and the route lines."] },
 		{ kind = "toggle", key = "nav.minimapPins", label = L["Guide pin on the minimap"], help = L["The arrow's target, the areas it spawns in, and the route line."] },
-		{ kind = "toggle", key = "nav.trailDots", label = L["Trail dots along the travel route"],
+		H({ kind = "toggle", key = "nav.trailDots", label = L["Trail dots along the travel route"],
 			help = L["Moving dots from you to the target on the world map and the minimap, along the travel route, while route lines are off."],
-			disabled = function() return ns.Get("nav.routeLines") end },
+			disabled = function() return ns.Get("nav.routeLines") end }),
 	} },
 	{ page = MAP, tab = L["Guide & quests"], section = L["Quest markers"], controls = {} },
 	{ page = MAP, tab = L["Rares & travel"], section = L["Rares and treasures"], controls = {} },

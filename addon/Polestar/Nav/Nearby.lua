@@ -49,16 +49,17 @@ local RUN_SPEED = 7
 local RIDING = 762 -- Compat.SKILL_LINES' riding: no trainer role
 local FACTION = { Alliance = "A", Horde = "H" }
 
+-- `stop`: the stop kind the target carries (Nav.SetTarget), for Shortest Path Forever's badge.
 local KINDS = {
-	{ key = "trainer", label = L["Profession trainer"] },
-	{ key = "class", label = L["Class trainer"] },
+	{ key = "trainer", label = L["Profession trainer"], stop = "trainer" },
+	{ key = "class", label = L["Class trainer"], stop = "trainer" },
 	{ key = "repair", role = "repair", label = L["Repair"] },
 	{ key = "reagents", role = "vendor", only = "reagentVendors", label = L["Reagents"] },
 	{ key = "vendor", role = "vendor", label = L["Vendor"] },
-	{ key = "innkeeper", role = "innkeeper", label = L["Innkeeper"] },
+	{ key = "innkeeper", role = "innkeeper", label = L["Innkeeper"], stop = "innkeeper" },
 	{ key = "bank", role = "banker", label = L["Bank"] },
 	{ key = "auction", role = "auctioneer", label = L["Auction house"] },
-	{ key = "flight", role = "flightmaster", label = L["Flight master"] },
+	{ key = "flight", role = "flightmaster", label = L["Flight master"], stop = "flightmaster" },
 	{ key = "stable", role = "stablemaster", label = L["Stable master"] },
 }
 local BY_KEY = {}
@@ -275,7 +276,7 @@ function Nearby.Go(key, line)
 		end
 		return false
 	end
-	if not Nav.SetTarget(place.map, place.x, place.y, place.name, place.f) then return false end
+	if not Nav.SetTarget(place.map, place.x, place.y, place.name, place.f, BY_KEY[key].stop) then return false end
 	local zone = ns.Compat.GetMapName(place.map) or "?"
 	local Q = ns.QoL
 	local time = seconds and Q and Q.Duration and Q.Duration(seconds)

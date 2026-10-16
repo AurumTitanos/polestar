@@ -886,7 +886,7 @@ function GF.TakeBanner()
 		notices.train = nil
 		local t, nav2 = n.trainer, ns.Nav
 		if t and t.map and t.x and nav2 and nav2.SetTarget then
-			nav2.SetTarget(t.map, t.x, t.y, t.npcName or L["Class trainer"], t.f)
+			nav2.SetTarget(t.map, t.x, t.y, t.npcName or L["Class trainer"], t.f, "trainer")
 		end
 	end
 	GF.Layout()

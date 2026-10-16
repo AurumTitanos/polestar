@@ -390,11 +390,12 @@ end
 
 -- The trail's runs: the player, then from the current leg on each leg's start
 -- (unless it walks there) and end; a Hearthstone starts a new run at the inn.
--- Route lines, when they draw, show the way instead.
+-- Route lines, when they draw, show the way instead; Shortest Path Forever's
+-- own line does while the target is handed to it (Nav/Handoff.lua).
 local function updateTrail(world, minimap)
 	local target = Nav.GetTarget()
 	local lines = ns.RouteLines and ns.RouteLines.Active()
-	if lines or not (target and ns.Get("nav.trailDots") and (world or minimap)) then
+	if lines or Nav.HandedOff() or not (target and ns.Get("nav.trailDots") and (world or minimap)) then
 		Pins.ClearTrail()
 		return
 	end

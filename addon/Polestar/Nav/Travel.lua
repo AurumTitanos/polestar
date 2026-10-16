@@ -261,9 +261,10 @@ end
 -- The loaded network, read-only (the live tables, not copies):
 --   taxi = { node, ... }, taxiById = { [id] = node }    node = { id, name, short, c, wx, wy, map, x, y, f, faction }
 --   flights = { [fromId] = { toId, yards, toId, yards, ... } }
---   transports = { { id, kind, faction, a, b, ab, ba, waitA, waitB }, ... }, inns = { inn, ... }
+--   transports = { { id, kind, faction, a, b, ab, ba, waitA, waitB }, ... }, inns = { inn, ... },
+--   portals = { { id, kind = "portal", name, faction, a, b, seconds }, ... }
 function Nav.GetTravelData()
-	return { taxi = taxiList, taxiById = taxi, flights = flights, transports = transports, inns = inns, build = Travel.build }
+	return { taxi = taxiList, taxiById = taxi, flights = flights, transports = transports, inns = inns, portals = portals, build = Travel.build }
 end
 
 ---------------------------------------------------------------------------
@@ -1101,7 +1102,8 @@ function Travel.Replan()
 		skipFor = nil
 		skipped = { hearth = false, spells = {}, transports = {}, taxi = {} }
 	end
-	if target and ns.Get("nav.travel") and #taxiList + #transports + #portals + #inns + pathCount + #crossEnds + #chains > 0 then
+	-- Handed to Shortest Path Forever (Nav/Handoff.lua): it plans the way; no route here.
+	if target and ns.Get("nav.travel") and not Nav.HandedOff() and #taxiList + #transports + #portals + #inns + pathCount + #crossEnds + #chains > 0 then
 		local tc, twx, twy = Nav.GetTargetWorld()
 		local C = ns.Compat
 		local pc, px, py
@@ -1741,6 +1743,7 @@ end)
 Nav.RegisterModule(Travel)
 
 ns.RegisterCommand("route", function()
+	if Nav.SayHandedOff() then return end
 	local list = legs
 	if not list then
 		ns.Print(L["No route: walk straight to the target."])

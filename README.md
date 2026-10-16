@@ -254,13 +254,23 @@ Hearthstone; his router walks every leg between them.
 
 His pathing ships with Polestar as the `Polestar_Nav` folder, copied from his
 repository with only mechanical changes (GPL-3.0-or-later; what came from
-where is in [addon/Polestar_Nav/CREDITS.md](addon/Polestar_Nav/CREDITS.md)). Polestar
-always reads its own copy of the maps, so with Shortest Path Forever installed
-too each addon holds its own. **Walk real paths** (Options, Arrow & routes)
-turns it off. If you like it, try his addon:
+where is in [addon/Polestar_Nav/CREDITS.md](addon/Polestar_Nav/CREDITS.md)).
+**Walk real paths** (Options, Arrow & routes) turns it off. If you like it, try
+his addon:
 [Shortest Path Forever on CurseForge](https://www.curseforge.com/wow/addons/shortest-path-forever)
 plans whole journeys with flights, boats, zeppelins, portals and live
 departure times.
+
+**Works with Shortest Path Forever.** With it installed, Polestar hands it
+the route: each goal goes to Shortest Path Forever, whose arrow, route and
+journey take you there, and Polestar's own arrow, route lines, journey steps,
+travel button, transport alerts, map clicks and `/way` step aside, so the two
+never guide at once (Polestar's walking maps are not even loaded). The guide
+window and the map pins stay. A kill or collect area is handed over as an
+area, so it holds you there until the goal is done; if you clear or replace
+the journey, Polestar leaves it be until the guide moves on. **Guide with
+Shortest Path Forever when it's installed** (Options, Arrow & routes) turns
+it off.
 
 ### Quests and the map
 

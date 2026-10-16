@@ -68,12 +68,13 @@ Also noted while reading v1.15.0, none reported by players:
   than two points (`UI/Strokes.lua:298`); Polestar's never does
   (`tests/nav-route-lines.test.js`).
 
-## Found while integrating (H1-H2)
+## Found while integrating (H1-H3)
 
 | # | Hazard | Polestar |
 |---|---|---|
 | H1 | Sharing an installed Shortest Path Forever's map tables: his engine trims and resets them while ours may be searching, which ends in a Lua error | Polestar always reads its own `PolestarPathData`: `tests/nav-vendor.test.js` |
 | H2 | Polestar's own "Show on map" (Dungeons) used the global world map opener that C3 describes | Fixed through `Compat.OpenWorldMap`: `tests/compat.test.js`, `tests/ui-dungeons.test.js` |
+| H3 | Both addons installed, both guide at once: two arrows, two route lines, two journeys, two `/way` and TomTom answers, and its corpse run fought over | Polestar hands its target to Shortest Path Forever (`Nav/Handoff.lua`, `Nav.HandedOff()`): its own arrow, trail, route lines, journey steps, travel button, alerts, map clicks, TomTom stand-in, `/way`, mirrors and walking searches step aside, nothing is sent in combat or while dead, and a journey the player cleared or replaced is not sent again: `tests/nav-handoff.test.js`; in game, see below |
 
 ## Chokepoint steps (K1-K8)
 
@@ -122,3 +123,8 @@ What tests cannot prove, checked in the client before a release:
    platform.
 4. **Loading (C17):** `Polestar_Nav` loads after login without a hitch;
    note its memory with `/run UpdateAddOnMemoryUsage() print(GetAddOnMemoryUsage("Polestar_Nav"))`.
+5. **Hand-off (H3):** with Shortest Path Forever installed, follow a few
+   guide steps (a pick-up, a kill area, a hand-in across a boat): only its
+   arrow, line and journey show; the kill area stays held while you work it;
+   clearing its journey sticks until the step changes; a fight and a death
+   send nothing; Polestar's option off brings Polestar's arrow back.

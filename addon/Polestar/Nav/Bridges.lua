@@ -4,6 +4,9 @@
 --   Blizzard's user waypoint (nav.blizzardWaypoint, off by default):
 --     C_Map.SetUserWaypoint plus C_SuperTrack, cleared only if we set it.
 -- Both take live-frame map percent, so Era-frame targets are converted first.
+-- Neither mirrors while the target is handed to Shortest Path Forever
+-- (Nav/Handoff.lua): its TomTom stand-in would start a second journey, and
+-- either would be a second arrow.
 
 local ADDON, ns = ...
 local Nav = ns.Nav
@@ -32,7 +35,7 @@ local function syncTomTom(target)
 		if T then T:RemoveWaypoint(tomtomUid) end
 		tomtomUid = nil
 	end
-	if not (T and target and ns.Get("nav.tomtom")) then return end
+	if not (T and target and ns.Get("nav.tomtom")) or Nav.HandedOff() then return end
 	-- A waypoint followed from TomTom's arrow (Nav/Journey.lua) is in TomTom already.
 	local J = Nav.journey
 	if J and J.IsTomTomTarget(target) then return end
@@ -60,7 +63,7 @@ local function makePoint(map, x, y)
 end
 
 local function syncBlizzard(target)
-	if ns.Get("nav.blizzardWaypoint") and target and C_Map and C_Map.SetUserWaypoint then
+	if ns.Get("nav.blizzardWaypoint") and target and not Nav.HandedOff() and C_Map and C_Map.SetUserWaypoint then
 		local map, x, y = Nav.LiveCoords(target)
 		if map and (not C_Map.CanSetUserWaypointOnMap or C_Map.CanSetUserWaypointOnMap(map)) then
 			local point = makePoint(map, x / 100, y / 100)

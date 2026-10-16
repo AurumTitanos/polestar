@@ -218,7 +218,9 @@ local function apply(shouldAnnounce)
 	if shouldAnnounce then announce() end
 end
 
-function Nav.SetTarget(map, x, y, label, f)
+-- `stop`: what stands there, as Shortest Path Forever's stop kinds name it
+-- ("dungeon", "trainer", "innkeeper", "flightmaster"; Nav/Handoff.lua), optional.
+function Nav.SetTarget(map, x, y, label, f, stop)
 	map, x, y = tonumber(map), tonumber(x), tonumber(y)
 	if not (map and x and y) then return false end
 	local Engine = ns.Engine
@@ -226,6 +228,7 @@ function Nav.SetTarget(map, x, y, label, f)
 		map = map, x = x, y = y, f = f,
 		label = (label and label ~= "") and label or L["Waypoint"],
 		kind = "manual",
+		stop = type(stop) == "string" and stop or nil,
 		r = Nav.DEFAULT_RADIUS,
 		stepIndex = Engine and Engine.GetStepIndex and Engine.GetStepIndex() or nil,
 	}
@@ -264,6 +267,16 @@ function Nav.GetTargetWorld()
 	return tC, tX, tY, tZ
 end
 
+-- The hand-off to Shortest Path Forever began or ended (Nav/Handoff.lua): the
+-- route is planned again and every module hears the same target anew, so its
+-- arrow, lines and bridges show or step aside. Nothing is announced: the
+-- target itself did not change.
+function Nav.Reapply()
+	local T = Nav.travel
+	if T and T.Replan then T.Replan() end
+	notify("OnTarget", target)
+end
+
 -- A point's coordinates in the live (Forever) frame of its own map, for
 -- APIs that take map percent: TomTom and Blizzard's user waypoint.
 function Nav.LiveCoords(point)
@@ -300,7 +313,7 @@ end
 ---------------------------------------------------------------------------
 
 local function playArrival()
-	if not ns.Get("nav.arrivalSound") then return end
+	if not ns.Get("nav.arrivalSound") or (Nav.HandedOff and Nav.HandedOff()) then return end
 	local id = (SOUNDKIT and SOUNDKIT.MAP_PING) or 3175
 	if PlaySound then PlaySound(id, "SFX") end
 end
@@ -507,13 +520,36 @@ end)
 -- Commands
 ---------------------------------------------------------------------------
 
+-- While Shortest Path Forever guides (Nav/Handoff.lua), a command that would
+-- show Polestar's own arrow or route says so in one line instead. True if it did.
+function Nav.SayHandedOff()
+	if not (Nav.HandedOff and Nav.HandedOff()) then return false end
+	ns.Print(L["Shortest Path Forever is guiding. Turn off \"Guide with Shortest Path Forever when it's installed\" (Options, Arrow & routes) to use Polestar's arrow."])
+	return true
+end
+
+-- An option with no effect while Shortest Path Forever guides: greyed out
+-- then (with any `disabled` it had), its help saying why. Returns `c`.
+function Nav.HandoffOption(c)
+	local was = c.disabled
+	c.disabled = function()
+		if Nav.HandedOff and Nav.HandedOff() then return true end
+		return was ~= nil and was() or false
+	end
+	local why = L["Greyed out while Shortest Path Forever guides: it does this itself."]
+	c.help = c.help and (c.help .. " " .. why) or why
+	return c
+end
+
 ns.RegisterCommand("arrow", function(rest)
 	local arg = (rest or ""):lower()
 	if arg == "reset" then
 		ns.Set("nav.arrowPos", nil)
 	elseif arg == "show" or arg == "hide" then
+		if arg == "show" and Nav.SayHandedOff() then return end
 		ns.Set("nav.arrow", arg == "show")
 	else
+		if not ns.Get("nav.arrow") and Nav.SayHandedOff() then return end
 		ns.Set("nav.arrow", not ns.Get("nav.arrow"))
 	end
 end, L["Waypoint arrow: show, hide, reset"])
