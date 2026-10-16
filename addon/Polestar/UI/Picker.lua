@@ -1754,6 +1754,12 @@ function UI.ShowPicker(opts)
 	if settings then settings:Hide() end
 end
 
+-- A new font measures the rail, the sidebar and the details' label column
+-- anew: the hub on screen renders again.
+W.OnFontChanged(function()
+	if win and win:IsShown() then P.Render() end
+end)
+
 function P.SetQuery(text)
 	if not win then build() end
 	win.Search:SetText(text or "")

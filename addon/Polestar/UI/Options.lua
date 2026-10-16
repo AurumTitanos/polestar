@@ -1034,6 +1034,26 @@ function UI.ShowOptions(section)
 	O.Select(section or (current and current.key) or pageList[1].key)
 end
 
+-- A new font measures every label, value and description anew: the rail,
+-- the sidebar and the page on screen are laid out again where they are
+-- (other tabs lay out when selected).
+W.OnFontChanged(function()
+	if not (win and win:IsShown()) then return end
+	renderRail()
+	if query ~= "" then
+		W.ShellNav(win, navItems(), nil, function(k) O.Select(k) end)
+		renderSearch()
+		return
+	end
+	O.RefreshNav()
+	local view = O.view
+	if view and view:IsShown() and view.Refresh then
+		local h = view.Refresh()
+		view:SetHeight(h)
+		W.ShellBody(win, h)
+	end
+end)
+
 -- The widgets on a page tab (tests and preview): key -> widget.
 function O.Controls(key, tabName)
 	local p = pageByKey(key)

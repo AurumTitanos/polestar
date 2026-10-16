@@ -509,6 +509,37 @@ test('window border, band and shadow repaint every window live; right-click rest
 	assert.equal(out.own.accentOff, false, 'picking an own border colour turns the accent border off');
 });
 
+test('switching the font lays the page out again: a label that now wraps grows its row and moves the rows below', () => {
+	const [out] = run(`
+		Polestar.Set("ui.font", "game")
+		UI.ShowOptions("guide")
+		local c = O.Controls("guide")
+		local row, below = c["ui.shown"], c["ui.locked"]
+		local function top(w) local _, _, _, _, y = w:GetPoint(1) return y end
+		local before = { h = row:GetHeight(), below = top(below), lines = row.Label:GetStringHeight() }
+		-- Inter set four times wider than the game font, as a font change can.
+		local M = stub.Methods
+		local function wide(self) return (self.font and tostring(self.font[1]):find("Inter")) and 4 or 1 end
+		M.GetUnboundedStringWidth = function(self)
+			return #tostring(self.text or "") * ((self.font and self.font[2]) or 12) * 0.5 * wide(self)
+		end
+		M.GetStringHeight = function(self)
+			local size, w = (self.font and self.font[2]) or 12, self.width or 0
+			if w <= 0 then return size end
+			local lines = 0
+			for line in (tostring(self.text or "") .. "\\n"):gmatch("([^\\n]*)\\n") do
+				lines = lines + math.max(1, math.ceil(#line * size * 0.5 * wide(self) / w))
+			end
+			return lines * size
+		end
+		Polestar.Set("ui.font", "inter")
+		emit({ before = before, after = { h = row:GetHeight(), below = top(below), lines = row.Label:GetStringHeight() } })`);
+	assert.equal(out.before.h, 40);
+	assert.ok(out.after.lines > out.before.lines, `the label wraps: ${out.before.lines} -> ${out.after.lines}`);
+	assert.ok(out.after.h > out.before.h, `its row grows: ${out.before.h} -> ${out.after.h}`);
+	assert.ok(out.after.below < out.before.below, `the rows below move down: ${out.before.below} -> ${out.after.below}`);
+});
+
 test('a Blizzard Settings category opens the options window', () => {
 	const [out] = run(`
 		local cat

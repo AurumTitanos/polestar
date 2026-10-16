@@ -586,6 +586,24 @@ end)
 
 Theme.OnChanged(W.RefreshAll)
 
+-- fn() after the font changes (ui.font, EllesmereUI's font): text that
+-- sized its row, column or control measures differently, so a window shown
+-- lays itself out again. Colour and look changes do not call it.
+local fontHandlers, fontKey = {}, nil
+local function currentFont()
+	local path, _, flags = Theme.FontSpec("body")
+	return tostring(path) .. "|" .. tostring(flags)
+end
+function W.OnFontChanged(fn)
+	fontHandlers[#fontHandlers + 1] = fn
+end
+Theme.OnChanged(function()
+	local key = currentFont()
+	if key == fontKey then return end
+	fontKey = key
+	for _, fn in ipairs(fontHandlers) do fn() end
+end)
+
 -- A grid row: label left, bound by the control and wrapping onto more lines
 -- rather than cut, a faint hairline underneath, the description as the
 -- row's tooltip. W.LayoutRow sizes it.
@@ -1011,7 +1029,7 @@ end
 -- following it).
 ---------------------------------------------------------------------------
 
-local DROPDOWN_W, DROPDOWN_LABEL_MIN = 150, 80
+local DROPDOWN_W, DROPDOWN_MIN = 150, 72
 
 local function choicesOf(row)
 	local c = row.psChoices
@@ -1060,19 +1078,18 @@ local function widestWord(row)
 end
 
 -- A dropdown row's control: as wide as its longest choice, DROPDOWN_W at
--- least, as far as the label keeps room for its widest word; narrower than
--- DROPDOWN_W when that word needs it, wider than that room (down to
--- DROPDOWN_LABEL_MIN for the label) when the choice does.
+-- least, but never so wide that the label loses room for its widest word
+-- (the label then wraps between words, never inside one): the box gives
+-- way first, down to DROPDOWN_MIN.
 local function dropdownSpan(row, width)
 	local b = row.Button
 	local shown = b.Label:GetText()
 	local need = 0
 	for _, c in ipairs(choicesOf(row)) do need = max(need, textWidth(b.Label, c.text)) end
 	b.Label:SetText(shown or "")
-	need = math.ceil(need) + 36
-	local desired = max(DROPDOWN_W, need)
+	local desired = max(DROPDOWN_W, math.ceil(need) + 36)
 	local room = width - 12 - 10 - 12 - math.ceil(widestWord(row))
-	local bw = desired <= room and desired or max(room, min(need, width - 12 - 10 - 12 - DROPDOWN_LABEL_MIN))
+	local bw = max(DROPDOWN_MIN, min(desired, room))
 	b:SetWidth(bw)
 	return 12 + bw + 10
 end
@@ -1085,6 +1102,11 @@ function W.Dropdown(parent, label, path, choices, desc, depends, opts)
 	b:SetSize(DROPDOWN_W, 28)
 	b:SetPoint("RIGHT", row, "RIGHT", -12, 0)
 	b.Label = W.Text(b, "label", "text")
+	-- Where the box gave way to the label, the choice takes a second line
+	-- (two 12px lines fit its 28px); set on every refresh, so the cold-start
+	-- blank of a max-lines string (W.Text) does not stick.
+	b.Label:SetWordWrap(true)
+	b.Label:SetMaxLines(2)
 	b.Label:SetPoint("LEFT", b, "LEFT", 10, 0)
 	b.Label:SetPoint("RIGHT", b, "RIGHT", -26, 0)
 	b.Arrow = b:CreateTexture(nil, "ARTWORK")
@@ -1528,7 +1550,11 @@ local function navButton(f, i)
 	b.Icon:SetSize(16, 16)
 	b.Icon:SetPoint("LEFT", b, "LEFT", SHELL.side, 0)
 	b.Label = W.Text(b, "body", "textDim")
+	-- Two lines at most: both fit the 40px row (13px type); past that it is
+	-- cut. Its text is set on every ShellNav, so the cold-start blank of a
+	-- max-lines string (W.Text) does not stick.
 	b.Label:SetWordWrap(true)
+	b.Label:SetMaxLines(2)
 	b.Label:SetPoint("LEFT", b.Icon, "RIGHT", 12, 0)
 	b.Count = W.Text(b, "number", "textMuted")
 	b.Count:SetJustifyH("RIGHT")
