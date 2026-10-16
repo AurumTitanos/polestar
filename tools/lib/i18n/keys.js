@@ -145,7 +145,8 @@ function keysInSource(src, file) {
 const DATA_KEYS = {
 	// The guide format's categories (docs/GUIDE_FORMAT.md, `category`; UI/Picker.lua CATEGORIES, UI.Category).
 	'UI/Picker.lua': ['Leveling', 'Class', 'Professions', 'Reputation', 'Exploration', 'Legacy', 'Collectibles'],
-	// UI.RaceName: Forever's race files (tools/lib/game/races.js) as RACE_NAMES words them;
+	// UI.RaceName: Forever's race files (tools/lib/game/races.js) as RACE_NAMES words them,
+	// where the client has no name for the race (Skyborne) or no C_CreatureInfo.GetRaceInfo;
 	// UI.ClassName when the client has no LOCALIZED_CLASS_NAMES_MALE.
 	'UI/UI.lua': ['Human', 'Orc', 'Dwarf', 'Night Elf', 'Undead', 'Tauren', 'Gnome', 'Troll', 'Skyborne',
 		'Warrior', 'Paladin', 'Hunter', 'Rogue', 'Priest', 'Shaman', 'Mage', 'Warlock', 'Druid'],

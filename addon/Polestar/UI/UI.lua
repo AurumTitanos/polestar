@@ -86,7 +86,12 @@ function UI.LevelRange(lo, hi)
 	return lo .. "\226\128\147" .. hi
 end
 
--- Player-facing race names for the client's race files.
+-- Player-facing race names for the client's race files: the client's own
+-- name (ChrRaces, through C_CreatureInfo.GetRaceInfo) for the Era races, by
+-- their ChrRaces ID (the file alone is ambiguous: 23, Gilnean, is "Human" too).
+-- Skyborne has a name per side ("High Order Skyborne", "Windshaper Skyborne")
+-- and none for the race, so it and races the client lacks read L[name].
+local RACE_ID = { Human = 1, Orc = 2, Dwarf = 3, NightElf = 4, Scourge = 5, Tauren = 6, Gnome = 7, Troll = 8 }
 local RACE_NAMES = {
 	Scourge = "Undead", NightElf = "Night Elf", BloodElf = "Blood Elf", HighmountainTauren = "Highmountain Tauren",
 	LightforgedDraenei = "Lightforged Draenei", VoidElf = "Void Elf", DarkIronDwarf = "Dark Iron Dwarf",
@@ -94,6 +99,10 @@ local RACE_NAMES = {
 }
 function UI.RaceName(file)
 	if type(file) ~= "string" then return "" end
+	local id = RACE_ID[file]
+	local get = id and C_CreatureInfo and C_CreatureInfo.GetRaceInfo
+	local info = get and get(id)
+	if type(info) == "table" and type(info.raceName) == "string" and info.raceName ~= "" then return info.raceName end
 	local name = RACE_NAMES[file] or file:gsub("(%l)(%u)", "%1 %2")
 	return L[name]
 end
