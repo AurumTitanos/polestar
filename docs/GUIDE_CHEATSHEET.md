@@ -80,6 +80,7 @@ Before the first `step`. `guide`, `title`, `levels` and `zone` are required.
 | `"<text>"` | Right after an id: the quest title, or the name of the NPC, object or item, for content missing from the data; after the modifiers: the text players see instead of the generated one | `accept 9201 "The First Step"` |
 | `xp <N>` / `money <amount>` | On `turnin`: what it pays (`money 1g50s`, `7s` or copper) | `turnin 9201 xp 210 money 1s` |
 | `choose <item> ...` / `reward <item> ...` | On `turnin`: the rewards to pick from, and the ones given outright | `turnin 5261 choose 159 2589 reward 4306` |
+| `direct` | On `turnin`: handed in straight from the giver's window, with no `accept` (Distracting Jarven, the cloth donations). Buy or collect what it asks for with `buy`/`collect`: the quest never enters the log, so nothing tracks objectives for it | `turnin 9300 direct` |
 
 ## Killing and collecting
 

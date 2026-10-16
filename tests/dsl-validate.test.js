@@ -84,6 +84,41 @@ test('turnin, complete and objective goals need an earlier accept in the guide',
 	]);
 });
 
+// Issue #108: quests handed in straight from the NPC's window, with no accept
+// (Distracting Jarven 308, the repeat cloth donations).
+test('#108: a `direct` turn-in needs no accept, and is checked for availability and prerequisites as an accept is', () => {
+	assert.deepEqual(compile(guideText(['step S', '  turnin 783 direct'])).errors, []);
+
+	// 9100 is Orc-only, so no character of this Alliance guide can be offered it.
+	const race = compile(guideText(['step S', '  turnin 9100 direct']));
+	assert.deepEqual(only(race.errors, /not available/), [
+		'test.guide:8: quest 9100 (Orcish Errand) is not available to any race this step applies to',
+	]);
+
+	// 7 needs 783 turned in first, and the chain never turns it in.
+	const pre = compile(guideText(['step S', '  turnin 7 direct']));
+	assert.deepEqual(only(pre.warnings, /turned in first/), [
+		'test.guide:8: quest 7 needs 783 (A Threat Within) turned in first, but the chain never turns it in',
+	]);
+});
+
+test('#108: `direct` contradicts an earlier accept, and a `direct` quest carries no objectives', () => {
+	const both = guideText(['step S', '  accept 783', '  turnin 783 direct']);
+	assert.deepEqual(only(compile(both).errors, /direct/), [
+		`test.guide:${lineOf(both, '  turnin 783 direct')}: \`turnin\` for quest 783 is marked \`direct\`, but the chain accepts that quest earlier: drop \`direct\``,
+	]);
+
+	// The item the hand-in asks for is a plain buy/collect: nothing tracks an
+	// objective of a quest that never enters the log. The goals come before the
+	// turn-in here, as they would in a guide, and still name the right reason.
+	const tracked = guideText(['step S', '  complete 783', '  collect 2589 quest 783', '  turnin 783 direct']);
+	const why = 'which is handed in directly (`turnin 783 direct`): it is never in the quest log, so nothing tracks its objectives. Get what it asks for with a plain `buy` or `collect`, without `quest`';
+	assert.deepEqual(only(compile(tracked).errors, /handed in directly/), [
+		`test.guide:${lineOf(tracked, '  complete 783')}: \`complete\` for quest 783 (A Threat Within), ${why}`,
+		`test.guide:${lineOf(tracked, '  collect 2589 quest 783')}: \`collect\` for quest 783 (A Threat Within), ${why}`,
+	]);
+});
+
 test('an accept in a guide that chains into this one (even indirectly) satisfies a later turn-in; an unrelated guide does not', () => {
 	const first = text('t/one', ['step S', '  accept 33'], ['next t/two']);
 	const middle = text('t/two', ['step S', '  level 3'], ['next t/three']);

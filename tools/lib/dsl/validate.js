@@ -431,6 +431,14 @@ function validateGuides(guides, data, diag) {
 			for (const t of questGoals(a)) take(t);
 		}
 		const own = new Map(questGoals(g).map((t) => [t.goal, t]));
+		// Quests handed in straight from the NPC's window (`turnin <id> direct`),
+		// in this guide or the chain into it: they have no accept, and nothing
+		// tracks their objectives. Gathered before the walk so a goal that comes
+		// earlier in the file still gets the message for the right reason.
+		const direct = new Set();
+		for (const a of [...ancestors(g), g]) {
+			for (const { goal } of goalsOf(a)) if (goal.t === 'turnin' && goal.direct) direct.add(goal.quest);
+		}
 		const gl = guideLayer(g);
 		const leveling = g.category === 'Leveling';
 		for (const { step, goal } of goalsOf(g)) {
@@ -443,7 +451,10 @@ function validateGuides(guides, data, diag) {
 					eliteReported.add(goal);
 				}
 			}
-			if (goal.t === 'accept') {
+			// A direct hand-in is offered like an accept, so its availability,
+			// prerequisites and exclusive quests are checked the same way.
+			const directTurnin = goal.t === 'turnin' && goal.direct === true;
+			if (goal.t === 'accept' || directTurnin) {
 				const set = applicable([gl, step._only, goal._only]);
 				if (q) {
 					const why = maskExcludes(set, q);
@@ -482,11 +493,22 @@ function validateGuides(guides, data, diag) {
 						}
 					}
 				}
-				accepted.add(goal.quest);
+				if (directTurnin) {
+					if (accepted.has(goal.quest)) {
+						diag.error(file, ln, `\`turnin\` for quest ${goal.quest} is marked \`direct\`, but the chain accepts that quest earlier: drop \`direct\``);
+					}
+					turnedIn.add(goal.quest);
+				} else {
+					accepted.add(goal.quest);
+				}
 				take(own.get(goal));
 			} else if (goal.t === 'turnin' || goal.t === 'complete' || (OBJECTIVE_VERBS.has(goal.t) && goal.quest !== undefined)) {
 				if (!accepted.has(goal.quest)) {
-					diag.error(file, ln, `\`${goal.t}\` for quest ${goal.quest} that is never accepted earlier in this guide or a guide chaining into it`);
+					if (direct.has(goal.quest)) {
+						diag.error(file, ln, `\`${goal.t}\` for quest ${questName(data, goal.quest, goal.title)}, which is handed in directly (\`turnin ${goal.quest} direct\`): it is never in the quest log, so nothing tracks its objectives. Get what it asks for with a plain \`buy\` or \`collect\`, without \`quest\``);
+					} else {
+						diag.error(file, ln, `\`${goal.t}\` for quest ${goal.quest} that is never accepted earlier in this guide or a guide chaining into it`);
+					}
 				}
 				if (goal.t === 'turnin') {
 					turnedIn.add(goal.quest);

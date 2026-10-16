@@ -43,6 +43,13 @@ local function wantsTurnIn(q)
 	return q and q ~= 0 and ns.Engine.WantsQuest("turnin", q)
 end
 
+-- A `turnin ... direct`: handed in straight from the giver's window with no
+-- accept, so the NPC lists it among the quests it offers, not the ones in the
+-- log. Picking it there opens the progress window, which onProgress finishes.
+local function wantsDirect(q)
+	return q and q ~= 0 and ns.Engine.WantsQuest("direct", q)
+end
+
 local function questID()
 	return GetQuestID and GetQuestID() or nil
 end
@@ -101,10 +108,10 @@ local function onGreeting()
 		end
 	end
 	local numAvailable = GetNumAvailableQuests and GetNumAvailableQuests() or 0
-	if accept and GetAvailableQuestInfo and SelectAvailableQuest then
+	if (accept or turnin) and GetAvailableQuestInfo and SelectAvailableQuest then
 		for i = 1, numAvailable do
 			local q = select(5, GetAvailableQuestInfo(i))
-			if wantsAccept(q) then
+			if (accept and wantsAccept(q)) or (turnin and wantsDirect(q)) then
 				SelectAvailableQuest(i)
 				return
 			end
@@ -119,7 +126,8 @@ end
 local function onGossip()
 	local G = C_GossipInfo
 	if not G then return end
-	if canTurnIn() and G.GetActiveQuests and G.SelectActiveQuest then
+	local turnin, accept = canTurnIn(), canAccept()
+	if turnin and G.GetActiveQuests and G.SelectActiveQuest then
 		local active = G.GetActiveQuests() or {}
 		for i = 1, #active do
 			local info = active[i]
@@ -129,11 +137,11 @@ local function onGossip()
 			end
 		end
 	end
-	if canAccept() and G.GetAvailableQuests and G.SelectAvailableQuest then
+	if (accept or turnin) and G.GetAvailableQuests and G.SelectAvailableQuest then
 		local available = G.GetAvailableQuests() or {}
 		for i = 1, #available do
 			local info = available[i]
-			if wantsAccept(info.questID) then
+			if (accept and wantsAccept(info.questID)) or (turnin and wantsDirect(info.questID)) then
 				G.SelectAvailableQuest(info.questID)
 				return
 			end

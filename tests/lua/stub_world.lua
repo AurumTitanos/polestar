@@ -214,9 +214,13 @@ function world.questDetail(npc, q, opts)
 	fire("QUEST_DETAIL", opts.startItem)
 end
 
-function world.questProgress(npc, q)
+-- opts.completable: the window's own word, for a quest handed in without ever
+-- being accepted (a give-item quest, which is never in the log). Left out, the
+-- quest log decides, as for a quest taken the usual way.
+function world.questProgress(npc, q, opts)
 	talkTo(npc)
-	world.frame = { kind = "progress", npc = npc, questID = q }
+	opts = opts or {}
+	world.frame = { kind = "progress", npc = npc, questID = q, completable = opts.completable }
 	fire("QUEST_PROGRESS")
 end
 
@@ -485,7 +489,12 @@ function AcknowledgeAutoAcceptQuest() acceptOpen("AcknowledgeAutoAcceptQuest") e
 function DeclineQuest() call("DeclineQuest"); world.close() end
 function CloseQuest() world.close() end
 
-function IsQuestCompletable() local f = frameOf("progress"); return f and questReady(f.questID) or false end
+function IsQuestCompletable()
+	local f = frameOf("progress")
+	if not f then return false end
+	if f.completable ~= nil then return f.completable and true or false end
+	return questReady(f.questID)
+end
 function CompleteQuest()
 	local f = frameOf("progress")
 	call("CompleteQuest", f and f.questID)
