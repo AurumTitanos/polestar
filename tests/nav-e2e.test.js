@@ -1,5 +1,6 @@
 'use strict';
-// End to end: the arrow on Shortest Path Forever's real walking engine. The
+// End to end: the arrow on Shortest Path Forever's real walking engine and
+// Polestar's packed maps (maps 0 and 1, `nav pack`). The
 // real Polestar (with TravelData, the guides' Era map frames, and the local
 // crossings when built) loads the real Polestar_Nav on demand at login, its
 // maps decoded by tests/lua/stub_encoding.lua the way the client decodes them;
@@ -30,7 +31,7 @@ function skipReason() {
 	}
 	const data = needs('map-frames.json', 'zones.json');
 	if (data) return data;
-	if (!fs.existsSync(path.join(ADDONS, 'Polestar_Nav', 'Nav', 'Nav.xml'))) return 'addon/Polestar_Nav has no walking maps (node tools/polestar.js nav vendor)';
+	if (!fs.existsSync(path.join(ADDONS, 'Polestar_Nav', 'Nav', 'Nav.xml'))) return 'addon/Polestar_Nav has no walking maps (node tools/polestar.js nav pack and nav vendor)';
 	if (!fs.existsSync(path.join(ADDONS, 'Polestar_Guides', 'MapFrames.lua'))) return 'addon/Polestar_Guides/MapFrames.lua not built (node tools/polestar.js compile)';
 	return false;
 }
@@ -303,13 +304,16 @@ test('b: where the straight line is blocked (Thelsamar to the Stonewrought Dam) 
 		local a = aim()
 		local _, tx, ty = N.GetTargetWorld()
 		emit({ map = f.map, n = #f.points, length = length(f.points), straight = dist(sx, sy, tx, ty), index = indexOf(f, a.x, a.y),
-			toTarget = dist(a.x, a.y, tx, ty), endGap = dist(f.points[#f.points].x, f.points[#f.points].y, tx, ty), dist = a.dist })`);
+			toTarget = dist(a.x, a.y, tx, ty), endGap = dist(f.points[#f.points].x, f.points[#f.points].y, tx, ty), dist = a.dist,
+			second = dist(sx, sy, f.points[2].x, f.points[2].y) })`);
 	assert.equal(out.map, 0);
 	assert.ok(out.length > out.straight * 1.2, `path ${out.length.toFixed(0)} yd against ${out.straight.toFixed(0)} yd straight`);
-	assert.equal(out.index, 2, `the arrow aims at the detour's first corner (of ${out.n} points)`);
+	// The path's second point is the start cell's centre; within Walk.lua's POINT_REACH (5 yd) it counts as passed.
+	assert.equal(out.index, out.second > 5 ? 2 : 3, `the arrow aims at the detour's first corner (of ${out.n} points; the second is ${out.second.toFixed(1)} yd away)`);
 	assert.ok(out.toTarget > 100);
 	assert.ok(out.endGap < 10);
-	assert.ok(Math.abs(out.dist - out.length) < 0.5, 'the yards shown are the detour\'s');
+	// Measured along the path from where the player stands on it (within the passed first segment).
+	assert.ok(out.dist <= out.length + 0.5 && out.dist > out.length - out.second - 0.5, `the yards shown (${out.dist.toFixed(1)}) are the detour's (${out.length.toFixed(1)})`);
 });
 
 test('c: walking the path point by point advances the aim, never asks the engine again, and arrives', { skip }, (t) => {
@@ -469,4 +473,31 @@ test('Z1: a guide goal at Andron Gant (Undercity, Rogues\' Quarter) is walked to
 	assert.equal(out.withoutZ.z, undefined, 'the same point set by hand has no height');
 	assert.equal(out.withoutZ.asked, 2);
 	assert.ok(out.withoutZ.endZ > 20, `and ends on the street ${out.withoutZ.endZ - out.withZ.endZ} yd above him (${out.withoutZ.endZ})`);
+});
+
+test('K1: a walk into a cave is split at its mouth from Polestar_Nav\'s Chokepoints.lua, the step named by the cave (Kharanos into the Grizzled Den)', { skip }, (t) => {
+	const out = run(t, `
+		local c, sx, sy = C.MapToWorld(1426, 46.7, 53.0, "e")
+		place(1426, sx, sy, 401.5)
+		-- A goal inside the cave with its height (a guide's spawn point): the engine walks in, not over the hill above.
+		Polestar.Fire("WAYPOINT_CHANGED", { map = 1426, x = 41.18, y = 50.28, f = "e", z = 355, label = "Grizzled Den", kind = "turnin", r = 5 })
+		aim()
+		local n = 0
+		while not (finds[#finds] and finds[#finds].done) and n < 200 do stub.advance(0.05); aim(); n = n + 1 end
+		N.walk.Split()
+		local legs, ci = N.GetRoute()
+		local list = {}
+		for i = ci, #legs do
+			local l = legs[i]
+			list[#list + 1] = { kind = l.kind, label = l.label, step = l.step, choke = l.choke and l.choke.name, seconds = l.seconds }
+		end
+		local caves = 0
+		for _, e in ipairs(PolestarNavChokepoints and PolestarNavChokepoints[0] or {}) do if e.kind == "cave" then caves = caves + 1 end end
+		emit({ legs = list, caves = caves, points = finds[#finds] and finds[#finds].points and #finds[#finds].points })`);
+	assert.ok(out.caves > 50, `Chokepoints.lua loads with Polestar_Nav (${out.caves} caves on map 0)`);
+	const cave = out.legs.find((l) => l.step === 'cave');
+	assert.ok(cave, `a cave step: ${JSON.stringify(out.legs)}`);
+	assert.equal(cave.choke, 'The Grizzled Den');
+	assert.match(cave.label, /Grizzled Den/);
+	assert.ok(out.legs.every((l) => typeof l.label === 'string' && l.label !== '' && l.label !== 'Unknown'), 'K1: every step is named');
 });

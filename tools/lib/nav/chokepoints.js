@@ -19,10 +19,15 @@
 //   liftLinks), one entry per landing (landings within LIFT_SAME yd and
 //   STEP in height are one); liftEnd 'top' or 'bottom' by height against the
 //   other end, `pair` the index of the other end, `lift` the object's name.
-// - cave, building, pass: the mouth (first node) of each approach chain of
-//   the aids (aids.js): 'Enter the cave' a cave, 'Go inside' a building,
-//   'Follow the path' / 'Follow the path up' a pass; 'Take the lift' chains
-//   are lifts already. Mouths of one kind within MERGE yd are one.
+// - cave, building, pass: the mouth of each approach chain of the aids
+//   (aids.js): 'Enter the cave' a cave, 'Go inside' a building, 'Follow the
+//   path' / 'Follow the path up' a pass; 'Take the lift' chains are lifts
+//   already. A cave's or building's mouth is where the chain's line first
+//   reaches an indoor surface (sampled every MOUTH_STEP yd from its first
+//   node, the surface nearest the line's height), centred on the indoor
+//   boundary around it, its radius reaching all of it (indoorMouth); a chain
+//   that never does keeps its first node. Mouths of one kind within MERGE
+//   yd are one.
 // - bridge, tunnel, pass: each zone crossing of the aids at the middle of
 //   its two ends, by its caption ('Cross the bridge', 'Walk through the
 //   tunnel', else a pass), sides the two ends with their zones.
@@ -60,6 +65,59 @@ const GATE_MIN = 6; // columns
 const GATE_WIDTH = 14; // yd on average
 const R_MIN = 6;
 const R_MAX = 30;
+const MOUTH_STEP = 2; // yd
+const MOUTH_R = 10; // yd: the least radius of a cave's or building's mouth
+const MOUTH_SPAN = 4; // yd of height the mouth's floor may vary across its width
+const MOUTH_REACH = 20; // yd around the chain's entry the mouth is looked for
+
+// Where the polyline `pts` ({ wx, wy }) first stands on an indoor surface ->
+// { wx, wy, z, r } or null; its height follows the surface it is on. The
+// mouth is the indoor boundary there: within MOUTH_REACH yd, every MOUTH_STEP
+// yd, indoor surfaces within MOUTH_SPAN of that height with outdoor ground
+// at the same height a step away. Centred on them, its radius reaches the
+// furthest (at least MOUTH_R), so a path entering anywhere across a wide
+// mouth passes within it.
+function indoorMouth(nav, c, pts) {
+	let z;
+	for (let i = 1; i < pts.length; i++) {
+		const a = pts[i - 1];
+		const b = pts[i];
+		const n = Math.max(1, Math.ceil(Math.hypot(b.wx - a.wx, b.wy - a.wy) / MOUTH_STEP));
+		for (let s = i === 1 ? 0 : 1; s <= n; s++) {
+			const wx = a.wx + ((b.wx - a.wx) * s) / n;
+			const wy = a.wy + ((b.wy - a.wy) * s) / n;
+			const at = nav.snap(z === undefined ? { c, wx, wy, radius: 3 } : { c, wx, wy, z, radius: 3 });
+			if (!at) continue;
+			if (at.flags & FLAG.INDOOR) return mouthAround(nav, c, wx, wy, at.z);
+			z = at.z;
+		}
+	}
+	return null;
+}
+
+function mouthAround(nav, c, wx, wy, z) {
+	const kind = (x, y) => {
+		const q = nav.snap({ c, wx: x, wy: y, z, radius: 1 });
+		if (!q || Math.abs(q.z - z) > MOUTH_SPAN) return 0;
+		return q.flags & FLAG.INDOOR ? 2 : 1;
+	};
+	const edge = [];
+	const R = Math.floor(MOUTH_REACH / MOUTH_STEP);
+	for (let i = -R; i <= R; i++) {
+		for (let j = -R; j <= R; j++) {
+			if (i * i + j * j > R * R) continue;
+			const x = wx + i * MOUTH_STEP;
+			const y = wy + j * MOUTH_STEP;
+			if (kind(x, y) !== 2) continue;
+			if ([[1, 0], [-1, 0], [0, 1], [0, -1]].some(([di, dj]) => kind(x + di * MOUTH_STEP, y + dj * MOUTH_STEP) === 1)) edge.push([x, y]);
+		}
+	}
+	if (!edge.length) return { wx, wy, z: round1(z), r: MOUTH_R };
+	const mx = edge.reduce((s, p) => s + p[0], 0) / edge.length;
+	const my = edge.reduce((s, p) => s + p[1], 0) / edge.length;
+	const far = Math.max(...edge.map(([x, y]) => Math.hypot(x - mx, y - my)));
+	return { wx: mx, wy: my, z: round1(z), r: Math.min(R_MAX, Math.max(MOUTH_R, Math.ceil(far + MOUTH_STEP))) };
+}
 const CAPTION_KIND = { 'Enter the cave': 'cave', 'Go inside': 'building', 'Follow the path up': 'pass', 'Follow the path': 'pass' };
 const round1 = (v) => Math.round(v * 10) / 10;
 
@@ -233,13 +291,19 @@ function chokepoints({ nav, c, aids, lifts = [], geo, areas }) {
 	}
 	const near = (wx, wy, kind) => list.findIndex((x) => x.kind === kind && Math.hypot(x.wx - wx, x.wy - wy) <= MERGE);
 	const world = (p) => geo.toWorld(p.map, p.x, p.y, 'e');
-	// Aids: chain mouths.
+	// Aids: chain mouths, a cave's or building's moved in to where it turns indoor.
 	for (const ch of (aids && aids.chains) || []) {
 		const n0 = ch.nodes[0];
 		const kind = CAPTION_KIND[n0.caption];
 		const w = kind && world(n0);
-		if (!w || w.c !== c || near(w.wx, w.wy, kind) >= 0) continue;
-		list.push({ wx: round1(w.wx), wy: round1(w.wy), z: zOf(w.wx, w.wy), r: Math.max(R_MIN, Math.min(R_MAX, n0.radius || R_MIN)), kind, ...place(w.wx, w.wy) });
+		if (!w || w.c !== c) continue;
+		let at = { wx: w.wx, wy: w.wy, z: zOf(w.wx, w.wy), r: Math.max(R_MIN, Math.min(R_MAX, n0.radius || R_MIN)) };
+		if (kind === 'cave' || kind === 'building') {
+			const mouth = indoorMouth(nav, c, ch.nodes.map(world).filter((p) => p && p.c === c));
+			if (mouth) at = mouth;
+		}
+		if (near(at.wx, at.wy, kind) >= 0) continue;
+		list.push({ wx: round1(at.wx), wy: round1(at.wy), z: at.z, r: at.r, kind, ...place(at.wx, at.wy) });
 	}
 	// Aids: zone crossings.
 	for (const x of (aids && aids.crossings) || []) {
@@ -276,12 +340,13 @@ function chokepoints({ nav, c, aids, lifts = [], geo, areas }) {
 
 const luaStr = (s) => `"${String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
 
-// { [c]: entries } -> Chokepoints.lua (global PolestarNavChokepoints).
-function chokepointsLua(byMap, source, global = 'PolestarNavChokepoints') {
+// { [c]: entries } -> Chokepoints.lua (global PolestarNavChokepoints); `gen`
+// is its first line (generated.js header).
+function chokepointsLua(byMap, gen, global = 'PolestarNavChokepoints') {
 	const field = (k, v) => (typeof v === 'number' ? `${k} = ${v}` : typeof v === 'string' ? `${k} = ${luaStr(v)}` : `${k} = { ${v.map((s) => `{ ${Object.entries(s).map(([a, b]) => field(a, b)).join(', ')} }`).join(', ')} }`);
 	const lines = [
-		'-- Generated by tools/lib/nav/chokepoints.js (Polestar) from the navigation grid and its aids. Do not edit.',
-		`-- Source: ${source}.`,
+		gen,
+		'-- Chokepoints a walk passes, for its named steps (tools/lib/nav/chokepoints.js; Nav/Walk.lua reads them).',
 		'-- Per continent: { wx, wy, z, r, kind, name, zone, sides?, liftEnd?, lift?, pair? } in UnitPosition\'s frame',
 		'-- (wx north, wy west), yards; kind lift | gate | bridge | tunnel | cave | building | pass; pair indexes this list.',
 		`${global} = ${global} or {}`,

@@ -4,6 +4,16 @@
 
 ### For players
 
+- In Eastern Kingdoms and Kalimdor the arrow's walks run on Polestar's own,
+  finer walking maps (made from the game's terrain, water and buildings, in
+  Shortest Path Forever's map format, with Cillian Berragan's permission): out
+  of an inn by its door rather than through the wall, down into the Undercity
+  by its lifts, never swimming across open sea (water the game tires you in),
+  and along the coast where that is the way. A walk is also told step by step
+  at the bridges, gates, tunnels, passes and cave and building mouths it
+  passes. The maps take about 26 MB once loaded (Walk real paths on) and up
+  to about 54 MB more while a walk is being searched; the zip grows by about
+  11 MB.
 - A class guide opened before your level says so: the guide window shows
   "Available from level 20" with who starts it (or the quest to finish
   first), instead of sending you to a trainer who has nothing for you, then
@@ -312,8 +322,8 @@
 - A walk is told step by step at the places it passes: "Walk to The Great
   Lift, Bottom" then "Take The Great Lift", through a zone's gate or into a
   cave by the zone data's or the guide's own words, each with its own time,
-  the arrow saying each as you reach it (bridges, gates and cave mouths
-  everywhere follow once the walking maps carry them). A cave or chain the
+  the arrow saying each as you reach it, and at the bridges, gates, tunnels,
+  passes and cave and building mouths the walking maps know. A cave or chain the
   guide or the zone data
   already describes keeps its own words, and a goal right after a guide's
   "go to the mouth" step is still pointed at straight from the mouth, so the
@@ -492,6 +502,21 @@
 
 ### For contributors
 
+- `addon/Polestar_Nav`'s maps of Eastern Kingdoms and Kalimdor are
+  Polestar's: `node tools/polestar.js nav pack` writes the
+  navigation grid in his walking-map format (`tools/lib/nav/pack.js`, a port
+  of his `gen_nav.py` and `pack_nav.py`: 128 cells a tile, a step between
+  cells open only where one of our links crosses it, floors for stacked
+  surfaces, his HPA* graph), with `Nav/Chokepoints.lua`
+  (`tools/lib/nav/chokepoints.js`) and `PACK.json` (grid build, cells, date,
+  sizes, sha256; `nav check` and `nav pack --check` hold the folder to it);
+  `nav vendor` now takes only his router and the maps we do not pack
+  (Zephras Isle), never removes Polestar's packed maps, and writes `Nav.xml`
+  from both manifests. `API.lua` raises the engine's ceilings to
+  `Path.cacheKB` 48 MB and `Path.graphKB` 6 MB for the finer maps. The grid
+  no longer swims fatigue water (MH2O's deep quads; grid tile format 3:
+  rebuild with `nav build`), stairs in WMOs walk as slopes or a jump, and a
+  point inside a building snaps to its floor.
 - `sim compare` and `sim bench` score the guides without their `optional`
   goals (an optional quest whole); `--with-optional` scores them as done, the
   old way. README, docs/SIMULATION.md and the charts are republished on world
@@ -675,7 +700,7 @@
   a goal after a guide `goto`) stay straight, and every failure falls back
   to the straight arrow; it splits that walk at the lifts `Nav/Transit.lua`
   knows (crossings, approach chains and guide gotos are legs already; gates,
-  bridges, caves and passes follow once Polestar_Nav carries
+  bridges, caves, passes and lift landings come from Polestar_Nav's
   `PolestarNavChokepoints`) (`Travel.SplitWalk`: pieces with `step`,
   `choke`, lift rides of kind `lift`) and publishes
   `Nav.GetRouteGeometry()`. `Travel.lua` plans

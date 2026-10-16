@@ -30,16 +30,31 @@ GPL-3.0-or-later, Copyright (C) 2026 Cillian Berragan:
 | `Routing/PathGrid.lua` | `Routing/PathGrid.lua` | the data global is `PolestarPathData`; one header line |
 | `Routing/Path.lua` | `Routing/Path.lua` | the same |
 | `Routing/PathJobs.lua` | `Routing/PathJobs.lua` | one header line |
-| `Nav/Nav.xml` | `Nav/Nav.xml` | one header comment |
-| `Nav/Nav*.lua` (the walking maps of map 0 Eastern Kingdoms, 1 Kalimdor and 2991 Zephras Isle) | `Nav/Nav*.lua` | the data global is `PolestarPathData`; one header line |
+| `Nav/Nav2991*.lua` (the walking map of Zephras Isle) | `Nav/Nav2991*.lua` | the data global is `PolestarPathData`; one header line |
 
 Each file's header line names its upstream file and commit, his copyright and
 licence, and the date it was modified for Polestar (2026-10-15).
 `UPSTREAM.json` records the commit, that date and the sha256 of every file as
 vendored; `node tools/polestar.js nav vendor <checkout>` redoes the copy from
 a newer commit with the same mechanical change, and `nav check` (and
-`tests/nav-vendor.test.js`) checks it. Polestar's own files here are
-`API.lua` and `Polestar_Nav.toc`.
+`tests/nav-vendor.test.js`) checks it.
+
+## Polestar's walking maps, in his format
+
+The walking maps of Eastern Kingdoms (`Nav/Nav0*.lua`) and Kalimdor
+(`Nav/Nav1*.lua`) are Polestar's: its navigation grid, built from the
+Forever client's terrain, water and model collision (`nav build`), written in
+his map format by `tools/lib/nav/pack.js`, a port of his
+`tools/baker/gen_nav.py` and `tools/pack_nav.py` (Portions Copyright (C) 2026
+Cillian Berragan, GPL-3.0-or-later, used with his permission). They cut each
+map tile into 128 x 128 cells (4.17 yd, his are 8 yd), so the routes keep to
+doors and gates, never swim across open sea, and his engine runs on them
+unchanged. `Nav/Chokepoints.lua` (the lifts, bridges, gates, tunnels, cave and
+building mouths and passes a walk is split at) is Polestar's too. `nav pack`
+writes them with `PACK.json` (the grid's client build, the cells, the date and
+the sha256 of every file) and `Nav/Nav.xml`; `nav check` checks them.
+Polestar's other files here are `API.lua` (with the memory ceilings for the
+finer maps) and `Polestar_Nav.toc`.
 
 Polestar does not copy his journey planner or tracker: its own travel planner
 (flights, boats, hearth) asks this router only for the walking legs
