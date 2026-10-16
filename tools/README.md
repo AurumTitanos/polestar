@@ -77,6 +77,12 @@ without QuestieDB.
 | `media` | Regenerates the addon's textures from `tools/media/*.js` |
 | `readme brand` / `readme charts` | Redraws the README's art: the banners, emblem, logo, download and CurseForge buttons and the CurseForge avatar / the route charts (needs `data/sim`); both also export the CurseForge listing's PNGs when `rsvg-convert` is installed |
 
+### Translating
+
+| Command | What it does |
+|---|---|
+| `i18n` | The interface translations ([docs/TRANSLATING.md](../docs/TRANSLATING.md)): `status`, `check`, `sync`, `keys`, `import` |
+
 ### Releasing
 
 | Command | What it does |
@@ -116,6 +122,7 @@ The release steps are in [docs/RELEASING.md](../docs/RELEASING.md).
 | `generated.js` | Writes or checks a command's generated files |
 | `game/` | The game's rules, once for every tool: `xp.js` (XP to level, quest and kill XP, the client's QuestXP table) and `races.js` (races, classes and their mask bits) |
 | `gear/` | `gear build`: Forever item stats, reward choices, weight bands |
+| `i18n/` | `i18n`: the locales (`locales.js`), key extraction (`keys.js`), the format check (`check.js`), reading and editing locale files (`files.js`), the glossary (`glossary.js`, `glossary/<locale>.json`) and each locale's state (`project.js`); adapted from Ding! by Yendi |
 | `itemdb/` | `itemdb build`: item stats from the client tables |
 | `lua.js` | Runs Lua 5.1 for the tools (reading SavedVariables and other addons' data) |
 | `maps/` | `maps build` (zone levels) and `maps overlays` |

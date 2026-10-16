@@ -27,6 +27,10 @@ package them. You can help without touching any code.
   deaths and detours.
 - **Code.** Bugs in the addon or the tools; see [Code changes](#code-changes).
   For a Lua error, use the "Bug report" form.
+- **Translate.** Polestar's interface is in German, Latin American Spanish
+  and French, and AI-made languages need native speakers to check them.
+  [docs/TRANSLATING.md](docs/TRANSLATING.md) shows the file to edit: a text
+  editor is enough.
 - **Suggest a feature.** Open an issue with the "Feature request" form, so the
   idea and the date it was asked stay in one place and anyone can pick it up.
 
@@ -146,6 +150,10 @@ command.
   recompile: the guide menu scenes load frozen copies of six compiled guides
   (`tests/fixtures/preview`). [docs/DESIGN.md](docs/DESIGN.md) describes the
   visual system.
+- Player-facing text is a literal `L["..."]`. After adding, changing or
+  removing texts, run `node tools/polestar.js i18n sync` and commit the
+  locale files with the change ([docs/TRANSLATING.md](docs/TRANSLATING.md),
+  "For developers"); CI runs `i18n check`.
 
 ## Commits and pull requests
 

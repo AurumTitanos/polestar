@@ -62,7 +62,7 @@ never in saved variables.
 
 | File | Public table | What it does |
 |---|---|---|
-| `Init.lua` | `Polestar` (`ns`) | The namespace and shared plumbing: lifecycle (`OnInit`, `OnLogin`), message bus (`On`, `Off`, `Fire`), game events, settings (`Get`, `Set`, `RegisterDefaults`), per-character state, the `/polestar` and `/pole` commands |
+| `Init.lua` | `Polestar` (`ns`) | The namespace and shared plumbing: lifecycle (`OnInit`, `OnLogin`), message bus (`On`, `Off`, `Fire`), game events, settings (`Get`, `Set`, `RegisterDefaults`), per-character state, the `/polestar` and `/pole` commands; translations (`L`, `LC`; `Locales/<locale>.lua` loads right after it from Core.xml), game terms in the client's words (`StandingName`, `QualityName`, `FactionName`) and `AI_LOCALES` |
 | `Compat.lua` | `Compat` | Every quest, map and unit client call, in one place, so tests can swap it for a fake; also the one copy of the client helpers every module shares: `IsSecret` and `Readable` (secret values from combat-restricted APIs), `Now` (the server clock) and `MapName` (the client's map name, else the Codex zone's) |
 | `Data.lua` | `Data` | Loads the load-on-demand data addons (`Data.Pack(name)`) |
 | `Hooks.lua` | `Hooks` | The one owner of the tooltip and item-click hooks; modules add lines and handle clicks through it |
