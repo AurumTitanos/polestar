@@ -77,6 +77,7 @@ modules meet. New client APIs go in the stub of the module that needs them;
 | `helpers/codex.js` | `writeCodexPack`, `sampleCodex`: a loadable `Polestar_Codex` built from a Codex object such as `fixtures/codex/sample.json` |
 | `helpers/packs.js` | `TEST_PACK`, `TEST_SOURCE`: the Lua lines that register the test guide pack and make it the suggestion source |
 | `helpers/profile.js` | `profileGuide`: plays a guide with every handler timed. Also a command: `node tests/helpers/profile.js <guide> [race] [class] --packs [--sample=1000]` |
+| `helpers/guide-engine.js` | `officialGuides()`: every guide under `guides/` compiled once with the real data (legacy left out); `stepGroups(guide, data, who, steps)`: the Engine's focus and groups of those steps for one character, with nothing done |
 
 ## Fixtures
 
@@ -97,7 +98,7 @@ CI, they skip; everything else runs.
 
 | Local input | Built by | Tests that use it |
 |---|---|---|
-| `data/forever/*.json` (reference data) | `data build` and the other data commands | `guides.test.js`, `guides-caves.test.js` and `guides-reported.test.js` (player-reported guide fixes, one case per report), `lint-timed.test.js` (the old and fixed orders of timed quest items, every guide in time; needs item durations), `engine-placement.test.js`, `perf.test.js`, `acceptance-packs.test.js`, `playtest.test.js`, `play.test.js`, `play-pack.test.js`, `play-start.test.js`, `new.test.js`, `dev.test.js`, `dsl.test.js`, `maps-zonelevels.test.js`, `profession-gathering.test.js`, `questdb.test.js`, `planner-timeline.test.js` (the Dwarf chain played to level 55; needs `travel.json` too) |
+| `data/forever/*.json` (reference data) | `data build` and the other data commands | `guides.test.js`, `guides-caves.test.js` and `guides-reported.test.js` (player-reported guide fixes, one case per report), `guides-patterns.test.js` (the patterns behind those reports, across every guide: the first giver beside the spawn, class letters on a training visit, "Click X" only for clicks, quest clicks shown with their step's kills, vendor-only items bought), `lint-timed.test.js` (the old and fixed orders of timed quest items, every guide in time; needs item durations), `engine-placement.test.js`, `perf.test.js`, `acceptance-packs.test.js`, `playtest.test.js`, `play.test.js`, `play-pack.test.js`, `play-start.test.js`, `new.test.js`, `dev.test.js`, `dsl.test.js`, `maps-zonelevels.test.js`, `profession-gathering.test.js`, `questdb.test.js`, `planner-timeline.test.js` (the Dwarf chain played to level 55; needs `travel.json` too) |
 | Client map tables cached in `data/sources/wago` | `exploration build` | `exploration.test.js` |
 | Classic Era `TaxiPathNode` cached in `data/sources/wago` | `travel build` | `nav-transit.test.js` (the transport model against every sniffed CMaNGOS period) |
 | `addon/Polestar_QuestDB` | `questdb build` | `questdb.test.js`, `quests.test.js` |

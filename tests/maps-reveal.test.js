@@ -197,6 +197,50 @@ test('the minimap readout exists only once turned on, follows the player and bla
 	assert.equal(out.hidden, true);
 });
 
+test('the minimap button exists only once turned on: click shows or hides the guide, right-click opens settings, drag moves it around the edge', () => {
+	const [out] = run(`
+		local fired = {}
+		Polestar.On("TOGGLE_FRAME", function() fired[#fired + 1] = "toggle" end)
+		Polestar.On("SHOW_OPTIONS", function() fired[#fired + 1] = "options" end)
+		local before = stub.frame("PolestarMinimapButton")
+		Polestar.Set("maps.minimapButton", true)
+		local b = stub.frame("PolestarMinimapButton")
+		local function at() local _, rel, _, x, y = b:GetPoint(1); return { rel == Minimap, math.floor(x + 0.5), math.floor(y + 0.5) } end
+		local start = at()
+		b:Click("LeftButton")
+		b:Click("RightButton")
+		-- Drag to the right of the minimap's centre (70, 70): east, 0 degrees.
+		stub.cursor = { 200, 70 }
+		b:GetScript("OnDragStart")(b)
+		b:GetScript("OnUpdate")(b, 0.01)
+		local dragging = at()
+		b:GetScript("OnDragStop")(b)
+		local saved, stopped = Polestar.Get("maps.minimapButtonAngle"), b:GetScript("OnUpdate") == nil
+		-- A square minimap: straight up rides the square's top edge.
+		GetMinimapShape = function() return "SQUARE" end
+		Polestar.Set("maps.minimapButtonAngle", 45)
+		local corner = at()
+		-- The minimap resized (Edit Mode): the button stays on the new edge.
+		GetMinimapShape = nil
+		Polestar.Set("maps.minimapButtonAngle", 0)
+		Minimap:SetSize(280, 280)
+		stub.RunScript(Minimap, "OnSizeChanged", 280, 280)
+		local resized = at()
+		Polestar.Set("maps.minimapButton", false)
+		emit({ before = before ~= nil, start = start, fired = fired, dragging = dragging, saved = saved, stopped = stopped,
+			corner = corner, resized = resized, hidden = not b:IsShown() })`);
+	assert.equal(out.before, false, 'no frame while off');
+	// 225 degrees (south-west) at 70 + 5 px from the centre.
+	assert.deepEqual(out.start, [true, -53, -53]);
+	assert.deepEqual(out.fired, ['toggle', 'options']);
+	assert.deepEqual(out.dragging, [true, 75, 0]);
+	assert.equal(out.saved, 0);
+	assert.equal(out.stopped, true);
+	assert.deepEqual(out.corner, [true, 75, 75], 'the square\'s corner, not the circle');
+	assert.deepEqual(out.resized, [true, 145, 0], 'on the edge of the resized minimap');
+	assert.equal(out.hidden, true);
+});
+
 // ---------------------------------------------------------------------------
 // Dungeon entrances
 // ---------------------------------------------------------------------------

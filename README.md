@@ -829,6 +829,10 @@ saved you a minute. Questions and ideas are welcome on the
   `node tools/polestar.js preview` renders them for review.
 - **Recordings** are the most useful contribution of all: play a guide with
   the Recorder on and attach `record report` for the steps that felt slow.
+- **With an AI agent?** It reads [AGENTS.md](AGENTS.md) in a clone. To have
+  Polestar's skills everywhere, install them:
+  `npx skills add fitzforge/polestar -g`, or the Claude Code and Codex
+  plugins in [CONTRIBUTING.md](CONTRIBUTING.md#installing-the-skills).
 
 Contributions are accepted under the GPL-3.0, the project's licence.
 

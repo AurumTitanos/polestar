@@ -224,7 +224,10 @@ local WHO = { accept = true, turnin = true, talk = true, train = true, vendor = 
 	getfp = true, learn = true, buy = true, interact = true }
 local function whoOf(goal)
 	if WHO[goal.t] and goal.npc then return "npc:" .. goal.npc, "npc", goal.npcName or (goal.subjectKind == "npc" and goal.subject) or nil end
-	if WHO[goal.t] and goal.object then return "object:" .. goal.object, "object", goal.objectName end
+	-- A quest interact is field work, not a visit (Engine whoOf).
+	if WHO[goal.t] and goal.object and not (goal.t == "interact" and goal.quest) then
+		return "object:" .. goal.object, "object", goal.objectName
+	end
 	return "here", "here", nil
 end
 local function groupsOf(goals)

@@ -490,6 +490,8 @@ L["Instances per day"] = "每日副本數"
 L["Classic Era allows 30 new instances per 24 hours per account; 0 ignores the daily cap. Forever may differ."] = "經典版每個帳號每 24 小時可進入 30 個新副本；0 表示忽略每日上限。Forever 可能不同。"
 L["Clear instance history"] = "清除副本記錄"
 L["Forgets recorded entries and runs (the server's own limit is not affected)."] = "忘記已記錄的進入與次數（不影響伺服器本身的限制）。"
+-- L["Minimap button"] = ""
+-- L["A Polestar button on the edge of the minimap. Click to show or hide the guide, right-click for settings, drag to move it."] = ""
 
 -- Maps/WorldMap.lua
 L["Player"] = "玩家"
@@ -1762,3 +1764,8 @@ L["Demonology"] = "惡魔學識"
 L["Destruction"] = "毀滅"
 L["Balance"] = "平衡"
 L["Feral"] = "野性戰鬥"
+
+-- Maps/MinimapButton.lua
+-- L["Click: show or hide the guide"] = ""
+-- L["Right-click: settings"] = ""
+-- L["Drag: move it around the minimap"] = ""
