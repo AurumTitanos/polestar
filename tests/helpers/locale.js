@@ -3,18 +3,21 @@
 // makes GetLocale() return `locale` and fills Polestar.L with `strings`
 // right after Core/Init.lua runs, where a locale file (Locales/<locale>.lua)
 // loads in the client. Code that looks a string up too early, or two
-// meanings sharing one key, then shows in the test. Use a locale Polestar
-// does not ship (frFR): a shipped one's file (deDE, esMX) loads after these
-// strings and replaces them.
+// meanings sharing one key, then shows in the test. The locale must be one
+// Polestar does not ship (itIT: WoW: Forever has no Italian client), or the
+// shipped file would load after these strings and replace them.
 //
 //   const { fakeLocale } = require('./helpers/locale');
-//   runAddon({ before: fakeLocale('frFR', { 'Open settings': 'Ouvrir les options' }), ... });
+//   runAddon({ before: fakeLocale('itIT', { 'Open settings': 'Apri le opzioni' }), ... });
+
+const { LOCALES } = require('../../tools/lib/i18n/locales');
 
 function luaString(s) {
 	return '"' + String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n') + '"';
 }
 
 function fakeLocale(locale, strings) {
+	if (LOCALES[locale]) throw new Error(`fakeLocale: Polestar ships ${locale} (tools/lib/i18n/locales.js); fake one it does not, such as itIT`);
 	const fill = Object.entries(strings)
 		.map(([k, v]) => `\t\tns.L[${luaString(k)}] = ${luaString(v)}`)
 		.join('\n');

@@ -229,7 +229,7 @@ local function folderOf(g, mine)
 		local lo, hi = band(g)
 		local f = g.faction
 		local rank = f == nil and 3 or (f == mine and 0 or (FACTION_ORDER[f] or 4))
-		local label = (f and L[f] or L["Leveling"]) .. " " .. UI.LevelRange(lo, hi)
+		local label = (f and ns.FactionName(f) or L["Leveling"]) .. " " .. UI.LevelRange(lo, hi)
 		return label, string.format("%02d%d%03d", CATEGORY_RANK.Leveling, rank, lo)
 	end
 	return L[c], string.format("%02d", CATEGORY_RANK[c] or 99) .. c
@@ -998,7 +998,7 @@ local function renderDetails(byId, tabs, active)
 	local lv = UI.LevelRange(g.minLevel, g.maxLevel)
 	if lv then addChip(L["Levels"] .. " " .. lv, "accent") end
 	if g.group == true then addChip(L["Group"], "dungeon") end
-	addChip(g.faction and L[g.faction] or L["Both factions"])
+	addChip(ns.FactionName(g.faction) or L["Both factions"])
 	if type(g.races) == "table" then for _, race in ipairs(g.races) do addChip(UI.RaceName(race)) end end
 	if type(g.classes) == "table" then for _, cl in ipairs(g.classes) do addChip(UI.ClassName(cl)) end end
 	for i = n + 1, #d.Chips do d.Chips[i]:Hide() end
@@ -1230,7 +1230,7 @@ local function navTips(filter)
 	for _, b in ipairs(win.navButtons) do
 		local tip
 		if b:IsShown() and b.psEmpty and query == "" and filter ~= "All" and b.psKey ~= "Favorites" then
-			tip = string.format(L["None for %s; switch the filter to All."], L[filter])
+			tip = string.format(L["None for %s; switch the filter to All."], ns.FactionName(filter))
 		end
 		b.psTip = tip
 		if tip and not b.psPickerTip then
@@ -1435,7 +1435,7 @@ function P.Render()
 			subtitle = n == 1 and string.format(L["1 result for \226\128\156%s\226\128\157"], query)
 				or string.format(L["%d results for \226\128\156%s\226\128\157"], n, query)
 		else
-			local parts = { filter == "All" and L["All factions"] or L[filter], n == 1 and L["1 guide"] or string.format(L["%d guides"], n) }
+			local parts = { filter == "All" and L["All factions"] or ns.FactionName(filter), n == 1 and L["1 guide"] or string.format(L["%d guides"], n) }
 			local open = tabs and #tabs or 0
 			if open > 0 then parts[#parts + 1] = string.format(L["%d open"], open) end
 			subtitle = table.concat(parts, DOT)
@@ -1701,7 +1701,7 @@ local function build()
 		b.Selected = W.Fill(b, "panelAlt", "BACKGROUND", 0)
 		b.Label = W.Text(b, "small", "textMuted")
 		b.Label:SetPoint("CENTER", b, "CENTER", 0, 0)
-		b.Label:SetText(f == "All" and L["All"] or L[f])
+		b.Label:SetText(f == "All" and L["All"] or ns.FactionName(f))
 		b:SetWidth(floor(b.Label:GetStringWidth() + 20 + 0.5))
 		b:SetPoint("RIGHT", win.TabRow, "RIGHT", x, 0)
 		b:SetScript("OnClick", function(self) ns.Set("ui.pickerFaction", self.psKey) end)

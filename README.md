@@ -105,7 +105,7 @@ Forever's routing engine by Cillian Berragan) and a travel planner, quest
 markers on the map, an upgrade indicator on item tooltips, a search for where
 any item, mount or pet comes from, a dungeon quest journal, rare alerts and
 the quality-of-life helpers a long leveling session needs. Its interface is
-in English, German and Latin American Spanish.
+in English, French, German and Latin American Spanish.
 
 The leveling routes are not hand-picked. A simulator models every quest
 Forever offers a faction, plays millions of complete 1-60 routes for each

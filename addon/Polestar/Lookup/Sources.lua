@@ -76,9 +76,6 @@ function Lookup.ProfessionName(line)
 	return C and C.IsLoaded() and C.Name("skill", line) or nil
 end
 
-local STANDINGS = { L["Hated"], L["Hostile"], L["Unfriendly"], L["Neutral"], L["Friendly"], L["Honored"], L["Revered"], L["Exalted"] }
-Lookup.STANDINGS = STANDINGS
-
 -- Era quest masks (ChrRaces / ChrClasses bits). A race or class missing
 -- here (a race Forever adds) is never excluded by a mask.
 local RACE_BIT = { Human = 1, Orc = 2, Dwarf = 4, NightElf = 8, Scourge = 16, Undead = 16, Tauren = 32, Gnome = 64, Troll = 128 }
@@ -263,7 +260,7 @@ local function repGate(r, faction, need)
 	local f = Codex().Faction(faction)
 	local name = f and f.name or (L["Faction"] .. " " .. faction)
 	r.effort = (r.effort or 0) + (need - have) * REP_STANDING
-	block(r, "reputation", L["Requires"] .. " " .. (STANDINGS[need] or "") .. " (" .. name .. ")")
+	block(r, "reputation", L["Requires"] .. " " .. (ns.StandingName(need) or "") .. " (" .. name .. ")")
 end
 
 -- Quest availability for this character: why, text | nil
@@ -474,7 +471,7 @@ builders.rep = function(src, p, from)
 	local f = src.faction and C.Faction(src.faction)
 	r.label = f and f.name or L["Reputation"]
 	r.standing = src.standing
-	r.detail = detail(L["Reputation"], src.standing and (STANDINGS[src.standing] or "") or nil)
+	r.detail = detail(L["Reputation"], src.standing and (ns.StandingName(src.standing) or "") or nil)
 	local npc, s, t
 	if src.npc then npc, s, t = npcSpawn(src.npc, from) end
 	place(r, s, t)
@@ -486,7 +483,7 @@ builders.rep = function(src, p, from)
 	local need = src.standing or 1
 	if have < need then
 		r.effort = (need - have) * REP_STANDING
-		block(r, "reputation", L["Requires"] .. " " .. (STANDINGS[need] or "") .. " (" .. (STANDINGS[have] or "") .. ")")
+		block(r, "reputation", L["Requires"] .. " " .. (ns.StandingName(need) or "") .. " (" .. (ns.StandingName(have) or "") .. ")")
 	end
 	r.guideable = src.faction ~= nil and src.standing ~= nil and f ~= nil
 	return r

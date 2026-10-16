@@ -1,0 +1,3 @@
+pfDB["items"]["deDE"] = {
+
+}

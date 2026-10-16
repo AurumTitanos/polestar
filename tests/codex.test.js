@@ -222,7 +222,7 @@ emit(out)
 test('foldName folds names exactly like Search.Fold (without its leading space)', () => {
 	const names = [
 		'Reins of the Striped Frostsaber', "Deathcharger's Reins", "Zul'Gurub", 'Ahn\u2019Qiraj', 'Señor Ñandú',
-		'Ægis Øre Straße', 'Œuvre Ÿ', 'Ironforge - East', 'A.B.C. 123', 'Test×Thing ÷ 2', '  spaced  out  ', '',
+		'Ægis Øre Straße', 'Œuvre Ÿ', 'Хоггер Ёлка ёж', '霍格', 'Ironforge - East', 'A.B.C. 123', 'Test×Thing ÷ 2', '  spaced  out  ', '',
 		'[Tag] (Old) 1/2', 'Ünder-Café', 'Tab\tName\nNext', 'ÿþ', 'ALL CAPS!', '"Quoted" & co.', 'Über_Thing~#5',
 	];
 	const [lua] = runAddon({

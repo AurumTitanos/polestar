@@ -132,16 +132,20 @@ Q.stats = stats
 -- Quest log
 ---------------------------------------------------------------------------
 
+-- The name an objective's client line is matched on: the client's language
+-- where Polestar.Names has it (a French line says "Vermine kobold tuée"),
+-- else the database's English.
 local function entityName(kind, id)
+	local N = ns.Names
 	if kind == KIND_KILL then
 		local r = Q.NpcRecord(id)
-		return r and r[1]
+		return r and ((N and N.Npc(id)) or r[1])
 	elseif kind == KIND_ITEM then
 		local r = Q.ItemRecord(id)
-		return r and r[1]
+		return r and ((N and N.Item(id)) or r[1])
 	elseif kind == KIND_OBJECT then
 		local r = Q.ObjectRecord(id)
-		return r and r[1]
+		return r and ((N and N.Object(id)) or r[1])
 	end
 end
 
@@ -427,8 +431,8 @@ local function rebuildIndex()
 					for k = 1, (r[j] or 0) do
 						local obj = r[j + 2 * k - 1]
 						push(index.object, obj, o)
-						local orec = Q.ObjectRecord(obj)
-						if orec then push(index.objectName, orec[1], o) end
+						-- Matched against the object tooltip's name: the client's language.
+						if Q.ObjectRecord(obj) then push(index.objectName, Q.EntityName(-obj), o) end
 					end
 				end
 			end
@@ -466,7 +470,7 @@ local function addTooltipLines(tt, pin)
 		elseif pin.kind == "available" then
 			local r = Q.QuestRecord(ref)
 			local lvl = r and r[F.LEVEL]
-			local title = (r and r[F.TITLE] or tostring(ref)) .. ((lvl and lvl > 0) and (" (" .. lvl .. ")") or "")
+			local title = (r and Q.GetQuestTitle(ref) or tostring(ref)) .. ((lvl and lvl > 0) and (" (" .. lvl .. ")") or "")
 			tt:AddLine(title, qc.r, qc.g, qc.b)
 		else
 			local e = ref.entry
@@ -1153,6 +1157,25 @@ end)
 ns.On("STEP_CHANGED", onGuide)
 ns.On("GUIDE_CHANGED", onGuide)
 ns.On("QUESTDB_STARTED", onGuide)
+
+-- The names pack arrived late (refused in combat, Core/Names.lua): the
+-- objectives were named in English, so read their names again, match the
+-- client's lines anew and rebuild what is keyed by name.
+ns.On("NAMES_LOADED", function()
+	for _, e in pairs(entries) do
+		for i = 1, #e.objs do
+			local o = e.objs[i]
+			o.name = entityName(o.kind, o.id)
+		end
+		e.lines = nil
+	end
+	if not running then return end
+	rebuildIndex()
+	rebuildObjectiveMarkers()
+	publish(LAYER_OBJECTIVES)
+	dirtyLog = true
+	schedule()
+end)
 
 local function onTheme()
 	for k in pairs(colors) do colors[k] = nil end

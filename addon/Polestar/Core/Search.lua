@@ -30,6 +30,11 @@
 -- folded once, again when the guide list changes. Guide keywords match one
 -- tier below the title. Generated Lookup guides (ids "lookup/...") are not
 -- listed.
+--
+-- On a client in another language a quest, NPC, item, treasure or zone is
+-- also found by its name in that language (Polestar.Names, the client's map
+-- names) and listed under it: each kind's index gets, once, a line per id
+-- whose name differs from the English, and a match counts an id once.
 
 local ADDON, ns = ...
 
@@ -38,7 +43,7 @@ ns.Search = Search
 
 local L = ns.L
 local type, ipairs, tostring, tonumber = type, ipairs, tostring, tonumber
-local find, sub, gsub, lower, byte, match = string.find, string.sub, string.gsub, string.lower, string.byte, string.match
+local find, sub, gsub, lower, byte, match, gmatch = string.find, string.sub, string.gsub, string.lower, string.byte, string.match, string.gmatch
 local min = math.min
 
 local STATUS = { r = "retired", n = "nosource" }
@@ -74,7 +79,7 @@ local DEFAULT_PER_KIND = 20
 -- Folding
 ---------------------------------------------------------------------------
 
--- Two-byte UTF-8 Latin-1 letters (lead byte 0xC3) -> ASCII.
+-- Two-byte UTF-8 letters -> folded: Latin-1 (lead byte 0xC3) to ASCII, Œ œ, Cyrillic case.
 local FOLD = {}
 do
 	local runs = {
@@ -90,6 +95,13 @@ do
 	for _, r in ipairs(runs) do
 		for b = r[1], r[2] do FOLD["\195" .. string.char(b)] = r[3] end
 	end
+	-- Œ œ (lead byte 0xC5) -> "oe".
+	FOLD["\197\146"], FOLD["\197\147"] = "oe", "oe"
+	-- Cyrillic capitals to lower case (string.lower leaves them), Ё and ё as е:
+	-- a Russian name matches whatever case the player types.
+	for b = 0x90, 0x9F do FOLD["\208" .. string.char(b)] = "\208" .. string.char(b + 0x20) end
+	for b = 0xA0, 0xAF do FOLD["\208" .. string.char(b)] = "\209" .. string.char(b - 0x20) end
+	FOLD["\208\129"], FOLD["\209\145"] = "\208\181", "\208\181"
 end
 
 -- " folded name" (leading space, single spaces), so a word prefix is a plain
@@ -97,7 +109,7 @@ end
 local function fold(s)
 	s = lower(s)
 	if find(s, "[\128-\255]") then
-		s = gsub(s, "\195[\128-\191]", FOLD)
+		s = gsub(s, "[\195\197\208\209][\128-\191]", FOLD)
 		s = gsub(s, "\226\128\153", "") -- right single quotation mark
 	end
 	s = gsub(s, "'", "")
@@ -164,11 +176,52 @@ end
 -- lines "\2<folded name>\1<id>,<quality>,<status letter>,<name length>\n",
 -- folded exactly as Search.Fold (without its leading space). nil while the
 -- Codex is not loaded or Lookup is off.
-local function blobOf(kind)
+local function codexBlob(kind)
 	if not codexOn() then return nil end
 	local C = ns.Codex
 	if not (C and C.IsLoaded and C.IsLoaded() and C.Index) then return nil end
 	return C.Index(kind)
+end
+
+-- Codex kinds named in the client's language, by Polestar.Names' kind; zones
+-- by the client's map names.
+local NAMES_KIND = { item = "item", mount = "item", pet = "item", recipe = "item", tabard = "item",
+	npc = "npc", rare = "npc", quest = "quest", treasure = "object", zone = "zone" }
+local localIndex = {} -- kind -> { base = the Codex's blob, blob = it plus the localised lines }
+
+local function localised()
+	local N = ns.Names
+	return N and N.Localised() or false
+end
+
+-- A Codex entity's name in the client's language, or nil; never asks the
+-- server (Names.Cached).
+local function localName(kind, id)
+	local nk = NAMES_KIND[kind]
+	if not nk or type(id) ~= "number" then return nil end
+	if nk == "zone" then return ns.Compat.GetMapName(id) end
+	return ns.Names.Cached(nk, id)
+end
+
+local function blobOf(kind)
+	local blob = codexBlob(kind)
+	if not (blob and NAMES_KIND[kind] and localised()) then return blob end
+	local cached = localIndex[kind]
+	if cached and cached.base == blob then return cached.blob end
+	local lines = { blob }
+	for folded, id, quality, st in gmatch(blob, "\2([^\1]*)\1([^,]*),(%d*),(%a?),%d+\n") do
+		local name = localName(kind, tonumber(id))
+		if name then
+			local f = sub(fold(name), 2)
+			if f ~= folded and f ~= "" then
+				lines[#lines + 1] = "\2" .. f .. "\1" .. id .. "," .. quality .. "," .. st .. "," .. #name .. "\n"
+			end
+		end
+	end
+	local full = table.concat(lines)
+	-- Kept once the names pack is in (or will not come this session).
+	if ns.Names.Ready() then localIndex[kind] = { base = blob, blob = full } end
+	return full
 end
 
 local function guideList()
@@ -243,12 +296,16 @@ local BUDGET = 200
 -- letters) word prefixes (" " .. q), anywhere, and (several words) lines
 -- holding every word. A line counts once, at its best tier. -> matches, more
 local function scanBlob(blob, kind, body, short, words, cap, top)
-	local seen, n, reads = {}, 0, 0
+	local seen, ids, n, reads = {}, {}, 0, 0
 	local function hit(e, t)
 		if seen[e] then return end
 		seen[e] = true
-		n = n + 1
 		local id, _, st, len = match(blob, META, e + 1)
+		-- An id found by its English and its localised name counts once, at
+		-- the better tier (the tiers run best first).
+		if ids[id] then return end
+		ids[id] = true
+		n = n + 1
 		local standing = st ~= "" and 0 or curated[tonumber(id)] and 2 or 1
 		keep(top, cap, score(t, kind, tonumber(len) or 0, standing), e)
 	end
@@ -381,7 +438,7 @@ function Search.Query(text, opts)
 				local rawId, quality, st = match(blob, META, top.i[j] + 1)
 				local id = kind == "instance" and rawId or tonumber(rawId)
 				results[#results + 1] = {
-					kind = kind, id = id, title = C.Name(kind, id) or rawId, quality = tonumber(quality), score = top.s[j],
+					kind = kind, id = id, title = (localised() and localName(kind, id)) or C.Name(kind, id) or rawId, quality = tonumber(quality), score = top.s[j],
 					status = STATUS[st], curated = curated[id] or nil,
 				}
 			end
